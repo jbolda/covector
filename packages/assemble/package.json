@@ -1,0 +1,12 @@
+{
+  "name": "assemble",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "remark-frontmatter": "^2.0.0",
+    "remark-parse": "^8.0.2",
+    "remark-parse-yaml": "^0.0.3",
+    "remark-stringify": "^8.0.0",
+    "unified": "^9.0.0"
+  }
+}

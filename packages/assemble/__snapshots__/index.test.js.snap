@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`first test runs 1`] = `
+Object {
+  "changes": Array [
+    Object {
+      "releases": Object {
+        "assemble1": "patch",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "assemble1": "minor",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "assemble1": "patch",
+        "assemble2": "major",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "@namespaced/assemble2": "patch",
+        "assemble1": "patch",
+      },
+      "summary": "This is a test.",
+    },
+  ],
+  "releases": Object {
+    "@namespaced/assemble2": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "patch",
+    },
+    "assemble1": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "major",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "minor",
+    },
+    "assemble2": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "major",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "major",
+    },
+  },
+}
+`;
