@@ -1,0 +1,21 @@
+{
+  "name": "covector",
+  "version": "0.0.0",
+  "private": true,
+  "repository": "https://github.com/jbolda/covector.git",
+  "author": "Jacob Bolda <me@jacobbolda.com>",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "jest",
+    "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.js\""
+  },
+  "workspaces": [
+    "packages/**/*"
+  ],
+  "devDependencies": {
+    "prettier": "^2.0.5"
+  },
+  "dependencies": {
+    "jest": "^26.0.1"
+  }
+}
