@@ -1,0 +1,20 @@
+{
+  "name": "covector",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "files": [
+    "bin/*",
+    "src/**/*"
+  ],
+  "scripts": {
+    "covector": "node ./src/index.js"
+  },
+  "dependencies": {
+    "@covector/assemble": "0.0.1",
+    "@covector/files": "0.0.1",
+    "@effection/node": "^0.6.2",
+    "effection": "^0.6.2",
+    "spawndamnit": "^2.0.0",
+    "yargs": "^15.3.1"
+  }
+}
