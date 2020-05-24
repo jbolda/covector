@@ -1,7 +1,10 @@
 {
-  "name": "assemble",
+  "name": "@covector/assemble",
   "version": "0.0.1",
   "license": "Apache-2.0",
+  "files": [
+    "index.js"
+  ],
   "dependencies": {
     "remark-frontmatter": "^2.0.0",
     "remark-parse": "^8.0.2",

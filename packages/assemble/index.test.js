@@ -1,6 +1,6 @@
 const { assemble } = require("./index");
 
-describe("first test", () => {
+describe("assemble test", () => {
   const testTextOne = `
 ---
 "assemble1": patch

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`first test runs 1`] = `
+exports[`assemble test runs 1`] = `
 Object {
   "changes": Array [
     Object {
