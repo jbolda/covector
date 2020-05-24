@@ -15,16 +15,16 @@ module.exports.cli = function* (argv) {
   const config = yield configFile({ cwd });
   const options = parseOptions(config, argv);
   const changesArray = yield changeFiles({ cwd });
-  const assembled = assemble(changesArray);
+  const assembledChanges = assemble(changesArray);
 
   if (options.command === "status") {
     if (changesArray.length === 0) {
       console.info("There are no changes.");
     } else {
       console.log("changes:");
-      return Object.keys(assembled.releases).forEach((release) => {
-        console.log(`${release} => ${assembled.releases[release].type}`);
-        console.dir(assembled.releases[release].changes);
+      return Object.keys(assembledChanges.releases).forEach((release) => {
+        console.log(`${release} => ${assembledChanges.releases[release].type}`);
+        console.dir(assembledChanges.releases[release].changes);
       });
     }
   } else if (options.command === "config") {
