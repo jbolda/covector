@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`file test globs changes 1`] = `
+Array [
+  "---
+\\"package-a\\": minor
+---
+
+Summary about the changes in pkg-a
+",
+  "---
+\\"package-b\\": patch
+---
+
+Summary about the changes in pkg-b
+",
+]
+`;

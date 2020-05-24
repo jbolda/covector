@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "name": "js-single-fixture",
+  "description": "A single package at the root. No monorepo setup.",
+  "version": "0.5.9"
+}

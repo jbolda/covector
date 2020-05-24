@@ -1,0 +1,17 @@
+{
+  "name": "@covector/files",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "fixturez": "^1.1.0",
+    "globby": "^11.0.0",
+    "to-vfile": "^6.1.0"
+  },
+  "devDependencies": {
+    "fixturez": "^1.1.0"
+  }
+}
