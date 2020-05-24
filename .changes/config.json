@@ -1,0 +1,27 @@
+{
+  "pkgManagers": {
+    "javascript": {
+      "preversion": "",
+      "version": "lerna version patch --no-git-tag-version --no-push",
+      "postversion": "",
+      "publish": "npm publish"
+    }
+  },
+  "packages": {
+    "covector": {
+      "path": "./packages/covector",
+      "version": "",
+      "publish": "npm publish"
+    },
+    "@covector/assemble": {
+      "path": "./packages/assemble",
+      "version": "",
+      "publish": "npm publish"
+    },
+    "@covector/files": {
+      "path": "./packages/files",
+      "version": "",
+      "publish": "npm publish"
+    }
+  }
+}
