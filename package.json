@@ -8,7 +8,8 @@
   "scripts": {
     "covector": "node ./packages/covector/bin/covector.js",
     "test": "jest",
-    "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.js\""
+    "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.js\"",
+    "postinstall": "patch-package"
   },
   "workspaces": [
     "packages/**/*"
@@ -18,6 +19,8 @@
   },
   "dependencies": {
     "jest": "^26.0.1",
-    "lerna": "^3.21.0"
+    "lerna": "^3.21.0",
+    "patch-package": "^6.2.2",
+    "postinstall-postinstall": "^2.1.0"
   }
 }

@@ -1,14 +1,19 @@
-const { fork, spawn, timeout } = require("effection");
+const { spawn, timeout } = require("effection");
+const { ChildProcess } = require("@effection/node");
+const { once, throwOnErrorEvent } = require("@effection/events");
 const yargs = require("yargs");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble } = require("@covector/assemble");
-const spawnCommand = require("spawndamnit");
 
-const raceTime = (t = 10000, msg = `timeout out waiting 10s for command`) =>
-  spawn(function* () {
+const raceTime = function (
+  t = 10000,
+  msg = `timeout out waiting ${t / 1000}s for command`
+) {
+  return spawn(function* () {
     yield timeout(t);
     throw new Error(msg);
   });
+};
 
 module.exports.cli = function* (argv) {
   const cwd = process.cwd();
@@ -35,20 +40,20 @@ module.exports.cli = function* (argv) {
     // create the changelog
 
     yield raceTime();
-    let child = spawnCommand("ls");
-    child.on("stdout", (data) => console.log(data.toString()));
-    child.on("stderr", (data) => console.error(data.toString()));
-    const forked = fork(child);
+    let child = yield ChildProcess.spawn("ls", [], {
+      shell: process.env.shell,
+      stdio: "inherit",
+      windowsHide: true,
+    });
+
+    yield once(child, "exit");
+    let message = yield once(child, "message");
+    console.log(message);
     return;
   } else if (options.command === "publish") {
     // run mergeConfig with values via template function
     // create the changelog
-
-    yield raceTime();
-    let child = spawnCommand("ls");
-    child.on("stdout", (data) => console.log(data.toString()));
-    child.on("stderr", (data) => console.error(data.toString()));
-    const forked = fork(child);
+    // spawnCommand
     return;
   }
 
