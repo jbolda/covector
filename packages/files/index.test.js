@@ -11,10 +11,10 @@ describe("file test", () => {
   });
 
   it("parses json", async () => {
-    const jsonFolder = f.copy("pkg.root-only");
+    const jsonFolder = f.copy("pkg.js-single");
     const jsonVfile = await pkgFile(jsonFolder + "/package.json");
-    expect(jsonVfile.name).toBe("root-only");
-    expect(jsonVfile.version).toBe("1.0.0");
+    expect(jsonVfile.name).toBe("js-single-fixture");
+    expect(jsonVfile.version).toBe("0.5.9");
   });
 
   it("parses config", async () => {
