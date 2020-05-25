@@ -64,3 +64,22 @@ module.exports.assemble = (texts) => {
   plan.releases = mergeReleases(plan.changes);
   return plan;
 };
+
+module.exports.mergeConfig = ({ config, assembledChanges, command }) => {
+  return Object.keys(config.packages).map((pkg) => {
+    const pkgManager = config.packages[pkg].manager;
+    const managerCommand =
+      !!pkgManager &&
+      !!config.pkgManagers[pkgManager] &&
+      !!config.pkgManagers[pkgManager][command]
+        ? config.pkgManagers[pkgManager][command]
+        : null;
+    return {
+      pkg,
+      path: config.packages[pkg].path,
+      [command]: !config.packages[pkg][command]
+        ? managerCommand
+        : config.packages[pkg][command],
+    };
+  });
+};

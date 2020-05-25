@@ -39,28 +39,21 @@ module.exports.cli = function* (argv) {
     // run mergeConfig with values via template function
     // create the changelog
 
-    // raceTime(500);
-    yield spawn(function* () {
-      yield timeout(2500);
-      throw new Error("error hit timeout");
-    });
+    yield raceTime();
     let child = yield ChildProcess.spawn("ls", [], {
       shell: process.env.shell,
       stdio: "inherit",
       windowsHide: true,
     });
-    yield once(child, "exit");
-    let message = yield once(child, "message");
-    console.log(message);
-    return;
+
+    yield throwOnErrorEvent(child);
+    return yield once(child, "exit");
   } else if (options.command === "publish") {
     // run mergeConfig with values via template function
     // create the changelog
     // spawnCommand
     return;
   }
-
-  return;
 };
 
 function parseOptions(config, argv) {

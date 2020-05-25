@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`assemble test runs 1`] = `
+exports[`assemble changes runs 1`] = `
 Object {
   "changes": Array [
     Object {
@@ -106,4 +106,44 @@ Object {
     },
   },
 }
+`;
+
+exports[`merge config test merges publish 1`] = `
+Array [
+  Object {
+    "path": "./packages/assemble1",
+    "pkg": "assemble1",
+    "publish": "npm publish",
+  },
+  Object {
+    "path": "./packages/assemble2",
+    "pkg": "assemble2",
+    "publish": null,
+  },
+  Object {
+    "path": "./packages/namespace-assemble2",
+    "pkg": "@namespace/assemble2",
+    "publish": "cargo publish",
+  },
+]
+`;
+
+exports[`merge config test merges version 1`] = `
+Array [
+  Object {
+    "path": "./packages/assemble1",
+    "pkg": "assemble1",
+    "version": "lerna version patch --no-git-tag-version --no-push",
+  },
+  Object {
+    "path": "./packages/assemble2",
+    "pkg": "assemble2",
+    "version": "lerna version",
+  },
+  Object {
+    "path": "./packages/namespace-assemble2",
+    "pkg": "@namespace/assemble2",
+    "version": "cargo version",
+  },
+]
 `;
