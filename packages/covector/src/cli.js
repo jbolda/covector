@@ -5,10 +5,10 @@ const yargs = require("yargs");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble } = require("@covector/assemble");
 
-const raceTime = function (
+const raceTime = (
   t = 10000,
   msg = `timeout out waiting ${t / 1000}s for command`
-) {
+) => {
   return spawn(function* () {
     yield timeout(t);
     throw new Error(msg);
