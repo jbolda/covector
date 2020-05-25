@@ -5,15 +5,15 @@ const yargs = require("yargs");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble } = require("@covector/assemble");
 
-const raceTime = (
+function raceTime(
   t = 10000,
   msg = `timeout out waiting ${t / 1000}s for command`
-) => {
+) {
   return spawn(function* () {
     yield timeout(t);
     throw new Error(msg);
   });
-};
+}
 
 module.exports.cli = function* (argv) {
   const cwd = process.cwd();
@@ -39,13 +39,16 @@ module.exports.cli = function* (argv) {
     // run mergeConfig with values via template function
     // create the changelog
 
-    yield raceTime();
+    // raceTime(500);
+    yield spawn(function* () {
+      yield timeout(2500);
+      throw new Error("error hit timeout");
+    });
     let child = yield ChildProcess.spawn("ls", [], {
       shell: process.env.shell,
       stdio: "inherit",
       windowsHide: true,
     });
-
     yield once(child, "exit");
     let message = yield once(child, "message");
     console.log(message);
