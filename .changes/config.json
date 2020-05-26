@@ -2,7 +2,7 @@
   "pkgManagers": {
     "javascript": {
       "preversion": "",
-      "version": "lerna version patch --no-git-tag-version --no-push",
+      "version": "yarn version --${ release.type } --no-git-tag-version --no-commit-hooks",
       "postversion": "",
       "publish": "npm publish"
     }
@@ -10,18 +10,15 @@
   "packages": {
     "covector": {
       "path": "./packages/covector",
-      "version": "",
-      "publish": "npm publish"
+      "manager": "javascript"
     },
     "@covector/assemble": {
       "path": "./packages/assemble",
-      "version": "",
-      "publish": "npm publish"
+      "manager": "javascript"
     },
     "@covector/files": {
       "path": "./packages/files",
-      "version": "",
-      "publish": "npm publish"
+      "manager": "javascript"
     }
   }
 }
