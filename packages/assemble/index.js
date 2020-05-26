@@ -3,6 +3,7 @@ const parse = require("remark-parse");
 const stringify = require("remark-stringify");
 const frontmatter = require("remark-frontmatter");
 const parseFrontmatter = require("remark-parse-yaml");
+const template = require("lodash.template");
 
 const processor = unified().use(parse).use(frontmatter).use(parseFrontmatter);
 
@@ -65,8 +66,10 @@ module.exports.assemble = (texts) => {
   return plan;
 };
 
-module.exports.mergeConfig = ({ config, assembledChanges, command }) => {
-  return Object.keys(config.packages).map((pkg) => {
+module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
+  // build in assembledChanges to only issue commands with ones with changes
+  // and pipe in data to template function
+  const pkgCommands = Object.keys(config.packages).reduce((pkged, pkg) => {
     const pkgManager = config.packages[pkg].manager;
     const managerCommand =
       !!pkgManager &&
@@ -74,12 +77,36 @@ module.exports.mergeConfig = ({ config, assembledChanges, command }) => {
       !!config.pkgManagers[pkgManager][command]
         ? config.pkgManagers[pkgManager][command]
         : null;
-    return {
-      pkg,
-      path: config.packages[pkg].path,
-      [command]: !config.packages[pkg][command]
-        ? managerCommand
-        : config.packages[pkg][command],
+    const mergedCommand = !config.packages[pkg][command]
+      ? managerCommand
+      : config.packages[pkg][command];
+    if (!!mergedCommand) {
+      pkged[pkg] = {
+        path: config.packages[pkg].path,
+        [command]: mergedCommand,
+      };
+    }
+    return pkged;
+  }, {});
+
+  const commands = Object.keys(assembledChanges.releases).map((pkg) => {
+    const pipeToTemplate = {
+      release: assembledChanges.releases[pkg],
+      pkg: pkgCommands[pkg],
     };
+    if (!pkgCommands[pkg]) return null;
+    const pkgCommand = pkgCommands[pkg][command];
+    const templatedString = !pkgCommand
+      ? null
+      : template(pkgCommand, pipeToTemplate);
+    const merged = {
+      pkg,
+      path: pkgCommands[pkg].path,
+      [command]: !pkgCommand ? null : templatedString(pipeToTemplate),
+    };
+
+    return merged;
   });
+
+  return commands;
 };

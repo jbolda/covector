@@ -6,6 +6,7 @@
     "index.js"
   ],
   "dependencies": {
+    "lodash.template": "^4.5.0",
     "remark-frontmatter": "^2.0.0",
     "remark-parse": "^8.0.2",
     "remark-parse-yaml": "^0.0.3",

@@ -1,4 +1,4 @@
-const { assemble, mergeConfig } = require("./index");
+const { assemble, mergeIntoConfig } = require("./index");
 
 describe("assemble changes", () => {
   const testTextOne = `
@@ -125,7 +125,8 @@ describe("merge config test", () => {
   const config = {
     pkgManagers: {
       javascript: {
-        version: "lerna version patch --no-git-tag-version --no-push",
+        version:
+          "lerna version ${ release.type } --no-git-tag-version --no-push",
         publish: "npm publish",
       },
     },
@@ -136,19 +137,25 @@ describe("merge config test", () => {
       },
       assemble2: {
         path: "./packages/assemble2",
-        version: "lerna version",
+        version: "lerna version ${ release.type }",
       },
-      "@namespace/assemble2": {
-        path: "./packages/namespace-assemble2",
+      "@namespaced/assemble1": {
+        path: "./packages/namespaced-assemble2",
         manager: "cargo",
-        version: "cargo version",
+        version: "cargo version ${ release.type }",
+        publish: "cargo publish",
+      },
+      "@namespaced/assemble2": {
+        path: "./packages/namespaced-assemble2",
+        manager: "cargo",
+        version: "cargo version ${ release.type }",
         publish: "cargo publish",
       },
     },
   };
 
   it("merges version", () => {
-    const mergedVersionConfig = mergeConfig({
+    const mergedVersionConfig = mergeIntoConfig({
       config,
       assembledChanges,
       command: "version",
@@ -157,7 +164,7 @@ describe("merge config test", () => {
   });
 
   it("merges publish", () => {
-    const mergedPublishConfig = mergeConfig({
+    const mergedPublishConfig = mergeIntoConfig({
       config,
       assembledChanges,
       command: "publish",
