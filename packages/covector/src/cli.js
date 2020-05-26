@@ -3,7 +3,7 @@ const { ChildProcess } = require("@effection/node");
 const { once, throwOnErrorEvent } = require("@effection/events");
 const yargs = require("yargs");
 const { configFile, changeFiles } = require("@covector/files");
-const { assemble } = require("@covector/assemble");
+const { assemble, mergeIntoConfig } = require("@covector/assemble");
 
 function raceTime(
   t = 10000,
@@ -36,22 +36,49 @@ module.exports.cli = function* (argv) {
     delete config.vfile;
     return console.dir(config);
   } else if (options.command === "version") {
-    // run mergeConfig with values via template function
-    // create the changelog
-
     yield raceTime();
-    let child = yield ChildProcess.spawn("ls", [], {
-      shell: process.env.shell,
-      stdio: "inherit",
-      windowsHide: true,
+    const commands = mergeIntoConfig({
+      assembledChanges,
+      config,
+      command: "version",
     });
+    // TODO create the changelog
+    for (let pkg of commands) {
+      console.log(
+        `bumping ${pkg.pkg} with ${assembledChanges.releases[pkg.pkg].type}`
+      );
+      let child = yield ChildProcess.spawn(pkg.version, [], {
+        cwd: pkg.path,
+        shell: process.env.shell,
+        stdio: "inherit",
+        windowsHide: true,
+      });
 
-    yield throwOnErrorEvent(child);
-    return yield once(child, "exit");
+      yield throwOnErrorEvent(child);
+      yield once(child, "exit");
+    }
+    return;
   } else if (options.command === "publish") {
-    // run mergeConfig with values via template function
-    // create the changelog
-    // spawnCommand
+    yield raceTime();
+    const commands = mergeIntoConfig({
+      assembledChanges,
+      config,
+      command: "publish",
+    });
+    // TODO create the changelog
+    for (let pkg of commands) {
+      console.log(`publishing ${pkg.pkg} with ${pkg.publish}`);
+      let child = yield ChildProcess.spawn(pkg.publish, [], {
+        cwd: pkg.path,
+        shell: process.env.shell,
+        stdio: "inherit",
+        windowsHide: true,
+      });
+
+      yield throwOnErrorEvent(child);
+      yield once(child, "exit");
+    }
+    return;
     return;
   }
 };

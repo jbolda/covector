@@ -12,9 +12,9 @@
   "dependencies": {
     "@covector/assemble": "0.0.1",
     "@covector/files": "0.0.1",
+    "@effection/events": "^0.6.1",
     "@effection/node": "^0.6.2",
     "effection": "^0.6.2",
-    "spawndamnit": "^2.0.0",
     "yargs": "^15.3.1"
   }
 }
