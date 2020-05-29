@@ -6,7 +6,7 @@ const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 
 function raceTime(
-  t = 10000,
+  t = 120000,
   msg = `timeout out waiting ${t / 1000}s for command`
 ) {
   return spawn(function* () {
