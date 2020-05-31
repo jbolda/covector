@@ -116,6 +116,7 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
   return commands;
 };
 
+// TODO: finish it, but do we need this even?
 module.exports.removeSameGraphBumps = ({
   mergedChanges,
   assembledChanges,

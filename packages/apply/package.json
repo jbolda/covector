@@ -1,0 +1,11 @@
+{
+  "name": "@covector/apply",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "files": [
+    "index.js"
+  ],
+  "dependencies": {
+    "semver": "^7.3.2"
+  }
+}
