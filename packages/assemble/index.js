@@ -110,3 +110,35 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
 
   return commands;
 };
+
+// TODO, complete, do we need this even?
+module.exports.removeSameGraphBumps = ({
+  mergedChanges,
+  assembledChanges,
+  config,
+  command,
+}) => {
+  if (command === "publish") return mergedChanges;
+
+  const graph = Object.keys(config.packages).reduce((graph, pkg) => {
+    if (!!config.packages[pkg].dependencies) {
+      graph[pkg] = config.packages[pkg].dependencies;
+    }
+    return graph;
+  }, {});
+
+  const releases = mergedChanges.reduce((releases, release) => {
+    releases[release.pkg] = release;
+    return releases;
+  }, {});
+
+  return mergedChanges.reduce((finalChanges, currentChange) => {
+    if (!!graph[currentChange.pkg] && !!graph[currentChange.pkg].dependencies) {
+      let graphBumps = graph[currentChange.pkg].dependencies.map(
+        (dep) => releases[dep].type
+      );
+    }
+
+    return [...finalChanges, currentChange];
+  }, []);
+};

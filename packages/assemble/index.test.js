@@ -1,4 +1,4 @@
-const { assemble, mergeIntoConfig } = require("./index");
+const { assemble, mergeIntoConfig, removeSameGraphBumps } = require("./index");
 
 describe("assemble changes", () => {
   const testTextOne = `
@@ -144,12 +144,14 @@ describe("merge config test", () => {
         manager: "cargo",
         version: "cargo version ${ release.type }",
         publish: "cargo publish",
+        dependencies: ["assemble1"],
       },
       "@namespaced/assemble2": {
         path: "./packages/namespaced-assemble2",
         manager: "cargo",
         version: "cargo version ${ release.type }",
         publish: "cargo publish",
+        dependencies: ["assemble2"],
       },
     },
   };
@@ -170,5 +172,152 @@ describe("merge config test", () => {
       command: "publish",
     });
     expect(mergedPublishConfig).toMatchSnapshot();
+  });
+});
+
+describe("removes graph bumps test", () => {
+  const assembledChanges = {
+    releases: {
+      "@namespaced/assemble2": {
+        changes: [
+          {
+            releases: {
+              "@namespaced/assemble2": "patch",
+              assemble1: "patch",
+            },
+            summary: "This is a test.",
+          },
+        ],
+        type: "patch",
+      },
+      assemble1: {
+        changes: [
+          {
+            releases: {
+              assemble1: "patch",
+              assemble2: "patch",
+            },
+            summary: "This is a test.",
+          },
+          {
+            releases: {
+              assemble1: "minor",
+              assemble2: "patch",
+            },
+            summary: "This is a test.",
+          },
+          {
+            releases: {
+              assemble1: "patch",
+              assemble2: "major",
+            },
+            summary: "This is a test.",
+          },
+          {
+            releases: {
+              "@namespaced/assemble2": "patch",
+              assemble1: "patch",
+            },
+            summary: "This is a test.",
+          },
+        ],
+        type: "minor",
+      },
+      assemble2: {
+        changes: [
+          {
+            releases: {
+              assemble1: "patch",
+              assemble2: "patch",
+            },
+            summary: "This is a test.",
+          },
+          {
+            releases: {
+              assemble1: "minor",
+              assemble2: "patch",
+            },
+            summary: "This is a test.",
+          },
+          {
+            releases: {
+              assemble1: "patch",
+              assemble2: "major",
+            },
+            summary: "This is a test.",
+          },
+        ],
+        type: "major",
+      },
+    },
+  };
+
+  const mergedChanges = [
+    {
+      path: "./packages/namespaced-assemble2",
+      pkg: "@namespaced/assemble2",
+      type: "patch",
+      version: "cargo version patch",
+    },
+    {
+      path: "./packages/assemble1",
+      pkg: "assemble1",
+      type: "minor",
+      version: "lerna version minor",
+    },
+    {
+      path: "./packages/assemble2",
+      pkg: "assemble2",
+      type: "major",
+      version: "lerna version major",
+    },
+  ];
+
+  const config = {
+    packages: {
+      assemble1: {
+        path: "./packages/assemble1",
+        manager: "javascript",
+      },
+      assemble2: {
+        path: "./packages/assemble2",
+        version: "lerna version ${ release.type }",
+      },
+      "@namespaced/assemble1": {
+        path: "./packages/namespaced-assemble2",
+        manager: "cargo",
+        version: "cargo version ${ release.type }",
+        publish: "cargo publish",
+        dependencies: ["assemble1"],
+      },
+      "@namespaced/assemble2": {
+        path: "./packages/namespaced-assemble2",
+        manager: "cargo",
+        version: "cargo version ${ release.type }",
+        publish: "cargo publish",
+        dependencies: ["assemble2"],
+      },
+    },
+  };
+
+  it("returns with graph bumps removed version", () => {
+    const trimmedVersionBumps = removeSameGraphBumps({
+      mergedChanges,
+      assembledChanges,
+      config,
+      command: "version",
+    });
+    // console.log(trimmedVersionBumps);
+    // expect(mergedVersionConfig).toMatchSnapshot();
+  });
+
+  it("returns with graph bumps removed merges publish", () => {
+    const trimmedPublishBumps = removeSameGraphBumps({
+      mergedChanges,
+      assembledChanges,
+      config,
+      command: "publish",
+    });
+    // expect(mergedPublishConfig).toMatchSnapshot();
   });
 });
