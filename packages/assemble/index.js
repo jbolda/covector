@@ -84,6 +84,8 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
       pkged[pkg] = {
         path: config.packages[pkg].path,
         [command]: mergedCommand,
+        manager: config.packages[pkg].manager,
+        dependencies: config.packages[pkg].dependencies,
       };
     }
     return pkged;
@@ -102,6 +104,9 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
     const merged = {
       pkg,
       path: pkgCommands[pkg].path,
+      type: assembledChanges.releases[pkg].type,
+      manager: pkgCommands[pkg].manager,
+      dependencies: pkgCommands[pkg].dependencies,
       [command]: !pkgCommand ? null : templatedString(pipeToTemplate),
     };
 
@@ -111,7 +116,6 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
   return commands;
 };
 
-// TODO, complete, do we need this even?
 module.exports.removeSameGraphBumps = ({
   mergedChanges,
   assembledChanges,

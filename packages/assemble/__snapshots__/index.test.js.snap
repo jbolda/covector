@@ -111,12 +111,18 @@ Object {
 exports[`merge config test merges publish 1`] = `
 Array [
   Object {
+    "dependencies": Array [
+      "assemble2",
+    ],
+    "manager": "cargo",
     "path": "./packages/namespaced-assemble2",
     "pkg": "@namespaced/assemble2",
     "publish": "cargo publish",
     "type": "patch",
   },
   Object {
+    "dependencies": undefined,
+    "manager": "javascript",
     "path": "./packages/assemble1",
     "pkg": "assemble1",
     "publish": "npm publish",
@@ -129,18 +135,26 @@ Array [
 exports[`merge config test merges version 1`] = `
 Array [
   Object {
+    "dependencies": Array [
+      "assemble2",
+    ],
+    "manager": "cargo",
     "path": "./packages/namespaced-assemble2",
     "pkg": "@namespaced/assemble2",
     "type": "patch",
     "version": "cargo version patch",
   },
   Object {
+    "dependencies": undefined,
+    "manager": "javascript",
     "path": "./packages/assemble1",
     "pkg": "assemble1",
     "type": "minor",
     "version": "lerna version minor --no-git-tag-version --no-push",
   },
   Object {
+    "dependencies": undefined,
+    "manager": undefined,
     "path": "./packages/assemble2",
     "pkg": "assemble2",
     "type": "major",
