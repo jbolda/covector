@@ -22,13 +22,32 @@ const parsePkg = (file) => {
   }
 };
 
-module.exports.pkgFile = async (file) => {
+const stringifyPkg = ({ newContents, extname }) => {
+  switch (extname) {
+    case ".toml":
+      return TOML.stringify(file.contents);
+    case ".json":
+      return JSON.stringify(newContents, null, "  ");
+  }
+};
+
+module.exports.readPkgFile = async (file) => {
   const inputVfile = await vfile.read(file, "utf8");
   const parsed = parsePkg(inputVfile);
   return {
     vfile: inputVfile,
     ...parsed,
   };
+};
+
+module.exports.writePkgFile = async ({ previousVFile, newContents }) => {
+  const vFileNext = { ...previousVFile };
+  vFileNext.contents = stringifyPkg({
+    newContents,
+    extname: previousVFile.extname,
+  });
+  const inputVfile = await vfile.write(vFileNext, "utf8");
+  return inputVfile;
 };
 
 module.exports.configFile = async ({ cwd, changeFolder = ".changes" }) => {

@@ -1,0 +1,8 @@
+{
+  "name": "@covector/changelog",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "files": [
+    "index.js"
+  ]
+}
