@@ -28,6 +28,10 @@
     "@covector/files": {
       "path": "./packages/files",
       "manager": "javascript"
+    },
+    "action": {
+      "path": "./packages/action",
+      "manager": "javascript"
     }
   }
 }

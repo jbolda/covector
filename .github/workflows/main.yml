@@ -1,0 +1,15 @@
+on: [push]
+
+jobs:
+  covector:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: covector action
+        uses: ./packages/action
+        id: covector
+        with:
+          command: 'status'
+      - name: get the output
+        run: echo ${{ steps.covector.change }}
