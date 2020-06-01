@@ -70,6 +70,10 @@ module.exports.changeFiles = async ({ cwd, changeFolder = ".changes" }) => {
     ignore: ["**/readme.md"],
   });
 
+  const vfiles = paths
+    .map((file) => vfile.readSync(path.join(cwd, file), "utf8"))
+    .map((v) => v.contents);
+
   for (let path of paths) {
     await fs.unlink(path, (err) => {
       if (err) throw err;
@@ -77,7 +81,5 @@ module.exports.changeFiles = async ({ cwd, changeFolder = ".changes" }) => {
     });
   }
 
-  return paths
-    .map((file) => vfile.readSync(path.join(cwd, file), "utf8"))
-    .map((v) => v.contents);
+  return vfiles;
 };
