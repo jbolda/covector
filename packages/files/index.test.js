@@ -11,9 +11,9 @@ describe("file test", () => {
   });
 
   it("parses json", async () => {
-    const jsonFolder = f.copy("pkg.js-single");
+    const jsonFolder = f.copy("pkg.js-single-json");
     const jsonVfile = await readPkgFile(jsonFolder + "/package.json");
-    expect(jsonVfile.name).toBe("js-single-fixture");
+    expect(jsonVfile.name).toBe("js-single-json-fixture");
     expect(jsonVfile.version).toBe("0.5.9");
   });
 

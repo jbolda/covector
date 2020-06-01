@@ -23,6 +23,7 @@ typings/
 # Optional cache directory
 .npm
 .yarn
+target
 
 # Optional eslint cache
 .eslintcache

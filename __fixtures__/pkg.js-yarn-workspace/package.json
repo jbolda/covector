@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "js-yarn-workspace",
+  "description": "yarn workspace",
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ]
+}

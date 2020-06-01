@@ -1,0 +1,8 @@
+{
+  "name": "basic-pkg-two-fixture",
+  "version": "0.3.1",
+  "scripts": {
+    "start": "echo start",
+    "test": "echo test"
+  }
+}
