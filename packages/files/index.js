@@ -27,7 +27,7 @@ const stringifyPkg = ({ newContents, extname }) => {
     case ".toml":
       return TOML.stringify(file.contents);
     case ".json":
-      return JSON.stringify(newContents, null, "  ");
+      return `${JSON.stringify(newContents, null, "  ")}\n`;
   }
 };
 
