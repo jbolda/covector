@@ -9,7 +9,6 @@ lerna-debug.log*
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-
 # Dependency directories
 node_modules/
 jspm_packages/
@@ -40,3 +39,6 @@ target
 # dotenv environment variables file
 .env
 .env.test
+
+# lockfiles, as a lib we don't need to lock
+yarn.lock
