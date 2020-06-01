@@ -1,6 +1,10 @@
 const { cli } = require("./cli");
 const { main } = require("@effection/node");
 
-main(function* boot() {
-  yield cli(process.argv.slice(2));
+const run = require("./run");
+
+main(function* start() {
+  yield cli(process.argv.slice(2), run);
 });
+
+module.exports.convector = run;
