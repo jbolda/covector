@@ -20,12 +20,10 @@ module.exports.apply = function* ({ changeList, config }) {
             changes[pkg].type
           );
         } else {
-          changes[pkg] = {};
+          changes[pkg] = config.packages[pkg];
+          changes[pkg].parents = [];
           changes[pkg].pkg = pkg;
-          changes[pkg].type = compareBumps(
-            changes[main].type,
-            changes[pkg].type
-          );
+          changes[pkg].type = changes[main].type;
         }
       });
     }

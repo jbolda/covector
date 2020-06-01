@@ -77,7 +77,7 @@ module.exports.changeFiles = async ({ cwd, changeFolder = ".changes" }) => {
   for (let path of paths) {
     await fs.unlink(path, (err) => {
       if (err) throw err;
-      console.log("path/file.txt was deleted");
+      console.info(`${path} was deleted`);
     });
   }
 
