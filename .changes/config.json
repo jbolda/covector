@@ -10,6 +10,15 @@
   "packages": {
     "covector": {
       "path": "./packages/covector",
+      "manager": "javascript",
+      "dependencies": [
+        "@covector/apply",
+        "@covector/assemble",
+        "@covector/files"
+      ]
+    },
+    "@covector/apply": {
+      "path": "./packages/apply",
       "manager": "javascript"
     },
     "@covector/assemble": {

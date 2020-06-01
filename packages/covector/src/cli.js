@@ -4,6 +4,7 @@ const { once, throwOnErrorEvent } = require("@effection/events");
 const yargs = require("yargs");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
+const { apply } = require("@covector/apply");
 
 function raceTime(
   t = 120000,
@@ -42,22 +43,9 @@ module.exports.cli = function* (argv) {
       config,
       command: "version",
     });
-    // TODO create the changelog
-    for (let pkg of commands) {
-      console.log(
-        `bumping ${pkg.pkg} with ${assembledChanges.releases[pkg.pkg].type}`
-      );
-      let child = yield ChildProcess.spawn(pkg.version, [], {
-        cwd: pkg.path,
-        shell: process.env.shell,
-        stdio: "inherit",
-        windowsHide: true,
-      });
 
-      yield throwOnErrorEvent(child);
-      yield once(child, "exit");
-    }
-    return;
+    // TODO create the changelog
+    return yield apply({ changeList: commands, config });
   } else if (options.command === "publish") {
     yield raceTime();
     const commands = mergeIntoConfig({

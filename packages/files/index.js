@@ -29,6 +29,7 @@ const stringifyPkg = ({ newContents, extname }) => {
     case ".json":
       return `${JSON.stringify(newContents, null, "  ")}\n`;
   }
+  throw new Error("Unknown package file type.");
 };
 
 module.exports.readPkgFile = async (file) => {
@@ -40,11 +41,11 @@ module.exports.readPkgFile = async (file) => {
   };
 };
 
-module.exports.writePkgFile = async ({ previousVFile, newContents }) => {
-  const vFileNext = { ...previousVFile };
+module.exports.writePkgFile = async ({ packageFile }) => {
+  const vFileNext = { ...packageFile.vfile };
   vFileNext.contents = stringifyPkg({
-    newContents,
-    extname: previousVFile.extname,
+    newContents: packageFile.pkg,
+    extname: packageFile.vfile.extname,
   });
   const inputVfile = await vfile.write(vFileNext, "utf8");
   return inputVfile;
