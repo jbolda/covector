@@ -1,8 +1,11 @@
 {
   "name": "action",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "dist/index.js",
   "license": "Apache-2.0",
+  "scripts": {
+    "build": "ncc build index.js -o dist"
+  },
   "dependencies": {
     "@actions/core": "^1.2.4",
     "@actions/github": "^2.2.0",
