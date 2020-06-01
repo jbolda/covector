@@ -1,5 +1,6 @@
 const vfile = require("to-vfile");
 const globby = require("globby");
+const fs = require("fs");
 const path = require("path");
 const TOML = require("@iarna/toml");
 
@@ -68,6 +69,13 @@ module.exports.changeFiles = async ({ cwd, changeFolder = ".changes" }) => {
     cwd,
     ignore: ["**/readme.md"],
   });
+
+  for (let path of paths) {
+    await fs.unlink(path, (err) => {
+      if (err) throw err;
+      console.log("path/file.txt was deleted");
+    });
+  }
 
   return paths
     .map((file) => vfile.readSync(path.join(cwd, file), "utf8"))
