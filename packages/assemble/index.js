@@ -40,6 +40,8 @@ const compareBumps = (bumpOne, bumpTwo) => {
   return bumps.get(bumpOne) < bumps.get(bumpTwo) ? bumpOne : bumpTwo;
 };
 
+module.exports.compareBumps = compareBumps;
+
 const mergeReleases = (changes) => {
   return changes.reduce((release, change) => {
     Object.keys(change.releases).forEach((pkg) => {
