@@ -4,7 +4,7 @@ const { covector } = require("../covector");
 
 try {
   const command = core.getInput("command");
-  //   const c = covector({ command });
+  const c = covector({ command });
   core.setOutput("change", c);
   // Get the JSON webhook payload for the event that triggered the workflow
   const payload = JSON.stringify(github.context.payload, undefined, 2);
