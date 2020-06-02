@@ -2,7 +2,7 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 // const { covector } = require("../covector");
 
-function* run() {
+async function run() {
   try {
     console.log("place 1");
     const inputCommand = core.getInput("command");
