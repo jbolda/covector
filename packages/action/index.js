@@ -4,11 +4,19 @@ const { covector } = require("../covector");
 
 try {
   const command = core.getInput("command");
-  const c = covector({ command });
-  core.setOutput("change", c);
-  // Get the JSON webhook payload for the event that triggered the workflow
-  const payload = JSON.stringify(github.context.payload, undefined, 2);
-  console.log(`The event payload: ${payload}`);
+  console.log = core.debug;
+  let commandToRun = command;
+  if (command === "version-or-publish") {
+    if (covector({ command: "status" }) === "No changes.") {
+      commandToRun = "publish";
+    } else {
+      commandToRun = "version";
+    }
+  }
+  const covectored = covector({ command: commandToRun });
+  core.setOutput("change", covectored);
+  const payload = JSON.stringify(c, undefined, 2);
+  console.log(`The covector output: ${payload}`);
 } catch (error) {
   core.setFailed(error.message);
 }

@@ -14,12 +14,14 @@ module.exports.run = function* ({ command }) {
   if (command === "status") {
     if (changesArray.length === 0) {
       console.info("There are no changes.");
+      return "No changes.";
     } else {
       console.log("changes:");
-      return Object.keys(assembledChanges.releases).forEach((release) => {
+      Object.keys(assembledChanges.releases).forEach((release) => {
         console.log(`${release} => ${assembledChanges.releases[release].type}`);
         console.dir(assembledChanges.releases[release].changes);
       });
+      return `There are ${assembledChanges.releases.length} changes.`;
     }
   } else if (command === "config") {
     delete config.vfile;
