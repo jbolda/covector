@@ -12,4 +12,4 @@ jobs:
         with:
           command: 'status'
       - name: get the output
-        run: echo ${{ steps.covector.change }}
+        run: echo ${{ toJson(steps.covector) }}
