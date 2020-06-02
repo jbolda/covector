@@ -1,3 +1,4 @@
+name: covector status
 on: [pull_request]
 
 jobs:
@@ -6,8 +7,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: covector
+      - name: covector status
         uses: ./packages/action
         id: covector
         with:
           command: 'status'
+      - name: dump output
+        run: echo ${{ toJson(steps.covector) }}

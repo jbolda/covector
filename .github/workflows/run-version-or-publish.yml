@@ -1,3 +1,4 @@
+name: covector version or publish
 on:
   push:
     branches:
@@ -9,8 +10,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: covector
+      - name: covector version-or-publish
         uses: ./packages/action
         id: covector
         with:
           command: 'version-or-publish'
+      - name: dump output
+        run: echo ${{ toJson(steps.covector) }}
