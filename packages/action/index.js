@@ -15,7 +15,7 @@ try {
   }
   const covectored = covector({ command: commandToRun });
   core.setOutput("change", covectored);
-  const payload = JSON.stringify(c, undefined, 2);
+  const payload = JSON.stringify(covectored, undefined, 2);
   console.log(`The covector output: ${payload}`);
 } catch (error) {
   core.setFailed(error.message);
