@@ -5,7 +5,6 @@ const { covector } = require("../covector");
 function* run() {
   try {
     const command = core.getInput("command");
-    console.log = core.debug;
     let commandToRun = command;
     if (command === "version-or-publish") {
       if (yield covector({ command: "status" }) === "No changes.") {
