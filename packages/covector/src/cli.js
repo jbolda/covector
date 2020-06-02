@@ -1,8 +1,8 @@
 const yargs = require("yargs");
 
-module.exports.cli = function* (argv, run) {
+module.exports.cli = function* (argv, covector) {
   const options = parseOptions(argv);
-  return yield run(options);
+  return yield covector(options);
 };
 
 function parseOptions(argv) {
