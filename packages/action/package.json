@@ -4,6 +4,7 @@
   "main": "dist/index.js",
   "license": "Apache-2.0",
   "scripts": {
+    "run-source": "node index.js",
     "build": "ncc build -m index.js -o dist"
   },
   "dependencies": {
