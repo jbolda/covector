@@ -32,7 +32,8 @@ module.exports.apply = function* ({ changeList, config }) {
   let allPackages = yield readAll({ changes, config });
 
   const bumps = bumpAll({ changes, allPackages });
-  return yield writeAll({ bumps });
+  yield writeAll({ bumps });
+  return bumps;
 };
 
 const readAll = ({ changes, config }) => {
