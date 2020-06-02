@@ -4,17 +4,23 @@ const { covector } = require("../covector");
 
 function* run() {
   try {
-    const command = core.getInput("command");
-    let commandToRun = command;
-    if (command === "version-or-publish") {
+    console.log("place 1");
+    const inputCommand = core.getInput("command");
+    console.log("place 2");
+    let command = inputCommand;
+    console.log("place 3");
+    if (inputCommand === "version-or-publish") {
       if (yield covector({ command: "status" }) === "No changes.") {
-        commandToRun = "publish";
+        command = "publish";
       } else {
-        commandToRun = "version";
+        command = "version";
       }
     }
-    const covectored = yield covector({ command: commandToRun });
+    console.log("place 4");
+    const covectored = yield covector({ command });
+    console.log("place 5");
     core.setOutput("change", covectored);
+    console.log("place 6");
     const payload = JSON.stringify(covectored, undefined, 2);
     console.log(`The covector output: ${payload}`);
   } catch (error) {
