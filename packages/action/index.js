@@ -28,6 +28,7 @@ function* run() {
   }
 }
 
+console.log("does it reach here");
 run();
 
 export default run;
