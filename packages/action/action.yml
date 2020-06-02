@@ -1,9 +1,9 @@
 name: 'covector'
 description: 'Sane change management in polyglot, monorepos, single '
 inputs:
-  command:  # id of input
+  command:
     description: 'covector cli command to run'
-    required: true
+    required: false
     default: 'status'
 outputs:
   change:
