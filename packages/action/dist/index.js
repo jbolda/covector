@@ -508,7 +508,7 @@ function blockHtml(eat, value, silent) {
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  */
-var reInterpolate = __webpack_require__(599),
+var reInterpolate = __webpack_require__(125),
     templateSettings = __webpack_require__(511);
 
 /** Used to detect hot functions by number of calls within a span of milliseconds. */
@@ -2229,7 +2229,7 @@ module.exports = rcompare
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const async = __webpack_require__(233);
+const async = __webpack_require__(120);
 const sync = __webpack_require__(719);
 const settings_1 = __webpack_require__(300);
 exports.Settings = settings_1.default;
@@ -15494,111 +15494,7 @@ exports.main = main;
 //# sourceMappingURL=main.js.map
 
 /***/ }),
-/* 26 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var trim = __webpack_require__(132)
-var trimTrailingLines = __webpack_require__(716)
-var interrupt = __webpack_require__(658)
-
-module.exports = paragraph
-
-var tab = '\t'
-var lineFeed = '\n'
-var space = ' '
-
-var tabSize = 4
-
-// Tokenise paragraph.
-function paragraph(eat, value, silent) {
-  var self = this
-  var settings = self.options
-  var commonmark = settings.commonmark
-  var tokenizers = self.blockTokenizers
-  var interruptors = self.interruptParagraph
-  var index = value.indexOf(lineFeed)
-  var length = value.length
-  var position
-  var subvalue
-  var character
-  var size
-  var now
-
-  while (index < length) {
-    // Eat everything if there’s no following newline.
-    if (index === -1) {
-      index = length
-      break
-    }
-
-    // Stop if the next character is NEWLINE.
-    if (value.charAt(index + 1) === lineFeed) {
-      break
-    }
-
-    // In commonmark-mode, following indented lines are part of the paragraph.
-    if (commonmark) {
-      size = 0
-      position = index + 1
-
-      while (position < length) {
-        character = value.charAt(position)
-
-        if (character === tab) {
-          size = tabSize
-          break
-        } else if (character === space) {
-          size++
-        } else {
-          break
-        }
-
-        position++
-      }
-
-      if (size >= tabSize && character !== lineFeed) {
-        index = value.indexOf(lineFeed, index + 1)
-        continue
-      }
-    }
-
-    subvalue = value.slice(index + 1)
-
-    // Check if the following code contains a possible block.
-    if (interrupt(interruptors, tokenizers, self, [eat, subvalue, true])) {
-      break
-    }
-
-    position = index
-    index = value.indexOf(lineFeed, index + 1)
-
-    if (index !== -1 && trim(value.slice(position, index)) === '') {
-      index = position
-      break
-    }
-  }
-
-  subvalue = value.slice(0, index)
-
-  /* istanbul ignore if - never used (yet) */
-  if (silent) {
-    return true
-  }
-
-  now = eat.now()
-  subvalue = trimTrailingLines(subvalue)
-
-  return eat(subvalue)({
-    type: 'paragraph',
-    children: self.tokenizeInline(subvalue, now)
-  })
-}
-
-
-/***/ }),
+/* 26 */,
 /* 27 */,
 /* 28 */,
 /* 29 */,
@@ -15904,23 +15800,170 @@ exports.default = Settings;
 /* 41 */,
 /* 42 */,
 /* 43 */,
-/* 44 */,
+/* 44 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(622)
+
+// add bash completions to your
+//  yargs-powered applications.
+module.exports = function completion (yargs, usage, command) {
+  const self = {
+    completionKey: 'get-yargs-completions'
+  }
+
+  let aliases
+  self.setParsed = function setParsed (parsed) {
+    aliases = parsed.aliases
+  }
+
+  const zshShell = (process.env.SHELL && process.env.SHELL.indexOf('zsh') !== -1) ||
+    (process.env.ZSH_NAME && process.env.ZSH_NAME.indexOf('zsh') !== -1)
+  // get a list of completion commands.
+  // 'args' is the array of strings from the line to be completed
+  self.getCompletion = function getCompletion (args, done) {
+    const completions = []
+    const current = args.length ? args[args.length - 1] : ''
+    const argv = yargs.parse(args, true)
+    const parentCommands = yargs.getContext().commands
+
+    // a custom completion function can be provided
+    // to completion().
+    if (completionFunction) {
+      if (completionFunction.length < 3) {
+        const result = completionFunction(current, argv)
+
+        // promise based completion function.
+        if (typeof result.then === 'function') {
+          return result.then((list) => {
+            process.nextTick(() => { done(list) })
+          }).catch((err) => {
+            process.nextTick(() => { throw err })
+          })
+        }
+
+        // synchronous completion function.
+        return done(result)
+      } else {
+        // asynchronous completion function
+        return completionFunction(current, argv, (completions) => {
+          done(completions)
+        })
+      }
+    }
+
+    const handlers = command.getCommandHandlers()
+    for (let i = 0, ii = args.length; i < ii; ++i) {
+      if (handlers[args[i]] && handlers[args[i]].builder) {
+        const builder = handlers[args[i]].builder
+        if (typeof builder === 'function') {
+          const y = yargs.reset()
+          builder(y)
+          return y.argv
+        }
+      }
+    }
+
+    if (!current.match(/^-/) && parentCommands[parentCommands.length - 1] !== current) {
+      usage.getCommands().forEach((usageCommand) => {
+        const commandName = command.parseCommand(usageCommand[0]).cmd
+        if (args.indexOf(commandName) === -1) {
+          if (!zshShell) {
+            completions.push(commandName)
+          } else {
+            const desc = usageCommand[1] || ''
+            completions.push(commandName.replace(/:/g, '\\:') + ':' + desc)
+          }
+        }
+      })
+    }
+
+    if (current.match(/^-/) || (current === '' && completions.length === 0)) {
+      const descs = usage.getDescriptions()
+      const options = yargs.getOptions()
+      Object.keys(options.key).forEach((key) => {
+        const negable = !!options.configuration['boolean-negation'] && options.boolean.includes(key)
+        // If the key and its aliases aren't in 'args', add the key to 'completions'
+        let keyAndAliases = [key].concat(aliases[key] || [])
+        if (negable) keyAndAliases = keyAndAliases.concat(keyAndAliases.map(key => `no-${key}`))
+
+        function completeOptionKey (key) {
+          const notInArgs = keyAndAliases.every(val => args.indexOf(`--${val}`) === -1)
+          if (notInArgs) {
+            const startsByTwoDashes = s => /^--/.test(s)
+            const isShortOption = s => /^[^0-9]$/.test(s)
+            const dashes = !startsByTwoDashes(current) && isShortOption(key) ? '-' : '--'
+            if (!zshShell) {
+              completions.push(dashes + key)
+            } else {
+              const desc = descs[key] || ''
+              completions.push(dashes + `${key.replace(/:/g, '\\:')}:${desc.replace('__yargsString__:', '')}`)
+            }
+          }
+        }
+
+        completeOptionKey(key)
+        if (negable && !!options.default[key]) completeOptionKey(`no-${key}`)
+      })
+    }
+
+    done(completions)
+  }
+
+  // generate the completion script to add to your .bashrc.
+  self.generateCompletionScript = function generateCompletionScript ($0, cmd) {
+    const templates = __webpack_require__(942)
+    let script = zshShell ? templates.completionZshTemplate : templates.completionShTemplate
+    const name = path.basename($0)
+
+    // add ./to applications not yet installed as bin.
+    if ($0.match(/\.js$/)) $0 = `./${$0}`
+
+    script = script.replace(/{{app_name}}/g, name)
+    script = script.replace(/{{completion_command}}/g, cmd)
+    return script.replace(/{{app_path}}/g, $0)
+  }
+
+  // register a function to perform your own custom
+  // completions., this function can be either
+  // synchrnous or asynchronous.
+  let completionFunction = null
+  self.registerFunction = (fn) => {
+    completionFunction = fn
+  }
+
+  return self
+}
+
+
+/***/ }),
 /* 45 */,
 /* 46 */,
 /* 47 */,
 /* 48 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = function whichModule (exported) {
-  for (var i = 0, files = Object.keys(require.cache), mod; i < files.length; i++) {
-    mod = require.cache[files[i]]
-    if (mod.exports === exported) return mod
+var path = __webpack_require__(622);
+
+function replaceExt(npath, ext) {
+  if (typeof npath !== 'string') {
+    return npath;
   }
-  return null
+
+  if (npath.length === 0) {
+    return npath;
+  }
+
+  var nFileName = path.basename(npath, path.extname(npath)) + ext;
+  return path.join(path.dirname(npath), nFileName);
 }
+
+module.exports = replaceExt;
 
 
 /***/ }),
@@ -16942,7 +16985,7 @@ module.exports = Schema.DEFAULT = new Schema({
 
 "use strict";
 
-const stringWidth = __webpack_require__(772);
+const stringWidth = __webpack_require__(107);
 const stripAnsi = __webpack_require__(598);
 const ansiStyles = __webpack_require__(285);
 
@@ -17308,7 +17351,7 @@ module.exports = satisfies
 
 
 const fill = __webpack_require__(385);
-const stringify = __webpack_require__(804);
+const stringify = __webpack_require__(450);
 const utils = __webpack_require__(49);
 
 const append = (queue = '', stash = '', enclose = false) => {
@@ -17671,20 +17714,14 @@ module.exports = {
 /***/ }),
 /* 69 */,
 /* 70 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-module.exports = function objFilter (original, filter) {
-  const obj = {}
-  filter = filter || ((k, v) => true)
-  Object.keys(original || {}).forEach((key) => {
-    if (filter(key, original[key])) {
-      obj[key] = original[key]
-    }
-  })
-  return obj
+const parse = __webpack_require__(249)
+const prerelease = (version, options) => {
+  const parsed = parse(version, options)
+  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null
 }
+module.exports = prerelease
 
 
 /***/ }),
@@ -17825,7 +17862,22 @@ function whitespace(character) {
 
 
 /***/ }),
-/* 78 */,
+/* 78 */
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = function whichModule (exported) {
+  for (var i = 0, files = Object.keys(require.cache), mod; i < files.length; i++) {
+    mod = require.cache[files[i]]
+    if (mod.exports === exported) return mod
+  }
+  return null
+}
+
+
+/***/ }),
 /* 79 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -18143,7 +18195,78 @@ module.exports = windowsRelease;
 
 
 /***/ }),
-/* 86 */,
+/* 86 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(622);
+const fs = __webpack_require__(747);
+const {promisify} = __webpack_require__(669);
+const pLocate = __webpack_require__(615);
+
+const fsStat = promisify(fs.stat);
+const fsLStat = promisify(fs.lstat);
+
+const typeMappings = {
+	directory: 'isDirectory',
+	file: 'isFile'
+};
+
+function checkType({type}) {
+	if (type in typeMappings) {
+		return;
+	}
+
+	throw new Error(`Invalid type specified: ${type}`);
+}
+
+const matchType = (type, stat) => type === undefined || stat[typeMappings[type]]();
+
+module.exports = async (paths, options) => {
+	options = {
+		cwd: process.cwd(),
+		type: 'file',
+		allowSymlinks: true,
+		...options
+	};
+	checkType(options);
+	const statFn = options.allowSymlinks ? fsStat : fsLStat;
+
+	return pLocate(paths, async path_ => {
+		try {
+			const stat = await statFn(path.resolve(options.cwd, path_));
+			return matchType(options.type, stat);
+		} catch (_) {
+			return false;
+		}
+	}, options);
+};
+
+module.exports.sync = (paths, options) => {
+	options = {
+		cwd: process.cwd(),
+		allowSymlinks: true,
+		type: 'file',
+		...options
+	};
+	checkType(options);
+	const statFn = options.allowSymlinks ? fs.statSync : fs.lstatSync;
+
+	for (const path_ of paths) {
+		try {
+			const stat = statFn(path.resolve(options.cwd, path_));
+
+			if (matchType(options.type, stat)) {
+				return path_;
+			}
+		} catch (_) {
+		}
+	}
+};
+
+
+/***/ }),
 /* 87 */
 /***/ (function(module) {
 
@@ -18938,25 +19061,27 @@ function imageReference(node) {
 
 /***/ }),
 /* 100 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const array = __webpack_require__(177);
-exports.array = array;
-const errno = __webpack_require__(786);
-exports.errno = errno;
-const fs = __webpack_require__(968);
-exports.fs = fs;
-const path = __webpack_require__(404);
-exports.path = path;
-const pattern = __webpack_require__(702);
-exports.pattern = pattern;
-const stream = __webpack_require__(918);
-exports.stream = stream;
-const string = __webpack_require__(351);
-exports.string = string;
+class DirentFromStats {
+    constructor(name, stats) {
+        this.name = name;
+        this.isBlockDevice = stats.isBlockDevice.bind(stats);
+        this.isCharacterDevice = stats.isCharacterDevice.bind(stats);
+        this.isDirectory = stats.isDirectory.bind(stats);
+        this.isFIFO = stats.isFIFO.bind(stats);
+        this.isFile = stats.isFile.bind(stats);
+        this.isSocket = stats.isSocket.bind(stats);
+        this.isSymbolicLink = stats.isSymbolicLink.bind(stats);
+    }
+}
+function createDirentFromStats(name, stats) {
+    return new DirentFromStats(name, stats);
+}
+exports.createDirentFromStats = createDirentFromStats;
 
 
 /***/ }),
@@ -19024,7 +19149,56 @@ module.exports = readShebang;
 
 
 /***/ }),
-/* 107 */,
+/* 107 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const stripAnsi = __webpack_require__(598);
+const isFullwidthCodePoint = __webpack_require__(999);
+const emojiRegex = __webpack_require__(339);
+
+const stringWidth = string => {
+	string = string.replace(emojiRegex(), '  ');
+
+	if (typeof string !== 'string' || string.length === 0) {
+		return 0;
+	}
+
+	string = stripAnsi(string);
+
+	let width = 0;
+
+	for (let i = 0; i < string.length; i++) {
+		const code = string.codePointAt(i);
+
+		// Ignore control characters
+		if (code <= 0x1F || (code >= 0x7F && code <= 0x9F)) {
+			continue;
+		}
+
+		// Ignore combining characters
+		if (code >= 0x300 && code <= 0x36F) {
+			continue;
+		}
+
+		// Surrogates
+		if (code > 0xFFFF) {
+			i++;
+		}
+
+		width += isFullwidthCodePoint(code) ? 2 : 1;
+	}
+
+	return width;
+};
+
+module.exports = stringWidth;
+// TODO: remove this in the next major version
+module.exports.default = stringWidth;
+
+
+/***/ }),
 /* 108 */
 /***/ (function(module) {
 
@@ -20127,7 +20301,7 @@ module.exports = parse;
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const SemVer = __webpack_require__(54)
-const parse = __webpack_require__(791)
+const parse = __webpack_require__(249)
 const {re, t} = __webpack_require__(629)
 
 const coerce = (version, options) => {
@@ -20371,32 +20545,40 @@ function toResult(value) {
 /***/ }),
 /* 119 */,
 /* 120 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
-const fs = __webpack_require__(747);
-const {promisify} = __webpack_require__(669);
-
-const pAccess = promisify(fs.access);
-
-module.exports = async path => {
-	try {
-		await pAccess(path);
-		return true;
-	} catch (_) {
-		return false;
-	}
-};
-
-module.exports.sync = path => {
-	try {
-		fs.accessSync(path);
-		return true;
-	} catch (_) {
-		return false;
-	}
-};
+Object.defineProperty(exports, "__esModule", { value: true });
+function read(path, settings, callback) {
+    settings.fs.lstat(path, (lstatError, lstat) => {
+        if (lstatError !== null) {
+            return callFailureCallback(callback, lstatError);
+        }
+        if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
+            return callSuccessCallback(callback, lstat);
+        }
+        settings.fs.stat(path, (statError, stat) => {
+            if (statError !== null) {
+                if (settings.throwErrorOnBrokenSymbolicLink) {
+                    return callFailureCallback(callback, statError);
+                }
+                return callSuccessCallback(callback, lstat);
+            }
+            if (settings.markSymbolicLink) {
+                stat.isSymbolicLink = () => true;
+            }
+            callSuccessCallback(callback, stat);
+        });
+    });
+}
+exports.read = read;
+function callFailureCallback(callback, error) {
+    callback(error);
+}
+function callSuccessCallback(callback, result) {
+    callback(null, result);
+}
 
 
 /***/ }),
@@ -20486,71 +20668,21 @@ isStream.transform = function (stream) {
 
 /***/ }),
 /* 125 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-"use strict";
+/**
+ * lodash 3.0.0 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modern modularize exports="npm" -o ./`
+ * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.7.0 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <https://lodash.com/license>
+ */
 
+/** Used to match template delimiters. */
+var reInterpolate = /<%=([\s\S]+?)%>/g;
 
-var matters = __webpack_require__(579)
-var parse = __webpack_require__(998)
-var compile = __webpack_require__(787)
-
-module.exports = frontmatter
-
-function frontmatter(options) {
-  var parser = this.Parser
-  var compiler = this.Compiler
-  var config = matters(options || ['yaml'])
-
-  if (isRemarkParser(parser)) {
-    attachParser(parser, config)
-  }
-
-  if (isRemarkCompiler(compiler)) {
-    attachCompiler(compiler, config)
-  }
-}
-
-function attachParser(parser, matters) {
-  var proto = parser.prototype
-  var tokenizers = wrap(parse, matters)
-  var names = []
-  var key
-
-  for (key in tokenizers) {
-    names.push(key)
-  }
-
-  proto.blockMethods = names.concat(proto.blockMethods)
-  proto.blockTokenizers = Object.assign({}, tokenizers, proto.blockTokenizers)
-}
-
-function attachCompiler(compiler, matters) {
-  var proto = compiler.prototype
-  proto.visitors = Object.assign({}, wrap(compile, matters), proto.visitors)
-}
-
-function wrap(func, matters) {
-  var result = {}
-  var length = matters.length
-  var index = -1
-  var tuple
-
-  while (++index < length) {
-    tuple = func(matters[index])
-    result[tuple[0]] = tuple[1]
-  }
-
-  return result
-}
-
-function isRemarkParser(parser) {
-  return Boolean(parser && parser.prototype && parser.prototype.blockTokenizers)
-}
-
-function isRemarkCompiler(compiler) {
-  return Boolean(compiler && compiler.prototype && compiler.prototype.visitors)
-}
+module.exports = reInterpolate;
 
 
 /***/ }),
@@ -21067,7 +21199,7 @@ function table(eat, value, silent) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const common = __webpack_require__(806);
+const common = __webpack_require__(720);
 class Reader {
     constructor(_root, _settings) {
         this._root = _root;
@@ -21930,7 +22062,7 @@ var proto = Compiler.prototype
 // Enter and exit helpers. */
 proto.enterLink = toggle('inLink', false)
 proto.enterTable = toggle('inTable', false)
-proto.enterLinkReference = __webpack_require__(743)
+proto.enterLinkReference = __webpack_require__(307)
 
 // Configuration.
 proto.options = __webpack_require__(815)
@@ -21950,7 +22082,7 @@ proto.visitors = {
   heading: __webpack_require__(735),
   paragraph: __webpack_require__(258),
   blockquote: __webpack_require__(794),
-  list: __webpack_require__(337),
+  list: __webpack_require__(910),
   listItem: __webpack_require__(646),
   inlineCode: __webpack_require__(483),
   code: __webpack_require__(796),
@@ -23162,7 +23294,36 @@ module.exports = new Type('tag:yaml.org,2002:js/function', {
 
 /***/ }),
 /* 171 */,
-/* 172 */,
+/* 172 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const fs = __webpack_require__(747);
+const {promisify} = __webpack_require__(669);
+
+const pAccess = promisify(fs.access);
+
+module.exports = async path => {
+	try {
+		await pAccess(path);
+		return true;
+	} catch (_) {
+		return false;
+	}
+};
+
+module.exports.sync = path => {
+	try {
+		fs.accessSync(path);
+		return true;
+	} catch (_) {
+		return false;
+	}
+};
+
+
+/***/ }),
 /* 173 */,
 /* 174 */
 /***/ (function(module) {
@@ -23794,52 +23955,327 @@ function compile() {
 /* 203 */,
 /* 204 */,
 /* 205 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const fsStat = __webpack_require__(20);
-const fsWalk = __webpack_require__(227);
-const reader_1 = __webpack_require__(494);
-class ReaderSync extends reader_1.default {
-    constructor() {
-        super(...arguments);
-        this._walkSync = fsWalk.walkSync;
-        this._statSync = fsStat.statSync;
+
+module.exports = factory
+
+// Construct a tokenizer.  This creates both `tokenizeInline` and `tokenizeBlock`.
+function factory(type) {
+  return tokenize
+
+  // Tokenizer for a bound `type`.
+  function tokenize(value, location) {
+    var self = this
+    var offset = self.offset
+    var tokens = []
+    var methods = self[type + 'Methods']
+    var tokenizers = self[type + 'Tokenizers']
+    var line = location.line
+    var column = location.column
+    var index
+    var length
+    var method
+    var name
+    var matched
+    var valueLength
+
+    // Trim white space only lines.
+    if (!value) {
+      return tokens
     }
-    dynamic(root, options) {
-        return this._walkSync(root, options);
+
+    // Expose on `eat`.
+    eat.now = now
+    eat.file = self.file
+
+    // Sync initial offset.
+    updatePosition('')
+
+    // Iterate over `value`, and iterate over all tokenizers.  When one eats
+    // something, re-iterate with the remaining value.  If no tokenizer eats,
+    // something failed (should not happen) and an exception is thrown.
+    while (value) {
+      index = -1
+      length = methods.length
+      matched = false
+
+      while (++index < length) {
+        name = methods[index]
+        method = tokenizers[name]
+
+        // Previously, we had constructs such as footnotes and YAML that used
+        // these properties.
+        // Those are now external (plus there are userland extensions), that may
+        // still use them.
+        if (
+          method &&
+          /* istanbul ignore next */ (!method.onlyAtStart || self.atStart) &&
+          /* istanbul ignore next */ (!method.notInList || !self.inList) &&
+          /* istanbul ignore next */ (!method.notInBlock || !self.inBlock) &&
+          (!method.notInLink || !self.inLink)
+        ) {
+          valueLength = value.length
+
+          method.apply(self, [eat, value])
+
+          matched = valueLength !== value.length
+
+          if (matched) {
+            break
+          }
+        }
+      }
+
+      /* istanbul ignore if */
+      if (!matched) {
+        self.file.fail(new Error('Infinite loop'), eat.now())
+      }
     }
-    static(patterns, options) {
-        const entries = [];
-        for (const pattern of patterns) {
-            const filepath = this._getFullEntryPath(pattern);
-            const entry = this._getEntry(filepath, pattern, options);
-            if (entry === null || !options.entryFilter(entry)) {
-                continue;
+
+    self.eof = now()
+
+    return tokens
+
+    // Update line, column, and offset based on `value`.
+    function updatePosition(subvalue) {
+      var lastIndex = -1
+      var index = subvalue.indexOf('\n')
+
+      while (index !== -1) {
+        line++
+        lastIndex = index
+        index = subvalue.indexOf('\n', index + 1)
+      }
+
+      if (lastIndex === -1) {
+        column += subvalue.length
+      } else {
+        column = subvalue.length - lastIndex
+      }
+
+      if (line in offset) {
+        if (lastIndex !== -1) {
+          column += offset[line]
+        } else if (column <= offset[line]) {
+          column = offset[line] + 1
+        }
+      }
+    }
+
+    // Get offset.  Called before the first character is eaten to retrieve the
+    // range’s offsets.
+    function getOffset() {
+      var indentation = []
+      var pos = line + 1
+
+      // Done.  Called when the last character is eaten to retrieve the range’s
+      // offsets.
+      return function () {
+        var last = line + 1
+
+        while (pos < last) {
+          indentation.push((offset[pos] || 0) + 1)
+
+          pos++
+        }
+
+        return indentation
+      }
+    }
+
+    // Get the current position.
+    function now() {
+      var pos = {line: line, column: column}
+
+      pos.offset = self.toOffset(pos)
+
+      return pos
+    }
+
+    // Store position information for a node.
+    function Position(start) {
+      this.start = start
+      this.end = now()
+    }
+
+    // Throw when a value is incorrectly eaten.  This shouldn’t happen but will
+    // throw on new, incorrect rules.
+    function validateEat(subvalue) {
+      /* istanbul ignore if */
+      if (value.slice(0, subvalue.length) !== subvalue) {
+        // Capture stack-trace.
+        self.file.fail(
+          new Error(
+            'Incorrectly eaten value: please report this warning on https://git.io/vg5Ft'
+          ),
+          now()
+        )
+      }
+    }
+
+    // Mark position and patch `node.position`.
+    function position() {
+      var before = now()
+
+      return update
+
+      // Add the position to a node.
+      function update(node, indent) {
+        var previous = node.position
+        var start = previous ? previous.start : before
+        var combined = []
+        var n = previous && previous.end.line
+        var l = before.line
+
+        node.position = new Position(start)
+
+        // If there was already a `position`, this node was merged.  Fixing
+        // `start` wasn’t hard, but the indent is different.  Especially
+        // because some information, the indent between `n` and `l` wasn’t
+        // tracked.  Luckily, that space is (should be?) empty, so we can
+        // safely check for it now.
+        if (previous && indent && previous.indent) {
+          combined = previous.indent
+
+          if (n < l) {
+            while (++n < l) {
+              combined.push((offset[n] || 0) + 1)
             }
-            entries.push(entry);
+
+            combined.push(before.column)
+          }
+
+          indent = combined.concat(indent)
         }
-        return entries;
+
+        node.position.indent = indent || []
+
+        return node
+      }
     }
-    _getEntry(filepath, pattern, options) {
-        try {
-            const stats = this._getStat(filepath);
-            return this._makeEntry(stats, pattern);
-        }
-        catch (error) {
-            if (options.errorFilter(error)) {
-                return null;
-            }
-            throw error;
-        }
+
+    // Add `node` to `parent`s children or to `tokens`.  Performs merges where
+    // possible.
+    function add(node, parent) {
+      var children = parent ? parent.children : tokens
+      var previous = children[children.length - 1]
+      var fn
+
+      if (
+        previous &&
+        node.type === previous.type &&
+        (node.type === 'text' || node.type === 'blockquote') &&
+        mergeable(previous) &&
+        mergeable(node)
+      ) {
+        fn = node.type === 'text' ? mergeText : mergeBlockquote
+        node = fn.call(self, previous, node)
+      }
+
+      if (node !== previous) {
+        children.push(node)
+      }
+
+      if (self.atStart && tokens.length !== 0) {
+        self.exitStart()
+      }
+
+      return node
     }
-    _getStat(filepath) {
-        return this._statSync(filepath, this._fsStatSettings);
+
+    // Remove `subvalue` from `value`.  `subvalue` must be at the start of
+    // `value`.
+    function eat(subvalue) {
+      var indent = getOffset()
+      var pos = position()
+      var current = now()
+
+      validateEat(subvalue)
+
+      apply.reset = reset
+      reset.test = test
+      apply.test = test
+
+      value = value.slice(subvalue.length)
+
+      updatePosition(subvalue)
+
+      indent = indent()
+
+      return apply
+
+      // Add the given arguments, add `position` to the returned node, and
+      // return the node.
+      function apply(node, parent) {
+        return pos(add(pos(node), parent), indent)
+      }
+
+      // Functions just like apply, but resets the content: the line and
+      // column are reversed, and the eaten value is re-added.   This is
+      // useful for nodes with a single type of content, such as lists and
+      // tables.  See `apply` above for what parameters are expected.
+      function reset() {
+        var node = apply.apply(null, arguments)
+
+        line = current.line
+        column = current.column
+        value = subvalue + value
+
+        return node
+      }
+
+      // Test the position, after eating, and reverse to a not-eaten state.
+      function test() {
+        var result = pos({})
+
+        line = current.line
+        column = current.column
+        value = subvalue + value
+
+        return result.position
+      }
     }
+  }
 }
-exports.default = ReaderSync;
+
+// Check whether a node is mergeable with adjacent nodes.
+function mergeable(node) {
+  var start
+  var end
+
+  if (node.type !== 'text' || !node.position) {
+    return true
+  }
+
+  start = node.position.start
+  end = node.position.end
+
+  // Only merge nodes which occupy the same size as their `value`.
+  return (
+    start.line !== end.line || end.column - start.column === node.value.length
+  )
+}
+
+// Merge two text nodes: `node` into `prev`.
+function mergeText(previous, node) {
+  previous.value += node.value
+
+  return previous
+}
+
+// Merge two blockquotes: `node` into `prev`, unless in CommonMark or gfm modes.
+function mergeBlockquote(previous, node) {
+  if (this.options.commonmark || this.options.gfm) {
+    return node
+  }
+
+  previous.children = previous.children.concat(node.children)
+
+  return previous
+}
 
 
 /***/ }),
@@ -24072,16 +24508,22 @@ module.exports = compare
 "use strict";
 
 
-var vfile = __webpack_require__(232)
-var sync = __webpack_require__(827)
-var async = __webpack_require__(981)
+var unherit = __webpack_require__(902)
+var xtend = __webpack_require__(81)
+var Compiler = __webpack_require__(156)
 
-module.exports = vfile
+module.exports = stringify
+stringify.Compiler = Compiler
 
-vfile.read = async.read
-vfile.readSync = sync.read
-vfile.write = async.write
-vfile.writeSync = sync.write
+function stringify(options) {
+  var Local = unherit(Compiler)
+  Local.prototype.options = xtend(
+    Local.prototype.options,
+    this.data('settings'),
+    options
+  )
+  this.Compiler = Local
+}
 
 
 /***/ }),
@@ -24106,136 +24548,66 @@ function tableCell(node) {
 
 "use strict";
 
-const path = __webpack_require__(622)
 
-// add bash completions to your
-//  yargs-powered applications.
-module.exports = function completion (yargs, usage, command) {
-  const self = {
-    completionKey: 'get-yargs-completions'
+var matters = __webpack_require__(579)
+var parse = __webpack_require__(998)
+var compile = __webpack_require__(787)
+
+module.exports = frontmatter
+
+function frontmatter(options) {
+  var parser = this.Parser
+  var compiler = this.Compiler
+  var config = matters(options || ['yaml'])
+
+  if (isRemarkParser(parser)) {
+    attachParser(parser, config)
   }
 
-  let aliases
-  self.setParsed = function setParsed (parsed) {
-    aliases = parsed.aliases
+  if (isRemarkCompiler(compiler)) {
+    attachCompiler(compiler, config)
+  }
+}
+
+function attachParser(parser, matters) {
+  var proto = parser.prototype
+  var tokenizers = wrap(parse, matters)
+  var names = []
+  var key
+
+  for (key in tokenizers) {
+    names.push(key)
   }
 
-  const zshShell = (process.env.SHELL && process.env.SHELL.indexOf('zsh') !== -1) ||
-    (process.env.ZSH_NAME && process.env.ZSH_NAME.indexOf('zsh') !== -1)
-  // get a list of completion commands.
-  // 'args' is the array of strings from the line to be completed
-  self.getCompletion = function getCompletion (args, done) {
-    const completions = []
-    const current = args.length ? args[args.length - 1] : ''
-    const argv = yargs.parse(args, true)
-    const parentCommands = yargs.getContext().commands
+  proto.blockMethods = names.concat(proto.blockMethods)
+  proto.blockTokenizers = Object.assign({}, tokenizers, proto.blockTokenizers)
+}
 
-    // a custom completion function can be provided
-    // to completion().
-    if (completionFunction) {
-      if (completionFunction.length < 3) {
-        const result = completionFunction(current, argv)
+function attachCompiler(compiler, matters) {
+  var proto = compiler.prototype
+  proto.visitors = Object.assign({}, wrap(compile, matters), proto.visitors)
+}
 
-        // promise based completion function.
-        if (typeof result.then === 'function') {
-          return result.then((list) => {
-            process.nextTick(() => { done(list) })
-          }).catch((err) => {
-            process.nextTick(() => { throw err })
-          })
-        }
+function wrap(func, matters) {
+  var result = {}
+  var length = matters.length
+  var index = -1
+  var tuple
 
-        // synchronous completion function.
-        return done(result)
-      } else {
-        // asynchronous completion function
-        return completionFunction(current, argv, (completions) => {
-          done(completions)
-        })
-      }
-    }
-
-    const handlers = command.getCommandHandlers()
-    for (let i = 0, ii = args.length; i < ii; ++i) {
-      if (handlers[args[i]] && handlers[args[i]].builder) {
-        const builder = handlers[args[i]].builder
-        if (typeof builder === 'function') {
-          const y = yargs.reset()
-          builder(y)
-          return y.argv
-        }
-      }
-    }
-
-    if (!current.match(/^-/) && parentCommands[parentCommands.length - 1] !== current) {
-      usage.getCommands().forEach((usageCommand) => {
-        const commandName = command.parseCommand(usageCommand[0]).cmd
-        if (args.indexOf(commandName) === -1) {
-          if (!zshShell) {
-            completions.push(commandName)
-          } else {
-            const desc = usageCommand[1] || ''
-            completions.push(commandName.replace(/:/g, '\\:') + ':' + desc)
-          }
-        }
-      })
-    }
-
-    if (current.match(/^-/) || (current === '' && completions.length === 0)) {
-      const descs = usage.getDescriptions()
-      const options = yargs.getOptions()
-      Object.keys(options.key).forEach((key) => {
-        const negable = !!options.configuration['boolean-negation'] && options.boolean.includes(key)
-        // If the key and its aliases aren't in 'args', add the key to 'completions'
-        let keyAndAliases = [key].concat(aliases[key] || [])
-        if (negable) keyAndAliases = keyAndAliases.concat(keyAndAliases.map(key => `no-${key}`))
-
-        function completeOptionKey (key) {
-          const notInArgs = keyAndAliases.every(val => args.indexOf(`--${val}`) === -1)
-          if (notInArgs) {
-            const startsByTwoDashes = s => /^--/.test(s)
-            const isShortOption = s => /^[^0-9]$/.test(s)
-            const dashes = !startsByTwoDashes(current) && isShortOption(key) ? '-' : '--'
-            if (!zshShell) {
-              completions.push(dashes + key)
-            } else {
-              const desc = descs[key] || ''
-              completions.push(dashes + `${key.replace(/:/g, '\\:')}:${desc.replace('__yargsString__:', '')}`)
-            }
-          }
-        }
-
-        completeOptionKey(key)
-        if (negable && !!options.default[key]) completeOptionKey(`no-${key}`)
-      })
-    }
-
-    done(completions)
+  while (++index < length) {
+    tuple = func(matters[index])
+    result[tuple[0]] = tuple[1]
   }
 
-  // generate the completion script to add to your .bashrc.
-  self.generateCompletionScript = function generateCompletionScript ($0, cmd) {
-    const templates = __webpack_require__(450)
-    let script = zshShell ? templates.completionZshTemplate : templates.completionShTemplate
-    const name = path.basename($0)
+  return result
+}
 
-    // add ./to applications not yet installed as bin.
-    if ($0.match(/\.js$/)) $0 = `./${$0}`
+function isRemarkParser(parser) {
+  return Boolean(parser && parser.prototype && parser.prototype.blockTokenizers)
+}
 
-    script = script.replace(/{{app_name}}/g, name)
-    script = script.replace(/{{completion_command}}/g, cmd)
-    return script.replace(/{{app_path}}/g, $0)
-  }
-
-  // register a function to perform your own custom
-  // completions., this function can be either
-  // synchrnous or asynchronous.
-  let completionFunction = null
-  self.registerFunction = (fn) => {
-    completionFunction = fn
-  }
-
-  return self
+function isRemarkCompiler(compiler) {
+  return Boolean(compiler && compiler.prototype && compiler.prototype.visitors)
 }
 
 
@@ -24596,51 +24968,14 @@ function toVFile(options) {
 
 
 /***/ }),
-/* 233 */
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function read(path, settings, callback) {
-    settings.fs.lstat(path, (lstatError, lstat) => {
-        if (lstatError !== null) {
-            return callFailureCallback(callback, lstatError);
-        }
-        if (!lstat.isSymbolicLink() || !settings.followSymbolicLink) {
-            return callSuccessCallback(callback, lstat);
-        }
-        settings.fs.stat(path, (statError, stat) => {
-            if (statError !== null) {
-                if (settings.throwErrorOnBrokenSymbolicLink) {
-                    return callFailureCallback(callback, statError);
-                }
-                return callSuccessCallback(callback, lstat);
-            }
-            if (settings.markSymbolicLink) {
-                stat.isSymbolicLink = () => true;
-            }
-            callSuccessCallback(callback, stat);
-        });
-    });
-}
-exports.read = read;
-function callFailureCallback(callback, error) {
-    callback(error);
-}
-function callSuccessCallback(callback, result) {
-    callback(null, result);
-}
-
-
-/***/ }),
+/* 233 */,
 /* 234 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 const fs = __webpack_require__(747);
-const arrayUnion = __webpack_require__(773);
+const arrayUnion = __webpack_require__(470);
 const merge2 = __webpack_require__(6);
 const fastGlob = __webpack_require__(885);
 const dirGlob = __webpack_require__(184);
@@ -25442,8 +25777,8 @@ function findIdx(table, val) {
 "use strict";
 
 const path = __webpack_require__(622);
-const locatePath = __webpack_require__(625);
-const pathExists = __webpack_require__(120);
+const locatePath = __webpack_require__(86);
+const pathExists = __webpack_require__(172);
 
 const stop = Symbol('findUp.stop');
 
@@ -25638,65 +25973,142 @@ function runParallel (tasks, cb) {
 /***/ }),
 /* 247 */,
 /* 248 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-const stripAnsi = __webpack_require__(598);
-const isFullwidthCodePoint = __webpack_require__(682);
-const emojiRegex = __webpack_require__(696);
-
-const stringWidth = string => {
-	string = string.replace(emojiRegex(), '  ');
-
-	if (typeof string !== 'string' || string.length === 0) {
-		return 0;
-	}
-
-	string = stripAnsi(string);
-
-	let width = 0;
-
-	for (let i = 0; i < string.length; i++) {
-		const code = string.codePointAt(i);
-
-		// Ignore control characters
-		if (code <= 0x1F || (code >= 0x7F && code <= 0x9F)) {
-			continue;
-		}
-
-		// Ignore combining characters
-		if (code >= 0x300 && code <= 0x36F) {
-			continue;
-		}
-
-		// Surrogates
-		if (code > 0xFFFF) {
-			i++;
-		}
-
-		width += isFullwidthCodePoint(code) ? 2 : 1;
-	}
-
-	return width;
-};
-
-module.exports = stringWidth;
-// TODO: remove this in the next major version
-module.exports.default = stringWidth;
+Object.defineProperty(exports, "__esModule", { value: true });
+const fsStat = __webpack_require__(20);
+const rpl = __webpack_require__(246);
+const constants_1 = __webpack_require__(416);
+const utils = __webpack_require__(1);
+function read(directory, settings, callback) {
+    if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
+        return readdirWithFileTypes(directory, settings, callback);
+    }
+    return readdir(directory, settings, callback);
+}
+exports.read = read;
+function readdirWithFileTypes(directory, settings, callback) {
+    settings.fs.readdir(directory, { withFileTypes: true }, (readdirError, dirents) => {
+        if (readdirError !== null) {
+            return callFailureCallback(callback, readdirError);
+        }
+        const entries = dirents.map((dirent) => ({
+            dirent,
+            name: dirent.name,
+            path: `${directory}${settings.pathSegmentSeparator}${dirent.name}`
+        }));
+        if (!settings.followSymbolicLinks) {
+            return callSuccessCallback(callback, entries);
+        }
+        const tasks = entries.map((entry) => makeRplTaskEntry(entry, settings));
+        rpl(tasks, (rplError, rplEntries) => {
+            if (rplError !== null) {
+                return callFailureCallback(callback, rplError);
+            }
+            callSuccessCallback(callback, rplEntries);
+        });
+    });
+}
+exports.readdirWithFileTypes = readdirWithFileTypes;
+function makeRplTaskEntry(entry, settings) {
+    return (done) => {
+        if (!entry.dirent.isSymbolicLink()) {
+            return done(null, entry);
+        }
+        settings.fs.stat(entry.path, (statError, stats) => {
+            if (statError !== null) {
+                if (settings.throwErrorOnBrokenSymbolicLink) {
+                    return done(statError);
+                }
+                return done(null, entry);
+            }
+            entry.dirent = utils.fs.createDirentFromStats(entry.name, stats);
+            return done(null, entry);
+        });
+    };
+}
+function readdir(directory, settings, callback) {
+    settings.fs.readdir(directory, (readdirError, names) => {
+        if (readdirError !== null) {
+            return callFailureCallback(callback, readdirError);
+        }
+        const filepaths = names.map((name) => `${directory}${settings.pathSegmentSeparator}${name}`);
+        const tasks = filepaths.map((filepath) => {
+            return (done) => fsStat.stat(filepath, settings.fsStatSettings, done);
+        });
+        rpl(tasks, (rplError, results) => {
+            if (rplError !== null) {
+                return callFailureCallback(callback, rplError);
+            }
+            const entries = [];
+            names.forEach((name, index) => {
+                const stats = results[index];
+                const entry = {
+                    name,
+                    path: filepaths[index],
+                    dirent: utils.fs.createDirentFromStats(name, stats)
+                };
+                if (settings.stats) {
+                    entry.stats = stats;
+                }
+                entries.push(entry);
+            });
+            callSuccessCallback(callback, entries);
+        });
+    });
+}
+exports.readdir = readdir;
+function callFailureCallback(callback, error) {
+    callback(error);
+}
+function callSuccessCallback(callback, result) {
+    callback(null, result);
+}
 
 
 /***/ }),
 /* 249 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const {MAX_LENGTH} = __webpack_require__(94)
+const { re, t } = __webpack_require__(629)
+const SemVer = __webpack_require__(54)
 
+const parse = (version, options) => {
+  if (!options || typeof options !== 'object') {
+    options = {
+      loose: !!options,
+      includePrerelease: false
+    }
+  }
 
-module.exports = function () {
-  // https://mths.be/emoji
-  return /\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F|\uD83D\uDC68(?:\uD83C\uDFFC\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68\uD83C\uDFFB|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFF\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFE])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFE\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFD])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFD\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFC])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|[\u2695\u2696\u2708]\uFE0F|\uD83D[\uDC66\uDC67]|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|(?:\uD83C\uDFFB\u200D[\u2695\u2696\u2708]|\uD83C\uDFFF\u200D[\u2695\u2696\u2708]|\uD83C\uDFFE\u200D[\u2695\u2696\u2708]|\uD83C\uDFFD\u200D[\u2695\u2696\u2708]|\uD83C\uDFFC\u200D[\u2695\u2696\u2708])\uFE0F|\uD83C\uDFFB\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C[\uDFFB-\uDFFF])|(?:\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)\uD83C\uDFFB|\uD83E\uDDD1(?:\uD83C\uDFFF\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1(?:\uD83C[\uDFFB-\uDFFF])|\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1)|(?:\uD83E\uDDD1\uD83C\uDFFE\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFF\u200D\uD83E\uDD1D\u200D(?:\uD83D[\uDC68\uDC69]))(?:\uD83C[\uDFFB-\uDFFE])|(?:\uD83E\uDDD1\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)(?:\uD83C[\uDFFB\uDFFC])|\uD83D\uDC69(?:\uD83C\uDFFE\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFD\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFC\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFD-\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFB\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFC-\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFD\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFF\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD]))|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|(?:\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFE\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)(?:\uD83C[\uDFFB-\uDFFD])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C\uDFFF\u200D[\u2695\u2696\u2708]|\uD83C\uDFFE\u200D[\u2695\u2696\u2708]|\uD83C\uDFFC\u200D[\u2695\u2696\u2708]|\uD83C\uDFFB\u200D[\u2695\u2696\u2708]|\uD83C\uDFFD\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83C\uDFF4\u200D\u2620)\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC15\u200D\uD83E\uDDBA|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83C\uDDF6\uD83C\uDDE6|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83E\uDDD1(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD0F\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDBB\uDDD2-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDED5\uDEEB\uDEEC\uDEF4-\uDEFA\uDFE0-\uDFEB]|\uD83E[\uDD0D-\uDD3A\uDD3C-\uDD45\uDD47-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDDFF\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDED5\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEFA\uDFE0-\uDFEB]|\uD83E[\uDD0D-\uDD3A\uDD3C-\uDD45\uDD47-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDDFF\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDC8F\uDC91\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD0F\uDD18-\uDD1F\uDD26\uDD30-\uDD39\uDD3C-\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDBB\uDDCD-\uDDCF\uDDD1-\uDDDD])/g;
-};
+  if (version instanceof SemVer) {
+    return version
+  }
+
+  if (typeof version !== 'string') {
+    return null
+  }
+
+  if (version.length > MAX_LENGTH) {
+    return null
+  }
+
+  const r = options.loose ? re[t.LOOSE] : re[t.FULL]
+  if (!r.test(version)) {
+    return null
+  }
+
+  try {
+    return new SemVer(version, options)
+  } catch (er) {
+    return null
+  }
+}
+
+module.exports = parse
 
 
 /***/ }),
@@ -25756,7 +26168,56 @@ function setOptions(options) {
 /***/ }),
 /* 252 */,
 /* 253 */,
-/* 254 */,
+/* 254 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const stripAnsi = __webpack_require__(598);
+const isFullwidthCodePoint = __webpack_require__(682);
+const emojiRegex = __webpack_require__(696);
+
+const stringWidth = string => {
+	string = string.replace(emojiRegex(), '  ');
+
+	if (typeof string !== 'string' || string.length === 0) {
+		return 0;
+	}
+
+	string = stripAnsi(string);
+
+	let width = 0;
+
+	for (let i = 0; i < string.length; i++) {
+		const code = string.codePointAt(i);
+
+		// Ignore control characters
+		if (code <= 0x1F || (code >= 0x7F && code <= 0x9F)) {
+			continue;
+		}
+
+		// Ignore combining characters
+		if (code >= 0x300 && code <= 0x36F) {
+			continue;
+		}
+
+		// Surrogates
+		if (code > 0xFFFF) {
+			i++;
+		}
+
+		width += isFullwidthCodePoint(code) ? 2 : 1;
+	}
+
+	return width;
+};
+
+module.exports = stringWidth;
+// TODO: remove this in the next major version
+module.exports.default = stringWidth;
+
+
+/***/ }),
 /* 255 */,
 /* 256 */,
 /* 257 */,
@@ -28196,7 +28657,52 @@ function text(node, parent) {
 /***/ }),
 /* 277 */,
 /* 278 */,
-/* 279 */,
+/* 279 */
+/***/ (function(module) {
+
+// take an un-split argv string and tokenize it.
+module.exports = function (argString) {
+  if (Array.isArray(argString)) {
+    return argString.map(e => typeof e !== 'string' ? e + '' : e)
+  }
+
+  argString = argString.trim()
+
+  let i = 0
+  let prevC = null
+  let c = null
+  let opening = null
+  const args = []
+
+  for (let ii = 0; ii < argString.length; ii++) {
+    prevC = c
+    c = argString.charAt(ii)
+
+    // split on spaces unless we're in quotes.
+    if (c === ' ' && !opening) {
+      if (!(prevC === ' ')) {
+        i++
+      }
+      continue
+    }
+
+    // don't split the string if we're in matching
+    // opening or closing single and double quotes.
+    if (c === opening) {
+      opening = null
+    } else if ((c === "'" || c === '"') && !opening) {
+      opening = c
+    }
+
+    if (!args[i]) args[i] = ''
+    args[i] += c
+  }
+
+  return args
+}
+
+
+/***/ }),
 /* 280 */
 /***/ (function(module) {
 
@@ -30344,15 +30850,7 @@ module.exports = require("buffer");
 /***/ }),
 /* 294 */,
 /* 295 */,
-/* 296 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const compare = __webpack_require__(217)
-const lt = (a, b, loose) => compare(a, b, loose) < 0
-module.exports = lt
-
-
-/***/ }),
+/* 296 */,
 /* 297 */,
 /* 298 */,
 /* 299 */
@@ -30361,7 +30859,7 @@ module.exports = lt
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const async = __webpack_require__(720);
+const async = __webpack_require__(248);
 const sync = __webpack_require__(875);
 const settings_1 = __webpack_require__(197);
 exports.Settings = settings_1.default;
@@ -30418,7 +30916,7 @@ exports.default = Settings;
 // hoisted due to circular dependency on command.
 module.exports = argsert
 const command = __webpack_require__(556)()
-const YError = __webpack_require__(436)
+const YError = __webpack_require__(574)
 
 const positionName = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth']
 function argsert (expected, callerArguments, length) {
@@ -30495,64 +30993,42 @@ module.exports = require("string_decoder");
 /* 305 */,
 /* 306 */,
 /* 307 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = __webpack_require__(413);
-const fsStat = __webpack_require__(20);
-const fsWalk = __webpack_require__(227);
-const reader_1 = __webpack_require__(494);
-class ReaderStream extends reader_1.default {
-    constructor() {
-        super(...arguments);
-        this._walkStream = fsWalk.walkStream;
-        this._stat = fsStat.stat;
-    }
-    dynamic(root, options) {
-        return this._walkStream(root, options);
-    }
-    static(patterns, options) {
-        const filepaths = patterns.map(this._getFullEntryPath, this);
-        const stream = new stream_1.PassThrough({ objectMode: true });
-        stream._write = (index, _enc, done) => {
-            return this._getEntry(filepaths[index], patterns[index], options)
-                .then((entry) => {
-                if (entry !== null && options.entryFilter(entry)) {
-                    stream.push(entry);
-                }
-                if (index === filepaths.length - 1) {
-                    stream.end();
-                }
-                done();
-            })
-                .catch(done);
-        };
-        for (let i = 0; i < filepaths.length; i++) {
-            stream.write(i);
-        }
-        return stream;
-    }
-    _getEntry(filepath, pattern, options) {
-        return this._getStat(filepath)
-            .then((stats) => this._makeEntry(stats, pattern))
-            .catch((error) => {
-            if (options.errorFilter(error)) {
-                return null;
-            }
-            throw error;
-        });
-    }
-    _getStat(filepath) {
-        return new Promise((resolve, reject) => {
-            this._stat(filepath, this._fsStatSettings, (error, stats) => {
-                return error === null ? resolve(stats) : reject(error);
-            });
-        });
-    }
+
+var identity = __webpack_require__(491)
+
+module.exports = enter
+
+// Shortcut and collapsed link references need no escaping and encoding during
+// the processing of child nodes (it must be implied from identifier).
+//
+// This toggler turns encoding and escaping off for shortcut and collapsed
+// references.
+//
+// Implies `enterLink`.
+function enter(compiler, node) {
+  var encode = compiler.encode
+  var escape = compiler.escape
+  var exitLink = compiler.enterLink()
+
+  if (node.referenceType !== 'shortcut' && node.referenceType !== 'collapsed') {
+    return exitLink
+  }
+
+  compiler.escape = identity
+  compiler.encode = identity
+
+  return exit
+
+  function exit() {
+    compiler.encode = encode
+    compiler.escape = escape
+    exitLink()
+  }
 }
-exports.default = ReaderStream;
 
 
 /***/ }),
@@ -31109,13 +31585,160 @@ module.exports = new Type('tag:yaml.org,2002:set', {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const Range = __webpack_require__(378)
+const { ANY } = __webpack_require__(9)
+const satisfies = __webpack_require__(60)
+const compare = __webpack_require__(217)
 
-// Mostly just for testing and legacy API reasons
-const toComparators = (range, options) =>
-  new Range(range, options).set
-    .map(comp => comp.map(c => c.value).join(' ').trim().split(' '))
+// Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
+// - Every simple range `r1, r2, ...` is a subset of some `R1, R2, ...`
+//
+// Simple range `c1 c2 ...` is a subset of simple range `C1 C2 ...` iff:
+// - If c is only the ANY comparator
+//   - If C is only the ANY comparator, return true
+//   - Else return false
+// - Let EQ be the set of = comparators in c
+// - If EQ is more than one, return true (null set)
+// - Let GT be the highest > or >= comparator in c
+// - Let LT be the lowest < or <= comparator in c
+// - If GT and LT, and GT.semver > LT.semver, return true (null set)
+// - If EQ
+//   - If GT, and EQ does not satisfy GT, return true (null set)
+//   - If LT, and EQ does not satisfy LT, return true (null set)
+//   - If EQ satisfies every C, return true
+//   - Else return false
+// - If GT
+//   - If GT is lower than any > or >= comp in C, return false
+//   - If GT is >=, and GT.semver does not satisfy every C, return false
+// - If LT
+//   - If LT.semver is greater than that of any > comp in C, return false
+//   - If LT is <=, and LT.semver does not satisfy every C, return false
+// - If any C is a = range, and GT or LT are set, return false
+// - Else return true
 
-module.exports = toComparators
+const subset = (sub, dom, options) => {
+  sub = new Range(sub, options)
+  dom = new Range(dom, options)
+  let sawNonNull = false
+
+  OUTER: for (const simpleSub of sub.set) {
+    for (const simpleDom of dom.set) {
+      const isSub = simpleSubset(simpleSub, simpleDom, options)
+      sawNonNull = sawNonNull || isSub !== null
+      if (isSub)
+        continue OUTER
+    }
+    // the null set is a subset of everything, but null simple ranges in
+    // a complex range should be ignored.  so if we saw a non-null range,
+    // then we know this isn't a subset, but if EVERY simple range was null,
+    // then it is a subset.
+    if (sawNonNull)
+      return false
+  }
+  return true
+}
+
+const simpleSubset = (sub, dom, options) => {
+  if (sub.length === 1 && sub[0].semver === ANY)
+    return dom.length === 1 && dom[0].semver === ANY
+
+  const eqSet = new Set()
+  let gt, lt
+  for (const c of sub) {
+    if (c.operator === '>' || c.operator === '>=')
+      gt = higherGT(gt, c, options)
+    else if (c.operator === '<' || c.operator === '<=')
+      lt = lowerLT(lt, c, options)
+    else
+      eqSet.add(c.semver)
+  }
+
+  if (eqSet.size > 1)
+    return null
+
+  let gtltComp
+  if (gt && lt) {
+    gtltComp = compare(gt.semver, lt.semver, options)
+    if (gtltComp > 0)
+      return null
+    else if (gtltComp === 0 && (gt.operator !== '>=' || lt.operator !== '<='))
+      return null
+  }
+
+  // will iterate one or zero times
+  for (const eq of eqSet) {
+    if (gt && !satisfies(eq, String(gt), options))
+      return null
+
+    if (lt && !satisfies(eq, String(lt), options))
+      return null
+
+    for (const c of dom) {
+      if (!satisfies(eq, String(c), options))
+        return false
+    }
+    return true
+  }
+
+  let higher, lower
+  let hasDomLT, hasDomGT
+  for (const c of dom) {
+    hasDomGT = hasDomGT || c.operator === '>' || c.operator === '>='
+    hasDomLT = hasDomLT || c.operator === '<' || c.operator === '<='
+    if (gt) {
+      if (c.operator === '>' || c.operator === '>=') {
+        higher = higherGT(gt, c, options)
+        if (higher === c)
+          return false
+      } else if (gt.operator === '>=' && !satisfies(gt.semver, String(c), options))
+        return false
+    }
+    if (lt) {
+      if (c.operator === '<' || c.operator === '<=') {
+        lower = lowerLT(lt, c, options)
+        if (lower === c)
+          return false
+      } else if (lt.operator === '<=' && !satisfies(lt.semver, String(c), options))
+        return false
+    }
+    if (!c.operator && (lt || gt) && gtltComp !== 0)
+      return false
+  }
+
+  // if there was a < or >, and nothing in the dom, then must be false
+  // UNLESS it was limited by another range in the other direction.
+  // Eg, >1.0.0 <1.0.1 is still a subset of <2.0.0
+  if (gt && hasDomLT && !lt && gtltComp !== 0)
+    return false
+
+  if (lt && hasDomGT && !gt && gtltComp !== 0)
+    return false
+
+  return true
+}
+
+// >=1.2.3 is lower than >1.2.3
+const higherGT = (a, b, options) => {
+  if (!a)
+    return b
+  const comp = compare(a.semver, b.semver, options)
+  return comp > 0 ? a
+    : comp < 0 ? b
+    : b.operator === '>' && a.operator === '>=' ? b
+    : a
+}
+
+// <=1.2.3 is higher than <1.2.3
+const lowerLT = (a, b, options) => {
+  if (!a)
+    return b
+  const comp = compare(a.semver, b.semver, options)
+  return comp < 0 ? a
+    : comp > 0 ? b
+    : b.operator === '<' && a.operator === '<=' ? b
+    : a
+}
+
+module.exports = subset
 
 
 /***/ }),
@@ -32995,36 +33618,21 @@ const bumpDeps = ({ packageFile, dep, bumpType }) => {
 /***/ }),
 /* 335 */,
 /* 336 */,
-/* 337 */
+/* 337 */,
+/* 338 */,
+/* 339 */
 /***/ (function(module) {
 
 "use strict";
 
 
-module.exports = list
-
-function list(node) {
-  var fn = node.ordered ? this.visitOrderedItems : this.visitUnorderedItems
-  return fn.call(this, node)
-}
+module.exports = function () {
+  // https://mths.be/emoji
+  return /\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F|\uD83D\uDC68(?:\uD83C\uDFFC\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68\uD83C\uDFFB|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFF\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFE])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFE\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFD])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFD\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFC])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|[\u2695\u2696\u2708]\uFE0F|\uD83D[\uDC66\uDC67]|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|(?:\uD83C\uDFFB\u200D[\u2695\u2696\u2708]|\uD83C\uDFFF\u200D[\u2695\u2696\u2708]|\uD83C\uDFFE\u200D[\u2695\u2696\u2708]|\uD83C\uDFFD\u200D[\u2695\u2696\u2708]|\uD83C\uDFFC\u200D[\u2695\u2696\u2708])\uFE0F|\uD83C\uDFFB\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C[\uDFFB-\uDFFF])|(?:\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)\uD83C\uDFFB|\uD83E\uDDD1(?:\uD83C\uDFFF\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1(?:\uD83C[\uDFFB-\uDFFF])|\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1)|(?:\uD83E\uDDD1\uD83C\uDFFE\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFF\u200D\uD83E\uDD1D\u200D(?:\uD83D[\uDC68\uDC69]))(?:\uD83C[\uDFFB-\uDFFE])|(?:\uD83E\uDDD1\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)(?:\uD83C[\uDFFB\uDFFC])|\uD83D\uDC69(?:\uD83C\uDFFE\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFD\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFC\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFD-\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFB\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFC-\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFD\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFF\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD]))|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|(?:\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFE\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)(?:\uD83C[\uDFFB-\uDFFD])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C\uDFFF\u200D[\u2695\u2696\u2708]|\uD83C\uDFFE\u200D[\u2695\u2696\u2708]|\uD83C\uDFFC\u200D[\u2695\u2696\u2708]|\uD83C\uDFFB\u200D[\u2695\u2696\u2708]|\uD83C\uDFFD\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83C\uDFF4\u200D\u2620)\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC15\u200D\uD83E\uDDBA|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83C\uDDF6\uD83C\uDDE6|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83E\uDDD1(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD0F\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDBB\uDDD2-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDED5\uDEEB\uDEEC\uDEF4-\uDEFA\uDFE0-\uDFEB]|\uD83E[\uDD0D-\uDD3A\uDD3C-\uDD45\uDD47-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDDFF\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDED5\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEFA\uDFE0-\uDFEB]|\uD83E[\uDD0D-\uDD3A\uDD3C-\uDD45\uDD47-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDDFF\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDC8F\uDC91\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD0F\uDD18-\uDD1F\uDD26\uDD30-\uDD39\uDD3C-\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDBB\uDDCD-\uDDCF\uDDD1-\uDDDD])/g;
+};
 
 
 /***/ }),
-/* 338 */
-/***/ (function(module) {
-
-"use strict";
-
-
-module.exports = locate
-
-function locate(value, fromIndex) {
-  return value.indexOf('`', fromIndex)
-}
-
-
-/***/ }),
-/* 339 */,
 /* 340 */,
 /* 341 */
 /***/ (function(module) {
@@ -33109,7 +33717,80 @@ function repeat(str, num) {
 
 
 /***/ }),
-/* 343 */,
+/* 343 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const fs = __webpack_require__(747)
+const path = __webpack_require__(622)
+const YError = __webpack_require__(574)
+
+let previouslyVisitedConfigs = []
+
+function checkForCircularExtends (cfgPath) {
+  if (previouslyVisitedConfigs.indexOf(cfgPath) > -1) {
+    throw new YError(`Circular extended configurations: '${cfgPath}'.`)
+  }
+}
+
+function getPathToDefaultConfig (cwd, pathToExtend) {
+  return path.resolve(cwd, pathToExtend)
+}
+
+function mergeDeep (config1, config2) {
+  const target = {}
+  const isObject = obj => obj && typeof obj === 'object' && !Array.isArray(obj)
+  Object.assign(target, config1)
+  for (const key of Object.keys(config2)) {
+    if (isObject(config2[key]) && isObject(target[key])) {
+      target[key] = mergeDeep(config1[key], config2[key])
+    } else {
+      target[key] = config2[key]
+    }
+  }
+  return target
+}
+
+function applyExtends (config, cwd, mergeExtends) {
+  let defaultConfig = {}
+
+  if (Object.prototype.hasOwnProperty.call(config, 'extends')) {
+    if (typeof config.extends !== 'string') return defaultConfig
+    const isPath = /\.json|\..*rc$/.test(config.extends)
+    let pathToDefault = null
+    if (!isPath) {
+      try {
+        pathToDefault = require.resolve(config.extends)
+      } catch (err) {
+        // most likely this simply isn't a module.
+      }
+    } else {
+      pathToDefault = getPathToDefaultConfig(cwd, config.extends)
+    }
+    // maybe the module uses key for some other reason,
+    // err on side of caution.
+    if (!pathToDefault && !isPath) return config
+
+    checkForCircularExtends(pathToDefault)
+
+    previouslyVisitedConfigs.push(pathToDefault)
+
+    defaultConfig = isPath ? JSON.parse(fs.readFileSync(pathToDefault, 'utf8')) : require(config.extends)
+    delete config.extends
+    defaultConfig = applyExtends(defaultConfig, path.dirname(pathToDefault), mergeExtends)
+  }
+
+  previouslyVisitedConfigs = []
+
+  return mergeExtends ? mergeDeep(defaultConfig, config) : Object.assign({}, defaultConfig, config)
+}
+
+module.exports = applyExtends
+
+
+/***/ }),
 /* 344 */,
 /* 345 */,
 /* 346 */
@@ -33774,7 +34455,7 @@ module.exports = require("assert");
 "use strict";
 
 
-const stringify = __webpack_require__(804);
+const stringify = __webpack_require__(450);
 const compile = __webpack_require__(76);
 const expand = __webpack_require__(61);
 const parse = __webpack_require__(627);
@@ -33951,8 +34632,8 @@ module.exports = braces;
 
 const unified = __webpack_require__(709);
 const parse = __webpack_require__(64);
-const stringify = __webpack_require__(393);
-const frontmatter = __webpack_require__(125);
+const stringify = __webpack_require__(219);
+const frontmatter = __webpack_require__(221);
 const parseFrontmatter = __webpack_require__(553);
 const template = __webpack_require__(15);
 
@@ -34291,15 +34972,427 @@ module.exports = {
 /* 366 */,
 /* 367 */,
 /* 368 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(772);
+const partial_1 = __webpack_require__(266);
+class DeepFilter {
+    constructor(_settings, _micromatchOptions) {
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+    }
+    getFilter(basePath, positive, negative) {
+        const matcher = this._getMatcher(positive);
+        const negativeRe = this._getNegativePatternsRe(negative);
+        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
+    }
+    _getMatcher(patterns) {
+        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
+    }
+    _getNegativePatternsRe(patterns) {
+        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
+        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
+    }
+    _filter(basePath, entry, matcher, negativeRe) {
+        const depth = this._getEntryLevel(basePath, entry.path);
+        if (this._isSkippedByDeep(depth)) {
+            return false;
+        }
+        if (this._isSkippedSymbolicLink(entry)) {
+            return false;
+        }
+        const filepath = utils.path.removeLeadingDotSegment(entry.path);
+        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
+            return false;
+        }
+        return this._isSkippedByNegativePatterns(filepath, negativeRe);
+    }
+    _isSkippedByDeep(entryDepth) {
+        return entryDepth >= this._settings.deep;
+    }
+    _isSkippedSymbolicLink(entry) {
+        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
+    }
+    _getEntryLevel(basePath, entryPath) {
+        const basePathDepth = basePath.split('/').length;
+        const entryPathDepth = entryPath.split('/').length;
+        return entryPathDepth - (basePath === '' ? 0 : basePathDepth);
+    }
+    _isSkippedByPositivePatterns(entryPath, matcher) {
+        return !this._settings.baseNameMatch && !matcher.match(entryPath);
+    }
+    _isSkippedByNegativePatterns(entryPath, negativeRe) {
+        return !utils.pattern.matchAny(entryPath, negativeRe);
+    }
+}
+exports.default = DeepFilter;
+
+
+/***/ }),
+/* 369 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-module.exports = __webpack_require__(219)
+
+const stringWidth = __webpack_require__(552)
+const stripAnsi = __webpack_require__(598)
+const wrap = __webpack_require__(58)
+
+const align = {
+  right: alignRight,
+  center: alignCenter
+}
+const top = 0
+const right = 1
+const bottom = 2
+const left = 3
+
+class UI {
+  constructor (opts) {
+    this.width = opts.width
+    this.wrap = opts.wrap
+    this.rows = []
+  }
+
+  span (...args) {
+    const cols = this.div(...args)
+    cols.span = true
+  }
+
+  resetOutput () {
+    this.rows = []
+  }
+
+  div (...args) {
+    if (args.length === 0) {
+      this.div('')
+    }
+
+    if (this.wrap && this._shouldApplyLayoutDSL(...args)) {
+      return this._applyLayoutDSL(args[0])
+    }
+
+    const cols = args.map(arg => {
+      if (typeof arg === 'string') {
+        return this._colFromString(arg)
+      }
+
+      return arg
+    })
+
+    this.rows.push(cols)
+    return cols
+  }
+
+  _shouldApplyLayoutDSL (...args) {
+    return args.length === 1 && typeof args[0] === 'string' &&
+      /[\t\n]/.test(args[0])
+  }
+
+  _applyLayoutDSL (str) {
+    const rows = str.split('\n').map(row => row.split('\t'))
+    let leftColumnWidth = 0
+
+    // simple heuristic for layout, make sure the
+    // second column lines up along the left-hand.
+    // don't allow the first column to take up more
+    // than 50% of the screen.
+    rows.forEach(columns => {
+      if (columns.length > 1 && stringWidth(columns[0]) > leftColumnWidth) {
+        leftColumnWidth = Math.min(
+          Math.floor(this.width * 0.5),
+          stringWidth(columns[0])
+        )
+      }
+    })
+
+    // generate a table:
+    //  replacing ' ' with padding calculations.
+    //  using the algorithmically generated width.
+    rows.forEach(columns => {
+      this.div(...columns.map((r, i) => {
+        return {
+          text: r.trim(),
+          padding: this._measurePadding(r),
+          width: (i === 0 && columns.length > 1) ? leftColumnWidth : undefined
+        }
+      }))
+    })
+
+    return this.rows[this.rows.length - 1]
+  }
+
+  _colFromString (text) {
+    return {
+      text,
+      padding: this._measurePadding(text)
+    }
+  }
+
+  _measurePadding (str) {
+    // measure padding without ansi escape codes
+    const noAnsi = stripAnsi(str)
+    return [0, noAnsi.match(/\s*$/)[0].length, 0, noAnsi.match(/^\s*/)[0].length]
+  }
+
+  toString () {
+    const lines = []
+
+    this.rows.forEach(row => {
+      this.rowToString(row, lines)
+    })
+
+    // don't display any lines with the
+    // hidden flag set.
+    return lines
+      .filter(line => !line.hidden)
+      .map(line => line.text)
+      .join('\n')
+  }
+
+  rowToString (row, lines) {
+    this._rasterize(row).forEach((rrow, r) => {
+      let str = ''
+      rrow.forEach((col, c) => {
+        const { width } = row[c] // the width with padding.
+        const wrapWidth = this._negatePadding(row[c]) // the width without padding.
+
+        let ts = col // temporary string used during alignment/padding.
+
+        if (wrapWidth > stringWidth(col)) {
+          ts += ' '.repeat(wrapWidth - stringWidth(col))
+        }
+
+        // align the string within its column.
+        if (row[c].align && row[c].align !== 'left' && this.wrap) {
+          ts = align[row[c].align](ts, wrapWidth)
+          if (stringWidth(ts) < wrapWidth) {
+            ts += ' '.repeat(width - stringWidth(ts) - 1)
+          }
+        }
+
+        // apply border and padding to string.
+        const padding = row[c].padding || [0, 0, 0, 0]
+        if (padding[left]) {
+          str += ' '.repeat(padding[left])
+        }
+
+        str += addBorder(row[c], ts, '| ')
+        str += ts
+        str += addBorder(row[c], ts, ' |')
+        if (padding[right]) {
+          str += ' '.repeat(padding[right])
+        }
+
+        // if prior row is span, try to render the
+        // current row on the prior line.
+        if (r === 0 && lines.length > 0) {
+          str = this._renderInline(str, lines[lines.length - 1])
+        }
+      })
+
+      // remove trailing whitespace.
+      lines.push({
+        text: str.replace(/ +$/, ''),
+        span: row.span
+      })
+    })
+
+    return lines
+  }
+
+  // if the full 'source' can render in
+  // the target line, do so.
+  _renderInline (source, previousLine) {
+    const leadingWhitespace = source.match(/^ */)[0].length
+    const target = previousLine.text
+    const targetTextWidth = stringWidth(target.trimRight())
+
+    if (!previousLine.span) {
+      return source
+    }
+
+    // if we're not applying wrapping logic,
+    // just always append to the span.
+    if (!this.wrap) {
+      previousLine.hidden = true
+      return target + source
+    }
+
+    if (leadingWhitespace < targetTextWidth) {
+      return source
+    }
+
+    previousLine.hidden = true
+
+    return target.trimRight() + ' '.repeat(leadingWhitespace - targetTextWidth) + source.trimLeft()
+  }
+
+  _rasterize (row) {
+    const rrows = []
+    const widths = this._columnWidths(row)
+    let wrapped
+
+    // word wrap all columns, and create
+    // a data-structure that is easy to rasterize.
+    row.forEach((col, c) => {
+      // leave room for left and right padding.
+      col.width = widths[c]
+      if (this.wrap) {
+        wrapped = wrap(col.text, this._negatePadding(col), { hard: true }).split('\n')
+      } else {
+        wrapped = col.text.split('\n')
+      }
+
+      if (col.border) {
+        wrapped.unshift('.' + '-'.repeat(this._negatePadding(col) + 2) + '.')
+        wrapped.push("'" + '-'.repeat(this._negatePadding(col) + 2) + "'")
+      }
+
+      // add top and bottom padding.
+      if (col.padding) {
+        wrapped.unshift(...new Array(col.padding[top] || 0).fill(''))
+        wrapped.push(...new Array(col.padding[bottom] || 0).fill(''))
+      }
+
+      wrapped.forEach((str, r) => {
+        if (!rrows[r]) {
+          rrows.push([])
+        }
+
+        const rrow = rrows[r]
+
+        for (let i = 0; i < c; i++) {
+          if (rrow[i] === undefined) {
+            rrow.push('')
+          }
+        }
+
+        rrow.push(str)
+      })
+    })
+
+    return rrows
+  }
+
+  _negatePadding (col) {
+    let wrapWidth = col.width
+    if (col.padding) {
+      wrapWidth -= (col.padding[left] || 0) + (col.padding[right] || 0)
+    }
+
+    if (col.border) {
+      wrapWidth -= 4
+    }
+
+    return wrapWidth
+  }
+
+  _columnWidths (row) {
+    if (!this.wrap) {
+      return row.map(col => {
+        return col.width || stringWidth(col.text)
+      })
+    }
+
+    let unset = row.length
+    let remainingWidth = this.width
+
+    // column widths can be set in config.
+    const widths = row.map(col => {
+      if (col.width) {
+        unset--
+        remainingWidth -= col.width
+        return col.width
+      }
+
+      return undefined
+    })
+
+    // any unset widths should be calculated.
+    const unsetWidth = unset ? Math.floor(remainingWidth / unset) : 0
+
+    return widths.map((w, i) => {
+      if (w === undefined) {
+        return Math.max(unsetWidth, _minWidth(row[i]))
+      }
+
+      return w
+    })
+  }
+}
+
+function addBorder (col, ts, style) {
+  if (col.border) {
+    if (/[.']-+[.']/.test(ts)) {
+      return ''
+    }
+
+    if (ts.trim().length !== 0) {
+      return style
+    }
+
+    return '  '
+  }
+
+  return ''
+}
+
+// calculates the minimum width of
+// a column, based on padding preferences.
+function _minWidth (col) {
+  const padding = col.padding || []
+  const minWidth = 1 + (padding[left] || 0) + (padding[right] || 0)
+  if (col.border) {
+    return minWidth + 4
+  }
+
+  return minWidth
+}
+
+function getWindowWidth () {
+  /* istanbul ignore next: depends on terminal */
+  if (typeof process === 'object' && process.stdout && process.stdout.columns) {
+    return process.stdout.columns
+  }
+}
+
+function alignRight (str, width) {
+  str = str.trim()
+  const strWidth = stringWidth(str)
+
+  if (strWidth < width) {
+    return ' '.repeat(width - strWidth) + str
+  }
+
+  return str
+}
+
+function alignCenter (str, width) {
+  str = str.trim()
+  const strWidth = stringWidth(str)
+
+  /* istanbul ignore next */
+  if (strWidth >= width) {
+    return str
+  }
+
+  return ' '.repeat((width - strWidth) >> 1) + str
+}
+
+module.exports = function (opts = {}) {
+  return new UI({
+    width: opts.width || getWindowWidth() || /* istanbul ignore next */ 80,
+    wrap: opts.wrap !== false
+  })
+}
 
 
 /***/ }),
-/* 369 */,
 /* 370 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -34349,403 +35442,64 @@ module.exports = maxSatisfying
 
 /***/ }),
 /* 373 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-const argsert = __webpack_require__(301)
-const objFilter = __webpack_require__(70)
-const specialKeys = ['$0', '--', '_']
-
-// validation-type-stuff, missing params,
-// bad implications, custom checks.
-module.exports = function validation (yargs, usage, y18n) {
-  const __ = y18n.__
-  const __n = y18n.__n
-  const self = {}
-
-  // validate appropriate # of non-option
-  // arguments were provided, i.e., '_'.
-  self.nonOptionCount = function nonOptionCount (argv) {
-    const demandedCommands = yargs.getDemandedCommands()
-    // don't count currently executing commands
-    const _s = argv._.length - yargs.getContext().commands.length
-
-    if (demandedCommands._ && (_s < demandedCommands._.min || _s > demandedCommands._.max)) {
-      if (_s < demandedCommands._.min) {
-        if (demandedCommands._.minMsg !== undefined) {
-          usage.fail(
-            // replace $0 with observed, $1 with expected.
-            demandedCommands._.minMsg ? demandedCommands._.minMsg.replace(/\$0/g, _s).replace(/\$1/, demandedCommands._.min) : null
-          )
-        } else {
-          usage.fail(
-            __n(
-              'Not enough non-option arguments: got %s, need at least %s',
-              'Not enough non-option arguments: got %s, need at least %s',
-              _s,
-              _s,
-              demandedCommands._.min
-            )
-          )
+Object.defineProperty(exports, "__esModule", { value: true });
+const stream_1 = __webpack_require__(413);
+const fsStat = __webpack_require__(20);
+const fsWalk = __webpack_require__(227);
+const reader_1 = __webpack_require__(494);
+class ReaderStream extends reader_1.default {
+    constructor() {
+        super(...arguments);
+        this._walkStream = fsWalk.walkStream;
+        this._stat = fsStat.stat;
+    }
+    dynamic(root, options) {
+        return this._walkStream(root, options);
+    }
+    static(patterns, options) {
+        const filepaths = patterns.map(this._getFullEntryPath, this);
+        const stream = new stream_1.PassThrough({ objectMode: true });
+        stream._write = (index, _enc, done) => {
+            return this._getEntry(filepaths[index], patterns[index], options)
+                .then((entry) => {
+                if (entry !== null && options.entryFilter(entry)) {
+                    stream.push(entry);
+                }
+                if (index === filepaths.length - 1) {
+                    stream.end();
+                }
+                done();
+            })
+                .catch(done);
+        };
+        for (let i = 0; i < filepaths.length; i++) {
+            stream.write(i);
         }
-      } else if (_s > demandedCommands._.max) {
-        if (demandedCommands._.maxMsg !== undefined) {
-          usage.fail(
-            // replace $0 with observed, $1 with expected.
-            demandedCommands._.maxMsg ? demandedCommands._.maxMsg.replace(/\$0/g, _s).replace(/\$1/, demandedCommands._.max) : null
-          )
-        } else {
-          usage.fail(
-            __n(
-              'Too many non-option arguments: got %s, maximum of %s',
-              'Too many non-option arguments: got %s, maximum of %s',
-              _s,
-              _s,
-              demandedCommands._.max
-            )
-          )
-        }
-      }
+        return stream;
     }
-  }
-
-  // validate the appropriate # of <required>
-  // positional arguments were provided:
-  self.positionalCount = function positionalCount (required, observed) {
-    if (observed < required) {
-      usage.fail(
-        __n(
-          'Not enough non-option arguments: got %s, need at least %s',
-          'Not enough non-option arguments: got %s, need at least %s',
-          observed,
-          observed,
-          required
-        )
-      )
+    _getEntry(filepath, pattern, options) {
+        return this._getStat(filepath)
+            .then((stats) => this._makeEntry(stats, pattern))
+            .catch((error) => {
+            if (options.errorFilter(error)) {
+                return null;
+            }
+            throw error;
+        });
     }
-  }
-
-  // make sure all the required arguments are present.
-  self.requiredArguments = function requiredArguments (argv) {
-    const demandedOptions = yargs.getDemandedOptions()
-    let missing = null
-
-    Object.keys(demandedOptions).forEach((key) => {
-      if (!Object.prototype.hasOwnProperty.call(argv, key) || typeof argv[key] === 'undefined') {
-        missing = missing || {}
-        missing[key] = demandedOptions[key]
-      }
-    })
-
-    if (missing) {
-      const customMsgs = []
-      Object.keys(missing).forEach((key) => {
-        const msg = missing[key]
-        if (msg && customMsgs.indexOf(msg) < 0) {
-          customMsgs.push(msg)
-        }
-      })
-
-      const customMsg = customMsgs.length ? `\n${customMsgs.join('\n')}` : ''
-
-      usage.fail(__n(
-        'Missing required argument: %s',
-        'Missing required arguments: %s',
-        Object.keys(missing).length,
-        Object.keys(missing).join(', ') + customMsg
-      ))
+    _getStat(filepath) {
+        return new Promise((resolve, reject) => {
+            this._stat(filepath, this._fsStatSettings, (error, stats) => {
+                return error === null ? resolve(stats) : reject(error);
+            });
+        });
     }
-  }
-
-  // check for unknown arguments (strict-mode).
-  self.unknownArguments = function unknownArguments (argv, aliases, positionalMap) {
-    const commandKeys = yargs.getCommandInstance().getCommands()
-    const unknown = []
-    const currentContext = yargs.getContext()
-
-    Object.keys(argv).forEach((key) => {
-      if (specialKeys.indexOf(key) === -1 &&
-        !Object.prototype.hasOwnProperty.call(positionalMap, key) &&
-        !Object.prototype.hasOwnProperty.call(yargs._getParseContext(), key) &&
-        !self.isValidAndSomeAliasIsNotNew(key, aliases)
-      ) {
-        unknown.push(key)
-      }
-    })
-
-    if ((currentContext.commands.length > 0) || (commandKeys.length > 0)) {
-      argv._.slice(currentContext.commands.length).forEach((key) => {
-        if (commandKeys.indexOf(key) === -1) {
-          unknown.push(key)
-        }
-      })
-    }
-
-    if (unknown.length > 0) {
-      usage.fail(__n(
-        'Unknown argument: %s',
-        'Unknown arguments: %s',
-        unknown.length,
-        unknown.join(', ')
-      ))
-    }
-  }
-
-  self.unknownCommands = function unknownCommands (argv, aliases, positionalMap) {
-    const commandKeys = yargs.getCommandInstance().getCommands()
-    const unknown = []
-    const currentContext = yargs.getContext()
-
-    if ((currentContext.commands.length > 0) || (commandKeys.length > 0)) {
-      argv._.slice(currentContext.commands.length).forEach((key) => {
-        if (commandKeys.indexOf(key) === -1) {
-          unknown.push(key)
-        }
-      })
-    }
-
-    if (unknown.length > 0) {
-      usage.fail(__n(
-        'Unknown command: %s',
-        'Unknown commands: %s',
-        unknown.length,
-        unknown.join(', ')
-      ))
-      return true
-    } else {
-      return false
-    }
-  }
-
-  // check for a key that is not an alias, or for which every alias is new,
-  // implying that it was invented by the parser, e.g., during camelization
-  self.isValidAndSomeAliasIsNotNew = function isValidAndSomeAliasIsNotNew (key, aliases) {
-    if (!Object.prototype.hasOwnProperty.call(aliases, key)) {
-      return false
-    }
-    const newAliases = yargs.parsed.newAliases
-    for (const a of [key, ...aliases[key]]) {
-      if (!Object.prototype.hasOwnProperty.call(newAliases, a) || !newAliases[key]) {
-        return true
-      }
-    }
-    return false
-  }
-
-  // validate arguments limited to enumerated choices
-  self.limitedChoices = function limitedChoices (argv) {
-    const options = yargs.getOptions()
-    const invalid = {}
-
-    if (!Object.keys(options.choices).length) return
-
-    Object.keys(argv).forEach((key) => {
-      if (specialKeys.indexOf(key) === -1 &&
-        Object.prototype.hasOwnProperty.call(options.choices, key)) {
-        [].concat(argv[key]).forEach((value) => {
-          // TODO case-insensitive configurability
-          if (options.choices[key].indexOf(value) === -1 &&
-              value !== undefined) {
-            invalid[key] = (invalid[key] || []).concat(value)
-          }
-        })
-      }
-    })
-
-    const invalidKeys = Object.keys(invalid)
-
-    if (!invalidKeys.length) return
-
-    let msg = __('Invalid values:')
-    invalidKeys.forEach((key) => {
-      msg += `\n  ${__(
-        'Argument: %s, Given: %s, Choices: %s',
-        key,
-        usage.stringifiedValues(invalid[key]),
-        usage.stringifiedValues(options.choices[key])
-      )}`
-    })
-    usage.fail(msg)
-  }
-
-  // custom checks, added using the `check` option on yargs.
-  let checks = []
-  self.check = function check (f, global) {
-    checks.push({
-      func: f,
-      global
-    })
-  }
-
-  self.customChecks = function customChecks (argv, aliases) {
-    for (let i = 0, f; (f = checks[i]) !== undefined; i++) {
-      const func = f.func
-      let result = null
-      try {
-        result = func(argv, aliases)
-      } catch (err) {
-        usage.fail(err.message ? err.message : err, err)
-        continue
-      }
-
-      if (!result) {
-        usage.fail(__('Argument check failed: %s', func.toString()))
-      } else if (typeof result === 'string' || result instanceof Error) {
-        usage.fail(result.toString(), result)
-      }
-    }
-  }
-
-  // check implications, argument foo implies => argument bar.
-  let implied = {}
-  self.implies = function implies (key, value) {
-    argsert('<string|object> [array|number|string]', [key, value], arguments.length)
-
-    if (typeof key === 'object') {
-      Object.keys(key).forEach((k) => {
-        self.implies(k, key[k])
-      })
-    } else {
-      yargs.global(key)
-      if (!implied[key]) {
-        implied[key] = []
-      }
-      if (Array.isArray(value)) {
-        value.forEach((i) => self.implies(key, i))
-      } else {
-        implied[key].push(value)
-      }
-    }
-  }
-  self.getImplied = function getImplied () {
-    return implied
-  }
-
-  function keyExists (argv, val) {
-    // convert string '1' to number 1
-    const num = Number(val)
-    val = isNaN(num) ? val : num
-
-    if (typeof val === 'number') {
-      // check length of argv._
-      val = argv._.length >= val
-    } else if (val.match(/^--no-.+/)) {
-      // check if key/value doesn't exist
-      val = val.match(/^--no-(.+)/)[1]
-      val = !argv[val]
-    } else {
-      // check if key/value exists
-      val = argv[val]
-    }
-    return val
-  }
-
-  self.implications = function implications (argv) {
-    const implyFail = []
-
-    Object.keys(implied).forEach((key) => {
-      const origKey = key
-      ;(implied[key] || []).forEach((value) => {
-        let key = origKey
-        const origValue = value
-        key = keyExists(argv, key)
-        value = keyExists(argv, value)
-
-        if (key && !value) {
-          implyFail.push(` ${origKey} -> ${origValue}`)
-        }
-      })
-    })
-
-    if (implyFail.length) {
-      let msg = `${__('Implications failed:')}\n`
-
-      implyFail.forEach((value) => {
-        msg += (value)
-      })
-
-      usage.fail(msg)
-    }
-  }
-
-  let conflicting = {}
-  self.conflicts = function conflicts (key, value) {
-    argsert('<string|object> [array|string]', [key, value], arguments.length)
-
-    if (typeof key === 'object') {
-      Object.keys(key).forEach((k) => {
-        self.conflicts(k, key[k])
-      })
-    } else {
-      yargs.global(key)
-      if (!conflicting[key]) {
-        conflicting[key] = []
-      }
-      if (Array.isArray(value)) {
-        value.forEach((i) => self.conflicts(key, i))
-      } else {
-        conflicting[key].push(value)
-      }
-    }
-  }
-  self.getConflicting = () => conflicting
-
-  self.conflicting = function conflictingFn (argv) {
-    Object.keys(argv).forEach((key) => {
-      if (conflicting[key]) {
-        conflicting[key].forEach((value) => {
-          // we default keys to 'undefined' that have been configured, we should not
-          // apply conflicting check unless they are a value other than 'undefined'.
-          if (value && argv[key] !== undefined && argv[value] !== undefined) {
-            usage.fail(__('Arguments %s and %s are mutually exclusive', key, value))
-          }
-        })
-      }
-    })
-  }
-
-  self.recommendCommands = function recommendCommands (cmd, potentialCommands) {
-    const distance = __webpack_require__(386)
-    const threshold = 3 // if it takes more than three edits, let's move on.
-    potentialCommands = potentialCommands.sort((a, b) => b.length - a.length)
-
-    let recommended = null
-    let bestDistance = Infinity
-    for (let i = 0, candidate; (candidate = potentialCommands[i]) !== undefined; i++) {
-      const d = distance(cmd, candidate)
-      if (d <= threshold && d < bestDistance) {
-        bestDistance = d
-        recommended = candidate
-      }
-    }
-    if (recommended) usage.fail(__('Did you mean %s?', recommended))
-  }
-
-  self.reset = function reset (localLookup) {
-    implied = objFilter(implied, (k, v) => !localLookup[k])
-    conflicting = objFilter(conflicting, (k, v) => !localLookup[k])
-    checks = checks.filter(c => c.global)
-    return self
-  }
-
-  const frozens = []
-  self.freeze = function freeze () {
-    const frozen = {}
-    frozens.push(frozen)
-    frozen.implied = implied
-    frozen.checks = checks
-    frozen.conflicting = conflicting
-  }
-  self.unfreeze = function unfreeze () {
-    const frozen = frozens.pop()
-    implied = frozen.implied
-    checks = frozen.checks
-    conflicting = frozen.conflicting
-  }
-
-  return self
 }
+exports.default = ReaderStream;
 
 
 /***/ }),
@@ -34755,71 +35509,102 @@ module.exports = function validation (yargs, usage, y18n) {
 "use strict";
 
 
-const fs = __webpack_require__(747)
-const path = __webpack_require__(622)
-const YError = __webpack_require__(436)
+var trim = __webpack_require__(132)
+var trimTrailingLines = __webpack_require__(716)
+var interrupt = __webpack_require__(658)
 
-let previouslyVisitedConfigs = []
+module.exports = paragraph
 
-function checkForCircularExtends (cfgPath) {
-  if (previouslyVisitedConfigs.indexOf(cfgPath) > -1) {
-    throw new YError(`Circular extended configurations: '${cfgPath}'.`)
-  }
-}
+var tab = '\t'
+var lineFeed = '\n'
+var space = ' '
 
-function getPathToDefaultConfig (cwd, pathToExtend) {
-  return path.resolve(cwd, pathToExtend)
-}
+var tabSize = 4
 
-function mergeDeep (config1, config2) {
-  const target = {}
-  const isObject = obj => obj && typeof obj === 'object' && !Array.isArray(obj)
-  Object.assign(target, config1)
-  for (const key of Object.keys(config2)) {
-    if (isObject(config2[key]) && isObject(target[key])) {
-      target[key] = mergeDeep(config1[key], config2[key])
-    } else {
-      target[key] = config2[key]
+// Tokenise paragraph.
+function paragraph(eat, value, silent) {
+  var self = this
+  var settings = self.options
+  var commonmark = settings.commonmark
+  var tokenizers = self.blockTokenizers
+  var interruptors = self.interruptParagraph
+  var index = value.indexOf(lineFeed)
+  var length = value.length
+  var position
+  var subvalue
+  var character
+  var size
+  var now
+
+  while (index < length) {
+    // Eat everything if there’s no following newline.
+    if (index === -1) {
+      index = length
+      break
     }
-  }
-  return target
-}
 
-function applyExtends (config, cwd, mergeExtends) {
-  let defaultConfig = {}
+    // Stop if the next character is NEWLINE.
+    if (value.charAt(index + 1) === lineFeed) {
+      break
+    }
 
-  if (Object.prototype.hasOwnProperty.call(config, 'extends')) {
-    if (typeof config.extends !== 'string') return defaultConfig
-    const isPath = /\.json|\..*rc$/.test(config.extends)
-    let pathToDefault = null
-    if (!isPath) {
-      try {
-        pathToDefault = require.resolve(config.extends)
-      } catch (err) {
-        // most likely this simply isn't a module.
+    // In commonmark-mode, following indented lines are part of the paragraph.
+    if (commonmark) {
+      size = 0
+      position = index + 1
+
+      while (position < length) {
+        character = value.charAt(position)
+
+        if (character === tab) {
+          size = tabSize
+          break
+        } else if (character === space) {
+          size++
+        } else {
+          break
+        }
+
+        position++
       }
-    } else {
-      pathToDefault = getPathToDefaultConfig(cwd, config.extends)
+
+      if (size >= tabSize && character !== lineFeed) {
+        index = value.indexOf(lineFeed, index + 1)
+        continue
+      }
     }
-    // maybe the module uses key for some other reason,
-    // err on side of caution.
-    if (!pathToDefault && !isPath) return config
 
-    checkForCircularExtends(pathToDefault)
+    subvalue = value.slice(index + 1)
 
-    previouslyVisitedConfigs.push(pathToDefault)
+    // Check if the following code contains a possible block.
+    if (interrupt(interruptors, tokenizers, self, [eat, subvalue, true])) {
+      break
+    }
 
-    defaultConfig = isPath ? JSON.parse(fs.readFileSync(pathToDefault, 'utf8')) : require(config.extends)
-    delete config.extends
-    defaultConfig = applyExtends(defaultConfig, path.dirname(pathToDefault), mergeExtends)
+    position = index
+    index = value.indexOf(lineFeed, index + 1)
+
+    if (index !== -1 && trim(value.slice(position, index)) === '') {
+      index = position
+      break
+    }
   }
 
-  previouslyVisitedConfigs = []
+  subvalue = value.slice(0, index)
 
-  return mergeExtends ? mergeDeep(defaultConfig, config) : Object.assign({}, defaultConfig, config)
+  /* istanbul ignore if - never used (yet) */
+  if (silent) {
+    return true
+  }
+
+  now = eat.now()
+  subvalue = trimTrailingLines(subvalue)
+
+  return eat(subvalue)({
+    type: 'paragraph',
+    children: self.tokenizeInline(subvalue, now)
+  })
 }
-
-module.exports = applyExtends
 
 
 /***/ }),
@@ -35695,31 +36480,7 @@ module.exports = function levenshtein (a, b) {
 /* 390 */,
 /* 391 */,
 /* 392 */,
-/* 393 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var unherit = __webpack_require__(902)
-var xtend = __webpack_require__(81)
-var Compiler = __webpack_require__(156)
-
-module.exports = stringify
-stringify.Compiler = Compiler
-
-function stringify(options) {
-  var Local = unherit(Compiler)
-  Local.prototype.options = xtend(
-    Local.prototype.options,
-    this.data('settings'),
-    options
-  )
-  this.Compiler = Local
-}
-
-
-/***/ }),
+/* 393 */,
 /* 394 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -35783,131 +36544,13 @@ module.exports.Collection = Hook.Collection
 
 
 /***/ }),
-/* 395 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var locate = __webpack_require__(338)
-
-module.exports = inlineCode
-inlineCode.locator = locate
-
-var lineFeed = 10 //  '\n'
-var space = 32 // ' '
-var graveAccent = 96 //  '`'
-
-function inlineCode(eat, value, silent) {
-  var length = value.length
-  var index = 0
-  var openingFenceEnd
-  var closingFenceStart
-  var closingFenceEnd
-  var code
-  var next
-  var found
-
-  while (index < length) {
-    if (value.charCodeAt(index) !== graveAccent) {
-      break
-    }
-
-    index++
-  }
-
-  if (index === 0 || index === length) {
-    return
-  }
-
-  openingFenceEnd = index
-  next = value.charCodeAt(index)
-
-  while (index < length) {
-    code = next
-    next = value.charCodeAt(index + 1)
-
-    if (code === graveAccent) {
-      if (closingFenceStart === undefined) {
-        closingFenceStart = index
-      }
-
-      closingFenceEnd = index + 1
-
-      if (
-        next !== graveAccent &&
-        closingFenceEnd - closingFenceStart === openingFenceEnd
-      ) {
-        found = true
-        break
-      }
-    } else if (closingFenceStart !== undefined) {
-      closingFenceStart = undefined
-      closingFenceEnd = undefined
-    }
-
-    index++
-  }
-
-  if (!found) {
-    return
-  }
-
-  /* istanbul ignore if - never used (yet) */
-  if (silent) {
-    return true
-  }
-
-  // Remove the initial and final space (or line feed), iff they exist and there
-  // are non-space characters in the content.
-  index = openingFenceEnd
-  length = closingFenceStart
-  code = value.charCodeAt(index)
-  next = value.charCodeAt(length - 1)
-  found = false
-
-  if (
-    length - index > 2 &&
-    (code === space || code === lineFeed) &&
-    (next === space || next === lineFeed)
-  ) {
-    index++
-    length--
-
-    while (index < length) {
-      code = value.charCodeAt(index)
-
-      if (code !== space && code !== lineFeed) {
-        found = true
-        break
-      }
-
-      index++
-    }
-
-    if (found === true) {
-      openingFenceEnd++
-      closingFenceStart--
-    }
-  }
-
-  return eat(value.slice(0, closingFenceEnd))({
-    type: 'inlineCode',
-    value: value.slice(openingFenceEnd, closingFenceStart)
-  })
-}
-
-
-/***/ }),
+/* 395 */,
 /* 396 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const parse = __webpack_require__(791)
-const prerelease = (version, options) => {
-  const parsed = parse(version, options)
-  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null
-}
-module.exports = prerelease
+const compare = __webpack_require__(217)
+const lt = (a, b, loose) => compare(a, b, loose) < 0
+module.exports = lt
 
 
 /***/ }),
@@ -37483,15 +38126,11 @@ exports.throwOnErrorEvent = throwOnErrorEvent;
 
 /***/ }),
 /* 406 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-
-module.exports = function () {
-  // https://mths.be/emoji
-  return /\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F|\uD83D\uDC68(?:\uD83C\uDFFC\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68\uD83C\uDFFB|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFF\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFE])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFE\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFD])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFD\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFC])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|[\u2695\u2696\u2708]\uFE0F|\uD83D[\uDC66\uDC67]|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|(?:\uD83C\uDFFB\u200D[\u2695\u2696\u2708]|\uD83C\uDFFF\u200D[\u2695\u2696\u2708]|\uD83C\uDFFE\u200D[\u2695\u2696\u2708]|\uD83C\uDFFD\u200D[\u2695\u2696\u2708]|\uD83C\uDFFC\u200D[\u2695\u2696\u2708])\uFE0F|\uD83C\uDFFB\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C[\uDFFB-\uDFFF])|(?:\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)\uD83C\uDFFB|\uD83E\uDDD1(?:\uD83C\uDFFF\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1(?:\uD83C[\uDFFB-\uDFFF])|\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1)|(?:\uD83E\uDDD1\uD83C\uDFFE\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFF\u200D\uD83E\uDD1D\u200D(?:\uD83D[\uDC68\uDC69]))(?:\uD83C[\uDFFB-\uDFFE])|(?:\uD83E\uDDD1\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)(?:\uD83C[\uDFFB\uDFFC])|\uD83D\uDC69(?:\uD83C\uDFFE\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFD\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFC\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFD-\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFB\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFC-\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFD\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFF\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD]))|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|(?:\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFE\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)(?:\uD83C[\uDFFB-\uDFFD])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C\uDFFF\u200D[\u2695\u2696\u2708]|\uD83C\uDFFE\u200D[\u2695\u2696\u2708]|\uD83C\uDFFC\u200D[\u2695\u2696\u2708]|\uD83C\uDFFB\u200D[\u2695\u2696\u2708]|\uD83C\uDFFD\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83C\uDFF4\u200D\u2620)\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC15\u200D\uD83E\uDDBA|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83C\uDDF6\uD83C\uDDE6|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83E\uDDD1(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD0F\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDBB\uDDD2-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDED5\uDEEB\uDEEC\uDEF4-\uDEFA\uDFE0-\uDFEB]|\uD83E[\uDD0D-\uDD3A\uDD3C-\uDD45\uDD47-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDDFF\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDED5\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEFA\uDFE0-\uDFEB]|\uD83E[\uDD0D-\uDD3A\uDD3C-\uDD45\uDD47-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDDFF\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDC8F\uDC91\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD0F\uDD18-\uDD1F\uDD26\uDD30-\uDD39\uDD3C-\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDBB\uDDCD-\uDDCF\uDDD1-\uDDDD])/g;
-};
+module.exports = __webpack_require__(769)
 
 
 /***/ }),
@@ -38727,7 +39366,19 @@ module.exports = get;
 module.exports = require("stream");
 
 /***/ }),
-/* 414 */,
+/* 414 */
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = function () {
+  // https://mths.be/emoji
+  return /\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62(?:\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67|\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74|\uDB40\uDC77\uDB40\uDC6C\uDB40\uDC73)\uDB40\uDC7F|\uD83D\uDC68(?:\uD83C\uDFFC\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68\uD83C\uDFFB|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFF\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFE])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFE\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFD])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFD\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFC])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D)?\uD83D\uDC68|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|(?:\uD83D[\uDC68\uDC69])\u200D(?:\uD83D[\uDC66\uDC67])|[\u2695\u2696\u2708]\uFE0F|\uD83D[\uDC66\uDC67]|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|(?:\uD83C\uDFFB\u200D[\u2695\u2696\u2708]|\uD83C\uDFFF\u200D[\u2695\u2696\u2708]|\uD83C\uDFFE\u200D[\u2695\u2696\u2708]|\uD83C\uDFFD\u200D[\u2695\u2696\u2708]|\uD83C\uDFFC\u200D[\u2695\u2696\u2708])\uFE0F|\uD83C\uDFFB\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C[\uDFFB-\uDFFF])|(?:\uD83E\uDDD1\uD83C\uDFFB\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)\uD83C\uDFFB|\uD83E\uDDD1(?:\uD83C\uDFFF\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1(?:\uD83C[\uDFFB-\uDFFF])|\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1)|(?:\uD83E\uDDD1\uD83C\uDFFE\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFF\u200D\uD83E\uDD1D\u200D(?:\uD83D[\uDC68\uDC69]))(?:\uD83C[\uDFFB-\uDFFE])|(?:\uD83E\uDDD1\uD83C\uDFFC\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFD\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)(?:\uD83C[\uDFFB\uDFFC])|\uD83D\uDC69(?:\uD83C\uDFFE\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB-\uDFFD\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFC\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFD-\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFB\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFC-\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFD\u200D(?:\uD83E\uDD1D\u200D\uD83D\uDC68(?:\uD83C[\uDFFB\uDFFC\uDFFE\uDFFF])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\u200D(?:\u2764\uFE0F\u200D(?:\uD83D\uDC8B\u200D(?:\uD83D[\uDC68\uDC69])|\uD83D[\uDC68\uDC69])|\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD])|\uD83C\uDFFF\u200D(?:\uD83C[\uDF3E\uDF73\uDF93\uDFA4\uDFA8\uDFEB\uDFED]|\uD83D[\uDCBB\uDCBC\uDD27\uDD2C\uDE80\uDE92]|\uD83E[\uDDAF-\uDDB3\uDDBC\uDDBD]))|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67]))|(?:\uD83E\uDDD1\uD83C\uDFFD\u200D\uD83E\uDD1D\u200D\uD83E\uDDD1|\uD83D\uDC69\uD83C\uDFFE\u200D\uD83E\uDD1D\u200D\uD83D\uDC69)(?:\uD83C[\uDFFB-\uDFFD])|\uD83D\uDC69\u200D\uD83D\uDC66\u200D\uD83D\uDC66|\uD83D\uDC69\u200D\uD83D\uDC69\u200D(?:\uD83D[\uDC66\uDC67])|(?:\uD83D\uDC41\uFE0F\u200D\uD83D\uDDE8|\uD83D\uDC69(?:\uD83C\uDFFF\u200D[\u2695\u2696\u2708]|\uD83C\uDFFE\u200D[\u2695\u2696\u2708]|\uD83C\uDFFC\u200D[\u2695\u2696\u2708]|\uD83C\uDFFB\u200D[\u2695\u2696\u2708]|\uD83C\uDFFD\u200D[\u2695\u2696\u2708]|\u200D[\u2695\u2696\u2708])|(?:(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)\uFE0F|\uD83D\uDC6F|\uD83E[\uDD3C\uDDDE\uDDDF])\u200D[\u2640\u2642]|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD6-\uDDDD])(?:(?:\uD83C[\uDFFB-\uDFFF])\u200D[\u2640\u2642]|\u200D[\u2640\u2642])|\uD83C\uDFF4\u200D\u2620)\uFE0F|\uD83D\uDC69\u200D\uD83D\uDC67\u200D(?:\uD83D[\uDC66\uDC67])|\uD83C\uDFF3\uFE0F\u200D\uD83C\uDF08|\uD83D\uDC15\u200D\uD83E\uDDBA|\uD83D\uDC69\u200D\uD83D\uDC66|\uD83D\uDC69\u200D\uD83D\uDC67|\uD83C\uDDFD\uD83C\uDDF0|\uD83C\uDDF4\uD83C\uDDF2|\uD83C\uDDF6\uD83C\uDDE6|[#\*0-9]\uFE0F\u20E3|\uD83C\uDDE7(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEF\uDDF1-\uDDF4\uDDF6-\uDDF9\uDDFB\uDDFC\uDDFE\uDDFF])|\uD83C\uDDF9(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDED\uDDEF-\uDDF4\uDDF7\uDDF9\uDDFB\uDDFC\uDDFF])|\uD83C\uDDEA(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDED\uDDF7-\uDDFA])|\uD83E\uDDD1(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDF7(?:\uD83C[\uDDEA\uDDF4\uDDF8\uDDFA\uDDFC])|\uD83D\uDC69(?:\uD83C[\uDFFB-\uDFFF])|\uD83C\uDDF2(?:\uD83C[\uDDE6\uDDE8-\uDDED\uDDF0-\uDDFF])|\uD83C\uDDE6(?:\uD83C[\uDDE8-\uDDEC\uDDEE\uDDF1\uDDF2\uDDF4\uDDF6-\uDDFA\uDDFC\uDDFD\uDDFF])|\uD83C\uDDF0(?:\uD83C[\uDDEA\uDDEC-\uDDEE\uDDF2\uDDF3\uDDF5\uDDF7\uDDFC\uDDFE\uDDFF])|\uD83C\uDDED(?:\uD83C[\uDDF0\uDDF2\uDDF3\uDDF7\uDDF9\uDDFA])|\uD83C\uDDE9(?:\uD83C[\uDDEA\uDDEC\uDDEF\uDDF0\uDDF2\uDDF4\uDDFF])|\uD83C\uDDFE(?:\uD83C[\uDDEA\uDDF9])|\uD83C\uDDEC(?:\uD83C[\uDDE6\uDDE7\uDDE9-\uDDEE\uDDF1-\uDDF3\uDDF5-\uDDFA\uDDFC\uDDFE])|\uD83C\uDDF8(?:\uD83C[\uDDE6-\uDDEA\uDDEC-\uDDF4\uDDF7-\uDDF9\uDDFB\uDDFD-\uDDFF])|\uD83C\uDDEB(?:\uD83C[\uDDEE-\uDDF0\uDDF2\uDDF4\uDDF7])|\uD83C\uDDF5(?:\uD83C[\uDDE6\uDDEA-\uDDED\uDDF0-\uDDF3\uDDF7-\uDDF9\uDDFC\uDDFE])|\uD83C\uDDFB(?:\uD83C[\uDDE6\uDDE8\uDDEA\uDDEC\uDDEE\uDDF3\uDDFA])|\uD83C\uDDF3(?:\uD83C[\uDDE6\uDDE8\uDDEA-\uDDEC\uDDEE\uDDF1\uDDF4\uDDF5\uDDF7\uDDFA\uDDFF])|\uD83C\uDDE8(?:\uD83C[\uDDE6\uDDE8\uDDE9\uDDEB-\uDDEE\uDDF0-\uDDF5\uDDF7\uDDFA-\uDDFF])|\uD83C\uDDF1(?:\uD83C[\uDDE6-\uDDE8\uDDEE\uDDF0\uDDF7-\uDDFB\uDDFE])|\uD83C\uDDFF(?:\uD83C[\uDDE6\uDDF2\uDDFC])|\uD83C\uDDFC(?:\uD83C[\uDDEB\uDDF8])|\uD83C\uDDFA(?:\uD83C[\uDDE6\uDDEC\uDDF2\uDDF3\uDDF8\uDDFE\uDDFF])|\uD83C\uDDEE(?:\uD83C[\uDDE8-\uDDEA\uDDF1-\uDDF4\uDDF6-\uDDF9])|\uD83C\uDDEF(?:\uD83C[\uDDEA\uDDF2\uDDF4\uDDF5])|(?:\uD83C[\uDFC3\uDFC4\uDFCA]|\uD83D[\uDC6E\uDC71\uDC73\uDC77\uDC81\uDC82\uDC86\uDC87\uDE45-\uDE47\uDE4B\uDE4D\uDE4E\uDEA3\uDEB4-\uDEB6]|\uD83E[\uDD26\uDD37-\uDD39\uDD3D\uDD3E\uDDB8\uDDB9\uDDCD-\uDDCF\uDDD6-\uDDDD])(?:\uD83C[\uDFFB-\uDFFF])|(?:\u26F9|\uD83C[\uDFCB\uDFCC]|\uD83D\uDD75)(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u261D\u270A-\u270D]|\uD83C[\uDF85\uDFC2\uDFC7]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66\uDC67\uDC6B-\uDC6D\uDC70\uDC72\uDC74-\uDC76\uDC78\uDC7C\uDC83\uDC85\uDCAA\uDD74\uDD7A\uDD90\uDD95\uDD96\uDE4C\uDE4F\uDEC0\uDECC]|\uD83E[\uDD0F\uDD18-\uDD1C\uDD1E\uDD1F\uDD30-\uDD36\uDDB5\uDDB6\uDDBB\uDDD2-\uDDD5])(?:\uD83C[\uDFFB-\uDFFF])|(?:[\u231A\u231B\u23E9-\u23EC\u23F0\u23F3\u25FD\u25FE\u2614\u2615\u2648-\u2653\u267F\u2693\u26A1\u26AA\u26AB\u26BD\u26BE\u26C4\u26C5\u26CE\u26D4\u26EA\u26F2\u26F3\u26F5\u26FA\u26FD\u2705\u270A\u270B\u2728\u274C\u274E\u2753-\u2755\u2757\u2795-\u2797\u27B0\u27BF\u2B1B\u2B1C\u2B50\u2B55]|\uD83C[\uDC04\uDCCF\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE1A\uDE2F\uDE32-\uDE36\uDE38-\uDE3A\uDE50\uDE51\uDF00-\uDF20\uDF2D-\uDF35\uDF37-\uDF7C\uDF7E-\uDF93\uDFA0-\uDFCA\uDFCF-\uDFD3\uDFE0-\uDFF0\uDFF4\uDFF8-\uDFFF]|\uD83D[\uDC00-\uDC3E\uDC40\uDC42-\uDCFC\uDCFF-\uDD3D\uDD4B-\uDD4E\uDD50-\uDD67\uDD7A\uDD95\uDD96\uDDA4\uDDFB-\uDE4F\uDE80-\uDEC5\uDECC\uDED0-\uDED2\uDED5\uDEEB\uDEEC\uDEF4-\uDEFA\uDFE0-\uDFEB]|\uD83E[\uDD0D-\uDD3A\uDD3C-\uDD45\uDD47-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDDFF\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95])|(?:[#\*0-9\xA9\xAE\u203C\u2049\u2122\u2139\u2194-\u2199\u21A9\u21AA\u231A\u231B\u2328\u23CF\u23E9-\u23F3\u23F8-\u23FA\u24C2\u25AA\u25AB\u25B6\u25C0\u25FB-\u25FE\u2600-\u2604\u260E\u2611\u2614\u2615\u2618\u261D\u2620\u2622\u2623\u2626\u262A\u262E\u262F\u2638-\u263A\u2640\u2642\u2648-\u2653\u265F\u2660\u2663\u2665\u2666\u2668\u267B\u267E\u267F\u2692-\u2697\u2699\u269B\u269C\u26A0\u26A1\u26AA\u26AB\u26B0\u26B1\u26BD\u26BE\u26C4\u26C5\u26C8\u26CE\u26CF\u26D1\u26D3\u26D4\u26E9\u26EA\u26F0-\u26F5\u26F7-\u26FA\u26FD\u2702\u2705\u2708-\u270D\u270F\u2712\u2714\u2716\u271D\u2721\u2728\u2733\u2734\u2744\u2747\u274C\u274E\u2753-\u2755\u2757\u2763\u2764\u2795-\u2797\u27A1\u27B0\u27BF\u2934\u2935\u2B05-\u2B07\u2B1B\u2B1C\u2B50\u2B55\u3030\u303D\u3297\u3299]|\uD83C[\uDC04\uDCCF\uDD70\uDD71\uDD7E\uDD7F\uDD8E\uDD91-\uDD9A\uDDE6-\uDDFF\uDE01\uDE02\uDE1A\uDE2F\uDE32-\uDE3A\uDE50\uDE51\uDF00-\uDF21\uDF24-\uDF93\uDF96\uDF97\uDF99-\uDF9B\uDF9E-\uDFF0\uDFF3-\uDFF5\uDFF7-\uDFFF]|\uD83D[\uDC00-\uDCFD\uDCFF-\uDD3D\uDD49-\uDD4E\uDD50-\uDD67\uDD6F\uDD70\uDD73-\uDD7A\uDD87\uDD8A-\uDD8D\uDD90\uDD95\uDD96\uDDA4\uDDA5\uDDA8\uDDB1\uDDB2\uDDBC\uDDC2-\uDDC4\uDDD1-\uDDD3\uDDDC-\uDDDE\uDDE1\uDDE3\uDDE8\uDDEF\uDDF3\uDDFA-\uDE4F\uDE80-\uDEC5\uDECB-\uDED2\uDED5\uDEE0-\uDEE5\uDEE9\uDEEB\uDEEC\uDEF0\uDEF3-\uDEFA\uDFE0-\uDFEB]|\uD83E[\uDD0D-\uDD3A\uDD3C-\uDD45\uDD47-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDDFF\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95])\uFE0F|(?:[\u261D\u26F9\u270A-\u270D]|\uD83C[\uDF85\uDFC2-\uDFC4\uDFC7\uDFCA-\uDFCC]|\uD83D[\uDC42\uDC43\uDC46-\uDC50\uDC66-\uDC78\uDC7C\uDC81-\uDC83\uDC85-\uDC87\uDC8F\uDC91\uDCAA\uDD74\uDD75\uDD7A\uDD90\uDD95\uDD96\uDE45-\uDE47\uDE4B-\uDE4F\uDEA3\uDEB4-\uDEB6\uDEC0\uDECC]|\uD83E[\uDD0F\uDD18-\uDD1F\uDD26\uDD30-\uDD39\uDD3C-\uDD3E\uDDB5\uDDB6\uDDB8\uDDB9\uDDBB\uDDCD-\uDDCF\uDDD1-\uDDDD])/g;
+};
+
+
+/***/ }),
 /* 415 */
 /***/ (function(module) {
 
@@ -38909,18 +39560,455 @@ module.exports.extend         = extend;
 /* 427 */,
 /* 428 */,
 /* 429 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-const pTry = (fn, ...arguments_) => new Promise(resolve => {
-	resolve(fn(...arguments_));
-});
+var trim = __webpack_require__(132)
+var repeat = __webpack_require__(342)
+var decimal = __webpack_require__(930)
+var getIndent = __webpack_require__(434)
+var removeIndent = __webpack_require__(891)
+var interrupt = __webpack_require__(658)
 
-module.exports = pTry;
-// TODO: remove this in the next major version
-module.exports.default = pTry;
+module.exports = list
+
+var asterisk = '*'
+var underscore = '_'
+var plusSign = '+'
+var dash = '-'
+var dot = '.'
+var space = ' '
+var lineFeed = '\n'
+var tab = '\t'
+var rightParenthesis = ')'
+var lowercaseX = 'x'
+
+var tabSize = 4
+var looseListItemExpression = /\n\n(?!\s*$)/
+var taskItemExpression = /^\[([ X\tx])][ \t]/
+var bulletExpression = /^([ \t]*)([*+-]|\d+[.)])( {1,4}(?! )| |\t|$|(?=\n))([^\n]*)/
+var pedanticBulletExpression = /^([ \t]*)([*+-]|\d+[.)])([ \t]+)/
+var initialIndentExpression = /^( {1,4}|\t)?/gm
+
+function list(eat, value, silent) {
+  var self = this
+  var commonmark = self.options.commonmark
+  var pedantic = self.options.pedantic
+  var tokenizers = self.blockTokenizers
+  var interuptors = self.interruptList
+  var index = 0
+  var length = value.length
+  var start = null
+  var size
+  var queue
+  var ordered
+  var character
+  var marker
+  var nextIndex
+  var startIndex
+  var prefixed
+  var currentMarker
+  var content
+  var line
+  var previousEmpty
+  var empty
+  var items
+  var allLines
+  var emptyLines
+  var item
+  var enterTop
+  var exitBlockquote
+  var spread = false
+  var node
+  var now
+  var end
+  var indented
+
+  while (index < length) {
+    character = value.charAt(index)
+
+    if (character !== tab && character !== space) {
+      break
+    }
+
+    index++
+  }
+
+  character = value.charAt(index)
+
+  if (character === asterisk || character === plusSign || character === dash) {
+    marker = character
+    ordered = false
+  } else {
+    ordered = true
+    queue = ''
+
+    while (index < length) {
+      character = value.charAt(index)
+
+      if (!decimal(character)) {
+        break
+      }
+
+      queue += character
+      index++
+    }
+
+    character = value.charAt(index)
+
+    if (
+      !queue ||
+      !(character === dot || (commonmark && character === rightParenthesis))
+    ) {
+      return
+    }
+
+    /* Slightly abusing `silent` mode, whose goal is to make interrupting
+     * paragraphs work.
+     * Well, that’s exactly what we want to do here: don’t interrupt:
+     * 2. here, because the “list” doesn’t start with `1`. */
+    if (silent && queue !== '1') {
+      return
+    }
+
+    start = parseInt(queue, 10)
+    marker = character
+  }
+
+  character = value.charAt(++index)
+
+  if (
+    character !== space &&
+    character !== tab &&
+    (pedantic || (character !== lineFeed && character !== ''))
+  ) {
+    return
+  }
+
+  if (silent) {
+    return true
+  }
+
+  index = 0
+  items = []
+  allLines = []
+  emptyLines = []
+
+  while (index < length) {
+    nextIndex = value.indexOf(lineFeed, index)
+    startIndex = index
+    prefixed = false
+    indented = false
+
+    if (nextIndex === -1) {
+      nextIndex = length
+    }
+
+    size = 0
+
+    while (index < length) {
+      character = value.charAt(index)
+
+      if (character === tab) {
+        size += tabSize - (size % tabSize)
+      } else if (character === space) {
+        size++
+      } else {
+        break
+      }
+
+      index++
+    }
+
+    if (item && size >= item.indent) {
+      indented = true
+    }
+
+    character = value.charAt(index)
+    currentMarker = null
+
+    if (!indented) {
+      if (
+        character === asterisk ||
+        character === plusSign ||
+        character === dash
+      ) {
+        currentMarker = character
+        index++
+        size++
+      } else {
+        queue = ''
+
+        while (index < length) {
+          character = value.charAt(index)
+
+          if (!decimal(character)) {
+            break
+          }
+
+          queue += character
+          index++
+        }
+
+        character = value.charAt(index)
+        index++
+
+        if (
+          queue &&
+          (character === dot || (commonmark && character === rightParenthesis))
+        ) {
+          currentMarker = character
+          size += queue.length + 1
+        }
+      }
+
+      if (currentMarker) {
+        character = value.charAt(index)
+
+        if (character === tab) {
+          size += tabSize - (size % tabSize)
+          index++
+        } else if (character === space) {
+          end = index + tabSize
+
+          while (index < end) {
+            if (value.charAt(index) !== space) {
+              break
+            }
+
+            index++
+            size++
+          }
+
+          if (index === end && value.charAt(index) === space) {
+            index -= tabSize - 1
+            size -= tabSize - 1
+          }
+        } else if (character !== lineFeed && character !== '') {
+          currentMarker = null
+        }
+      }
+    }
+
+    if (currentMarker) {
+      if (!pedantic && marker !== currentMarker) {
+        break
+      }
+
+      prefixed = true
+    } else {
+      if (!commonmark && !indented && value.charAt(startIndex) === space) {
+        indented = true
+      } else if (commonmark && item) {
+        indented = size >= item.indent || size > tabSize
+      }
+
+      prefixed = false
+      index = startIndex
+    }
+
+    line = value.slice(startIndex, nextIndex)
+    content = startIndex === index ? line : value.slice(index, nextIndex)
+
+    if (
+      currentMarker === asterisk ||
+      currentMarker === underscore ||
+      currentMarker === dash
+    ) {
+      if (tokenizers.thematicBreak.call(self, eat, line, true)) {
+        break
+      }
+    }
+
+    previousEmpty = empty
+    empty = !prefixed && !trim(content).length
+
+    if (indented && item) {
+      item.value = item.value.concat(emptyLines, line)
+      allLines = allLines.concat(emptyLines, line)
+      emptyLines = []
+    } else if (prefixed) {
+      if (emptyLines.length !== 0) {
+        spread = true
+        item.value.push('')
+        item.trail = emptyLines.concat()
+      }
+
+      item = {
+        value: [line],
+        indent: size,
+        trail: []
+      }
+
+      items.push(item)
+      allLines = allLines.concat(emptyLines, line)
+      emptyLines = []
+    } else if (empty) {
+      if (previousEmpty && !commonmark) {
+        break
+      }
+
+      emptyLines.push(line)
+    } else {
+      if (previousEmpty) {
+        break
+      }
+
+      if (interrupt(interuptors, tokenizers, self, [eat, line, true])) {
+        break
+      }
+
+      item.value = item.value.concat(emptyLines, line)
+      allLines = allLines.concat(emptyLines, line)
+      emptyLines = []
+    }
+
+    index = nextIndex + 1
+  }
+
+  node = eat(allLines.join(lineFeed)).reset({
+    type: 'list',
+    ordered: ordered,
+    start: start,
+    spread: spread,
+    children: []
+  })
+
+  enterTop = self.enterList()
+  exitBlockquote = self.enterBlock()
+  index = -1
+  length = items.length
+
+  while (++index < length) {
+    item = items[index].value.join(lineFeed)
+    now = eat.now()
+
+    eat(item)(listItem(self, item, now), node)
+
+    item = items[index].trail.join(lineFeed)
+
+    if (index !== length - 1) {
+      item += lineFeed
+    }
+
+    eat(item)
+  }
+
+  enterTop()
+  exitBlockquote()
+
+  return node
+}
+
+function listItem(ctx, value, position) {
+  var offsets = ctx.offset
+  var fn = ctx.options.pedantic ? pedanticListItem : normalListItem
+  var checked = null
+  var task
+  var indent
+
+  value = fn.apply(null, arguments)
+
+  if (ctx.options.gfm) {
+    task = value.match(taskItemExpression)
+
+    if (task) {
+      indent = task[0].length
+      checked = task[1].toLowerCase() === lowercaseX
+      offsets[position.line] += indent
+      value = value.slice(indent)
+    }
+  }
+
+  return {
+    type: 'listItem',
+    spread: looseListItemExpression.test(value),
+    checked: checked,
+    children: ctx.tokenizeBlock(value, position)
+  }
+}
+
+// Create a list-item using overly simple mechanics.
+function pedanticListItem(ctx, value, position) {
+  var offsets = ctx.offset
+  var line = position.line
+
+  // Remove the list-item’s bullet.
+  value = value.replace(pedanticBulletExpression, replacer)
+
+  // The initial line was also matched by the below, so we reset the `line`.
+  line = position.line
+
+  return value.replace(initialIndentExpression, replacer)
+
+  // A simple replacer which removed all matches, and adds their length to
+  // `offset`.
+  function replacer($0) {
+    offsets[line] = (offsets[line] || 0) + $0.length
+    line++
+
+    return ''
+  }
+}
+
+// Create a list-item using sane mechanics.
+function normalListItem(ctx, value, position) {
+  var offsets = ctx.offset
+  var line = position.line
+  var max
+  var bullet
+  var rest
+  var lines
+  var trimmedLines
+  var index
+  var length
+
+  // Remove the list-item’s bullet.
+  value = value.replace(bulletExpression, replacer)
+
+  lines = value.split(lineFeed)
+
+  trimmedLines = removeIndent(value, getIndent(max).indent).split(lineFeed)
+
+  // We replaced the initial bullet with something else above, which was used
+  // to trick `removeIndentation` into removing some more characters when
+  // possible.  However, that could result in the initial line to be stripped
+  // more than it should be.
+  trimmedLines[0] = rest
+
+  offsets[line] = (offsets[line] || 0) + bullet.length
+  line++
+
+  index = 0
+  length = lines.length
+
+  while (++index < length) {
+    offsets[line] =
+      (offsets[line] || 0) + lines[index].length - trimmedLines[index].length
+    line++
+  }
+
+  return trimmedLines.join(lineFeed)
+
+  /* eslint-disable-next-line max-params */
+  function replacer($0, $1, $2, $3, $4) {
+    bullet = $1 + $2 + $3
+    rest = $4
+
+    // Make sure that the first nine numbered list items can indent with an
+    // extra space.  That is, when the bullet did not receive an extra final
+    // space.
+    if (Number($2) < 10 && bullet.length % 2 === 1) {
+      $2 = space + $2
+    }
+
+    max = $1 + repeat(space, $2.length) + $3
+
+    return max + rest
+  }
+}
 
 
 /***/ }),
@@ -39121,20 +40209,133 @@ function indentation(value) {
 /***/ }),
 /* 435 */,
 /* 436 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-function YError (msg) {
-  this.name = 'YError'
-  this.message = msg || 'yargs error'
-  Error.captureStackTrace(this, YError)
+
+var trim = __webpack_require__(132)
+var interrupt = __webpack_require__(658)
+
+module.exports = blockquote
+
+var lineFeed = '\n'
+var tab = '\t'
+var space = ' '
+var greaterThan = '>'
+
+function blockquote(eat, value, silent) {
+  var self = this
+  var offsets = self.offset
+  var tokenizers = self.blockTokenizers
+  var interruptors = self.interruptBlockquote
+  var now = eat.now()
+  var currentLine = now.line
+  var length = value.length
+  var values = []
+  var contents = []
+  var indents = []
+  var add
+  var index = 0
+  var character
+  var rest
+  var nextIndex
+  var content
+  var line
+  var startIndex
+  var prefixed
+  var exit
+
+  while (index < length) {
+    character = value.charAt(index)
+
+    if (character !== space && character !== tab) {
+      break
+    }
+
+    index++
+  }
+
+  if (value.charAt(index) !== greaterThan) {
+    return
+  }
+
+  if (silent) {
+    return true
+  }
+
+  index = 0
+
+  while (index < length) {
+    nextIndex = value.indexOf(lineFeed, index)
+    startIndex = index
+    prefixed = false
+
+    if (nextIndex === -1) {
+      nextIndex = length
+    }
+
+    while (index < length) {
+      character = value.charAt(index)
+
+      if (character !== space && character !== tab) {
+        break
+      }
+
+      index++
+    }
+
+    if (value.charAt(index) === greaterThan) {
+      index++
+      prefixed = true
+
+      if (value.charAt(index) === space) {
+        index++
+      }
+    } else {
+      index = startIndex
+    }
+
+    content = value.slice(index, nextIndex)
+
+    if (!prefixed && !trim(content)) {
+      index = startIndex
+      break
+    }
+
+    if (!prefixed) {
+      rest = value.slice(index)
+
+      // Check if the following code contains a possible block.
+      if (interrupt(interruptors, tokenizers, self, [eat, rest, true])) {
+        break
+      }
+    }
+
+    line = startIndex === index ? content : value.slice(startIndex, nextIndex)
+
+    indents.push(index - startIndex)
+    values.push(line)
+    contents.push(content)
+
+    index = nextIndex + 1
+  }
+
+  index = -1
+  length = indents.length
+  add = eat(values.join(lineFeed))
+
+  while (++index < length) {
+    offsets[currentLine] = (offsets[currentLine] || 0) + indents[index]
+    currentLine++
+  }
+
+  exit = self.enterBlock()
+  contents = self.tokenizeBlock(contents.join(lineFeed), now)
+  exit()
+
+  return add({type: 'blockquote', children: contents})
 }
-
-YError.prototype = Object.create(Error.prototype)
-YError.prototype.constructor = YError
-
-module.exports = YError
 
 
 /***/ }),
@@ -39265,7 +40466,7 @@ function email(eat, value, silent) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(100);
+const utils = __webpack_require__(772);
 class Matcher {
     constructor(_patterns, _settings, _micromatchOptions) {
         this._patterns = _patterns;
@@ -39650,57 +40851,41 @@ module.exports = {"AElig":"Æ","AMP":"&","Aacute":"Á","Acirc":"Â","Agrave":"À
 /* 448 */,
 /* 449 */,
 /* 450 */
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-exports.completionShTemplate =
-`###-begin-{{app_name}}-completions-###
-#
-# yargs command completion script
-#
-# Installation: {{app_path}} {{completion_command}} >> ~/.bashrc
-#    or {{app_path}} {{completion_command}} >> ~/.bash_profile on OSX.
-#
-_yargs_completions()
-{
-    local cur_word args type_list
+"use strict";
 
-    cur_word="\${COMP_WORDS[COMP_CWORD]}"
-    args=("\${COMP_WORDS[@]}")
 
-    # ask yargs to generate completions.
-    type_list=$({{app_path}} --get-yargs-completions "\${args[@]}")
+const utils = __webpack_require__(49);
 
-    COMPREPLY=( $(compgen -W "\${type_list}" -- \${cur_word}) )
+module.exports = (ast, options = {}) => {
+  let stringify = (node, parent = {}) => {
+    let invalidBlock = options.escapeInvalid && utils.isInvalidBrace(parent);
+    let invalidNode = node.invalid === true && options.escapeInvalid === true;
+    let output = '';
 
-    # if no match was found, fall back to filename completion
-    if [ \${#COMPREPLY[@]} -eq 0 ]; then
-      COMPREPLY=()
-    fi
+    if (node.value) {
+      if ((invalidBlock || invalidNode) && utils.isOpenOrClose(node)) {
+        return '\\' + node.value;
+      }
+      return node.value;
+    }
 
-    return 0
-}
-complete -o default -F _yargs_completions {{app_name}}
-###-end-{{app_name}}-completions-###
-`
+    if (node.value) {
+      return node.value;
+    }
 
-exports.completionZshTemplate = `###-begin-{{app_name}}-completions-###
-#
-# yargs command completion script
-#
-# Installation: {{app_path}} {{completion_command}} >> ~/.zshrc
-#    or {{app_path}} {{completion_command}} >> ~/.zsh_profile on OSX.
-#
-_{{app_name}}_yargs_completions()
-{
-  local reply
-  local si=$IFS
-  IFS=$'\n' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" {{app_path}} --get-yargs-completions "\${words[@]}"))
-  IFS=$si
-  _describe 'values' reply
-}
-compdef _{{app_name}}_yargs_completions {{app_name}}
-###-end-{{app_name}}-completions-###
-`
+    if (node.nodes) {
+      for (let child of node.nodes) {
+        output += stringify(child);
+      }
+    }
+    return output;
+  };
+
+  return stringify(ast);
+};
+
 
 
 /***/ }),
@@ -39741,7 +40926,7 @@ module.exports = value => {
 const camelCase = __webpack_require__(656)
 const decamelize = __webpack_require__(189)
 const path = __webpack_require__(622)
-const tokenizeArgString = __webpack_require__(667)
+const tokenizeArgString = __webpack_require__(279)
 const util = __webpack_require__(669)
 
 function parse (args, opts) {
@@ -41527,56 +42712,11 @@ if (
 /***/ (function(module) {
 
 "use strict";
-/* eslint-disable yoda */
 
 
-const isFullwidthCodePoint = codePoint => {
-	if (Number.isNaN(codePoint)) {
-		return false;
-	}
-
-	// Code points are derived from:
-	// http://www.unix.org/Public/UNIDATA/EastAsianWidth.txt
-	if (
-		codePoint >= 0x1100 && (
-			codePoint <= 0x115F || // Hangul Jamo
-			codePoint === 0x2329 || // LEFT-POINTING ANGLE BRACKET
-			codePoint === 0x232A || // RIGHT-POINTING ANGLE BRACKET
-			// CJK Radicals Supplement .. Enclosed CJK Letters and Months
-			(0x2E80 <= codePoint && codePoint <= 0x3247 && codePoint !== 0x303F) ||
-			// Enclosed CJK Letters and Months .. CJK Unified Ideographs Extension A
-			(0x3250 <= codePoint && codePoint <= 0x4DBF) ||
-			// CJK Unified Ideographs .. Yi Radicals
-			(0x4E00 <= codePoint && codePoint <= 0xA4C6) ||
-			// Hangul Jamo Extended-A
-			(0xA960 <= codePoint && codePoint <= 0xA97C) ||
-			// Hangul Syllables
-			(0xAC00 <= codePoint && codePoint <= 0xD7A3) ||
-			// CJK Compatibility Ideographs
-			(0xF900 <= codePoint && codePoint <= 0xFAFF) ||
-			// Vertical Forms
-			(0xFE10 <= codePoint && codePoint <= 0xFE19) ||
-			// CJK Compatibility Forms .. Small Form Variants
-			(0xFE30 <= codePoint && codePoint <= 0xFE6B) ||
-			// Halfwidth and Fullwidth Forms
-			(0xFF01 <= codePoint && codePoint <= 0xFF60) ||
-			(0xFFE0 <= codePoint && codePoint <= 0xFFE6) ||
-			// Kana Supplement
-			(0x1B000 <= codePoint && codePoint <= 0x1B001) ||
-			// Enclosed Ideographic Supplement
-			(0x1F200 <= codePoint && codePoint <= 0x1F251) ||
-			// CJK Unified Ideographs Extension B .. Tertiary Ideographic Plane
-			(0x20000 <= codePoint && codePoint <= 0x3FFFD)
-		)
-	) {
-		return true;
-	}
-
-	return false;
+module.exports = (...arguments_) => {
+	return [...new Set([].concat(...arguments_))];
 };
-
-module.exports = isFullwidthCodePoint;
-module.exports.default = isFullwidthCodePoint;
 
 
 /***/ }),
@@ -41587,9 +42727,9 @@ module.exports.default = isFullwidthCodePoint;
 
 const yargs = __webpack_require__(907);
 
-module.exports.cli = function* (argv, run) {
+module.exports.cli = function* (argv, covector) {
   const options = parseOptions(argv);
-  return yield run(options);
+  return yield covector(options);
 };
 
 function parseOptions(argv) {
@@ -41910,7 +43050,7 @@ module.exports = toRegexRange;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(100);
+const utils = __webpack_require__(772);
 function generate(patterns, settings) {
     const positivePatterns = getPositivePatterns(patterns);
     const negativePatterns = getNegativePatternsAsPositive(patterns, settings.ignore);
@@ -42185,7 +43325,7 @@ function strong(eat, value, silent) {
 
 
 var path = __webpack_require__(622)
-var replace = __webpack_require__(576)
+var replace = __webpack_require__(48)
 var buffer = __webpack_require__(155)
 
 module.exports = VFile
@@ -42742,7 +43882,7 @@ module.exports = picomatch;
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(622);
 const fsStat = __webpack_require__(20);
-const utils = __webpack_require__(100);
+const utils = __webpack_require__(772);
 class Reader {
     constructor(_settings) {
         this._settings = _settings;
@@ -42779,7 +43919,7 @@ exports.default = Reader;
 
 "use strict";
 
-const pTry = __webpack_require__(429);
+const pTry = __webpack_require__(834);
 
 const pLimit = concurrency => {
 	if (!((Number.isInteger(concurrency) || concurrency === Infinity) && concurrency > 0)) {
@@ -42844,361 +43984,12 @@ module.exports.default = pLimit;
 /* 499 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-
-const stringWidth = __webpack_require__(552)
-const stripAnsi = __webpack_require__(598)
-const wrap = __webpack_require__(58)
-
-const align = {
-  right: alignRight,
-  center: alignCenter
+const parse = __webpack_require__(249)
+const valid = (version, options) => {
+  const v = parse(version, options)
+  return v ? v.version : null
 }
-const top = 0
-const right = 1
-const bottom = 2
-const left = 3
-
-class UI {
-  constructor (opts) {
-    this.width = opts.width
-    this.wrap = opts.wrap
-    this.rows = []
-  }
-
-  span (...args) {
-    const cols = this.div(...args)
-    cols.span = true
-  }
-
-  resetOutput () {
-    this.rows = []
-  }
-
-  div (...args) {
-    if (args.length === 0) {
-      this.div('')
-    }
-
-    if (this.wrap && this._shouldApplyLayoutDSL(...args)) {
-      return this._applyLayoutDSL(args[0])
-    }
-
-    const cols = args.map(arg => {
-      if (typeof arg === 'string') {
-        return this._colFromString(arg)
-      }
-
-      return arg
-    })
-
-    this.rows.push(cols)
-    return cols
-  }
-
-  _shouldApplyLayoutDSL (...args) {
-    return args.length === 1 && typeof args[0] === 'string' &&
-      /[\t\n]/.test(args[0])
-  }
-
-  _applyLayoutDSL (str) {
-    const rows = str.split('\n').map(row => row.split('\t'))
-    let leftColumnWidth = 0
-
-    // simple heuristic for layout, make sure the
-    // second column lines up along the left-hand.
-    // don't allow the first column to take up more
-    // than 50% of the screen.
-    rows.forEach(columns => {
-      if (columns.length > 1 && stringWidth(columns[0]) > leftColumnWidth) {
-        leftColumnWidth = Math.min(
-          Math.floor(this.width * 0.5),
-          stringWidth(columns[0])
-        )
-      }
-    })
-
-    // generate a table:
-    //  replacing ' ' with padding calculations.
-    //  using the algorithmically generated width.
-    rows.forEach(columns => {
-      this.div(...columns.map((r, i) => {
-        return {
-          text: r.trim(),
-          padding: this._measurePadding(r),
-          width: (i === 0 && columns.length > 1) ? leftColumnWidth : undefined
-        }
-      }))
-    })
-
-    return this.rows[this.rows.length - 1]
-  }
-
-  _colFromString (text) {
-    return {
-      text,
-      padding: this._measurePadding(text)
-    }
-  }
-
-  _measurePadding (str) {
-    // measure padding without ansi escape codes
-    const noAnsi = stripAnsi(str)
-    return [0, noAnsi.match(/\s*$/)[0].length, 0, noAnsi.match(/^\s*/)[0].length]
-  }
-
-  toString () {
-    const lines = []
-
-    this.rows.forEach(row => {
-      this.rowToString(row, lines)
-    })
-
-    // don't display any lines with the
-    // hidden flag set.
-    return lines
-      .filter(line => !line.hidden)
-      .map(line => line.text)
-      .join('\n')
-  }
-
-  rowToString (row, lines) {
-    this._rasterize(row).forEach((rrow, r) => {
-      let str = ''
-      rrow.forEach((col, c) => {
-        const { width } = row[c] // the width with padding.
-        const wrapWidth = this._negatePadding(row[c]) // the width without padding.
-
-        let ts = col // temporary string used during alignment/padding.
-
-        if (wrapWidth > stringWidth(col)) {
-          ts += ' '.repeat(wrapWidth - stringWidth(col))
-        }
-
-        // align the string within its column.
-        if (row[c].align && row[c].align !== 'left' && this.wrap) {
-          ts = align[row[c].align](ts, wrapWidth)
-          if (stringWidth(ts) < wrapWidth) {
-            ts += ' '.repeat(width - stringWidth(ts) - 1)
-          }
-        }
-
-        // apply border and padding to string.
-        const padding = row[c].padding || [0, 0, 0, 0]
-        if (padding[left]) {
-          str += ' '.repeat(padding[left])
-        }
-
-        str += addBorder(row[c], ts, '| ')
-        str += ts
-        str += addBorder(row[c], ts, ' |')
-        if (padding[right]) {
-          str += ' '.repeat(padding[right])
-        }
-
-        // if prior row is span, try to render the
-        // current row on the prior line.
-        if (r === 0 && lines.length > 0) {
-          str = this._renderInline(str, lines[lines.length - 1])
-        }
-      })
-
-      // remove trailing whitespace.
-      lines.push({
-        text: str.replace(/ +$/, ''),
-        span: row.span
-      })
-    })
-
-    return lines
-  }
-
-  // if the full 'source' can render in
-  // the target line, do so.
-  _renderInline (source, previousLine) {
-    const leadingWhitespace = source.match(/^ */)[0].length
-    const target = previousLine.text
-    const targetTextWidth = stringWidth(target.trimRight())
-
-    if (!previousLine.span) {
-      return source
-    }
-
-    // if we're not applying wrapping logic,
-    // just always append to the span.
-    if (!this.wrap) {
-      previousLine.hidden = true
-      return target + source
-    }
-
-    if (leadingWhitespace < targetTextWidth) {
-      return source
-    }
-
-    previousLine.hidden = true
-
-    return target.trimRight() + ' '.repeat(leadingWhitespace - targetTextWidth) + source.trimLeft()
-  }
-
-  _rasterize (row) {
-    const rrows = []
-    const widths = this._columnWidths(row)
-    let wrapped
-
-    // word wrap all columns, and create
-    // a data-structure that is easy to rasterize.
-    row.forEach((col, c) => {
-      // leave room for left and right padding.
-      col.width = widths[c]
-      if (this.wrap) {
-        wrapped = wrap(col.text, this._negatePadding(col), { hard: true }).split('\n')
-      } else {
-        wrapped = col.text.split('\n')
-      }
-
-      if (col.border) {
-        wrapped.unshift('.' + '-'.repeat(this._negatePadding(col) + 2) + '.')
-        wrapped.push("'" + '-'.repeat(this._negatePadding(col) + 2) + "'")
-      }
-
-      // add top and bottom padding.
-      if (col.padding) {
-        wrapped.unshift(...new Array(col.padding[top] || 0).fill(''))
-        wrapped.push(...new Array(col.padding[bottom] || 0).fill(''))
-      }
-
-      wrapped.forEach((str, r) => {
-        if (!rrows[r]) {
-          rrows.push([])
-        }
-
-        const rrow = rrows[r]
-
-        for (let i = 0; i < c; i++) {
-          if (rrow[i] === undefined) {
-            rrow.push('')
-          }
-        }
-
-        rrow.push(str)
-      })
-    })
-
-    return rrows
-  }
-
-  _negatePadding (col) {
-    let wrapWidth = col.width
-    if (col.padding) {
-      wrapWidth -= (col.padding[left] || 0) + (col.padding[right] || 0)
-    }
-
-    if (col.border) {
-      wrapWidth -= 4
-    }
-
-    return wrapWidth
-  }
-
-  _columnWidths (row) {
-    if (!this.wrap) {
-      return row.map(col => {
-        return col.width || stringWidth(col.text)
-      })
-    }
-
-    let unset = row.length
-    let remainingWidth = this.width
-
-    // column widths can be set in config.
-    const widths = row.map(col => {
-      if (col.width) {
-        unset--
-        remainingWidth -= col.width
-        return col.width
-      }
-
-      return undefined
-    })
-
-    // any unset widths should be calculated.
-    const unsetWidth = unset ? Math.floor(remainingWidth / unset) : 0
-
-    return widths.map((w, i) => {
-      if (w === undefined) {
-        return Math.max(unsetWidth, _minWidth(row[i]))
-      }
-
-      return w
-    })
-  }
-}
-
-function addBorder (col, ts, style) {
-  if (col.border) {
-    if (/[.']-+[.']/.test(ts)) {
-      return ''
-    }
-
-    if (ts.trim().length !== 0) {
-      return style
-    }
-
-    return '  '
-  }
-
-  return ''
-}
-
-// calculates the minimum width of
-// a column, based on padding preferences.
-function _minWidth (col) {
-  const padding = col.padding || []
-  const minWidth = 1 + (padding[left] || 0) + (padding[right] || 0)
-  if (col.border) {
-    return minWidth + 4
-  }
-
-  return minWidth
-}
-
-function getWindowWidth () {
-  /* istanbul ignore next: depends on terminal */
-  if (typeof process === 'object' && process.stdout && process.stdout.columns) {
-    return process.stdout.columns
-  }
-}
-
-function alignRight (str, width) {
-  str = str.trim()
-  const strWidth = stringWidth(str)
-
-  if (strWidth < width) {
-    return ' '.repeat(width - strWidth) + str
-  }
-
-  return str
-}
-
-function alignCenter (str, width) {
-  str = str.trim()
-  const strWidth = stringWidth(str)
-
-  /* istanbul ignore next */
-  if (strWidth >= width) {
-    return str
-  }
-
-  return ' '.repeat((width - strWidth) >> 1) + str
-}
-
-module.exports = function (opts = {}) {
-  return new UI({
-    width: opts.width || getWindowWidth() || /* istanbul ignore next */ 80,
-    wrap: opts.wrap !== false
-  })
-}
+module.exports = valid
 
 
 /***/ }),
@@ -43211,7 +44002,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = __webpack_require__(614);
 const fsScandir = __webpack_require__(299);
 const fastq = __webpack_require__(272);
-const common = __webpack_require__(806);
+const common = __webpack_require__(720);
 const reader_1 = __webpack_require__(139);
 class AsyncReader extends reader_1.default {
     constructor(_root, _settings) {
@@ -43575,26 +44366,16 @@ module.exports = lte
 /***/ }),
 /* 509 */,
 /* 510 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports = function (_require) {
-  _require = _require || require
-  var main = _require.main
-  if (main && isIISNode(main)) return handleIISNode(main)
-  else return main ? main.filename : process.cwd()
-}
+const Range = __webpack_require__(378)
 
-function isIISNode (main) {
-  return /\\iisnode\\/.test(main.filename)
-}
+// Mostly just for testing and legacy API reasons
+const toComparators = (range, options) =>
+  new Range(range, options).set
+    .map(comp => comp.map(c => c.value).join(' ').trim().split(' '))
 
-function handleIISNode (main) {
-  if (!main.children.length) {
-    return main.filename
-  } else {
-    return main.children[0].filename
-  }
-}
+module.exports = toComparators
 
 
 /***/ }),
@@ -43609,7 +44390,7 @@ function handleIISNode (main) {
  * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
  * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  */
-var reInterpolate = __webpack_require__(599);
+var reInterpolate = __webpack_require__(125);
 
 /** Used as references for various `Number` constants. */
 var INFINITY = 1 / 0;
@@ -44307,15 +45088,15 @@ module.exports = {
   SemVer: __webpack_require__(54),
   compareIdentifiers: __webpack_require__(313).compareIdentifiers,
   rcompareIdentifiers: __webpack_require__(313).rcompareIdentifiers,
-  parse: __webpack_require__(791),
-  valid: __webpack_require__(732),
+  parse: __webpack_require__(249),
+  valid: __webpack_require__(499),
   clean: __webpack_require__(985),
   inc: __webpack_require__(154),
   diff: __webpack_require__(951),
   major: __webpack_require__(645),
   minor: __webpack_require__(507),
   patch: __webpack_require__(542),
-  prerelease: __webpack_require__(396),
+  prerelease: __webpack_require__(70),
   compare: __webpack_require__(217),
   rcompare: __webpack_require__(19),
   compareLoose: __webpack_require__(32),
@@ -44323,7 +45104,7 @@ module.exports = {
   sort: __webpack_require__(270),
   rsort: __webpack_require__(873),
   gt: __webpack_require__(855),
-  lt: __webpack_require__(296),
+  lt: __webpack_require__(396),
   eq: __webpack_require__(901),
   neq: __webpack_require__(225),
   gte: __webpack_require__(989),
@@ -44333,7 +45114,7 @@ module.exports = {
   Comparator: __webpack_require__(9),
   Range: __webpack_require__(378),
   satisfies: __webpack_require__(60),
-  toComparators: __webpack_require__(327),
+  toComparators: __webpack_require__(510),
   maxSatisfying: __webpack_require__(372),
   minSatisfying: __webpack_require__(375),
   minVersion: __webpack_require__(116),
@@ -44343,7 +45124,7 @@ module.exports = {
   ltr: __webpack_require__(522),
   intersects: __webpack_require__(845),
   simplifyRange: __webpack_require__(549),
-  subset: __webpack_require__(588),
+  subset: __webpack_require__(327),
 }
 
 
@@ -44761,7 +45542,7 @@ const { covector } = __webpack_require__(955);
 
 try {
   const command = core.getInput("command");
-  const c = covector({ command });
+  //   const c = covector({ command });
   core.setOutput("change", c);
   // Get the JSON webhook payload for the event that triggered the workflow
   const payload = JSON.stringify(github.context.payload, undefined, 2);
@@ -44889,8 +45670,8 @@ exports.stringify = __webpack_require__(259)
 "use strict";
 
 const stripAnsi = __webpack_require__(598);
-const isFullwidthCodePoint = __webpack_require__(470);
-const emojiRegex = __webpack_require__(249);
+const isFullwidthCodePoint = __webpack_require__(611);
+const emojiRegex = __webpack_require__(414);
 
 const stringWidth = string => {
 	string = string.replace(emojiRegex(), '  ');
@@ -45101,7 +45882,7 @@ module.exports = function command (yargs, usage, validation, globalMiddleware) {
   // lookup module object from require()d command and derive name
   // if module was not require()d and no name given, throw error
   function moduleName (obj) {
-    const mod = __webpack_require__(48)(obj)
+    const mod = __webpack_require__(78)(obj)
     if (!mod) throw new Error(`No command name given for module: ${inspect(obj)}`)
     return commandFromFilename(mod.filename)
   }
@@ -46223,33 +47004,26 @@ if (process.platform === 'linux') {
 
 
 /***/ }),
-/* 574 */,
-/* 575 */,
-/* 576 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/* 574 */
+/***/ (function(module) {
 
 "use strict";
 
-
-var path = __webpack_require__(622);
-
-function replaceExt(npath, ext) {
-  if (typeof npath !== 'string') {
-    return npath;
-  }
-
-  if (npath.length === 0) {
-    return npath;
-  }
-
-  var nFileName = path.basename(npath, path.extname(npath)) + ext;
-  return path.join(path.dirname(npath), nFileName);
+function YError (msg) {
+  this.name = 'YError'
+  this.message = msg || 'yargs error'
+  Error.captureStackTrace(this, YError)
 }
 
-module.exports = replaceExt;
+YError.prototype = Object.create(Error.prototype)
+YError.prototype.constructor = YError
+
+module.exports = YError
 
 
 /***/ }),
+/* 575 */,
+/* 576 */,
 /* 577 */,
 /* 578 */
 /***/ (function(module) {
@@ -46372,7 +47146,7 @@ function matter(option) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const sync_1 = __webpack_require__(205);
+const sync_1 = __webpack_require__(625);
 const provider_1 = __webpack_require__(803);
 class ProviderSync extends provider_1.default {
     constructor() {
@@ -46471,16 +47245,11 @@ function applyMiddleware (argv, yargs, middlewares, beforeValidation) {
 /* 584 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
+const { run } = __webpack_require__(994);
+module.exports.covector = run;
+
 const { cli } = __webpack_require__(473);
-const { main } = __webpack_require__(142);
-
-const run = __webpack_require__(994);
-
-main(function* start() {
-  yield cli(process.argv.slice(2), run);
-});
-
-module.exports.convector = run;
+module.exports.cli = cli;
 
 
 /***/ }),
@@ -46498,167 +47267,7 @@ module.exports = __webpack_require__(849);
 
 
 /***/ }),
-/* 588 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const Range = __webpack_require__(378)
-const { ANY } = __webpack_require__(9)
-const satisfies = __webpack_require__(60)
-const compare = __webpack_require__(217)
-
-// Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
-// - Every simple range `r1, r2, ...` is a subset of some `R1, R2, ...`
-//
-// Simple range `c1 c2 ...` is a subset of simple range `C1 C2 ...` iff:
-// - If c is only the ANY comparator
-//   - If C is only the ANY comparator, return true
-//   - Else return false
-// - Let EQ be the set of = comparators in c
-// - If EQ is more than one, return true (null set)
-// - Let GT be the highest > or >= comparator in c
-// - Let LT be the lowest < or <= comparator in c
-// - If GT and LT, and GT.semver > LT.semver, return true (null set)
-// - If EQ
-//   - If GT, and EQ does not satisfy GT, return true (null set)
-//   - If LT, and EQ does not satisfy LT, return true (null set)
-//   - If EQ satisfies every C, return true
-//   - Else return false
-// - If GT
-//   - If GT is lower than any > or >= comp in C, return false
-//   - If GT is >=, and GT.semver does not satisfy every C, return false
-// - If LT
-//   - If LT.semver is greater than that of any > comp in C, return false
-//   - If LT is <=, and LT.semver does not satisfy every C, return false
-// - If any C is a = range, and GT or LT are set, return false
-// - Else return true
-
-const subset = (sub, dom, options) => {
-  sub = new Range(sub, options)
-  dom = new Range(dom, options)
-  let sawNonNull = false
-
-  OUTER: for (const simpleSub of sub.set) {
-    for (const simpleDom of dom.set) {
-      const isSub = simpleSubset(simpleSub, simpleDom, options)
-      sawNonNull = sawNonNull || isSub !== null
-      if (isSub)
-        continue OUTER
-    }
-    // the null set is a subset of everything, but null simple ranges in
-    // a complex range should be ignored.  so if we saw a non-null range,
-    // then we know this isn't a subset, but if EVERY simple range was null,
-    // then it is a subset.
-    if (sawNonNull)
-      return false
-  }
-  return true
-}
-
-const simpleSubset = (sub, dom, options) => {
-  if (sub.length === 1 && sub[0].semver === ANY)
-    return dom.length === 1 && dom[0].semver === ANY
-
-  const eqSet = new Set()
-  let gt, lt
-  for (const c of sub) {
-    if (c.operator === '>' || c.operator === '>=')
-      gt = higherGT(gt, c, options)
-    else if (c.operator === '<' || c.operator === '<=')
-      lt = lowerLT(lt, c, options)
-    else
-      eqSet.add(c.semver)
-  }
-
-  if (eqSet.size > 1)
-    return null
-
-  let gtltComp
-  if (gt && lt) {
-    gtltComp = compare(gt.semver, lt.semver, options)
-    if (gtltComp > 0)
-      return null
-    else if (gtltComp === 0 && (gt.operator !== '>=' || lt.operator !== '<='))
-      return null
-  }
-
-  // will iterate one or zero times
-  for (const eq of eqSet) {
-    if (gt && !satisfies(eq, String(gt), options))
-      return null
-
-    if (lt && !satisfies(eq, String(lt), options))
-      return null
-
-    for (const c of dom) {
-      if (!satisfies(eq, String(c), options))
-        return false
-    }
-    return true
-  }
-
-  let higher, lower
-  let hasDomLT, hasDomGT
-  for (const c of dom) {
-    hasDomGT = hasDomGT || c.operator === '>' || c.operator === '>='
-    hasDomLT = hasDomLT || c.operator === '<' || c.operator === '<='
-    if (gt) {
-      if (c.operator === '>' || c.operator === '>=') {
-        higher = higherGT(gt, c, options)
-        if (higher === c)
-          return false
-      } else if (gt.operator === '>=' && !satisfies(gt.semver, String(c), options))
-        return false
-    }
-    if (lt) {
-      if (c.operator === '<' || c.operator === '<=') {
-        lower = lowerLT(lt, c, options)
-        if (lower === c)
-          return false
-      } else if (lt.operator === '<=' && !satisfies(lt.semver, String(c), options))
-        return false
-    }
-    if (!c.operator && (lt || gt) && gtltComp !== 0)
-      return false
-  }
-
-  // if there was a < or >, and nothing in the dom, then must be false
-  // UNLESS it was limited by another range in the other direction.
-  // Eg, >1.0.0 <1.0.1 is still a subset of <2.0.0
-  if (gt && hasDomLT && !lt && gtltComp !== 0)
-    return false
-
-  if (lt && hasDomGT && !gt && gtltComp !== 0)
-    return false
-
-  return true
-}
-
-// >=1.2.3 is lower than >1.2.3
-const higherGT = (a, b, options) => {
-  if (!a)
-    return b
-  const comp = compare(a.semver, b.semver, options)
-  return comp > 0 ? a
-    : comp < 0 ? b
-    : b.operator === '>' && a.operator === '>=' ? b
-    : a
-}
-
-// <=1.2.3 is higher than <1.2.3
-const lowerLT = (a, b, options) => {
-  if (!a)
-    return b
-  const comp = compare(a.semver, b.semver, options)
-  return comp < 0 ? a
-    : comp > 0 ? b
-    : b.operator === '<' && a.operator === '<=' ? b
-    : a
-}
-
-module.exports = subset
-
-
-/***/ }),
+/* 588 */,
 /* 589 */,
 /* 590 */,
 /* 591 */,
@@ -46757,103 +47366,7 @@ function unorderedItems(node) {
 /***/ }),
 /* 595 */,
 /* 596 */,
-/* 597 */
-/***/ (function(module) {
-
-"use strict";
-/*
-object-assign
-(c) Sindre Sorhus
-@license MIT
-*/
-
-
-/* eslint-disable no-unused-vars */
-var getOwnPropertySymbols = Object.getOwnPropertySymbols;
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-var propIsEnumerable = Object.prototype.propertyIsEnumerable;
-
-function toObject(val) {
-	if (val === null || val === undefined) {
-		throw new TypeError('Object.assign cannot be called with null or undefined');
-	}
-
-	return Object(val);
-}
-
-function shouldUseNative() {
-	try {
-		if (!Object.assign) {
-			return false;
-		}
-
-		// Detect buggy property enumeration order in older V8 versions.
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
-		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
-		test1[5] = 'de';
-		if (Object.getOwnPropertyNames(test1)[0] === '5') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test2 = {};
-		for (var i = 0; i < 10; i++) {
-			test2['_' + String.fromCharCode(i)] = i;
-		}
-		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
-			return test2[n];
-		});
-		if (order2.join('') !== '0123456789') {
-			return false;
-		}
-
-		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
-		var test3 = {};
-		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
-			test3[letter] = letter;
-		});
-		if (Object.keys(Object.assign({}, test3)).join('') !==
-				'abcdefghijklmnopqrst') {
-			return false;
-		}
-
-		return true;
-	} catch (err) {
-		// We don't expect any of the above to throw, but better to be safe.
-		return false;
-	}
-}
-
-module.exports = shouldUseNative() ? Object.assign : function (target, source) {
-	var from;
-	var to = toObject(target);
-	var symbols;
-
-	for (var s = 1; s < arguments.length; s++) {
-		from = Object(arguments[s]);
-
-		for (var key in from) {
-			if (hasOwnProperty.call(from, key)) {
-				to[key] = from[key];
-			}
-		}
-
-		if (getOwnPropertySymbols) {
-			symbols = getOwnPropertySymbols(from);
-			for (var i = 0; i < symbols.length; i++) {
-				if (propIsEnumerable.call(from, symbols[i])) {
-					to[symbols[i]] = from[symbols[i]];
-				}
-			}
-		}
-	}
-
-	return to;
-};
-
-
-/***/ }),
+/* 597 */,
 /* 598 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -46865,25 +47378,7 @@ module.exports = string => typeof string === 'string' ? string.replace(ansiRegex
 
 
 /***/ }),
-/* 599 */
-/***/ (function(module) {
-
-/**
- * lodash 3.0.0 (Custom Build) <https://lodash.com/>
- * Build: `lodash modern modularize exports="npm" -o ./`
- * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
- * Based on Underscore.js 1.7.0 <http://underscorejs.org/LICENSE>
- * Copyright 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- * Available under MIT license <https://lodash.com/license>
- */
-
-/** Used to match template delimiters. */
-var reInterpolate = /<%=([\s\S]+?)%>/g;
-
-module.exports = reInterpolate;
-
-
-/***/ }),
+/* 599 */,
 /* 600 */
 /***/ (function(module) {
 
@@ -47184,7 +47679,63 @@ module.exports = require("http");
 /* 608 */,
 /* 609 */,
 /* 610 */,
-/* 611 */,
+/* 611 */
+/***/ (function(module) {
+
+"use strict";
+/* eslint-disable yoda */
+
+
+const isFullwidthCodePoint = codePoint => {
+	if (Number.isNaN(codePoint)) {
+		return false;
+	}
+
+	// Code points are derived from:
+	// http://www.unix.org/Public/UNIDATA/EastAsianWidth.txt
+	if (
+		codePoint >= 0x1100 && (
+			codePoint <= 0x115F || // Hangul Jamo
+			codePoint === 0x2329 || // LEFT-POINTING ANGLE BRACKET
+			codePoint === 0x232A || // RIGHT-POINTING ANGLE BRACKET
+			// CJK Radicals Supplement .. Enclosed CJK Letters and Months
+			(0x2E80 <= codePoint && codePoint <= 0x3247 && codePoint !== 0x303F) ||
+			// Enclosed CJK Letters and Months .. CJK Unified Ideographs Extension A
+			(0x3250 <= codePoint && codePoint <= 0x4DBF) ||
+			// CJK Unified Ideographs .. Yi Radicals
+			(0x4E00 <= codePoint && codePoint <= 0xA4C6) ||
+			// Hangul Jamo Extended-A
+			(0xA960 <= codePoint && codePoint <= 0xA97C) ||
+			// Hangul Syllables
+			(0xAC00 <= codePoint && codePoint <= 0xD7A3) ||
+			// CJK Compatibility Ideographs
+			(0xF900 <= codePoint && codePoint <= 0xFAFF) ||
+			// Vertical Forms
+			(0xFE10 <= codePoint && codePoint <= 0xFE19) ||
+			// CJK Compatibility Forms .. Small Form Variants
+			(0xFE30 <= codePoint && codePoint <= 0xFE6B) ||
+			// Halfwidth and Fullwidth Forms
+			(0xFF01 <= codePoint && codePoint <= 0xFF60) ||
+			(0xFFE0 <= codePoint && codePoint <= 0xFFE6) ||
+			// Kana Supplement
+			(0x1B000 <= codePoint && codePoint <= 0x1B001) ||
+			// Enclosed Ideographic Supplement
+			(0x1F200 <= codePoint && codePoint <= 0x1F251) ||
+			// CJK Unified Ideographs Extension B .. Tertiary Ideographic Plane
+			(0x20000 <= codePoint && codePoint <= 0x3FFFD)
+		)
+	) {
+		return true;
+	}
+
+	return false;
+};
+
+module.exports = isFullwidthCodePoint;
+module.exports.default = isFullwidthCodePoint;
+
+
+/***/ }),
 /* 612 */,
 /* 613 */,
 /* 614 */
@@ -47308,7 +47859,7 @@ function strikethrough(node) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(100);
+const utils = __webpack_require__(772);
 class EntryFilter {
     constructor(_settings, _micromatchOptions) {
         this._settings = _settings;
@@ -47509,74 +48060,52 @@ IconvLiteDecoderStream.prototype.collect = function(cb) {
 
 /***/ }),
 /* 625 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-const path = __webpack_require__(622);
-const fs = __webpack_require__(747);
-const {promisify} = __webpack_require__(669);
-const pLocate = __webpack_require__(615);
-
-const fsStat = promisify(fs.stat);
-const fsLStat = promisify(fs.lstat);
-
-const typeMappings = {
-	directory: 'isDirectory',
-	file: 'isFile'
-};
-
-function checkType({type}) {
-	if (type in typeMappings) {
-		return;
-	}
-
-	throw new Error(`Invalid type specified: ${type}`);
+Object.defineProperty(exports, "__esModule", { value: true });
+const fsStat = __webpack_require__(20);
+const fsWalk = __webpack_require__(227);
+const reader_1 = __webpack_require__(494);
+class ReaderSync extends reader_1.default {
+    constructor() {
+        super(...arguments);
+        this._walkSync = fsWalk.walkSync;
+        this._statSync = fsStat.statSync;
+    }
+    dynamic(root, options) {
+        return this._walkSync(root, options);
+    }
+    static(patterns, options) {
+        const entries = [];
+        for (const pattern of patterns) {
+            const filepath = this._getFullEntryPath(pattern);
+            const entry = this._getEntry(filepath, pattern, options);
+            if (entry === null || !options.entryFilter(entry)) {
+                continue;
+            }
+            entries.push(entry);
+        }
+        return entries;
+    }
+    _getEntry(filepath, pattern, options) {
+        try {
+            const stats = this._getStat(filepath);
+            return this._makeEntry(stats, pattern);
+        }
+        catch (error) {
+            if (options.errorFilter(error)) {
+                return null;
+            }
+            throw error;
+        }
+    }
+    _getStat(filepath) {
+        return this._statSync(filepath, this._fsStatSettings);
+    }
 }
-
-const matchType = (type, stat) => type === undefined || stat[typeMappings[type]]();
-
-module.exports = async (paths, options) => {
-	options = {
-		cwd: process.cwd(),
-		type: 'file',
-		allowSymlinks: true,
-		...options
-	};
-	checkType(options);
-	const statFn = options.allowSymlinks ? fsStat : fsLStat;
-
-	return pLocate(paths, async path_ => {
-		try {
-			const stat = await statFn(path.resolve(options.cwd, path_));
-			return matchType(options.type, stat);
-		} catch (_) {
-			return false;
-		}
-	}, options);
-};
-
-module.exports.sync = (paths, options) => {
-	options = {
-		cwd: process.cwd(),
-		allowSymlinks: true,
-		type: 'file',
-		...options
-	};
-	checkType(options);
-	const statFn = options.allowSymlinks ? fs.statSync : fs.lstatSync;
-
-	for (const path_ of paths) {
-		try {
-			const stat = statFn(path.resolve(options.cwd, path_));
-
-			if (matchType(options.type, stat)) {
-				return path_;
-			}
-		} catch (_) {
-		}
-	}
-};
+exports.default = ReaderSync;
 
 
 /***/ }),
@@ -47687,7 +48216,7 @@ function parseOrigin(origin) {
 "use strict";
 
 
-const stringify = __webpack_require__(804);
+const stringify = __webpack_require__(450);
 
 /**
  * Constants
@@ -48222,7 +48751,30 @@ createToken('GTE0PRE', '^\\s*>=\\s*0\.0\.0-0\\s*$')
 
 
 /***/ }),
-/* 630 */,
+/* 630 */
+/***/ (function(module) {
+
+module.exports = function (_require) {
+  _require = _require || require
+  var main = _require.main
+  if (main && isIISNode(main)) return handleIISNode(main)
+  else return main ? main.filename : process.cwd()
+}
+
+function isIISNode (main) {
+  return /\\iisnode\\/.test(main.filename)
+}
+
+function handleIISNode (main) {
+  if (!main.children.length) {
+    return main.filename
+  } else {
+    return main.children[0].filename
+  }
+}
+
+
+/***/ }),
 /* 631 */
 /***/ (function(module) {
 
@@ -48239,7 +48791,7 @@ module.exports = require("net");
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const stream_1 = __webpack_require__(413);
-const stream_2 = __webpack_require__(307);
+const stream_2 = __webpack_require__(373);
 const provider_1 = __webpack_require__(803);
 class ProviderStream extends provider_1.default {
     constructor() {
@@ -48869,459 +49421,7 @@ function interrupt(interruptors, tokenizers, ctx, parameters) {
 
 /***/ }),
 /* 659 */,
-/* 660 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var trim = __webpack_require__(132)
-var repeat = __webpack_require__(342)
-var decimal = __webpack_require__(930)
-var getIndent = __webpack_require__(434)
-var removeIndent = __webpack_require__(891)
-var interrupt = __webpack_require__(658)
-
-module.exports = list
-
-var asterisk = '*'
-var underscore = '_'
-var plusSign = '+'
-var dash = '-'
-var dot = '.'
-var space = ' '
-var lineFeed = '\n'
-var tab = '\t'
-var rightParenthesis = ')'
-var lowercaseX = 'x'
-
-var tabSize = 4
-var looseListItemExpression = /\n\n(?!\s*$)/
-var taskItemExpression = /^\[([ X\tx])][ \t]/
-var bulletExpression = /^([ \t]*)([*+-]|\d+[.)])( {1,4}(?! )| |\t|$|(?=\n))([^\n]*)/
-var pedanticBulletExpression = /^([ \t]*)([*+-]|\d+[.)])([ \t]+)/
-var initialIndentExpression = /^( {1,4}|\t)?/gm
-
-function list(eat, value, silent) {
-  var self = this
-  var commonmark = self.options.commonmark
-  var pedantic = self.options.pedantic
-  var tokenizers = self.blockTokenizers
-  var interuptors = self.interruptList
-  var index = 0
-  var length = value.length
-  var start = null
-  var size
-  var queue
-  var ordered
-  var character
-  var marker
-  var nextIndex
-  var startIndex
-  var prefixed
-  var currentMarker
-  var content
-  var line
-  var previousEmpty
-  var empty
-  var items
-  var allLines
-  var emptyLines
-  var item
-  var enterTop
-  var exitBlockquote
-  var spread = false
-  var node
-  var now
-  var end
-  var indented
-
-  while (index < length) {
-    character = value.charAt(index)
-
-    if (character !== tab && character !== space) {
-      break
-    }
-
-    index++
-  }
-
-  character = value.charAt(index)
-
-  if (character === asterisk || character === plusSign || character === dash) {
-    marker = character
-    ordered = false
-  } else {
-    ordered = true
-    queue = ''
-
-    while (index < length) {
-      character = value.charAt(index)
-
-      if (!decimal(character)) {
-        break
-      }
-
-      queue += character
-      index++
-    }
-
-    character = value.charAt(index)
-
-    if (
-      !queue ||
-      !(character === dot || (commonmark && character === rightParenthesis))
-    ) {
-      return
-    }
-
-    /* Slightly abusing `silent` mode, whose goal is to make interrupting
-     * paragraphs work.
-     * Well, that’s exactly what we want to do here: don’t interrupt:
-     * 2. here, because the “list” doesn’t start with `1`. */
-    if (silent && queue !== '1') {
-      return
-    }
-
-    start = parseInt(queue, 10)
-    marker = character
-  }
-
-  character = value.charAt(++index)
-
-  if (
-    character !== space &&
-    character !== tab &&
-    (pedantic || (character !== lineFeed && character !== ''))
-  ) {
-    return
-  }
-
-  if (silent) {
-    return true
-  }
-
-  index = 0
-  items = []
-  allLines = []
-  emptyLines = []
-
-  while (index < length) {
-    nextIndex = value.indexOf(lineFeed, index)
-    startIndex = index
-    prefixed = false
-    indented = false
-
-    if (nextIndex === -1) {
-      nextIndex = length
-    }
-
-    size = 0
-
-    while (index < length) {
-      character = value.charAt(index)
-
-      if (character === tab) {
-        size += tabSize - (size % tabSize)
-      } else if (character === space) {
-        size++
-      } else {
-        break
-      }
-
-      index++
-    }
-
-    if (item && size >= item.indent) {
-      indented = true
-    }
-
-    character = value.charAt(index)
-    currentMarker = null
-
-    if (!indented) {
-      if (
-        character === asterisk ||
-        character === plusSign ||
-        character === dash
-      ) {
-        currentMarker = character
-        index++
-        size++
-      } else {
-        queue = ''
-
-        while (index < length) {
-          character = value.charAt(index)
-
-          if (!decimal(character)) {
-            break
-          }
-
-          queue += character
-          index++
-        }
-
-        character = value.charAt(index)
-        index++
-
-        if (
-          queue &&
-          (character === dot || (commonmark && character === rightParenthesis))
-        ) {
-          currentMarker = character
-          size += queue.length + 1
-        }
-      }
-
-      if (currentMarker) {
-        character = value.charAt(index)
-
-        if (character === tab) {
-          size += tabSize - (size % tabSize)
-          index++
-        } else if (character === space) {
-          end = index + tabSize
-
-          while (index < end) {
-            if (value.charAt(index) !== space) {
-              break
-            }
-
-            index++
-            size++
-          }
-
-          if (index === end && value.charAt(index) === space) {
-            index -= tabSize - 1
-            size -= tabSize - 1
-          }
-        } else if (character !== lineFeed && character !== '') {
-          currentMarker = null
-        }
-      }
-    }
-
-    if (currentMarker) {
-      if (!pedantic && marker !== currentMarker) {
-        break
-      }
-
-      prefixed = true
-    } else {
-      if (!commonmark && !indented && value.charAt(startIndex) === space) {
-        indented = true
-      } else if (commonmark && item) {
-        indented = size >= item.indent || size > tabSize
-      }
-
-      prefixed = false
-      index = startIndex
-    }
-
-    line = value.slice(startIndex, nextIndex)
-    content = startIndex === index ? line : value.slice(index, nextIndex)
-
-    if (
-      currentMarker === asterisk ||
-      currentMarker === underscore ||
-      currentMarker === dash
-    ) {
-      if (tokenizers.thematicBreak.call(self, eat, line, true)) {
-        break
-      }
-    }
-
-    previousEmpty = empty
-    empty = !prefixed && !trim(content).length
-
-    if (indented && item) {
-      item.value = item.value.concat(emptyLines, line)
-      allLines = allLines.concat(emptyLines, line)
-      emptyLines = []
-    } else if (prefixed) {
-      if (emptyLines.length !== 0) {
-        spread = true
-        item.value.push('')
-        item.trail = emptyLines.concat()
-      }
-
-      item = {
-        value: [line],
-        indent: size,
-        trail: []
-      }
-
-      items.push(item)
-      allLines = allLines.concat(emptyLines, line)
-      emptyLines = []
-    } else if (empty) {
-      if (previousEmpty && !commonmark) {
-        break
-      }
-
-      emptyLines.push(line)
-    } else {
-      if (previousEmpty) {
-        break
-      }
-
-      if (interrupt(interuptors, tokenizers, self, [eat, line, true])) {
-        break
-      }
-
-      item.value = item.value.concat(emptyLines, line)
-      allLines = allLines.concat(emptyLines, line)
-      emptyLines = []
-    }
-
-    index = nextIndex + 1
-  }
-
-  node = eat(allLines.join(lineFeed)).reset({
-    type: 'list',
-    ordered: ordered,
-    start: start,
-    spread: spread,
-    children: []
-  })
-
-  enterTop = self.enterList()
-  exitBlockquote = self.enterBlock()
-  index = -1
-  length = items.length
-
-  while (++index < length) {
-    item = items[index].value.join(lineFeed)
-    now = eat.now()
-
-    eat(item)(listItem(self, item, now), node)
-
-    item = items[index].trail.join(lineFeed)
-
-    if (index !== length - 1) {
-      item += lineFeed
-    }
-
-    eat(item)
-  }
-
-  enterTop()
-  exitBlockquote()
-
-  return node
-}
-
-function listItem(ctx, value, position) {
-  var offsets = ctx.offset
-  var fn = ctx.options.pedantic ? pedanticListItem : normalListItem
-  var checked = null
-  var task
-  var indent
-
-  value = fn.apply(null, arguments)
-
-  if (ctx.options.gfm) {
-    task = value.match(taskItemExpression)
-
-    if (task) {
-      indent = task[0].length
-      checked = task[1].toLowerCase() === lowercaseX
-      offsets[position.line] += indent
-      value = value.slice(indent)
-    }
-  }
-
-  return {
-    type: 'listItem',
-    spread: looseListItemExpression.test(value),
-    checked: checked,
-    children: ctx.tokenizeBlock(value, position)
-  }
-}
-
-// Create a list-item using overly simple mechanics.
-function pedanticListItem(ctx, value, position) {
-  var offsets = ctx.offset
-  var line = position.line
-
-  // Remove the list-item’s bullet.
-  value = value.replace(pedanticBulletExpression, replacer)
-
-  // The initial line was also matched by the below, so we reset the `line`.
-  line = position.line
-
-  return value.replace(initialIndentExpression, replacer)
-
-  // A simple replacer which removed all matches, and adds their length to
-  // `offset`.
-  function replacer($0) {
-    offsets[line] = (offsets[line] || 0) + $0.length
-    line++
-
-    return ''
-  }
-}
-
-// Create a list-item using sane mechanics.
-function normalListItem(ctx, value, position) {
-  var offsets = ctx.offset
-  var line = position.line
-  var max
-  var bullet
-  var rest
-  var lines
-  var trimmedLines
-  var index
-  var length
-
-  // Remove the list-item’s bullet.
-  value = value.replace(bulletExpression, replacer)
-
-  lines = value.split(lineFeed)
-
-  trimmedLines = removeIndent(value, getIndent(max).indent).split(lineFeed)
-
-  // We replaced the initial bullet with something else above, which was used
-  // to trick `removeIndentation` into removing some more characters when
-  // possible.  However, that could result in the initial line to be stripped
-  // more than it should be.
-  trimmedLines[0] = rest
-
-  offsets[line] = (offsets[line] || 0) + bullet.length
-  line++
-
-  index = 0
-  length = lines.length
-
-  while (++index < length) {
-    offsets[line] =
-      (offsets[line] || 0) + lines[index].length - trimmedLines[index].length
-    line++
-  }
-
-  return trimmedLines.join(lineFeed)
-
-  /* eslint-disable-next-line max-params */
-  function replacer($0, $1, $2, $3, $4) {
-    bullet = $1 + $2 + $3
-    rest = $4
-
-    // Make sure that the first nine numbered list items can indent with an
-    // extra space.  That is, when the bullet did not receive an extra final
-    // space.
-    if (Number($2) < 10 && bullet.length % 2 === 1) {
-      $2 = space + $2
-    }
-
-    max = $1 + repeat(space, $2.length) + $3
-
-    return max + rest
-  }
-}
-
-
-/***/ }),
+/* 660 */,
 /* 661 */,
 /* 662 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -49796,47 +49896,117 @@ module.exports = {
 /***/ }),
 /* 666 */,
 /* 667 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-// take an un-split argv string and tokenize it.
-module.exports = function (argString) {
-  if (Array.isArray(argString)) {
-    return argString.map(e => typeof e !== 'string' ? e + '' : e)
+"use strict";
+
+
+var locate = __webpack_require__(839)
+
+module.exports = inlineCode
+inlineCode.locator = locate
+
+var lineFeed = 10 //  '\n'
+var space = 32 // ' '
+var graveAccent = 96 //  '`'
+
+function inlineCode(eat, value, silent) {
+  var length = value.length
+  var index = 0
+  var openingFenceEnd
+  var closingFenceStart
+  var closingFenceEnd
+  var code
+  var next
+  var found
+
+  while (index < length) {
+    if (value.charCodeAt(index) !== graveAccent) {
+      break
+    }
+
+    index++
   }
 
-  argString = argString.trim()
+  if (index === 0 || index === length) {
+    return
+  }
 
-  let i = 0
-  let prevC = null
-  let c = null
-  let opening = null
-  const args = []
+  openingFenceEnd = index
+  next = value.charCodeAt(index)
 
-  for (let ii = 0; ii < argString.length; ii++) {
-    prevC = c
-    c = argString.charAt(ii)
+  while (index < length) {
+    code = next
+    next = value.charCodeAt(index + 1)
 
-    // split on spaces unless we're in quotes.
-    if (c === ' ' && !opening) {
-      if (!(prevC === ' ')) {
-        i++
+    if (code === graveAccent) {
+      if (closingFenceStart === undefined) {
+        closingFenceStart = index
       }
-      continue
+
+      closingFenceEnd = index + 1
+
+      if (
+        next !== graveAccent &&
+        closingFenceEnd - closingFenceStart === openingFenceEnd
+      ) {
+        found = true
+        break
+      }
+    } else if (closingFenceStart !== undefined) {
+      closingFenceStart = undefined
+      closingFenceEnd = undefined
     }
 
-    // don't split the string if we're in matching
-    // opening or closing single and double quotes.
-    if (c === opening) {
-      opening = null
-    } else if ((c === "'" || c === '"') && !opening) {
-      opening = c
-    }
-
-    if (!args[i]) args[i] = ''
-    args[i] += c
+    index++
   }
 
-  return args
+  if (!found) {
+    return
+  }
+
+  /* istanbul ignore if - never used (yet) */
+  if (silent) {
+    return true
+  }
+
+  // Remove the initial and final space (or line feed), iff they exist and there
+  // are non-space characters in the content.
+  index = openingFenceEnd
+  length = closingFenceStart
+  code = value.charCodeAt(index)
+  next = value.charCodeAt(length - 1)
+  found = false
+
+  if (
+    length - index > 2 &&
+    (code === space || code === lineFeed) &&
+    (next === space || next === lineFeed)
+  ) {
+    index++
+    length--
+
+    while (index < length) {
+      code = value.charCodeAt(index)
+
+      if (code !== space && code !== lineFeed) {
+        found = true
+        break
+      }
+
+      index++
+    }
+
+    if (found === true) {
+      openingFenceEnd++
+      closingFenceStart--
+    }
+  }
+
+  return eat(value.slice(0, closingFenceEnd))({
+    type: 'inlineCode',
+    value: value.slice(openingFenceEnd, closingFenceStart)
+  })
 }
 
 
@@ -50219,7 +50389,7 @@ var toggle = __webpack_require__(616)
 var vfileLocation = __webpack_require__(568)
 var unescape = __webpack_require__(31)
 var decode = __webpack_require__(572)
-var tokenizer = __webpack_require__(910)
+var tokenizer = __webpack_require__(205)
 
 module.exports = Parser
 
@@ -50312,15 +50482,15 @@ proto.blockTokenizers = {
   blankLine: __webpack_require__(144),
   indentedCode: __webpack_require__(53),
   fencedCode: __webpack_require__(966),
-  blockquote: __webpack_require__(912),
+  blockquote: __webpack_require__(436),
   atxHeading: __webpack_require__(648),
   thematicBreak: __webpack_require__(952),
-  list: __webpack_require__(660),
+  list: __webpack_require__(429),
   setextHeading: __webpack_require__(287),
   html: __webpack_require__(10),
   definition: __webpack_require__(93),
   table: __webpack_require__(137),
-  paragraph: __webpack_require__(26)
+  paragraph: __webpack_require__(374)
 }
 
 proto.inlineTokenizers = {
@@ -50332,9 +50502,9 @@ proto.inlineTokenizers = {
   link: __webpack_require__(766),
   reference: __webpack_require__(876),
   strong: __webpack_require__(486),
-  emphasis: __webpack_require__(839),
+  emphasis: __webpack_require__(806),
   deletion: __webpack_require__(945),
-  code: __webpack_require__(395),
+  code: __webpack_require__(667),
   break: __webpack_require__(194),
   text: __webpack_require__(684)
 }
@@ -50806,7 +50976,7 @@ exports.matchAny = matchAny;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const stream_1 = __webpack_require__(307);
+const stream_1 = __webpack_require__(373);
 const provider_1 = __webpack_require__(803);
 class ProviderAsync extends provider_1.default {
     constructor() {
@@ -50848,17 +51018,17 @@ requiresNode8OrGreater()
 const argsert = __webpack_require__(301)
 const fs = __webpack_require__(747)
 const Command = __webpack_require__(556)
-const Completion = __webpack_require__(221)
+const Completion = __webpack_require__(44)
 const Parser = __webpack_require__(453)
 const path = __webpack_require__(622)
 const Usage = __webpack_require__(866)
-const Validation = __webpack_require__(373)
+const Validation = __webpack_require__(890)
 const Y18n = __webpack_require__(407)
-const objFilter = __webpack_require__(70)
+const objFilter = __webpack_require__(739)
 const setBlocking = __webpack_require__(411)
-const applyExtends = __webpack_require__(374)
+const applyExtends = __webpack_require__(343)
 const { globalMiddlewareFactory } = __webpack_require__(582)
-const YError = __webpack_require__(436)
+const YError = __webpack_require__(574)
 const processArgv = __webpack_require__(665)
 
 exports = module.exports = Yargs
@@ -51239,7 +51409,7 @@ function Yargs (processArgs, cwd, parentRequire) {
   self.commandDir = function (dir, opts) {
     argsert('<string> [object]', [dir, opts], arguments.length)
     const req = parentRequire || require
-    command.addDirectory(dir, self.getContext(), req, __webpack_require__(769)(), opts)
+    command.addDirectory(dir, self.getContext(), req, __webpack_require__(732)(), opts)
     return self
   }
 
@@ -51412,7 +51582,7 @@ function Yargs (processArgs, cwd, parentRequire) {
 
     let obj = {}
     try {
-      let startDir = rootPath || __webpack_require__(510)(parentRequire || require)
+      let startDir = rootPath || __webpack_require__(630)(parentRequire || require)
 
       // When called in an environment that lacks require.main.filename, such as a jest test runner,
       // startDir is already process.cwd(), and should not be shortened.
@@ -52883,99 +53053,33 @@ exports.read = read;
 
 /***/ }),
 /* 720 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const fsStat = __webpack_require__(20);
-const rpl = __webpack_require__(246);
-const constants_1 = __webpack_require__(416);
-const utils = __webpack_require__(1);
-function read(directory, settings, callback) {
-    if (!settings.stats && constants_1.IS_SUPPORT_READDIR_WITH_FILE_TYPES) {
-        return readdirWithFileTypes(directory, settings, callback);
+function isFatalError(settings, error) {
+    if (settings.errorFilter === null) {
+        return true;
     }
-    return readdir(directory, settings, callback);
+    return !settings.errorFilter(error);
 }
-exports.read = read;
-function readdirWithFileTypes(directory, settings, callback) {
-    settings.fs.readdir(directory, { withFileTypes: true }, (readdirError, dirents) => {
-        if (readdirError !== null) {
-            return callFailureCallback(callback, readdirError);
-        }
-        const entries = dirents.map((dirent) => ({
-            dirent,
-            name: dirent.name,
-            path: `${directory}${settings.pathSegmentSeparator}${dirent.name}`
-        }));
-        if (!settings.followSymbolicLinks) {
-            return callSuccessCallback(callback, entries);
-        }
-        const tasks = entries.map((entry) => makeRplTaskEntry(entry, settings));
-        rpl(tasks, (rplError, rplEntries) => {
-            if (rplError !== null) {
-                return callFailureCallback(callback, rplError);
-            }
-            callSuccessCallback(callback, rplEntries);
-        });
-    });
+exports.isFatalError = isFatalError;
+function isAppliedFilter(filter, value) {
+    return filter === null || filter(value);
 }
-exports.readdirWithFileTypes = readdirWithFileTypes;
-function makeRplTaskEntry(entry, settings) {
-    return (done) => {
-        if (!entry.dirent.isSymbolicLink()) {
-            return done(null, entry);
-        }
-        settings.fs.stat(entry.path, (statError, stats) => {
-            if (statError !== null) {
-                if (settings.throwErrorOnBrokenSymbolicLink) {
-                    return done(statError);
-                }
-                return done(null, entry);
-            }
-            entry.dirent = utils.fs.createDirentFromStats(entry.name, stats);
-            return done(null, entry);
-        });
-    };
+exports.isAppliedFilter = isAppliedFilter;
+function replacePathSegmentSeparator(filepath, separator) {
+    return filepath.split(/[\\/]/).join(separator);
 }
-function readdir(directory, settings, callback) {
-    settings.fs.readdir(directory, (readdirError, names) => {
-        if (readdirError !== null) {
-            return callFailureCallback(callback, readdirError);
-        }
-        const filepaths = names.map((name) => `${directory}${settings.pathSegmentSeparator}${name}`);
-        const tasks = filepaths.map((filepath) => {
-            return (done) => fsStat.stat(filepath, settings.fsStatSettings, done);
-        });
-        rpl(tasks, (rplError, results) => {
-            if (rplError !== null) {
-                return callFailureCallback(callback, rplError);
-            }
-            const entries = [];
-            names.forEach((name, index) => {
-                const stats = results[index];
-                const entry = {
-                    name,
-                    path: filepaths[index],
-                    dirent: utils.fs.createDirentFromStats(name, stats)
-                };
-                if (settings.stats) {
-                    entry.stats = stats;
-                }
-                entries.push(entry);
-            });
-            callSuccessCallback(callback, entries);
-        });
-    });
+exports.replacePathSegmentSeparator = replacePathSegmentSeparator;
+function joinPathSegments(a, b, separator) {
+    if (a === '') {
+        return b;
+    }
+    return a + separator + b;
 }
-exports.readdir = readdir;
-function callFailureCallback(callback, error) {
-    callback(error);
-}
-function callSuccessCallback(callback, result) {
-    callback(null, result);
-}
+exports.joinPathSegments = joinPathSegments;
 
 
 /***/ }),
@@ -53387,15 +53491,31 @@ exports.createDirentFromStats = createDirentFromStats;
 
 /***/ }),
 /* 732 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-const parse = __webpack_require__(791)
-const valid = (version, options) => {
-  const v = parse(version, options)
-  return v ? v.version : null
-}
-module.exports = valid
+"use strict";
 
+// Call this function in a another function to find out the file from
+// which that function was called from. (Inspects the v8 stack trace)
+//
+// Inspired by http://stackoverflow.com/questions/13227489
+module.exports = function getCallerFile(position) {
+    if (position === void 0) { position = 2; }
+    if (position >= Error.stackTraceLimit) {
+        throw new TypeError('getCallerFile(position) requires position be less then Error.stackTraceLimit but position was: `' + position + '` and Error.stackTraceLimit was: `' + Error.stackTraceLimit + '`');
+    }
+    var oldPrepareStackTrace = Error.prepareStackTrace;
+    Error.prepareStackTrace = function (_, stack) { return stack; };
+    var stack = new Error().stack;
+    Error.prepareStackTrace = oldPrepareStackTrace;
+    if (stack !== null && typeof stack === 'object') {
+        // stack[0] holds this file
+        // stack[1] holds where this function was called
+        // stack[2] holds the file we're interested in
+        return stack[position] ? stack[position].getFileName() : undefined;
+    }
+};
+//# sourceMappingURL=index.js.map
 
 /***/ }),
 /* 733 */,
@@ -53484,7 +53604,24 @@ module.exports = new Schema({
 
 
 /***/ }),
-/* 739 */,
+/* 739 */
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = function objFilter (original, filter) {
+  const obj = {}
+  filter = filter || ((k, v) => true)
+  Object.keys(original || {}).forEach((key) => {
+    if (filter(key, original[key])) {
+      obj[key] = original[key]
+    }
+  })
+  return obj
+}
+
+
+/***/ }),
 /* 740 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -53520,46 +53657,7 @@ exports.default = Settings;
 /***/ }),
 /* 741 */,
 /* 742 */,
-/* 743 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var identity = __webpack_require__(491)
-
-module.exports = enter
-
-// Shortcut and collapsed link references need no escaping and encoding during
-// the processing of child nodes (it must be implied from identifier).
-//
-// This toggler turns encoding and escaping off for shortcut and collapsed
-// references.
-//
-// Implies `enterLink`.
-function enter(compiler, node) {
-  var encode = compiler.encode
-  var escape = compiler.escape
-  var exitLink = compiler.enterLink()
-
-  if (node.referenceType !== 'shortcut' && node.referenceType !== 'collapsed') {
-    return exitLink
-  }
-
-  compiler.escape = identity
-  compiler.encode = identity
-
-  return exit
-
-  function exit() {
-    compiler.encode = encode
-    compiler.escape = escape
-    exitLink()
-  }
-}
-
-
-/***/ }),
+/* 743 */,
 /* 744 */,
 /* 745 */,
 /* 746 */,
@@ -54267,31 +54365,22 @@ module.exports = Mark;
 /***/ }),
 /* 768 */,
 /* 769 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-// Call this function in a another function to find out the file from
-// which that function was called from. (Inspects the v8 stack trace)
-//
-// Inspired by http://stackoverflow.com/questions/13227489
-module.exports = function getCallerFile(position) {
-    if (position === void 0) { position = 2; }
-    if (position >= Error.stackTraceLimit) {
-        throw new TypeError('getCallerFile(position) requires position be less then Error.stackTraceLimit but position was: `' + position + '` and Error.stackTraceLimit was: `' + Error.stackTraceLimit + '`');
-    }
-    var oldPrepareStackTrace = Error.prepareStackTrace;
-    Error.prepareStackTrace = function (_, stack) { return stack; };
-    var stack = new Error().stack;
-    Error.prepareStackTrace = oldPrepareStackTrace;
-    if (stack !== null && typeof stack === 'object') {
-        // stack[0] holds this file
-        // stack[1] holds where this function was called
-        // stack[2] holds the file we're interested in
-        return stack[position] ? stack[position].getFileName() : undefined;
-    }
-};
-//# sourceMappingURL=index.js.map
+
+var vfile = __webpack_require__(232)
+var sync = __webpack_require__(827)
+var async = __webpack_require__(981)
+
+module.exports = vfile
+
+vfile.read = async.read
+vfile.readSync = sync.read
+vfile.write = async.write
+vfile.writeSync = sync.write
+
 
 /***/ }),
 /* 770 */,
@@ -54336,52 +54425,25 @@ module.exports = reusify
 
 /***/ }),
 /* 772 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-const stripAnsi = __webpack_require__(598);
-const isFullwidthCodePoint = __webpack_require__(999);
-const emojiRegex = __webpack_require__(406);
-
-const stringWidth = string => {
-	string = string.replace(emojiRegex(), '  ');
-
-	if (typeof string !== 'string' || string.length === 0) {
-		return 0;
-	}
-
-	string = stripAnsi(string);
-
-	let width = 0;
-
-	for (let i = 0; i < string.length; i++) {
-		const code = string.codePointAt(i);
-
-		// Ignore control characters
-		if (code <= 0x1F || (code >= 0x7F && code <= 0x9F)) {
-			continue;
-		}
-
-		// Ignore combining characters
-		if (code >= 0x300 && code <= 0x36F) {
-			continue;
-		}
-
-		// Surrogates
-		if (code > 0xFFFF) {
-			i++;
-		}
-
-		width += isFullwidthCodePoint(code) ? 2 : 1;
-	}
-
-	return width;
-};
-
-module.exports = stringWidth;
-// TODO: remove this in the next major version
-module.exports.default = stringWidth;
+Object.defineProperty(exports, "__esModule", { value: true });
+const array = __webpack_require__(177);
+exports.array = array;
+const errno = __webpack_require__(786);
+exports.errno = errno;
+const fs = __webpack_require__(100);
+exports.fs = fs;
+const path = __webpack_require__(404);
+exports.path = path;
+const pattern = __webpack_require__(702);
+exports.pattern = pattern;
+const stream = __webpack_require__(918);
+exports.stream = stream;
+const string = __webpack_require__(351);
+exports.string = string;
 
 
 /***/ }),
@@ -54389,10 +54451,95 @@ module.exports.default = stringWidth;
 /***/ (function(module) {
 
 "use strict";
+/*
+object-assign
+(c) Sindre Sorhus
+@license MIT
+*/
 
 
-module.exports = (...arguments_) => {
-	return [...new Set([].concat(...arguments_))];
+/* eslint-disable no-unused-vars */
+var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+
+function toObject(val) {
+	if (val === null || val === undefined) {
+		throw new TypeError('Object.assign cannot be called with null or undefined');
+	}
+
+	return Object(val);
+}
+
+function shouldUseNative() {
+	try {
+		if (!Object.assign) {
+			return false;
+		}
+
+		// Detect buggy property enumeration order in older V8 versions.
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=4118
+		var test1 = new String('abc');  // eslint-disable-line no-new-wrappers
+		test1[5] = 'de';
+		if (Object.getOwnPropertyNames(test1)[0] === '5') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test2 = {};
+		for (var i = 0; i < 10; i++) {
+			test2['_' + String.fromCharCode(i)] = i;
+		}
+		var order2 = Object.getOwnPropertyNames(test2).map(function (n) {
+			return test2[n];
+		});
+		if (order2.join('') !== '0123456789') {
+			return false;
+		}
+
+		// https://bugs.chromium.org/p/v8/issues/detail?id=3056
+		var test3 = {};
+		'abcdefghijklmnopqrst'.split('').forEach(function (letter) {
+			test3[letter] = letter;
+		});
+		if (Object.keys(Object.assign({}, test3)).join('') !==
+				'abcdefghijklmnopqrst') {
+			return false;
+		}
+
+		return true;
+	} catch (err) {
+		// We don't expect any of the above to throw, but better to be safe.
+		return false;
+	}
+}
+
+module.exports = shouldUseNative() ? Object.assign : function (target, source) {
+	var from;
+	var to = toObject(target);
+	var symbols;
+
+	for (var s = 1; s < arguments.length; s++) {
+		from = Object(arguments[s]);
+
+		for (var key in from) {
+			if (hasOwnProperty.call(from, key)) {
+				to[key] = from[key];
+			}
+		}
+
+		if (getOwnPropertySymbols) {
+			symbols = getOwnPropertySymbols(from);
+			for (var i = 0; i < symbols.length; i++) {
+				if (propIsEnumerable.call(from, symbols[i])) {
+					to[symbols[i]] = from[symbols[i]];
+				}
+			}
+		}
+	}
+
+	return to;
 };
 
 
@@ -54619,7 +54766,7 @@ const {ANY} = Comparator
 const Range = __webpack_require__(378)
 const satisfies = __webpack_require__(60)
 const gt = __webpack_require__(855)
-const lt = __webpack_require__(296)
+const lt = __webpack_require__(396)
 const lte = __webpack_require__(508)
 const gte = __webpack_require__(989)
 
@@ -54752,49 +54899,7 @@ function getFirstPage (octokit, link, headers) {
 
 
 /***/ }),
-/* 791 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const {MAX_LENGTH} = __webpack_require__(94)
-const { re, t } = __webpack_require__(629)
-const SemVer = __webpack_require__(54)
-
-const parse = (version, options) => {
-  if (!options || typeof options !== 'object') {
-    options = {
-      loose: !!options,
-      includePrerelease: false
-    }
-  }
-
-  if (version instanceof SemVer) {
-    return version
-  }
-
-  if (typeof version !== 'string') {
-    return null
-  }
-
-  if (version.length > MAX_LENGTH) {
-    return null
-  }
-
-  const r = options.loose ? re[t.LOOSE] : re[t.FULL]
-  if (!r.test(version)) {
-    return null
-  }
-
-  try {
-    return new SemVer(version, options)
-  } catch (er) {
-    return null
-  }
-}
-
-module.exports = parse
-
-
-/***/ }),
+/* 791 */,
 /* 792 */,
 /* 793 */
 /***/ (function(module) {
@@ -54996,7 +55101,7 @@ exports.Deprecation = Deprecation;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(622);
-const deep_1 = __webpack_require__(943);
+const deep_1 = __webpack_require__(368);
 const entry_1 = __webpack_require__(620);
 const error_1 = __webpack_require__(811);
 const entry_2 = __webpack_require__(967);
@@ -55044,74 +55149,98 @@ exports.default = Provider;
 
 
 /***/ }),
-/* 804 */
+/* 804 */,
+/* 805 */,
+/* 806 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-const utils = __webpack_require__(49);
+var trim = __webpack_require__(132)
+var word = __webpack_require__(324)
+var whitespace = __webpack_require__(77)
+var locate = __webpack_require__(561)
 
-module.exports = (ast, options = {}) => {
-  let stringify = (node, parent = {}) => {
-    let invalidBlock = options.escapeInvalid && utils.isInvalidBrace(parent);
-    let invalidNode = node.invalid === true && options.escapeInvalid === true;
-    let output = '';
+module.exports = emphasis
+emphasis.locator = locate
 
-    if (node.value) {
-      if ((invalidBlock || invalidNode) && utils.isOpenOrClose(node)) {
-        return '\\' + node.value;
+var asterisk = '*'
+var underscore = '_'
+var backslash = '\\'
+
+function emphasis(eat, value, silent) {
+  var self = this
+  var index = 0
+  var character = value.charAt(index)
+  var now
+  var pedantic
+  var marker
+  var queue
+  var subvalue
+  var length
+  var previous
+
+  if (character !== asterisk && character !== underscore) {
+    return
+  }
+
+  pedantic = self.options.pedantic
+  subvalue = character
+  marker = character
+  length = value.length
+  index++
+  queue = ''
+  character = ''
+
+  if (pedantic && whitespace(value.charAt(index))) {
+    return
+  }
+
+  while (index < length) {
+    previous = character
+    character = value.charAt(index)
+
+    if (character === marker && (!pedantic || !whitespace(previous))) {
+      character = value.charAt(++index)
+
+      if (character !== marker) {
+        if (!trim(queue) || previous === marker) {
+          return
+        }
+
+        if (!pedantic && marker === underscore && word(character)) {
+          queue += marker
+          continue
+        }
+
+        /* istanbul ignore if - never used (yet) */
+        if (silent) {
+          return true
+        }
+
+        now = eat.now()
+        now.column++
+        now.offset++
+
+        return eat(subvalue + queue + marker)({
+          type: 'emphasis',
+          children: self.tokenizeInline(queue, now)
+        })
       }
-      return node.value;
+
+      queue += marker
     }
 
-    if (node.value) {
-      return node.value;
+    if (!pedantic && character === backslash) {
+      queue += character
+      character = value.charAt(++index)
     }
 
-    if (node.nodes) {
-      for (let child of node.nodes) {
-        output += stringify(child);
-      }
-    }
-    return output;
-  };
-
-  return stringify(ast);
-};
-
-
-
-/***/ }),
-/* 805 */,
-/* 806 */
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function isFatalError(settings, error) {
-    if (settings.errorFilter === null) {
-        return true;
-    }
-    return !settings.errorFilter(error);
+    queue += character
+    index++
+  }
 }
-exports.isFatalError = isFatalError;
-function isAppliedFilter(filter, value) {
-    return filter === null || filter(value);
-}
-exports.isAppliedFilter = isAppliedFilter;
-function replacePathSegmentSeparator(filepath, separator) {
-    return filepath.split(/[\\/]/).join(separator);
-}
-exports.replacePathSegmentSeparator = replacePathSegmentSeparator;
-function joinPathSegments(a, b, separator) {
-    if (a === '') {
-        return b;
-    }
-    return a + separator + b;
-}
-exports.joinPathSegments = joinPathSegments;
 
 
 /***/ }),
@@ -55208,7 +55337,7 @@ function info() {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(100);
+const utils = __webpack_require__(772);
 class ErrorFilter {
     constructor(_settings) {
         this._settings = _settings;
@@ -55373,7 +55502,22 @@ exports.default = SyncProvider;
 /***/ }),
 /* 832 */,
 /* 833 */,
-/* 834 */,
+/* 834 */
+/***/ (function(module) {
+
+"use strict";
+
+
+const pTry = (fn, ...arguments_) => new Promise(resolve => {
+	resolve(fn(...arguments_));
+});
+
+module.exports = pTry;
+// TODO: remove this in the next major version
+module.exports.default = pTry;
+
+
+/***/ }),
 /* 835 */
 /***/ (function(module) {
 
@@ -55719,94 +55863,15 @@ module.exports = isPlainObject;
 
 /***/ }),
 /* 839 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
 
-var trim = __webpack_require__(132)
-var word = __webpack_require__(324)
-var whitespace = __webpack_require__(77)
-var locate = __webpack_require__(561)
+module.exports = locate
 
-module.exports = emphasis
-emphasis.locator = locate
-
-var asterisk = '*'
-var underscore = '_'
-var backslash = '\\'
-
-function emphasis(eat, value, silent) {
-  var self = this
-  var index = 0
-  var character = value.charAt(index)
-  var now
-  var pedantic
-  var marker
-  var queue
-  var subvalue
-  var length
-  var previous
-
-  if (character !== asterisk && character !== underscore) {
-    return
-  }
-
-  pedantic = self.options.pedantic
-  subvalue = character
-  marker = character
-  length = value.length
-  index++
-  queue = ''
-  character = ''
-
-  if (pedantic && whitespace(value.charAt(index))) {
-    return
-  }
-
-  while (index < length) {
-    previous = character
-    character = value.charAt(index)
-
-    if (character === marker && (!pedantic || !whitespace(previous))) {
-      character = value.charAt(++index)
-
-      if (character !== marker) {
-        if (!trim(queue) || previous === marker) {
-          return
-        }
-
-        if (!pedantic && marker === underscore && word(character)) {
-          queue += marker
-          continue
-        }
-
-        /* istanbul ignore if - never used (yet) */
-        if (silent) {
-          return true
-        }
-
-        now = eat.now()
-        now.column++
-        now.offset++
-
-        return eat(subvalue + queue + marker)({
-          type: 'emphasis',
-          children: self.tokenizeInline(queue, now)
-        })
-      }
-
-      queue += marker
-    }
-
-    if (!pedantic && character === backslash) {
-      queue += character
-      character = value.charAt(++index)
-    }
-
-    queue += character
-    index++
-  }
+function locate(value, fromIndex) {
+  return value.indexOf('`', fromIndex)
 }
 
 
@@ -58991,11 +59056,11 @@ function authenticationRequestError(state, error, options) {
 // this file handles outputting usage instructions,
 // failures, etc. keeps logging in one place.
 const decamelize = __webpack_require__(189)
-const stringWidth = __webpack_require__(248)
-const objFilter = __webpack_require__(70)
+const stringWidth = __webpack_require__(254)
+const objFilter = __webpack_require__(739)
 const path = __webpack_require__(622)
 const setBlocking = __webpack_require__(411)
-const YError = __webpack_require__(436)
+const YError = __webpack_require__(574)
 
 module.exports = function usage (yargs, y18n) {
   const __ = y18n.__
@@ -59160,7 +59225,7 @@ module.exports = function usage (yargs, y18n) {
     }, {}))
 
     const theWrap = getWrap()
-    const ui = __webpack_require__(499)({
+    const ui = __webpack_require__(369)({
       width: theWrap,
       wrap: !!theWrap
     })
@@ -59600,7 +59665,7 @@ function hasPreviousPage (link) {
 // LICENSE : MIT
 
 
-var assign = __webpack_require__(597)
+var assign = __webpack_require__(773)
 
 module.exports = map
 
@@ -61169,7 +61234,7 @@ const async_1 = __webpack_require__(703);
 const stream_1 = __webpack_require__(635);
 const sync_1 = __webpack_require__(581);
 const settings_1 = __webpack_require__(38);
-const utils = __webpack_require__(100);
+const utils = __webpack_require__(772);
 async function FastGlob(source, options) {
     assertPatternsInput(source);
     const works = getWorks(source, async_1.default, options);
@@ -61394,7 +61459,407 @@ if (false) {}
 /* 887 */,
 /* 888 */,
 /* 889 */,
-/* 890 */,
+/* 890 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const argsert = __webpack_require__(301)
+const objFilter = __webpack_require__(739)
+const specialKeys = ['$0', '--', '_']
+
+// validation-type-stuff, missing params,
+// bad implications, custom checks.
+module.exports = function validation (yargs, usage, y18n) {
+  const __ = y18n.__
+  const __n = y18n.__n
+  const self = {}
+
+  // validate appropriate # of non-option
+  // arguments were provided, i.e., '_'.
+  self.nonOptionCount = function nonOptionCount (argv) {
+    const demandedCommands = yargs.getDemandedCommands()
+    // don't count currently executing commands
+    const _s = argv._.length - yargs.getContext().commands.length
+
+    if (demandedCommands._ && (_s < demandedCommands._.min || _s > demandedCommands._.max)) {
+      if (_s < demandedCommands._.min) {
+        if (demandedCommands._.minMsg !== undefined) {
+          usage.fail(
+            // replace $0 with observed, $1 with expected.
+            demandedCommands._.minMsg ? demandedCommands._.minMsg.replace(/\$0/g, _s).replace(/\$1/, demandedCommands._.min) : null
+          )
+        } else {
+          usage.fail(
+            __n(
+              'Not enough non-option arguments: got %s, need at least %s',
+              'Not enough non-option arguments: got %s, need at least %s',
+              _s,
+              _s,
+              demandedCommands._.min
+            )
+          )
+        }
+      } else if (_s > demandedCommands._.max) {
+        if (demandedCommands._.maxMsg !== undefined) {
+          usage.fail(
+            // replace $0 with observed, $1 with expected.
+            demandedCommands._.maxMsg ? demandedCommands._.maxMsg.replace(/\$0/g, _s).replace(/\$1/, demandedCommands._.max) : null
+          )
+        } else {
+          usage.fail(
+            __n(
+              'Too many non-option arguments: got %s, maximum of %s',
+              'Too many non-option arguments: got %s, maximum of %s',
+              _s,
+              _s,
+              demandedCommands._.max
+            )
+          )
+        }
+      }
+    }
+  }
+
+  // validate the appropriate # of <required>
+  // positional arguments were provided:
+  self.positionalCount = function positionalCount (required, observed) {
+    if (observed < required) {
+      usage.fail(
+        __n(
+          'Not enough non-option arguments: got %s, need at least %s',
+          'Not enough non-option arguments: got %s, need at least %s',
+          observed,
+          observed,
+          required
+        )
+      )
+    }
+  }
+
+  // make sure all the required arguments are present.
+  self.requiredArguments = function requiredArguments (argv) {
+    const demandedOptions = yargs.getDemandedOptions()
+    let missing = null
+
+    Object.keys(demandedOptions).forEach((key) => {
+      if (!Object.prototype.hasOwnProperty.call(argv, key) || typeof argv[key] === 'undefined') {
+        missing = missing || {}
+        missing[key] = demandedOptions[key]
+      }
+    })
+
+    if (missing) {
+      const customMsgs = []
+      Object.keys(missing).forEach((key) => {
+        const msg = missing[key]
+        if (msg && customMsgs.indexOf(msg) < 0) {
+          customMsgs.push(msg)
+        }
+      })
+
+      const customMsg = customMsgs.length ? `\n${customMsgs.join('\n')}` : ''
+
+      usage.fail(__n(
+        'Missing required argument: %s',
+        'Missing required arguments: %s',
+        Object.keys(missing).length,
+        Object.keys(missing).join(', ') + customMsg
+      ))
+    }
+  }
+
+  // check for unknown arguments (strict-mode).
+  self.unknownArguments = function unknownArguments (argv, aliases, positionalMap) {
+    const commandKeys = yargs.getCommandInstance().getCommands()
+    const unknown = []
+    const currentContext = yargs.getContext()
+
+    Object.keys(argv).forEach((key) => {
+      if (specialKeys.indexOf(key) === -1 &&
+        !Object.prototype.hasOwnProperty.call(positionalMap, key) &&
+        !Object.prototype.hasOwnProperty.call(yargs._getParseContext(), key) &&
+        !self.isValidAndSomeAliasIsNotNew(key, aliases)
+      ) {
+        unknown.push(key)
+      }
+    })
+
+    if ((currentContext.commands.length > 0) || (commandKeys.length > 0)) {
+      argv._.slice(currentContext.commands.length).forEach((key) => {
+        if (commandKeys.indexOf(key) === -1) {
+          unknown.push(key)
+        }
+      })
+    }
+
+    if (unknown.length > 0) {
+      usage.fail(__n(
+        'Unknown argument: %s',
+        'Unknown arguments: %s',
+        unknown.length,
+        unknown.join(', ')
+      ))
+    }
+  }
+
+  self.unknownCommands = function unknownCommands (argv, aliases, positionalMap) {
+    const commandKeys = yargs.getCommandInstance().getCommands()
+    const unknown = []
+    const currentContext = yargs.getContext()
+
+    if ((currentContext.commands.length > 0) || (commandKeys.length > 0)) {
+      argv._.slice(currentContext.commands.length).forEach((key) => {
+        if (commandKeys.indexOf(key) === -1) {
+          unknown.push(key)
+        }
+      })
+    }
+
+    if (unknown.length > 0) {
+      usage.fail(__n(
+        'Unknown command: %s',
+        'Unknown commands: %s',
+        unknown.length,
+        unknown.join(', ')
+      ))
+      return true
+    } else {
+      return false
+    }
+  }
+
+  // check for a key that is not an alias, or for which every alias is new,
+  // implying that it was invented by the parser, e.g., during camelization
+  self.isValidAndSomeAliasIsNotNew = function isValidAndSomeAliasIsNotNew (key, aliases) {
+    if (!Object.prototype.hasOwnProperty.call(aliases, key)) {
+      return false
+    }
+    const newAliases = yargs.parsed.newAliases
+    for (const a of [key, ...aliases[key]]) {
+      if (!Object.prototype.hasOwnProperty.call(newAliases, a) || !newAliases[key]) {
+        return true
+      }
+    }
+    return false
+  }
+
+  // validate arguments limited to enumerated choices
+  self.limitedChoices = function limitedChoices (argv) {
+    const options = yargs.getOptions()
+    const invalid = {}
+
+    if (!Object.keys(options.choices).length) return
+
+    Object.keys(argv).forEach((key) => {
+      if (specialKeys.indexOf(key) === -1 &&
+        Object.prototype.hasOwnProperty.call(options.choices, key)) {
+        [].concat(argv[key]).forEach((value) => {
+          // TODO case-insensitive configurability
+          if (options.choices[key].indexOf(value) === -1 &&
+              value !== undefined) {
+            invalid[key] = (invalid[key] || []).concat(value)
+          }
+        })
+      }
+    })
+
+    const invalidKeys = Object.keys(invalid)
+
+    if (!invalidKeys.length) return
+
+    let msg = __('Invalid values:')
+    invalidKeys.forEach((key) => {
+      msg += `\n  ${__(
+        'Argument: %s, Given: %s, Choices: %s',
+        key,
+        usage.stringifiedValues(invalid[key]),
+        usage.stringifiedValues(options.choices[key])
+      )}`
+    })
+    usage.fail(msg)
+  }
+
+  // custom checks, added using the `check` option on yargs.
+  let checks = []
+  self.check = function check (f, global) {
+    checks.push({
+      func: f,
+      global
+    })
+  }
+
+  self.customChecks = function customChecks (argv, aliases) {
+    for (let i = 0, f; (f = checks[i]) !== undefined; i++) {
+      const func = f.func
+      let result = null
+      try {
+        result = func(argv, aliases)
+      } catch (err) {
+        usage.fail(err.message ? err.message : err, err)
+        continue
+      }
+
+      if (!result) {
+        usage.fail(__('Argument check failed: %s', func.toString()))
+      } else if (typeof result === 'string' || result instanceof Error) {
+        usage.fail(result.toString(), result)
+      }
+    }
+  }
+
+  // check implications, argument foo implies => argument bar.
+  let implied = {}
+  self.implies = function implies (key, value) {
+    argsert('<string|object> [array|number|string]', [key, value], arguments.length)
+
+    if (typeof key === 'object') {
+      Object.keys(key).forEach((k) => {
+        self.implies(k, key[k])
+      })
+    } else {
+      yargs.global(key)
+      if (!implied[key]) {
+        implied[key] = []
+      }
+      if (Array.isArray(value)) {
+        value.forEach((i) => self.implies(key, i))
+      } else {
+        implied[key].push(value)
+      }
+    }
+  }
+  self.getImplied = function getImplied () {
+    return implied
+  }
+
+  function keyExists (argv, val) {
+    // convert string '1' to number 1
+    const num = Number(val)
+    val = isNaN(num) ? val : num
+
+    if (typeof val === 'number') {
+      // check length of argv._
+      val = argv._.length >= val
+    } else if (val.match(/^--no-.+/)) {
+      // check if key/value doesn't exist
+      val = val.match(/^--no-(.+)/)[1]
+      val = !argv[val]
+    } else {
+      // check if key/value exists
+      val = argv[val]
+    }
+    return val
+  }
+
+  self.implications = function implications (argv) {
+    const implyFail = []
+
+    Object.keys(implied).forEach((key) => {
+      const origKey = key
+      ;(implied[key] || []).forEach((value) => {
+        let key = origKey
+        const origValue = value
+        key = keyExists(argv, key)
+        value = keyExists(argv, value)
+
+        if (key && !value) {
+          implyFail.push(` ${origKey} -> ${origValue}`)
+        }
+      })
+    })
+
+    if (implyFail.length) {
+      let msg = `${__('Implications failed:')}\n`
+
+      implyFail.forEach((value) => {
+        msg += (value)
+      })
+
+      usage.fail(msg)
+    }
+  }
+
+  let conflicting = {}
+  self.conflicts = function conflicts (key, value) {
+    argsert('<string|object> [array|string]', [key, value], arguments.length)
+
+    if (typeof key === 'object') {
+      Object.keys(key).forEach((k) => {
+        self.conflicts(k, key[k])
+      })
+    } else {
+      yargs.global(key)
+      if (!conflicting[key]) {
+        conflicting[key] = []
+      }
+      if (Array.isArray(value)) {
+        value.forEach((i) => self.conflicts(key, i))
+      } else {
+        conflicting[key].push(value)
+      }
+    }
+  }
+  self.getConflicting = () => conflicting
+
+  self.conflicting = function conflictingFn (argv) {
+    Object.keys(argv).forEach((key) => {
+      if (conflicting[key]) {
+        conflicting[key].forEach((value) => {
+          // we default keys to 'undefined' that have been configured, we should not
+          // apply conflicting check unless they are a value other than 'undefined'.
+          if (value && argv[key] !== undefined && argv[value] !== undefined) {
+            usage.fail(__('Arguments %s and %s are mutually exclusive', key, value))
+          }
+        })
+      }
+    })
+  }
+
+  self.recommendCommands = function recommendCommands (cmd, potentialCommands) {
+    const distance = __webpack_require__(386)
+    const threshold = 3 // if it takes more than three edits, let's move on.
+    potentialCommands = potentialCommands.sort((a, b) => b.length - a.length)
+
+    let recommended = null
+    let bestDistance = Infinity
+    for (let i = 0, candidate; (candidate = potentialCommands[i]) !== undefined; i++) {
+      const d = distance(cmd, candidate)
+      if (d <= threshold && d < bestDistance) {
+        bestDistance = d
+        recommended = candidate
+      }
+    }
+    if (recommended) usage.fail(__('Did you mean %s?', recommended))
+  }
+
+  self.reset = function reset (localLookup) {
+    implied = objFilter(implied, (k, v) => !localLookup[k])
+    conflicting = objFilter(conflicting, (k, v) => !localLookup[k])
+    checks = checks.filter(c => c.global)
+    return self
+  }
+
+  const frozens = []
+  self.freeze = function freeze () {
+    const frozen = {}
+    frozens.push(frozen)
+    frozen.implied = implied
+    frozen.checks = checks
+    frozen.conflicting = conflicting
+  }
+  self.unfreeze = function unfreeze () {
+    const frozen = frozens.pop()
+    implied = frozen.implied
+    checks = frozen.checks
+    conflicting = frozen.conflicting
+  }
+
+  return self
+}
+
+
+/***/ }),
 /* 891 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -61507,7 +61972,7 @@ const eq = __webpack_require__(901)
 const neq = __webpack_require__(225)
 const gt = __webpack_require__(855)
 const gte = __webpack_require__(989)
-const lt = __webpack_require__(296)
+const lt = __webpack_require__(396)
 const lte = __webpack_require__(508)
 
 const cmp = (a, op, b, loose) => {
@@ -61812,457 +62277,17 @@ function singletonify (inst) {
 "use strict";
 
 
-module.exports = factory
-
-// Construct a tokenizer.  This creates both `tokenizeInline` and `tokenizeBlock`.
-function factory(type) {
-  return tokenize
-
-  // Tokenizer for a bound `type`.
-  function tokenize(value, location) {
-    var self = this
-    var offset = self.offset
-    var tokens = []
-    var methods = self[type + 'Methods']
-    var tokenizers = self[type + 'Tokenizers']
-    var line = location.line
-    var column = location.column
-    var index
-    var length
-    var method
-    var name
-    var matched
-    var valueLength
-
-    // Trim white space only lines.
-    if (!value) {
-      return tokens
-    }
-
-    // Expose on `eat`.
-    eat.now = now
-    eat.file = self.file
-
-    // Sync initial offset.
-    updatePosition('')
-
-    // Iterate over `value`, and iterate over all tokenizers.  When one eats
-    // something, re-iterate with the remaining value.  If no tokenizer eats,
-    // something failed (should not happen) and an exception is thrown.
-    while (value) {
-      index = -1
-      length = methods.length
-      matched = false
-
-      while (++index < length) {
-        name = methods[index]
-        method = tokenizers[name]
-
-        // Previously, we had constructs such as footnotes and YAML that used
-        // these properties.
-        // Those are now external (plus there are userland extensions), that may
-        // still use them.
-        if (
-          method &&
-          /* istanbul ignore next */ (!method.onlyAtStart || self.atStart) &&
-          /* istanbul ignore next */ (!method.notInList || !self.inList) &&
-          /* istanbul ignore next */ (!method.notInBlock || !self.inBlock) &&
-          (!method.notInLink || !self.inLink)
-        ) {
-          valueLength = value.length
-
-          method.apply(self, [eat, value])
-
-          matched = valueLength !== value.length
-
-          if (matched) {
-            break
-          }
-        }
-      }
-
-      /* istanbul ignore if */
-      if (!matched) {
-        self.file.fail(new Error('Infinite loop'), eat.now())
-      }
-    }
-
-    self.eof = now()
-
-    return tokens
-
-    // Update line, column, and offset based on `value`.
-    function updatePosition(subvalue) {
-      var lastIndex = -1
-      var index = subvalue.indexOf('\n')
-
-      while (index !== -1) {
-        line++
-        lastIndex = index
-        index = subvalue.indexOf('\n', index + 1)
-      }
-
-      if (lastIndex === -1) {
-        column += subvalue.length
-      } else {
-        column = subvalue.length - lastIndex
-      }
-
-      if (line in offset) {
-        if (lastIndex !== -1) {
-          column += offset[line]
-        } else if (column <= offset[line]) {
-          column = offset[line] + 1
-        }
-      }
-    }
-
-    // Get offset.  Called before the first character is eaten to retrieve the
-    // range’s offsets.
-    function getOffset() {
-      var indentation = []
-      var pos = line + 1
-
-      // Done.  Called when the last character is eaten to retrieve the range’s
-      // offsets.
-      return function () {
-        var last = line + 1
-
-        while (pos < last) {
-          indentation.push((offset[pos] || 0) + 1)
-
-          pos++
-        }
-
-        return indentation
-      }
-    }
-
-    // Get the current position.
-    function now() {
-      var pos = {line: line, column: column}
-
-      pos.offset = self.toOffset(pos)
-
-      return pos
-    }
-
-    // Store position information for a node.
-    function Position(start) {
-      this.start = start
-      this.end = now()
-    }
-
-    // Throw when a value is incorrectly eaten.  This shouldn’t happen but will
-    // throw on new, incorrect rules.
-    function validateEat(subvalue) {
-      /* istanbul ignore if */
-      if (value.slice(0, subvalue.length) !== subvalue) {
-        // Capture stack-trace.
-        self.file.fail(
-          new Error(
-            'Incorrectly eaten value: please report this warning on https://git.io/vg5Ft'
-          ),
-          now()
-        )
-      }
-    }
-
-    // Mark position and patch `node.position`.
-    function position() {
-      var before = now()
-
-      return update
-
-      // Add the position to a node.
-      function update(node, indent) {
-        var previous = node.position
-        var start = previous ? previous.start : before
-        var combined = []
-        var n = previous && previous.end.line
-        var l = before.line
-
-        node.position = new Position(start)
-
-        // If there was already a `position`, this node was merged.  Fixing
-        // `start` wasn’t hard, but the indent is different.  Especially
-        // because some information, the indent between `n` and `l` wasn’t
-        // tracked.  Luckily, that space is (should be?) empty, so we can
-        // safely check for it now.
-        if (previous && indent && previous.indent) {
-          combined = previous.indent
-
-          if (n < l) {
-            while (++n < l) {
-              combined.push((offset[n] || 0) + 1)
-            }
-
-            combined.push(before.column)
-          }
-
-          indent = combined.concat(indent)
-        }
-
-        node.position.indent = indent || []
-
-        return node
-      }
-    }
-
-    // Add `node` to `parent`s children or to `tokens`.  Performs merges where
-    // possible.
-    function add(node, parent) {
-      var children = parent ? parent.children : tokens
-      var previous = children[children.length - 1]
-      var fn
-
-      if (
-        previous &&
-        node.type === previous.type &&
-        (node.type === 'text' || node.type === 'blockquote') &&
-        mergeable(previous) &&
-        mergeable(node)
-      ) {
-        fn = node.type === 'text' ? mergeText : mergeBlockquote
-        node = fn.call(self, previous, node)
-      }
-
-      if (node !== previous) {
-        children.push(node)
-      }
-
-      if (self.atStart && tokens.length !== 0) {
-        self.exitStart()
-      }
-
-      return node
-    }
-
-    // Remove `subvalue` from `value`.  `subvalue` must be at the start of
-    // `value`.
-    function eat(subvalue) {
-      var indent = getOffset()
-      var pos = position()
-      var current = now()
-
-      validateEat(subvalue)
-
-      apply.reset = reset
-      reset.test = test
-      apply.test = test
-
-      value = value.slice(subvalue.length)
-
-      updatePosition(subvalue)
-
-      indent = indent()
-
-      return apply
-
-      // Add the given arguments, add `position` to the returned node, and
-      // return the node.
-      function apply(node, parent) {
-        return pos(add(pos(node), parent), indent)
-      }
-
-      // Functions just like apply, but resets the content: the line and
-      // column are reversed, and the eaten value is re-added.   This is
-      // useful for nodes with a single type of content, such as lists and
-      // tables.  See `apply` above for what parameters are expected.
-      function reset() {
-        var node = apply.apply(null, arguments)
-
-        line = current.line
-        column = current.column
-        value = subvalue + value
-
-        return node
-      }
-
-      // Test the position, after eating, and reverse to a not-eaten state.
-      function test() {
-        var result = pos({})
-
-        line = current.line
-        column = current.column
-        value = subvalue + value
-
-        return result.position
-      }
-    }
-  }
-}
-
-// Check whether a node is mergeable with adjacent nodes.
-function mergeable(node) {
-  var start
-  var end
-
-  if (node.type !== 'text' || !node.position) {
-    return true
-  }
-
-  start = node.position.start
-  end = node.position.end
-
-  // Only merge nodes which occupy the same size as their `value`.
-  return (
-    start.line !== end.line || end.column - start.column === node.value.length
-  )
-}
-
-// Merge two text nodes: `node` into `prev`.
-function mergeText(previous, node) {
-  previous.value += node.value
-
-  return previous
-}
-
-// Merge two blockquotes: `node` into `prev`, unless in CommonMark or gfm modes.
-function mergeBlockquote(previous, node) {
-  if (this.options.commonmark || this.options.gfm) {
-    return node
-  }
-
-  previous.children = previous.children.concat(node.children)
-
-  return previous
+module.exports = list
+
+function list(node) {
+  var fn = node.ordered ? this.visitOrderedItems : this.visitUnorderedItems
+  return fn.call(this, node)
 }
 
 
 /***/ }),
 /* 911 */,
-/* 912 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var trim = __webpack_require__(132)
-var interrupt = __webpack_require__(658)
-
-module.exports = blockquote
-
-var lineFeed = '\n'
-var tab = '\t'
-var space = ' '
-var greaterThan = '>'
-
-function blockquote(eat, value, silent) {
-  var self = this
-  var offsets = self.offset
-  var tokenizers = self.blockTokenizers
-  var interruptors = self.interruptBlockquote
-  var now = eat.now()
-  var currentLine = now.line
-  var length = value.length
-  var values = []
-  var contents = []
-  var indents = []
-  var add
-  var index = 0
-  var character
-  var rest
-  var nextIndex
-  var content
-  var line
-  var startIndex
-  var prefixed
-  var exit
-
-  while (index < length) {
-    character = value.charAt(index)
-
-    if (character !== space && character !== tab) {
-      break
-    }
-
-    index++
-  }
-
-  if (value.charAt(index) !== greaterThan) {
-    return
-  }
-
-  if (silent) {
-    return true
-  }
-
-  index = 0
-
-  while (index < length) {
-    nextIndex = value.indexOf(lineFeed, index)
-    startIndex = index
-    prefixed = false
-
-    if (nextIndex === -1) {
-      nextIndex = length
-    }
-
-    while (index < length) {
-      character = value.charAt(index)
-
-      if (character !== space && character !== tab) {
-        break
-      }
-
-      index++
-    }
-
-    if (value.charAt(index) === greaterThan) {
-      index++
-      prefixed = true
-
-      if (value.charAt(index) === space) {
-        index++
-      }
-    } else {
-      index = startIndex
-    }
-
-    content = value.slice(index, nextIndex)
-
-    if (!prefixed && !trim(content)) {
-      index = startIndex
-      break
-    }
-
-    if (!prefixed) {
-      rest = value.slice(index)
-
-      // Check if the following code contains a possible block.
-      if (interrupt(interruptors, tokenizers, self, [eat, rest, true])) {
-        break
-      }
-    }
-
-    line = startIndex === index ? content : value.slice(startIndex, nextIndex)
-
-    indents.push(index - startIndex)
-    values.push(line)
-    contents.push(content)
-
-    index = nextIndex + 1
-  }
-
-  index = -1
-  length = indents.length
-  add = eat(values.join(lineFeed))
-
-  while (++index < length) {
-    offsets[currentLine] = (offsets[currentLine] || 0) + indents[index]
-    currentLine++
-  }
-
-  exit = self.enterBlock()
-  contents = self.tokenizeBlock(contents.join(lineFeed), now)
-  exit()
-
-  return add({type: 'blockquote', children: contents})
-}
-
-
-/***/ }),
+/* 912 */,
 /* 913 */,
 /* 914 */
 /***/ (function(module) {
@@ -62283,7 +62308,7 @@ module.exports = function (str) {
 /* 916 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const vfile = __webpack_require__(368);
+const vfile = __webpack_require__(406);
 const globby = __webpack_require__(234);
 const fs = __webpack_require__(747);
 const path = __webpack_require__(622);
@@ -63087,68 +63112,62 @@ module.exports = debug
 
 /***/ }),
 /* 941 */,
-/* 942 */,
-/* 943 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/* 942 */
+/***/ (function(__unusedmodule, exports) {
 
-"use strict";
+exports.completionShTemplate =
+`###-begin-{{app_name}}-completions-###
+#
+# yargs command completion script
+#
+# Installation: {{app_path}} {{completion_command}} >> ~/.bashrc
+#    or {{app_path}} {{completion_command}} >> ~/.bash_profile on OSX.
+#
+_yargs_completions()
+{
+    local cur_word args type_list
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(100);
-const partial_1 = __webpack_require__(266);
-class DeepFilter {
-    constructor(_settings, _micromatchOptions) {
-        this._settings = _settings;
-        this._micromatchOptions = _micromatchOptions;
-    }
-    getFilter(basePath, positive, negative) {
-        const matcher = this._getMatcher(positive);
-        const negativeRe = this._getNegativePatternsRe(negative);
-        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
-    }
-    _getMatcher(patterns) {
-        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
-    }
-    _getNegativePatternsRe(patterns) {
-        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
-        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
-    }
-    _filter(basePath, entry, matcher, negativeRe) {
-        const depth = this._getEntryLevel(basePath, entry.path);
-        if (this._isSkippedByDeep(depth)) {
-            return false;
-        }
-        if (this._isSkippedSymbolicLink(entry)) {
-            return false;
-        }
-        const filepath = utils.path.removeLeadingDotSegment(entry.path);
-        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
-            return false;
-        }
-        return this._isSkippedByNegativePatterns(filepath, negativeRe);
-    }
-    _isSkippedByDeep(entryDepth) {
-        return entryDepth >= this._settings.deep;
-    }
-    _isSkippedSymbolicLink(entry) {
-        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
-    }
-    _getEntryLevel(basePath, entryPath) {
-        const basePathDepth = basePath.split('/').length;
-        const entryPathDepth = entryPath.split('/').length;
-        return entryPathDepth - (basePath === '' ? 0 : basePathDepth);
-    }
-    _isSkippedByPositivePatterns(entryPath, matcher) {
-        return !this._settings.baseNameMatch && !matcher.match(entryPath);
-    }
-    _isSkippedByNegativePatterns(entryPath, negativeRe) {
-        return !utils.pattern.matchAny(entryPath, negativeRe);
-    }
+    cur_word="\${COMP_WORDS[COMP_CWORD]}"
+    args=("\${COMP_WORDS[@]}")
+
+    # ask yargs to generate completions.
+    type_list=$({{app_path}} --get-yargs-completions "\${args[@]}")
+
+    COMPREPLY=( $(compgen -W "\${type_list}" -- \${cur_word}) )
+
+    # if no match was found, fall back to filename completion
+    if [ \${#COMPREPLY[@]} -eq 0 ]; then
+      COMPREPLY=()
+    fi
+
+    return 0
 }
-exports.default = DeepFilter;
+complete -o default -F _yargs_completions {{app_name}}
+###-end-{{app_name}}-completions-###
+`
+
+exports.completionZshTemplate = `###-begin-{{app_name}}-completions-###
+#
+# yargs command completion script
+#
+# Installation: {{app_path}} {{completion_command}} >> ~/.zshrc
+#    or {{app_path}} {{completion_command}} >> ~/.zsh_profile on OSX.
+#
+_{{app_name}}_yargs_completions()
+{
+  local reply
+  local si=$IFS
+  IFS=$'\n' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" {{app_path}} --get-yargs-completions "\${words[@]}"))
+  IFS=$si
+  _describe 'values' reply
+}
+compdef _{{app_name}}_yargs_completions {{app_name}}
+###-end-{{app_name}}-completions-###
+`
 
 
 /***/ }),
+/* 943 */,
 /* 944 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -63156,7 +63175,7 @@ exports.default = DeepFilter;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const fsScandir = __webpack_require__(299);
-const common = __webpack_require__(806);
+const common = __webpack_require__(720);
 const reader_1 = __webpack_require__(139);
 class SyncReader extends reader_1.default {
     constructor() {
@@ -63429,7 +63448,7 @@ exports.RequestError = RequestError;
 /* 951 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const parse = __webpack_require__(791)
+const parse = __webpack_require__(249)
 const eq = __webpack_require__(901)
 
 const diff = (version1, version2) => {
@@ -63556,7 +63575,9 @@ function decodeEntity(characters) {
 /* 955 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-module.exports.covector = __webpack_require__(584);
+const { covector, cli } = __webpack_require__(584);
+module.exports.covector = covector;
+module.exports.cli = cli;
 
 
 /***/ }),
@@ -64341,7 +64362,7 @@ function fencedCode(eat, value, silent) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(100);
+const utils = __webpack_require__(772);
 class EntryTransformer {
     constructor(_settings) {
         this._settings = _settings;
@@ -64368,31 +64389,7 @@ exports.default = EntryTransformer;
 
 
 /***/ }),
-/* 968 */
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-class DirentFromStats {
-    constructor(name, stats) {
-        this.name = name;
-        this.isBlockDevice = stats.isBlockDevice.bind(stats);
-        this.isCharacterDevice = stats.isCharacterDevice.bind(stats);
-        this.isDirectory = stats.isDirectory.bind(stats);
-        this.isFIFO = stats.isFIFO.bind(stats);
-        this.isFile = stats.isFile.bind(stats);
-        this.isSocket = stats.isSocket.bind(stats);
-        this.isSymbolicLink = stats.isSymbolicLink.bind(stats);
-    }
-}
-function createDirentFromStats(name, stats) {
-    return new DirentFromStats(name, stats);
-}
-exports.createDirentFromStats = createDirentFromStats;
-
-
-/***/ }),
+/* 968 */,
 /* 969 */,
 /* 970 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -65707,7 +65704,7 @@ module.exports = function isGlob(str, options) {
 /* 985 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const parse = __webpack_require__(791)
+const parse = __webpack_require__(249)
 const clean = (version, options) => {
   const s = parse(version.trim().replace(/^[=v]+/, ''), options)
   return s ? s.version : null
@@ -65987,7 +65984,7 @@ const { configFile, changeFiles } = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(360);
 const { apply } = __webpack_require__(334);
 
-module.exports.run = function* run({ command }) {
+module.exports.run = function* ({ command }) {
   const cwd = process.cwd();
   const config = yield configFile({ cwd });
   const changesArray = yield changeFiles({ cwd });
