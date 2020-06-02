@@ -13,4 +13,6 @@ jobs:
         with:
           command: 'status'
       - name: dump output
-        run: echo ${{ toJson(steps.covector) }}
+        env:
+          COVECTOR_DUMP: ${{ toJson(steps.covector) }}
+        run: echo "$COVECTOR_DUMP"
