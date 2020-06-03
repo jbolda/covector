@@ -13,7 +13,7 @@ async function run() {
         command = "version";
       }
     }
-    const covectored = await covector({ command });
+    const covectored = await covector({ command }).result;
     core.setOutput("change", covectored);
     const payload = JSON.stringify(covectored, undefined, 2);
     console.log(`The covector output: ${payload}`);
