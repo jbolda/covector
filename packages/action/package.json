@@ -5,7 +5,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "run-source": "node index.js",
-    "build": "ncc build -m index.js -o dist"
+    "build": "ncc build --no-cache index.js -o dist"
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
