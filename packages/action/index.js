@@ -7,13 +7,13 @@ async function run() {
     const inputCommand = core.getInput("command");
     let command = inputCommand;
     if (inputCommand === "version-or-publish") {
-      if (covector({ command: "status" }) === "No changes.") {
+      if ((await covector({ command: "status" })) === "No changes.") {
         command = "publish";
       } else {
         command = "version";
       }
     }
-    const covectored = covector({ command });
+    const covectored = await covector({ command });
     core.setOutput("change", covectored);
     const payload = JSON.stringify(covectored, undefined, 2);
     console.log(`The covector output: ${payload}`);

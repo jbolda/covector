@@ -5,8 +5,8 @@ const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { apply } = require("@covector/apply");
 
-module.exports.main = ({ command }) =>
-  main(function* start() {
+module.exports.main = async ({ command }) =>
+  await main(function* start() {
     yield run({ command });
   });
 
