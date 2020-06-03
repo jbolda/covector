@@ -66000,7 +66000,7 @@ const { apply } = __webpack_require__(334);
 
 module.exports.main = async ({ command }) =>
   await main(function* start() {
-    yield run({ command });
+    return yield run({ command });
   });
 
 function* run({ command }) {

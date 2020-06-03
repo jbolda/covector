@@ -7,7 +7,7 @@ const { apply } = require("@covector/apply");
 
 module.exports.main = async ({ command }) =>
   await main(function* start() {
-    yield run({ command });
+    return yield run({ command });
   });
 
 function* run({ command }) {
