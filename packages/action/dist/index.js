@@ -45552,7 +45552,7 @@ async function run() {
         command = "version";
       }
     }
-    const covectored = await covector({ command }).result;
+    const covectored = await covector({ command });
     core.setOutput("change", covectored);
     const payload = JSON.stringify(covectored, undefined, 2);
     console.log(`The covector output: ${payload}`);
@@ -65998,10 +65998,7 @@ const { configFile, changeFiles } = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(360);
 const { apply } = __webpack_require__(334);
 
-module.exports.main = async ({ command }) =>
-  await main(function* start() {
-    return yield run({ command });
-  });
+module.exports.main = ({ command }) => main(run({ command }));
 
 function* run({ command }) {
   const cwd = process.cwd();
