@@ -45552,7 +45552,7 @@ async function run() {
         command = "version";
       }
     }
-    const covectored = await covector({ command }).next().value;
+    const covectored = await covector({ command });
     core.setOutput("change", covectored);
     const payload = JSON.stringify(covectored, undefined, 2);
     console.log(`The covector output: ${payload}`);
@@ -47257,8 +47257,9 @@ function applyMiddleware (argv, yargs, middlewares, beforeValidation) {
 /* 584 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const { run } = __webpack_require__(994);
-module.exports.covector = run;
+const { main, run } = __webpack_require__(994);
+module.exports.covector = main;
+module.exports.run = run;
 
 const { cli } = __webpack_require__(473);
 module.exports.cli = cli;
@@ -63587,8 +63588,9 @@ function decodeEntity(characters) {
 /* 955 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const { covector, cli } = __webpack_require__(584);
+const { covector, run, cli } = __webpack_require__(584);
 module.exports.covector = covector;
+module.exports.run = run;
 module.exports.cli = cli;
 
 
@@ -65990,13 +65992,18 @@ function link(node) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const { spawn, timeout } = __webpack_require__(700);
-const { ChildProcess } = __webpack_require__(142);
+const { main, ChildProcess } = __webpack_require__(142);
 const { once, throwOnErrorEvent } = __webpack_require__(370);
 const { configFile, changeFiles } = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(360);
 const { apply } = __webpack_require__(334);
 
-module.exports.run = function* ({ command }) {
+module.exports.main = ({ command }) =>
+  main(function* start() {
+    yield run({ command });
+  });
+
+function* run({ command }) {
   const cwd = process.cwd();
   const config = yield configFile({ cwd });
   const changesArray = yield changeFiles({ cwd });
@@ -66049,7 +66056,9 @@ module.exports.run = function* ({ command }) {
     }
     return;
   }
-};
+}
+
+module.exports.run = run;
 
 function raceTime(
   t = 120000,
