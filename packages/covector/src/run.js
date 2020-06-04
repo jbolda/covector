@@ -1,13 +1,11 @@
 const { spawn, timeout } = require("effection");
-const { main, ChildProcess } = require("@effection/node");
+const { ChildProcess } = require("@effection/node");
 const { once, throwOnErrorEvent } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { apply } = require("@covector/apply");
 
-module.exports.main = ({ command }) => main(run({ command }));
-
-function* run({ command }) {
+module.exports.covector = function* covector({ command }) {
   const cwd = process.cwd();
   const config = yield configFile({ cwd });
   const changesArray = yield changeFiles({
@@ -63,9 +61,7 @@ function* run({ command }) {
     }
     return;
   }
-}
-
-module.exports.run = run;
+};
 
 function raceTime(
   t = 120000,

@@ -1,6 +1,5 @@
-const { main, run } = require("./run");
-module.exports.covector = main;
-module.exports.run = run;
+const { covector } = require("./run");
+module.exports.covector = covector;
 
 const { cli } = require("./cli");
 module.exports.cli = cli;
