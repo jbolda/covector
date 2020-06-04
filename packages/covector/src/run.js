@@ -10,7 +10,10 @@ module.exports.main = ({ command }) => main(run({ command }));
 function* run({ command }) {
   const cwd = process.cwd();
   const config = yield configFile({ cwd });
-  const changesArray = yield changeFiles({ cwd });
+  const changesArray = yield changeFiles({
+    cwd,
+    remove: command === "version",
+  });
   const assembledChanges = assemble(changesArray);
 
   if (command === "status") {
