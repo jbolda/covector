@@ -64,7 +64,11 @@ module.exports.configFile = async ({ cwd, changeFolder = ".changes" }) => {
   };
 };
 
-module.exports.changeFiles = async ({ cwd, changeFolder = ".changes" }) => {
+module.exports.changeFiles = async ({
+  cwd,
+  changeFolder = ".changes",
+  remove = true,
+}) => {
   const paths = await globby([path.posix.join(changeFolder, "*.md")], {
     cwd,
     ignore: ["**/readme.md"],
@@ -74,11 +78,13 @@ module.exports.changeFiles = async ({ cwd, changeFolder = ".changes" }) => {
     .map((file) => vfile.readSync(path.join(cwd, file), "utf8"))
     .map((v) => v.contents);
 
-  for (let path of paths) {
-    await fs.unlink(path, (err) => {
-      if (err) throw err;
-      console.info(`${path} was deleted`);
-    });
+  if (remove) {
+    for (let changePath of paths) {
+      await fs.unlink(path.posix.join(cwd, changePath), (err) => {
+        if (err) throw err;
+        console.info(`${changePath} was deleted`);
+      });
+    }
   }
 
   return vfiles;

@@ -1,6 +1,5 @@
-const { cli } = require("./cli");
-const { main } = require("@effection/node");
+const { covector } = require("./run");
+module.exports.covector = covector;
 
-main(function* boot() {
-  yield cli(process.argv.slice(2));
-});
+const { cli } = require("./cli");
+module.exports.cli = cli;

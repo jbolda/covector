@@ -1,0 +1,16 @@
+name: 'covector'
+description: 'Sane change management in polyglot, monorepos, single '
+inputs:
+  command:
+    description: 'covector cli command to run'
+    required: false
+    default: 'status'
+outputs:
+  change:
+    description: 'The time we greeted you'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+branding:
+  icon: 'sliders'  
+  color: 'green'

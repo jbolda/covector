@@ -1,0 +1,19 @@
+name: covector version or publish
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  covector:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: covector version-or-publish
+        uses: ./packages/action
+        id: covector
+        with:
+          command: 'version-or-publish'
+      - name: dump output
+        run: echo ${{ toJson(steps.covector) }}
