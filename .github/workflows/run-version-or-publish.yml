@@ -16,4 +16,6 @@ jobs:
         with:
           command: 'version-or-publish'
       - name: dump output
-        run: echo ${{ toJson(steps.covector) }}
+        env:
+          COVECTOR_DUMP: ${{ toJson(steps.covector) }}
+        run: echo "$COVECTOR_DUMP"
