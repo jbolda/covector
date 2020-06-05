@@ -66020,7 +66020,12 @@ module.exports.covector = function* covector({ command }) {
         console.log(`${release} => ${assembledChanges.releases[release].type}`);
         console.dir(assembledChanges.releases[release].changes);
       });
-      return `There are ${assembledChanges.releases.length} changes.`;
+      return `There are ${
+        Object.keys(assembledChanges.releases).length
+      } changes which include${Object.keys(assembledChanges.releases).map(
+        (release) =>
+          ` ${release} with ${assembledChanges.releases[release].type}`
+      )}`;
     }
   } else if (command === "config") {
     delete config.vfile;
