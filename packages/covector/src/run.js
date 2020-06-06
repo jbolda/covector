@@ -51,6 +51,7 @@ module.exports.covector = function* covector({ command }) {
       config,
       command: "publish",
     });
+
     // TODO create the changelog
     let published = {};
     for (let pkg of commands) {
@@ -62,7 +63,6 @@ module.exports.covector = function* covector({ command }) {
         windowsHide: true,
       });
 
-      yield throwOnErrorEvent(child);
       yield once(child, "exit");
       publish[pkg] = true;
     }

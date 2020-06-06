@@ -13,6 +13,8 @@ jobs:
       - name: covector version-or-publish
         uses: ./packages/action
         id: covector
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           command: 'version-or-publish'
       - name: dump output
