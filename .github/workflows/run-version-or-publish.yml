@@ -17,5 +17,13 @@ jobs:
           command: 'version-or-publish'
       - name: dump output
         env:
-          COVECTOR_DUMP: ${{ toJson(steps.covector) }}
+          COVECTOR_DUMP: ${{ toJson(steps.covector.change) }}
         run: echo "$COVECTOR_DUMP"
+      - name: create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v2
+        if: steps.covector.change.length !== 0
+        with:
+          title: "Publish New Versions"
+          labels: "version updates"
+          branch: "release"
