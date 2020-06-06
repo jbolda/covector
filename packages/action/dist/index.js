@@ -45548,6 +45548,7 @@ main(function* run() {
     let command = inputCommand;
     if (inputCommand === "version-or-publish") {
       if ((yield covector({ command: "status" })) === "No changes.") {
+        console.log("As there are no changes, let's try publishing.");
         command = "publish";
       } else {
         command = "version";
@@ -66048,6 +66049,7 @@ module.exports.covector = function* covector({ command }) {
       command: "publish",
     });
     // TODO create the changelog
+    let published = {};
     for (let pkg of commands) {
       console.log(`publishing ${pkg.pkg} with ${pkg.publish}`);
       let child = yield ChildProcess.spawn(pkg.publish, [], {
@@ -66059,8 +66061,9 @@ module.exports.covector = function* covector({ command }) {
 
       yield throwOnErrorEvent(child);
       yield once(child, "exit");
+      publish[pkg] = true;
     }
-    return;
+    return published;
   }
 };
 

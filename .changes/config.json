@@ -4,7 +4,7 @@
       "preversion": "",
       "version": "yarn version --${ release.type } --no-git-tag-version --no-commit-hooks",
       "postversion": "",
-      "publish": "npm publish"
+      "publish": "npm publish --access public"
     }
   },
   "packages": {

@@ -93,9 +93,13 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
     return pkged;
   }, {});
 
-  const commands = Object.keys(assembledChanges.releases).map((pkg) => {
+  const commands = Object.keys(
+    command === "publish" ? config.packages : assembledChanges.releases
+  ).map((pkg) => {
+    const pkgs =
+      command === "publish" ? config.packages : assembledChanges.releases;
     const pipeToTemplate = {
-      release: assembledChanges.releases[pkg],
+      release: pkgs[pkg],
       pkg: pkgCommands[pkg],
     };
     if (!pkgCommands[pkg]) return null;
@@ -106,7 +110,7 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
     const merged = {
       pkg,
       path: pkgCommands[pkg].path,
-      type: assembledChanges.releases[pkg].type,
+      type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
       dependencies: pkgCommands[pkg].dependencies,
       [command]: !pkgCommand ? null : templatedString(pipeToTemplate),
