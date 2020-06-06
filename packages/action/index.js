@@ -9,6 +9,7 @@ main(function* run() {
     let command = inputCommand;
     if (inputCommand === "version-or-publish") {
       if ((yield covector({ command: "status" })) === "No changes.") {
+        console.log("As there are no changes, let's try publishing.");
         command = "publish";
       } else {
         command = "version";
