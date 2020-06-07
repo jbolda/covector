@@ -25191,7 +25191,7 @@ function* supervise(child) {
 }
 function* spawn(command, args, options) {
     let child = childProcess.spawn(command, args, Object.assign({}, options, {
-        shell: true,
+        shell: !options.shell ? true : options.shell,
         detached: true,
     }));
     return yield effection_1.resource(child, supervise(child));
@@ -34637,6 +34637,8 @@ const stringify = __webpack_require__(219);
 const frontmatter = __webpack_require__(221);
 const parseFrontmatter = __webpack_require__(553);
 const template = __webpack_require__(15);
+const { readPkgFile } = __webpack_require__(916);
+const path = __webpack_require__(622);
 
 const processor = unified().use(parse).use(frontmatter).use(parseFrontmatter);
 
@@ -34712,13 +34714,30 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
       !!config.pkgManagers[pkgManager][command]
         ? config.pkgManagers[pkgManager][command]
         : null;
-    const mergedCommand = !config.packages[pkg][command]
-      ? managerCommand
-      : config.packages[pkg][command];
+    const mergedCommand =
+      !config.packages[pkg][command] && config.packages[pkg][command] !== false
+        ? managerCommand
+        : config.packages[pkg][command];
+    let getPublishedVersion;
+    if (command === "publish") {
+      const managerVersionCommand =
+        !!pkgManager &&
+        !!config.pkgManagers[pkgManager] &&
+        !!config.pkgManagers[pkgManager].getPublishedVersion
+          ? config.pkgManagers[pkgManager].getPublishedVersion
+          : null;
+      getPublishedVersion =
+        !config.packages[pkg].getPublishedVersion &&
+        config.packages[pkg].getPublishedVersion !== false
+          ? managerVersionCommand
+          : config.packages[pkg].getPublishedVersion;
+    }
     if (!!mergedCommand) {
       pkged[pkg] = {
+        pkg: pkg,
         path: config.packages[pkg].path,
         [command]: mergedCommand,
+        ...(!getPublishedVersion ? {} : { getPublishedVersion }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
       };
@@ -34727,8 +34746,8 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
   }, {});
 
   const commands = Object.keys(
-    command === "publish" ? config.packages : assembledChanges.releases
-  ).map((pkg) => {
+    command === "publish" ? pkgCommands : assembledChanges.releases
+  ).map(async (pkg) => {
     const pkgs =
       command === "publish" ? config.packages : assembledChanges.releases;
     const pipeToTemplate = {
@@ -34740,8 +34759,30 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
     const templatedString = !pkgCommand
       ? null
       : template(pkgCommand, pipeToTemplate);
+    const extraPublishParams =
+      command !== "publish"
+        ? {}
+        : {
+            pkgFile: await readPkgFile(
+              path.join(
+                config.packages[pkg].path,
+                !!config.packages[pkg].manager &&
+                  config.packages[pkg].manager === "rust"
+                  ? "Cargo.toml"
+                  : "package.json"
+              )
+            ),
+            ...(!pkgCommands[pkg].getPublishedVersion
+              ? {}
+              : {
+                  getPublishedVersion: template(
+                    pkgCommands[pkg].getPublishedVersion
+                  )(pipeToTemplate),
+                }),
+          };
     const merged = {
       pkg,
+      ...extraPublishParams,
       path: pkgCommands[pkg].path,
       type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
@@ -34752,7 +34793,7 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
     return merged;
   });
 
-  return commands;
+  return Promise.all(commands);
 };
 
 // TODO: finish it, but do we need this even?
@@ -66001,7 +66042,7 @@ function link(node) {
 
 const { spawn, timeout } = __webpack_require__(700);
 const { ChildProcess } = __webpack_require__(142);
-const { once, throwOnErrorEvent } = __webpack_require__(370);
+const { once, on } = __webpack_require__(370);
 const { configFile, changeFiles } = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(360);
 const { apply } = __webpack_require__(334);
@@ -66037,7 +66078,7 @@ module.exports.covector = function* covector({ command }) {
     return console.dir(config);
   } else if (command === "version") {
     yield raceTime();
-    const commands = mergeIntoConfig({
+    const commands = yield mergeIntoConfig({
       assembledChanges,
       config,
       command: "version",
@@ -66047,7 +66088,7 @@ module.exports.covector = function* covector({ command }) {
     return yield apply({ changeList: commands, config });
   } else if (command === "publish") {
     yield raceTime();
-    const commands = mergeIntoConfig({
+    const commands = yield mergeIntoConfig({
       assembledChanges,
       config,
       command: "publish",
@@ -66056,6 +66097,35 @@ module.exports.covector = function* covector({ command }) {
     // TODO create the changelog
     let published = {};
     for (let pkg of commands) {
+      if (!!pkg.getPublishedVersion) {
+        const publishedVersionCommand = yield ChildProcess.spawn(
+          pkg.getPublishedVersion,
+          [],
+          {
+            cwd: pkg.path,
+            shell: process.env.shell,
+            stdio: "pipe",
+            windowsHide: true,
+          }
+        );
+        let version = "";
+        let events = yield on(publishedVersionCommand.stdout, "data");
+
+        while (version === "" || version === "undefined") {
+          let data = yield events.next();
+          version += !data.value
+            ? data.toString().trim()
+            : data.value.toString().trim();
+        }
+        yield once(publishedVersionCommand, "exit");
+        if (pkg.pkgFile.version === version) {
+          console.log(
+            `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
+          );
+          continue;
+        }
+      }
+
       console.log(`publishing ${pkg.pkg} with ${pkg.publish}`);
       let child = yield ChildProcess.spawn(pkg.publish, [], {
         cwd: pkg.path,
@@ -66065,8 +66135,9 @@ module.exports.covector = function* covector({ command }) {
       });
 
       yield once(child, "exit");
-      publish[pkg] = true;
+      published[pkg] = true;
     }
+
     return published;
   }
 };
