@@ -1,6 +1,6 @@
 const { spawn, timeout } = require("effection");
 const { ChildProcess } = require("@effection/node");
-const { once, throwOnErrorEvent } = require("@effection/events");
+const { once, on } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { apply } = require("@covector/apply");
@@ -36,7 +36,7 @@ module.exports.covector = function* covector({ command }) {
     return console.dir(config);
   } else if (command === "version") {
     yield raceTime();
-    const commands = mergeIntoConfig({
+    const commands = yield mergeIntoConfig({
       assembledChanges,
       config,
       command: "version",
@@ -46,7 +46,7 @@ module.exports.covector = function* covector({ command }) {
     return yield apply({ changeList: commands, config });
   } else if (command === "publish") {
     yield raceTime();
-    const commands = mergeIntoConfig({
+    const commands = yield mergeIntoConfig({
       assembledChanges,
       config,
       command: "publish",
@@ -55,6 +55,35 @@ module.exports.covector = function* covector({ command }) {
     // TODO create the changelog
     let published = {};
     for (let pkg of commands) {
+      if (!!pkg.getPublishedVersion) {
+        const publishedVersionCommand = yield ChildProcess.spawn(
+          pkg.getPublishedVersion,
+          [],
+          {
+            cwd: pkg.path,
+            shell: process.env.shell,
+            stdio: "pipe",
+            windowsHide: true,
+          }
+        );
+        let version = "";
+        let events = yield on(publishedVersionCommand.stdout, "data");
+
+        while (version === "" || version === "undefined") {
+          let data = yield events.next();
+          version += !data.value
+            ? data.toString().trim()
+            : data.value.toString().trim();
+        }
+        yield once(publishedVersionCommand, "exit");
+        if (pkg.pkgFile.version === version) {
+          console.log(
+            `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
+          );
+          continue;
+        }
+      }
+
       console.log(`publishing ${pkg.pkg} with ${pkg.publish}`);
       let child = yield ChildProcess.spawn(pkg.publish, [], {
         cwd: pkg.path,
@@ -64,8 +93,9 @@ module.exports.covector = function* covector({ command }) {
       });
 
       yield once(child, "exit");
-      publish[pkg] = true;
+      published[pkg] = true;
     }
+
     return published;
   }
 };

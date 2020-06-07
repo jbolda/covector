@@ -4,6 +4,8 @@ const stringify = require("remark-stringify");
 const frontmatter = require("remark-frontmatter");
 const parseFrontmatter = require("remark-parse-yaml");
 const template = require("lodash.template");
+const { readPkgFile } = require("@covector/files");
+const path = require("path");
 
 const processor = unified().use(parse).use(frontmatter).use(parseFrontmatter);
 
@@ -79,13 +81,30 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
       !!config.pkgManagers[pkgManager][command]
         ? config.pkgManagers[pkgManager][command]
         : null;
-    const mergedCommand = !config.packages[pkg][command]
-      ? managerCommand
-      : config.packages[pkg][command];
+    const mergedCommand =
+      !config.packages[pkg][command] && config.packages[pkg][command] !== false
+        ? managerCommand
+        : config.packages[pkg][command];
+    let getPublishedVersion;
+    if (command === "publish") {
+      const managerVersionCommand =
+        !!pkgManager &&
+        !!config.pkgManagers[pkgManager] &&
+        !!config.pkgManagers[pkgManager].getPublishedVersion
+          ? config.pkgManagers[pkgManager].getPublishedVersion
+          : null;
+      getPublishedVersion =
+        !config.packages[pkg].getPublishedVersion &&
+        config.packages[pkg].getPublishedVersion !== false
+          ? managerVersionCommand
+          : config.packages[pkg].getPublishedVersion;
+    }
     if (!!mergedCommand) {
       pkged[pkg] = {
+        pkg: pkg,
         path: config.packages[pkg].path,
         [command]: mergedCommand,
+        ...(!getPublishedVersion ? {} : { getPublishedVersion }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
       };
@@ -94,8 +113,8 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
   }, {});
 
   const commands = Object.keys(
-    command === "publish" ? config.packages : assembledChanges.releases
-  ).map((pkg) => {
+    command === "publish" ? pkgCommands : assembledChanges.releases
+  ).map(async (pkg) => {
     const pkgs =
       command === "publish" ? config.packages : assembledChanges.releases;
     const pipeToTemplate = {
@@ -107,8 +126,30 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
     const templatedString = !pkgCommand
       ? null
       : template(pkgCommand, pipeToTemplate);
+    const extraPublishParams =
+      command !== "publish"
+        ? {}
+        : {
+            pkgFile: await readPkgFile(
+              path.join(
+                config.packages[pkg].path,
+                !!config.packages[pkg].manager &&
+                  config.packages[pkg].manager === "rust"
+                  ? "Cargo.toml"
+                  : "package.json"
+              )
+            ),
+            ...(!pkgCommands[pkg].getPublishedVersion
+              ? {}
+              : {
+                  getPublishedVersion: template(
+                    pkgCommands[pkg].getPublishedVersion
+                  )(pipeToTemplate),
+                }),
+          };
     const merged = {
       pkg,
+      ...extraPublishParams,
       path: pkgCommands[pkg].path,
       type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
@@ -119,7 +160,7 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
     return merged;
   });
 
-  return commands;
+  return Promise.all(commands);
 };
 
 // TODO: finish it, but do we need this even?
