@@ -5,8 +5,7 @@ const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { apply } = require("@covector/apply");
 
-module.exports.covector = function* covector({ command }) {
-  const cwd = process.cwd();
+module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
   const config = yield configFile({ cwd });
   const changesArray = yield changeFiles({
     cwd,
