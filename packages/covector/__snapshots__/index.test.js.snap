@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`integration test passes correct config for js and rust 1`] = `
+Object {
+  "consoleDir": Array [
+    Array [
+      Array [
+        Object {
+          "releases": Object {
+            "tauri": "minor",
+          },
+          "summary": "Summary about the changes in tauri",
+        },
+      ],
+    ],
+    Array [
+      Array [
+        Object {
+          "releases": Object {
+            "tauri-updater": "patch",
+          },
+          "summary": "Summary about the changes in tauri-updater",
+        },
+      ],
+    ],
+  ],
+  "consoleLog": Array [
+    Array [
+      "changes:",
+    ],
+    Array [
+      "tauri => minor",
+    ],
+    Array [
+      "tauri-updater => patch",
+    ],
+  ],
+  "covectorReturn": "There are 2 changes which include tauri with minor, tauri-updater with patch",
+}
+`;
