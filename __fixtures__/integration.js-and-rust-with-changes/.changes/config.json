@@ -9,10 +9,6 @@
     }
   },
   "packages": {
-    "tauri-core": {
-      "path": "./tauri",
-      "manager": "rust"
-    },
     "tauri.js": {
       "path": "./cli/tauri.js",
       "manager": "javascript",
@@ -22,9 +18,15 @@
       "path": "./cli/tauri-bundler",
       "manager": "rust"
     },
+    "tauri": {
+      "path": "./tauri",
+      "manager": "rust",
+      "dependencies": ["tauri-api"]
+    },
     "tauri-api": {
       "path": "./tauri-api",
-      "manager": "rust"
+      "manager": "rust",
+      "dependencies": ["tauri-utils"]
     },
     "tauri-utils": {
       "path": "./tauri-utils",
