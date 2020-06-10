@@ -16,8 +16,5 @@
     "@effection/node": "^0.6.2",
     "effection": "^0.6.2",
     "yargs": "^15.3.1"
-  },
-  "devDependencies": {
-    "jest-mock-console": "^1.0.1"
   }
 }
