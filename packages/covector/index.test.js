@@ -18,4 +18,19 @@ describe("integration test", () => {
     }).toMatchSnapshot();
     restoreConsole();
   });
+
+  it("runs version for js and rust", function* () {
+    const restoreConsole = mockConsole(["log", "dir"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    });
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
 });
