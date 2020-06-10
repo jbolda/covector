@@ -156,8 +156,8 @@ describe("merge config test", () => {
     },
   };
 
-  it("merges version", () => {
-    const mergedVersionConfig = mergeIntoConfig({
+  it("merges version", async () => {
+    const mergedVersionConfig = await mergeIntoConfig({
       config,
       assembledChanges,
       command: "version",
@@ -165,8 +165,8 @@ describe("merge config test", () => {
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges publish", () => {
-    const mergedPublishConfig = mergeIntoConfig({
+  it("merges publish", async () => {
+    const mergedPublishConfig = await mergeIntoConfig({
       config,
       assembledChanges,
       command: "publish",
