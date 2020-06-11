@@ -15,7 +15,6 @@ describe("package file test", () => {
       jsonFolder + "/package.json",
       "utf-8"
     );
-    console.log(originalVFile, modifiedVFile);
     expect(originalVFile).toStrictEqual(modifiedVFile);
   });
 });

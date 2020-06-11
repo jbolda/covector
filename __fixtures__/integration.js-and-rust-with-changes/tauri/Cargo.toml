@@ -1,0 +1,67 @@
+[package]
+name = "tauri"
+version = "0.5.2"
+authors = "test"
+license = "MIT"
+homepage = "https://tauri.studio"
+repository = "https://github.com/tauri-apps/tauri"
+description = "Make tiny, secure apps for all desktop platforms with Tauri"
+edition = "2018"
+exclude = ["test/fixture/**"]
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+webview-sys = "=0.5.0"
+web-view = "=0.6.2"
+tauri_includedir = "0.5.0"
+phf = "0.8.0"
+base64 = "0.12.1"
+webbrowser = "0.5.2"
+lazy_static = "1.4.0"
+tiny_http = { version = "0.7", optional = true }
+threadpool = "1.8"
+uuid = { version = "0.8.1", features = ["v4"] }
+anyhow = "1.0.31"
+thiserror = "1.0.19"
+envmnt = "0.8.2"
+
+tauri-api = { version = "0.5",  path = "../tauri-api" }
+
+[build-dependencies]
+tauri_includedir_codegen = "0.5.2"
+
+[dev-dependencies]
+proptest = "0.9.6"
+serde_json = "1.0"
+tauri = {path = ".", features = [ "all-api", "edge" ]}
+serde = { version = "1.0", features = [ "derive" ] }
+
+[features]
+edge = ["web-view/edge"]
+embedded-server = ["tiny_http"]
+no-server = []
+all-api = []
+read-text-file = []
+read-binary-file = []
+write-file = []
+read-dir = []
+copy-file = []
+create-dir = []
+remove-dir = []
+remove-file = []
+rename-file = []
+set-title = []
+execute = []
+open = []
+event = []
+updater = []
+open-dialog = []
+save-dialog = []
+
+[package.metadata.docs.rs]
+features = ["all-api"]
+
+[[example]]
+name = "communication"
+path = "examples/communication/src-tauri/src/main.rs"

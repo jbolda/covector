@@ -1,0 +1,42 @@
+{
+  "pkgManagers": {
+    "rust": {
+      "preversion": "",
+      "version": "yarn version --${ release.type } --no-git-tag-version --no-commit-hooks",
+      "getPublishedVersion": "npm view ${ pkg.pkg } version",
+      "postversion": "",
+      "publish": "npm publish --access public"
+    }
+  },
+  "packages": {
+    "tauri.js": {
+      "path": "./cli/tauri.js",
+      "manager": "javascript",
+      "dependencies": ["tauri"]
+    },
+    "tauri-bundler": {
+      "path": "./cli/tauri-bundler",
+      "manager": "rust"
+    },
+    "tauri": {
+      "path": "./tauri",
+      "manager": "rust",
+      "dependencies": ["tauri-api"]
+    },
+    "tauri-api": {
+      "path": "./tauri-api",
+      "manager": "rust",
+      "dependencies": ["tauri-utils"]
+    },
+    "tauri-utils": {
+      "path": "./tauri-utils",
+      "manager": "rust"
+    },
+    "tauri-updater": {
+      "path": "./tauri-updater",
+      "manager": "rust",
+      "publish": false,
+      "getPublishedVersion": false
+    }
+  }
+}
