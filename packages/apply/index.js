@@ -3,7 +3,7 @@ const { compareBumps } = require("@covector/assemble");
 const semver = require("semver");
 const path = require("path");
 
-module.exports.apply = function* ({ changeList, config }) {
+module.exports.apply = function* ({ changeList, config, cwd = process.cwd() }) {
   const parents = resolveParents({ config });
   let changes = changeList.reduce((list, change) => {
     list[change.pkg] = change;
@@ -29,14 +29,14 @@ module.exports.apply = function* ({ changeList, config }) {
     }
   });
 
-  let allPackages = yield readAll({ changes, config });
+  let allPackages = yield readAll({ changes, config, cwd });
 
   const bumps = bumpAll({ changes, allPackages });
   yield writeAll({ bumps });
   return bumps;
 };
 
-const readAll = ({ changes, config }) => {
+const readAll = ({ changes, config, cwd = process.cwd() }) => {
   let files = Object.keys(changes).reduce((fileList, change) => {
     fileList[change] = {};
     if (changes[change].parents.length > 0)
@@ -48,6 +48,7 @@ const readAll = ({ changes, config }) => {
     Object.keys(files).map((pkg) =>
       readPkgFile(
         path.join(
+          cwd,
           config.packages[pkg].path,
           !!config.packages[pkg].manager &&
             config.packages[pkg].manager === "rust"
