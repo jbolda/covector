@@ -26,7 +26,7 @@ const parsePkg = (file) => {
 const stringifyPkg = ({ newContents, extname }) => {
   switch (extname) {
     case ".toml":
-      return TOML.stringify(file.contents);
+      return TOML.stringify(newContents);
     case ".json":
       return `${JSON.stringify(newContents, null, "  ")}\n`;
   }
