@@ -112,7 +112,13 @@ const bumpAll = ({ changes, allPackages }) => {
 const bumpMain = ({ packageFile, bumpType }) => {
   let pkg = { ...packageFile };
   pkg.version = semver.inc(pkg.version, bumpType);
-  pkg.pkg.version = semver.inc(pkg.pkg.version, bumpType);
+  if (pkg.vfile.extname === ".json") {
+    // for javascript
+    pkg.pkg.version = semver.inc(pkg.pkg.version, bumpType);
+  } else if (pkg.vfile.extname === ".toml") {
+    // for rust
+    pkg.pkg.package.version = semver.inc(pkg.pkg.package.version, bumpType);
+  }
   return pkg;
 };
 
@@ -122,20 +128,32 @@ const bumpDeps = ({ packageFile, dep, bumpType }) => {
   if (!!pkg.pkg.dependencies)
     Object.keys(pkg.pkg.dependencies).forEach((existingDep) => {
       if (existingDep === dep) {
-        pkg.pkg.dependencies[dep] = semver.inc(
-          pkg.pkg.dependencies[dep],
-          bumpType
-        );
+        if (pkg.vfile.extname === ".json") {
+          // for javascript
+          pkg.pkg.dependencies[dep] = semver.inc(
+            pkg.pkg.dependencies[dep],
+            bumpType
+          );
+        } else if (pkg.vfile.extname === ".toml") {
+          // for rust
+          pkg.pkg.dependencies[dep] = semver.inc(
+            pkg.pkg.dependencies[dep],
+            bumpType
+          );
+        }
       }
     });
 
   if (!!pkg.pkg.devDependencies)
     Object.keys(pkg.pkg.devDependencies).forEach((existingDep) => {
       if (existingDep === dep) {
-        pkg.pkg.devDependencies[dep] = semver.inc(
-          pkg.pkg.devDependencies[dep],
-          bumpType
-        );
+        if (pkg.vfile.extname === ".json") {
+          // for javascript
+          pkg.pkg.devDependencies[dep] = semver.inc(
+            pkg.pkg.devDependencies[dep],
+            bumpType
+          );
+        }
       }
     });
 
