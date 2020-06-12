@@ -13,11 +13,47 @@ describe("package file apply bump", () => {
     restoreConsole();
   });
 
+  it("bumps single js json", function* () {
     const jsonFolder = f.copy("pkg.js-single-json");
-    const originalVFile = await toVFile.read(
+
+    const changeList = [
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: "./",
+        pkg: "js-single-json-fixture",
+        type: "minor",
+      },
+    ];
+
+    const config = {
+      packages: {
+        "js-single-json-fixture": {
+          path: "./",
+          manager: "javascript",
+        },
+      },
+    };
+
+    yield apply({ changeList, config, cwd: jsonFolder });
+    const modifiedVFile = yield toVFile.read(
       jsonFolder + "/package.json",
       "utf-8"
     );
+    expect(modifiedVFile.contents).toBe(
+      "{\n" +
+        '  "private": true,\n' +
+        '  "name": "js-single-json-fixture",\n' +
+        '  "description": "A single package at the root. No monorepo setup.",\n' +
+        '  "version": "0.6.0"\n' +
+        "}\n"
+    );
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
 
   it("bumps single rust toml", function* () {
     const rustFolder = f.copy("pkg.rust-single");
