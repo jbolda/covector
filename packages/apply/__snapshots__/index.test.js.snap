@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`package file apply bump bumps multi rust toml 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with minor",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump bumps single js json 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping js-single-json-fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump bumps single rust toml 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust-single-fixture with minor",
+    ],
+  ],
+}
+`;
