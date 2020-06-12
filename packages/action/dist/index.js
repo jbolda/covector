@@ -33477,7 +33477,7 @@ const { compareBumps } = __webpack_require__(360);
 const semver = __webpack_require__(534);
 const path = __webpack_require__(622);
 
-module.exports.apply = function* ({ changeList, config }) {
+module.exports.apply = function* ({ changeList, config, cwd = process.cwd() }) {
   const parents = resolveParents({ config });
   let changes = changeList.reduce((list, change) => {
     list[change.pkg] = change;
@@ -33503,14 +33503,14 @@ module.exports.apply = function* ({ changeList, config }) {
     }
   });
 
-  let allPackages = yield readAll({ changes, config });
+  let allPackages = yield readAll({ changes, config, cwd });
 
   const bumps = bumpAll({ changes, allPackages });
   yield writeAll({ bumps });
   return bumps;
 };
 
-const readAll = ({ changes, config }) => {
+const readAll = ({ changes, config, cwd = process.cwd() }) => {
   let files = Object.keys(changes).reduce((fileList, change) => {
     fileList[change] = {};
     if (changes[change].parents.length > 0)
@@ -33522,6 +33522,7 @@ const readAll = ({ changes, config }) => {
     Object.keys(files).map((pkg) =>
       readPkgFile(
         path.join(
+          cwd,
           config.packages[pkg].path,
           !!config.packages[pkg].manager &&
             config.packages[pkg].manager === "rust"
@@ -33585,7 +33586,13 @@ const bumpAll = ({ changes, allPackages }) => {
 const bumpMain = ({ packageFile, bumpType }) => {
   let pkg = { ...packageFile };
   pkg.version = semver.inc(pkg.version, bumpType);
-  pkg.pkg.version = semver.inc(pkg.pkg.version, bumpType);
+  if (pkg.vfile.extname === ".json") {
+    // for javascript
+    pkg.pkg.version = semver.inc(pkg.pkg.version, bumpType);
+  } else if (pkg.vfile.extname === ".toml") {
+    // for rust
+    pkg.pkg.package.version = semver.inc(pkg.pkg.package.version, bumpType);
+  }
   return pkg;
 };
 
@@ -33595,20 +33602,32 @@ const bumpDeps = ({ packageFile, dep, bumpType }) => {
   if (!!pkg.pkg.dependencies)
     Object.keys(pkg.pkg.dependencies).forEach((existingDep) => {
       if (existingDep === dep) {
-        pkg.pkg.dependencies[dep] = semver.inc(
-          pkg.pkg.dependencies[dep],
-          bumpType
-        );
+        if (pkg.vfile.extname === ".json") {
+          // for javascript
+          pkg.pkg.dependencies[dep] = semver.inc(
+            pkg.pkg.dependencies[dep],
+            bumpType
+          );
+        } else if (pkg.vfile.extname === ".toml") {
+          // for rust
+          pkg.pkg.dependencies[dep] = semver.inc(
+            pkg.pkg.dependencies[dep],
+            bumpType
+          );
+        }
       }
     });
 
   if (!!pkg.pkg.devDependencies)
     Object.keys(pkg.pkg.devDependencies).forEach((existingDep) => {
       if (existingDep === dep) {
-        pkg.pkg.devDependencies[dep] = semver.inc(
-          pkg.pkg.devDependencies[dep],
-          bumpType
-        );
+        if (pkg.vfile.extname === ".json") {
+          // for javascript
+          pkg.pkg.devDependencies[dep] = semver.inc(
+            pkg.pkg.devDependencies[dep],
+            bumpType
+          );
+        }
       }
     });
 
@@ -62393,7 +62412,7 @@ const parsePkg = (file) => {
 const stringifyPkg = ({ newContents, extname }) => {
   switch (extname) {
     case ".toml":
-      return TOML.stringify(file.contents);
+      return TOML.stringify(newContents);
     case ".json":
       return `${JSON.stringify(newContents, null, "  ")}\n`;
   }
@@ -66047,8 +66066,7 @@ const { configFile, changeFiles } = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(360);
 const { apply } = __webpack_require__(334);
 
-module.exports.covector = function* covector({ command }) {
-  const cwd = process.cwd();
+module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
   const config = yield configFile({ cwd });
   const changesArray = yield changeFiles({
     cwd,
