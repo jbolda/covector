@@ -28,4 +28,10 @@ describe("file test", () => {
     const changesArray = await changeFiles({ cwd: changesFolder });
     expect(changesArray).toMatchSnapshot();
   });
+
+  it("ignores readme", async () => {
+    const changesFolder = f.copy("changes.no-changes-with-readme");
+    const changesArray = await changeFiles({ cwd: changesFolder });
+    expect(changesArray).toMatchSnapshot();
+  });
 });
