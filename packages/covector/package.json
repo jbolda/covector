@@ -6,7 +6,9 @@
     "bin/*",
     "src/**/*"
   ],
-  "bin": "./bin/covector.js",
+  "bin": {
+    "covector": "./bin/covector.js"
+  },
   "scripts": {
     "covector": "node ./src/index.js"
   },
