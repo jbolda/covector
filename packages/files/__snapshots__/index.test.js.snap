@@ -16,3 +16,5 @@ Summary about the changes in pkg-b
 ",
 ]
 `;
+
+exports[`file test ignores readme 1`] = `Array []`;
