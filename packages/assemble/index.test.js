@@ -165,6 +165,21 @@ describe("merge config test", () => {
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
+  it("merges version without command", async () => {
+    let modifiedConfig = { ...config };
+    delete modifiedConfig.pkgManagers.javascript.version;
+    delete modifiedConfig.packages["assemble2"].version;
+    delete modifiedConfig.packages["@namespaced/assemble1"].version;
+    delete modifiedConfig.packages["@namespaced/assemble2"].version;
+
+    const mergedVersionConfig = await mergeIntoConfig({
+      config: modifiedConfig,
+      assembledChanges,
+      command: "version",
+    });
+    expect(mergedVersionConfig).toMatchSnapshot();
+  });
+
   it("merges publish", async () => {
     // const mergedPublishConfig = await mergeIntoConfig({
     //   config,

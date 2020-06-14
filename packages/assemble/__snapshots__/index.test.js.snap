@@ -138,3 +138,5 @@ Array [
   },
 ]
 `;
+
+exports[`merge config test merges version without command 1`] = `Array []`;
