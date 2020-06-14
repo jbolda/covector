@@ -1,4 +1,5 @@
 const { readPkgFile, configFile, changeFiles } = require("./index");
+const mockConsole = require("jest-mock-console");
 const fixtures = require("fixturez");
 const f = fixtures(__dirname);
 
@@ -24,14 +25,18 @@ describe("file test", () => {
   });
 
   it("globs changes", async () => {
+    const restoreConsole = mockConsole(["info"]);
     const changesFolder = f.copy("changes.multiple-changes");
     const changesArray = await changeFiles({ cwd: changesFolder });
     expect(changesArray).toMatchSnapshot();
+    restoreConsole();
   });
 
   it("ignores readme", async () => {
+    const restoreConsole = mockConsole(["info"]);
     const changesFolder = f.copy("changes.no-changes-with-readme");
     const changesArray = await changeFiles({ cwd: changesFolder });
     expect(changesArray).toMatchSnapshot();
+    restoreConsole();
   });
 });
