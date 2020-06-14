@@ -2,6 +2,7 @@
   "name": "covector",
   "version": "0.0.7",
   "license": "Apache-2.0",
+  "main": "src",
   "files": [
     "bin/*",
     "src/**/*"
@@ -9,10 +10,8 @@
   "bin": {
     "covector": "./bin/covector.js"
   },
-  "scripts": {
-    "covector": "node ./src/index.js"
-  },
   "dependencies": {
+    "@covector/apply": "^0.0.3",
     "@covector/assemble": "0.0.1",
     "@covector/files": "0.0.3",
     "@effection/events": "^0.6.1",
