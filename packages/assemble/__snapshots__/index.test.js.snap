@@ -108,30 +108,6 @@ Object {
 }
 `;
 
-exports[`merge config test merges publish 1`] = `
-Array [
-  Object {
-    "dependencies": Array [
-      "assemble2",
-    ],
-    "manager": "cargo",
-    "path": "./packages/namespaced-assemble2",
-    "pkg": "@namespaced/assemble2",
-    "publish": "cargo publish",
-    "type": "patch",
-  },
-  Object {
-    "dependencies": undefined,
-    "manager": "javascript",
-    "path": "./packages/assemble1",
-    "pkg": "assemble1",
-    "publish": "npm publish",
-    "type": "minor",
-  },
-  null,
-]
-`;
-
 exports[`merge config test merges version 1`] = `
 Array [
   Object {
