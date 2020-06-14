@@ -160,7 +160,12 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
     return merged;
   });
 
-  return Promise.all(commands);
+  return Promise.all(commands).then((values) =>
+    values.reduce(
+      (acc, current) => (!current ? acc : acc.concat([current])),
+      []
+    )
+  );
 };
 
 // TODO: finish it, but do we need this even?
