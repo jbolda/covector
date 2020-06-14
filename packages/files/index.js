@@ -69,10 +69,17 @@ module.exports.changeFiles = async ({
   changeFolder = ".changes",
   remove = true,
 }) => {
-  const paths = await globby([path.posix.join(changeFolder, "*.md")], {
-    cwd,
-    ignore: ["**/readme.md"],
-  });
+  const paths = await globby(
+    [
+      path.posix.join(changeFolder, "*.md"),
+      `!${path.posix.join(changeFolder, "README.md")}`,
+      `!${path.posix.join(changeFolder, "readme.md")}`,
+      `!${path.posix.join(changeFolder, "Readme.md")}`,
+    ],
+    {
+      cwd,
+    }
+  );
 
   const vfiles = paths
     .map((file) => vfile.readSync(path.join(cwd, file), "utf8"))
