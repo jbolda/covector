@@ -36,7 +36,7 @@ module.exports.apply = function* ({ changeList, config, cwd = process.cwd() }) {
   return bumps;
 };
 
-const readAll = ({ changes, config, cwd = process.cwd() }) => {
+const readAll = async ({ changes, config, cwd = process.cwd() }) => {
   let files = Object.keys(changes).reduce((fileList, change) => {
     fileList[change] = {};
     if (changes[change].parents.length > 0)
@@ -44,7 +44,8 @@ const readAll = ({ changes, config, cwd = process.cwd() }) => {
     return fileList;
   }, {});
 
-  return Promise.all(
+  const pkgs = Object.keys(files);
+  const pkgFiles = await Promise.all(
     Object.keys(files).map((pkg) =>
       readPkgFile(
         path.join(
@@ -57,12 +58,12 @@ const readAll = ({ changes, config, cwd = process.cwd() }) => {
         )
       )
     )
-  ).then((pkgs) =>
-    pkgs.reduce((list, pkgFile) => {
-      list[pkgFile.name] = pkgFile;
-      return list;
-    }, {})
   );
+
+  return pkgs.reduce((list, pkg, index) => {
+    list[pkg] = pkgFiles[index];
+    return list;
+  }, files);
 };
 
 const writeAll = function* ({ bumps }) {

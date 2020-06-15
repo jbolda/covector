@@ -23,18 +23,25 @@ describe("integration test", () => {
   });
 
   it("runs version for js and rust", async () => {
-    const restoreConsole = mockConsole(["info"]);
+    const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    // const covectored = await main(
-    //   covector({
-    //     command: "version",
-    //     cwd: fullIntegration,
-    //   })
-    // );
-    // expect({
-    //   consoleInfo: console.info.mock.calls,
-    //   covectorReturn: covectored,
-    // }).toMatchSnapshot();
+    const covectored = await main(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored.map((pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
+        delete pkg.vfile.history;
+        delete pkg.vfile.cwd;
+        return pkg;
+      }),
+    }).toMatchSnapshot();
     restoreConsole();
   });
 });
