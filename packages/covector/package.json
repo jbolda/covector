@@ -11,7 +11,7 @@
     "covector": "./bin/covector.js"
   },
   "dependencies": {
-    "@covector/apply": null,
+    "@covector/apply": "0.0.4",
     "@covector/assemble": "0.0.3",
     "@covector/files": "0.0.4",
     "@effection/events": "^0.6.1",
