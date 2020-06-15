@@ -242,7 +242,6 @@ features = [\\"all-api\\"]
 [[example]]
 name = \\"communication\\"
 path = \\"examples/communication/src-tauri/src/main.rs\\"",
-        "cwd": "C:\\\\Users\\\\Jacob\\\\Documents\\\\dev\\\\covector",
         "data": Object {},
         "messages": Array [],
       },
@@ -470,7 +469,6 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
   ]
 }
 ",
-        "cwd": "C:\\\\Users\\\\Jacob\\\\Documents\\\\dev\\\\covector",
         "data": Object {},
         "messages": Array [],
       },
@@ -544,7 +542,6 @@ tauri-utils = { version = \\"0.5\\", path = \\"../tauri-utils\\" }
 anyhow = \\"1.0.31\\"
 thiserror = \\"1.0.19\\"
 ",
-        "cwd": "C:\\\\Users\\\\Jacob\\\\Documents\\\\dev\\\\covector",
         "data": Object {},
         "messages": Array [],
       },
