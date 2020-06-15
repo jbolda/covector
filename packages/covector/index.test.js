@@ -35,7 +35,10 @@ describe("integration test", () => {
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
       covectorReturn: covectored.map((pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
         delete pkg.vfile.history;
+        delete pkg.vfile.cwd;
         return pkg;
       }),
     }).toMatchSnapshot();
