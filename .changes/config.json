@@ -1,10 +1,8 @@
 {
   "pkgManagers": {
     "javascript": {
-      "preversion": "",
-      "version": "yarn version --${ release.type } --no-git-tag-version --no-commit-hooks",
+      "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
-      "postversion": "",
       "publish": "npm publish --access public"
     }
   },
@@ -33,8 +31,10 @@
     "action": {
       "path": "./packages/action",
       "manager": "javascript",
+      "preversion": "yarn build",
       "publish": false,
-      "getPublishedVersion": false
+      "getPublishedVersion": false,
+      "dependencies": ["covector"]
     }
   }
 }
