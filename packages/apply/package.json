@@ -1,6 +1,6 @@
 {
   "name": "@covector/apply",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "Apache-2.0",
   "files": [
     "index.js"
