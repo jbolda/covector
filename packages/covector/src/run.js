@@ -42,7 +42,7 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
     });
 
     // TODO create the changelog
-    return yield apply({ changeList: commands, config });
+    return yield apply({ changeList: commands, config, cwd });
   } else if (command === "publish") {
     yield raceTime();
     const commands = yield mergeIntoConfig({
