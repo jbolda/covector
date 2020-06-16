@@ -153,4 +153,252 @@ describe("package file apply bump", () => {
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
+
+  it("bumps multi rust toml with object dep", function* () {
+    const rustFolder = f.copy("pkg.rust-multi-object-dep");
+
+    const changeList = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "minor",
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "minor",
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    yield apply({ changeList, config, cwd: rustFolder });
+
+    const modifiedAPKGVFile = yield toVFile.read(
+      rustFolder + "/pkg-a/Cargo.toml",
+      "utf-8"
+    );
+    expect(modifiedAPKGVFile.contents).toBe(
+      "[package]\n" +
+        'name = "rust_pkg_a_fixture"\n' +
+        'version = "0.6.0"\n' +
+        "\n" +
+        "[dependencies]\n" +
+        'rust_pkg_b_fixture = { version = "0.9.0", path = "../rust_pkg_b_fixture" }\n'
+    );
+
+    const modifiedBPKGVFile = yield toVFile.read(
+      rustFolder + "/pkg-b/Cargo.toml",
+      "utf-8"
+    );
+    expect(modifiedBPKGVFile.contents).toBe(
+      "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+    );
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+
+  it("bumps multi rust toml with dep missing patch", function* () {
+    const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
+
+    const changeList = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "minor",
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "minor",
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    yield apply({ changeList, config, cwd: rustFolder });
+
+    const modifiedAPKGVFile = yield toVFile.read(
+      rustFolder + "/pkg-a/Cargo.toml",
+      "utf-8"
+    );
+    expect(modifiedAPKGVFile.contents).toBe(
+      "[package]\n" +
+        'name = "rust_pkg_a_fixture"\n' +
+        'version = "0.6.0"\n' +
+        "\n" +
+        "[dependencies]\n" +
+        'rust_pkg_b_fixture = "0.9"\n'
+    );
+
+    const modifiedBPKGVFile = yield toVFile.read(
+      rustFolder + "/pkg-b/Cargo.toml",
+      "utf-8"
+    );
+    expect(modifiedBPKGVFile.contents).toBe(
+      "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+    );
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+
+  it("bumps multi rust toml as patch with object dep missing patch", function* () {
+    const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
+
+    const changeList = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "patch",
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "patch",
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    yield apply({ changeList, config, cwd: rustFolder });
+
+    const modifiedAPKGVFile = yield toVFile.read(
+      rustFolder + "/pkg-a/Cargo.toml",
+      "utf-8"
+    );
+    expect(modifiedAPKGVFile.contents).toBe(
+      "[package]\n" +
+        'name = "rust_pkg_a_fixture"\n' +
+        'version = "0.5.1"\n' +
+        "\n" +
+        "[dependencies]\n" +
+        'rust_pkg_b_fixture = { version = "0.8", path = "../rust_pkg_b_fixture" }\n'
+    );
+
+    const modifiedBPKGVFile = yield toVFile.read(
+      rustFolder + "/pkg-b/Cargo.toml",
+      "utf-8"
+    );
+    expect(modifiedBPKGVFile.contents).toBe(
+      "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+    );
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+
+  it("bumps multi rust toml as minor with object dep missing patch", function* () {
+    const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
+
+    const changeList = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "minor",
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "minor",
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    yield apply({ changeList, config, cwd: rustFolder });
+
+    const modifiedAPKGVFile = yield toVFile.read(
+      rustFolder + "/pkg-a/Cargo.toml",
+      "utf-8"
+    );
+    expect(modifiedAPKGVFile.contents).toBe(
+      "[package]\n" +
+        'name = "rust_pkg_a_fixture"\n' +
+        'version = "0.6.0"\n' +
+        "\n" +
+        "[dependencies]\n" +
+        'rust_pkg_b_fixture = { version = "0.9", path = "../rust_pkg_b_fixture" }\n'
+    );
+
+    const modifiedBPKGVFile = yield toVFile.read(
+      rustFolder + "/pkg-b/Cargo.toml",
+      "utf-8"
+    );
+    expect(modifiedBPKGVFile.contents).toBe(
+      "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+    );
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
 });
