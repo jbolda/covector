@@ -2,7 +2,7 @@ const vfile = require("to-vfile");
 const globby = require("globby");
 const fs = require("fs");
 const path = require("path");
-const TOML = require("@iarna/toml");
+const TOML = require("@tauri-apps/toml");
 
 const parsePkg = (file) => {
   switch (file.extname) {

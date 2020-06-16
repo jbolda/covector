@@ -74,6 +74,7 @@ Object {
           "lazy_static": "1.4.0",
           "phf": "0.8.0",
           "serde": Object {
+            "__tomlInline": true,
             "features": Array [
               "derive",
             ],
@@ -81,6 +82,7 @@ Object {
           },
           "serde_json": "1.0",
           "tauri-api": Object {
+            "__tomlInline": true,
             "path": "../tauri-api",
             "version": "0.5",
           },
@@ -88,10 +90,12 @@ Object {
           "thiserror": "1.0.19",
           "threadpool": "1.8",
           "tiny_http": Object {
+            "__tomlInline": true,
             "optional": true,
             "version": "0.7",
           },
           "uuid": Object {
+            "__tomlInline": true,
             "features": Array [
               "v4",
             ],
@@ -104,6 +108,7 @@ Object {
         "dev-dependencies": Object {
           "proptest": "0.9.6",
           "serde": Object {
+            "__tomlInline": true,
             "features": Array [
               "derive",
             ],
@@ -111,6 +116,7 @@ Object {
           },
           "serde_json": "1.0",
           "tauri": Object {
+            "__tomlInline": true,
             "features": Array [
               "all-api",
               "edge",
@@ -479,6 +485,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
         "dependencies": Object {
           "anyhow": "1.0.31",
           "attohttpc": Object {
+            "__tomlInline": true,
             "features": Array [
               "json",
               "compress",
@@ -488,10 +495,12 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
           "serde": "1.0",
           "serde_json": "1.0",
           "tauri-api": Object {
+            "__tomlInline": true,
             "path": "../tauri-api",
             "version": "0.5",
           },
           "tauri-utils": Object {
+            "__tomlInline": true,
             "path": "../tauri-utils",
             "version": "0.5",
           },
