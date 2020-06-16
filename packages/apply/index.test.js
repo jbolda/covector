@@ -331,7 +331,7 @@ describe("package file apply bump", () => {
       "utf-8"
     );
     expect(modifiedBPKGVFile.contents).toBe(
-      "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+      "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.8.9"\n'
     );
 
     expect({
