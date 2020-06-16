@@ -14,6 +14,62 @@ Object {
 }
 `;
 
+exports[`package file apply bump bumps multi rust toml as minor with object dep missing patch 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with minor",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump bumps multi rust toml as patch with object dep missing patch 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with patch",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with patch",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump bumps multi rust toml with dep missing patch 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with minor",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump bumps multi rust toml with object dep 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with minor",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
 exports[`package file apply bump bumps single js json 1`] = `
 Object {
   "consoleDir": Array [],

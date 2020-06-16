@@ -137,10 +137,17 @@ const bumpDeps = ({ packageFile, dep, bumpType }) => {
           );
         } else if (pkg.vfile.extname === ".toml") {
           // for rust
-          pkg.pkg.dependencies[dep] = semver.inc(
-            pkg.pkg.dependencies[dep],
-            bumpType
-          );
+          if (typeof pkg.pkg.dependencies[dep] === "object") {
+            pkg.pkg.dependencies[dep].version = incWithPartials(
+              pkg.pkg.dependencies[dep].version,
+              bumpType
+            );
+          } else {
+            pkg.pkg.dependencies[dep] = incWithPartials(
+              pkg.pkg.dependencies[dep],
+              bumpType
+            );
+          }
         }
       }
     });
@@ -159,4 +166,27 @@ const bumpDeps = ({ packageFile, dep, bumpType }) => {
     });
 
   return pkg;
+};
+
+const incWithPartials = (version, bumpType) => {
+  if (semver.valid(version)) {
+    return semver.inc(version, bumpType);
+  } else {
+    try {
+      const fullVersion = semver
+        .inc(semver.coerce(version), bumpType)
+        .split(".");
+      if (version.split(".").length === 2) {
+        return [].concat(fullVersion[0], fullVersion[1]).join(".");
+      } else if (version.split(".").length === 1) {
+        return fullVersion[0];
+      } else {
+        // failsafe is better than null
+        return fullVersion.join(".");
+      }
+    } catch {
+      // failsafe is better than null
+      return semver.inc(semver.coerce(version), bumpType);
+    }
+  }
 };
