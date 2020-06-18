@@ -39,12 +39,15 @@ const readAllChangelogs = ({ applied, config, cwd }) => {
 const applyChanges = ({ changelogs, assembledChanges }) => {
   return changelogs.map((change) => {
     let changelog = processor.parse(change.changelog.contents);
-    const addition = assembledChanges.releases[
-      change.changes.name
-    ].changes.reduce(
-      (finalString, release) => `${finalString}\n - ${release.summary}`,
-      `## [${change.changes.version}]`
-    );
+    let addition = "";
+    if (!assembledChanges.releases[change.changes.name]) {
+      addition = `## [${change.changes.version}]\nBumped due to dependency.`;
+    } else {
+      addition = assembledChanges.releases[change.changes.name].changes.reduce(
+        (finalString, release) => `${finalString}\n - ${release.summary}`,
+        `## [${change.changes.version}]`
+      );
+    }
     const parsedAddition = processor.parse(addition);
     const changelogFirstElement = changelog.children.shift();
     const changelogRemainingElements = changelog.children;
