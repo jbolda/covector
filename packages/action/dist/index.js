@@ -43502,7 +43502,77 @@ module.exports = new Type('tag:yaml.org,2002:float', {
 
 
 /***/ }),
-/* 528 */,
+/* 528 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const { readChangelog, writeChangelog } = __webpack_require__(916);
+const path = __webpack_require__(622);
+const unified = __webpack_require__(709);
+const parse = __webpack_require__(64);
+const stringify = __webpack_require__(219);
+
+const processor = unified().use(parse).use(stringify);
+
+module.exports.fillChangelogs = async ({
+  applied,
+  assembledChanges,
+  config,
+  cwd,
+}) => {
+  const changelogs = await readAllChangelogs({ applied, config, cwd });
+  const writtenChanges = applyChanges({
+    changelogs,
+    assembledChanges,
+  });
+  return await writeAllChangelogs({ writtenChanges });
+};
+
+const readAllChangelogs = ({ applied, config, cwd }) => {
+  return Promise.all(
+    applied.map((change) =>
+      readChangelog({
+        change,
+        cwd: path.join(cwd, config.packages[change.name].path),
+      })
+    )
+  ).then((changelogs) =>
+    changelogs.map((changelog, index) => ({
+      changes: applied[index],
+      changelog,
+    }))
+  );
+};
+
+const applyChanges = ({ changelogs, assembledChanges }) => {
+  return changelogs.map((change) => {
+    let changelog = processor.parse(change.changelog.contents);
+    const addition = assembledChanges.releases[
+      change.changes.name
+    ].changes.reduce(
+      (finalString, release) => `${finalString}\n - ${release.summary}`,
+      `## [${change.changes.version}]`
+    );
+    const parsedAddition = processor.parse(addition);
+    const changelogFirstElement = changelog.children.shift();
+    const changelogRemainingElements = changelog.children;
+    changelog.children = [].concat(
+      changelogFirstElement,
+      parsedAddition.children,
+      changelogRemainingElements
+    );
+    change.changelog.contents = processor.stringify(changelog);
+    return change;
+  });
+};
+
+const writeAllChangelogs = ({ writtenChanges }) => {
+  return Promise.all(
+    writtenChanges.map((changelog) => writeChangelog({ ...changelog }))
+  );
+};
+
+
+/***/ }),
 /* 529 */,
 /* 530 */,
 /* 531 */,
@@ -62573,6 +62643,25 @@ module.exports.changeFiles = async ({
   return vfiles;
 };
 
+module.exports.readChangelog = async ({ cwd }) => {
+  let file = null;
+  try {
+    file = await vfile.read(path.join(cwd, "CHANGELOG.md"), "utf8");
+  } catch {
+    console.log("Could not load the CHANGELOG.md. Creating one.");
+    file = {
+      path: path.join(cwd, "CHANGELOG.md"),
+      contents: "# Changelog\n\n\n",
+    };
+  }
+  return file;
+};
+
+module.exports.writeChangelog = async ({ changelog }) => {
+  const inputVfile = await vfile.write(changelog, "utf8");
+  return inputVfile;
+};
+
 
 /***/ }),
 /* 917 */,
@@ -66371,6 +66460,7 @@ const { ChildProcess } = __webpack_require__(142);
 const { once, on } = __webpack_require__(370);
 const { configFile, changeFiles } = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(749);
+const { fillChangelogs } = __webpack_require__(528);
 const { apply } = __webpack_require__(334);
 
 module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
@@ -66409,8 +66499,9 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       command: "version",
     });
 
-    // TODO create the changelog
-    return yield apply({ changeList: commands, config, cwd });
+    const applied = yield apply({ changeList: commands, config, cwd });
+    yield fillChangelogs({ applied, assembledChanges, config, cwd });
+    return applied;
   } else if (command === "publish") {
     yield raceTime();
     const commands = yield mergeIntoConfig({
@@ -66419,7 +66510,6 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       command: "publish",
     });
 
-    // TODO create the changelog
     let published = {};
     for (let pkg of commands) {
       if (!!pkg.getPublishedVersion) {

@@ -13,6 +13,7 @@
   "dependencies": {
     "@covector/apply": "0.0.5",
     "@covector/assemble": "0.0.3",
+    "@covector/changelog": "0.0.1",
     "@covector/files": "0.0.5",
     "@effection/events": "^0.6.1",
     "@effection/node": "^0.6.2",
