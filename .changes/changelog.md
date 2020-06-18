@@ -1,4 +1,5 @@
 ---
+"covector": patch
 "@covector/files": patch
 ---
 

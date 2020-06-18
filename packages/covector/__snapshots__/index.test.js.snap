@@ -59,6 +59,15 @@ Object {
     Array [
       "bumping tauri.js with minor",
     ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
   ],
   "covectorReturn": Array [
     Object {

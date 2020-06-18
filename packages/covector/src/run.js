@@ -3,6 +3,7 @@ const { ChildProcess } = require("@effection/node");
 const { once, on } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
+const { fillChangelogs } = require("@covector/changelog");
 const { apply } = require("@covector/apply");
 
 module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
@@ -41,8 +42,9 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       command: "version",
     });
 
-    // TODO create the changelog
-    return yield apply({ changeList: commands, config, cwd });
+    const applied = yield apply({ changeList: commands, config, cwd });
+    yield fillChangelogs({ applied, assembledChanges, config, cwd });
+    return applied;
   } else if (command === "publish") {
     yield raceTime();
     const commands = yield mergeIntoConfig({
@@ -51,7 +53,6 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       command: "publish",
     });
 
-    // TODO create the changelog
     let published = {};
     for (let pkg of commands) {
       if (!!pkg.getPublishedVersion) {
