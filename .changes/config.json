@@ -13,20 +13,30 @@
       "dependencies": [
         "@covector/apply",
         "@covector/assemble",
-        "@covector/files"
+        "@covector/files",
+        "@covector/changelog",
+        "all"
       ]
     },
     "@covector/apply": {
       "path": "./packages/apply",
-      "manager": "javascript"
+      "manager": "javascript",
+      "dependencies": ["all"]
     },
     "@covector/assemble": {
       "path": "./packages/assemble",
-      "manager": "javascript"
+      "manager": "javascript",
+      "dependencies": ["all"]
     },
     "@covector/files": {
       "path": "./packages/files",
-      "manager": "javascript"
+      "manager": "javascript",
+      "dependencies": ["all"]
+    },
+    "@covector/changelog": {
+      "path": "./packages/changelog",
+      "manager": "javascript",
+      "dependencies": ["all"]
     },
     "action": {
       "path": "./packages/action",
@@ -35,6 +45,10 @@
       "publish": false,
       "getPublishedVersion": false,
       "dependencies": ["covector"]
+    },
+    "all": {
+      "version": false,
+      "publish": false
     }
   }
 }

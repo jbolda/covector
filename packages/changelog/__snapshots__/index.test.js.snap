@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`changelog fills a changelog 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+  ],
+}
+`;

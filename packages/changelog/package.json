@@ -4,5 +4,13 @@
   "license": "Apache-2.0",
   "files": [
     "index.js"
-  ]
+  ],
+  "dependencies": {
+    "@covector/files": "^0.0.5",
+    "lodash.template": "^4.5.0",
+    "remark-parse": "^8.0.2",
+    "remark-stringify": "^8.1.0",
+    "to-vfile": "^6.1.0",
+    "unified": "^9.0.0"
+  }
 }
