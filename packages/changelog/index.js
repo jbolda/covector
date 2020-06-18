@@ -6,34 +6,51 @@ const stringify = require("remark-stringify");
 
 const processor = unified().use(parse).use(stringify);
 
-module.exports.fillChangelogs = async ({ changeList, cwd }) => {
-  const changelogs = await readAllChangelogs({ changeList, cwd });
-  const writtenChanges = applyChanges({ changelogs });
+module.exports.fillChangelogs = async ({
+  applied,
+  assembledChanges,
+  config,
+  cwd,
+}) => {
+  const changelogs = await readAllChangelogs({ applied, config, cwd });
+  const writtenChanges = applyChanges({
+    changelogs,
+    assembledChanges,
+  });
   return await writeAllChangelogs({ writtenChanges });
 };
 
-const readAllChangelogs = ({ changeList, cwd }) => {
+const readAllChangelogs = ({ applied, config, cwd }) => {
   return Promise.all(
-    changeList.map((change) =>
-      readChangelog({ change, cwd: path.join(cwd, change.path) })
+    applied.map((change) =>
+      readChangelog({
+        change,
+        cwd: path.join(cwd, config.packages[change.name].path),
+      })
     )
   ).then((changelogs) =>
     changelogs.map((changelog, index) => ({
-      changes: changeList[index],
+      changes: applied[index],
       changelog,
     }))
   );
 };
 
-const applyChanges = ({ changelogs }) => {
+const applyChanges = ({ changelogs, assembledChanges }) => {
   return changelogs.map((change) => {
     let changelog = processor.parse(change.changelog.contents);
-    const addition = processor.parse(change.changes.type);
+    const addition = assembledChanges.releases[
+      change.changes.name
+    ].changes.reduce(
+      (finalString, release) => `${finalString}\n - ${release.summary}`,
+      `## [${change.changes.version}]`
+    );
+    const parsedAddition = processor.parse(addition);
     const changelogFirstElement = changelog.children.shift();
     const changelogRemainingElements = changelog.children;
     changelog.children = [].concat(
       changelogFirstElement,
-      addition.children,
+      parsedAddition.children,
       changelogRemainingElements
     );
     change.changelog.contents = processor.stringify(changelog);

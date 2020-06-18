@@ -16,15 +16,40 @@ describe("changelog", () => {
   it("fills a changelog", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
 
-    const changeList = [
+    const applied = [
       {
-        dependencies: undefined,
-        manager: "javascript",
-        path: "./",
-        pkg: "js-single-json-fixture",
-        type: "minor",
+        name: "js-single-json-fixture",
+        version: "0.5.6",
       },
     ];
+
+    const assembledChanges = {
+      releases: {
+        "js-single-json-fixture": {
+          changes: [
+            {
+              releases: {
+                "js-single-json-fixture": "patch",
+              },
+              summary: "This is a test.",
+            },
+            {
+              releases: {
+                "js-single-json-fixture": "patch",
+              },
+              summary: "This is another test.",
+            },
+            {
+              releases: {
+                "js-single-json-fixture": "patch",
+              },
+              summary: "This is the last test.",
+            },
+          ],
+          type: "patch",
+        },
+      },
+    };
 
     const config = {
       packages: {
@@ -35,13 +60,24 @@ describe("changelog", () => {
       },
     };
 
-    yield fillChangelogs({ changeList, config, cwd: projectFolder });
+    yield fillChangelogs({
+      applied,
+      assembledChanges,
+      config,
+      cwd: projectFolder,
+    });
 
     const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
-    expect(changelog.contents).toBe("# Changelog\n\nminor\n");
+    expect(changelog.contents).toBe(
+      "# Changelog\n\n" +
+        "## [0.5.6]\n\n" +
+        "-   This is a test.\n" +
+        "-   This is another test.\n" +
+        "-   This is the last test.\n"
+    );
 
     expect({
       consoleLog: console.log.mock.calls,
