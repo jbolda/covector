@@ -6,7 +6,7 @@
     "index.js"
   ],
   "dependencies": {
-    "@covector/files": "^0.0.5",
+    "@covector/files": "0.0.6",
     "lodash.template": "^4.5.0",
     "remark-parse": "^8.0.2",
     "remark-stringify": "^8.1.0",

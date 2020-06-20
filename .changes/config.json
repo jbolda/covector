@@ -36,7 +36,7 @@
     "@covector/changelog": {
       "path": "./packages/changelog",
       "manager": "javascript",
-      "dependencies": ["all"]
+      "dependencies": ["@covector/files", "all"]
     },
     "action": {
       "path": "./packages/action",
