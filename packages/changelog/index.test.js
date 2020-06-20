@@ -13,7 +13,7 @@ describe("changelog", () => {
     restoreConsole();
   });
 
-  it("fills a changelog", function* () {
+  it("creates and fills a changelog", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -77,6 +77,79 @@ describe("changelog", () => {
         "-   This is a test.\n" +
         "-   This is another test.\n" +
         "-   This is the last test.\n"
+    );
+  });
+
+  it("inserts into an existing changelog", function* () {
+    const projectFolder = f.copy("changelog.js-single-exists");
+
+    const applied = [
+      {
+        name: "changelog-js-pkg-fixture",
+        version: "0.9.0",
+      },
+    ];
+
+    const assembledChanges = {
+      releases: {
+        "changelog-js-pkg-fixture": {
+          changes: [
+            {
+              releases: {
+                "changelog-js-pkg-fixture": "patch",
+              },
+              summary: "This is a test.",
+            },
+            {
+              releases: {
+                "changelog-js-pkg-fixture": "patch",
+              },
+              summary: "This is another test.",
+            },
+            {
+              releases: {
+                "changelog-js-pkg-fixture": "minor",
+              },
+              summary: "This is the last test.",
+            },
+          ],
+          type: "minor",
+        },
+      },
+    };
+
+    const config = {
+      packages: {
+        "changelog-js-pkg-fixture": {
+          path: "./",
+          manager: "javascript",
+        },
+      },
+    };
+
+    yield fillChangelogs({
+      applied,
+      assembledChanges,
+      config,
+      cwd: projectFolder,
+    });
+
+    const changelog = yield toVFile.read(
+      projectFolder + "/CHANGELOG.md",
+      "utf-8"
+    );
+    expect(changelog.contents).toBe(
+      "# Changelog\n\n" +
+        "## [0.9.0]\n\n" +
+        "-   This is a test.\n" +
+        "-   This is another test.\n" +
+        "-   This is the last test.\n\n" +
+        "## [0.8.16]\n\n" +
+        "-   Adds a command line interface option to tauri apps, configurable under tauri.conf.json > tauri > cli.\n" +
+        "-   Fixes no-server mode not running on another machine due to fs::read_to_string usage instead of the include_str macro.\n" +
+        "    Build no longer fails when compiling without environment variables, now the app will show an error.\n" +
+        "-   Adds desktop notifications API.\n" +
+        "-   Properly reflect tauri.conf.json changes on app when running tauri dev.\n"
     );
 
     expect({
