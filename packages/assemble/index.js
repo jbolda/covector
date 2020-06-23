@@ -70,7 +70,12 @@ module.exports.assemble = (texts) => {
   return plan;
 };
 
-module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
+module.exports.mergeIntoConfig = ({
+  config,
+  assembledChanges,
+  command,
+  cwd,
+}) => {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce((pkged, pkg) => {
@@ -132,6 +137,7 @@ module.exports.mergeIntoConfig = ({ config, assembledChanges, command }) => {
         : {
             pkgFile: await readPkgFile(
               path.join(
+                cwd,
                 config.packages[pkg].path,
                 !!config.packages[pkg].manager &&
                   config.packages[pkg].manager === "rust"
