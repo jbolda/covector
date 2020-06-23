@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`integration test fails with error 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "publishing tauri.js with npm publish",
+    ],
+    Array [
+      "",
+    ],
+  ],
+  "covectorReturn": Object {
+    "tauri.js": true,
+  },
+}
+`;
+
 exports[`integration test passes correct config for js and rust 1`] = `
 Object {
   "consoleDir": Array [
