@@ -1,10 +1,11 @@
 const { spawn, timeout } = require("effection");
 const { ChildProcess } = require("@effection/node");
-const { once, on } = require("@effection/events");
+const { once, on, throwOnErrorEvent } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { fillChangelogs } = require("@covector/changelog");
 const { apply } = require("@covector/apply");
+const path = require("path");
 
 module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
   const config = yield configFile({ cwd });
@@ -51,24 +52,32 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       assembledChanges,
       config,
       command: "publish",
+      cwd,
     });
 
-    let published = {};
+    let published = Object.keys(config.packages).reduce((pkgs, pkg) => {
+      pkgs[pkg] = false;
+      return pkgs;
+    }, {});
+
     for (let pkg of commands) {
       if (!!pkg.getPublishedVersion) {
+        console.log(
+          `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`
+        );
         const publishedVersionCommand = yield ChildProcess.spawn(
           pkg.getPublishedVersion,
           [],
           {
-            cwd: pkg.path,
-            shell: process.env.shell,
+            cwd: path.join(cwd, pkg.path),
+            shell: process.env.shell || true,
             stdio: "pipe",
             windowsHide: true,
           }
         );
+        yield throwOnErrorEvent(publishedVersionCommand);
         let version = "";
         let events = yield on(publishedVersionCommand.stdout, "data");
-
         while (version === "" || version === "undefined") {
           let data = yield events.next();
           version += !data.value
@@ -83,19 +92,26 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
           continue;
         }
       }
-
       console.log(`publishing ${pkg.pkg} with ${pkg.publish}`);
       let child = yield ChildProcess.spawn(pkg.publish, [], {
-        cwd: pkg.path,
-        shell: process.env.shell,
-        stdio: "inherit",
+        cwd: path.join(cwd, pkg.path),
+        shell: process.env.shell || true,
+        stdio: "pipe",
         windowsHide: true,
       });
-
+      yield throwOnErrorEvent(child);
+      let response = "";
+      let resEvents = yield on(child.stdout, "data");
+      while (response === "" || response === "undefined") {
+        let data = yield resEvents.next();
+        response += !data.value
+          ? data.toString().trim()
+          : data.value.toString().trim();
+      }
       yield once(child, "exit");
-      published[pkg] = true;
+      console.log(response);
+      published[pkg.pkg] = true;
     }
-
     return published;
   }
 };

@@ -1,11 +1,13 @@
 {
   "pkgManagers": {
     "rust": {
-      "preversion": "",
-      "version": "yarn version --${ release.type } --no-git-tag-version --no-commit-hooks",
-      "getPublishedVersion": "npm view ${ pkg.pkg } version",
-      "postversion": "",
-      "publish": "npm publish --access public"
+      "version": true,
+      "prepublish": "cargo package --no-verify",
+      "publish": "echo publishing ${ pkg.pkg } would happen here"
+    },
+    "javascript": {
+      "version": true,
+      "publish": "echo publishing ${ pkg.pkg } would happen here"
     }
   },
   "packages": {

@@ -44,4 +44,21 @@ describe("integration test", () => {
     }).toMatchSnapshot();
     restoreConsole();
   });
+
+  it("runs publish for js and rust", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "publish",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
 });
