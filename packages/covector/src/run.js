@@ -111,6 +111,7 @@ const runCommand = function* ({
   log = `running command for ${pkg}`,
 }) {
   console.log(log);
+  let response = "";
   let child = yield ChildProcess.spawn(command, [], {
     cwd: path.join(cwd, pkgPath),
     shell: process.env.shell || true,
@@ -118,14 +119,19 @@ const runCommand = function* ({
     windowsHide: true,
   });
   yield throwOnErrorEvent(child);
-  let response = "";
   let resEvents = yield on(child.stdout, "data");
   while (response === "" || response === "undefined") {
-    let data = yield resEvents.next();
-    response += !data.value
-      ? data.toString().trim()
-      : data.value.toString().trim();
+    try {
+      let data = yield resEvents.next();
+      response += !data.value
+        ? data.toString().trim()
+        : data.value.toString().trim();
+    } catch (e) {}
   }
-  yield once(child, "exit");
+  const exit = yield once(child, "exit");
+  if (exit[1] !== null) {
+    console.log(exit);
+    throw { value: exit[0], message: exit[1] };
+  }
   return response;
 };
