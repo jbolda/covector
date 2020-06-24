@@ -110,28 +110,28 @@ const runCommand = function* ({
   pkgPath,
   log = `running command for ${pkg}`,
 }) {
-  console.log(log);
-  let response = "";
-  let child = yield ChildProcess.spawn(command, [], {
-    cwd: path.join(cwd, pkgPath),
-    shell: process.env.shell || true,
-    stdio: "pipe",
-    windowsHide: true,
-  });
-  yield throwOnErrorEvent(child);
-  let resEvents = yield on(child.stdout, "data");
-  while (response === "" || response === "undefined") {
-    try {
-      let data = yield resEvents.next();
-      response += !data.value
-        ? data.toString().trim()
-        : data.value.toString().trim();
-    } catch (e) {}
+  try {
+    return yield function* () {
+      console.log(log);
+      let child = yield ChildProcess.spawn(command, [], {
+        cwd: path.join(cwd, pkgPath),
+        shell: process.env.shell || true,
+        stdio: "pipe",
+        windowsHide: true,
+      });
+
+      let response = "";
+      let resEvents = yield on(child.stdout, "data");
+      while (response === "" || response === "undefined") {
+        let data = yield resEvents.next();
+        response += !data.value
+          ? data.toString().trim()
+          : data.value.toString().trim();
+      }
+      yield once(child, "exit");
+      return response;
+    };
+  } catch (error) {
+    throw error;
   }
-  const exit = yield once(child, "exit");
-  if (exit[1] !== null) {
-    console.log(exit);
-    throw { value: exit[0], message: exit[1] };
-  }
-  return response;
 };
