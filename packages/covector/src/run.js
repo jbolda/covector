@@ -110,6 +110,7 @@ const runCommand = function* ({
   pkgPath,
   log = `running command for ${pkg}`,
 }) {
+  let stdio = { stdout: Buffer.from(""), stderr: Buffer.from("") };
   try {
     return yield function* () {
       console.log(log);
@@ -120,18 +121,22 @@ const runCommand = function* ({
         windowsHide: true,
       });
 
-      let response = "";
-      let resEvents = yield on(child.stdout, "data");
-      while (response === "" || response === "undefined") {
-        let data = yield resEvents.next();
-        response += !data.value
-          ? data.toString().trim()
-          : data.value.toString().trim();
+      let stdoutEvents = yield on(child.stdout, "data");
+      let stderrEvents = yield on(child.stderr, "data");
+      while (stdio.stdout.length === 0) {
+        let errordata = yield stderrEvents.next();
+        stdio.stderr = pull(errordata, stdio, "stderr");
+        let outdata = yield stdoutEvents.next();
+        stdio.stdout = pull(outdata, stdio, "stdout");
       }
       yield once(child, "exit");
-      return response;
+      return stdio.stdout;
     };
   } catch (error) {
+    console.log(stdio.stdout.toString());
     throw error;
   }
 };
+
+const pull = (data, stdio, out) =>
+  Buffer.concat([stdio[out]].concat(data.value));
