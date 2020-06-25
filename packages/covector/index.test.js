@@ -78,5 +78,5 @@ describe("integration test", () => {
       // covectorReturn: covectored, // skip this as npm publish has fs dep output which creates false positives
     }).toMatchSnapshot();
     restoreConsole();
-  });
+  }, 10000);
 });
