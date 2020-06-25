@@ -75,7 +75,7 @@ describe("integration test", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      // covectorReturn: covectored, // skip this as npm publish has fs dep output which creates false positives
     }).toMatchSnapshot();
     restoreConsole();
   });
