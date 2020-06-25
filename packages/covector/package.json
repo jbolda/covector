@@ -15,9 +15,9 @@
     "@covector/assemble": "0.0.3",
     "@covector/changelog": "0.0.2",
     "@covector/files": "0.0.7",
-    "@effection/events": "0.6.1",
-    "@effection/node": "0.6.2",
-    "effection": "0.6.2",
+    "@effection/events": "0.7.5",
+    "@effection/node": "0.7.0",
+    "effection": "0.7.0",
     "yargs": "^15.3.1"
   }
 }

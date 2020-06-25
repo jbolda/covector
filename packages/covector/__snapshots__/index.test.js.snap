@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`integration test fails with error 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "publishing tauri.js with npm publish",
+    ],
+  ],
+  "covectorReturn": Object {
+    "tauri.js": true,
+  },
+}
+`;
+
 exports[`integration test passes correct config for js and rust 1`] = `
 Object {
   "consoleDir": Array [
@@ -47,31 +61,16 @@ Object {
       "publishing tauri.js with echo publishing tauri.js would happen here",
     ],
     Array [
-      "publishing tauri.js would happen here",
-    ],
-    Array [
       "publishing tauri-bundler with echo publishing tauri-bundler would happen here",
-    ],
-    Array [
-      "publishing tauri-bundler would happen here",
     ],
     Array [
       "publishing tauri with echo publishing tauri would happen here",
     ],
     Array [
-      "publishing tauri would happen here",
-    ],
-    Array [
       "publishing tauri-api with echo publishing tauri-api would happen here",
     ],
     Array [
-      "publishing tauri-api would happen here",
-    ],
-    Array [
       "publishing tauri-utils with echo publishing tauri-utils would happen here",
-    ],
-    Array [
-      "publishing tauri-utils would happen here",
     ],
   ],
   "covectorReturn": Object {

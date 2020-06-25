@@ -1,6 +1,6 @@
 const { spawn, timeout } = require("effection");
 const { ChildProcess } = require("@effection/node");
-const { once, on, throwOnErrorEvent } = require("@effection/events");
+const { once, on } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { fillChangelogs } = require("@covector/changelog");
@@ -62,29 +62,15 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
 
     for (let pkg of commands) {
       if (!!pkg.getPublishedVersion) {
-        console.log(
-          `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`
-        );
-        const publishedVersionCommand = yield ChildProcess.spawn(
-          pkg.getPublishedVersion,
-          [],
-          {
-            cwd: path.join(cwd, pkg.path),
-            shell: process.env.shell || true,
-            stdio: "pipe",
-            windowsHide: true,
-          }
-        );
-        yield throwOnErrorEvent(publishedVersionCommand);
-        let version = "";
-        let events = yield on(publishedVersionCommand.stdout, "data");
-        while (version === "" || version === "undefined") {
-          let data = yield events.next();
-          version += !data.value
-            ? data.toString().trim()
-            : data.value.toString().trim();
-        }
-        yield once(publishedVersionCommand, "exit");
+        const version = runCommand({
+          command: pkg.getPublishedVersion,
+          cwd,
+          pkg: pkg.pkg,
+          pkgPath: pkg.path,
+          stdio: "pipe",
+          log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
+        });
+
         if (pkg.pkgFile.version === version) {
           console.log(
             `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
@@ -92,24 +78,15 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
           continue;
         }
       }
-      console.log(`publishing ${pkg.pkg} with ${pkg.publish}`);
-      let child = yield ChildProcess.spawn(pkg.publish, [], {
-        cwd: path.join(cwd, pkg.path),
-        shell: process.env.shell || true,
-        stdio: "pipe",
-        windowsHide: true,
+
+      const response = yield runCommand({
+        command: pkg.publish,
+        cwd,
+        pkg: pkg.pkg,
+        pkgPath: pkg.path,
+        log: `publishing ${pkg.pkg} with ${pkg.publish}`,
       });
-      yield throwOnErrorEvent(child);
-      let response = "";
-      let resEvents = yield on(child.stdout, "data");
-      while (response === "" || response === "undefined") {
-        let data = yield resEvents.next();
-        response += !data.value
-          ? data.toString().trim()
-          : data.value.toString().trim();
-      }
-      yield once(child, "exit");
-      console.log(response);
+
       published[pkg.pkg] = true;
     }
     return published;
@@ -125,3 +102,42 @@ function raceTime(
     throw new Error(msg);
   });
 }
+
+const runCommand = function* ({
+  pkg,
+  command,
+  cwd,
+  pkgPath,
+  stdio = "inherit",
+  log = `running command for ${pkg}`,
+}) {
+  try {
+    return yield function* () {
+      console.log(log);
+      let child = yield ChildProcess.spawn(command, [], {
+        cwd: path.join(cwd, pkgPath),
+        shell: process.env.shell || true,
+        stdio,
+        windowsHide: true,
+      });
+
+      if (stdio === "pipe") {
+        let response = "";
+        let resEvents = yield on(child.stdout, "data");
+        while (response === "" || response === "undefined") {
+          let data = yield resEvents.next();
+          response += !data.value
+            ? data.toString().trim()
+            : data.value.toString().trim();
+        }
+        yield once(child, "exit");
+        console.log(response);
+        return response;
+      } else {
+        return;
+      }
+    };
+  } catch (error) {
+    throw error;
+  }
+};
