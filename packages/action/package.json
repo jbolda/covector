@@ -10,7 +10,7 @@
   "dependencies": {
     "@actions/core": "^1.2.4",
     "@actions/github": "^2.2.0",
-    "@effection/node": "0.6.2",
+    "@effection/node": "0.7.0",
     "@zeit/ncc": "^0.22.3"
   }
 }
