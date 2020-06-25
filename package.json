@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "covector": "node ./packages/covector/bin/covector.js",
-    "test": "jest",
+    "test": "jest --detectOpenHandles",
     "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.js\"",
     "postinstall": "patch-package"
   },
