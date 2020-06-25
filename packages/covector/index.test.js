@@ -65,18 +65,18 @@ describe("integration test", () => {
   it("fails with error", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-publish-error");
-    const covectored = await main(
+    const covectored = main(
       covector({
         command: "publish",
         cwd: fullIntegration,
       })
     );
+    await expect(covectored).rejects.toThrow();
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
-    expect(covectored).toThrow();
     restoreConsole();
   });
 });

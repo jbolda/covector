@@ -8,8 +8,49 @@ Object {
       "publishing tauri.js with npm publish",
     ],
   ],
-  "covectorReturn": Object {
-    "tauri.js": true,
+  "covectorReturn": t {
+    "_promise": Promise {},
+    "blockOnReturnedContext": true,
+    "children": Set {},
+    "ensure": [Function],
+    "exitHooks": Set {},
+    "fail": [Function],
+    "fork": [Function],
+    "id": 57,
+    "isRequired": false,
+    "operation": Object {},
+    "reject": [Function],
+    "resolve": [Function],
+    "result": [Error: Command failed with ENOENT: npm publish
+spawn npm ENOENT
+npm notice 
+npm notice package: react@16.13.0
+npm notice === Tarball Contents === 
+npm notice 216B .changes/config.json
+npm notice 93B  package.json        
+npm notice === Tarball Details === 
+npm notice name:          react                                   
+npm notice version:       16.13.0                                 
+npm notice package size:  300 B                                   
+npm notice unpacked size: 309 B                                   
+npm notice shasum:        8fa44d58b9961cff92023f6a343be06cdd6b5d6e
+npm notice integrity:     sha512-m2FPYzFegVo0A[...]dvZrRSsW7nefQ==
+npm notice total files:   2                                       
+npm notice 
+npm ERR! code E404
+npm ERR! 404 Not Found - PUT https://registry.yarnpkg.com/react - Not found
+npm ERR! 404 
+npm ERR! 404  'react@16.13.0' is not in the npm registry.
+npm ERR! 404 You should bug the author to publish it (or use the name yourself!)
+npm ERR! 404 
+npm ERR! 404 Note that you can also install from a
+npm ERR! 404 tarball, folder, http url, or git url.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\\Users\\Jacob\\AppData\\Roaming\\npm-cache\\_logs\\2020-06-25T12_22_42_808Z-debug.log],
+    "resume": [Function],
+    "spawn": [Function],
+    "state": "errored",
   },
 }
 `;
@@ -61,16 +102,31 @@ Object {
       "publishing tauri.js with echo publishing tauri.js would happen here",
     ],
     Array [
+      "publishing tauri.js would happen here",
+    ],
+    Array [
       "publishing tauri-bundler with echo publishing tauri-bundler would happen here",
+    ],
+    Array [
+      "publishing tauri-bundler would happen here",
     ],
     Array [
       "publishing tauri with echo publishing tauri would happen here",
     ],
     Array [
+      "publishing tauri would happen here",
+    ],
+    Array [
       "publishing tauri-api with echo publishing tauri-api would happen here",
     ],
     Array [
+      "publishing tauri-api would happen here",
+    ],
+    Array [
       "publishing tauri-utils with echo publishing tauri-utils would happen here",
+    ],
+    Array [
+      "publishing tauri-utils would happen here",
     ],
   ],
   "covectorReturn": Object {

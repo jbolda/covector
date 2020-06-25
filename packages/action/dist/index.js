@@ -15800,7 +15800,19 @@ module.exports = factory();
 
 
 /***/ }),
-/* 37 */,
+/* 37 */
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = (d, num) => {
+  num = String(num)
+  while (num.length < d) num = '0' + num
+  return num
+}
+
+
+/***/ }),
 /* 38 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -16511,18 +16523,25 @@ exports.request = request;
 
 /***/ }),
 /* 60 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-const Range = __webpack_require__(378)
-const satisfies = (version, range, options) => {
-  try {
-    range = new Range(range, options)
-  } catch (er) {
-    return false
-  }
-  return range.test(version)
-}
-module.exports = satisfies
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
 
 
 /***/ }),
@@ -16722,7 +16741,131 @@ module.exports = (...arguments_) => {
 
 
 /***/ }),
-/* 68 */,
+/* 68 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {promisify} = __webpack_require__(669);
+const fs = __webpack_require__(747);
+const path = __webpack_require__(622);
+const fastGlob = __webpack_require__(344);
+const gitIgnore = __webpack_require__(396);
+const slash = __webpack_require__(903);
+
+const DEFAULT_IGNORE = [
+	'**/node_modules/**',
+	'**/flow-typed/**',
+	'**/coverage/**',
+	'**/.git'
+];
+
+const readFileP = promisify(fs.readFile);
+
+const mapGitIgnorePatternTo = base => ignore => {
+	if (ignore.startsWith('!')) {
+		return '!' + path.posix.join(base, ignore.slice(1));
+	}
+
+	return path.posix.join(base, ignore);
+};
+
+const parseGitIgnore = (content, options) => {
+	const base = slash(path.relative(options.cwd, path.dirname(options.fileName)));
+
+	return content
+		.split(/\r?\n/)
+		.filter(Boolean)
+		.filter(line => !line.startsWith('#'))
+		.map(mapGitIgnorePatternTo(base));
+};
+
+const reduceIgnore = files => {
+	return files.reduce((ignores, file) => {
+		ignores.add(parseGitIgnore(file.content, {
+			cwd: file.cwd,
+			fileName: file.filePath
+		}));
+		return ignores;
+	}, gitIgnore());
+};
+
+const ensureAbsolutePathForCwd = (cwd, p) => {
+	cwd = slash(cwd);
+	if (path.isAbsolute(p)) {
+		if (p.startsWith(cwd)) {
+			return p;
+		}
+
+		throw new Error(`Path ${p} is not in cwd ${cwd}`);
+	}
+
+	return path.join(cwd, p);
+};
+
+const getIsIgnoredPredecate = (ignores, cwd) => {
+	return p => ignores.ignores(slash(path.relative(cwd, ensureAbsolutePathForCwd(cwd, p))));
+};
+
+const getFile = async (file, cwd) => {
+	const filePath = path.join(cwd, file);
+	const content = await readFileP(filePath, 'utf8');
+
+	return {
+		cwd,
+		filePath,
+		content
+	};
+};
+
+const getFileSync = (file, cwd) => {
+	const filePath = path.join(cwd, file);
+	const content = fs.readFileSync(filePath, 'utf8');
+
+	return {
+		cwd,
+		filePath,
+		content
+	};
+};
+
+const normalizeOptions = ({
+	ignore = [],
+	cwd = slash(process.cwd())
+} = {}) => {
+	return {ignore, cwd};
+};
+
+module.exports = async options => {
+	options = normalizeOptions(options);
+
+	const paths = await fastGlob('**/.gitignore', {
+		ignore: DEFAULT_IGNORE.concat(options.ignore),
+		cwd: options.cwd
+	});
+
+	const files = await Promise.all(paths.map(file => getFile(file, options.cwd)));
+	const ignores = reduceIgnore(files);
+
+	return getIsIgnoredPredecate(ignores, options.cwd);
+};
+
+module.exports.sync = options => {
+	options = normalizeOptions(options);
+
+	const paths = fastGlob.sync('**/.gitignore', {
+		ignore: DEFAULT_IGNORE.concat(options.ignore),
+		cwd: options.cwd
+	});
+
+	const files = paths.map(file => getFileSync(file, options.cwd));
+	const ignores = reduceIgnore(files);
+
+	return getIsIgnoredPredecate(ignores, options.cwd);
+};
+
+
+/***/ }),
 /* 69 */,
 /* 70 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -16846,7 +16989,54 @@ function Octokit(plugins, options) {
 
 
 /***/ }),
-/* 74 */,
+/* 74 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const { PassThrough } = __webpack_require__(413);
+
+module.exports = function (/*streams...*/) {
+  var sources = []
+  var output  = new PassThrough({objectMode: true})
+
+  output.setMaxListeners(0)
+
+  output.add = add
+  output.isEmpty = isEmpty
+
+  output.on('unpipe', remove)
+
+  Array.prototype.slice.call(arguments).forEach(add)
+
+  return output
+
+  function add (source) {
+    if (Array.isArray(source)) {
+      source.forEach(add)
+      return this
+    }
+
+    sources.push(source);
+    source.once('end', remove.bind(null, source))
+    source.once('error', output.emit.bind(output, 'error'))
+    source.pipe(output, {end: false})
+    return this
+  }
+
+  function isEmpty () {
+    return sources.length == 0;
+  }
+
+  function remove (source) {
+    sources = sources.filter(function (it) { return it !== source })
+    if (!sources.length && output.readable) { output.end() }
+  }
+}
+
+
+/***/ }),
 /* 75 */,
 /* 76 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -16934,18 +17124,11 @@ function whitespace(character) {
 
 /***/ }),
 /* 78 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-
-module.exports = function whichModule (exported) {
-  for (var i = 0, files = Object.keys(require.cache), mod; i < files.length; i++) {
-    mod = require.cache[files[i]]
-    if (mod.exports === exported) return mod
-  }
-  return null
-}
+const SemVer = __webpack_require__(840)
+const patch = (a, loose) => new SemVer(a, loose).patch
+module.exports = patch
 
 
 /***/ }),
@@ -17973,7 +18156,59 @@ function imageReference(node) {
 
 
 /***/ }),
-/* 100 */,
+/* 100 */
+/***/ (function(module) {
+
+"use strict";
+
+
+const nativePromisePrototype = (async () => {})().constructor.prototype;
+const descriptors = ['then', 'catch', 'finally'].map(property => [
+	property,
+	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
+]);
+
+// The return value is a mixin of `childProcess` and `Promise`
+const mergePromise = (spawned, promise) => {
+	for (const [property, descriptor] of descriptors) {
+		// Starting the main `promise` is deferred to avoid consuming streams
+		const value = typeof promise === 'function' ?
+			(...args) => Reflect.apply(descriptor.value, promise(), args) :
+			descriptor.value.bind(promise);
+
+		Reflect.defineProperty(spawned, property, {...descriptor, value});
+	}
+
+	return spawned;
+};
+
+// Use promises instead of `child_process` events
+const getSpawnedPromise = spawned => {
+	return new Promise((resolve, reject) => {
+		spawned.on('exit', (exitCode, signal) => {
+			resolve({exitCode, signal});
+		});
+
+		spawned.on('error', error => {
+			reject(error);
+		});
+
+		if (spawned.stdin) {
+			spawned.stdin.on('error', error => {
+				reject(error);
+			});
+		}
+	});
+};
+
+module.exports = {
+	mergePromise,
+	getSpawnedPromise
+};
+
+
+
+/***/ }),
 /* 101 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -18143,1092 +18378,158 @@ module.exports = function btoa(str) {
 /***/ }),
 /* 109 */,
 /* 110 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
 
-const constants = __webpack_require__(933);
-const utils = __webpack_require__(167);
+const isWin = process.platform === 'win32';
 
-/**
- * Constants
- */
-
-const {
-  MAX_LENGTH,
-  POSIX_REGEX_SOURCE,
-  REGEX_NON_SPECIAL_CHARS,
-  REGEX_SPECIAL_CHARS_BACKREF,
-  REPLACEMENTS
-} = constants;
-
-/**
- * Helpers
- */
-
-const expandRange = (args, options) => {
-  if (typeof options.expandRange === 'function') {
-    return options.expandRange(...args, options);
-  }
-
-  args.sort();
-  const value = `[${args.join('-')}]`;
-
-  try {
-    /* eslint-disable-next-line no-new */
-    new RegExp(value);
-  } catch (ex) {
-    return args.map(v => utils.escapeRegex(v)).join('..');
-  }
-
-  return value;
-};
-
-/**
- * Create the message for a syntax error
- */
-
-const syntaxError = (type, char) => {
-  return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
-};
-
-/**
- * Parse the given input string.
- * @param {String} input
- * @param {Object} options
- * @return {Object}
- */
-
-const parse = (input, options) => {
-  if (typeof input !== 'string') {
-    throw new TypeError('Expected a string');
-  }
-
-  input = REPLACEMENTS[input] || input;
-
-  const opts = { ...options };
-  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
-
-  let len = input.length;
-  if (len > max) {
-    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
-  }
-
-  const bos = { type: 'bos', value: '', output: opts.prepend || '' };
-  const tokens = [bos];
-
-  const capture = opts.capture ? '' : '?:';
-  const win32 = utils.isWindows(options);
-
-  // create constants based on platform, for windows or posix
-  const PLATFORM_CHARS = constants.globChars(win32);
-  const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
-
-  const {
-    DOT_LITERAL,
-    PLUS_LITERAL,
-    SLASH_LITERAL,
-    ONE_CHAR,
-    DOTS_SLASH,
-    NO_DOT,
-    NO_DOT_SLASH,
-    NO_DOTS_SLASH,
-    QMARK,
-    QMARK_NO_DOT,
-    STAR,
-    START_ANCHOR
-  } = PLATFORM_CHARS;
-
-  const globstar = (opts) => {
-    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
-  };
-
-  const nodot = opts.dot ? '' : NO_DOT;
-  const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
-  let star = opts.bash === true ? globstar(opts) : STAR;
-
-  if (opts.capture) {
-    star = `(${star})`;
-  }
-
-  // minimatch options support
-  if (typeof opts.noext === 'boolean') {
-    opts.noextglob = opts.noext;
-  }
-
-  const state = {
-    input,
-    index: -1,
-    start: 0,
-    dot: opts.dot === true,
-    consumed: '',
-    output: '',
-    prefix: '',
-    backtrack: false,
-    negated: false,
-    brackets: 0,
-    braces: 0,
-    parens: 0,
-    quotes: 0,
-    globstar: false,
-    tokens
-  };
-
-  input = utils.removePrefix(input, state);
-  len = input.length;
-
-  const extglobs = [];
-  const braces = [];
-  const stack = [];
-  let prev = bos;
-  let value;
-
-  /**
-   * Tokenizing helpers
-   */
-
-  const eos = () => state.index === len - 1;
-  const peek = state.peek = (n = 1) => input[state.index + n];
-  const advance = state.advance = () => input[++state.index];
-  const remaining = () => input.slice(state.index + 1);
-  const consume = (value = '', num = 0) => {
-    state.consumed += value;
-    state.index += num;
-  };
-  const append = token => {
-    state.output += token.output != null ? token.output : token.value;
-    consume(token.value);
-  };
-
-  const negate = () => {
-    let count = 1;
-
-    while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
-      advance();
-      state.start++;
-      count++;
-    }
-
-    if (count % 2 === 0) {
-      return false;
-    }
-
-    state.negated = true;
-    state.start++;
-    return true;
-  };
-
-  const increment = type => {
-    state[type]++;
-    stack.push(type);
-  };
-
-  const decrement = type => {
-    state[type]--;
-    stack.pop();
-  };
-
-  /**
-   * Push tokens onto the tokens array. This helper speeds up
-   * tokenizing by 1) helping us avoid backtracking as much as possible,
-   * and 2) helping us avoid creating extra tokens when consecutive
-   * characters are plain text. This improves performance and simplifies
-   * lookbehinds.
-   */
-
-  const push = tok => {
-    if (prev.type === 'globstar') {
-      const isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
-      const isExtglob = tok.extglob === true || (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'));
-
-      if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
-        state.output = state.output.slice(0, -prev.output.length);
-        prev.type = 'star';
-        prev.value = '*';
-        prev.output = star;
-        state.output += prev.output;
-      }
-    }
-
-    if (extglobs.length && tok.type !== 'paren' && !EXTGLOB_CHARS[tok.value]) {
-      extglobs[extglobs.length - 1].inner += tok.value;
-    }
-
-    if (tok.value || tok.output) append(tok);
-    if (prev && prev.type === 'text' && tok.type === 'text') {
-      prev.value += tok.value;
-      prev.output = (prev.output || '') + tok.value;
-      return;
-    }
-
-    tok.prev = prev;
-    tokens.push(tok);
-    prev = tok;
-  };
-
-  const extglobOpen = (type, value) => {
-    const token = { ...EXTGLOB_CHARS[value], conditions: 1, inner: '' };
-
-    token.prev = prev;
-    token.parens = state.parens;
-    token.output = state.output;
-    const output = (opts.capture ? '(' : '') + token.open;
-
-    increment('parens');
-    push({ type, value, output: state.output ? '' : ONE_CHAR });
-    push({ type: 'paren', extglob: true, value: advance(), output });
-    extglobs.push(token);
-  };
-
-  const extglobClose = token => {
-    let output = token.close + (opts.capture ? ')' : '');
-
-    if (token.type === 'negate') {
-      let extglobStar = star;
-
-      if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
-        extglobStar = globstar(opts);
-      }
-
-      if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
-        output = token.close = `)$))${extglobStar}`;
-      }
-
-      if (token.prev.type === 'bos' && eos()) {
-        state.negatedExtglob = true;
-      }
-    }
-
-    push({ type: 'paren', extglob: true, value, output });
-    decrement('parens');
-  };
-
-  /**
-   * Fast paths
-   */
-
-  if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
-    let backslashes = false;
-
-    let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc, chars, first, rest, index) => {
-      if (first === '\\') {
-        backslashes = true;
-        return m;
-      }
-
-      if (first === '?') {
-        if (esc) {
-          return esc + first + (rest ? QMARK.repeat(rest.length) : '');
-        }
-        if (index === 0) {
-          return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : '');
-        }
-        return QMARK.repeat(chars.length);
-      }
-
-      if (first === '.') {
-        return DOT_LITERAL.repeat(chars.length);
-      }
-
-      if (first === '*') {
-        if (esc) {
-          return esc + first + (rest ? star : '');
-        }
-        return star;
-      }
-      return esc ? m : `\\${m}`;
+function notFoundError(original, syscall) {
+    return Object.assign(new Error(`${syscall} ${original.command} ENOENT`), {
+        code: 'ENOENT',
+        errno: 'ENOENT',
+        syscall: `${syscall} ${original.command}`,
+        path: original.command,
+        spawnargs: original.args,
     });
+}
 
-    if (backslashes === true) {
-      if (opts.unescape === true) {
-        output = output.replace(/\\/g, '');
-      } else {
-        output = output.replace(/\\+/g, m => {
-          return m.length % 2 === 0 ? '\\\\' : (m ? '\\' : '');
-        });
-      }
+function hookChildProcess(cp, parsed) {
+    if (!isWin) {
+        return;
     }
 
-    if (output === input && opts.contains === true) {
-      state.output = input;
-      return state;
-    }
+    const originalEmit = cp.emit;
 
-    state.output = utils.wrapOutput(output, state, options);
-    return state;
-  }
+    cp.emit = function (name, arg1) {
+        // If emitting "exit" event and exit code is 1, we need to check if
+        // the command exists and emit an "error" instead
+        // See https://github.com/IndigoUnited/node-cross-spawn/issues/16
+        if (name === 'exit') {
+            const err = verifyENOENT(arg1, parsed, 'spawn');
 
-  /**
-   * Tokenize input until we reach end-of-string
-   */
-
-  while (!eos()) {
-    value = advance();
-
-    if (value === '\u0000') {
-      continue;
-    }
-
-    /**
-     * Escaped characters
-     */
-
-    if (value === '\\') {
-      const next = peek();
-
-      if (next === '/' && opts.bash !== true) {
-        continue;
-      }
-
-      if (next === '.' || next === ';') {
-        continue;
-      }
-
-      if (!next) {
-        value += '\\';
-        push({ type: 'text', value });
-        continue;
-      }
-
-      // collapse slashes to reduce potential for exploits
-      const match = /^\\+/.exec(remaining());
-      let slashes = 0;
-
-      if (match && match[0].length > 2) {
-        slashes = match[0].length;
-        state.index += slashes;
-        if (slashes % 2 !== 0) {
-          value += '\\';
-        }
-      }
-
-      if (opts.unescape === true) {
-        value = advance() || '';
-      } else {
-        value += advance() || '';
-      }
-
-      if (state.brackets === 0) {
-        push({ type: 'text', value });
-        continue;
-      }
-    }
-
-    /**
-     * If we're inside a regex character class, continue
-     * until we reach the closing bracket.
-     */
-
-    if (state.brackets > 0 && (value !== ']' || prev.value === '[' || prev.value === '[^')) {
-      if (opts.posix !== false && value === ':') {
-        const inner = prev.value.slice(1);
-        if (inner.includes('[')) {
-          prev.posix = true;
-
-          if (inner.includes(':')) {
-            const idx = prev.value.lastIndexOf('[');
-            const pre = prev.value.slice(0, idx);
-            const rest = prev.value.slice(idx + 2);
-            const posix = POSIX_REGEX_SOURCE[rest];
-            if (posix) {
-              prev.value = pre + posix;
-              state.backtrack = true;
-              advance();
-
-              if (!bos.output && tokens.indexOf(prev) === 1) {
-                bos.output = ONE_CHAR;
-              }
-              continue;
+            if (err) {
+                return originalEmit.call(cp, 'error', err);
             }
-          }
-        }
-      }
-
-      if ((value === '[' && peek() !== ':') || (value === '-' && peek() === ']')) {
-        value = `\\${value}`;
-      }
-
-      if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
-        value = `\\${value}`;
-      }
-
-      if (opts.posix === true && value === '!' && prev.value === '[') {
-        value = '^';
-      }
-
-      prev.value += value;
-      append({ value });
-      continue;
-    }
-
-    /**
-     * If we're inside a quoted string, continue
-     * until we reach the closing double quote.
-     */
-
-    if (state.quotes === 1 && value !== '"') {
-      value = utils.escapeRegex(value);
-      prev.value += value;
-      append({ value });
-      continue;
-    }
-
-    /**
-     * Double quotes
-     */
-
-    if (value === '"') {
-      state.quotes = state.quotes === 1 ? 0 : 1;
-      if (opts.keepQuotes === true) {
-        push({ type: 'text', value });
-      }
-      continue;
-    }
-
-    /**
-     * Parentheses
-     */
-
-    if (value === '(') {
-      increment('parens');
-      push({ type: 'paren', value });
-      continue;
-    }
-
-    if (value === ')') {
-      if (state.parens === 0 && opts.strictBrackets === true) {
-        throw new SyntaxError(syntaxError('opening', '('));
-      }
-
-      const extglob = extglobs[extglobs.length - 1];
-      if (extglob && state.parens === extglob.parens + 1) {
-        extglobClose(extglobs.pop());
-        continue;
-      }
-
-      push({ type: 'paren', value, output: state.parens ? ')' : '\\)' });
-      decrement('parens');
-      continue;
-    }
-
-    /**
-     * Square brackets
-     */
-
-    if (value === '[') {
-      if (opts.nobracket === true || !remaining().includes(']')) {
-        if (opts.nobracket !== true && opts.strictBrackets === true) {
-          throw new SyntaxError(syntaxError('closing', ']'));
         }
 
-        value = `\\${value}`;
-      } else {
-        increment('brackets');
-      }
+        return originalEmit.apply(cp, arguments); // eslint-disable-line prefer-rest-params
+    };
+}
 
-      push({ type: 'bracket', value });
-      continue;
+function verifyENOENT(status, parsed) {
+    if (isWin && status === 1 && !parsed.file) {
+        return notFoundError(parsed.original, 'spawn');
     }
 
-    if (value === ']') {
-      if (opts.nobracket === true || (prev && prev.type === 'bracket' && prev.value.length === 1)) {
-        push({ type: 'text', value, output: `\\${value}` });
-        continue;
-      }
+    return null;
+}
 
-      if (state.brackets === 0) {
-        if (opts.strictBrackets === true) {
-          throw new SyntaxError(syntaxError('opening', '['));
-        }
-
-        push({ type: 'text', value, output: `\\${value}` });
-        continue;
-      }
-
-      decrement('brackets');
-
-      const prevValue = prev.value.slice(1);
-      if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
-        value = `/${value}`;
-      }
-
-      prev.value += value;
-      append({ value });
-
-      // when literal brackets are explicitly disabled
-      // assume we should match with a regex character class
-      if (opts.literalBrackets === false || utils.hasRegexChars(prevValue)) {
-        continue;
-      }
-
-      const escaped = utils.escapeRegex(prev.value);
-      state.output = state.output.slice(0, -prev.value.length);
-
-      // when literal brackets are explicitly enabled
-      // assume we should escape the brackets to match literal characters
-      if (opts.literalBrackets === true) {
-        state.output += escaped;
-        prev.value = escaped;
-        continue;
-      }
-
-      // when the user specifies nothing, try to match both
-      prev.value = `(${capture}${escaped}|${prev.value})`;
-      state.output += prev.value;
-      continue;
+function verifyENOENTSync(status, parsed) {
+    if (isWin && status === 1 && !parsed.file) {
+        return notFoundError(parsed.original, 'spawnSync');
     }
 
-    /**
-     * Braces
-     */
-
-    if (value === '{' && opts.nobrace !== true) {
-      increment('braces');
-
-      const open = {
-        type: 'brace',
-        value,
-        output: '(',
-        outputIndex: state.output.length,
-        tokensIndex: state.tokens.length
-      };
-
-      braces.push(open);
-      push(open);
-      continue;
-    }
-
-    if (value === '}') {
-      const brace = braces[braces.length - 1];
-
-      if (opts.nobrace === true || !brace) {
-        push({ type: 'text', value, output: value });
-        continue;
-      }
-
-      let output = ')';
-
-      if (brace.dots === true) {
-        const arr = tokens.slice();
-        const range = [];
-
-        for (let i = arr.length - 1; i >= 0; i--) {
-          tokens.pop();
-          if (arr[i].type === 'brace') {
-            break;
-          }
-          if (arr[i].type !== 'dots') {
-            range.unshift(arr[i].value);
-          }
-        }
-
-        output = expandRange(range, opts);
-        state.backtrack = true;
-      }
-
-      if (brace.comma !== true && brace.dots !== true) {
-        const out = state.output.slice(0, brace.outputIndex);
-        const toks = state.tokens.slice(brace.tokensIndex);
-        brace.value = brace.output = '\\{';
-        value = output = '\\}';
-        state.output = out;
-        for (const t of toks) {
-          state.output += (t.output || t.value);
-        }
-      }
-
-      push({ type: 'brace', value, output });
-      decrement('braces');
-      braces.pop();
-      continue;
-    }
-
-    /**
-     * Pipes
-     */
-
-    if (value === '|') {
-      if (extglobs.length > 0) {
-        extglobs[extglobs.length - 1].conditions++;
-      }
-      push({ type: 'text', value });
-      continue;
-    }
-
-    /**
-     * Commas
-     */
-
-    if (value === ',') {
-      let output = value;
-
-      const brace = braces[braces.length - 1];
-      if (brace && stack[stack.length - 1] === 'braces') {
-        brace.comma = true;
-        output = '|';
-      }
-
-      push({ type: 'comma', value, output });
-      continue;
-    }
-
-    /**
-     * Slashes
-     */
-
-    if (value === '/') {
-      // if the beginning of the glob is "./", advance the start
-      // to the current index, and don't add the "./" characters
-      // to the state. This greatly simplifies lookbehinds when
-      // checking for BOS characters like "!" and "." (not "./")
-      if (prev.type === 'dot' && state.index === state.start + 1) {
-        state.start = state.index + 1;
-        state.consumed = '';
-        state.output = '';
-        tokens.pop();
-        prev = bos; // reset "prev" to the first token
-        continue;
-      }
-
-      push({ type: 'slash', value, output: SLASH_LITERAL });
-      continue;
-    }
-
-    /**
-     * Dots
-     */
-
-    if (value === '.') {
-      if (state.braces > 0 && prev.type === 'dot') {
-        if (prev.value === '.') prev.output = DOT_LITERAL;
-        const brace = braces[braces.length - 1];
-        prev.type = 'dots';
-        prev.output += value;
-        prev.value += value;
-        brace.dots = true;
-        continue;
-      }
-
-      if ((state.braces + state.parens) === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
-        push({ type: 'text', value, output: DOT_LITERAL });
-        continue;
-      }
-
-      push({ type: 'dot', value, output: DOT_LITERAL });
-      continue;
-    }
-
-    /**
-     * Question marks
-     */
-
-    if (value === '?') {
-      const isGroup = prev && prev.value === '(';
-      if (!isGroup && opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-        extglobOpen('qmark', value);
-        continue;
-      }
-
-      if (prev && prev.type === 'paren') {
-        const next = peek();
-        let output = value;
-
-        if (next === '<' && !utils.supportsLookbehinds()) {
-          throw new Error('Node.js v10 or higher is required for regex lookbehinds');
-        }
-
-        if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
-          output = `\\${value}`;
-        }
-
-        push({ type: 'text', value, output });
-        continue;
-      }
-
-      if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
-        push({ type: 'qmark', value, output: QMARK_NO_DOT });
-        continue;
-      }
-
-      push({ type: 'qmark', value, output: QMARK });
-      continue;
-    }
-
-    /**
-     * Exclamation
-     */
-
-    if (value === '!') {
-      if (opts.noextglob !== true && peek() === '(') {
-        if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
-          extglobOpen('negate', value);
-          continue;
-        }
-      }
-
-      if (opts.nonegate !== true && state.index === 0) {
-        negate();
-        continue;
-      }
-    }
-
-    /**
-     * Plus
-     */
-
-    if (value === '+') {
-      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-        extglobOpen('plus', value);
-        continue;
-      }
-
-      if ((prev && prev.value === '(') || opts.regex === false) {
-        push({ type: 'plus', value, output: PLUS_LITERAL });
-        continue;
-      }
-
-      if ((prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace')) || state.parens > 0) {
-        push({ type: 'plus', value });
-        continue;
-      }
-
-      push({ type: 'plus', value: PLUS_LITERAL });
-      continue;
-    }
-
-    /**
-     * Plain text
-     */
-
-    if (value === '@') {
-      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
-        push({ type: 'at', extglob: true, value, output: '' });
-        continue;
-      }
-
-      push({ type: 'text', value });
-      continue;
-    }
-
-    /**
-     * Plain text
-     */
-
-    if (value !== '*') {
-      if (value === '$' || value === '^') {
-        value = `\\${value}`;
-      }
-
-      const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
-      if (match) {
-        value += match[0];
-        state.index += match[0].length;
-      }
-
-      push({ type: 'text', value });
-      continue;
-    }
-
-    /**
-     * Stars
-     */
-
-    if (prev && (prev.type === 'globstar' || prev.star === true)) {
-      prev.type = 'star';
-      prev.star = true;
-      prev.value += value;
-      prev.output = star;
-      state.backtrack = true;
-      state.globstar = true;
-      consume(value);
-      continue;
-    }
-
-    let rest = remaining();
-    if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
-      extglobOpen('star', value);
-      continue;
-    }
-
-    if (prev.type === 'star') {
-      if (opts.noglobstar === true) {
-        consume(value);
-        continue;
-      }
-
-      const prior = prev.prev;
-      const before = prior.prev;
-      const isStart = prior.type === 'slash' || prior.type === 'bos';
-      const afterStar = before && (before.type === 'star' || before.type === 'globstar');
-
-      if (opts.bash === true && (!isStart || (rest[0] && rest[0] !== '/'))) {
-        push({ type: 'star', value, output: '' });
-        continue;
-      }
-
-      const isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
-      const isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
-      if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
-        push({ type: 'star', value, output: '' });
-        continue;
-      }
-
-      // strip consecutive `/**/`
-      while (rest.slice(0, 3) === '/**') {
-        const after = input[state.index + 4];
-        if (after && after !== '/') {
-          break;
-        }
-        rest = rest.slice(3);
-        consume('/**', 3);
-      }
-
-      if (prior.type === 'bos' && eos()) {
-        prev.type = 'globstar';
-        prev.value += value;
-        prev.output = globstar(opts);
-        state.output = prev.output;
-        state.globstar = true;
-        consume(value);
-        continue;
-      }
-
-      if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
-        state.output = state.output.slice(0, -(prior.output + prev.output).length);
-        prior.output = `(?:${prior.output}`;
-
-        prev.type = 'globstar';
-        prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)');
-        prev.value += value;
-        state.globstar = true;
-        state.output += prior.output + prev.output;
-        consume(value);
-        continue;
-      }
-
-      if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
-        const end = rest[1] !== void 0 ? '|$' : '';
-
-        state.output = state.output.slice(0, -(prior.output + prev.output).length);
-        prior.output = `(?:${prior.output}`;
-
-        prev.type = 'globstar';
-        prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
-        prev.value += value;
-
-        state.output += prior.output + prev.output;
-        state.globstar = true;
-
-        consume(value + advance());
-
-        push({ type: 'slash', value: '/', output: '' });
-        continue;
-      }
-
-      if (prior.type === 'bos' && rest[0] === '/') {
-        prev.type = 'globstar';
-        prev.value += value;
-        prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`;
-        state.output = prev.output;
-        state.globstar = true;
-        consume(value + advance());
-        push({ type: 'slash', value: '/', output: '' });
-        continue;
-      }
-
-      // remove single star from output
-      state.output = state.output.slice(0, -prev.output.length);
-
-      // reset previous token to globstar
-      prev.type = 'globstar';
-      prev.output = globstar(opts);
-      prev.value += value;
-
-      // reset output with globstar
-      state.output += prev.output;
-      state.globstar = true;
-      consume(value);
-      continue;
-    }
-
-    const token = { type: 'star', value, output: star };
-
-    if (opts.bash === true) {
-      token.output = '.*?';
-      if (prev.type === 'bos' || prev.type === 'slash') {
-        token.output = nodot + token.output;
-      }
-      push(token);
-      continue;
-    }
-
-    if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
-      token.output = value;
-      push(token);
-      continue;
-    }
-
-    if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
-      if (prev.type === 'dot') {
-        state.output += NO_DOT_SLASH;
-        prev.output += NO_DOT_SLASH;
-
-      } else if (opts.dot === true) {
-        state.output += NO_DOTS_SLASH;
-        prev.output += NO_DOTS_SLASH;
-
-      } else {
-        state.output += nodot;
-        prev.output += nodot;
-      }
-
-      if (peek() !== '*') {
-        state.output += ONE_CHAR;
-        prev.output += ONE_CHAR;
-      }
-    }
-
-    push(token);
-  }
-
-  while (state.brackets > 0) {
-    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
-    state.output = utils.escapeLast(state.output, '[');
-    decrement('brackets');
-  }
-
-  while (state.parens > 0) {
-    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
-    state.output = utils.escapeLast(state.output, '(');
-    decrement('parens');
-  }
-
-  while (state.braces > 0) {
-    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
-    state.output = utils.escapeLast(state.output, '{');
-    decrement('braces');
-  }
-
-  if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
-    push({ type: 'maybe_slash', value: '', output: `${SLASH_LITERAL}?` });
-  }
-
-  // rebuild the output if we had to backtrack at any point
-  if (state.backtrack === true) {
-    state.output = '';
-
-    for (const token of state.tokens) {
-      state.output += token.output != null ? token.output : token.value;
-
-      if (token.suffix) {
-        state.output += token.suffix;
-      }
-    }
-  }
-
-  return state;
+    return null;
+}
+
+module.exports = {
+    hookChildProcess,
+    verifyENOENT,
+    verifyENOENTSync,
+    notFoundError,
 };
-
-/**
- * Fast paths for creating regular expressions for common glob patterns.
- * This can significantly speed up processing and has very little downside
- * impact when none of the fast paths match.
- */
-
-parse.fastpaths = (input, options) => {
-  const opts = { ...options };
-  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
-  const len = input.length;
-  if (len > max) {
-    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
-  }
-
-  input = REPLACEMENTS[input] || input;
-  const win32 = utils.isWindows(options);
-
-  // create constants based on platform, for windows or posix
-  const {
-    DOT_LITERAL,
-    SLASH_LITERAL,
-    ONE_CHAR,
-    DOTS_SLASH,
-    NO_DOT,
-    NO_DOTS,
-    NO_DOTS_SLASH,
-    STAR,
-    START_ANCHOR
-  } = constants.globChars(win32);
-
-  const nodot = opts.dot ? NO_DOTS : NO_DOT;
-  const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
-  const capture = opts.capture ? '' : '?:';
-  const state = { negated: false, prefix: '' };
-  let star = opts.bash === true ? '.*?' : STAR;
-
-  if (opts.capture) {
-    star = `(${star})`;
-  }
-
-  const globstar = (opts) => {
-    if (opts.noglobstar === true) return star;
-    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
-  };
-
-  const create = str => {
-    switch (str) {
-      case '*':
-        return `${nodot}${ONE_CHAR}${star}`;
-
-      case '.*':
-        return `${DOT_LITERAL}${ONE_CHAR}${star}`;
-
-      case '*.*':
-        return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
-
-      case '*/*':
-        return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
-
-      case '**':
-        return nodot + globstar(opts);
-
-      case '**/*':
-        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
-
-      case '**/*.*':
-        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
-
-      case '**/.*':
-        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
-
-      default: {
-        const match = /^(.*?)\.(\w+)$/.exec(str);
-        if (!match) return;
-
-        const source = create(match[1]);
-        if (!source) return;
-
-        return source + DOT_LITERAL + match[2];
-      }
-    }
-  };
-
-  const output = utils.removePrefix(input, state);
-  let source = create(output);
-
-  if (source && opts.strictSlashes !== true) {
-    source += `${SLASH_LITERAL}?`;
-  }
-
-  return source;
-};
-
-module.exports = parse;
 
 
 /***/ }),
-/* 111 */,
-/* 112 */,
+/* 111 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports,"__esModule",{value:true});exports.getSignals=void 0;var _os=__webpack_require__(87);
+
+var _core=__webpack_require__(208);
+var _realtime=__webpack_require__(480);
+
+
+
+const getSignals=function(){
+const realtimeSignals=(0,_realtime.getRealtimeSignals)();
+const signals=[..._core.SIGNALS,...realtimeSignals].map(normalizeSignal);
+return signals;
+};exports.getSignals=getSignals;
+
+
+
+
+
+
+
+const normalizeSignal=function({
+name,
+number:defaultNumber,
+description,
+action,
+forced=false,
+standard})
+{
+const{
+signals:{[name]:constantSignal}}=
+_os.constants;
+const supported=constantSignal!==undefined;
+const number=supported?constantSignal:defaultNumber;
+return{name,number,description,supported,action,forced,standard};
+};
+//# sourceMappingURL=signals.js.map
+
+/***/ }),
+/* 112 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(622);
+const pathKey = __webpack_require__(697);
+
+module.exports = opts => {
+	opts = Object.assign({
+		cwd: process.cwd(),
+		path: process.env[pathKey()]
+	}, opts);
+
+	let prev;
+	let pth = path.resolve(opts.cwd);
+	const ret = [];
+
+	while (prev !== pth) {
+		ret.push(path.join(pth, 'node_modules/.bin'));
+		prev = pth;
+		pth = path.resolve(pth, '..');
+	}
+
+	// ensure the running `node` binary is used
+	ret.push(path.dirname(process.execPath));
+
+	return ret.concat(opts.path).join(path.delimiter);
+};
+
+module.exports.env = opts => {
+	opts = Object.assign({
+		env: process.env
+	}, opts);
+
+	const env = Object.assign({}, opts.env);
+	const path = pathKey({env});
+
+	opts.path = env[path];
+	env[path] = module.exports(opts);
+
+	return env;
+};
+
+
+/***/ }),
 /* 113 */,
 /* 114 */,
 /* 115 */
@@ -19466,25 +18767,33 @@ module.exports = function isExtglob(str) {
 "use strict";
 
 
-var isStream = module.exports = function (stream) {
-	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
-};
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
 
-isStream.writable = function (stream) {
-	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
-};
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
 
-isStream.readable = function (stream) {
-	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
-};
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
 
-isStream.duplex = function (stream) {
-	return isStream.writable(stream) && isStream.readable(stream);
-};
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
 
-isStream.transform = function (stream) {
-	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
-};
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function' &&
+	typeof stream._transformState === 'object';
+
+module.exports = isStream;
 
 
 /***/ }),
@@ -20805,7 +20114,7 @@ proto.visitors = {
   heading: __webpack_require__(735),
   paragraph: __webpack_require__(258),
   blockquote: __webpack_require__(794),
-  list: __webpack_require__(910),
+  list: __webpack_require__(337),
   listItem: __webpack_require__(646),
   inlineCode: __webpack_require__(483),
   code: __webpack_require__(796),
@@ -23198,17 +22507,282 @@ exports.RequestError = RequestError;
 
 /***/ }),
 /* 208 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
+Object.defineProperty(exports,"__esModule",{value:true});exports.SIGNALS=void 0;
 
+const SIGNALS=[
+{
+name:"SIGHUP",
+number:1,
+action:"terminate",
+description:"Terminal closed",
+standard:"posix"},
 
+{
+name:"SIGINT",
+number:2,
+action:"terminate",
+description:"User interruption with CTRL-C",
+standard:"ansi"},
 
-var yaml = __webpack_require__(999);
+{
+name:"SIGQUIT",
+number:3,
+action:"core",
+description:"User interruption with CTRL-\\",
+standard:"posix"},
 
+{
+name:"SIGILL",
+number:4,
+action:"core",
+description:"Invalid machine instruction",
+standard:"ansi"},
 
-module.exports = yaml;
+{
+name:"SIGTRAP",
+number:5,
+action:"core",
+description:"Debugger breakpoint",
+standard:"posix"},
 
+{
+name:"SIGABRT",
+number:6,
+action:"core",
+description:"Aborted",
+standard:"ansi"},
+
+{
+name:"SIGIOT",
+number:6,
+action:"core",
+description:"Aborted",
+standard:"bsd"},
+
+{
+name:"SIGBUS",
+number:7,
+action:"core",
+description:
+"Bus error due to misaligned, non-existing address or paging error",
+standard:"bsd"},
+
+{
+name:"SIGEMT",
+number:7,
+action:"terminate",
+description:"Command should be emulated but is not implemented",
+standard:"other"},
+
+{
+name:"SIGFPE",
+number:8,
+action:"core",
+description:"Floating point arithmetic error",
+standard:"ansi"},
+
+{
+name:"SIGKILL",
+number:9,
+action:"terminate",
+description:"Forced termination",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGUSR1",
+number:10,
+action:"terminate",
+description:"Application-specific signal",
+standard:"posix"},
+
+{
+name:"SIGSEGV",
+number:11,
+action:"core",
+description:"Segmentation fault",
+standard:"ansi"},
+
+{
+name:"SIGUSR2",
+number:12,
+action:"terminate",
+description:"Application-specific signal",
+standard:"posix"},
+
+{
+name:"SIGPIPE",
+number:13,
+action:"terminate",
+description:"Broken pipe or socket",
+standard:"posix"},
+
+{
+name:"SIGALRM",
+number:14,
+action:"terminate",
+description:"Timeout or timer",
+standard:"posix"},
+
+{
+name:"SIGTERM",
+number:15,
+action:"terminate",
+description:"Termination",
+standard:"ansi"},
+
+{
+name:"SIGSTKFLT",
+number:16,
+action:"terminate",
+description:"Stack is empty or overflowed",
+standard:"other"},
+
+{
+name:"SIGCHLD",
+number:17,
+action:"ignore",
+description:"Child process terminated, paused or unpaused",
+standard:"posix"},
+
+{
+name:"SIGCLD",
+number:17,
+action:"ignore",
+description:"Child process terminated, paused or unpaused",
+standard:"other"},
+
+{
+name:"SIGCONT",
+number:18,
+action:"unpause",
+description:"Unpaused",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGSTOP",
+number:19,
+action:"pause",
+description:"Paused",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGTSTP",
+number:20,
+action:"pause",
+description:"Paused using CTRL-Z or \"suspend\"",
+standard:"posix"},
+
+{
+name:"SIGTTIN",
+number:21,
+action:"pause",
+description:"Background process cannot read terminal input",
+standard:"posix"},
+
+{
+name:"SIGBREAK",
+number:21,
+action:"terminate",
+description:"User interruption with CTRL-BREAK",
+standard:"other"},
+
+{
+name:"SIGTTOU",
+number:22,
+action:"pause",
+description:"Background process cannot write to terminal output",
+standard:"posix"},
+
+{
+name:"SIGURG",
+number:23,
+action:"ignore",
+description:"Socket received out-of-band data",
+standard:"bsd"},
+
+{
+name:"SIGXCPU",
+number:24,
+action:"core",
+description:"Process timed out",
+standard:"bsd"},
+
+{
+name:"SIGXFSZ",
+number:25,
+action:"core",
+description:"File too big",
+standard:"bsd"},
+
+{
+name:"SIGVTALRM",
+number:26,
+action:"terminate",
+description:"Timeout or timer",
+standard:"bsd"},
+
+{
+name:"SIGPROF",
+number:27,
+action:"terminate",
+description:"Timeout or timer",
+standard:"bsd"},
+
+{
+name:"SIGWINCH",
+number:28,
+action:"ignore",
+description:"Terminal window size changed",
+standard:"bsd"},
+
+{
+name:"SIGIO",
+number:29,
+action:"terminate",
+description:"I/O is available",
+standard:"other"},
+
+{
+name:"SIGPOLL",
+number:29,
+action:"terminate",
+description:"Watched event",
+standard:"other"},
+
+{
+name:"SIGINFO",
+number:29,
+action:"ignore",
+description:"Request for process information",
+standard:"other"},
+
+{
+name:"SIGPWR",
+number:30,
+action:"terminate",
+description:"Device running out of power",
+standard:"systemv"},
+
+{
+name:"SIGSYS",
+number:31,
+action:"core",
+description:"Invalid system call",
+standard:"other"},
+
+{
+name:"SIGUNUSED",
+number:31,
+action:"terminate",
+description:"Invalid system call",
+standard:"other"}];exports.SIGNALS=SIGNALS;
+//# sourceMappingURL=core.js.map
 
 /***/ }),
 /* 209 */
@@ -23226,21 +22800,25 @@ class MaxBufferError extends Error {
 	}
 }
 
-function getStream(inputStream, options) {
+async function getStream(inputStream, options) {
 	if (!inputStream) {
 		return Promise.reject(new Error('Expected a stream'));
 	}
 
-	options = Object.assign({maxBuffer: Infinity}, options);
+	options = {
+		maxBuffer: Infinity,
+		...options
+	};
 
 	const {maxBuffer} = options;
 
 	let stream;
-	return new Promise((resolve, reject) => {
+	await new Promise((resolve, reject) => {
 		const rejectPromise = error => {
 			if (error) { // A null check
 				error.bufferedData = stream.getBufferedValue();
 			}
+
 			reject(error);
 		};
 
@@ -23258,12 +22836,16 @@ function getStream(inputStream, options) {
 				rejectPromise(new MaxBufferError());
 			}
 		});
-	}).then(() => stream.getBufferedValue());
+	});
+
+	return stream.getBufferedValue();
 }
 
 module.exports = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
-module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
+// TODO: Remove this for the next major release
+module.exports.default = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
+module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
 module.exports.MaxBufferError = MaxBufferError;
 
 
@@ -23482,15 +23064,48 @@ function lineBreak() {
 
 /***/ }),
 /* 224 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-module.exports = (d, num) => {
-  num = String(num)
-  while (num.length < d) num = '0' + num
-  return num
+
+const cp = __webpack_require__(129);
+const parse = __webpack_require__(750);
+const enoent = __webpack_require__(110);
+
+function spawn(command, args, options) {
+    // Parse the arguments
+    const parsed = parse(command, args, options);
+
+    // Spawn the child process
+    const spawned = cp.spawn(parsed.command, parsed.args, parsed.options);
+
+    // Hook into child process "exit" event to emit an error if the command
+    // does not exists, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
+    enoent.hookChildProcess(spawned, parsed);
+
+    return spawned;
 }
+
+function spawnSync(command, args, options) {
+    // Parse the arguments
+    const parsed = parse(command, args, options);
+
+    // Spawn the child process
+    const result = cp.spawnSync(parsed.command, parsed.args, parsed.options);
+
+    // Analyze if the command does not exist, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
+    result.error = result.error || enoent.verifyENOENTSync(result.status, parsed);
+
+    return result;
+}
+
+module.exports = spawn;
+module.exports.spawn = spawn;
+module.exports.sync = spawnSync;
+
+module.exports._parse = parse;
+module.exports._enoent = enoent;
 
 
 /***/ }),
@@ -24002,7 +23617,7 @@ var Schema = __webpack_require__(717);
 
 module.exports = new Schema({
   include: [
-    __webpack_require__(937)
+    __webpack_require__(754)
   ]
 });
 
@@ -26971,7 +26586,15 @@ Object.defineProperty(module, 'exports', {
 
 
 /***/ }),
-/* 286 */,
+/* 286 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const compare = __webpack_require__(217)
+const rcompare = (a, b, loose) => compare(b, a, loose)
+module.exports = rcompare
+
+
+/***/ }),
 /* 287 */,
 /* 288 */
 /***/ (function(module) {
@@ -27310,7 +26933,7 @@ function construct() {
 
 const Range = __webpack_require__(378)
 const { ANY } = __webpack_require__(9)
-const satisfies = __webpack_require__(60)
+const satisfies = __webpack_require__(845)
 const compare = __webpack_require__(217)
 
 // Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
@@ -27469,11 +27092,22 @@ module.exports = subset
 /* 294 */,
 /* 295 */,
 /* 296 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-const compare = __webpack_require__(217)
-const lt = (a, b, loose) => compare(a, b, loose) < 0
-module.exports = lt
+"use strict";
+
+
+const mimicFn = (to, from) => {
+	for (const prop of Reflect.ownKeys(from)) {
+		Object.defineProperty(to, prop, Object.getOwnPropertyDescriptor(from, prop));
+	}
+
+	return to;
+};
+
+module.exports = mimicFn;
+// TODO: Remove this for the next major release
+module.exports.default = mimicFn;
 
 
 /***/ }),
@@ -29199,7 +28833,63 @@ module.exports = {
 
 
 /***/ }),
-/* 314 */,
+/* 314 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const pump = __webpack_require__(957);
+const bufferStream = __webpack_require__(565);
+
+class MaxBufferError extends Error {
+	constructor() {
+		super('maxBuffer exceeded');
+		this.name = 'MaxBufferError';
+	}
+}
+
+function getStream(inputStream, options) {
+	if (!inputStream) {
+		return Promise.reject(new Error('Expected a stream'));
+	}
+
+	options = Object.assign({maxBuffer: Infinity}, options);
+
+	const {maxBuffer} = options;
+
+	let stream;
+	return new Promise((resolve, reject) => {
+		const rejectPromise = error => {
+			if (error) { // A null check
+				error.bufferedData = stream.getBufferedValue();
+			}
+			reject(error);
+		};
+
+		stream = pump(inputStream, bufferStream(options), error => {
+			if (error) {
+				rejectPromise(error);
+				return;
+			}
+
+			resolve();
+		});
+
+		stream.on('data', () => {
+			if (stream.getBufferedLength() > maxBuffer) {
+				rejectPromise(new MaxBufferError());
+			}
+		});
+	}).then(() => stream.getBufferedValue());
+}
+
+module.exports = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
+module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
+module.exports.MaxBufferError = MaxBufferError;
+
+
+/***/ }),
 /* 315 */,
 /* 316 */,
 /* 317 */,
@@ -29502,40 +29192,48 @@ module.exports._enoent = enoent;
 "use strict";
 
 const path = __webpack_require__(622);
-const pathKey = __webpack_require__(697);
+const pathKey = __webpack_require__(60);
 
-module.exports = opts => {
-	opts = Object.assign({
+const npmRunPath = options => {
+	options = {
 		cwd: process.cwd(),
-		path: process.env[pathKey()]
-	}, opts);
+		path: process.env[pathKey()],
+		execPath: process.execPath,
+		...options
+	};
 
-	let prev;
-	let pth = path.resolve(opts.cwd);
-	const ret = [];
+	let previous;
+	let cwdPath = path.resolve(options.cwd);
+	const result = [];
 
-	while (prev !== pth) {
-		ret.push(path.join(pth, 'node_modules/.bin'));
-		prev = pth;
-		pth = path.resolve(pth, '..');
+	while (previous !== cwdPath) {
+		result.push(path.join(cwdPath, 'node_modules/.bin'));
+		previous = cwdPath;
+		cwdPath = path.resolve(cwdPath, '..');
 	}
 
-	// ensure the running `node` binary is used
-	ret.push(path.dirname(process.execPath));
+	// Ensure the running `node` binary is used
+	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
+	result.push(execPathDir);
 
-	return ret.concat(opts.path).join(path.delimiter);
+	return result.concat(options.path).join(path.delimiter);
 };
 
-module.exports.env = opts => {
-	opts = Object.assign({
-		env: process.env
-	}, opts);
+module.exports = npmRunPath;
+// TODO: Remove this for the next major release
+module.exports.default = npmRunPath;
 
-	const env = Object.assign({}, opts.env);
+module.exports.env = options => {
+	options = {
+		env: process.env,
+		...options
+	};
+
+	const env = {...options.env};
 	const path = pathKey({env});
 
-	opts.path = env[path];
-	env[path] = module.exports(opts);
+	options.path = env[path];
+	env[path] = module.exports(options);
 
 	return env;
 };
@@ -29551,7 +29249,7 @@ module.exports.env = opts => {
 
 const { readPkgFile, writePkgFile } = __webpack_require__(916);
 const { compareBumps } = __webpack_require__(749);
-const semver = __webpack_require__(534);
+const semver = __webpack_require__(571);
 const path = __webpack_require__(622);
 
 module.exports.apply = function* ({ changeList, config, cwd = process.cwd() }) {
@@ -29746,8 +29444,30 @@ const incWithPartials = (version, bumpType) => {
 /***/ }),
 /* 335 */,
 /* 336 */,
-/* 337 */,
-/* 338 */,
+/* 337 */
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = list
+
+function list(node) {
+  var fn = node.ordered ? this.visitOrderedItems : this.visitUnorderedItems
+  return fn.call(this, node)
+}
+
+
+/***/ }),
+/* 338 */
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = /^#!(.*)/;
+
+
+/***/ }),
 /* 339 */,
 /* 340 */,
 /* 341 */
@@ -30020,59 +29740,1144 @@ module.exports.defaults = defaultOptions;
 /***/ }),
 /* 349 */,
 /* 350 */,
-/* 351 */,
+/* 351 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const constants = __webpack_require__(933);
+const utils = __webpack_require__(167);
+
+/**
+ * Constants
+ */
+
+const {
+  MAX_LENGTH,
+  POSIX_REGEX_SOURCE,
+  REGEX_NON_SPECIAL_CHARS,
+  REGEX_SPECIAL_CHARS_BACKREF,
+  REPLACEMENTS
+} = constants;
+
+/**
+ * Helpers
+ */
+
+const expandRange = (args, options) => {
+  if (typeof options.expandRange === 'function') {
+    return options.expandRange(...args, options);
+  }
+
+  args.sort();
+  const value = `[${args.join('-')}]`;
+
+  try {
+    /* eslint-disable-next-line no-new */
+    new RegExp(value);
+  } catch (ex) {
+    return args.map(v => utils.escapeRegex(v)).join('..');
+  }
+
+  return value;
+};
+
+/**
+ * Create the message for a syntax error
+ */
+
+const syntaxError = (type, char) => {
+  return `Missing ${type}: "${char}" - use "\\\\${char}" to match literal characters`;
+};
+
+/**
+ * Parse the given input string.
+ * @param {String} input
+ * @param {Object} options
+ * @return {Object}
+ */
+
+const parse = (input, options) => {
+  if (typeof input !== 'string') {
+    throw new TypeError('Expected a string');
+  }
+
+  input = REPLACEMENTS[input] || input;
+
+  const opts = { ...options };
+  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+
+  let len = input.length;
+  if (len > max) {
+    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+  }
+
+  const bos = { type: 'bos', value: '', output: opts.prepend || '' };
+  const tokens = [bos];
+
+  const capture = opts.capture ? '' : '?:';
+  const win32 = utils.isWindows(options);
+
+  // create constants based on platform, for windows or posix
+  const PLATFORM_CHARS = constants.globChars(win32);
+  const EXTGLOB_CHARS = constants.extglobChars(PLATFORM_CHARS);
+
+  const {
+    DOT_LITERAL,
+    PLUS_LITERAL,
+    SLASH_LITERAL,
+    ONE_CHAR,
+    DOTS_SLASH,
+    NO_DOT,
+    NO_DOT_SLASH,
+    NO_DOTS_SLASH,
+    QMARK,
+    QMARK_NO_DOT,
+    STAR,
+    START_ANCHOR
+  } = PLATFORM_CHARS;
+
+  const globstar = (opts) => {
+    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+  };
+
+  const nodot = opts.dot ? '' : NO_DOT;
+  const qmarkNoDot = opts.dot ? QMARK : QMARK_NO_DOT;
+  let star = opts.bash === true ? globstar(opts) : STAR;
+
+  if (opts.capture) {
+    star = `(${star})`;
+  }
+
+  // minimatch options support
+  if (typeof opts.noext === 'boolean') {
+    opts.noextglob = opts.noext;
+  }
+
+  const state = {
+    input,
+    index: -1,
+    start: 0,
+    dot: opts.dot === true,
+    consumed: '',
+    output: '',
+    prefix: '',
+    backtrack: false,
+    negated: false,
+    brackets: 0,
+    braces: 0,
+    parens: 0,
+    quotes: 0,
+    globstar: false,
+    tokens
+  };
+
+  input = utils.removePrefix(input, state);
+  len = input.length;
+
+  const extglobs = [];
+  const braces = [];
+  const stack = [];
+  let prev = bos;
+  let value;
+
+  /**
+   * Tokenizing helpers
+   */
+
+  const eos = () => state.index === len - 1;
+  const peek = state.peek = (n = 1) => input[state.index + n];
+  const advance = state.advance = () => input[++state.index];
+  const remaining = () => input.slice(state.index + 1);
+  const consume = (value = '', num = 0) => {
+    state.consumed += value;
+    state.index += num;
+  };
+  const append = token => {
+    state.output += token.output != null ? token.output : token.value;
+    consume(token.value);
+  };
+
+  const negate = () => {
+    let count = 1;
+
+    while (peek() === '!' && (peek(2) !== '(' || peek(3) === '?')) {
+      advance();
+      state.start++;
+      count++;
+    }
+
+    if (count % 2 === 0) {
+      return false;
+    }
+
+    state.negated = true;
+    state.start++;
+    return true;
+  };
+
+  const increment = type => {
+    state[type]++;
+    stack.push(type);
+  };
+
+  const decrement = type => {
+    state[type]--;
+    stack.pop();
+  };
+
+  /**
+   * Push tokens onto the tokens array. This helper speeds up
+   * tokenizing by 1) helping us avoid backtracking as much as possible,
+   * and 2) helping us avoid creating extra tokens when consecutive
+   * characters are plain text. This improves performance and simplifies
+   * lookbehinds.
+   */
+
+  const push = tok => {
+    if (prev.type === 'globstar') {
+      const isBrace = state.braces > 0 && (tok.type === 'comma' || tok.type === 'brace');
+      const isExtglob = tok.extglob === true || (extglobs.length && (tok.type === 'pipe' || tok.type === 'paren'));
+
+      if (tok.type !== 'slash' && tok.type !== 'paren' && !isBrace && !isExtglob) {
+        state.output = state.output.slice(0, -prev.output.length);
+        prev.type = 'star';
+        prev.value = '*';
+        prev.output = star;
+        state.output += prev.output;
+      }
+    }
+
+    if (extglobs.length && tok.type !== 'paren' && !EXTGLOB_CHARS[tok.value]) {
+      extglobs[extglobs.length - 1].inner += tok.value;
+    }
+
+    if (tok.value || tok.output) append(tok);
+    if (prev && prev.type === 'text' && tok.type === 'text') {
+      prev.value += tok.value;
+      prev.output = (prev.output || '') + tok.value;
+      return;
+    }
+
+    tok.prev = prev;
+    tokens.push(tok);
+    prev = tok;
+  };
+
+  const extglobOpen = (type, value) => {
+    const token = { ...EXTGLOB_CHARS[value], conditions: 1, inner: '' };
+
+    token.prev = prev;
+    token.parens = state.parens;
+    token.output = state.output;
+    const output = (opts.capture ? '(' : '') + token.open;
+
+    increment('parens');
+    push({ type, value, output: state.output ? '' : ONE_CHAR });
+    push({ type: 'paren', extglob: true, value: advance(), output });
+    extglobs.push(token);
+  };
+
+  const extglobClose = token => {
+    let output = token.close + (opts.capture ? ')' : '');
+
+    if (token.type === 'negate') {
+      let extglobStar = star;
+
+      if (token.inner && token.inner.length > 1 && token.inner.includes('/')) {
+        extglobStar = globstar(opts);
+      }
+
+      if (extglobStar !== star || eos() || /^\)+$/.test(remaining())) {
+        output = token.close = `)$))${extglobStar}`;
+      }
+
+      if (token.prev.type === 'bos' && eos()) {
+        state.negatedExtglob = true;
+      }
+    }
+
+    push({ type: 'paren', extglob: true, value, output });
+    decrement('parens');
+  };
+
+  /**
+   * Fast paths
+   */
+
+  if (opts.fastpaths !== false && !/(^[*!]|[/()[\]{}"])/.test(input)) {
+    let backslashes = false;
+
+    let output = input.replace(REGEX_SPECIAL_CHARS_BACKREF, (m, esc, chars, first, rest, index) => {
+      if (first === '\\') {
+        backslashes = true;
+        return m;
+      }
+
+      if (first === '?') {
+        if (esc) {
+          return esc + first + (rest ? QMARK.repeat(rest.length) : '');
+        }
+        if (index === 0) {
+          return qmarkNoDot + (rest ? QMARK.repeat(rest.length) : '');
+        }
+        return QMARK.repeat(chars.length);
+      }
+
+      if (first === '.') {
+        return DOT_LITERAL.repeat(chars.length);
+      }
+
+      if (first === '*') {
+        if (esc) {
+          return esc + first + (rest ? star : '');
+        }
+        return star;
+      }
+      return esc ? m : `\\${m}`;
+    });
+
+    if (backslashes === true) {
+      if (opts.unescape === true) {
+        output = output.replace(/\\/g, '');
+      } else {
+        output = output.replace(/\\+/g, m => {
+          return m.length % 2 === 0 ? '\\\\' : (m ? '\\' : '');
+        });
+      }
+    }
+
+    if (output === input && opts.contains === true) {
+      state.output = input;
+      return state;
+    }
+
+    state.output = utils.wrapOutput(output, state, options);
+    return state;
+  }
+
+  /**
+   * Tokenize input until we reach end-of-string
+   */
+
+  while (!eos()) {
+    value = advance();
+
+    if (value === '\u0000') {
+      continue;
+    }
+
+    /**
+     * Escaped characters
+     */
+
+    if (value === '\\') {
+      const next = peek();
+
+      if (next === '/' && opts.bash !== true) {
+        continue;
+      }
+
+      if (next === '.' || next === ';') {
+        continue;
+      }
+
+      if (!next) {
+        value += '\\';
+        push({ type: 'text', value });
+        continue;
+      }
+
+      // collapse slashes to reduce potential for exploits
+      const match = /^\\+/.exec(remaining());
+      let slashes = 0;
+
+      if (match && match[0].length > 2) {
+        slashes = match[0].length;
+        state.index += slashes;
+        if (slashes % 2 !== 0) {
+          value += '\\';
+        }
+      }
+
+      if (opts.unescape === true) {
+        value = advance() || '';
+      } else {
+        value += advance() || '';
+      }
+
+      if (state.brackets === 0) {
+        push({ type: 'text', value });
+        continue;
+      }
+    }
+
+    /**
+     * If we're inside a regex character class, continue
+     * until we reach the closing bracket.
+     */
+
+    if (state.brackets > 0 && (value !== ']' || prev.value === '[' || prev.value === '[^')) {
+      if (opts.posix !== false && value === ':') {
+        const inner = prev.value.slice(1);
+        if (inner.includes('[')) {
+          prev.posix = true;
+
+          if (inner.includes(':')) {
+            const idx = prev.value.lastIndexOf('[');
+            const pre = prev.value.slice(0, idx);
+            const rest = prev.value.slice(idx + 2);
+            const posix = POSIX_REGEX_SOURCE[rest];
+            if (posix) {
+              prev.value = pre + posix;
+              state.backtrack = true;
+              advance();
+
+              if (!bos.output && tokens.indexOf(prev) === 1) {
+                bos.output = ONE_CHAR;
+              }
+              continue;
+            }
+          }
+        }
+      }
+
+      if ((value === '[' && peek() !== ':') || (value === '-' && peek() === ']')) {
+        value = `\\${value}`;
+      }
+
+      if (value === ']' && (prev.value === '[' || prev.value === '[^')) {
+        value = `\\${value}`;
+      }
+
+      if (opts.posix === true && value === '!' && prev.value === '[') {
+        value = '^';
+      }
+
+      prev.value += value;
+      append({ value });
+      continue;
+    }
+
+    /**
+     * If we're inside a quoted string, continue
+     * until we reach the closing double quote.
+     */
+
+    if (state.quotes === 1 && value !== '"') {
+      value = utils.escapeRegex(value);
+      prev.value += value;
+      append({ value });
+      continue;
+    }
+
+    /**
+     * Double quotes
+     */
+
+    if (value === '"') {
+      state.quotes = state.quotes === 1 ? 0 : 1;
+      if (opts.keepQuotes === true) {
+        push({ type: 'text', value });
+      }
+      continue;
+    }
+
+    /**
+     * Parentheses
+     */
+
+    if (value === '(') {
+      increment('parens');
+      push({ type: 'paren', value });
+      continue;
+    }
+
+    if (value === ')') {
+      if (state.parens === 0 && opts.strictBrackets === true) {
+        throw new SyntaxError(syntaxError('opening', '('));
+      }
+
+      const extglob = extglobs[extglobs.length - 1];
+      if (extglob && state.parens === extglob.parens + 1) {
+        extglobClose(extglobs.pop());
+        continue;
+      }
+
+      push({ type: 'paren', value, output: state.parens ? ')' : '\\)' });
+      decrement('parens');
+      continue;
+    }
+
+    /**
+     * Square brackets
+     */
+
+    if (value === '[') {
+      if (opts.nobracket === true || !remaining().includes(']')) {
+        if (opts.nobracket !== true && opts.strictBrackets === true) {
+          throw new SyntaxError(syntaxError('closing', ']'));
+        }
+
+        value = `\\${value}`;
+      } else {
+        increment('brackets');
+      }
+
+      push({ type: 'bracket', value });
+      continue;
+    }
+
+    if (value === ']') {
+      if (opts.nobracket === true || (prev && prev.type === 'bracket' && prev.value.length === 1)) {
+        push({ type: 'text', value, output: `\\${value}` });
+        continue;
+      }
+
+      if (state.brackets === 0) {
+        if (opts.strictBrackets === true) {
+          throw new SyntaxError(syntaxError('opening', '['));
+        }
+
+        push({ type: 'text', value, output: `\\${value}` });
+        continue;
+      }
+
+      decrement('brackets');
+
+      const prevValue = prev.value.slice(1);
+      if (prev.posix !== true && prevValue[0] === '^' && !prevValue.includes('/')) {
+        value = `/${value}`;
+      }
+
+      prev.value += value;
+      append({ value });
+
+      // when literal brackets are explicitly disabled
+      // assume we should match with a regex character class
+      if (opts.literalBrackets === false || utils.hasRegexChars(prevValue)) {
+        continue;
+      }
+
+      const escaped = utils.escapeRegex(prev.value);
+      state.output = state.output.slice(0, -prev.value.length);
+
+      // when literal brackets are explicitly enabled
+      // assume we should escape the brackets to match literal characters
+      if (opts.literalBrackets === true) {
+        state.output += escaped;
+        prev.value = escaped;
+        continue;
+      }
+
+      // when the user specifies nothing, try to match both
+      prev.value = `(${capture}${escaped}|${prev.value})`;
+      state.output += prev.value;
+      continue;
+    }
+
+    /**
+     * Braces
+     */
+
+    if (value === '{' && opts.nobrace !== true) {
+      increment('braces');
+
+      const open = {
+        type: 'brace',
+        value,
+        output: '(',
+        outputIndex: state.output.length,
+        tokensIndex: state.tokens.length
+      };
+
+      braces.push(open);
+      push(open);
+      continue;
+    }
+
+    if (value === '}') {
+      const brace = braces[braces.length - 1];
+
+      if (opts.nobrace === true || !brace) {
+        push({ type: 'text', value, output: value });
+        continue;
+      }
+
+      let output = ')';
+
+      if (brace.dots === true) {
+        const arr = tokens.slice();
+        const range = [];
+
+        for (let i = arr.length - 1; i >= 0; i--) {
+          tokens.pop();
+          if (arr[i].type === 'brace') {
+            break;
+          }
+          if (arr[i].type !== 'dots') {
+            range.unshift(arr[i].value);
+          }
+        }
+
+        output = expandRange(range, opts);
+        state.backtrack = true;
+      }
+
+      if (brace.comma !== true && brace.dots !== true) {
+        const out = state.output.slice(0, brace.outputIndex);
+        const toks = state.tokens.slice(brace.tokensIndex);
+        brace.value = brace.output = '\\{';
+        value = output = '\\}';
+        state.output = out;
+        for (const t of toks) {
+          state.output += (t.output || t.value);
+        }
+      }
+
+      push({ type: 'brace', value, output });
+      decrement('braces');
+      braces.pop();
+      continue;
+    }
+
+    /**
+     * Pipes
+     */
+
+    if (value === '|') {
+      if (extglobs.length > 0) {
+        extglobs[extglobs.length - 1].conditions++;
+      }
+      push({ type: 'text', value });
+      continue;
+    }
+
+    /**
+     * Commas
+     */
+
+    if (value === ',') {
+      let output = value;
+
+      const brace = braces[braces.length - 1];
+      if (brace && stack[stack.length - 1] === 'braces') {
+        brace.comma = true;
+        output = '|';
+      }
+
+      push({ type: 'comma', value, output });
+      continue;
+    }
+
+    /**
+     * Slashes
+     */
+
+    if (value === '/') {
+      // if the beginning of the glob is "./", advance the start
+      // to the current index, and don't add the "./" characters
+      // to the state. This greatly simplifies lookbehinds when
+      // checking for BOS characters like "!" and "." (not "./")
+      if (prev.type === 'dot' && state.index === state.start + 1) {
+        state.start = state.index + 1;
+        state.consumed = '';
+        state.output = '';
+        tokens.pop();
+        prev = bos; // reset "prev" to the first token
+        continue;
+      }
+
+      push({ type: 'slash', value, output: SLASH_LITERAL });
+      continue;
+    }
+
+    /**
+     * Dots
+     */
+
+    if (value === '.') {
+      if (state.braces > 0 && prev.type === 'dot') {
+        if (prev.value === '.') prev.output = DOT_LITERAL;
+        const brace = braces[braces.length - 1];
+        prev.type = 'dots';
+        prev.output += value;
+        prev.value += value;
+        brace.dots = true;
+        continue;
+      }
+
+      if ((state.braces + state.parens) === 0 && prev.type !== 'bos' && prev.type !== 'slash') {
+        push({ type: 'text', value, output: DOT_LITERAL });
+        continue;
+      }
+
+      push({ type: 'dot', value, output: DOT_LITERAL });
+      continue;
+    }
+
+    /**
+     * Question marks
+     */
+
+    if (value === '?') {
+      const isGroup = prev && prev.value === '(';
+      if (!isGroup && opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+        extglobOpen('qmark', value);
+        continue;
+      }
+
+      if (prev && prev.type === 'paren') {
+        const next = peek();
+        let output = value;
+
+        if (next === '<' && !utils.supportsLookbehinds()) {
+          throw new Error('Node.js v10 or higher is required for regex lookbehinds');
+        }
+
+        if ((prev.value === '(' && !/[!=<:]/.test(next)) || (next === '<' && !/<([!=]|\w+>)/.test(remaining()))) {
+          output = `\\${value}`;
+        }
+
+        push({ type: 'text', value, output });
+        continue;
+      }
+
+      if (opts.dot !== true && (prev.type === 'slash' || prev.type === 'bos')) {
+        push({ type: 'qmark', value, output: QMARK_NO_DOT });
+        continue;
+      }
+
+      push({ type: 'qmark', value, output: QMARK });
+      continue;
+    }
+
+    /**
+     * Exclamation
+     */
+
+    if (value === '!') {
+      if (opts.noextglob !== true && peek() === '(') {
+        if (peek(2) !== '?' || !/[!=<:]/.test(peek(3))) {
+          extglobOpen('negate', value);
+          continue;
+        }
+      }
+
+      if (opts.nonegate !== true && state.index === 0) {
+        negate();
+        continue;
+      }
+    }
+
+    /**
+     * Plus
+     */
+
+    if (value === '+') {
+      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+        extglobOpen('plus', value);
+        continue;
+      }
+
+      if ((prev && prev.value === '(') || opts.regex === false) {
+        push({ type: 'plus', value, output: PLUS_LITERAL });
+        continue;
+      }
+
+      if ((prev && (prev.type === 'bracket' || prev.type === 'paren' || prev.type === 'brace')) || state.parens > 0) {
+        push({ type: 'plus', value });
+        continue;
+      }
+
+      push({ type: 'plus', value: PLUS_LITERAL });
+      continue;
+    }
+
+    /**
+     * Plain text
+     */
+
+    if (value === '@') {
+      if (opts.noextglob !== true && peek() === '(' && peek(2) !== '?') {
+        push({ type: 'at', extglob: true, value, output: '' });
+        continue;
+      }
+
+      push({ type: 'text', value });
+      continue;
+    }
+
+    /**
+     * Plain text
+     */
+
+    if (value !== '*') {
+      if (value === '$' || value === '^') {
+        value = `\\${value}`;
+      }
+
+      const match = REGEX_NON_SPECIAL_CHARS.exec(remaining());
+      if (match) {
+        value += match[0];
+        state.index += match[0].length;
+      }
+
+      push({ type: 'text', value });
+      continue;
+    }
+
+    /**
+     * Stars
+     */
+
+    if (prev && (prev.type === 'globstar' || prev.star === true)) {
+      prev.type = 'star';
+      prev.star = true;
+      prev.value += value;
+      prev.output = star;
+      state.backtrack = true;
+      state.globstar = true;
+      consume(value);
+      continue;
+    }
+
+    let rest = remaining();
+    if (opts.noextglob !== true && /^\([^?]/.test(rest)) {
+      extglobOpen('star', value);
+      continue;
+    }
+
+    if (prev.type === 'star') {
+      if (opts.noglobstar === true) {
+        consume(value);
+        continue;
+      }
+
+      const prior = prev.prev;
+      const before = prior.prev;
+      const isStart = prior.type === 'slash' || prior.type === 'bos';
+      const afterStar = before && (before.type === 'star' || before.type === 'globstar');
+
+      if (opts.bash === true && (!isStart || (rest[0] && rest[0] !== '/'))) {
+        push({ type: 'star', value, output: '' });
+        continue;
+      }
+
+      const isBrace = state.braces > 0 && (prior.type === 'comma' || prior.type === 'brace');
+      const isExtglob = extglobs.length && (prior.type === 'pipe' || prior.type === 'paren');
+      if (!isStart && prior.type !== 'paren' && !isBrace && !isExtglob) {
+        push({ type: 'star', value, output: '' });
+        continue;
+      }
+
+      // strip consecutive `/**/`
+      while (rest.slice(0, 3) === '/**') {
+        const after = input[state.index + 4];
+        if (after && after !== '/') {
+          break;
+        }
+        rest = rest.slice(3);
+        consume('/**', 3);
+      }
+
+      if (prior.type === 'bos' && eos()) {
+        prev.type = 'globstar';
+        prev.value += value;
+        prev.output = globstar(opts);
+        state.output = prev.output;
+        state.globstar = true;
+        consume(value);
+        continue;
+      }
+
+      if (prior.type === 'slash' && prior.prev.type !== 'bos' && !afterStar && eos()) {
+        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+        prior.output = `(?:${prior.output}`;
+
+        prev.type = 'globstar';
+        prev.output = globstar(opts) + (opts.strictSlashes ? ')' : '|$)');
+        prev.value += value;
+        state.globstar = true;
+        state.output += prior.output + prev.output;
+        consume(value);
+        continue;
+      }
+
+      if (prior.type === 'slash' && prior.prev.type !== 'bos' && rest[0] === '/') {
+        const end = rest[1] !== void 0 ? '|$' : '';
+
+        state.output = state.output.slice(0, -(prior.output + prev.output).length);
+        prior.output = `(?:${prior.output}`;
+
+        prev.type = 'globstar';
+        prev.output = `${globstar(opts)}${SLASH_LITERAL}|${SLASH_LITERAL}${end})`;
+        prev.value += value;
+
+        state.output += prior.output + prev.output;
+        state.globstar = true;
+
+        consume(value + advance());
+
+        push({ type: 'slash', value: '/', output: '' });
+        continue;
+      }
+
+      if (prior.type === 'bos' && rest[0] === '/') {
+        prev.type = 'globstar';
+        prev.value += value;
+        prev.output = `(?:^|${SLASH_LITERAL}|${globstar(opts)}${SLASH_LITERAL})`;
+        state.output = prev.output;
+        state.globstar = true;
+        consume(value + advance());
+        push({ type: 'slash', value: '/', output: '' });
+        continue;
+      }
+
+      // remove single star from output
+      state.output = state.output.slice(0, -prev.output.length);
+
+      // reset previous token to globstar
+      prev.type = 'globstar';
+      prev.output = globstar(opts);
+      prev.value += value;
+
+      // reset output with globstar
+      state.output += prev.output;
+      state.globstar = true;
+      consume(value);
+      continue;
+    }
+
+    const token = { type: 'star', value, output: star };
+
+    if (opts.bash === true) {
+      token.output = '.*?';
+      if (prev.type === 'bos' || prev.type === 'slash') {
+        token.output = nodot + token.output;
+      }
+      push(token);
+      continue;
+    }
+
+    if (prev && (prev.type === 'bracket' || prev.type === 'paren') && opts.regex === true) {
+      token.output = value;
+      push(token);
+      continue;
+    }
+
+    if (state.index === state.start || prev.type === 'slash' || prev.type === 'dot') {
+      if (prev.type === 'dot') {
+        state.output += NO_DOT_SLASH;
+        prev.output += NO_DOT_SLASH;
+
+      } else if (opts.dot === true) {
+        state.output += NO_DOTS_SLASH;
+        prev.output += NO_DOTS_SLASH;
+
+      } else {
+        state.output += nodot;
+        prev.output += nodot;
+      }
+
+      if (peek() !== '*') {
+        state.output += ONE_CHAR;
+        prev.output += ONE_CHAR;
+      }
+    }
+
+    push(token);
+  }
+
+  while (state.brackets > 0) {
+    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ']'));
+    state.output = utils.escapeLast(state.output, '[');
+    decrement('brackets');
+  }
+
+  while (state.parens > 0) {
+    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', ')'));
+    state.output = utils.escapeLast(state.output, '(');
+    decrement('parens');
+  }
+
+  while (state.braces > 0) {
+    if (opts.strictBrackets === true) throw new SyntaxError(syntaxError('closing', '}'));
+    state.output = utils.escapeLast(state.output, '{');
+    decrement('braces');
+  }
+
+  if (opts.strictSlashes !== true && (prev.type === 'star' || prev.type === 'bracket')) {
+    push({ type: 'maybe_slash', value: '', output: `${SLASH_LITERAL}?` });
+  }
+
+  // rebuild the output if we had to backtrack at any point
+  if (state.backtrack === true) {
+    state.output = '';
+
+    for (const token of state.tokens) {
+      state.output += token.output != null ? token.output : token.value;
+
+      if (token.suffix) {
+        state.output += token.suffix;
+      }
+    }
+  }
+
+  return state;
+};
+
+/**
+ * Fast paths for creating regular expressions for common glob patterns.
+ * This can significantly speed up processing and has very little downside
+ * impact when none of the fast paths match.
+ */
+
+parse.fastpaths = (input, options) => {
+  const opts = { ...options };
+  const max = typeof opts.maxLength === 'number' ? Math.min(MAX_LENGTH, opts.maxLength) : MAX_LENGTH;
+  const len = input.length;
+  if (len > max) {
+    throw new SyntaxError(`Input length: ${len}, exceeds maximum allowed length: ${max}`);
+  }
+
+  input = REPLACEMENTS[input] || input;
+  const win32 = utils.isWindows(options);
+
+  // create constants based on platform, for windows or posix
+  const {
+    DOT_LITERAL,
+    SLASH_LITERAL,
+    ONE_CHAR,
+    DOTS_SLASH,
+    NO_DOT,
+    NO_DOTS,
+    NO_DOTS_SLASH,
+    STAR,
+    START_ANCHOR
+  } = constants.globChars(win32);
+
+  const nodot = opts.dot ? NO_DOTS : NO_DOT;
+  const slashDot = opts.dot ? NO_DOTS_SLASH : NO_DOT;
+  const capture = opts.capture ? '' : '?:';
+  const state = { negated: false, prefix: '' };
+  let star = opts.bash === true ? '.*?' : STAR;
+
+  if (opts.capture) {
+    star = `(${star})`;
+  }
+
+  const globstar = (opts) => {
+    if (opts.noglobstar === true) return star;
+    return `(${capture}(?:(?!${START_ANCHOR}${opts.dot ? DOTS_SLASH : DOT_LITERAL}).)*?)`;
+  };
+
+  const create = str => {
+    switch (str) {
+      case '*':
+        return `${nodot}${ONE_CHAR}${star}`;
+
+      case '.*':
+        return `${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+      case '*.*':
+        return `${nodot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+      case '*/*':
+        return `${nodot}${star}${SLASH_LITERAL}${ONE_CHAR}${slashDot}${star}`;
+
+      case '**':
+        return nodot + globstar(opts);
+
+      case '**/*':
+        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${ONE_CHAR}${star}`;
+
+      case '**/*.*':
+        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${slashDot}${star}${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+      case '**/.*':
+        return `(?:${nodot}${globstar(opts)}${SLASH_LITERAL})?${DOT_LITERAL}${ONE_CHAR}${star}`;
+
+      default: {
+        const match = /^(.*?)\.(\w+)$/.exec(str);
+        if (!match) return;
+
+        const source = create(match[1]);
+        if (!source) return;
+
+        return source + DOT_LITERAL + match[2];
+      }
+    }
+  };
+
+  const output = utils.removePrefix(input, state);
+  let source = create(output);
+
+  if (source && opts.strictSlashes !== true) {
+    source += `${SLASH_LITERAL}?`;
+  }
+
+  return source;
+};
+
+module.exports = parse;
+
+
+/***/ }),
 /* 352 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-const {PassThrough} = __webpack_require__(413);
+const {PassThrough: PassThroughStream} = __webpack_require__(413);
 
 module.exports = options => {
-	options = Object.assign({}, options);
+	options = {...options};
 
 	const {array} = options;
 	let {encoding} = options;
-	const buffer = encoding === 'buffer';
+	const isBuffer = encoding === 'buffer';
 	let objectMode = false;
 
 	if (array) {
-		objectMode = !(encoding || buffer);
+		objectMode = !(encoding || isBuffer);
 	} else {
 		encoding = encoding || 'utf8';
 	}
 
-	if (buffer) {
+	if (isBuffer) {
 		encoding = null;
 	}
 
-	let len = 0;
-	const ret = [];
-	const stream = new PassThrough({objectMode});
+	const stream = new PassThroughStream({objectMode});
 
 	if (encoding) {
 		stream.setEncoding(encoding);
 	}
 
+	let length = 0;
+	const chunks = [];
+
 	stream.on('data', chunk => {
-		ret.push(chunk);
+		chunks.push(chunk);
 
 		if (objectMode) {
-			len = ret.length;
+			length = chunks.length;
 		} else {
-			len += chunk.length;
+			length += chunk.length;
 		}
 	});
 
 	stream.getBufferedValue = () => {
 		if (array) {
-			return ret;
+			return chunks;
 		}
 
-		return buffer ? Buffer.concat(ret, len) : ret.join('');
+		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
 	};
 
-	stream.getBufferedLength = () => len;
+	stream.getBufferedLength = () => length;
 
 	return stream;
 };
@@ -36865,7 +37670,7 @@ module.exports = new Type('tag:yaml.org,2002:js/undefined', {
 
 
 var alphabetical = __webpack_require__(973)
-var locate = __webpack_require__(750)
+var locate = __webpack_require__(937)
 var tag = __webpack_require__(201).tag
 
 module.exports = inlineHTML
@@ -37434,7 +38239,31 @@ module.exports = __webpack_require__(492);
 
 /***/ }),
 /* 479 */,
-/* 480 */,
+/* 480 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+Object.defineProperty(exports,"__esModule",{value:true});exports.SIGRTMAX=exports.getRealtimeSignals=void 0;
+const getRealtimeSignals=function(){
+const length=SIGRTMAX-SIGRTMIN+1;
+return Array.from({length},getRealtimeSignal);
+};exports.getRealtimeSignals=getRealtimeSignals;
+
+const getRealtimeSignal=function(value,index){
+return{
+name:`SIGRT${index+1}`,
+number:SIGRTMIN+index,
+action:"terminate",
+description:"Application-specific signal (realtime)",
+standard:"posix"};
+
+};
+
+const SIGRTMIN=34;
+const SIGRTMAX=64;exports.SIGRTMAX=SIGRTMAX;
+//# sourceMappingURL=realtime.js.map
+
+/***/ }),
 /* 481 */
 /***/ (function(module) {
 
@@ -37818,7 +38647,36 @@ module.exports = {
 
 
 /***/ }),
-/* 489 */,
+/* 489 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const fs = __webpack_require__(747);
+const shebangCommand = __webpack_require__(751);
+
+function readShebang(command) {
+    // Read the first 150 bytes from the file
+    const size = 150;
+    const buffer = Buffer.alloc(size);
+
+    let fd;
+
+    try {
+        fd = fs.openSync(command, 'r');
+        fs.readSync(fd, buffer, 0, size, 0);
+        fs.closeSync(fd);
+    } catch (e) { /* Empty */ }
+
+    // Attempt to extract shebang (null is returned if not a shebang)
+    return shebangCommand(buffer.toString());
+}
+
+module.exports = readShebang;
+
+
+/***/ }),
 /* 490 */,
 /* 491 */
 /***/ (function(module) {
@@ -37842,7 +38700,7 @@ function identity(value) {
 
 const path = __webpack_require__(622);
 const scan = __webpack_require__(150);
-const parse = __webpack_require__(110);
+const parse = __webpack_require__(351);
 const utils = __webpack_require__(167);
 const constants = __webpack_require__(933);
 const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
@@ -38324,7 +39182,7 @@ function applyMiddleware (argv, yargs, middlewares, beforeValidation) {
 
 "use strict";
 
-const f = __webpack_require__(224)
+const f = __webpack_require__(37)
 
 class FloatingDateTime extends Date {
   constructor (value) {
@@ -38507,65 +39365,71 @@ function table(node) {
 
 /***/ }),
 /* 502 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-const SemVer = __webpack_require__(840)
-const Range = __webpack_require__(378)
-const gt = __webpack_require__(855)
+"use strict";
 
-const minVersion = (range, loose) => {
-  range = new Range(range, loose)
-
-  let minver = new SemVer('0.0.0')
-  if (range.test(minver)) {
-    return minver
-  }
-
-  minver = new SemVer('0.0.0-0')
-  if (range.test(minver)) {
-    return minver
-  }
-
-  minver = null
-  for (let i = 0; i < range.set.length; ++i) {
-    const comparators = range.set[i]
-
-    comparators.forEach((comparator) => {
-      // Clone to avoid manipulating the comparator's semver object.
-      const compver = new SemVer(comparator.semver.version)
-      switch (comparator.operator) {
-        case '>':
-          if (compver.prerelease.length === 0) {
-            compver.patch++
-          } else {
-            compver.prerelease.push(0)
-          }
-          compver.raw = compver.format()
-          /* fallthrough */
-        case '':
-        case '>=':
-          if (!minver || gt(minver, compver)) {
-            minver = compver
-          }
-          break
-        case '<':
-        case '<=':
-          /* Ignore maximum versions */
-          break
-        /* istanbul ignore next */
-        default:
-          throw new Error(`Unexpected operation: ${comparator.operator}`)
-      }
-    })
-  }
-
-  if (minver && range.test(minver)) {
-    return minver
-  }
-
-  return null
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(17);
+const partial_1 = __webpack_require__(858);
+class DeepFilter {
+    constructor(_settings, _micromatchOptions) {
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+    }
+    getFilter(basePath, positive, negative) {
+        const matcher = this._getMatcher(positive);
+        const negativeRe = this._getNegativePatternsRe(negative);
+        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
+    }
+    _getMatcher(patterns) {
+        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
+    }
+    _getNegativePatternsRe(patterns) {
+        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
+        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
+    }
+    _filter(basePath, entry, matcher, negativeRe) {
+        if (this._isSkippedByDeep(basePath, entry.path)) {
+            return false;
+        }
+        if (this._isSkippedSymbolicLink(entry)) {
+            return false;
+        }
+        const filepath = utils.path.removeLeadingDotSegment(entry.path);
+        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
+            return false;
+        }
+        return this._isSkippedByNegativePatterns(filepath, negativeRe);
+    }
+    _isSkippedByDeep(basePath, entryPath) {
+        /**
+         * Avoid unnecessary depth calculations when it doesn't matter.
+         */
+        if (this._settings.deep === Infinity) {
+            return false;
+        }
+        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
+    }
+    _getEntryLevel(basePath, entryPath) {
+        const entryPathDepth = entryPath.split('/').length;
+        if (basePath === '') {
+            return entryPathDepth;
+        }
+        const basePathDepth = basePath.split('/').length;
+        return entryPathDepth - basePathDepth;
+    }
+    _isSkippedSymbolicLink(entry) {
+        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
+    }
+    _isSkippedByPositivePatterns(entryPath, matcher) {
+        return !this._settings.baseNameMatch && !matcher.match(entryPath);
+    }
+    _isSkippedByNegativePatterns(entryPath, patternsRe) {
+        return !utils.pattern.matchAny(entryPath, patternsRe);
+    }
 }
-module.exports = minVersion
+exports.default = DeepFilter;
 
 
 /***/ }),
@@ -38598,125 +39462,131 @@ function soft(node) {
 /* 505 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const isWindows = process.platform === 'win32' ||
+    process.env.OSTYPE === 'cygwin' ||
+    process.env.OSTYPE === 'msys'
 
-const {promisify} = __webpack_require__(669);
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
-const fastGlob = __webpack_require__(344);
-const gitIgnore = __webpack_require__(396);
-const slash = __webpack_require__(903);
+const path = __webpack_require__(622)
+const COLON = isWindows ? ';' : ':'
+const isexe = __webpack_require__(443)
 
-const DEFAULT_IGNORE = [
-	'**/node_modules/**',
-	'**/flow-typed/**',
-	'**/coverage/**',
-	'**/.git'
-];
+const getNotFoundError = (cmd) =>
+  Object.assign(new Error(`not found: ${cmd}`), { code: 'ENOENT' })
 
-const readFileP = promisify(fs.readFile);
+const getPathInfo = (cmd, opt) => {
+  const colon = opt.colon || COLON
 
-const mapGitIgnorePatternTo = base => ignore => {
-	if (ignore.startsWith('!')) {
-		return '!' + path.posix.join(base, ignore.slice(1));
-	}
+  // If it has a slash, then we don't bother searching the pathenv.
+  // just check the file itself, and that's it.
+  const pathEnv = cmd.match(/\//) || isWindows && cmd.match(/\\/) ? ['']
+    : (
+      [
+        // windows always checks the cwd first
+        ...(isWindows ? [process.cwd()] : []),
+        ...(opt.path || process.env.PATH ||
+          /* istanbul ignore next: very unusual */ '').split(colon),
+      ]
+    )
+  const pathExtExe = isWindows
+    ? opt.pathExt || process.env.PATHEXT || '.EXE;.CMD;.BAT;.COM'
+    : ''
+  const pathExt = isWindows ? pathExtExe.split(colon) : ['']
 
-	return path.posix.join(base, ignore);
-};
+  if (isWindows) {
+    if (cmd.indexOf('.') !== -1 && pathExt[0] !== '')
+      pathExt.unshift('')
+  }
 
-const parseGitIgnore = (content, options) => {
-	const base = slash(path.relative(options.cwd, path.dirname(options.fileName)));
+  return {
+    pathEnv,
+    pathExt,
+    pathExtExe,
+  }
+}
 
-	return content
-		.split(/\r?\n/)
-		.filter(Boolean)
-		.filter(line => !line.startsWith('#'))
-		.map(mapGitIgnorePatternTo(base));
-};
+const which = (cmd, opt, cb) => {
+  if (typeof opt === 'function') {
+    cb = opt
+    opt = {}
+  }
+  if (!opt)
+    opt = {}
 
-const reduceIgnore = files => {
-	return files.reduce((ignores, file) => {
-		ignores.add(parseGitIgnore(file.content, {
-			cwd: file.cwd,
-			fileName: file.filePath
-		}));
-		return ignores;
-	}, gitIgnore());
-};
+  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
+  const found = []
 
-const ensureAbsolutePathForCwd = (cwd, p) => {
-	cwd = slash(cwd);
-	if (path.isAbsolute(p)) {
-		if (p.startsWith(cwd)) {
-			return p;
-		}
+  const step = i => new Promise((resolve, reject) => {
+    if (i === pathEnv.length)
+      return opt.all && found.length ? resolve(found)
+        : reject(getNotFoundError(cmd))
 
-		throw new Error(`Path ${p} is not in cwd ${cwd}`);
-	}
+    const ppRaw = pathEnv[i]
+    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
 
-	return path.join(cwd, p);
-};
+    const pCmd = path.join(pathPart, cmd)
+    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
+      : pCmd
 
-const getIsIgnoredPredecate = (ignores, cwd) => {
-	return p => ignores.ignores(slash(path.relative(cwd, ensureAbsolutePathForCwd(cwd, p))));
-};
+    resolve(subStep(p, i, 0))
+  })
 
-const getFile = async (file, cwd) => {
-	const filePath = path.join(cwd, file);
-	const content = await readFileP(filePath, 'utf8');
+  const subStep = (p, i, ii) => new Promise((resolve, reject) => {
+    if (ii === pathExt.length)
+      return resolve(step(i + 1))
+    const ext = pathExt[ii]
+    isexe(p + ext, { pathExt: pathExtExe }, (er, is) => {
+      if (!er && is) {
+        if (opt.all)
+          found.push(p + ext)
+        else
+          return resolve(p + ext)
+      }
+      return resolve(subStep(p, i, ii + 1))
+    })
+  })
 
-	return {
-		cwd,
-		filePath,
-		content
-	};
-};
+  return cb ? step(0).then(res => cb(null, res), cb) : step(0)
+}
 
-const getFileSync = (file, cwd) => {
-	const filePath = path.join(cwd, file);
-	const content = fs.readFileSync(filePath, 'utf8');
+const whichSync = (cmd, opt) => {
+  opt = opt || {}
 
-	return {
-		cwd,
-		filePath,
-		content
-	};
-};
+  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
+  const found = []
 
-const normalizeOptions = ({
-	ignore = [],
-	cwd = slash(process.cwd())
-} = {}) => {
-	return {ignore, cwd};
-};
+  for (let i = 0; i < pathEnv.length; i ++) {
+    const ppRaw = pathEnv[i]
+    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
 
-module.exports = async options => {
-	options = normalizeOptions(options);
+    const pCmd = path.join(pathPart, cmd)
+    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
+      : pCmd
 
-	const paths = await fastGlob('**/.gitignore', {
-		ignore: DEFAULT_IGNORE.concat(options.ignore),
-		cwd: options.cwd
-	});
+    for (let j = 0; j < pathExt.length; j ++) {
+      const cur = p + pathExt[j]
+      try {
+        const is = isexe.sync(cur, { pathExt: pathExtExe })
+        if (is) {
+          if (opt.all)
+            found.push(cur)
+          else
+            return cur
+        }
+      } catch (ex) {}
+    }
+  }
 
-	const files = await Promise.all(paths.map(file => getFile(file, options.cwd)));
-	const ignores = reduceIgnore(files);
+  if (opt.all && found.length)
+    return found
 
-	return getIsIgnoredPredecate(ignores, options.cwd);
-};
+  if (opt.nothrow)
+    return null
 
-module.exports.sync = options => {
-	options = normalizeOptions(options);
+  throw getNotFoundError(cmd)
+}
 
-	const paths = fastGlob.sync('**/.gitignore', {
-		ignore: DEFAULT_IGNORE.concat(options.ignore),
-		cwd: options.cwd
-	});
-
-	const files = paths.map(file => getFileSync(file, options.cwd));
-	const ignores = reduceIgnore(files);
-
-	return getIsIgnoredPredecate(ignores, options.cwd);
-};
+module.exports = which
+which.sync = whichSync
 
 
 /***/ }),
@@ -39150,7 +40020,7 @@ module.exports = templateSettings;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(622);
-const deep_1 = __webpack_require__(565);
+const deep_1 = __webpack_require__(502);
 const entry_1 = __webpack_require__(148);
 const error_1 = __webpack_require__(952);
 const entry_2 = __webpack_require__(653);
@@ -39326,7 +40196,69 @@ function withAuthorizationPrefix(authorization) {
 /* 517 */,
 /* 518 */,
 /* 519 */,
-/* 520 */,
+/* 520 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const SemVer = __webpack_require__(840)
+const Range = __webpack_require__(378)
+const gt = __webpack_require__(855)
+
+const minVersion = (range, loose) => {
+  range = new Range(range, loose)
+
+  let minver = new SemVer('0.0.0')
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = new SemVer('0.0.0-0')
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = null
+  for (let i = 0; i < range.set.length; ++i) {
+    const comparators = range.set[i]
+
+    comparators.forEach((comparator) => {
+      // Clone to avoid manipulating the comparator's semver object.
+      const compver = new SemVer(comparator.semver.version)
+      switch (comparator.operator) {
+        case '>':
+          if (compver.prerelease.length === 0) {
+            compver.patch++
+          } else {
+            compver.prerelease.push(0)
+          }
+          compver.raw = compver.format()
+          /* fallthrough */
+        case '':
+        case '>=':
+          if (!minver || gt(minver, compver)) {
+            minver = compver
+          }
+          break
+        case '<':
+        case '<=':
+          /* Ignore maximum versions */
+          break
+        /* istanbul ignore next */
+        default:
+          throw new Error(`Unexpected operation: ${comparator.operator}`)
+      }
+    })
+  }
+
+  if (minver && range.test(minver)) {
+    return minver
+  }
+
+  return null
+}
+module.exports = minVersion
+
+
+/***/ }),
 /* 521 */,
 /* 522 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -39528,14 +40460,113 @@ module.exports = new Type('tag:yaml.org,2002:float', {
 /***/ }),
 /* 528 */,
 /* 529 */,
-/* 530 */,
-/* 531 */,
-/* 532 */
+/* 530 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const compare = __webpack_require__(217)
-const rcompare = (a, b, loose) => compare(b, a, loose)
-module.exports = rcompare
+"use strict";
+
+const mimicFn = __webpack_require__(296);
+
+const calledFunctions = new WeakMap();
+
+const oneTime = (fn, options = {}) => {
+	if (typeof fn !== 'function') {
+		throw new TypeError('Expected a function');
+	}
+
+	let ret;
+	let isCalled = false;
+	let callCount = 0;
+	const functionName = fn.displayName || fn.name || '<anonymous>';
+
+	const onetime = function (...args) {
+		calledFunctions.set(onetime, ++callCount);
+
+		if (isCalled) {
+			if (options.throw === true) {
+				throw new Error(`Function \`${functionName}\` can only be called once`);
+			}
+
+			return ret;
+		}
+
+		isCalled = true;
+		ret = fn.apply(this, args);
+		fn = null;
+
+		return ret;
+	};
+
+	mimicFn(onetime, fn);
+	calledFunctions.set(onetime, callCount);
+
+	return onetime;
+};
+
+module.exports = oneTime;
+// TODO: Remove this for the next major release
+module.exports.default = oneTime;
+
+module.exports.callCount = fn => {
+	if (!calledFunctions.has(fn)) {
+		throw new Error(`The given function \`${fn.name}\` is not wrapped by the \`onetime\` package`);
+	}
+
+	return calledFunctions.get(fn);
+};
+
+
+/***/ }),
+/* 531 */,
+/* 532 */
+/***/ (function(module) {
+
+"use strict";
+
+
+// See http://www.robvanderwoude.com/escapechars.php
+const metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
+
+function escapeCommand(arg) {
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    return arg;
+}
+
+function escapeArgument(arg, doubleEscapeMetaChars) {
+    // Convert to string
+    arg = `${arg}`;
+
+    // Algorithm below is based on https://qntm.org/cmd
+
+    // Sequence of backslashes followed by a double quote:
+    // double up all the backslashes and escape the double quote
+    arg = arg.replace(/(\\*)"/g, '$1$1\\"');
+
+    // Sequence of backslashes followed by the end of the string
+    // (which will become a double quote later):
+    // double up all the backslashes
+    arg = arg.replace(/(\\*)$/, '$1$1');
+
+    // All other backslashes occur literally
+
+    // Quote the whole thing:
+    arg = `"${arg}"`;
+
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    // Double escape meta chars if necessary
+    if (doubleEscapeMetaChars) {
+        arg = arg.replace(metaCharsRegExp, '^$1');
+    }
+
+    return arg;
+}
+
+module.exports.command = escapeCommand;
+module.exports.argument = escapeArgument;
 
 
 /***/ }),
@@ -39624,54 +40655,263 @@ module.exports.sync = (input, options) => {
 /* 534 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-// just pre-load all the stuff that index.js lazily exports
-const internalRe = __webpack_require__(273)
-module.exports = {
-  re: internalRe.re,
-  src: internalRe.src,
-  tokens: internalRe.t,
-  SEMVER_SPEC_VERSION: __webpack_require__(94).SEMVER_SPEC_VERSION,
-  SemVer: __webpack_require__(840),
-  compareIdentifiers: __webpack_require__(313).compareIdentifiers,
-  rcompareIdentifiers: __webpack_require__(313).rcompareIdentifiers,
-  parse: __webpack_require__(249),
-  valid: __webpack_require__(732),
-  clean: __webpack_require__(189),
-  inc: __webpack_require__(154),
-  diff: __webpack_require__(182),
-  major: __webpack_require__(677),
-  minor: __webpack_require__(507),
-  patch: __webpack_require__(542),
-  prerelease: __webpack_require__(70),
-  compare: __webpack_require__(217),
-  rcompare: __webpack_require__(532),
-  compareLoose: __webpack_require__(886),
-  compareBuild: __webpack_require__(405),
-  sort: __webpack_require__(270),
-  rsort: __webpack_require__(873),
-  gt: __webpack_require__(855),
-  lt: __webpack_require__(296),
-  eq: __webpack_require__(901),
-  neq: __webpack_require__(132),
-  gte: __webpack_require__(989),
-  lte: __webpack_require__(508),
-  cmp: __webpack_require__(897),
-  coerce: __webpack_require__(408),
-  Comparator: __webpack_require__(9),
-  Range: __webpack_require__(378),
-  satisfies: __webpack_require__(60),
-  toComparators: __webpack_require__(510),
-  maxSatisfying: __webpack_require__(266),
-  minSatisfying: __webpack_require__(38),
-  minVersion: __webpack_require__(502),
-  validRange: __webpack_require__(319),
-  outside: __webpack_require__(783),
-  gtr: __webpack_require__(557),
-  ltr: __webpack_require__(522),
-  intersects: __webpack_require__(620),
-  simplifyRange: __webpack_require__(549),
-  subset: __webpack_require__(293),
-}
+"use strict";
+
+const path = __webpack_require__(622);
+const childProcess = __webpack_require__(129);
+const crossSpawn = __webpack_require__(224);
+const stripFinalNewline = __webpack_require__(839);
+const npmRunPath = __webpack_require__(329);
+const onetime = __webpack_require__(530);
+const makeError = __webpack_require__(978);
+const normalizeStdio = __webpack_require__(784);
+const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __webpack_require__(542);
+const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __webpack_require__(809);
+const {mergePromise, getSpawnedPromise} = __webpack_require__(100);
+const {joinCommand, parseCommand} = __webpack_require__(679);
+
+const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
+
+const getEnv = ({env: envOption, extendEnv, preferLocal, localDir, execPath}) => {
+	const env = extendEnv ? {...process.env, ...envOption} : envOption;
+
+	if (preferLocal) {
+		return npmRunPath.env({env, cwd: localDir, execPath});
+	}
+
+	return env;
+};
+
+const handleArgs = (file, args, options = {}) => {
+	const parsed = crossSpawn._parse(file, args, options);
+	file = parsed.command;
+	args = parsed.args;
+	options = parsed.options;
+
+	options = {
+		maxBuffer: DEFAULT_MAX_BUFFER,
+		buffer: true,
+		stripFinalNewline: true,
+		extendEnv: true,
+		preferLocal: false,
+		localDir: options.cwd || process.cwd(),
+		execPath: process.execPath,
+		encoding: 'utf8',
+		reject: true,
+		cleanup: true,
+		all: false,
+		windowsHide: true,
+		...options
+	};
+
+	options.env = getEnv(options);
+
+	options.stdio = normalizeStdio(options);
+
+	if (process.platform === 'win32' && path.basename(file, '.exe') === 'cmd') {
+		// #116
+		args.unshift('/q');
+	}
+
+	return {file, args, options, parsed};
+};
+
+const handleOutput = (options, value, error) => {
+	if (typeof value !== 'string' && !Buffer.isBuffer(value)) {
+		// When `execa.sync()` errors, we normalize it to '' to mimic `execa()`
+		return error === undefined ? undefined : '';
+	}
+
+	if (options.stripFinalNewline) {
+		return stripFinalNewline(value);
+	}
+
+	return value;
+};
+
+const execa = (file, args, options) => {
+	const parsed = handleArgs(file, args, options);
+	const command = joinCommand(file, args);
+
+	let spawned;
+	try {
+		spawned = childProcess.spawn(parsed.file, parsed.args, parsed.options);
+	} catch (error) {
+		// Ensure the returned error is always both a promise and a child process
+		const dummySpawned = new childProcess.ChildProcess();
+		const errorPromise = Promise.reject(makeError({
+			error,
+			stdout: '',
+			stderr: '',
+			all: '',
+			command,
+			parsed,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		}));
+		return mergePromise(dummySpawned, errorPromise);
+	}
+
+	const spawnedPromise = getSpawnedPromise(spawned);
+	const timedPromise = setupTimeout(spawned, parsed.options, spawnedPromise);
+	const processDone = setExitHandler(spawned, parsed.options, timedPromise);
+
+	const context = {isCanceled: false};
+
+	spawned.kill = spawnedKill.bind(null, spawned.kill.bind(spawned));
+	spawned.cancel = spawnedCancel.bind(null, spawned, context);
+
+	const handlePromise = async () => {
+		const [{error, exitCode, signal, timedOut}, stdoutResult, stderrResult, allResult] = await getSpawnedResult(spawned, parsed.options, processDone);
+		const stdout = handleOutput(parsed.options, stdoutResult);
+		const stderr = handleOutput(parsed.options, stderrResult);
+		const all = handleOutput(parsed.options, allResult);
+
+		if (error || exitCode !== 0 || signal !== null) {
+			const returnedError = makeError({
+				error,
+				exitCode,
+				signal,
+				stdout,
+				stderr,
+				all,
+				command,
+				parsed,
+				timedOut,
+				isCanceled: context.isCanceled,
+				killed: spawned.killed
+			});
+
+			if (!parsed.options.reject) {
+				return returnedError;
+			}
+
+			throw returnedError;
+		}
+
+		return {
+			command,
+			exitCode: 0,
+			stdout,
+			stderr,
+			all,
+			failed: false,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		};
+	};
+
+	const handlePromiseOnce = onetime(handlePromise);
+
+	crossSpawn._enoent.hookChildProcess(spawned, parsed.parsed);
+
+	handleInput(spawned, parsed.options.input);
+
+	spawned.all = makeAllStream(spawned, parsed.options);
+
+	return mergePromise(spawned, handlePromiseOnce);
+};
+
+module.exports = execa;
+
+module.exports.sync = (file, args, options) => {
+	const parsed = handleArgs(file, args, options);
+	const command = joinCommand(file, args);
+
+	validateInputSync(parsed.options);
+
+	let result;
+	try {
+		result = childProcess.spawnSync(parsed.file, parsed.args, parsed.options);
+	} catch (error) {
+		throw makeError({
+			error,
+			stdout: '',
+			stderr: '',
+			all: '',
+			command,
+			parsed,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		});
+	}
+
+	const stdout = handleOutput(parsed.options, result.stdout, result.error);
+	const stderr = handleOutput(parsed.options, result.stderr, result.error);
+
+	if (result.error || result.status !== 0 || result.signal !== null) {
+		const error = makeError({
+			stdout,
+			stderr,
+			error: result.error,
+			signal: result.signal,
+			exitCode: result.status,
+			command,
+			parsed,
+			timedOut: result.error && result.error.code === 'ETIMEDOUT',
+			isCanceled: false,
+			killed: result.signal !== null
+		});
+
+		if (!parsed.options.reject) {
+			return error;
+		}
+
+		throw error;
+	}
+
+	return {
+		command,
+		exitCode: 0,
+		stdout,
+		stderr,
+		failed: false,
+		timedOut: false,
+		isCanceled: false,
+		killed: false
+	};
+};
+
+module.exports.command = (command, options) => {
+	const [file, ...args] = parseCommand(command);
+	return execa(file, args, options);
+};
+
+module.exports.commandSync = (command, options) => {
+	const [file, ...args] = parseCommand(command);
+	return execa.sync(file, args, options);
+};
+
+module.exports.node = (scriptPath, args, options = {}) => {
+	if (args && !Array.isArray(args) && typeof args === 'object') {
+		options = args;
+		args = [];
+	}
+
+	const stdio = normalizeStdio.node(options);
+
+	const {nodePath = process.execPath, nodeOptions = process.execArgv} = options;
+
+	return execa(
+		nodePath,
+		[
+			...nodeOptions,
+			scriptPath,
+			...(Array.isArray(args) ? args : [])
+		],
+		{
+			...options,
+			stdin: undefined,
+			stdout: undefined,
+			stderr: undefined,
+			stdio,
+			shell: false
+		}
+	);
+};
 
 
 /***/ }),
@@ -39942,9 +41182,119 @@ module.exports = new Type('tag:yaml.org,2002:binary', {
 /* 542 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(840)
-const patch = (a, loose) => new SemVer(a, loose).patch
-module.exports = patch
+"use strict";
+
+const os = __webpack_require__(87);
+const onExit = __webpack_require__(145);
+
+const DEFAULT_FORCE_KILL_TIMEOUT = 1000 * 5;
+
+// Monkey-patches `childProcess.kill()` to add `forceKillAfterTimeout` behavior
+const spawnedKill = (kill, signal = 'SIGTERM', options = {}) => {
+	const killResult = kill(signal);
+	setKillTimeout(kill, signal, options, killResult);
+	return killResult;
+};
+
+const setKillTimeout = (kill, signal, options, killResult) => {
+	if (!shouldForceKill(signal, options, killResult)) {
+		return;
+	}
+
+	const timeout = getForceKillAfterTimeout(options);
+	const t = setTimeout(() => {
+		kill('SIGKILL');
+	}, timeout);
+
+	// Guarded because there's no `.unref()` when `execa` is used in the renderer
+	// process in Electron. This cannot be tested since we don't run tests in
+	// Electron.
+	// istanbul ignore else
+	if (t.unref) {
+		t.unref();
+	}
+};
+
+const shouldForceKill = (signal, {forceKillAfterTimeout}, killResult) => {
+	return isSigterm(signal) && forceKillAfterTimeout !== false && killResult;
+};
+
+const isSigterm = signal => {
+	return signal === os.constants.signals.SIGTERM ||
+		(typeof signal === 'string' && signal.toUpperCase() === 'SIGTERM');
+};
+
+const getForceKillAfterTimeout = ({forceKillAfterTimeout = true}) => {
+	if (forceKillAfterTimeout === true) {
+		return DEFAULT_FORCE_KILL_TIMEOUT;
+	}
+
+	if (!Number.isInteger(forceKillAfterTimeout) || forceKillAfterTimeout < 0) {
+		throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${forceKillAfterTimeout}\` (${typeof forceKillAfterTimeout})`);
+	}
+
+	return forceKillAfterTimeout;
+};
+
+// `childProcess.cancel()`
+const spawnedCancel = (spawned, context) => {
+	const killResult = spawned.kill();
+
+	if (killResult) {
+		context.isCanceled = true;
+	}
+};
+
+const timeoutKill = (spawned, signal, reject) => {
+	spawned.kill(signal);
+	reject(Object.assign(new Error('Timed out'), {timedOut: true, signal}));
+};
+
+// `timeout` option handling
+const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise) => {
+	if (timeout === 0 || timeout === undefined) {
+		return spawnedPromise;
+	}
+
+	if (!Number.isInteger(timeout) || timeout < 0) {
+		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
+	}
+
+	let timeoutId;
+	const timeoutPromise = new Promise((resolve, reject) => {
+		timeoutId = setTimeout(() => {
+			timeoutKill(spawned, killSignal, reject);
+		}, timeout);
+	});
+
+	const safeSpawnedPromise = spawnedPromise.finally(() => {
+		clearTimeout(timeoutId);
+	});
+
+	return Promise.race([timeoutPromise, safeSpawnedPromise]);
+};
+
+// `cleanup` option handling
+const setExitHandler = async (spawned, {cleanup, detached}, timedPromise) => {
+	if (!cleanup || detached) {
+		return timedPromise;
+	}
+
+	const removeExitHandler = onExit(() => {
+		spawned.kill();
+	});
+
+	return timedPromise.finally(() => {
+		removeExitHandler();
+	});
+};
+
+module.exports = {
+	spawnedKill,
+	spawnedCancel,
+	setupTimeout,
+	setExitHandler
+};
 
 
 /***/ }),
@@ -40138,7 +41488,7 @@ main(function* run() {
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
-const satisfies = __webpack_require__(60)
+const satisfies = __webpack_require__(845)
 const compare = __webpack_require__(217)
 module.exports = (versions, range, options) => {
   const set = []
@@ -40239,7 +41589,7 @@ module.exports = opts => {
 
 
 var map = __webpack_require__(871);
-var yaml = __webpack_require__(208);
+var yaml = __webpack_require__(643);
 
 var yamlPlugin = function yamlPlugin(options) {
     options = options || {};
@@ -40400,7 +41750,7 @@ module.exports = function command (yargs, usage, validation, globalMiddleware) {
   // lookup module object from require()d command and derive name
   // if module was not require()d and no name given, throw error
   function moduleName (obj) {
-    const mod = __webpack_require__(78)(obj)
+    const mod = __webpack_require__(867)(obj)
     if (!mod) throw new Error(`No command name given for module: ${inspect(obj)}`)
     return commandFromFilename(mod.filename)
   }
@@ -41009,71 +42359,60 @@ exports.default = Settings;
 /* 563 */,
 /* 564 */,
 /* 565 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(17);
-const partial_1 = __webpack_require__(858);
-class DeepFilter {
-    constructor(_settings, _micromatchOptions) {
-        this._settings = _settings;
-        this._micromatchOptions = _micromatchOptions;
-    }
-    getFilter(basePath, positive, negative) {
-        const matcher = this._getMatcher(positive);
-        const negativeRe = this._getNegativePatternsRe(negative);
-        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
-    }
-    _getMatcher(patterns) {
-        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
-    }
-    _getNegativePatternsRe(patterns) {
-        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
-        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
-    }
-    _filter(basePath, entry, matcher, negativeRe) {
-        if (this._isSkippedByDeep(basePath, entry.path)) {
-            return false;
-        }
-        if (this._isSkippedSymbolicLink(entry)) {
-            return false;
-        }
-        const filepath = utils.path.removeLeadingDotSegment(entry.path);
-        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
-            return false;
-        }
-        return this._isSkippedByNegativePatterns(filepath, negativeRe);
-    }
-    _isSkippedByDeep(basePath, entryPath) {
-        /**
-         * Avoid unnecessary depth calculations when it doesn't matter.
-         */
-        if (this._settings.deep === Infinity) {
-            return false;
-        }
-        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
-    }
-    _getEntryLevel(basePath, entryPath) {
-        const entryPathDepth = entryPath.split('/').length;
-        if (basePath === '') {
-            return entryPathDepth;
-        }
-        const basePathDepth = basePath.split('/').length;
-        return entryPathDepth - basePathDepth;
-    }
-    _isSkippedSymbolicLink(entry) {
-        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
-    }
-    _isSkippedByPositivePatterns(entryPath, matcher) {
-        return !this._settings.baseNameMatch && !matcher.match(entryPath);
-    }
-    _isSkippedByNegativePatterns(entryPath, patternsRe) {
-        return !utils.pattern.matchAny(entryPath, patternsRe);
-    }
-}
-exports.default = DeepFilter;
+const {PassThrough} = __webpack_require__(413);
+
+module.exports = options => {
+	options = Object.assign({}, options);
+
+	const {array} = options;
+	let {encoding} = options;
+	const buffer = encoding === 'buffer';
+	let objectMode = false;
+
+	if (array) {
+		objectMode = !(encoding || buffer);
+	} else {
+		encoding = encoding || 'utf8';
+	}
+
+	if (buffer) {
+		encoding = null;
+	}
+
+	let len = 0;
+	const ret = [];
+	const stream = new PassThrough({objectMode});
+
+	if (encoding) {
+		stream.setEncoding(encoding);
+	}
+
+	stream.on('data', chunk => {
+		ret.push(chunk);
+
+		if (objectMode) {
+			len = ret.length;
+		} else {
+			len += chunk.length;
+		}
+	});
+
+	stream.getBufferedValue = () => {
+		if (array) {
+			return ret;
+		}
+
+		return buffer ? Buffer.concat(ret, len) : ret.join('');
+	};
+
+	stream.getBufferedLength = () => len;
+
+	return stream;
+};
 
 
 /***/ }),
@@ -41406,8 +42745,638 @@ module.exports = function atob(str) {
 
 
 /***/ }),
-/* 570 */,
-/* 571 */,
+/* 570 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+// this file handles outputting usage instructions,
+// failures, etc. keeps logging in one place.
+const decamelize = __webpack_require__(597)
+const stringWidth = __webpack_require__(21)
+const objFilter = __webpack_require__(739)
+const path = __webpack_require__(622)
+const setBlocking = __webpack_require__(411)
+const YError = __webpack_require__(574)
+
+module.exports = function usage (yargs, y18n) {
+  const __ = y18n.__
+  const self = {}
+
+  // methods for ouputting/building failure message.
+  const fails = []
+  self.failFn = function failFn (f) {
+    fails.push(f)
+  }
+
+  let failMessage = null
+  let showHelpOnFail = true
+  self.showHelpOnFail = function showHelpOnFailFn (enabled, message) {
+    if (typeof enabled === 'string') {
+      message = enabled
+      enabled = true
+    } else if (typeof enabled === 'undefined') {
+      enabled = true
+    }
+    failMessage = message
+    showHelpOnFail = enabled
+    return self
+  }
+
+  let failureOutput = false
+  self.fail = function fail (msg, err) {
+    const logger = yargs._getLoggerInstance()
+
+    if (fails.length) {
+      for (let i = fails.length - 1; i >= 0; --i) {
+        fails[i](msg, err, self)
+      }
+    } else {
+      if (yargs.getExitProcess()) setBlocking(true)
+
+      // don't output failure message more than once
+      if (!failureOutput) {
+        failureOutput = true
+        if (showHelpOnFail) {
+          yargs.showHelp('error')
+          logger.error()
+        }
+        if (msg || err) logger.error(msg || err)
+        if (failMessage) {
+          if (msg || err) logger.error('')
+          logger.error(failMessage)
+        }
+      }
+
+      err = err || new YError(msg)
+      if (yargs.getExitProcess()) {
+        return yargs.exit(1)
+      } else if (yargs._hasParseCallback()) {
+        return yargs.exit(1, err)
+      } else {
+        throw err
+      }
+    }
+  }
+
+  // methods for ouputting/building help (usage) message.
+  let usages = []
+  let usageDisabled = false
+  self.usage = (msg, description) => {
+    if (msg === null) {
+      usageDisabled = true
+      usages = []
+      return
+    }
+    usageDisabled = false
+    usages.push([msg, description || ''])
+    return self
+  }
+  self.getUsage = () => {
+    return usages
+  }
+  self.getUsageDisabled = () => {
+    return usageDisabled
+  }
+
+  self.getPositionalGroupName = () => {
+    return __('Positionals:')
+  }
+
+  let examples = []
+  self.example = (cmd, description) => {
+    examples.push([cmd, description || ''])
+  }
+
+  let commands = []
+  self.command = function command (cmd, description, isDefault, aliases) {
+    // the last default wins, so cancel out any previously set default
+    if (isDefault) {
+      commands = commands.map((cmdArray) => {
+        cmdArray[2] = false
+        return cmdArray
+      })
+    }
+    commands.push([cmd, description || '', isDefault, aliases])
+  }
+  self.getCommands = () => commands
+
+  let descriptions = {}
+  self.describe = function describe (key, desc) {
+    if (typeof key === 'object') {
+      Object.keys(key).forEach((k) => {
+        self.describe(k, key[k])
+      })
+    } else {
+      descriptions[key] = desc
+    }
+  }
+  self.getDescriptions = () => descriptions
+
+  let epilogs = []
+  self.epilog = (msg) => {
+    epilogs.push(msg)
+  }
+
+  let wrapSet = false
+  let wrap
+  self.wrap = (cols) => {
+    wrapSet = true
+    wrap = cols
+  }
+
+  function getWrap () {
+    if (!wrapSet) {
+      wrap = windowWidth()
+      wrapSet = true
+    }
+
+    return wrap
+  }
+
+  const deferY18nLookupPrefix = '__yargsString__:'
+  self.deferY18nLookup = str => deferY18nLookupPrefix + str
+
+  const defaultGroup = __('Options:')
+  self.help = function help () {
+    if (cachedHelpMessage) return cachedHelpMessage
+    normalizeAliases()
+
+    // handle old demanded API
+    const base$0 = yargs.customScriptName ? yargs.$0 : path.basename(yargs.$0)
+    const demandedOptions = yargs.getDemandedOptions()
+    const demandedCommands = yargs.getDemandedCommands()
+    const deprecatedOptions = yargs.getDeprecatedOptions()
+    const groups = yargs.getGroups()
+    const options = yargs.getOptions()
+
+    let keys = []
+    keys = keys.concat(Object.keys(descriptions))
+    keys = keys.concat(Object.keys(demandedOptions))
+    keys = keys.concat(Object.keys(demandedCommands))
+    keys = keys.concat(Object.keys(options.default))
+    keys = keys.filter(filterHiddenOptions)
+    keys = Object.keys(keys.reduce((acc, key) => {
+      if (key !== '_') acc[key] = true
+      return acc
+    }, {}))
+
+    const theWrap = getWrap()
+    const ui = __webpack_require__(369)({
+      width: theWrap,
+      wrap: !!theWrap
+    })
+
+    // the usage string.
+    if (!usageDisabled) {
+      if (usages.length) {
+        // user-defined usage.
+        usages.forEach((usage) => {
+          ui.div(`${usage[0].replace(/\$0/g, base$0)}`)
+          if (usage[1]) {
+            ui.div({ text: `${usage[1]}`, padding: [1, 0, 0, 0] })
+          }
+        })
+        ui.div()
+      } else if (commands.length) {
+        let u = null
+        // demonstrate how commands are used.
+        if (demandedCommands._) {
+          u = `${base$0} <${__('command')}>\n`
+        } else {
+          u = `${base$0} [${__('command')}]\n`
+        }
+        ui.div(`${u}`)
+      }
+    }
+
+    // your application's commands, i.e., non-option
+    // arguments populated in '_'.
+    if (commands.length) {
+      ui.div(__('Commands:'))
+
+      const context = yargs.getContext()
+      const parentCommands = context.commands.length ? `${context.commands.join(' ')} ` : ''
+
+      if (yargs.getParserConfiguration()['sort-commands'] === true) {
+        commands = commands.sort((a, b) => a[0].localeCompare(b[0]))
+      }
+
+      commands.forEach((command) => {
+        const commandString = `${base$0} ${parentCommands}${command[0].replace(/^\$0 ?/, '')}` // drop $0 from default commands.
+        ui.span(
+          {
+            text: commandString,
+            padding: [0, 2, 0, 2],
+            width: maxWidth(commands, theWrap, `${base$0}${parentCommands}`) + 4
+          },
+          { text: command[1] }
+        )
+        const hints = []
+        if (command[2]) hints.push(`[${__('default')}]`)
+        if (command[3] && command[3].length) {
+          hints.push(`[${__('aliases:')} ${command[3].join(', ')}]`)
+        }
+        if (hints.length) {
+          ui.div({ text: hints.join(' '), padding: [0, 0, 0, 2], align: 'right' })
+        } else {
+          ui.div()
+        }
+      })
+
+      ui.div()
+    }
+
+    // perform some cleanup on the keys array, making it
+    // only include top-level keys not their aliases.
+    const aliasKeys = (Object.keys(options.alias) || [])
+      .concat(Object.keys(yargs.parsed.newAliases) || [])
+
+    keys = keys.filter(key => !yargs.parsed.newAliases[key] && aliasKeys.every(alias => (options.alias[alias] || []).indexOf(key) === -1))
+
+    // populate 'Options:' group with any keys that have not
+    // explicitly had a group set.
+    if (!groups[defaultGroup]) groups[defaultGroup] = []
+    addUngroupedKeys(keys, options.alias, groups)
+
+    // display 'Options:' table along with any custom tables:
+    Object.keys(groups).forEach((groupName) => {
+      if (!groups[groupName].length) return
+
+      // if we've grouped the key 'f', but 'f' aliases 'foobar',
+      // normalizedKeys should contain only 'foobar'.
+      const normalizedKeys = groups[groupName].filter(filterHiddenOptions).map((key) => {
+        if (~aliasKeys.indexOf(key)) return key
+        for (let i = 0, aliasKey; (aliasKey = aliasKeys[i]) !== undefined; i++) {
+          if (~(options.alias[aliasKey] || []).indexOf(key)) return aliasKey
+        }
+        return key
+      })
+
+      if (normalizedKeys.length < 1) return
+
+      ui.div(groupName)
+
+      // actually generate the switches string --foo, -f, --bar.
+      const switches = normalizedKeys.reduce((acc, key) => {
+        acc[key] = [key].concat(options.alias[key] || [])
+          .map(sw => {
+            // for the special positional group don't
+            // add '--' or '-' prefix.
+            if (groupName === self.getPositionalGroupName()) return sw
+            else {
+              return (
+                // matches yargs-parser logic in which single-digits
+                // aliases declared with a boolean type are now valid
+                /^[0-9]$/.test(sw)
+                  ? ~options.boolean.indexOf(key) ? '-' : '--'
+                  : sw.length > 1 ? '--' : '-'
+              ) + sw
+            }
+          })
+          .join(', ')
+
+        return acc
+      }, {})
+
+      normalizedKeys.forEach((key) => {
+        const kswitch = switches[key]
+        let desc = descriptions[key] || ''
+        let type = null
+
+        if (~desc.lastIndexOf(deferY18nLookupPrefix)) desc = __(desc.substring(deferY18nLookupPrefix.length))
+
+        if (~options.boolean.indexOf(key)) type = `[${__('boolean')}]`
+        if (~options.count.indexOf(key)) type = `[${__('count')}]`
+        if (~options.string.indexOf(key)) type = `[${__('string')}]`
+        if (~options.normalize.indexOf(key)) type = `[${__('string')}]`
+        if (~options.array.indexOf(key)) type = `[${__('array')}]`
+        if (~options.number.indexOf(key)) type = `[${__('number')}]`
+
+        const extra = [
+          (key in deprecatedOptions) ? (
+            typeof deprecatedOptions[key] === 'string'
+              ? `[${__('deprecated: %s', deprecatedOptions[key])}]`
+              : `[${__('deprecated')}]`
+          ) : null,
+          type,
+          (key in demandedOptions) ? `[${__('required')}]` : null,
+          options.choices && options.choices[key] ? `[${__('choices:')} ${
+            self.stringifiedValues(options.choices[key])}]` : null,
+          defaultString(options.default[key], options.defaultDescription[key])
+        ].filter(Boolean).join(' ')
+
+        ui.span(
+          { text: kswitch, padding: [0, 2, 0, 2], width: maxWidth(switches, theWrap) + 4 },
+          desc
+        )
+
+        if (extra) ui.div({ text: extra, padding: [0, 0, 0, 2], align: 'right' })
+        else ui.div()
+      })
+
+      ui.div()
+    })
+
+    // describe some common use-cases for your application.
+    if (examples.length) {
+      ui.div(__('Examples:'))
+
+      examples.forEach((example) => {
+        example[0] = example[0].replace(/\$0/g, base$0)
+      })
+
+      examples.forEach((example) => {
+        if (example[1] === '') {
+          ui.div(
+            {
+              text: example[0],
+              padding: [0, 2, 0, 2]
+            }
+          )
+        } else {
+          ui.div(
+            {
+              text: example[0],
+              padding: [0, 2, 0, 2],
+              width: maxWidth(examples, theWrap) + 4
+            }, {
+              text: example[1]
+            }
+          )
+        }
+      })
+
+      ui.div()
+    }
+
+    // the usage string.
+    if (epilogs.length > 0) {
+      const e = epilogs.map(epilog => epilog.replace(/\$0/g, base$0)).join('\n')
+      ui.div(`${e}\n`)
+    }
+
+    // Remove the trailing white spaces
+    return ui.toString().replace(/\s*$/, '')
+  }
+
+  // return the maximum width of a string
+  // in the left-hand column of a table.
+  function maxWidth (table, theWrap, modifier) {
+    let width = 0
+
+    // table might be of the form [leftColumn],
+    // or {key: leftColumn}
+    if (!Array.isArray(table)) {
+      table = Object.keys(table).map(key => [table[key]])
+    }
+
+    table.forEach((v) => {
+      width = Math.max(
+        stringWidth(modifier ? `${modifier} ${v[0]}` : v[0]),
+        width
+      )
+    })
+
+    // if we've enabled 'wrap' we should limit
+    // the max-width of the left-column.
+    if (theWrap) width = Math.min(width, parseInt(theWrap * 0.5, 10))
+
+    return width
+  }
+
+  // make sure any options set for aliases,
+  // are copied to the keys being aliased.
+  function normalizeAliases () {
+    // handle old demanded API
+    const demandedOptions = yargs.getDemandedOptions()
+    const options = yargs.getOptions()
+
+    ;(Object.keys(options.alias) || []).forEach((key) => {
+      options.alias[key].forEach((alias) => {
+        // copy descriptions.
+        if (descriptions[alias]) self.describe(key, descriptions[alias])
+        // copy demanded.
+        if (alias in demandedOptions) yargs.demandOption(key, demandedOptions[alias])
+        // type messages.
+        if (~options.boolean.indexOf(alias)) yargs.boolean(key)
+        if (~options.count.indexOf(alias)) yargs.count(key)
+        if (~options.string.indexOf(alias)) yargs.string(key)
+        if (~options.normalize.indexOf(alias)) yargs.normalize(key)
+        if (~options.array.indexOf(alias)) yargs.array(key)
+        if (~options.number.indexOf(alias)) yargs.number(key)
+      })
+    })
+  }
+
+  // if yargs is executing an async handler, we take a snapshot of the
+  // help message to display on failure:
+  let cachedHelpMessage
+  self.cacheHelpMessage = function () {
+    cachedHelpMessage = this.help()
+  }
+
+  // however this snapshot must be cleared afterwards
+  // not to be be used by next calls to parse
+  self.clearCachedHelpMessage = function () {
+    cachedHelpMessage = undefined
+  }
+
+  // given a set of keys, place any keys that are
+  // ungrouped under the 'Options:' grouping.
+  function addUngroupedKeys (keys, aliases, groups) {
+    let groupedKeys = []
+    let toCheck = null
+    Object.keys(groups).forEach((group) => {
+      groupedKeys = groupedKeys.concat(groups[group])
+    })
+
+    keys.forEach((key) => {
+      toCheck = [key].concat(aliases[key])
+      if (!toCheck.some(k => groupedKeys.indexOf(k) !== -1)) {
+        groups[defaultGroup].push(key)
+      }
+    })
+    return groupedKeys
+  }
+
+  function filterHiddenOptions (key) {
+    return yargs.getOptions().hiddenOptions.indexOf(key) < 0 || yargs.parsed.argv[yargs.getOptions().showHiddenOpt]
+  }
+
+  self.showHelp = (level) => {
+    const logger = yargs._getLoggerInstance()
+    if (!level) level = 'error'
+    const emit = typeof level === 'function' ? level : logger[level]
+    emit(self.help())
+  }
+
+  self.functionDescription = (fn) => {
+    const description = fn.name ? decamelize(fn.name, '-') : __('generated-value')
+    return ['(', description, ')'].join('')
+  }
+
+  self.stringifiedValues = function stringifiedValues (values, separator) {
+    let string = ''
+    const sep = separator || ', '
+    const array = [].concat(values)
+
+    if (!values || !array.length) return string
+
+    array.forEach((value) => {
+      if (string.length) string += sep
+      string += JSON.stringify(value)
+    })
+
+    return string
+  }
+
+  // format the default-value-string displayed in
+  // the right-hand column.
+  function defaultString (value, defaultDescription) {
+    let string = `[${__('default:')} `
+
+    if (value === undefined && !defaultDescription) return null
+
+    if (defaultDescription) {
+      string += defaultDescription
+    } else {
+      switch (typeof value) {
+        case 'string':
+          string += `"${value}"`
+          break
+        case 'object':
+          string += JSON.stringify(value)
+          break
+        default:
+          string += value
+      }
+    }
+
+    return `${string}]`
+  }
+
+  // guess the width of the console window, max-width 80.
+  function windowWidth () {
+    const maxWidth = 80
+    // CI is not a TTY
+    /* c8 ignore next 2 */
+    if (typeof process === 'object' && process.stdout && process.stdout.columns) {
+      return Math.min(maxWidth, process.stdout.columns)
+    } else {
+      return maxWidth
+    }
+  }
+
+  // logic for displaying application version.
+  let version = null
+  self.version = (ver) => {
+    version = ver
+  }
+
+  self.showVersion = () => {
+    const logger = yargs._getLoggerInstance()
+    logger.log(version)
+  }
+
+  self.reset = function reset (localLookup) {
+    // do not reset wrap here
+    // do not reset fails here
+    failMessage = null
+    failureOutput = false
+    usages = []
+    usageDisabled = false
+    epilogs = []
+    examples = []
+    commands = []
+    descriptions = objFilter(descriptions, (k, v) => !localLookup[k])
+    return self
+  }
+
+  const frozens = []
+  self.freeze = function freeze () {
+    const frozen = {}
+    frozens.push(frozen)
+    frozen.failMessage = failMessage
+    frozen.failureOutput = failureOutput
+    frozen.usages = usages
+    frozen.usageDisabled = usageDisabled
+    frozen.epilogs = epilogs
+    frozen.examples = examples
+    frozen.commands = commands
+    frozen.descriptions = descriptions
+  }
+  self.unfreeze = function unfreeze () {
+    const frozen = frozens.pop()
+    failMessage = frozen.failMessage
+    failureOutput = frozen.failureOutput
+    usages = frozen.usages
+    usageDisabled = frozen.usageDisabled
+    epilogs = frozen.epilogs
+    examples = frozen.examples
+    commands = frozen.commands
+    descriptions = frozen.descriptions
+  }
+
+  return self
+}
+
+
+/***/ }),
+/* 571 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// just pre-load all the stuff that index.js lazily exports
+const internalRe = __webpack_require__(273)
+module.exports = {
+  re: internalRe.re,
+  src: internalRe.src,
+  tokens: internalRe.t,
+  SEMVER_SPEC_VERSION: __webpack_require__(94).SEMVER_SPEC_VERSION,
+  SemVer: __webpack_require__(840),
+  compareIdentifiers: __webpack_require__(313).compareIdentifiers,
+  rcompareIdentifiers: __webpack_require__(313).rcompareIdentifiers,
+  parse: __webpack_require__(249),
+  valid: __webpack_require__(732),
+  clean: __webpack_require__(189),
+  inc: __webpack_require__(154),
+  diff: __webpack_require__(182),
+  major: __webpack_require__(677),
+  minor: __webpack_require__(507),
+  patch: __webpack_require__(78),
+  prerelease: __webpack_require__(70),
+  compare: __webpack_require__(217),
+  rcompare: __webpack_require__(286),
+  compareLoose: __webpack_require__(886),
+  compareBuild: __webpack_require__(405),
+  sort: __webpack_require__(270),
+  rsort: __webpack_require__(873),
+  gt: __webpack_require__(855),
+  lt: __webpack_require__(618),
+  eq: __webpack_require__(901),
+  neq: __webpack_require__(132),
+  gte: __webpack_require__(989),
+  lte: __webpack_require__(508),
+  cmp: __webpack_require__(897),
+  coerce: __webpack_require__(408),
+  Comparator: __webpack_require__(9),
+  Range: __webpack_require__(378),
+  satisfies: __webpack_require__(845),
+  toComparators: __webpack_require__(510),
+  maxSatisfying: __webpack_require__(266),
+  minSatisfying: __webpack_require__(38),
+  minVersion: __webpack_require__(520),
+  validRange: __webpack_require__(319),
+  outside: __webpack_require__(783),
+  gtr: __webpack_require__(557),
+  ltr: __webpack_require__(522),
+  intersects: __webpack_require__(620),
+  simplifyRange: __webpack_require__(549),
+  subset: __webpack_require__(293),
+}
+
+
+/***/ }),
 /* 572 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -41667,7 +43636,34 @@ function matter(option) {
 
 
 /***/ }),
-/* 580 */,
+/* 580 */
+/***/ (function(module) {
+
+"use strict";
+
+
+var isStream = module.exports = function (stream) {
+	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
+};
+
+isStream.writable = function (stream) {
+	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
+};
+
+isStream.readable = function (stream) {
+	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
+};
+
+isStream.duplex = function (stream) {
+	return isStream.writable(stream) && isStream.readable(stream);
+};
+
+isStream.transform = function (stream) {
+	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
+};
+
+
+/***/ }),
 /* 581 */,
 /* 582 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -42328,7 +44324,15 @@ function factory(key, state, ctx) {
 
 /***/ }),
 /* 617 */,
-/* 618 */,
+/* 618 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const compare = __webpack_require__(217)
+const lt = (a, b, loose) => compare(a, b, loose) < 0
+module.exports = lt
+
+
+/***/ }),
 /* 619 */
 /***/ (function(module) {
 
@@ -42935,7 +44939,20 @@ exports.createDirentFromStats = createDirentFromStats;
 
 /***/ }),
 /* 642 */,
-/* 643 */,
+/* 643 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+
+var yaml = __webpack_require__(999);
+
+
+module.exports = yaml;
+
+
+/***/ }),
 /* 644 */,
 /* 645 */,
 /* 646 */
@@ -43932,7 +45949,7 @@ module.exports = {
 "use strict";
 
 
-var locate = __webpack_require__(839)
+var locate = __webpack_require__(910)
 
 module.exports = inlineCode
 inlineCode.locator = locate
@@ -44524,13 +46541,57 @@ function keys(value) {
 
 
 /***/ }),
-/* 679 */,
+/* 679 */
+/***/ (function(module) {
+
+"use strict";
+
+const SPACES_REGEXP = / +/g;
+
+const joinCommand = (file, args = []) => {
+	if (!Array.isArray(args)) {
+		return file;
+	}
+
+	return [file, ...args].join(' ');
+};
+
+// Allow spaces to be escaped by a backslash if not meant as a delimiter
+const handleEscaping = (tokens, token, index) => {
+	if (index === 0) {
+		return [token];
+	}
+
+	const previousToken = tokens[tokens.length - 1];
+
+	if (previousToken.endsWith('\\')) {
+		return [...tokens.slice(0, -1), `${previousToken.slice(0, -1)} ${token}`];
+	}
+
+	return [...tokens, token];
+};
+
+// Handle `execa.command()`
+const parseCommand = command => {
+	return command
+		.trim()
+		.split(SPACES_REGEXP)
+		.reduce(handleEscaping, []);
+};
+
+module.exports = {
+	joinCommand,
+	parseCommand
+};
+
+
+/***/ }),
 /* 680 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-const f = __webpack_require__(224)
+const f = __webpack_require__(37)
 
 class Time extends Date {
   constructor (value) {
@@ -46491,7 +48552,7 @@ const Command = __webpack_require__(556)
 const Completion = __webpack_require__(44)
 const Parser = __webpack_require__(453)
 const path = __webpack_require__(622)
-const Usage = __webpack_require__(866)
+const Usage = __webpack_require__(570)
 const Validation = __webpack_require__(373)
 const Y18n = __webpack_require__(407)
 const objFilter = __webpack_require__(739)
@@ -50519,20 +52580,129 @@ module.exports.removeSameGraphBumps = ({
 
 /***/ }),
 /* 750 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = locate
+const path = __webpack_require__(622);
+const resolveCommand = __webpack_require__(866);
+const escape = __webpack_require__(532);
+const readShebang = __webpack_require__(489);
 
-function locate(value, fromIndex) {
-  return value.indexOf('<', fromIndex)
+const isWin = process.platform === 'win32';
+const isExecutableRegExp = /\.(?:com|exe)$/i;
+const isCmdShimRegExp = /node_modules[\\/].bin[\\/][^\\/]+\.cmd$/i;
+
+function detectShebang(parsed) {
+    parsed.file = resolveCommand(parsed);
+
+    const shebang = parsed.file && readShebang(parsed.file);
+
+    if (shebang) {
+        parsed.args.unshift(parsed.file);
+        parsed.command = shebang;
+
+        return resolveCommand(parsed);
+    }
+
+    return parsed.file;
 }
+
+function parseNonShell(parsed) {
+    if (!isWin) {
+        return parsed;
+    }
+
+    // Detect & add support for shebangs
+    const commandFile = detectShebang(parsed);
+
+    // We don't need a shell if the command filename is an executable
+    const needsShell = !isExecutableRegExp.test(commandFile);
+
+    // If a shell is required, use cmd.exe and take care of escaping everything correctly
+    // Note that `forceShell` is an hidden option used only in tests
+    if (parsed.options.forceShell || needsShell) {
+        // Need to double escape meta chars if the command is a cmd-shim located in `node_modules/.bin/`
+        // The cmd-shim simply calls execute the package bin file with NodeJS, proxying any argument
+        // Because the escape of metachars with ^ gets interpreted when the cmd.exe is first called,
+        // we need to double escape them
+        const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
+
+        // Normalize posix paths into OS compatible paths (e.g.: foo/bar -> foo\bar)
+        // This is necessary otherwise it will always fail with ENOENT in those cases
+        parsed.command = path.normalize(parsed.command);
+
+        // Escape command & arguments
+        parsed.command = escape.command(parsed.command);
+        parsed.args = parsed.args.map((arg) => escape.argument(arg, needsDoubleEscapeMetaChars));
+
+        const shellCommand = [parsed.command].concat(parsed.args).join(' ');
+
+        parsed.args = ['/d', '/s', '/c', `"${shellCommand}"`];
+        parsed.command = process.env.comspec || 'cmd.exe';
+        parsed.options.windowsVerbatimArguments = true; // Tell node's spawn that the arguments are already escaped
+    }
+
+    return parsed;
+}
+
+function parse(command, args, options) {
+    // Normalize arguments, similar to nodejs
+    if (args && !Array.isArray(args)) {
+        options = args;
+        args = null;
+    }
+
+    args = args ? args.slice(0) : []; // Clone array to avoid changing the original
+    options = Object.assign({}, options); // Clone object to avoid changing the original
+
+    // Build our parsed object
+    const parsed = {
+        command,
+        args,
+        options,
+        file: undefined,
+        original: {
+            command,
+            args,
+        },
+    };
+
+    // Delegate further parsing to shell or non-shell
+    return options.shell ? parsed : parseNonShell(parsed);
+}
+
+module.exports = parse;
 
 
 /***/ }),
-/* 751 */,
+/* 751 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const shebangRegex = __webpack_require__(338);
+
+module.exports = (string = '') => {
+	const match = string.match(shebangRegex);
+
+	if (!match) {
+		return null;
+	}
+
+	const [path, argument] = match[0].replace(/#! ?/, '').split(' ');
+	const binary = path.split('/').pop();
+
+	if (binary === 'env') {
+		return argument;
+	}
+
+	return argument ? `${binary} ${argument}` : binary;
+};
+
+
+/***/ }),
 /* 752 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -50617,7 +52787,38 @@ function pick(schema, prop) {
 
 
 /***/ }),
-/* 754 */,
+/* 754 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+// Standard YAML's JSON schema.
+// http://www.yaml.org/spec/1.2/spec.html#id2803231
+//
+// NOTE: JS-YAML does not support schema-specific tag resolution restrictions.
+// So, this schema is not such strict as defined in the YAML specification.
+// It allows numbers in binary notaion, use `Null` and `NULL` as `null`, etc.
+
+
+
+
+
+var Schema = __webpack_require__(717);
+
+
+module.exports = new Schema({
+  include: [
+    __webpack_require__(738)
+  ],
+  implicit: [
+    __webpack_require__(140),
+    __webpack_require__(231),
+    __webpack_require__(880),
+    __webpack_require__(527)
+  ]
+});
+
+
+/***/ }),
 /* 755 */,
 /* 756 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -51580,7 +53781,83 @@ module.exports = {"0":"�","128":"€","130":"‚","131":"ƒ","132":"„","133"
 
 /***/ }),
 /* 780 */,
-/* 781 */,
+/* 781 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports,"__esModule",{value:true});exports.signalsByNumber=exports.signalsByName=void 0;var _os=__webpack_require__(87);
+
+var _signals=__webpack_require__(111);
+var _realtime=__webpack_require__(480);
+
+
+
+const getSignalsByName=function(){
+const signals=(0,_signals.getSignals)();
+return signals.reduce(getSignalByName,{});
+};
+
+const getSignalByName=function(
+signalByNameMemo,
+{name,number,description,supported,action,forced,standard})
+{
+return{
+...signalByNameMemo,
+[name]:{name,number,description,supported,action,forced,standard}};
+
+};
+
+const signalsByName=getSignalsByName();exports.signalsByName=signalsByName;
+
+
+
+
+const getSignalsByNumber=function(){
+const signals=(0,_signals.getSignals)();
+const length=_realtime.SIGRTMAX+1;
+const signalsA=Array.from({length},(value,number)=>
+getSignalByNumber(number,signals));
+
+return Object.assign({},...signalsA);
+};
+
+const getSignalByNumber=function(number,signals){
+const signal=findSignalByNumber(number,signals);
+
+if(signal===undefined){
+return{};
+}
+
+const{name,description,supported,action,forced,standard}=signal;
+return{
+[number]:{
+name,
+number,
+description,
+supported,
+action,
+forced,
+standard}};
+
+
+};
+
+
+
+const findSignalByNumber=function(number,signals){
+const signal=signals.find(({name})=>_os.constants.signals[name]===number);
+
+if(signal!==undefined){
+return signal;
+}
+
+return signals.find(signalA=>signalA.number===number);
+};
+
+const signalsByNumber=getSignalsByNumber();exports.signalsByNumber=signalsByNumber;
+//# sourceMappingURL=main.js.map
+
+/***/ }),
 /* 782 */,
 /* 783 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -51589,9 +53866,9 @@ const SemVer = __webpack_require__(840)
 const Comparator = __webpack_require__(9)
 const {ANY} = Comparator
 const Range = __webpack_require__(378)
-const satisfies = __webpack_require__(60)
+const satisfies = __webpack_require__(845)
 const gt = __webpack_require__(855)
-const lt = __webpack_require__(296)
+const lt = __webpack_require__(618)
 const lte = __webpack_require__(508)
 const gte = __webpack_require__(989)
 
@@ -51668,7 +53945,65 @@ module.exports = outside
 
 
 /***/ }),
-/* 784 */,
+/* 784 */
+/***/ (function(module) {
+
+"use strict";
+
+const aliases = ['stdin', 'stdout', 'stderr'];
+
+const hasAlias = opts => aliases.some(alias => opts[alias] !== undefined);
+
+const normalizeStdio = opts => {
+	if (!opts) {
+		return;
+	}
+
+	const {stdio} = opts;
+
+	if (stdio === undefined) {
+		return aliases.map(alias => opts[alias]);
+	}
+
+	if (hasAlias(opts)) {
+		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map(alias => `\`${alias}\``).join(', ')}`);
+	}
+
+	if (typeof stdio === 'string') {
+		return stdio;
+	}
+
+	if (!Array.isArray(stdio)) {
+		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
+	}
+
+	const length = Math.max(stdio.length, aliases.length);
+	return Array.from({length}, (value, index) => stdio[index]);
+};
+
+module.exports = normalizeStdio;
+
+// `ipc` is pushed unless it is already present
+module.exports.node = opts => {
+	const stdio = normalizeStdio(opts);
+
+	if (stdio === 'ipc') {
+		return 'ipc';
+	}
+
+	if (stdio === undefined || typeof stdio === 'string') {
+		return [stdio, stdio, stdio, 'ipc'];
+	}
+
+	if (stdio.includes('ipc')) {
+		return stdio;
+	}
+
+	return [...stdio, 'ipc'];
+};
+
+
+/***/ }),
 /* 785 */,
 /* 786 */,
 /* 787 */
@@ -51691,7 +54026,7 @@ const arrayUnion = __webpack_require__(67);
 const merge2 = __webpack_require__(6);
 const fastGlob = __webpack_require__(344);
 const dirGlob = __webpack_require__(533);
-const gitignore = __webpack_require__(505);
+const gitignore = __webpack_require__(68);
 const {FilterStream, UniqueStream} = __webpack_require__(537);
 
 const DEFAULT_FILTER = () => false;
@@ -52214,7 +54549,110 @@ function ccount(value, character) {
 
 
 /***/ }),
-/* 809 */,
+/* 809 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const isStream = __webpack_require__(124);
+const getStream = __webpack_require__(209);
+const mergeStream = __webpack_require__(74);
+
+// `input` option
+const handleInput = (spawned, input) => {
+	// Checking for stdin is workaround for https://github.com/nodejs/node/issues/26852
+	// TODO: Remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
+	if (input === undefined || spawned.stdin === undefined) {
+		return;
+	}
+
+	if (isStream(input)) {
+		input.pipe(spawned.stdin);
+	} else {
+		spawned.stdin.end(input);
+	}
+};
+
+// `all` interleaves `stdout` and `stderr`
+const makeAllStream = (spawned, {all}) => {
+	if (!all || (!spawned.stdout && !spawned.stderr)) {
+		return;
+	}
+
+	const mixed = mergeStream();
+
+	if (spawned.stdout) {
+		mixed.add(spawned.stdout);
+	}
+
+	if (spawned.stderr) {
+		mixed.add(spawned.stderr);
+	}
+
+	return mixed;
+};
+
+// On failure, `result.stdout|stderr|all` should contain the currently buffered stream
+const getBufferedData = async (stream, streamPromise) => {
+	if (!stream) {
+		return;
+	}
+
+	stream.destroy();
+
+	try {
+		return await streamPromise;
+	} catch (error) {
+		return error.bufferedData;
+	}
+};
+
+const getStreamPromise = (stream, {encoding, buffer, maxBuffer}) => {
+	if (!stream || !buffer) {
+		return;
+	}
+
+	if (encoding) {
+		return getStream(stream, {encoding, maxBuffer});
+	}
+
+	return getStream.buffer(stream, {maxBuffer});
+};
+
+// Retrieve result of child process: exit code, signal, error, streams (stdout/stderr/all)
+const getSpawnedResult = async ({stdout, stderr, all}, {encoding, buffer, maxBuffer}, processDone) => {
+	const stdoutPromise = getStreamPromise(stdout, {encoding, buffer, maxBuffer});
+	const stderrPromise = getStreamPromise(stderr, {encoding, buffer, maxBuffer});
+	const allPromise = getStreamPromise(all, {encoding, buffer, maxBuffer: maxBuffer * 2});
+
+	try {
+		return await Promise.all([processDone, stdoutPromise, stderrPromise, allPromise]);
+	} catch (error) {
+		return Promise.all([
+			{error, signal: error.signal, timedOut: error.timedOut},
+			getBufferedData(stdout, stdoutPromise),
+			getBufferedData(stderr, stderrPromise),
+			getBufferedData(all, allPromise)
+		]);
+	}
+};
+
+const validateInputSync = ({input}) => {
+	if (isStream(input)) {
+		throw new TypeError('The `input` option cannot be a stream in sync mode');
+	}
+};
+
+module.exports = {
+	handleInput,
+	makeAllStream,
+	getSpawnedResult,
+	validateInputSync
+};
+
+
+
+/***/ }),
 /* 810 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -52728,11 +55166,20 @@ module.exports = {
 "use strict";
 
 
-module.exports = locate
+module.exports = input => {
+	const LF = typeof input === 'string' ? '\n' : '\n'.charCodeAt();
+	const CR = typeof input === 'string' ? '\r' : '\r'.charCodeAt();
 
-function locate(value, fromIndex) {
-  return value.indexOf('`', fromIndex)
-}
+	if (input[input.length - 1] === LF) {
+		input = input.slice(0, input.length - 1);
+	}
+
+	if (input[input.length - 1] === CR) {
+		input = input.slice(0, input.length - 1);
+	}
+
+	return input;
+};
 
 
 /***/ }),
@@ -53088,7 +55535,22 @@ function authenticationPlugin(octokit, options) {
 
 /***/ }),
 /* 844 */,
-/* 845 */,
+/* 845 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const Range = __webpack_require__(378)
+const satisfies = (version, range, options) => {
+  try {
+    range = new Range(range, options)
+  } catch (er) {
+    return false
+  }
+  return range.test(version)
+}
+module.exports = satisfies
+
+
+/***/ }),
 /* 846 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -55389,7 +57851,29 @@ exports.getState = getState;
 //# sourceMappingURL=core.js.map
 
 /***/ }),
-/* 853 */,
+/* 853 */
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
+
+
+/***/ }),
 /* 854 */
 /***/ (function(module) {
 
@@ -56198,580 +58682,76 @@ function authenticationRequestError(state, error, options) {
 
 "use strict";
 
-// this file handles outputting usage instructions,
-// failures, etc. keeps logging in one place.
-const decamelize = __webpack_require__(597)
-const stringWidth = __webpack_require__(21)
-const objFilter = __webpack_require__(739)
-const path = __webpack_require__(622)
-const setBlocking = __webpack_require__(411)
-const YError = __webpack_require__(574)
 
-module.exports = function usage (yargs, y18n) {
-  const __ = y18n.__
-  const self = {}
+const path = __webpack_require__(622);
+const which = __webpack_require__(505);
+const getPathKey = __webpack_require__(853);
 
-  // methods for ouputting/building failure message.
-  const fails = []
-  self.failFn = function failFn (f) {
-    fails.push(f)
-  }
+function resolveCommandAttempt(parsed, withoutPathExt) {
+    const env = parsed.options.env || process.env;
+    const cwd = process.cwd();
+    const hasCustomCwd = parsed.options.cwd != null;
+    // Worker threads do not have process.chdir()
+    const shouldSwitchCwd = hasCustomCwd && process.chdir !== undefined && !process.chdir.disabled;
 
-  let failMessage = null
-  let showHelpOnFail = true
-  self.showHelpOnFail = function showHelpOnFailFn (enabled, message) {
-    if (typeof enabled === 'string') {
-      message = enabled
-      enabled = true
-    } else if (typeof enabled === 'undefined') {
-      enabled = true
-    }
-    failMessage = message
-    showHelpOnFail = enabled
-    return self
-  }
-
-  let failureOutput = false
-  self.fail = function fail (msg, err) {
-    const logger = yargs._getLoggerInstance()
-
-    if (fails.length) {
-      for (let i = fails.length - 1; i >= 0; --i) {
-        fails[i](msg, err, self)
-      }
-    } else {
-      if (yargs.getExitProcess()) setBlocking(true)
-
-      // don't output failure message more than once
-      if (!failureOutput) {
-        failureOutput = true
-        if (showHelpOnFail) {
-          yargs.showHelp('error')
-          logger.error()
+    // If a custom `cwd` was specified, we need to change the process cwd
+    // because `which` will do stat calls but does not support a custom cwd
+    if (shouldSwitchCwd) {
+        try {
+            process.chdir(parsed.options.cwd);
+        } catch (err) {
+            /* Empty */
         }
-        if (msg || err) logger.error(msg || err)
-        if (failMessage) {
-          if (msg || err) logger.error('')
-          logger.error(failMessage)
+    }
+
+    let resolved;
+
+    try {
+        resolved = which.sync(parsed.command, {
+            path: env[getPathKey({ env })],
+            pathExt: withoutPathExt ? path.delimiter : undefined,
+        });
+    } catch (e) {
+        /* Empty */
+    } finally {
+        if (shouldSwitchCwd) {
+            process.chdir(cwd);
         }
-      }
-
-      err = err || new YError(msg)
-      if (yargs.getExitProcess()) {
-        return yargs.exit(1)
-      } else if (yargs._hasParseCallback()) {
-        return yargs.exit(1, err)
-      } else {
-        throw err
-      }
-    }
-  }
-
-  // methods for ouputting/building help (usage) message.
-  let usages = []
-  let usageDisabled = false
-  self.usage = (msg, description) => {
-    if (msg === null) {
-      usageDisabled = true
-      usages = []
-      return
-    }
-    usageDisabled = false
-    usages.push([msg, description || ''])
-    return self
-  }
-  self.getUsage = () => {
-    return usages
-  }
-  self.getUsageDisabled = () => {
-    return usageDisabled
-  }
-
-  self.getPositionalGroupName = () => {
-    return __('Positionals:')
-  }
-
-  let examples = []
-  self.example = (cmd, description) => {
-    examples.push([cmd, description || ''])
-  }
-
-  let commands = []
-  self.command = function command (cmd, description, isDefault, aliases) {
-    // the last default wins, so cancel out any previously set default
-    if (isDefault) {
-      commands = commands.map((cmdArray) => {
-        cmdArray[2] = false
-        return cmdArray
-      })
-    }
-    commands.push([cmd, description || '', isDefault, aliases])
-  }
-  self.getCommands = () => commands
-
-  let descriptions = {}
-  self.describe = function describe (key, desc) {
-    if (typeof key === 'object') {
-      Object.keys(key).forEach((k) => {
-        self.describe(k, key[k])
-      })
-    } else {
-      descriptions[key] = desc
-    }
-  }
-  self.getDescriptions = () => descriptions
-
-  let epilogs = []
-  self.epilog = (msg) => {
-    epilogs.push(msg)
-  }
-
-  let wrapSet = false
-  let wrap
-  self.wrap = (cols) => {
-    wrapSet = true
-    wrap = cols
-  }
-
-  function getWrap () {
-    if (!wrapSet) {
-      wrap = windowWidth()
-      wrapSet = true
     }
 
-    return wrap
-  }
-
-  const deferY18nLookupPrefix = '__yargsString__:'
-  self.deferY18nLookup = str => deferY18nLookupPrefix + str
-
-  const defaultGroup = __('Options:')
-  self.help = function help () {
-    if (cachedHelpMessage) return cachedHelpMessage
-    normalizeAliases()
-
-    // handle old demanded API
-    const base$0 = yargs.customScriptName ? yargs.$0 : path.basename(yargs.$0)
-    const demandedOptions = yargs.getDemandedOptions()
-    const demandedCommands = yargs.getDemandedCommands()
-    const deprecatedOptions = yargs.getDeprecatedOptions()
-    const groups = yargs.getGroups()
-    const options = yargs.getOptions()
-
-    let keys = []
-    keys = keys.concat(Object.keys(descriptions))
-    keys = keys.concat(Object.keys(demandedOptions))
-    keys = keys.concat(Object.keys(demandedCommands))
-    keys = keys.concat(Object.keys(options.default))
-    keys = keys.filter(filterHiddenOptions)
-    keys = Object.keys(keys.reduce((acc, key) => {
-      if (key !== '_') acc[key] = true
-      return acc
-    }, {}))
-
-    const theWrap = getWrap()
-    const ui = __webpack_require__(369)({
-      width: theWrap,
-      wrap: !!theWrap
-    })
-
-    // the usage string.
-    if (!usageDisabled) {
-      if (usages.length) {
-        // user-defined usage.
-        usages.forEach((usage) => {
-          ui.div(`${usage[0].replace(/\$0/g, base$0)}`)
-          if (usage[1]) {
-            ui.div({ text: `${usage[1]}`, padding: [1, 0, 0, 0] })
-          }
-        })
-        ui.div()
-      } else if (commands.length) {
-        let u = null
-        // demonstrate how commands are used.
-        if (demandedCommands._) {
-          u = `${base$0} <${__('command')}>\n`
-        } else {
-          u = `${base$0} [${__('command')}]\n`
-        }
-        ui.div(`${u}`)
-      }
+    // If we successfully resolved, ensure that an absolute path is returned
+    // Note that when a custom `cwd` was used, we need to resolve to an absolute path based on it
+    if (resolved) {
+        resolved = path.resolve(hasCustomCwd ? parsed.options.cwd : '', resolved);
     }
 
-    // your application's commands, i.e., non-option
-    // arguments populated in '_'.
-    if (commands.length) {
-      ui.div(__('Commands:'))
+    return resolved;
+}
 
-      const context = yargs.getContext()
-      const parentCommands = context.commands.length ? `${context.commands.join(' ')} ` : ''
+function resolveCommand(parsed) {
+    return resolveCommandAttempt(parsed) || resolveCommandAttempt(parsed, true);
+}
 
-      if (yargs.getParserConfiguration()['sort-commands'] === true) {
-        commands = commands.sort((a, b) => a[0].localeCompare(b[0]))
-      }
+module.exports = resolveCommand;
 
-      commands.forEach((command) => {
-        const commandString = `${base$0} ${parentCommands}${command[0].replace(/^\$0 ?/, '')}` // drop $0 from default commands.
-        ui.span(
-          {
-            text: commandString,
-            padding: [0, 2, 0, 2],
-            width: maxWidth(commands, theWrap, `${base$0}${parentCommands}`) + 4
-          },
-          { text: command[1] }
-        )
-        const hints = []
-        if (command[2]) hints.push(`[${__('default')}]`)
-        if (command[3] && command[3].length) {
-          hints.push(`[${__('aliases:')} ${command[3].join(', ')}]`)
-        }
-        if (hints.length) {
-          ui.div({ text: hints.join(' '), padding: [0, 0, 0, 2], align: 'right' })
-        } else {
-          ui.div()
-        }
-      })
 
-      ui.div()
-    }
+/***/ }),
+/* 867 */
+/***/ (function(module) {
 
-    // perform some cleanup on the keys array, making it
-    // only include top-level keys not their aliases.
-    const aliasKeys = (Object.keys(options.alias) || [])
-      .concat(Object.keys(yargs.parsed.newAliases) || [])
+"use strict";
 
-    keys = keys.filter(key => !yargs.parsed.newAliases[key] && aliasKeys.every(alias => (options.alias[alias] || []).indexOf(key) === -1))
 
-    // populate 'Options:' group with any keys that have not
-    // explicitly had a group set.
-    if (!groups[defaultGroup]) groups[defaultGroup] = []
-    addUngroupedKeys(keys, options.alias, groups)
-
-    // display 'Options:' table along with any custom tables:
-    Object.keys(groups).forEach((groupName) => {
-      if (!groups[groupName].length) return
-
-      // if we've grouped the key 'f', but 'f' aliases 'foobar',
-      // normalizedKeys should contain only 'foobar'.
-      const normalizedKeys = groups[groupName].filter(filterHiddenOptions).map((key) => {
-        if (~aliasKeys.indexOf(key)) return key
-        for (let i = 0, aliasKey; (aliasKey = aliasKeys[i]) !== undefined; i++) {
-          if (~(options.alias[aliasKey] || []).indexOf(key)) return aliasKey
-        }
-        return key
-      })
-
-      if (normalizedKeys.length < 1) return
-
-      ui.div(groupName)
-
-      // actually generate the switches string --foo, -f, --bar.
-      const switches = normalizedKeys.reduce((acc, key) => {
-        acc[key] = [key].concat(options.alias[key] || [])
-          .map(sw => {
-            // for the special positional group don't
-            // add '--' or '-' prefix.
-            if (groupName === self.getPositionalGroupName()) return sw
-            else {
-              return (
-                // matches yargs-parser logic in which single-digits
-                // aliases declared with a boolean type are now valid
-                /^[0-9]$/.test(sw)
-                  ? ~options.boolean.indexOf(key) ? '-' : '--'
-                  : sw.length > 1 ? '--' : '-'
-              ) + sw
-            }
-          })
-          .join(', ')
-
-        return acc
-      }, {})
-
-      normalizedKeys.forEach((key) => {
-        const kswitch = switches[key]
-        let desc = descriptions[key] || ''
-        let type = null
-
-        if (~desc.lastIndexOf(deferY18nLookupPrefix)) desc = __(desc.substring(deferY18nLookupPrefix.length))
-
-        if (~options.boolean.indexOf(key)) type = `[${__('boolean')}]`
-        if (~options.count.indexOf(key)) type = `[${__('count')}]`
-        if (~options.string.indexOf(key)) type = `[${__('string')}]`
-        if (~options.normalize.indexOf(key)) type = `[${__('string')}]`
-        if (~options.array.indexOf(key)) type = `[${__('array')}]`
-        if (~options.number.indexOf(key)) type = `[${__('number')}]`
-
-        const extra = [
-          (key in deprecatedOptions) ? (
-            typeof deprecatedOptions[key] === 'string'
-              ? `[${__('deprecated: %s', deprecatedOptions[key])}]`
-              : `[${__('deprecated')}]`
-          ) : null,
-          type,
-          (key in demandedOptions) ? `[${__('required')}]` : null,
-          options.choices && options.choices[key] ? `[${__('choices:')} ${
-            self.stringifiedValues(options.choices[key])}]` : null,
-          defaultString(options.default[key], options.defaultDescription[key])
-        ].filter(Boolean).join(' ')
-
-        ui.span(
-          { text: kswitch, padding: [0, 2, 0, 2], width: maxWidth(switches, theWrap) + 4 },
-          desc
-        )
-
-        if (extra) ui.div({ text: extra, padding: [0, 0, 0, 2], align: 'right' })
-        else ui.div()
-      })
-
-      ui.div()
-    })
-
-    // describe some common use-cases for your application.
-    if (examples.length) {
-      ui.div(__('Examples:'))
-
-      examples.forEach((example) => {
-        example[0] = example[0].replace(/\$0/g, base$0)
-      })
-
-      examples.forEach((example) => {
-        if (example[1] === '') {
-          ui.div(
-            {
-              text: example[0],
-              padding: [0, 2, 0, 2]
-            }
-          )
-        } else {
-          ui.div(
-            {
-              text: example[0],
-              padding: [0, 2, 0, 2],
-              width: maxWidth(examples, theWrap) + 4
-            }, {
-              text: example[1]
-            }
-          )
-        }
-      })
-
-      ui.div()
-    }
-
-    // the usage string.
-    if (epilogs.length > 0) {
-      const e = epilogs.map(epilog => epilog.replace(/\$0/g, base$0)).join('\n')
-      ui.div(`${e}\n`)
-    }
-
-    // Remove the trailing white spaces
-    return ui.toString().replace(/\s*$/, '')
+module.exports = function whichModule (exported) {
+  for (var i = 0, files = Object.keys(require.cache), mod; i < files.length; i++) {
+    mod = require.cache[files[i]]
+    if (mod.exports === exported) return mod
   }
-
-  // return the maximum width of a string
-  // in the left-hand column of a table.
-  function maxWidth (table, theWrap, modifier) {
-    let width = 0
-
-    // table might be of the form [leftColumn],
-    // or {key: leftColumn}
-    if (!Array.isArray(table)) {
-      table = Object.keys(table).map(key => [table[key]])
-    }
-
-    table.forEach((v) => {
-      width = Math.max(
-        stringWidth(modifier ? `${modifier} ${v[0]}` : v[0]),
-        width
-      )
-    })
-
-    // if we've enabled 'wrap' we should limit
-    // the max-width of the left-column.
-    if (theWrap) width = Math.min(width, parseInt(theWrap * 0.5, 10))
-
-    return width
-  }
-
-  // make sure any options set for aliases,
-  // are copied to the keys being aliased.
-  function normalizeAliases () {
-    // handle old demanded API
-    const demandedOptions = yargs.getDemandedOptions()
-    const options = yargs.getOptions()
-
-    ;(Object.keys(options.alias) || []).forEach((key) => {
-      options.alias[key].forEach((alias) => {
-        // copy descriptions.
-        if (descriptions[alias]) self.describe(key, descriptions[alias])
-        // copy demanded.
-        if (alias in demandedOptions) yargs.demandOption(key, demandedOptions[alias])
-        // type messages.
-        if (~options.boolean.indexOf(alias)) yargs.boolean(key)
-        if (~options.count.indexOf(alias)) yargs.count(key)
-        if (~options.string.indexOf(alias)) yargs.string(key)
-        if (~options.normalize.indexOf(alias)) yargs.normalize(key)
-        if (~options.array.indexOf(alias)) yargs.array(key)
-        if (~options.number.indexOf(alias)) yargs.number(key)
-      })
-    })
-  }
-
-  // if yargs is executing an async handler, we take a snapshot of the
-  // help message to display on failure:
-  let cachedHelpMessage
-  self.cacheHelpMessage = function () {
-    cachedHelpMessage = this.help()
-  }
-
-  // however this snapshot must be cleared afterwards
-  // not to be be used by next calls to parse
-  self.clearCachedHelpMessage = function () {
-    cachedHelpMessage = undefined
-  }
-
-  // given a set of keys, place any keys that are
-  // ungrouped under the 'Options:' grouping.
-  function addUngroupedKeys (keys, aliases, groups) {
-    let groupedKeys = []
-    let toCheck = null
-    Object.keys(groups).forEach((group) => {
-      groupedKeys = groupedKeys.concat(groups[group])
-    })
-
-    keys.forEach((key) => {
-      toCheck = [key].concat(aliases[key])
-      if (!toCheck.some(k => groupedKeys.indexOf(k) !== -1)) {
-        groups[defaultGroup].push(key)
-      }
-    })
-    return groupedKeys
-  }
-
-  function filterHiddenOptions (key) {
-    return yargs.getOptions().hiddenOptions.indexOf(key) < 0 || yargs.parsed.argv[yargs.getOptions().showHiddenOpt]
-  }
-
-  self.showHelp = (level) => {
-    const logger = yargs._getLoggerInstance()
-    if (!level) level = 'error'
-    const emit = typeof level === 'function' ? level : logger[level]
-    emit(self.help())
-  }
-
-  self.functionDescription = (fn) => {
-    const description = fn.name ? decamelize(fn.name, '-') : __('generated-value')
-    return ['(', description, ')'].join('')
-  }
-
-  self.stringifiedValues = function stringifiedValues (values, separator) {
-    let string = ''
-    const sep = separator || ', '
-    const array = [].concat(values)
-
-    if (!values || !array.length) return string
-
-    array.forEach((value) => {
-      if (string.length) string += sep
-      string += JSON.stringify(value)
-    })
-
-    return string
-  }
-
-  // format the default-value-string displayed in
-  // the right-hand column.
-  function defaultString (value, defaultDescription) {
-    let string = `[${__('default:')} `
-
-    if (value === undefined && !defaultDescription) return null
-
-    if (defaultDescription) {
-      string += defaultDescription
-    } else {
-      switch (typeof value) {
-        case 'string':
-          string += `"${value}"`
-          break
-        case 'object':
-          string += JSON.stringify(value)
-          break
-        default:
-          string += value
-      }
-    }
-
-    return `${string}]`
-  }
-
-  // guess the width of the console window, max-width 80.
-  function windowWidth () {
-    const maxWidth = 80
-    // CI is not a TTY
-    /* c8 ignore next 2 */
-    if (typeof process === 'object' && process.stdout && process.stdout.columns) {
-      return Math.min(maxWidth, process.stdout.columns)
-    } else {
-      return maxWidth
-    }
-  }
-
-  // logic for displaying application version.
-  let version = null
-  self.version = (ver) => {
-    version = ver
-  }
-
-  self.showVersion = () => {
-    const logger = yargs._getLoggerInstance()
-    logger.log(version)
-  }
-
-  self.reset = function reset (localLookup) {
-    // do not reset wrap here
-    // do not reset fails here
-    failMessage = null
-    failureOutput = false
-    usages = []
-    usageDisabled = false
-    epilogs = []
-    examples = []
-    commands = []
-    descriptions = objFilter(descriptions, (k, v) => !localLookup[k])
-    return self
-  }
-
-  const frozens = []
-  self.freeze = function freeze () {
-    const frozen = {}
-    frozens.push(frozen)
-    frozen.failMessage = failMessage
-    frozen.failureOutput = failureOutput
-    frozen.usages = usages
-    frozen.usageDisabled = usageDisabled
-    frozen.epilogs = epilogs
-    frozen.examples = examples
-    frozen.commands = commands
-    frozen.descriptions = descriptions
-  }
-  self.unfreeze = function unfreeze () {
-    const frozen = frozens.pop()
-    failMessage = frozen.failMessage
-    failureOutput = frozen.failureOutput
-    usages = frozen.usages
-    usageDisabled = frozen.usageDisabled
-    epilogs = frozen.epilogs
-    examples = frozen.examples
-    commands = frozen.commands
-    descriptions = frozen.descriptions
-  }
-
-  return self
+  return null
 }
 
 
 /***/ }),
-/* 867 */,
 /* 868 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -58577,7 +60557,7 @@ const eq = __webpack_require__(901)
 const neq = __webpack_require__(132)
 const gt = __webpack_require__(855)
 const gte = __webpack_require__(989)
-const lt = __webpack_require__(296)
+const lt = __webpack_require__(618)
 const lte = __webpack_require__(508)
 
 const cmp = (a, op, b, loose) => {
@@ -59263,11 +61243,10 @@ function singletonify (inst) {
 "use strict";
 
 
-module.exports = list
+module.exports = locate
 
-function list(node) {
-  var fn = node.ordered ? this.visitOrderedItems : this.visitUnorderedItems
-  return fn.call(this, node)
+function locate(value, fromIndex) {
+  return value.indexOf('`', fromIndex)
 }
 
 
@@ -59992,7 +61971,7 @@ function decimal(character) {
 
 "use strict";
 
-const f = __webpack_require__(224)
+const f = __webpack_require__(37)
 const DateTime = global.Date
 
 class Date extends DateTime {
@@ -60312,34 +62291,16 @@ module.exports = {
 
 /***/ }),
 /* 937 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
-// Standard YAML's JSON schema.
-// http://www.yaml.org/spec/1.2/spec.html#id2803231
-//
-// NOTE: JS-YAML does not support schema-specific tag resolution restrictions.
-// So, this schema is not such strict as defined in the YAML specification.
-// It allows numbers in binary notaion, use `Null` and `NULL` as `null`, etc.
 
 
+module.exports = locate
 
-
-
-var Schema = __webpack_require__(717);
-
-
-module.exports = new Schema({
-  include: [
-    __webpack_require__(738)
-  ],
-  implicit: [
-    __webpack_require__(140),
-    __webpack_require__(231),
-    __webpack_require__(880),
-    __webpack_require__(527)
-  ]
-});
+function locate(value, fromIndex) {
+  return value.indexOf('<', fromIndex)
+}
 
 
 /***/ }),
@@ -61018,9 +62979,9 @@ const path = __webpack_require__(622);
 const childProcess = __webpack_require__(129);
 const crossSpawn = __webpack_require__(328);
 const stripEof = __webpack_require__(922);
-const npmRunPath = __webpack_require__(329);
-const isStream = __webpack_require__(124);
-const _getStream = __webpack_require__(209);
+const npmRunPath = __webpack_require__(112);
+const isStream = __webpack_require__(580);
+const _getStream = __webpack_require__(314);
 const pFinally = __webpack_require__(990);
 const onExit = __webpack_require__(145);
 const errname = __webpack_require__(758);
@@ -62639,7 +64600,99 @@ exports.withCustomRequest = withCustomRequest;
 
 
 /***/ }),
-/* 978 */,
+/* 978 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {signalsByName} = __webpack_require__(781);
+
+const getErrorPrefix = ({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled}) => {
+	if (timedOut) {
+		return `timed out after ${timeout} milliseconds`;
+	}
+
+	if (isCanceled) {
+		return 'was canceled';
+	}
+
+	if (errorCode !== undefined) {
+		return `failed with ${errorCode}`;
+	}
+
+	if (signal !== undefined) {
+		return `was killed with ${signal} (${signalDescription})`;
+	}
+
+	if (exitCode !== undefined) {
+		return `failed with exit code ${exitCode}`;
+	}
+
+	return 'failed';
+};
+
+const makeError = ({
+	stdout,
+	stderr,
+	all,
+	error,
+	signal,
+	exitCode,
+	command,
+	timedOut,
+	isCanceled,
+	killed,
+	parsed: {options: {timeout}}
+}) => {
+	// `signal` and `exitCode` emitted on `spawned.on('exit')` event can be `null`.
+	// We normalize them to `undefined`
+	exitCode = exitCode === null ? undefined : exitCode;
+	signal = signal === null ? undefined : signal;
+	const signalDescription = signal === undefined ? undefined : signalsByName[signal].description;
+
+	const errorCode = error && error.code;
+
+	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
+	const execaMessage = `Command ${prefix}: ${command}`;
+	const isError = Object.prototype.toString.call(error) === '[object Error]';
+	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
+	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
+
+	if (isError) {
+		error.originalMessage = error.message;
+		error.message = message;
+	} else {
+		error = new Error(message);
+	}
+
+	error.shortMessage = shortMessage;
+	error.command = command;
+	error.exitCode = exitCode;
+	error.signal = signal;
+	error.signalDescription = signalDescription;
+	error.stdout = stdout;
+	error.stderr = stderr;
+
+	if (all !== undefined) {
+		error.all = all;
+	}
+
+	if ('bufferedData' in error) {
+		delete error.bufferedData;
+	}
+
+	error.failed = true;
+	error.timedOut = Boolean(timedOut);
+	error.isCanceled = isCanceled;
+	error.killed = killed && !timedOut;
+
+	return error;
+};
+
+module.exports = makeError;
+
+
+/***/ }),
 /* 979 */,
 /* 980 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -63119,7 +65172,7 @@ module.exports = new Type('tag:yaml.org,2002:map', {
 
 var whitespace = __webpack_require__(77)
 var decode = __webpack_require__(900)
-var locate = __webpack_require__(750)
+var locate = __webpack_require__(937)
 
 module.exports = autoLink
 autoLink.locator = locate
@@ -63255,7 +65308,7 @@ function autoLink(eat, value, silent) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const { spawn, timeout } = __webpack_require__(700);
-const { ChildProcess } = __webpack_require__(142);
+const execa = __webpack_require__(534);
 const { once, on } = __webpack_require__(370);
 const { configFile, changeFiles } = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(749);
@@ -63364,34 +65417,21 @@ const runCommand = function* ({
   command,
   cwd,
   pkgPath,
-  stdio = "inherit",
+  stdio = "pipe",
   log = `running command for ${pkg}`,
 }) {
+  let child;
   try {
     return yield function* () {
       console.log(log);
-      let child = yield ChildProcess.spawn(command, [], {
+      child = yield execa.command(command, {
         cwd: path.join(cwd, pkgPath),
         shell: process.env.shell || true,
-        stdio,
         windowsHide: true,
       });
 
-      if (stdio === "pipe") {
-        let response = "";
-        let resEvents = yield on(child.stdout, "data");
-        while (response === "" || response === "undefined") {
-          let data = yield resEvents.next();
-          response += !data.value
-            ? data.toString().trim()
-            : data.value.toString().trim();
-        }
-        yield once(child, "exit");
-        console.log(response);
-        return response;
-      } else {
-        return;
-      }
+      console.log(child.stdout);
+      return child.stdout;
     };
   } catch (error) {
     throw error;
@@ -63477,7 +65517,7 @@ function deprecated(name) {
 module.exports.Type                = __webpack_require__(35);
 module.exports.Schema              = __webpack_require__(717);
 module.exports.FAILSAFE_SCHEMA     = __webpack_require__(738);
-module.exports.JSON_SCHEMA         = __webpack_require__(937);
+module.exports.JSON_SCHEMA         = __webpack_require__(754);
 module.exports.CORE_SCHEMA         = __webpack_require__(242);
 module.exports.DEFAULT_SAFE_SCHEMA = __webpack_require__(959);
 module.exports.DEFAULT_FULL_SCHEMA = __webpack_require__(803);
