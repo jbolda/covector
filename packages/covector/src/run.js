@@ -1,6 +1,6 @@
 const { spawn, timeout } = require("effection");
 const { ChildProcess } = require("@effection/node");
-const { once, on, throwOnErrorEvent } = require("@effection/events");
+const { once, on } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { fillChangelogs } = require("@covector/changelog");
@@ -67,6 +67,7 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
           cwd,
           pkg: pkg.pkg,
           pkgPath: pkg.path,
+          stdio: "pipe",
           log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
         });
 
@@ -85,7 +86,6 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
         pkgPath: pkg.path,
         log: `publishing ${pkg.pkg} with ${pkg.publish}`,
       });
-      console.log(response);
 
       published[pkg.pkg] = true;
     }
@@ -108,35 +108,36 @@ const runCommand = function* ({
   command,
   cwd,
   pkgPath,
+  stdio = "inherit",
   log = `running command for ${pkg}`,
 }) {
-  let stdio = { stdout: Buffer.from(""), stderr: Buffer.from("") };
   try {
     return yield function* () {
       console.log(log);
       let child = yield ChildProcess.spawn(command, [], {
         cwd: path.join(cwd, pkgPath),
         shell: process.env.shell || true,
-        stdio: "pipe",
+        stdio,
         windowsHide: true,
       });
 
-      let stdoutEvents = yield on(child.stdout, "data");
-      let stderrEvents = yield on(child.stderr, "data");
-      while (stdio.stdout.length === 0) {
-        let errordata = yield stderrEvents.next();
-        stdio.stderr = pull(errordata, stdio, "stderr");
-        let outdata = yield stdoutEvents.next();
-        stdio.stdout = pull(outdata, stdio, "stdout");
+      if (stdio === "pipe") {
+        let response = "";
+        let resEvents = yield on(child.stdout, "data");
+        while (response === "" || response === "undefined") {
+          let data = yield resEvents.next();
+          response += !data.value
+            ? data.toString().trim()
+            : data.value.toString().trim();
+        }
+        yield once(child, "exit");
+        console.log(response);
+        return response;
+      } else {
+        return;
       }
-      yield once(child, "exit");
-      return stdio.stdout;
     };
   } catch (error) {
-    console.log(stdio.stdout.toString());
     throw error;
   }
 };
-
-const pull = (data, stdio, out) =>
-  Buffer.concat([stdio[out]].concat(data.value));

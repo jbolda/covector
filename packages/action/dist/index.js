@@ -406,7 +406,7 @@ module.exports = Comparator
 const {re, t} = __webpack_require__(273)
 const cmp = __webpack_require__(897)
 const debug = __webpack_require__(940)
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const Range = __webpack_require__(378)
 
 
@@ -15584,45 +15584,20 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 /* 24 */,
-/* 25 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const effection_1 = __webpack_require__(700);
-function main(operation) {
-    return effection_1.main(({ context: mainContext, spawn }) => {
-        spawn(function* main() {
-            let interrupt = () => { mainContext.halt(); };
-            let debug = () => console.debug(mainContext.toString());
-            try {
-                process.on('SIGINT', interrupt);
-                process.on('SIGTERM', interrupt);
-                process.on('SIGUSR1', debug);
-                return yield operation;
-            }
-            catch (e) {
-                console.error(e);
-                process.exit(-1);
-            }
-            finally {
-                process.off('SIGINT', interrupt);
-                process.off('SIGTERM', interrupt);
-                process.off('SIGUSR1', debug);
-            }
-        });
-    });
-}
-exports.main = main;
-//# sourceMappingURL=main.js.map
-
-/***/ }),
+/* 25 */,
 /* 26 */,
 /* 27 */,
 /* 28 */,
 /* 29 */,
-/* 30 */,
+/* 30 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+var n=__webpack_require__(700);function r(n){return function(t){if("object"==typeof t&&"object"==typeof n){var e=t;return Object.entries(n).every((function(n){var t=n[0];return r(n[1])(e[t])}))}return t===n}}var t=function(){function n(n){this.subscription=n}var t=n.prototype;return t.filter=function(r){var t=this.subscription;return new n({next:function*(){for(;;){var n=yield t.next();if(n.done)return n;if(r(n.value))return n}}})},t.match=function(n){return this.filter(r(n))},t.map=function(r){var t=this.subscription;return new n({next:function*(){for(;;){var n=yield t.next();return n.done?n:{done:!1,value:r(n.value)}}}})},t.first=function*(){var n=yield this.subscription.next();return n.done?void 0:n.value},t.expect=function*(){var n=yield this.subscription.next();if(n.done)throw new Error("expected subscription to contain a value");return n.value},t.forEach=function*(n){for(;;){var r=yield this.subscription.next();if(r.done)return r.value;yield n(r.value)}},t.next=function(){return this.subscription.next()},n}(),e=function(){var n=this;this.waiters=[],this.signal=function(r){var t=n.waiters.pop();t&&t(r)},this.wait=function(){return new Promise((function(r){return n.waiters.push(r)}))}};function i(r){return function*(){var i=[],u=new e,o=function(n){i.push({done:!1,value:n}),u.signal()};return yield n.resource(new t({next:function(){try{var n=u.wait();return i.length>0&&u.signal(),Promise.resolve(n.then((function(){return i.shift()})))}catch(n){return Promise.reject(n)}}}),(function*(){try{var n=yield r((function(n){return o(n)}));i.push({done:!0,value:n}),u.signal()}finally{o=function(n){throw function(n){var r=new Error("tried to publish a value: "+n+" on an already finished subscription");return r.name="TypeError",r}(n)}}}))}}var u=Symbol.for("Symbol.subscription");function*o(n,r){for(var t=yield a(n);;){var e=yield t.next();if(e.done)return e.value;yield r(e.value)}}var c={from:function(n){return new s(n)}},s=function(){function n(n){this.source=n}var t=n.prototype;return t[u]=function(){return a(this.source)},t.map=function(n){return this.chain((function(r){return function(t){return o(r,(function*(r){t(n(r))}))}}))},t.filter=function(n){return this.chain((function(r){return function(t){return o(r,(function*(r){n(r)&&t(r)}))}}))},t.match=function(n){return this.filter(r(n))},t.chain=function(r){return new n(i(r(this.source)))},t.forEach=function(n){return o(this.source,n)},t.first=function*(){var n=yield a(this.source),r=yield n.next();return r.done?void 0:r.value},n}();function a(n){if(f(n)){var r=f(n);if(r)return r.call(n);var t=new Error("cannot subscribe to "+n+" because it does not contain Symbol.subscription");throw t.name="TypeError",t}return n}function f(n){return n[u]}exports.ChainableSubscription=t,exports.Subscribable=c,exports.SymbolSubscribable=u,exports.createSubscription=i,exports.forEach=o,exports.subscribe=function*(n){var r=yield a(n);return new t(r)};
+//# sourceMappingURL=subscription.cjs.production.min.js.map
+
+
+/***/ }),
 /* 31 */
 /***/ (function(module) {
 
@@ -15829,7 +15804,7 @@ module.exports = factory();
 /* 38 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const Range = __webpack_require__(378)
 const minSatisfying = (versions, range, options) => {
   let min = null
@@ -16176,298 +16151,11 @@ function strong(node) {
 
 /***/ }),
 /* 54 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
-const debug = __webpack_require__(940)
-const { MAX_LENGTH, MAX_SAFE_INTEGER } = __webpack_require__(94)
-const { re, t } = __webpack_require__(273)
-
-const { compareIdentifiers } = __webpack_require__(313)
-class SemVer {
-  constructor (version, options) {
-    if (!options || typeof options !== 'object') {
-      options = {
-        loose: !!options,
-        includePrerelease: false
-      }
-    }
-    if (version instanceof SemVer) {
-      if (version.loose === !!options.loose &&
-          version.includePrerelease === !!options.includePrerelease) {
-        return version
-      } else {
-        version = version.version
-      }
-    } else if (typeof version !== 'string') {
-      throw new TypeError(`Invalid Version: ${version}`)
-    }
-
-    if (version.length > MAX_LENGTH) {
-      throw new TypeError(
-        `version is longer than ${MAX_LENGTH} characters`
-      )
-    }
-
-    debug('SemVer', version, options)
-    this.options = options
-    this.loose = !!options.loose
-    // this isn't actually relevant for versions, but keep it so that we
-    // don't run into trouble passing this.options around.
-    this.includePrerelease = !!options.includePrerelease
-
-    const m = version.trim().match(options.loose ? re[t.LOOSE] : re[t.FULL])
-
-    if (!m) {
-      throw new TypeError(`Invalid Version: ${version}`)
-    }
-
-    this.raw = version
-
-    // these are actually numbers
-    this.major = +m[1]
-    this.minor = +m[2]
-    this.patch = +m[3]
-
-    if (this.major > MAX_SAFE_INTEGER || this.major < 0) {
-      throw new TypeError('Invalid major version')
-    }
-
-    if (this.minor > MAX_SAFE_INTEGER || this.minor < 0) {
-      throw new TypeError('Invalid minor version')
-    }
-
-    if (this.patch > MAX_SAFE_INTEGER || this.patch < 0) {
-      throw new TypeError('Invalid patch version')
-    }
-
-    // numberify any prerelease numeric ids
-    if (!m[4]) {
-      this.prerelease = []
-    } else {
-      this.prerelease = m[4].split('.').map((id) => {
-        if (/^[0-9]+$/.test(id)) {
-          const num = +id
-          if (num >= 0 && num < MAX_SAFE_INTEGER) {
-            return num
-          }
-        }
-        return id
-      })
-    }
-
-    this.build = m[5] ? m[5].split('.') : []
-    this.format()
-  }
-
-  format () {
-    this.version = `${this.major}.${this.minor}.${this.patch}`
-    if (this.prerelease.length) {
-      this.version += `-${this.prerelease.join('.')}`
-    }
-    return this.version
-  }
-
-  toString () {
-    return this.version
-  }
-
-  compare (other) {
-    debug('SemVer.compare', this.version, this.options, other)
-    if (!(other instanceof SemVer)) {
-      if (typeof other === 'string' && other === this.version) {
-        return 0
-      }
-      other = new SemVer(other, this.options)
-    }
-
-    if (other.version === this.version) {
-      return 0
-    }
-
-    return this.compareMain(other) || this.comparePre(other)
-  }
-
-  compareMain (other) {
-    if (!(other instanceof SemVer)) {
-      other = new SemVer(other, this.options)
-    }
-
-    return (
-      compareIdentifiers(this.major, other.major) ||
-      compareIdentifiers(this.minor, other.minor) ||
-      compareIdentifiers(this.patch, other.patch)
-    )
-  }
-
-  comparePre (other) {
-    if (!(other instanceof SemVer)) {
-      other = new SemVer(other, this.options)
-    }
-
-    // NOT having a prerelease is > having one
-    if (this.prerelease.length && !other.prerelease.length) {
-      return -1
-    } else if (!this.prerelease.length && other.prerelease.length) {
-      return 1
-    } else if (!this.prerelease.length && !other.prerelease.length) {
-      return 0
-    }
-
-    let i = 0
-    do {
-      const a = this.prerelease[i]
-      const b = other.prerelease[i]
-      debug('prerelease compare', i, a, b)
-      if (a === undefined && b === undefined) {
-        return 0
-      } else if (b === undefined) {
-        return 1
-      } else if (a === undefined) {
-        return -1
-      } else if (a === b) {
-        continue
-      } else {
-        return compareIdentifiers(a, b)
-      }
-    } while (++i)
-  }
-
-  compareBuild (other) {
-    if (!(other instanceof SemVer)) {
-      other = new SemVer(other, this.options)
-    }
-
-    let i = 0
-    do {
-      const a = this.build[i]
-      const b = other.build[i]
-      debug('prerelease compare', i, a, b)
-      if (a === undefined && b === undefined) {
-        return 0
-      } else if (b === undefined) {
-        return 1
-      } else if (a === undefined) {
-        return -1
-      } else if (a === b) {
-        continue
-      } else {
-        return compareIdentifiers(a, b)
-      }
-    } while (++i)
-  }
-
-  // preminor will bump the version up to the next minor release, and immediately
-  // down to pre-release. premajor and prepatch work the same way.
-  inc (release, identifier) {
-    switch (release) {
-      case 'premajor':
-        this.prerelease.length = 0
-        this.patch = 0
-        this.minor = 0
-        this.major++
-        this.inc('pre', identifier)
-        break
-      case 'preminor':
-        this.prerelease.length = 0
-        this.patch = 0
-        this.minor++
-        this.inc('pre', identifier)
-        break
-      case 'prepatch':
-        // If this is already a prerelease, it will bump to the next version
-        // drop any prereleases that might already exist, since they are not
-        // relevant at this point.
-        this.prerelease.length = 0
-        this.inc('patch', identifier)
-        this.inc('pre', identifier)
-        break
-      // If the input is a non-prerelease version, this acts the same as
-      // prepatch.
-      case 'prerelease':
-        if (this.prerelease.length === 0) {
-          this.inc('patch', identifier)
-        }
-        this.inc('pre', identifier)
-        break
-
-      case 'major':
-        // If this is a pre-major version, bump up to the same major version.
-        // Otherwise increment major.
-        // 1.0.0-5 bumps to 1.0.0
-        // 1.1.0 bumps to 2.0.0
-        if (
-          this.minor !== 0 ||
-          this.patch !== 0 ||
-          this.prerelease.length === 0
-        ) {
-          this.major++
-        }
-        this.minor = 0
-        this.patch = 0
-        this.prerelease = []
-        break
-      case 'minor':
-        // If this is a pre-minor version, bump up to the same minor version.
-        // Otherwise increment minor.
-        // 1.2.0-5 bumps to 1.2.0
-        // 1.2.1 bumps to 1.3.0
-        if (this.patch !== 0 || this.prerelease.length === 0) {
-          this.minor++
-        }
-        this.patch = 0
-        this.prerelease = []
-        break
-      case 'patch':
-        // If this is not a pre-release version, it will increment the patch.
-        // If it is a pre-release it will bump up to the same patch version.
-        // 1.2.0-5 patches to 1.2.0
-        // 1.2.0 patches to 1.2.1
-        if (this.prerelease.length === 0) {
-          this.patch++
-        }
-        this.prerelease = []
-        break
-      // This probably shouldn't be used publicly.
-      // 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
-      case 'pre':
-        if (this.prerelease.length === 0) {
-          this.prerelease = [0]
-        } else {
-          let i = this.prerelease.length
-          while (--i >= 0) {
-            if (typeof this.prerelease[i] === 'number') {
-              this.prerelease[i]++
-              i = -2
-            }
-          }
-          if (i === -1) {
-            // didn't increment anything
-            this.prerelease.push(0)
-          }
-        }
-        if (identifier) {
-          // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
-          // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
-          if (this.prerelease[0] === identifier) {
-            if (isNaN(this.prerelease[1])) {
-              this.prerelease = [identifier, 0]
-            }
-          } else {
-            this.prerelease = [identifier, 0]
-          }
-        }
-        break
-
-      default:
-        throw new Error(`invalid increment argument: ${release}`)
-    }
-    this.format()
-    this.raw = this.version
-    return this
-  }
-}
-
-module.exports = SemVer
+"use strict";
+var e=__webpack_require__(700),r=__webpack_require__(370),o=__webpack_require__(129);function*t(e,o,t=[]){try{yield r.throwOnErrorEvent(e);let[n]=yield r.once(e,"exit");if(0!==n)throw new Error(`'${(o+t.join(" ")).trim()}' exited with non-zero exit code`)}finally{try{process.kill(-e.pid,"SIGTERM")}catch(e){}}}exports.ChildProcess={__proto__:null,spawn:function*(r,n,s){let i=o.spawn(r,n||[],Object.assign({},s,{detached:!0}));return yield e.resource(i,t(i,r,n))},fork:function*(r,n,s){let i=o.fork(r,n,Object.assign({},s,{detached:!0}));return yield e.resource(i,t(i,r,n))}},exports.main=function(r){return e.main(({context:e,spawn:o})=>{o((function*(){let o=()=>{e.halt()},t=()=>console.debug(e.toString());try{return process.on("SIGINT",o),process.on("SIGTERM",o),process.on("SIGUSR1",t),yield r}catch(e){console.error(e),process.exit(-1)}finally{process.off("SIGINT",o),process.off("SIGTERM",o),process.off("SIGUSR1",t)}}))})};
+//# sourceMappingURL=node.cjs.production.min.js.map
 
 
 /***/ }),
@@ -17050,46 +16738,77 @@ module.exports = prerelease
 /***/ }),
 /* 71 */,
 /* 72 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const { readChangelog, writeChangelog } = __webpack_require__(916);
+const path = __webpack_require__(622);
+const unified = __webpack_require__(709);
+const parse = __webpack_require__(64);
+const stringify = __webpack_require__(104);
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const effection_1 = __webpack_require__(700);
-const event_source_1 = __webpack_require__(895);
-const once_1 = __webpack_require__(856);
-class Subscription {
-    constructor(source, eventName) {
-        this.source = source;
-        this.eventName = eventName;
-        this.events = [];
+const processor = unified().use(parse).use(stringify);
+
+module.exports.fillChangelogs = async ({
+  applied,
+  assembledChanges,
+  config,
+  cwd,
+}) => {
+  const changelogs = await readAllChangelogs({ applied, config, cwd });
+  const writtenChanges = applyChanges({
+    changelogs,
+    assembledChanges,
+  });
+  return await writeAllChangelogs({ writtenChanges });
+};
+
+const readAllChangelogs = ({ applied, config, cwd }) => {
+  return Promise.all(
+    applied.map((change) =>
+      readChangelog({
+        change,
+        cwd: path.join(cwd, config.packages[change.name].path),
+      })
+    )
+  ).then((changelogs) =>
+    changelogs.map((changelog, index) => ({
+      changes: applied[index],
+      changelog,
+    }))
+  );
+};
+
+const applyChanges = ({ changelogs, assembledChanges }) => {
+  return changelogs.map((change) => {
+    let changelog = processor.parse(change.changelog.contents);
+    let addition = "";
+    if (!assembledChanges.releases[change.changes.name]) {
+      addition = `## [${change.changes.version}]\nBumped due to dependency.`;
+    } else {
+      addition = assembledChanges.releases[change.changes.name].changes.reduce(
+        (finalString, release) => `${finalString}\n - ${release.summary}`,
+        `## [${change.changes.version}]`
+      );
     }
-    *next() {
-        while (true) {
-            if (this.events.length > 0) {
-                return this.events.shift();
-            }
-            yield once_1.once(this.source, this.eventName);
-        }
-    }
-    *subscribe() {
-        let listener = (...args) => this.events.push(args);
-        try {
-            event_source_1.addListener(this.source, this.eventName, listener);
-            yield;
-        }
-        finally {
-            event_source_1.removeListener(this.source, this.eventName, listener);
-        }
-    }
-}
-exports.Subscription = Subscription;
-function* on(source, name) {
-    let subscription = new Subscription(source, name);
-    return yield effection_1.resource(subscription, subscription.subscribe());
-}
-exports.on = on;
-//# sourceMappingURL=on.js.map
+    const parsedAddition = processor.parse(addition);
+    const changelogFirstElement = changelog.children.shift();
+    const changelogRemainingElements = changelog.children;
+    changelog.children = [].concat(
+      changelogFirstElement,
+      parsedAddition.children,
+      changelogRemainingElements
+    );
+    change.changelog.contents = processor.stringify(changelog);
+    return change;
+  });
+};
+
+const writeAllChangelogs = ({ writtenChanges }) => {
+  return Promise.all(
+    writtenChanges.map((changelog) => writeChangelog({ ...changelog }))
+  );
+};
+
 
 /***/ }),
 /* 73 */
@@ -17285,7 +17004,7 @@ function locate(value, fromIndex) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const conversions = __webpack_require__(161);
-const route = __webpack_require__(840);
+const route = __webpack_require__(672);
 
 const convert = {};
 
@@ -18255,7 +17974,96 @@ function imageReference(node) {
 
 /***/ }),
 /* 100 */,
-/* 101 */,
+/* 101 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+var effection = __webpack_require__(700);
+var events = __webpack_require__(370);
+var childProcess = __webpack_require__(129);
+
+function main(operation) {
+  return effection.main(({
+    context: mainContext,
+    spawn
+  }) => {
+    spawn(function* main() {
+      let interrupt = () => {
+        mainContext.halt();
+      };
+
+      let debug = () => console.debug(mainContext.toString());
+
+      try {
+        process.on('SIGINT', interrupt);
+        process.on('SIGTERM', interrupt);
+        process.on('SIGUSR1', debug);
+        return yield operation;
+      } catch (e) {
+        console.error(e);
+        process.exit(-1);
+      } finally {
+        process.off('SIGINT', interrupt);
+        process.off('SIGTERM', interrupt);
+        process.off('SIGUSR1', debug);
+      }
+    });
+  });
+}
+
+function* supervise(child, command, args = []) {
+  // Killing all child processes started by this command is surprisingly
+  // tricky. If a process spawns another processes and we kill the parent,
+  // then the child process is NOT automatically killed. Instead we're using
+  // the `detached` option to force the child into its own process group,
+  // which all of its children in turn will inherit. By sending the signal to
+  // `-pid` rather than `pid`, we are sending it to the entire process group
+  // instead. This will send the signal to all processes started by the child
+  // process.
+  //
+  // More information here: https://unix.stackexchange.com/questions/14815/process-descendants
+  try {
+    yield events.throwOnErrorEvent(child);
+    let [code] = yield events.once(child, "exit");
+
+    if (code !== 0) {
+      throw new Error(`'${(command + args.join(' ')).trim()}' exited with non-zero exit code`);
+    }
+  } finally {
+    try {
+      process.kill(-child.pid, "SIGTERM");
+    } catch (e) {// do nothing, process is probably already dead
+    }
+  }
+}
+
+function* spawn(command, args, options) {
+  let child = childProcess.spawn(command, args || [], Object.assign({}, options, {
+    detached: true
+  }));
+  return yield effection.resource(child, supervise(child, command, args));
+}
+function* fork(module, args, options) {
+  let child = childProcess.fork(module, args, Object.assign({}, options, {
+    detached: true
+  }));
+  return yield effection.resource(child, supervise(child, module, args));
+}
+
+var child_process = {
+  __proto__: null,
+  spawn: spawn,
+  fork: fork
+};
+
+exports.ChildProcess = child_process;
+exports.main = main;
+//# sourceMappingURL=node.cjs.development.js.map
+
+
+/***/ }),
 /* 102 */,
 /* 103 */,
 /* 104 */
@@ -20104,15 +19912,18 @@ module.exports = new Type('tag:yaml.org,2002:null', {
 /***/ }),
 /* 141 */,
 /* 142 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-var main_1 = __webpack_require__(25);
-exports.main = main_1.main;
-exports.ChildProcess = __webpack_require__(917);
-//# sourceMappingURL=index.js.map
+
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = __webpack_require__(54)
+} else {
+  module.exports = __webpack_require__(101)
+}
+
 
 /***/ }),
 /* 143 */,
@@ -20913,7 +20724,7 @@ exports.checkBypass = checkBypass;
 /* 154 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 
 const inc = (version, release, options, identifier) => {
   if (typeof (options) === 'string') {
@@ -23531,7 +23342,7 @@ module.exports = isPlainObject;
 /* 217 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const compare = (a, b, loose) =>
   new SemVer(a, loose).compare(new SemVer(b, loose))
 
@@ -23565,7 +23376,7 @@ function tableCell(node) {
 
 var matters = __webpack_require__(579)
 var parse = __webpack_require__(998)
-var compile = __webpack_require__(787)
+var compile = __webpack_require__(468)
 
 module.exports = frontmatter
 
@@ -24396,7 +24207,7 @@ function callSuccessCallback(callback, result) {
 
 const {MAX_LENGTH} = __webpack_require__(94)
 const { re, t } = __webpack_require__(273)
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 
 const parse = (version, options) => {
   if (!options || typeof options !== 'object') {
@@ -25768,7 +25579,7 @@ function sync (path, options) {
 /* 266 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const Range = __webpack_require__(378)
 
 const maxSatisfying = (versions, range, options) => {
@@ -25824,7 +25635,7 @@ exports.createFileSystemAdapter = createFileSystemAdapter;
 /* 270 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const compareBuild = __webpack_require__(997)
+const compareBuild = __webpack_require__(405)
 const sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose))
 module.exports = sort
 
@@ -31008,19 +30819,18 @@ module.exports = function (opts = {}) {
 
 /***/ }),
 /* 370 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-Object.defineProperty(exports, "__esModule", { value: true });
-var once_1 = __webpack_require__(856);
-exports.once = once_1.once;
-var on_1 = __webpack_require__(72);
-exports.on = on_1.on;
-exports.Subscription = on_1.Subscription;
-var throw_on_error_event_1 = __webpack_require__(405);
-exports.throwOnErrorEvent = throw_on_error_event_1.throwOnErrorEvent;
-//# sourceMappingURL=index.js.map
+
+
+if (process.env.NODE_ENV === 'production') {
+  module.exports = __webpack_require__(787)
+} else {
+  module.exports = __webpack_require__(950)
+}
+
 
 /***/ }),
 /* 371 */,
@@ -31714,7 +31524,7 @@ module.exports = Range
 
 const Comparator = __webpack_require__(9)
 const debug = __webpack_require__(940)
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const {
   re,
   t,
@@ -33339,21 +33149,16 @@ module.exports = osName;
 /* 403 */,
 /* 404 */,
 /* 405 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const effection_1 = __webpack_require__(700);
-const once_1 = __webpack_require__(856);
-function throwOnErrorEvent(source) {
-    return effection_1.spawn(function* () {
-        let [error] = yield once_1.once(source, 'error');
-        throw error;
-    });
+const SemVer = __webpack_require__(840)
+const compareBuild = (a, b, loose) => {
+  const versionA = new SemVer(a, loose)
+  const versionB = new SemVer(b, loose)
+  return versionA.compare(versionB) || versionA.compareBuild(versionB)
 }
-exports.throwOnErrorEvent = throwOnErrorEvent;
-//# sourceMappingURL=throw-on-error-event.js.map
+module.exports = compareBuild
+
 
 /***/ }),
 /* 406 */
@@ -33562,7 +33367,7 @@ module.exports = function (opts) {
 /* 408 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const parse = __webpack_require__(249)
 const {re, t} = __webpack_require__(273)
 
@@ -37224,7 +37029,32 @@ function escape(eat, value, silent) {
 
 
 /***/ }),
-/* 468 */,
+/* 468 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+var fence = __webpack_require__(753)
+
+module.exports = create
+
+function create(matter) {
+  var type = matter.type
+  var open = fence(matter, 'open')
+  var close = fence(matter, 'close')
+
+  frontmatter.displayName = type + 'FrontMatter'
+
+  return [type, frontmatter]
+
+  function frontmatter(node) {
+    return open + (node.value ? '\n' + node.value : '') + '\n' + close
+  }
+}
+
+
+/***/ }),
 /* 469 */
 /***/ (function(module) {
 
@@ -38679,7 +38509,7 @@ function table(node) {
 /* 502 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const Range = __webpack_require__(378)
 const gt = __webpack_require__(855)
 
@@ -38894,7 +38724,7 @@ module.exports.sync = options => {
 /* 507 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const minor = (a, loose) => new SemVer(a, loose).minor
 module.exports = minor
 
@@ -39696,80 +39526,7 @@ module.exports = new Type('tag:yaml.org,2002:float', {
 
 
 /***/ }),
-/* 528 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const { readChangelog, writeChangelog } = __webpack_require__(916);
-const path = __webpack_require__(622);
-const unified = __webpack_require__(709);
-const parse = __webpack_require__(64);
-const stringify = __webpack_require__(104);
-
-const processor = unified().use(parse).use(stringify);
-
-module.exports.fillChangelogs = async ({
-  applied,
-  assembledChanges,
-  config,
-  cwd,
-}) => {
-  const changelogs = await readAllChangelogs({ applied, config, cwd });
-  const writtenChanges = applyChanges({
-    changelogs,
-    assembledChanges,
-  });
-  return await writeAllChangelogs({ writtenChanges });
-};
-
-const readAllChangelogs = ({ applied, config, cwd }) => {
-  return Promise.all(
-    applied.map((change) =>
-      readChangelog({
-        change,
-        cwd: path.join(cwd, config.packages[change.name].path),
-      })
-    )
-  ).then((changelogs) =>
-    changelogs.map((changelog, index) => ({
-      changes: applied[index],
-      changelog,
-    }))
-  );
-};
-
-const applyChanges = ({ changelogs, assembledChanges }) => {
-  return changelogs.map((change) => {
-    let changelog = processor.parse(change.changelog.contents);
-    let addition = "";
-    if (!assembledChanges.releases[change.changes.name]) {
-      addition = `## [${change.changes.version}]\nBumped due to dependency.`;
-    } else {
-      addition = assembledChanges.releases[change.changes.name].changes.reduce(
-        (finalString, release) => `${finalString}\n - ${release.summary}`,
-        `## [${change.changes.version}]`
-      );
-    }
-    const parsedAddition = processor.parse(addition);
-    const changelogFirstElement = changelog.children.shift();
-    const changelogRemainingElements = changelog.children;
-    changelog.children = [].concat(
-      changelogFirstElement,
-      parsedAddition.children,
-      changelogRemainingElements
-    );
-    change.changelog.contents = processor.stringify(changelog);
-    return change;
-  });
-};
-
-const writeAllChangelogs = ({ writtenChanges }) => {
-  return Promise.all(
-    writtenChanges.map((changelog) => writeChangelog({ ...changelog }))
-  );
-};
-
-
-/***/ }),
+/* 528 */,
 /* 529 */,
 /* 530 */,
 /* 531 */,
@@ -39874,7 +39631,7 @@ module.exports = {
   src: internalRe.src,
   tokens: internalRe.t,
   SEMVER_SPEC_VERSION: __webpack_require__(94).SEMVER_SPEC_VERSION,
-  SemVer: __webpack_require__(54),
+  SemVer: __webpack_require__(840),
   compareIdentifiers: __webpack_require__(313).compareIdentifiers,
   rcompareIdentifiers: __webpack_require__(313).rcompareIdentifiers,
   parse: __webpack_require__(249),
@@ -39889,7 +39646,7 @@ module.exports = {
   compare: __webpack_require__(217),
   rcompare: __webpack_require__(532),
   compareLoose: __webpack_require__(886),
-  compareBuild: __webpack_require__(997),
+  compareBuild: __webpack_require__(405),
   sort: __webpack_require__(270),
   rsort: __webpack_require__(873),
   gt: __webpack_require__(855),
@@ -40185,7 +39942,7 @@ module.exports = new Type('tag:yaml.org,2002:binary', {
 /* 542 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const patch = (a, loose) => new SemVer(a, loose).patch
 module.exports = patch
 
@@ -41626,82 +41383,16 @@ function protocol(value) {
 
 /***/ }),
 /* 568 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = factory
 
-function factory(file) {
-  var contents = indices(String(file))
-
-  return {
-    toPosition: offsetToPositionFactory(contents),
-    toOffset: positionToOffsetFactory(contents)
-  }
-}
-
-// Factory to get the line and column-based `position` for `offset` in the bound
-// indices.
-function offsetToPositionFactory(indices) {
-  return offsetToPosition
-
-  // Get the line and column-based `position` for `offset` in the bound indices.
-  function offsetToPosition(offset) {
-    var index = -1
-    var length = indices.length
-
-    if (offset < 0) {
-      return {}
-    }
-
-    while (++index < length) {
-      if (indices[index] > offset) {
-        return {
-          line: index + 1,
-          column: offset - (indices[index - 1] || 0) + 1,
-          offset: offset
-        }
-      }
-    }
-
-    return {}
-  }
-}
-
-// Factory to get the `offset` for a line and column-based `position` in the
-// bound indices.
-function positionToOffsetFactory(indices) {
-  return positionToOffset
-
-  // Get the `offset` for a line and column-based `position` in the bound
-  // indices.
-  function positionToOffset(position) {
-    var line = position && position.line
-    var column = position && position.column
-
-    if (!isNaN(line) && !isNaN(column) && line - 1 in indices) {
-      return (indices[line - 2] || 0) + column - 1 || 0
-    }
-
-    return -1
-  }
-}
-
-// Get indices of line-breaks in `value`.
-function indices(value) {
-  var result = []
-  var index = value.indexOf('\n')
-
-  while (index !== -1) {
-    result.push(index + 1)
-    index = value.indexOf('\n', index + 1)
-  }
-
-  result.push(value.length + 1)
-
-  return result
+if (process.env.NODE_ENV === 'production') {
+  module.exports = __webpack_require__(30)
+} else {
+  module.exports = __webpack_require__(926)
 }
 
 
@@ -44469,7 +44160,109 @@ function parseTransform () {
 module.exports = {"AEli":"Æ","AElig":"Æ","AM":"&","AMP":"&","Aacut":"Á","Aacute":"Á","Abreve":"Ă","Acir":"Â","Acirc":"Â","Acy":"А","Afr":"𝔄","Agrav":"À","Agrave":"À","Alpha":"Α","Amacr":"Ā","And":"⩓","Aogon":"Ą","Aopf":"𝔸","ApplyFunction":"⁡","Arin":"Å","Aring":"Å","Ascr":"𝒜","Assign":"≔","Atild":"Ã","Atilde":"Ã","Aum":"Ä","Auml":"Ä","Backslash":"∖","Barv":"⫧","Barwed":"⌆","Bcy":"Б","Because":"∵","Bernoullis":"ℬ","Beta":"Β","Bfr":"𝔅","Bopf":"𝔹","Breve":"˘","Bscr":"ℬ","Bumpeq":"≎","CHcy":"Ч","COP":"©","COPY":"©","Cacute":"Ć","Cap":"⋒","CapitalDifferentialD":"ⅅ","Cayleys":"ℭ","Ccaron":"Č","Ccedi":"Ç","Ccedil":"Ç","Ccirc":"Ĉ","Cconint":"∰","Cdot":"Ċ","Cedilla":"¸","CenterDot":"·","Cfr":"ℭ","Chi":"Χ","CircleDot":"⊙","CircleMinus":"⊖","CirclePlus":"⊕","CircleTimes":"⊗","ClockwiseContourIntegral":"∲","CloseCurlyDoubleQuote":"”","CloseCurlyQuote":"’","Colon":"∷","Colone":"⩴","Congruent":"≡","Conint":"∯","ContourIntegral":"∮","Copf":"ℂ","Coproduct":"∐","CounterClockwiseContourIntegral":"∳","Cross":"⨯","Cscr":"𝒞","Cup":"⋓","CupCap":"≍","DD":"ⅅ","DDotrahd":"⤑","DJcy":"Ђ","DScy":"Ѕ","DZcy":"Џ","Dagger":"‡","Darr":"↡","Dashv":"⫤","Dcaron":"Ď","Dcy":"Д","Del":"∇","Delta":"Δ","Dfr":"𝔇","DiacriticalAcute":"´","DiacriticalDot":"˙","DiacriticalDoubleAcute":"˝","DiacriticalGrave":"`","DiacriticalTilde":"˜","Diamond":"⋄","DifferentialD":"ⅆ","Dopf":"𝔻","Dot":"¨","DotDot":"⃜","DotEqual":"≐","DoubleContourIntegral":"∯","DoubleDot":"¨","DoubleDownArrow":"⇓","DoubleLeftArrow":"⇐","DoubleLeftRightArrow":"⇔","DoubleLeftTee":"⫤","DoubleLongLeftArrow":"⟸","DoubleLongLeftRightArrow":"⟺","DoubleLongRightArrow":"⟹","DoubleRightArrow":"⇒","DoubleRightTee":"⊨","DoubleUpArrow":"⇑","DoubleUpDownArrow":"⇕","DoubleVerticalBar":"∥","DownArrow":"↓","DownArrowBar":"⤓","DownArrowUpArrow":"⇵","DownBreve":"̑","DownLeftRightVector":"⥐","DownLeftTeeVector":"⥞","DownLeftVector":"↽","DownLeftVectorBar":"⥖","DownRightTeeVector":"⥟","DownRightVector":"⇁","DownRightVectorBar":"⥗","DownTee":"⊤","DownTeeArrow":"↧","Downarrow":"⇓","Dscr":"𝒟","Dstrok":"Đ","ENG":"Ŋ","ET":"Ð","ETH":"Ð","Eacut":"É","Eacute":"É","Ecaron":"Ě","Ecir":"Ê","Ecirc":"Ê","Ecy":"Э","Edot":"Ė","Efr":"𝔈","Egrav":"È","Egrave":"È","Element":"∈","Emacr":"Ē","EmptySmallSquare":"◻","EmptyVerySmallSquare":"▫","Eogon":"Ę","Eopf":"𝔼","Epsilon":"Ε","Equal":"⩵","EqualTilde":"≂","Equilibrium":"⇌","Escr":"ℰ","Esim":"⩳","Eta":"Η","Eum":"Ë","Euml":"Ë","Exists":"∃","ExponentialE":"ⅇ","Fcy":"Ф","Ffr":"𝔉","FilledSmallSquare":"◼","FilledVerySmallSquare":"▪","Fopf":"𝔽","ForAll":"∀","Fouriertrf":"ℱ","Fscr":"ℱ","GJcy":"Ѓ","G":">","GT":">","Gamma":"Γ","Gammad":"Ϝ","Gbreve":"Ğ","Gcedil":"Ģ","Gcirc":"Ĝ","Gcy":"Г","Gdot":"Ġ","Gfr":"𝔊","Gg":"⋙","Gopf":"𝔾","GreaterEqual":"≥","GreaterEqualLess":"⋛","GreaterFullEqual":"≧","GreaterGreater":"⪢","GreaterLess":"≷","GreaterSlantEqual":"⩾","GreaterTilde":"≳","Gscr":"𝒢","Gt":"≫","HARDcy":"Ъ","Hacek":"ˇ","Hat":"^","Hcirc":"Ĥ","Hfr":"ℌ","HilbertSpace":"ℋ","Hopf":"ℍ","HorizontalLine":"─","Hscr":"ℋ","Hstrok":"Ħ","HumpDownHump":"≎","HumpEqual":"≏","IEcy":"Е","IJlig":"Ĳ","IOcy":"Ё","Iacut":"Í","Iacute":"Í","Icir":"Î","Icirc":"Î","Icy":"И","Idot":"İ","Ifr":"ℑ","Igrav":"Ì","Igrave":"Ì","Im":"ℑ","Imacr":"Ī","ImaginaryI":"ⅈ","Implies":"⇒","Int":"∬","Integral":"∫","Intersection":"⋂","InvisibleComma":"⁣","InvisibleTimes":"⁢","Iogon":"Į","Iopf":"𝕀","Iota":"Ι","Iscr":"ℐ","Itilde":"Ĩ","Iukcy":"І","Ium":"Ï","Iuml":"Ï","Jcirc":"Ĵ","Jcy":"Й","Jfr":"𝔍","Jopf":"𝕁","Jscr":"𝒥","Jsercy":"Ј","Jukcy":"Є","KHcy":"Х","KJcy":"Ќ","Kappa":"Κ","Kcedil":"Ķ","Kcy":"К","Kfr":"𝔎","Kopf":"𝕂","Kscr":"𝒦","LJcy":"Љ","L":"<","LT":"<","Lacute":"Ĺ","Lambda":"Λ","Lang":"⟪","Laplacetrf":"ℒ","Larr":"↞","Lcaron":"Ľ","Lcedil":"Ļ","Lcy":"Л","LeftAngleBracket":"⟨","LeftArrow":"←","LeftArrowBar":"⇤","LeftArrowRightArrow":"⇆","LeftCeiling":"⌈","LeftDoubleBracket":"⟦","LeftDownTeeVector":"⥡","LeftDownVector":"⇃","LeftDownVectorBar":"⥙","LeftFloor":"⌊","LeftRightArrow":"↔","LeftRightVector":"⥎","LeftTee":"⊣","LeftTeeArrow":"↤","LeftTeeVector":"⥚","LeftTriangle":"⊲","LeftTriangleBar":"⧏","LeftTriangleEqual":"⊴","LeftUpDownVector":"⥑","LeftUpTeeVector":"⥠","LeftUpVector":"↿","LeftUpVectorBar":"⥘","LeftVector":"↼","LeftVectorBar":"⥒","Leftarrow":"⇐","Leftrightarrow":"⇔","LessEqualGreater":"⋚","LessFullEqual":"≦","LessGreater":"≶","LessLess":"⪡","LessSlantEqual":"⩽","LessTilde":"≲","Lfr":"𝔏","Ll":"⋘","Lleftarrow":"⇚","Lmidot":"Ŀ","LongLeftArrow":"⟵","LongLeftRightArrow":"⟷","LongRightArrow":"⟶","Longleftarrow":"⟸","Longleftrightarrow":"⟺","Longrightarrow":"⟹","Lopf":"𝕃","LowerLeftArrow":"↙","LowerRightArrow":"↘","Lscr":"ℒ","Lsh":"↰","Lstrok":"Ł","Lt":"≪","Map":"⤅","Mcy":"М","MediumSpace":" ","Mellintrf":"ℳ","Mfr":"𝔐","MinusPlus":"∓","Mopf":"𝕄","Mscr":"ℳ","Mu":"Μ","NJcy":"Њ","Nacute":"Ń","Ncaron":"Ň","Ncedil":"Ņ","Ncy":"Н","NegativeMediumSpace":"​","NegativeThickSpace":"​","NegativeThinSpace":"​","NegativeVeryThinSpace":"​","NestedGreaterGreater":"≫","NestedLessLess":"≪","NewLine":"\n","Nfr":"𝔑","NoBreak":"⁠","NonBreakingSpace":" ","Nopf":"ℕ","Not":"⫬","NotCongruent":"≢","NotCupCap":"≭","NotDoubleVerticalBar":"∦","NotElement":"∉","NotEqual":"≠","NotEqualTilde":"≂̸","NotExists":"∄","NotGreater":"≯","NotGreaterEqual":"≱","NotGreaterFullEqual":"≧̸","NotGreaterGreater":"≫̸","NotGreaterLess":"≹","NotGreaterSlantEqual":"⩾̸","NotGreaterTilde":"≵","NotHumpDownHump":"≎̸","NotHumpEqual":"≏̸","NotLeftTriangle":"⋪","NotLeftTriangleBar":"⧏̸","NotLeftTriangleEqual":"⋬","NotLess":"≮","NotLessEqual":"≰","NotLessGreater":"≸","NotLessLess":"≪̸","NotLessSlantEqual":"⩽̸","NotLessTilde":"≴","NotNestedGreaterGreater":"⪢̸","NotNestedLessLess":"⪡̸","NotPrecedes":"⊀","NotPrecedesEqual":"⪯̸","NotPrecedesSlantEqual":"⋠","NotReverseElement":"∌","NotRightTriangle":"⋫","NotRightTriangleBar":"⧐̸","NotRightTriangleEqual":"⋭","NotSquareSubset":"⊏̸","NotSquareSubsetEqual":"⋢","NotSquareSuperset":"⊐̸","NotSquareSupersetEqual":"⋣","NotSubset":"⊂⃒","NotSubsetEqual":"⊈","NotSucceeds":"⊁","NotSucceedsEqual":"⪰̸","NotSucceedsSlantEqual":"⋡","NotSucceedsTilde":"≿̸","NotSuperset":"⊃⃒","NotSupersetEqual":"⊉","NotTilde":"≁","NotTildeEqual":"≄","NotTildeFullEqual":"≇","NotTildeTilde":"≉","NotVerticalBar":"∤","Nscr":"𝒩","Ntild":"Ñ","Ntilde":"Ñ","Nu":"Ν","OElig":"Œ","Oacut":"Ó","Oacute":"Ó","Ocir":"Ô","Ocirc":"Ô","Ocy":"О","Odblac":"Ő","Ofr":"𝔒","Ograv":"Ò","Ograve":"Ò","Omacr":"Ō","Omega":"Ω","Omicron":"Ο","Oopf":"𝕆","OpenCurlyDoubleQuote":"“","OpenCurlyQuote":"‘","Or":"⩔","Oscr":"𝒪","Oslas":"Ø","Oslash":"Ø","Otild":"Õ","Otilde":"Õ","Otimes":"⨷","Oum":"Ö","Ouml":"Ö","OverBar":"‾","OverBrace":"⏞","OverBracket":"⎴","OverParenthesis":"⏜","PartialD":"∂","Pcy":"П","Pfr":"𝔓","Phi":"Φ","Pi":"Π","PlusMinus":"±","Poincareplane":"ℌ","Popf":"ℙ","Pr":"⪻","Precedes":"≺","PrecedesEqual":"⪯","PrecedesSlantEqual":"≼","PrecedesTilde":"≾","Prime":"″","Product":"∏","Proportion":"∷","Proportional":"∝","Pscr":"𝒫","Psi":"Ψ","QUO":"\"","QUOT":"\"","Qfr":"𝔔","Qopf":"ℚ","Qscr":"𝒬","RBarr":"⤐","RE":"®","REG":"®","Racute":"Ŕ","Rang":"⟫","Rarr":"↠","Rarrtl":"⤖","Rcaron":"Ř","Rcedil":"Ŗ","Rcy":"Р","Re":"ℜ","ReverseElement":"∋","ReverseEquilibrium":"⇋","ReverseUpEquilibrium":"⥯","Rfr":"ℜ","Rho":"Ρ","RightAngleBracket":"⟩","RightArrow":"→","RightArrowBar":"⇥","RightArrowLeftArrow":"⇄","RightCeiling":"⌉","RightDoubleBracket":"⟧","RightDownTeeVector":"⥝","RightDownVector":"⇂","RightDownVectorBar":"⥕","RightFloor":"⌋","RightTee":"⊢","RightTeeArrow":"↦","RightTeeVector":"⥛","RightTriangle":"⊳","RightTriangleBar":"⧐","RightTriangleEqual":"⊵","RightUpDownVector":"⥏","RightUpTeeVector":"⥜","RightUpVector":"↾","RightUpVectorBar":"⥔","RightVector":"⇀","RightVectorBar":"⥓","Rightarrow":"⇒","Ropf":"ℝ","RoundImplies":"⥰","Rrightarrow":"⇛","Rscr":"ℛ","Rsh":"↱","RuleDelayed":"⧴","SHCHcy":"Щ","SHcy":"Ш","SOFTcy":"Ь","Sacute":"Ś","Sc":"⪼","Scaron":"Š","Scedil":"Ş","Scirc":"Ŝ","Scy":"С","Sfr":"𝔖","ShortDownArrow":"↓","ShortLeftArrow":"←","ShortRightArrow":"→","ShortUpArrow":"↑","Sigma":"Σ","SmallCircle":"∘","Sopf":"𝕊","Sqrt":"√","Square":"□","SquareIntersection":"⊓","SquareSubset":"⊏","SquareSubsetEqual":"⊑","SquareSuperset":"⊐","SquareSupersetEqual":"⊒","SquareUnion":"⊔","Sscr":"𝒮","Star":"⋆","Sub":"⋐","Subset":"⋐","SubsetEqual":"⊆","Succeeds":"≻","SucceedsEqual":"⪰","SucceedsSlantEqual":"≽","SucceedsTilde":"≿","SuchThat":"∋","Sum":"∑","Sup":"⋑","Superset":"⊃","SupersetEqual":"⊇","Supset":"⋑","THOR":"Þ","THORN":"Þ","TRADE":"™","TSHcy":"Ћ","TScy":"Ц","Tab":"\t","Tau":"Τ","Tcaron":"Ť","Tcedil":"Ţ","Tcy":"Т","Tfr":"𝔗","Therefore":"∴","Theta":"Θ","ThickSpace":"  ","ThinSpace":" ","Tilde":"∼","TildeEqual":"≃","TildeFullEqual":"≅","TildeTilde":"≈","Topf":"𝕋","TripleDot":"⃛","Tscr":"𝒯","Tstrok":"Ŧ","Uacut":"Ú","Uacute":"Ú","Uarr":"↟","Uarrocir":"⥉","Ubrcy":"Ў","Ubreve":"Ŭ","Ucir":"Û","Ucirc":"Û","Ucy":"У","Udblac":"Ű","Ufr":"𝔘","Ugrav":"Ù","Ugrave":"Ù","Umacr":"Ū","UnderBar":"_","UnderBrace":"⏟","UnderBracket":"⎵","UnderParenthesis":"⏝","Union":"⋃","UnionPlus":"⊎","Uogon":"Ų","Uopf":"𝕌","UpArrow":"↑","UpArrowBar":"⤒","UpArrowDownArrow":"⇅","UpDownArrow":"↕","UpEquilibrium":"⥮","UpTee":"⊥","UpTeeArrow":"↥","Uparrow":"⇑","Updownarrow":"⇕","UpperLeftArrow":"↖","UpperRightArrow":"↗","Upsi":"ϒ","Upsilon":"Υ","Uring":"Ů","Uscr":"𝒰","Utilde":"Ũ","Uum":"Ü","Uuml":"Ü","VDash":"⊫","Vbar":"⫫","Vcy":"В","Vdash":"⊩","Vdashl":"⫦","Vee":"⋁","Verbar":"‖","Vert":"‖","VerticalBar":"∣","VerticalLine":"|","VerticalSeparator":"❘","VerticalTilde":"≀","VeryThinSpace":" ","Vfr":"𝔙","Vopf":"𝕍","Vscr":"𝒱","Vvdash":"⊪","Wcirc":"Ŵ","Wedge":"⋀","Wfr":"𝔚","Wopf":"𝕎","Wscr":"𝒲","Xfr":"𝔛","Xi":"Ξ","Xopf":"𝕏","Xscr":"𝒳","YAcy":"Я","YIcy":"Ї","YUcy":"Ю","Yacut":"Ý","Yacute":"Ý","Ycirc":"Ŷ","Ycy":"Ы","Yfr":"𝔜","Yopf":"𝕐","Yscr":"𝒴","Yuml":"Ÿ","ZHcy":"Ж","Zacute":"Ź","Zcaron":"Ž","Zcy":"З","Zdot":"Ż","ZeroWidthSpace":"​","Zeta":"Ζ","Zfr":"ℨ","Zopf":"ℤ","Zscr":"𝒵","aacut":"á","aacute":"á","abreve":"ă","ac":"∾","acE":"∾̳","acd":"∿","acir":"â","acirc":"â","acut":"´","acute":"´","acy":"а","aeli":"æ","aelig":"æ","af":"⁡","afr":"𝔞","agrav":"à","agrave":"à","alefsym":"ℵ","aleph":"ℵ","alpha":"α","amacr":"ā","amalg":"⨿","am":"&","amp":"&","and":"∧","andand":"⩕","andd":"⩜","andslope":"⩘","andv":"⩚","ang":"∠","ange":"⦤","angle":"∠","angmsd":"∡","angmsdaa":"⦨","angmsdab":"⦩","angmsdac":"⦪","angmsdad":"⦫","angmsdae":"⦬","angmsdaf":"⦭","angmsdag":"⦮","angmsdah":"⦯","angrt":"∟","angrtvb":"⊾","angrtvbd":"⦝","angsph":"∢","angst":"Å","angzarr":"⍼","aogon":"ą","aopf":"𝕒","ap":"≈","apE":"⩰","apacir":"⩯","ape":"≊","apid":"≋","apos":"'","approx":"≈","approxeq":"≊","arin":"å","aring":"å","ascr":"𝒶","ast":"*","asymp":"≈","asympeq":"≍","atild":"ã","atilde":"ã","aum":"ä","auml":"ä","awconint":"∳","awint":"⨑","bNot":"⫭","backcong":"≌","backepsilon":"϶","backprime":"‵","backsim":"∽","backsimeq":"⋍","barvee":"⊽","barwed":"⌅","barwedge":"⌅","bbrk":"⎵","bbrktbrk":"⎶","bcong":"≌","bcy":"б","bdquo":"„","becaus":"∵","because":"∵","bemptyv":"⦰","bepsi":"϶","bernou":"ℬ","beta":"β","beth":"ℶ","between":"≬","bfr":"𝔟","bigcap":"⋂","bigcirc":"◯","bigcup":"⋃","bigodot":"⨀","bigoplus":"⨁","bigotimes":"⨂","bigsqcup":"⨆","bigstar":"★","bigtriangledown":"▽","bigtriangleup":"△","biguplus":"⨄","bigvee":"⋁","bigwedge":"⋀","bkarow":"⤍","blacklozenge":"⧫","blacksquare":"▪","blacktriangle":"▴","blacktriangledown":"▾","blacktriangleleft":"◂","blacktriangleright":"▸","blank":"␣","blk12":"▒","blk14":"░","blk34":"▓","block":"█","bne":"=⃥","bnequiv":"≡⃥","bnot":"⌐","bopf":"𝕓","bot":"⊥","bottom":"⊥","bowtie":"⋈","boxDL":"╗","boxDR":"╔","boxDl":"╖","boxDr":"╓","boxH":"═","boxHD":"╦","boxHU":"╩","boxHd":"╤","boxHu":"╧","boxUL":"╝","boxUR":"╚","boxUl":"╜","boxUr":"╙","boxV":"║","boxVH":"╬","boxVL":"╣","boxVR":"╠","boxVh":"╫","boxVl":"╢","boxVr":"╟","boxbox":"⧉","boxdL":"╕","boxdR":"╒","boxdl":"┐","boxdr":"┌","boxh":"─","boxhD":"╥","boxhU":"╨","boxhd":"┬","boxhu":"┴","boxminus":"⊟","boxplus":"⊞","boxtimes":"⊠","boxuL":"╛","boxuR":"╘","boxul":"┘","boxur":"└","boxv":"│","boxvH":"╪","boxvL":"╡","boxvR":"╞","boxvh":"┼","boxvl":"┤","boxvr":"├","bprime":"‵","breve":"˘","brvba":"¦","brvbar":"¦","bscr":"𝒷","bsemi":"⁏","bsim":"∽","bsime":"⋍","bsol":"\\","bsolb":"⧅","bsolhsub":"⟈","bull":"•","bullet":"•","bump":"≎","bumpE":"⪮","bumpe":"≏","bumpeq":"≏","cacute":"ć","cap":"∩","capand":"⩄","capbrcup":"⩉","capcap":"⩋","capcup":"⩇","capdot":"⩀","caps":"∩︀","caret":"⁁","caron":"ˇ","ccaps":"⩍","ccaron":"č","ccedi":"ç","ccedil":"ç","ccirc":"ĉ","ccups":"⩌","ccupssm":"⩐","cdot":"ċ","cedi":"¸","cedil":"¸","cemptyv":"⦲","cen":"¢","cent":"¢","centerdot":"·","cfr":"𝔠","chcy":"ч","check":"✓","checkmark":"✓","chi":"χ","cir":"○","cirE":"⧃","circ":"ˆ","circeq":"≗","circlearrowleft":"↺","circlearrowright":"↻","circledR":"®","circledS":"Ⓢ","circledast":"⊛","circledcirc":"⊚","circleddash":"⊝","cire":"≗","cirfnint":"⨐","cirmid":"⫯","cirscir":"⧂","clubs":"♣","clubsuit":"♣","colon":":","colone":"≔","coloneq":"≔","comma":",","commat":"@","comp":"∁","compfn":"∘","complement":"∁","complexes":"ℂ","cong":"≅","congdot":"⩭","conint":"∮","copf":"𝕔","coprod":"∐","cop":"©","copy":"©","copysr":"℗","crarr":"↵","cross":"✗","cscr":"𝒸","csub":"⫏","csube":"⫑","csup":"⫐","csupe":"⫒","ctdot":"⋯","cudarrl":"⤸","cudarrr":"⤵","cuepr":"⋞","cuesc":"⋟","cularr":"↶","cularrp":"⤽","cup":"∪","cupbrcap":"⩈","cupcap":"⩆","cupcup":"⩊","cupdot":"⊍","cupor":"⩅","cups":"∪︀","curarr":"↷","curarrm":"⤼","curlyeqprec":"⋞","curlyeqsucc":"⋟","curlyvee":"⋎","curlywedge":"⋏","curre":"¤","curren":"¤","curvearrowleft":"↶","curvearrowright":"↷","cuvee":"⋎","cuwed":"⋏","cwconint":"∲","cwint":"∱","cylcty":"⌭","dArr":"⇓","dHar":"⥥","dagger":"†","daleth":"ℸ","darr":"↓","dash":"‐","dashv":"⊣","dbkarow":"⤏","dblac":"˝","dcaron":"ď","dcy":"д","dd":"ⅆ","ddagger":"‡","ddarr":"⇊","ddotseq":"⩷","de":"°","deg":"°","delta":"δ","demptyv":"⦱","dfisht":"⥿","dfr":"𝔡","dharl":"⇃","dharr":"⇂","diam":"⋄","diamond":"⋄","diamondsuit":"♦","diams":"♦","die":"¨","digamma":"ϝ","disin":"⋲","div":"÷","divid":"÷","divide":"÷","divideontimes":"⋇","divonx":"⋇","djcy":"ђ","dlcorn":"⌞","dlcrop":"⌍","dollar":"$","dopf":"𝕕","dot":"˙","doteq":"≐","doteqdot":"≑","dotminus":"∸","dotplus":"∔","dotsquare":"⊡","doublebarwedge":"⌆","downarrow":"↓","downdownarrows":"⇊","downharpoonleft":"⇃","downharpoonright":"⇂","drbkarow":"⤐","drcorn":"⌟","drcrop":"⌌","dscr":"𝒹","dscy":"ѕ","dsol":"⧶","dstrok":"đ","dtdot":"⋱","dtri":"▿","dtrif":"▾","duarr":"⇵","duhar":"⥯","dwangle":"⦦","dzcy":"џ","dzigrarr":"⟿","eDDot":"⩷","eDot":"≑","eacut":"é","eacute":"é","easter":"⩮","ecaron":"ě","ecir":"ê","ecirc":"ê","ecolon":"≕","ecy":"э","edot":"ė","ee":"ⅇ","efDot":"≒","efr":"𝔢","eg":"⪚","egrav":"è","egrave":"è","egs":"⪖","egsdot":"⪘","el":"⪙","elinters":"⏧","ell":"ℓ","els":"⪕","elsdot":"⪗","emacr":"ē","empty":"∅","emptyset":"∅","emptyv":"∅","emsp13":" ","emsp14":" ","emsp":" ","eng":"ŋ","ensp":" ","eogon":"ę","eopf":"𝕖","epar":"⋕","eparsl":"⧣","eplus":"⩱","epsi":"ε","epsilon":"ε","epsiv":"ϵ","eqcirc":"≖","eqcolon":"≕","eqsim":"≂","eqslantgtr":"⪖","eqslantless":"⪕","equals":"=","equest":"≟","equiv":"≡","equivDD":"⩸","eqvparsl":"⧥","erDot":"≓","erarr":"⥱","escr":"ℯ","esdot":"≐","esim":"≂","eta":"η","et":"ð","eth":"ð","eum":"ë","euml":"ë","euro":"€","excl":"!","exist":"∃","expectation":"ℰ","exponentiale":"ⅇ","fallingdotseq":"≒","fcy":"ф","female":"♀","ffilig":"ﬃ","fflig":"ﬀ","ffllig":"ﬄ","ffr":"𝔣","filig":"ﬁ","fjlig":"fj","flat":"♭","fllig":"ﬂ","fltns":"▱","fnof":"ƒ","fopf":"𝕗","forall":"∀","fork":"⋔","forkv":"⫙","fpartint":"⨍","frac1":"¼","frac12":"½","frac13":"⅓","frac14":"¼","frac15":"⅕","frac16":"⅙","frac18":"⅛","frac23":"⅔","frac25":"⅖","frac3":"¾","frac34":"¾","frac35":"⅗","frac38":"⅜","frac45":"⅘","frac56":"⅚","frac58":"⅝","frac78":"⅞","frasl":"⁄","frown":"⌢","fscr":"𝒻","gE":"≧","gEl":"⪌","gacute":"ǵ","gamma":"γ","gammad":"ϝ","gap":"⪆","gbreve":"ğ","gcirc":"ĝ","gcy":"г","gdot":"ġ","ge":"≥","gel":"⋛","geq":"≥","geqq":"≧","geqslant":"⩾","ges":"⩾","gescc":"⪩","gesdot":"⪀","gesdoto":"⪂","gesdotol":"⪄","gesl":"⋛︀","gesles":"⪔","gfr":"𝔤","gg":"≫","ggg":"⋙","gimel":"ℷ","gjcy":"ѓ","gl":"≷","glE":"⪒","gla":"⪥","glj":"⪤","gnE":"≩","gnap":"⪊","gnapprox":"⪊","gne":"⪈","gneq":"⪈","gneqq":"≩","gnsim":"⋧","gopf":"𝕘","grave":"`","gscr":"ℊ","gsim":"≳","gsime":"⪎","gsiml":"⪐","g":">","gt":">","gtcc":"⪧","gtcir":"⩺","gtdot":"⋗","gtlPar":"⦕","gtquest":"⩼","gtrapprox":"⪆","gtrarr":"⥸","gtrdot":"⋗","gtreqless":"⋛","gtreqqless":"⪌","gtrless":"≷","gtrsim":"≳","gvertneqq":"≩︀","gvnE":"≩︀","hArr":"⇔","hairsp":" ","half":"½","hamilt":"ℋ","hardcy":"ъ","harr":"↔","harrcir":"⥈","harrw":"↭","hbar":"ℏ","hcirc":"ĥ","hearts":"♥","heartsuit":"♥","hellip":"…","hercon":"⊹","hfr":"𝔥","hksearow":"⤥","hkswarow":"⤦","hoarr":"⇿","homtht":"∻","hookleftarrow":"↩","hookrightarrow":"↪","hopf":"𝕙","horbar":"―","hscr":"𝒽","hslash":"ℏ","hstrok":"ħ","hybull":"⁃","hyphen":"‐","iacut":"í","iacute":"í","ic":"⁣","icir":"î","icirc":"î","icy":"и","iecy":"е","iexc":"¡","iexcl":"¡","iff":"⇔","ifr":"𝔦","igrav":"ì","igrave":"ì","ii":"ⅈ","iiiint":"⨌","iiint":"∭","iinfin":"⧜","iiota":"℩","ijlig":"ĳ","imacr":"ī","image":"ℑ","imagline":"ℐ","imagpart":"ℑ","imath":"ı","imof":"⊷","imped":"Ƶ","in":"∈","incare":"℅","infin":"∞","infintie":"⧝","inodot":"ı","int":"∫","intcal":"⊺","integers":"ℤ","intercal":"⊺","intlarhk":"⨗","intprod":"⨼","iocy":"ё","iogon":"į","iopf":"𝕚","iota":"ι","iprod":"⨼","iques":"¿","iquest":"¿","iscr":"𝒾","isin":"∈","isinE":"⋹","isindot":"⋵","isins":"⋴","isinsv":"⋳","isinv":"∈","it":"⁢","itilde":"ĩ","iukcy":"і","ium":"ï","iuml":"ï","jcirc":"ĵ","jcy":"й","jfr":"𝔧","jmath":"ȷ","jopf":"𝕛","jscr":"𝒿","jsercy":"ј","jukcy":"є","kappa":"κ","kappav":"ϰ","kcedil":"ķ","kcy":"к","kfr":"𝔨","kgreen":"ĸ","khcy":"х","kjcy":"ќ","kopf":"𝕜","kscr":"𝓀","lAarr":"⇚","lArr":"⇐","lAtail":"⤛","lBarr":"⤎","lE":"≦","lEg":"⪋","lHar":"⥢","lacute":"ĺ","laemptyv":"⦴","lagran":"ℒ","lambda":"λ","lang":"⟨","langd":"⦑","langle":"⟨","lap":"⪅","laqu":"«","laquo":"«","larr":"←","larrb":"⇤","larrbfs":"⤟","larrfs":"⤝","larrhk":"↩","larrlp":"↫","larrpl":"⤹","larrsim":"⥳","larrtl":"↢","lat":"⪫","latail":"⤙","late":"⪭","lates":"⪭︀","lbarr":"⤌","lbbrk":"❲","lbrace":"{","lbrack":"[","lbrke":"⦋","lbrksld":"⦏","lbrkslu":"⦍","lcaron":"ľ","lcedil":"ļ","lceil":"⌈","lcub":"{","lcy":"л","ldca":"⤶","ldquo":"“","ldquor":"„","ldrdhar":"⥧","ldrushar":"⥋","ldsh":"↲","le":"≤","leftarrow":"←","leftarrowtail":"↢","leftharpoondown":"↽","leftharpoonup":"↼","leftleftarrows":"⇇","leftrightarrow":"↔","leftrightarrows":"⇆","leftrightharpoons":"⇋","leftrightsquigarrow":"↭","leftthreetimes":"⋋","leg":"⋚","leq":"≤","leqq":"≦","leqslant":"⩽","les":"⩽","lescc":"⪨","lesdot":"⩿","lesdoto":"⪁","lesdotor":"⪃","lesg":"⋚︀","lesges":"⪓","lessapprox":"⪅","lessdot":"⋖","lesseqgtr":"⋚","lesseqqgtr":"⪋","lessgtr":"≶","lesssim":"≲","lfisht":"⥼","lfloor":"⌊","lfr":"𝔩","lg":"≶","lgE":"⪑","lhard":"↽","lharu":"↼","lharul":"⥪","lhblk":"▄","ljcy":"љ","ll":"≪","llarr":"⇇","llcorner":"⌞","llhard":"⥫","lltri":"◺","lmidot":"ŀ","lmoust":"⎰","lmoustache":"⎰","lnE":"≨","lnap":"⪉","lnapprox":"⪉","lne":"⪇","lneq":"⪇","lneqq":"≨","lnsim":"⋦","loang":"⟬","loarr":"⇽","lobrk":"⟦","longleftarrow":"⟵","longleftrightarrow":"⟷","longmapsto":"⟼","longrightarrow":"⟶","looparrowleft":"↫","looparrowright":"↬","lopar":"⦅","lopf":"𝕝","loplus":"⨭","lotimes":"⨴","lowast":"∗","lowbar":"_","loz":"◊","lozenge":"◊","lozf":"⧫","lpar":"(","lparlt":"⦓","lrarr":"⇆","lrcorner":"⌟","lrhar":"⇋","lrhard":"⥭","lrm":"‎","lrtri":"⊿","lsaquo":"‹","lscr":"𝓁","lsh":"↰","lsim":"≲","lsime":"⪍","lsimg":"⪏","lsqb":"[","lsquo":"‘","lsquor":"‚","lstrok":"ł","l":"<","lt":"<","ltcc":"⪦","ltcir":"⩹","ltdot":"⋖","lthree":"⋋","ltimes":"⋉","ltlarr":"⥶","ltquest":"⩻","ltrPar":"⦖","ltri":"◃","ltrie":"⊴","ltrif":"◂","lurdshar":"⥊","luruhar":"⥦","lvertneqq":"≨︀","lvnE":"≨︀","mDDot":"∺","mac":"¯","macr":"¯","male":"♂","malt":"✠","maltese":"✠","map":"↦","mapsto":"↦","mapstodown":"↧","mapstoleft":"↤","mapstoup":"↥","marker":"▮","mcomma":"⨩","mcy":"м","mdash":"—","measuredangle":"∡","mfr":"𝔪","mho":"℧","micr":"µ","micro":"µ","mid":"∣","midast":"*","midcir":"⫰","middo":"·","middot":"·","minus":"−","minusb":"⊟","minusd":"∸","minusdu":"⨪","mlcp":"⫛","mldr":"…","mnplus":"∓","models":"⊧","mopf":"𝕞","mp":"∓","mscr":"𝓂","mstpos":"∾","mu":"μ","multimap":"⊸","mumap":"⊸","nGg":"⋙̸","nGt":"≫⃒","nGtv":"≫̸","nLeftarrow":"⇍","nLeftrightarrow":"⇎","nLl":"⋘̸","nLt":"≪⃒","nLtv":"≪̸","nRightarrow":"⇏","nVDash":"⊯","nVdash":"⊮","nabla":"∇","nacute":"ń","nang":"∠⃒","nap":"≉","napE":"⩰̸","napid":"≋̸","napos":"ŉ","napprox":"≉","natur":"♮","natural":"♮","naturals":"ℕ","nbs":" ","nbsp":" ","nbump":"≎̸","nbumpe":"≏̸","ncap":"⩃","ncaron":"ň","ncedil":"ņ","ncong":"≇","ncongdot":"⩭̸","ncup":"⩂","ncy":"н","ndash":"–","ne":"≠","neArr":"⇗","nearhk":"⤤","nearr":"↗","nearrow":"↗","nedot":"≐̸","nequiv":"≢","nesear":"⤨","nesim":"≂̸","nexist":"∄","nexists":"∄","nfr":"𝔫","ngE":"≧̸","nge":"≱","ngeq":"≱","ngeqq":"≧̸","ngeqslant":"⩾̸","nges":"⩾̸","ngsim":"≵","ngt":"≯","ngtr":"≯","nhArr":"⇎","nharr":"↮","nhpar":"⫲","ni":"∋","nis":"⋼","nisd":"⋺","niv":"∋","njcy":"њ","nlArr":"⇍","nlE":"≦̸","nlarr":"↚","nldr":"‥","nle":"≰","nleftarrow":"↚","nleftrightarrow":"↮","nleq":"≰","nleqq":"≦̸","nleqslant":"⩽̸","nles":"⩽̸","nless":"≮","nlsim":"≴","nlt":"≮","nltri":"⋪","nltrie":"⋬","nmid":"∤","nopf":"𝕟","no":"¬","not":"¬","notin":"∉","notinE":"⋹̸","notindot":"⋵̸","notinva":"∉","notinvb":"⋷","notinvc":"⋶","notni":"∌","notniva":"∌","notnivb":"⋾","notnivc":"⋽","npar":"∦","nparallel":"∦","nparsl":"⫽⃥","npart":"∂̸","npolint":"⨔","npr":"⊀","nprcue":"⋠","npre":"⪯̸","nprec":"⊀","npreceq":"⪯̸","nrArr":"⇏","nrarr":"↛","nrarrc":"⤳̸","nrarrw":"↝̸","nrightarrow":"↛","nrtri":"⋫","nrtrie":"⋭","nsc":"⊁","nsccue":"⋡","nsce":"⪰̸","nscr":"𝓃","nshortmid":"∤","nshortparallel":"∦","nsim":"≁","nsime":"≄","nsimeq":"≄","nsmid":"∤","nspar":"∦","nsqsube":"⋢","nsqsupe":"⋣","nsub":"⊄","nsubE":"⫅̸","nsube":"⊈","nsubset":"⊂⃒","nsubseteq":"⊈","nsubseteqq":"⫅̸","nsucc":"⊁","nsucceq":"⪰̸","nsup":"⊅","nsupE":"⫆̸","nsupe":"⊉","nsupset":"⊃⃒","nsupseteq":"⊉","nsupseteqq":"⫆̸","ntgl":"≹","ntild":"ñ","ntilde":"ñ","ntlg":"≸","ntriangleleft":"⋪","ntrianglelefteq":"⋬","ntriangleright":"⋫","ntrianglerighteq":"⋭","nu":"ν","num":"#","numero":"№","numsp":" ","nvDash":"⊭","nvHarr":"⤄","nvap":"≍⃒","nvdash":"⊬","nvge":"≥⃒","nvgt":">⃒","nvinfin":"⧞","nvlArr":"⤂","nvle":"≤⃒","nvlt":"<⃒","nvltrie":"⊴⃒","nvrArr":"⤃","nvrtrie":"⊵⃒","nvsim":"∼⃒","nwArr":"⇖","nwarhk":"⤣","nwarr":"↖","nwarrow":"↖","nwnear":"⤧","oS":"Ⓢ","oacut":"ó","oacute":"ó","oast":"⊛","ocir":"ô","ocirc":"ô","ocy":"о","odash":"⊝","odblac":"ő","odiv":"⨸","odot":"⊙","odsold":"⦼","oelig":"œ","ofcir":"⦿","ofr":"𝔬","ogon":"˛","ograv":"ò","ograve":"ò","ogt":"⧁","ohbar":"⦵","ohm":"Ω","oint":"∮","olarr":"↺","olcir":"⦾","olcross":"⦻","oline":"‾","olt":"⧀","omacr":"ō","omega":"ω","omicron":"ο","omid":"⦶","ominus":"⊖","oopf":"𝕠","opar":"⦷","operp":"⦹","oplus":"⊕","or":"∨","orarr":"↻","ord":"º","order":"ℴ","orderof":"ℴ","ordf":"ª","ordm":"º","origof":"⊶","oror":"⩖","orslope":"⩗","orv":"⩛","oscr":"ℴ","oslas":"ø","oslash":"ø","osol":"⊘","otild":"õ","otilde":"õ","otimes":"⊗","otimesas":"⨶","oum":"ö","ouml":"ö","ovbar":"⌽","par":"¶","para":"¶","parallel":"∥","parsim":"⫳","parsl":"⫽","part":"∂","pcy":"п","percnt":"%","period":".","permil":"‰","perp":"⊥","pertenk":"‱","pfr":"𝔭","phi":"φ","phiv":"ϕ","phmmat":"ℳ","phone":"☎","pi":"π","pitchfork":"⋔","piv":"ϖ","planck":"ℏ","planckh":"ℎ","plankv":"ℏ","plus":"+","plusacir":"⨣","plusb":"⊞","pluscir":"⨢","plusdo":"∔","plusdu":"⨥","pluse":"⩲","plusm":"±","plusmn":"±","plussim":"⨦","plustwo":"⨧","pm":"±","pointint":"⨕","popf":"𝕡","poun":"£","pound":"£","pr":"≺","prE":"⪳","prap":"⪷","prcue":"≼","pre":"⪯","prec":"≺","precapprox":"⪷","preccurlyeq":"≼","preceq":"⪯","precnapprox":"⪹","precneqq":"⪵","precnsim":"⋨","precsim":"≾","prime":"′","primes":"ℙ","prnE":"⪵","prnap":"⪹","prnsim":"⋨","prod":"∏","profalar":"⌮","profline":"⌒","profsurf":"⌓","prop":"∝","propto":"∝","prsim":"≾","prurel":"⊰","pscr":"𝓅","psi":"ψ","puncsp":" ","qfr":"𝔮","qint":"⨌","qopf":"𝕢","qprime":"⁗","qscr":"𝓆","quaternions":"ℍ","quatint":"⨖","quest":"?","questeq":"≟","quo":"\"","quot":"\"","rAarr":"⇛","rArr":"⇒","rAtail":"⤜","rBarr":"⤏","rHar":"⥤","race":"∽̱","racute":"ŕ","radic":"√","raemptyv":"⦳","rang":"⟩","rangd":"⦒","range":"⦥","rangle":"⟩","raqu":"»","raquo":"»","rarr":"→","rarrap":"⥵","rarrb":"⇥","rarrbfs":"⤠","rarrc":"⤳","rarrfs":"⤞","rarrhk":"↪","rarrlp":"↬","rarrpl":"⥅","rarrsim":"⥴","rarrtl":"↣","rarrw":"↝","ratail":"⤚","ratio":"∶","rationals":"ℚ","rbarr":"⤍","rbbrk":"❳","rbrace":"}","rbrack":"]","rbrke":"⦌","rbrksld":"⦎","rbrkslu":"⦐","rcaron":"ř","rcedil":"ŗ","rceil":"⌉","rcub":"}","rcy":"р","rdca":"⤷","rdldhar":"⥩","rdquo":"”","rdquor":"”","rdsh":"↳","real":"ℜ","realine":"ℛ","realpart":"ℜ","reals":"ℝ","rect":"▭","re":"®","reg":"®","rfisht":"⥽","rfloor":"⌋","rfr":"𝔯","rhard":"⇁","rharu":"⇀","rharul":"⥬","rho":"ρ","rhov":"ϱ","rightarrow":"→","rightarrowtail":"↣","rightharpoondown":"⇁","rightharpoonup":"⇀","rightleftarrows":"⇄","rightleftharpoons":"⇌","rightrightarrows":"⇉","rightsquigarrow":"↝","rightthreetimes":"⋌","ring":"˚","risingdotseq":"≓","rlarr":"⇄","rlhar":"⇌","rlm":"‏","rmoust":"⎱","rmoustache":"⎱","rnmid":"⫮","roang":"⟭","roarr":"⇾","robrk":"⟧","ropar":"⦆","ropf":"𝕣","roplus":"⨮","rotimes":"⨵","rpar":")","rpargt":"⦔","rppolint":"⨒","rrarr":"⇉","rsaquo":"›","rscr":"𝓇","rsh":"↱","rsqb":"]","rsquo":"’","rsquor":"’","rthree":"⋌","rtimes":"⋊","rtri":"▹","rtrie":"⊵","rtrif":"▸","rtriltri":"⧎","ruluhar":"⥨","rx":"℞","sacute":"ś","sbquo":"‚","sc":"≻","scE":"⪴","scap":"⪸","scaron":"š","sccue":"≽","sce":"⪰","scedil":"ş","scirc":"ŝ","scnE":"⪶","scnap":"⪺","scnsim":"⋩","scpolint":"⨓","scsim":"≿","scy":"с","sdot":"⋅","sdotb":"⊡","sdote":"⩦","seArr":"⇘","searhk":"⤥","searr":"↘","searrow":"↘","sec":"§","sect":"§","semi":";","seswar":"⤩","setminus":"∖","setmn":"∖","sext":"✶","sfr":"𝔰","sfrown":"⌢","sharp":"♯","shchcy":"щ","shcy":"ш","shortmid":"∣","shortparallel":"∥","sh":"­","shy":"­","sigma":"σ","sigmaf":"ς","sigmav":"ς","sim":"∼","simdot":"⩪","sime":"≃","simeq":"≃","simg":"⪞","simgE":"⪠","siml":"⪝","simlE":"⪟","simne":"≆","simplus":"⨤","simrarr":"⥲","slarr":"←","smallsetminus":"∖","smashp":"⨳","smeparsl":"⧤","smid":"∣","smile":"⌣","smt":"⪪","smte":"⪬","smtes":"⪬︀","softcy":"ь","sol":"/","solb":"⧄","solbar":"⌿","sopf":"𝕤","spades":"♠","spadesuit":"♠","spar":"∥","sqcap":"⊓","sqcaps":"⊓︀","sqcup":"⊔","sqcups":"⊔︀","sqsub":"⊏","sqsube":"⊑","sqsubset":"⊏","sqsubseteq":"⊑","sqsup":"⊐","sqsupe":"⊒","sqsupset":"⊐","sqsupseteq":"⊒","squ":"□","square":"□","squarf":"▪","squf":"▪","srarr":"→","sscr":"𝓈","ssetmn":"∖","ssmile":"⌣","sstarf":"⋆","star":"☆","starf":"★","straightepsilon":"ϵ","straightphi":"ϕ","strns":"¯","sub":"⊂","subE":"⫅","subdot":"⪽","sube":"⊆","subedot":"⫃","submult":"⫁","subnE":"⫋","subne":"⊊","subplus":"⪿","subrarr":"⥹","subset":"⊂","subseteq":"⊆","subseteqq":"⫅","subsetneq":"⊊","subsetneqq":"⫋","subsim":"⫇","subsub":"⫕","subsup":"⫓","succ":"≻","succapprox":"⪸","succcurlyeq":"≽","succeq":"⪰","succnapprox":"⪺","succneqq":"⪶","succnsim":"⋩","succsim":"≿","sum":"∑","sung":"♪","sup":"⊃","sup1":"¹","sup2":"²","sup3":"³","supE":"⫆","supdot":"⪾","supdsub":"⫘","supe":"⊇","supedot":"⫄","suphsol":"⟉","suphsub":"⫗","suplarr":"⥻","supmult":"⫂","supnE":"⫌","supne":"⊋","supplus":"⫀","supset":"⊃","supseteq":"⊇","supseteqq":"⫆","supsetneq":"⊋","supsetneqq":"⫌","supsim":"⫈","supsub":"⫔","supsup":"⫖","swArr":"⇙","swarhk":"⤦","swarr":"↙","swarrow":"↙","swnwar":"⤪","szli":"ß","szlig":"ß","target":"⌖","tau":"τ","tbrk":"⎴","tcaron":"ť","tcedil":"ţ","tcy":"т","tdot":"⃛","telrec":"⌕","tfr":"𝔱","there4":"∴","therefore":"∴","theta":"θ","thetasym":"ϑ","thetav":"ϑ","thickapprox":"≈","thicksim":"∼","thinsp":" ","thkap":"≈","thksim":"∼","thor":"þ","thorn":"þ","tilde":"˜","time":"×","times":"×","timesb":"⊠","timesbar":"⨱","timesd":"⨰","tint":"∭","toea":"⤨","top":"⊤","topbot":"⌶","topcir":"⫱","topf":"𝕥","topfork":"⫚","tosa":"⤩","tprime":"‴","trade":"™","triangle":"▵","triangledown":"▿","triangleleft":"◃","trianglelefteq":"⊴","triangleq":"≜","triangleright":"▹","trianglerighteq":"⊵","tridot":"◬","trie":"≜","triminus":"⨺","triplus":"⨹","trisb":"⧍","tritime":"⨻","trpezium":"⏢","tscr":"𝓉","tscy":"ц","tshcy":"ћ","tstrok":"ŧ","twixt":"≬","twoheadleftarrow":"↞","twoheadrightarrow":"↠","uArr":"⇑","uHar":"⥣","uacut":"ú","uacute":"ú","uarr":"↑","ubrcy":"ў","ubreve":"ŭ","ucir":"û","ucirc":"û","ucy":"у","udarr":"⇅","udblac":"ű","udhar":"⥮","ufisht":"⥾","ufr":"𝔲","ugrav":"ù","ugrave":"ù","uharl":"↿","uharr":"↾","uhblk":"▀","ulcorn":"⌜","ulcorner":"⌜","ulcrop":"⌏","ultri":"◸","umacr":"ū","um":"¨","uml":"¨","uogon":"ų","uopf":"𝕦","uparrow":"↑","updownarrow":"↕","upharpoonleft":"↿","upharpoonright":"↾","uplus":"⊎","upsi":"υ","upsih":"ϒ","upsilon":"υ","upuparrows":"⇈","urcorn":"⌝","urcorner":"⌝","urcrop":"⌎","uring":"ů","urtri":"◹","uscr":"𝓊","utdot":"⋰","utilde":"ũ","utri":"▵","utrif":"▴","uuarr":"⇈","uum":"ü","uuml":"ü","uwangle":"⦧","vArr":"⇕","vBar":"⫨","vBarv":"⫩","vDash":"⊨","vangrt":"⦜","varepsilon":"ϵ","varkappa":"ϰ","varnothing":"∅","varphi":"ϕ","varpi":"ϖ","varpropto":"∝","varr":"↕","varrho":"ϱ","varsigma":"ς","varsubsetneq":"⊊︀","varsubsetneqq":"⫋︀","varsupsetneq":"⊋︀","varsupsetneqq":"⫌︀","vartheta":"ϑ","vartriangleleft":"⊲","vartriangleright":"⊳","vcy":"в","vdash":"⊢","vee":"∨","veebar":"⊻","veeeq":"≚","vellip":"⋮","verbar":"|","vert":"|","vfr":"𝔳","vltri":"⊲","vnsub":"⊂⃒","vnsup":"⊃⃒","vopf":"𝕧","vprop":"∝","vrtri":"⊳","vscr":"𝓋","vsubnE":"⫋︀","vsubne":"⊊︀","vsupnE":"⫌︀","vsupne":"⊋︀","vzigzag":"⦚","wcirc":"ŵ","wedbar":"⩟","wedge":"∧","wedgeq":"≙","weierp":"℘","wfr":"𝔴","wopf":"𝕨","wp":"℘","wr":"≀","wreath":"≀","wscr":"𝓌","xcap":"⋂","xcirc":"◯","xcup":"⋃","xdtri":"▽","xfr":"𝔵","xhArr":"⟺","xharr":"⟷","xi":"ξ","xlArr":"⟸","xlarr":"⟵","xmap":"⟼","xnis":"⋻","xodot":"⨀","xopf":"𝕩","xoplus":"⨁","xotime":"⨂","xrArr":"⟹","xrarr":"⟶","xscr":"𝓍","xsqcup":"⨆","xuplus":"⨄","xutri":"△","xvee":"⋁","xwedge":"⋀","yacut":"ý","yacute":"ý","yacy":"я","ycirc":"ŷ","ycy":"ы","ye":"¥","yen":"¥","yfr":"𝔶","yicy":"ї","yopf":"𝕪","yscr":"𝓎","yucy":"ю","yum":"ÿ","yuml":"ÿ","zacute":"ź","zcaron":"ž","zcy":"з","zdot":"ż","zeetrf":"ℨ","zeta":"ζ","zfr":"𝔷","zhcy":"ж","zigrarr":"⇝","zopf":"𝕫","zscr":"𝓏","zwj":"‍","zwnj":"‌"};
 
 /***/ }),
-/* 672 */,
+/* 672 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const conversions = __webpack_require__(161);
+
+/*
+	This function routes a model to all other models.
+
+	all functions that are routed have a property `.conversion` attached
+	to the returned synthetic function. This property is an array
+	of strings, each with the steps in between the 'from' and 'to'
+	color models (inclusive).
+
+	conversions that are not possible simply are not included.
+*/
+
+function buildGraph() {
+	const graph = {};
+	// https://jsperf.com/object-keys-vs-for-in-with-closure/3
+	const models = Object.keys(conversions);
+
+	for (let len = models.length, i = 0; i < len; i++) {
+		graph[models[i]] = {
+			// http://jsperf.com/1-vs-infinity
+			// micro-opt, but this is simple.
+			distance: -1,
+			parent: null
+		};
+	}
+
+	return graph;
+}
+
+// https://en.wikipedia.org/wiki/Breadth-first_search
+function deriveBFS(fromModel) {
+	const graph = buildGraph();
+	const queue = [fromModel]; // Unshift -> queue -> pop
+
+	graph[fromModel].distance = 0;
+
+	while (queue.length) {
+		const current = queue.pop();
+		const adjacents = Object.keys(conversions[current]);
+
+		for (let len = adjacents.length, i = 0; i < len; i++) {
+			const adjacent = adjacents[i];
+			const node = graph[adjacent];
+
+			if (node.distance === -1) {
+				node.distance = graph[current].distance + 1;
+				node.parent = current;
+				queue.unshift(adjacent);
+			}
+		}
+	}
+
+	return graph;
+}
+
+function link(from, to) {
+	return function (args) {
+		return to(from(args));
+	};
+}
+
+function wrapConversion(toModel, graph) {
+	const path = [graph[toModel].parent, toModel];
+	let fn = conversions[graph[toModel].parent][toModel];
+
+	let cur = graph[toModel].parent;
+	while (graph[cur].parent) {
+		path.unshift(graph[cur].parent);
+		fn = link(conversions[graph[cur].parent][cur], fn);
+		cur = graph[cur].parent;
+	}
+
+	fn.conversion = path;
+	return fn;
+}
+
+module.exports = function (fromModel) {
+	const graph = deriveBFS(fromModel);
+	const conversion = {};
+
+	const models = Object.keys(graph);
+	for (let len = models.length, i = 0; i < len; i++) {
+		const toModel = models[i];
+		const node = graph[toModel];
+
+		if (node.parent === null) {
+			// No possible conversion, or this node is the source model.
+			continue;
+		}
+
+		conversion[toModel] = wrapConversion(toModel, graph);
+	}
+
+	return conversion;
+};
+
+
+
+/***/ }),
 /* 673 */,
 /* 674 */,
 /* 675 */
@@ -44571,7 +44364,7 @@ function parseOptions(options, log, hook) {
 /* 677 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const major = (a, loose) => new SemVer(a, loose).major
 module.exports = major
 
@@ -44585,7 +44378,7 @@ module.exports = major
 
 var xtend = __webpack_require__(81)
 var toggle = __webpack_require__(616)
-var vfileLocation = __webpack_require__(568)
+var vfileLocation = __webpack_require__(862)
 var unescape = __webpack_require__(31)
 var decode = __webpack_require__(572)
 var tokenizer = __webpack_require__(205)
@@ -44989,7 +44782,7 @@ module.exports = opts => {
 /* 700 */
 /***/ (function(__unusedmodule, exports) {
 
-function t(t,n){for(var e=0;e<n.length;e++){var r=n[e];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r)}}function n(n,e,r){return e&&t(n.prototype,e),r&&t(n,r),n}function e(t,n){t.prototype=Object.create(n.prototype),t.prototype.constructor=t,t.__proto__=n}function r(t){return(r=Object.setPrototypeOf?Object.getPrototypeOf:function(t){return t.__proto__||Object.getPrototypeOf(t)})(t)}function i(t,n){return(i=Object.setPrototypeOf||function(t,n){return t.__proto__=n,t})(t,n)}function o(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Date.prototype.toString.call(Reflect.construct(Date,[],function(){})),!0}catch(t){return!1}}function s(t,n,e){return(s=o()?Reflect.construct:function(t,n,e){var r=[null];r.push.apply(r,n);var o=new(Function.bind.apply(t,r));return e&&i(o,e.prototype),o}).apply(null,arguments)}function u(t){var n="function"==typeof Map?new Map:void 0;return(u=function(t){if(null===t||-1===Function.toString.call(t).indexOf("[native code]"))return t;if("function"!=typeof t)throw new TypeError("Super expression must either be null or a function");if(void 0!==n){if(n.has(t))return n.get(t);n.set(t,e)}function e(){return s(t,arguments,r(this).constructor)}return e.prototype=Object.create(t.prototype,{constructor:{value:e,enumerable:!1,writable:!0,configurable:!0}}),i(e,t)})(t)}function a(t,n){(null==n||n>t.length)&&(n=t.length);for(var e=0,r=new Array(n);e<n;e++)r[e]=t[e];return r}function c(t){var n=0;if("undefined"==typeof Symbol||null==t[Symbol.iterator]){if(Array.isArray(t)||(t=function(t,n){if(t){if("string"==typeof t)return a(t,void 0);var e=Object.prototype.toString.call(t).slice(8,-1);return"Object"===e&&t.constructor&&(e=t.constructor.name),"Map"===e||"Set"===e?Array.from(e):"Arguments"===e||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(e)?a(t,void 0):void 0}}(t)))return function(){return n>=t.length?{done:!0}:{done:!1,value:t[n++]}};throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}return(n=t[Symbol.iterator]()).next.bind(n)}var f=Symbol("resource");function l(t){return t instanceof p?t:null!=t?t[f]:void 0}var h=1,p=function(){function t(t){var n=void 0===t?{}:t,e=n.isRequired,r=void 0!==e&&e,i=n.blockOnReturnedContext,o=void 0!==i&&i;this.id=h++,this.isRequired=r,this.blockOnReturnedContext=o,this.children=new Set,this.exitHooks=new Set,this.state="unstarted",this.resume=this.resume.bind(this),this.fail=this.fail.bind(this),this.spawn=this.spawn.bind(this),this.fork=this.fork.bind(this),this.ensure=this.ensure.bind(this)}n(t,[{key:"isUnstarted",get:function(){return"unstarted"===this.state}},{key:"isRunning",get:function(){return"running"===this.state}},{key:"isWaiting",get:function(){return"waiting"===this.state}},{key:"isCompleted",get:function(){return"completed"===this.state}},{key:"isErrored",get:function(){return"errored"===this.state}},{key:"isHalted",get:function(){return"halted"===this.state}},{key:"isBlocking",get:function(){return this.isRunning||this.isWaiting||this.isUnstarted}}]);var e=t.prototype;return e.finalizePromise=function(){this.isCompleted&&this.resolve?this.resolve(this.result):this.isErrored&&this.reject?this.reject(this.result):this.isHalted&&this.reject&&this.reject(new b(this.result))},e.then=function(){var t;return(t=this.promise).then.apply(t,arguments)},e.catch=function(){var t;return(t=this.promise).catch.apply(t,arguments)},e.finally=function(){var t;return(t=this.promise).finally.apply(t,arguments)},e.spawn=function(n){var e=new t({isRequired:!1});return this.link(e),e.enter(n),e},e.fork=function(n){var e=new t({isRequired:!0});return this.link(e),e.enter(n),e},e.ensure=function(t){var n=this,e=t.bind(null,this);return this.isBlocking?(this.exitHooks.add(e),function(){return n.exitHooks.delete(e)}):(t(),function(t){return t})},e.enter=function(t){if(!this.isUnstarted)throw new Error("\nTried to call #enter() on a Context that has already been finalized. This\nshould never happen and so is almost assuredly a bug in effection. All of\nits users would be in your eternal debt were you to please take the time to\nreport this issue here:\nhttps://github.com/thefrontside/effection.js/issues/new\n\nThanks!");var n=this.createController(t);this.operation=t,this.state="running",n.call({resume:this.resume,fail:this.fail,ensure:this.ensure,spawn:this.spawn,fork:this.fork,context:this})},e.halt=function(t){this.isBlocking&&this.finalize("halted",t)},e.resume=function(t){var n=this;this.isBlocking&&(this.isRunning&&(this.result=t,l(t)&&this.link(l(t))),Array.from(this.children).some(function(e){return e===t?n.blockOnReturnedContext:e.isRequired})?this.state="waiting":this.finalize("completed",t))},e.fail=function(t){this.isBlocking&&this.finalize("errored",t)},e.finalize=function(t,n){if(this.isBlocking){this.state=t,this.result=n||this.result;for(var e,r=c(Array.from(this.children).reverse());!(e=r()).done;){var i=e.value;(this.blockOnReturnedContext||l(this.result)!==i)&&i.halt(n)}for(var o,s=c(Array.from(this.exitHooks).reverse());!(o=s()).done;){var u=o.value;try{u()}catch(t){console.error("\nCRITICAL ERROR: an exception was thrown in an exit handler, this might put\nEffection into an unknown state, and you should avoid this ever happening.\nOriginal error:"),console.error(t)}}this.parent&&this.parent.trapExit(this),this.finalizePromise()}},e.trapExit=function(t){this.unlink(t),t.isCompleted&&l(t.result)&&this.link(l(t.result)),t.isErrored?this.fail(t.result):this.isWaiting&&Array.from(this.children).every(function(t){return!t.isRequired})&&this.finalize("completed")},e.link=function(t){if(this.id===t.id)throw new Error("cannot link context to itself");this.isBlocking||t.halt(),t.parent&&t.parent.unlink(t),t.isBlocking?(t.parent=this,this.children.add(t)):this.trapExit(t)},e.unlink=function(t){t.parent=null,this.children.delete(t)},e.createController=function(t){var n=d.for(t);if(!n)throw new Error("cannot find controller for "+t);return n},e.toString=function(t){void 0===t&&(t="");var n=this.operation&&this.operation.name||"",e=Array.from(this.children).map(function(n){return""+n.toString(t+"  ")});return[t+"-> ["+this.id+"]("+n+"): "+this.state].concat(e).join("\n")},n(t,[{key:"promise",get:function(){var t=this;return this._promise=new Promise(function(n,e){t.resolve=n,t.reject=e}),this.finalizePromise(),this._promise}},{key:"root",get:function(){return this.parent?this.parent.root:this}}]),t}(),d=function(){function t(t){this.call=t}return t.of=function(t){return new this(t)},t.for=function(n){return null==n?t.of(function(t){return t}):n instanceof t?n:null!=(r=n)&&"function"==typeof r.constructor&&"GeneratorFunction"===r.constructor.name?y(n):null!=(e=n)&&"function"==typeof e.next&&"function"==typeof e.throw&&"function"==typeof e.return?g(n):"function"==typeof n.then?v(n):"function"==typeof n?t.of(n):void 0;var e,r},t}();function v(t){return d.of(function(n){var e=n.ensure,r=n.resume,i=n.fail,o=function(t){return t};t.then(function(t){r(t)},function(t){i(t)}),e(function(){return r=i=o})})}var y=function(t){return d.of(function(){var n;return(n=g(t())).call.apply(n,arguments)})},m=function(t){function n(n,e){var r;return(r=t.call(this)||this).generator=e,r.parentControls=n,r.ensure(function(){return r.generator.return()}),r}e(n,t);var r=n.prototype;return r.enter=function(){var n=this;t.prototype.enter.call(this,void 0),this.advance(function(){return n.generator.next()})},r.advance=function(t){try{var n=t();n.done?(this.resume(),this.parentControls.resume(n.value)):this.fork(n.value)}catch(t){this.fail(t)}},r.trapExit=function(t){var n=this;this.unlink(t),this.isBlocking&&(l(t.result)&&this.parentControls.context.link(l(t.result)),t.isErrored&&this.advance(function(){return n.generator.throw(t.result)}),t.isCompleted&&this.advance(function(){return n.generator.next(t.result)}),t.isHalted&&this.advance(function(){return n.generator.throw(new b(t.result))}))},n}(p),g=function(t){return d.of(function(n){var e=new m(n,t);n.context.link(e),e.enter()})};function k(t){return function(n){(0,n.resume)((0,n.spawn)(t))}}var b=function(t){function n(n){var e;return(e=t.call(this,"Interrupted: "+n)||this).cause=n,e}return e(n,t),n}(u(Error));exports.ExecutionContext=p,exports.contextOf=l,exports.fork=function(t){return function(n){(0,n.resume)((0,n.fork)(t))}},exports.join=function(t){return function(n){var e=n.resume,r=n.fail,i=n.context;(0,n.ensure)(t.ensure(function(){if(i.isRunning){var n=t.result;t.isCompleted?e(n):t.isErrored?r(n):t.isHalted&&r(new b(t.result))}}))}},exports.main=function(t){var n=new p({blockOnReturnedContext:!0});return n.enter(t),n},exports.monitor=k,exports.resource=function(t,n){return function(e){var r=e.resume,i=e.context,o=new p({isRequired:!1,blockOnReturnedContext:!0});i.link(o),o.enter(n),Object.defineProperty(t,f,{value:o,configurable:!0,enumerable:!1,writable:!1}),r(t)}},exports.spawn=k,exports.timeout=function(t){return function(n){var e=n.resume,r=n.ensure,i=setTimeout(function(){return e()},t);r(function(){return clearTimeout(i)})}};
+function t(t,e){for(var n=0;n<e.length;n++){var r=e[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(t,r.key,r)}}function e(e,n,r){return n&&t(e.prototype,n),r&&t(e,r),e}function n(t,e){t.prototype=Object.create(e.prototype),t.prototype.constructor=t,t.__proto__=e}function r(t){return(r=Object.setPrototypeOf?Object.getPrototypeOf:function(t){return t.__proto__||Object.getPrototypeOf(t)})(t)}function i(t,e){return(i=Object.setPrototypeOf||function(t,e){return t.__proto__=e,t})(t,e)}function o(){if("undefined"==typeof Reflect||!Reflect.construct)return!1;if(Reflect.construct.sham)return!1;if("function"==typeof Proxy)return!0;try{return Date.prototype.toString.call(Reflect.construct(Date,[],function(){})),!0}catch(t){return!1}}function s(t,e,n){return(s=o()?Reflect.construct:function(t,e,n){var r=[null];r.push.apply(r,e);var o=new(Function.bind.apply(t,r));return n&&i(o,n.prototype),o}).apply(null,arguments)}function u(t){var e="function"==typeof Map?new Map:void 0;return(u=function(t){if(null===t||-1===Function.toString.call(t).indexOf("[native code]"))return t;if("function"!=typeof t)throw new TypeError("Super expression must either be null or a function");if(void 0!==e){if(e.has(t))return e.get(t);e.set(t,n)}function n(){return s(t,arguments,r(this).constructor)}return n.prototype=Object.create(t.prototype,{constructor:{value:n,enumerable:!1,writable:!0,configurable:!0}}),i(n,t)})(t)}function a(t,e){(null==e||e>t.length)&&(e=t.length);for(var n=0,r=new Array(e);n<e;n++)r[n]=t[n];return r}function c(t){var e=0;if("undefined"==typeof Symbol||null==t[Symbol.iterator]){if(Array.isArray(t)||(t=function(t,e){if(t){if("string"==typeof t)return a(t,void 0);var n=Object.prototype.toString.call(t).slice(8,-1);return"Object"===n&&t.constructor&&(n=t.constructor.name),"Map"===n||"Set"===n?Array.from(t):"Arguments"===n||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)?a(t,void 0):void 0}}(t)))return function(){return e>=t.length?{done:!0}:{done:!1,value:t[e++]}};throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}return(e=t[Symbol.iterator]()).next.bind(e)}var l=Symbol.for("@effection.resource");function f(t){return t instanceof p?t:null!=t?t[l]:void 0}var h=1,p=function(){function t(t){var e=void 0===t?{}:t,n=e.isRequired,r=void 0!==n&&n,i=e.blockOnReturnedContext,o=void 0!==i&&i;this.id=h++,this.isRequired=r,this.blockOnReturnedContext=o,this.children=new Set,this.exitHooks=new Set,this.state="unstarted",this.resume=this.resume.bind(this),this.fail=this.fail.bind(this),this.spawn=this.spawn.bind(this),this.fork=this.fork.bind(this),this.ensure=this.ensure.bind(this)}e(t,[{key:"isUnstarted",get:function(){return"unstarted"===this.state}},{key:"isRunning",get:function(){return"running"===this.state}},{key:"isWaiting",get:function(){return"waiting"===this.state}},{key:"isCompleted",get:function(){return"completed"===this.state}},{key:"isErrored",get:function(){return"errored"===this.state}},{key:"isHalted",get:function(){return"halted"===this.state}},{key:"isBlocking",get:function(){return this.isRunning||this.isWaiting||this.isUnstarted}}]);var n=t.prototype;return n.finalizePromise=function(){this.isCompleted&&this.resolve?this.resolve(this.result):this.isErrored&&this.reject?this.reject(this.result):this.isHalted&&this.reject&&this.reject(new b(this.result))},n.then=function(){var t;return(t=this.promise).then.apply(t,[].slice.call(arguments))},n.catch=function(){var t;return(t=this.promise).catch.apply(t,[].slice.call(arguments))},n.finally=function(){var t;return(t=this.promise).finally.apply(t,[].slice.call(arguments))},n.spawn=function(e){var n=new t({isRequired:!1});return this.link(n),n.enter(e),n},n.fork=function(e){var n=new t({isRequired:!0});return this.link(n),n.enter(e),n},n.ensure=function(t){var e=this,n=t.bind(null,this);return this.isBlocking?(this.exitHooks.add(n),function(){return e.exitHooks.delete(n)}):(t(),function(t){return t})},n.enter=function(t){if(!this.isUnstarted)throw new Error("\nTried to call #enter() on a Context that has already been finalized. This\nshould never happen and so is almost assuredly a bug in effection. All of\nits users would be in your eternal debt were you to please take the time to\nreport this issue here:\nhttps://github.com/thefrontside/effection.js/issues/new\n\nThanks!");var e=this.createController(t);this.operation=t,this.state="running",e.call({resume:this.resume,fail:this.fail,ensure:this.ensure,spawn:this.spawn,fork:this.fork,context:this})},n.halt=function(t){this.isBlocking&&this.finalize("halted",t)},n.resume=function(t){var e=this;this.isBlocking&&(this.isRunning&&(this.result=t,f(t)&&this.link(f(t))),Array.from(this.children).some(function(n){return n===t?e.blockOnReturnedContext:n.isRequired})?this.state="waiting":this.finalize("completed",t))},n.fail=function(t){this.isBlocking&&this.finalize("errored",t)},n.finalize=function(t,e){if(this.isBlocking){this.state=t,this.result=e||this.result;for(var n,r=c(Array.from(this.children).reverse());!(n=r()).done;){var i=n.value;(this.blockOnReturnedContext||f(this.result)!==i)&&i.halt(e)}for(var o,s=c(Array.from(this.exitHooks).reverse());!(o=s()).done;){var u=o.value;try{u()}catch(t){console.error("\nCRITICAL ERROR: an exception was thrown in an exit handler, this might put\nEffection into an unknown state, and you should avoid this ever happening.\nOriginal error:"),console.error(t)}}this.parent&&this.parent.trapExit(this),this.finalizePromise()}},n.trapExit=function(t){this.unlink(t),t.isCompleted&&f(t.result)&&this.link(f(t.result)),t.isErrored?this.fail(t.result):this.isWaiting&&Array.from(this.children).every(function(t){return!t.isRequired})&&this.finalize("completed")},n.link=function(t){if(this.id===t.id)throw new Error("cannot link context to itself");this.isBlocking||t.halt(),t.parent&&t.parent.unlink(t),t.isBlocking?(t.parent=this,this.children.add(t)):this.trapExit(t)},n.unlink=function(t){t.parent=null,this.children.delete(t)},n.createController=function(t){var e=d.for(t);if(!e)throw new Error("cannot find controller for "+t);return e},n.toString=function(t){void 0===t&&(t="");var e=this.operation&&this.operation.name||"",n=Array.from(this.children).map(function(e){return""+e.toString(t+"  ")});return[t+"-> ["+this.id+"]("+e+"): "+this.state].concat(n).join("\n")},e(t,[{key:"promise",get:function(){var t=this;return this._promise=new Promise(function(e,n){t.resolve=e,t.reject=n}),this.finalizePromise(),this._promise}},{key:"root",get:function(){return this.parent?this.parent.root:this}}]),t}(),d=function(){function t(t){this.call=t}return t.of=function(t){return new this(t)},t.for=function(e){return null==e?t.of(function(t){return t}):e instanceof t?e:null!=(r=e)&&"function"==typeof r.constructor&&"GeneratorFunction"===r.constructor.name?y(e):null!=(n=e)&&"function"==typeof n.next&&"function"==typeof n.throw&&"function"==typeof n.return?g(e):"function"==typeof e.then?v(e):"function"==typeof e?t.of(e):void 0;var n,r},t}();function v(t){return d.of(function(e){var n=e.ensure,r=e.resume,i=e.fail,o=function(t){return t};t.then(function(t){r(t)},function(t){i(t)}),n(function(){return r=i=o})})}var y=function(t){return d.of(function(){var e;return(e=g(t())).call.apply(e,[].slice.call(arguments))})},m=function(t){function e(e,n){var r;return(r=t.call(this)||this).generator=n,r.parentControls=e,r.ensure(function(){return r.generator.return()}),r}n(e,t);var r=e.prototype;return r.enter=function(){var e=this;t.prototype.enter.call(this,void 0),this.advance(function(){return e.generator.next()})},r.advance=function(t){try{var e=t();e.done?(this.resume(),this.parentControls.resume(e.value)):this.fork(e.value)}catch(t){this.fail(t)}},r.trapExit=function(t){var e=this;this.unlink(t),this.isBlocking&&(f(t.result)&&this.parentControls.context.link(f(t.result)),t.isErrored&&this.advance(function(){return e.generator.throw(t.result)}),t.isCompleted&&this.advance(function(){return e.generator.next(t.result)}),t.isHalted&&this.advance(function(){return e.generator.throw(new b(t.result))}))},e}(p),g=function(t){return d.of(function(e){var n=new m(e,t);e.context.link(n),n.enter()})};function k(t){return function(e){(0,e.resume)((0,e.spawn)(t))}}var b=function(t){function e(e){var n;return(n=t.call(this,"Interrupted: "+e)||this).cause=e,n}return n(e,t),e}(u(Error));exports.ExecutionContext=p,exports.contextOf=f,exports.fork=function(t){return function(e){(0,e.resume)((0,e.fork)(t))}},exports.join=function(t){return function(e){var n=e.resume,r=e.fail,i=e.context;(0,e.ensure)(t.ensure(function(){if(i.isRunning){var e=t.result;t.isCompleted?n(e):t.isErrored?r(e):t.isHalted&&r(new b(t.result))}}))}},exports.main=function(t){var e=new p({blockOnReturnedContext:!0});return e.enter(t),e},exports.monitor=k,exports.resource=function(t,e){return function(n){var r=n.resume,i=n.context,o=new p({isRequired:!1,blockOnReturnedContext:!0});i.link(o),o.enter(e),Object.defineProperty(t,l,{value:o,configurable:!0,enumerable:!1,writable:!1}),r(t)}},exports.spawn=k,exports.timeout=function(t){return function(e){var n=e.resume,r=e.ensure,i=setTimeout(function(){return n()},t);r(function(){return clearTimeout(i)})}};
 //# sourceMappingURL=effection.js.map
 
 
@@ -51792,7 +51585,7 @@ module.exports = {"0":"�","128":"€","130":"‚","131":"ƒ","132":"„","133"
 /* 783 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(54)
+const SemVer = __webpack_require__(840)
 const Comparator = __webpack_require__(9)
 const {ANY} = Comparator
 const Range = __webpack_require__(378)
@@ -51879,28 +51672,11 @@ module.exports = outside
 /* 785 */,
 /* 786 */,
 /* 787 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
-
-
-var fence = __webpack_require__(753)
-
-module.exports = create
-
-function create(matter) {
-  var type = matter.type
-  var open = fence(matter, 'open')
-  var close = fence(matter, 'close')
-
-  frontmatter.displayName = type + 'FrontMatter'
-
-  return [type, frontmatter]
-
-  function frontmatter(node) {
-    return open + (node.value ? '\n' + node.value : '') + '\n' + close
-  }
-}
+var n=__webpack_require__(568),r=__webpack_require__(700);function e(n){return"function"==typeof n.addEventListener}function t(n,r,t){e(n)?n.addEventListener(r,t):n.on(r,t)}function o(n,r,t){e(n)?n.removeEventListener(r,t):n.off(r,t)}function*i(n,r){var e=function(){};try{return yield new Promise((function(o){t(n,r,e=function(){for(var n=arguments.length,r=new Array(n),e=0;e<n;e++)r[e]=arguments[e];return o(r)})}))}finally{o(n,r,e)}}exports.on=function(r,e){return n.createSubscription((function*(n){var i=function(){for(var r=arguments.length,e=new Array(r),t=0;t<r;t++)e[t]=arguments[t];return n(e)};try{t(r,e,i),yield}finally{o(r,e,i)}}))},exports.once=i,exports.throwOnErrorEvent=function(n){return r.spawn((function*(){throw(yield i(n,"error"))[0]}))};
+//# sourceMappingURL=events.cjs.production.min.js.map
 
 
 /***/ }),
@@ -52963,103 +52739,296 @@ function locate(value, fromIndex) {
 /* 840 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const conversions = __webpack_require__(161);
+const debug = __webpack_require__(940)
+const { MAX_LENGTH, MAX_SAFE_INTEGER } = __webpack_require__(94)
+const { re, t } = __webpack_require__(273)
 
-/*
-	This function routes a model to all other models.
+const { compareIdentifiers } = __webpack_require__(313)
+class SemVer {
+  constructor (version, options) {
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
+      }
+    }
+    if (version instanceof SemVer) {
+      if (version.loose === !!options.loose &&
+          version.includePrerelease === !!options.includePrerelease) {
+        return version
+      } else {
+        version = version.version
+      }
+    } else if (typeof version !== 'string') {
+      throw new TypeError(`Invalid Version: ${version}`)
+    }
 
-	all functions that are routed have a property `.conversion` attached
-	to the returned synthetic function. This property is an array
-	of strings, each with the steps in between the 'from' and 'to'
-	color models (inclusive).
+    if (version.length > MAX_LENGTH) {
+      throw new TypeError(
+        `version is longer than ${MAX_LENGTH} characters`
+      )
+    }
 
-	conversions that are not possible simply are not included.
-*/
+    debug('SemVer', version, options)
+    this.options = options
+    this.loose = !!options.loose
+    // this isn't actually relevant for versions, but keep it so that we
+    // don't run into trouble passing this.options around.
+    this.includePrerelease = !!options.includePrerelease
 
-function buildGraph() {
-	const graph = {};
-	// https://jsperf.com/object-keys-vs-for-in-with-closure/3
-	const models = Object.keys(conversions);
+    const m = version.trim().match(options.loose ? re[t.LOOSE] : re[t.FULL])
 
-	for (let len = models.length, i = 0; i < len; i++) {
-		graph[models[i]] = {
-			// http://jsperf.com/1-vs-infinity
-			// micro-opt, but this is simple.
-			distance: -1,
-			parent: null
-		};
-	}
+    if (!m) {
+      throw new TypeError(`Invalid Version: ${version}`)
+    }
 
-	return graph;
+    this.raw = version
+
+    // these are actually numbers
+    this.major = +m[1]
+    this.minor = +m[2]
+    this.patch = +m[3]
+
+    if (this.major > MAX_SAFE_INTEGER || this.major < 0) {
+      throw new TypeError('Invalid major version')
+    }
+
+    if (this.minor > MAX_SAFE_INTEGER || this.minor < 0) {
+      throw new TypeError('Invalid minor version')
+    }
+
+    if (this.patch > MAX_SAFE_INTEGER || this.patch < 0) {
+      throw new TypeError('Invalid patch version')
+    }
+
+    // numberify any prerelease numeric ids
+    if (!m[4]) {
+      this.prerelease = []
+    } else {
+      this.prerelease = m[4].split('.').map((id) => {
+        if (/^[0-9]+$/.test(id)) {
+          const num = +id
+          if (num >= 0 && num < MAX_SAFE_INTEGER) {
+            return num
+          }
+        }
+        return id
+      })
+    }
+
+    this.build = m[5] ? m[5].split('.') : []
+    this.format()
+  }
+
+  format () {
+    this.version = `${this.major}.${this.minor}.${this.patch}`
+    if (this.prerelease.length) {
+      this.version += `-${this.prerelease.join('.')}`
+    }
+    return this.version
+  }
+
+  toString () {
+    return this.version
+  }
+
+  compare (other) {
+    debug('SemVer.compare', this.version, this.options, other)
+    if (!(other instanceof SemVer)) {
+      if (typeof other === 'string' && other === this.version) {
+        return 0
+      }
+      other = new SemVer(other, this.options)
+    }
+
+    if (other.version === this.version) {
+      return 0
+    }
+
+    return this.compareMain(other) || this.comparePre(other)
+  }
+
+  compareMain (other) {
+    if (!(other instanceof SemVer)) {
+      other = new SemVer(other, this.options)
+    }
+
+    return (
+      compareIdentifiers(this.major, other.major) ||
+      compareIdentifiers(this.minor, other.minor) ||
+      compareIdentifiers(this.patch, other.patch)
+    )
+  }
+
+  comparePre (other) {
+    if (!(other instanceof SemVer)) {
+      other = new SemVer(other, this.options)
+    }
+
+    // NOT having a prerelease is > having one
+    if (this.prerelease.length && !other.prerelease.length) {
+      return -1
+    } else if (!this.prerelease.length && other.prerelease.length) {
+      return 1
+    } else if (!this.prerelease.length && !other.prerelease.length) {
+      return 0
+    }
+
+    let i = 0
+    do {
+      const a = this.prerelease[i]
+      const b = other.prerelease[i]
+      debug('prerelease compare', i, a, b)
+      if (a === undefined && b === undefined) {
+        return 0
+      } else if (b === undefined) {
+        return 1
+      } else if (a === undefined) {
+        return -1
+      } else if (a === b) {
+        continue
+      } else {
+        return compareIdentifiers(a, b)
+      }
+    } while (++i)
+  }
+
+  compareBuild (other) {
+    if (!(other instanceof SemVer)) {
+      other = new SemVer(other, this.options)
+    }
+
+    let i = 0
+    do {
+      const a = this.build[i]
+      const b = other.build[i]
+      debug('prerelease compare', i, a, b)
+      if (a === undefined && b === undefined) {
+        return 0
+      } else if (b === undefined) {
+        return 1
+      } else if (a === undefined) {
+        return -1
+      } else if (a === b) {
+        continue
+      } else {
+        return compareIdentifiers(a, b)
+      }
+    } while (++i)
+  }
+
+  // preminor will bump the version up to the next minor release, and immediately
+  // down to pre-release. premajor and prepatch work the same way.
+  inc (release, identifier) {
+    switch (release) {
+      case 'premajor':
+        this.prerelease.length = 0
+        this.patch = 0
+        this.minor = 0
+        this.major++
+        this.inc('pre', identifier)
+        break
+      case 'preminor':
+        this.prerelease.length = 0
+        this.patch = 0
+        this.minor++
+        this.inc('pre', identifier)
+        break
+      case 'prepatch':
+        // If this is already a prerelease, it will bump to the next version
+        // drop any prereleases that might already exist, since they are not
+        // relevant at this point.
+        this.prerelease.length = 0
+        this.inc('patch', identifier)
+        this.inc('pre', identifier)
+        break
+      // If the input is a non-prerelease version, this acts the same as
+      // prepatch.
+      case 'prerelease':
+        if (this.prerelease.length === 0) {
+          this.inc('patch', identifier)
+        }
+        this.inc('pre', identifier)
+        break
+
+      case 'major':
+        // If this is a pre-major version, bump up to the same major version.
+        // Otherwise increment major.
+        // 1.0.0-5 bumps to 1.0.0
+        // 1.1.0 bumps to 2.0.0
+        if (
+          this.minor !== 0 ||
+          this.patch !== 0 ||
+          this.prerelease.length === 0
+        ) {
+          this.major++
+        }
+        this.minor = 0
+        this.patch = 0
+        this.prerelease = []
+        break
+      case 'minor':
+        // If this is a pre-minor version, bump up to the same minor version.
+        // Otherwise increment minor.
+        // 1.2.0-5 bumps to 1.2.0
+        // 1.2.1 bumps to 1.3.0
+        if (this.patch !== 0 || this.prerelease.length === 0) {
+          this.minor++
+        }
+        this.patch = 0
+        this.prerelease = []
+        break
+      case 'patch':
+        // If this is not a pre-release version, it will increment the patch.
+        // If it is a pre-release it will bump up to the same patch version.
+        // 1.2.0-5 patches to 1.2.0
+        // 1.2.0 patches to 1.2.1
+        if (this.prerelease.length === 0) {
+          this.patch++
+        }
+        this.prerelease = []
+        break
+      // This probably shouldn't be used publicly.
+      // 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
+      case 'pre':
+        if (this.prerelease.length === 0) {
+          this.prerelease = [0]
+        } else {
+          let i = this.prerelease.length
+          while (--i >= 0) {
+            if (typeof this.prerelease[i] === 'number') {
+              this.prerelease[i]++
+              i = -2
+            }
+          }
+          if (i === -1) {
+            // didn't increment anything
+            this.prerelease.push(0)
+          }
+        }
+        if (identifier) {
+          // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
+          // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
+          if (this.prerelease[0] === identifier) {
+            if (isNaN(this.prerelease[1])) {
+              this.prerelease = [identifier, 0]
+            }
+          } else {
+            this.prerelease = [identifier, 0]
+          }
+        }
+        break
+
+      default:
+        throw new Error(`invalid increment argument: ${release}`)
+    }
+    this.format()
+    this.raw = this.version
+    return this
+  }
 }
 
-// https://en.wikipedia.org/wiki/Breadth-first_search
-function deriveBFS(fromModel) {
-	const graph = buildGraph();
-	const queue = [fromModel]; // Unshift -> queue -> pop
-
-	graph[fromModel].distance = 0;
-
-	while (queue.length) {
-		const current = queue.pop();
-		const adjacents = Object.keys(conversions[current]);
-
-		for (let len = adjacents.length, i = 0; i < len; i++) {
-			const adjacent = adjacents[i];
-			const node = graph[adjacent];
-
-			if (node.distance === -1) {
-				node.distance = graph[current].distance + 1;
-				node.parent = current;
-				queue.unshift(adjacent);
-			}
-		}
-	}
-
-	return graph;
-}
-
-function link(from, to) {
-	return function (args) {
-		return to(from(args));
-	};
-}
-
-function wrapConversion(toModel, graph) {
-	const path = [graph[toModel].parent, toModel];
-	let fn = conversions[graph[toModel].parent][toModel];
-
-	let cur = graph[toModel].parent;
-	while (graph[cur].parent) {
-		path.unshift(graph[cur].parent);
-		fn = link(conversions[graph[cur].parent][cur], fn);
-		cur = graph[cur].parent;
-	}
-
-	fn.conversion = path;
-	return fn;
-}
-
-module.exports = function (fromModel) {
-	const graph = deriveBFS(fromModel);
-	const conversion = {};
-
-	const models = Object.keys(graph);
-	for (let len = models.length, i = 0; i < len; i++) {
-		const toModel = models[i];
-		const node = graph[toModel];
-
-		if (node.parent === null) {
-			// No possible conversion, or this node is the source model.
-			continue;
-		}
-
-		conversion[toModel] = wrapConversion(toModel, graph);
-	}
-
-	return conversion;
-};
-
+module.exports = SemVer
 
 
 /***/ }),
@@ -55487,33 +55456,7 @@ module.exports = gt
 
 
 /***/ }),
-/* 856 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const event_source_1 = __webpack_require__(895);
-/**
- * Takes an event source and event name and returns a yieldable
- * operation which resumes when the event occurs.
- */
-function* once(source, eventName) {
-    let onceListener;
-    try {
-        return yield new Promise((resolve) => {
-            onceListener = (...args) => resolve(args);
-            event_source_1.addListener(source, eventName, onceListener);
-        });
-    }
-    finally {
-        event_source_1.removeListener(source, eventName, onceListener);
-    }
-}
-exports.once = once;
-//# sourceMappingURL=once.js.map
-
-/***/ }),
+/* 856 */,
 /* 857 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -56100,7 +56043,87 @@ exports.default = PartialMatcher;
 /* 859 */,
 /* 860 */,
 /* 861 */,
-/* 862 */,
+/* 862 */
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = factory
+
+function factory(file) {
+  var contents = indices(String(file))
+
+  return {
+    toPosition: offsetToPositionFactory(contents),
+    toOffset: positionToOffsetFactory(contents)
+  }
+}
+
+// Factory to get the line and column-based `position` for `offset` in the bound
+// indices.
+function offsetToPositionFactory(indices) {
+  return offsetToPosition
+
+  // Get the line and column-based `position` for `offset` in the bound indices.
+  function offsetToPosition(offset) {
+    var index = -1
+    var length = indices.length
+
+    if (offset < 0) {
+      return {}
+    }
+
+    while (++index < length) {
+      if (indices[index] > offset) {
+        return {
+          line: index + 1,
+          column: offset - (indices[index - 1] || 0) + 1,
+          offset: offset
+        }
+      }
+    }
+
+    return {}
+  }
+}
+
+// Factory to get the `offset` for a line and column-based `position` in the
+// bound indices.
+function positionToOffsetFactory(indices) {
+  return positionToOffset
+
+  // Get the `offset` for a line and column-based `position` in the bound
+  // indices.
+  function positionToOffset(position) {
+    var line = position && position.line
+    var column = position && position.column
+
+    if (!isNaN(line) && !isNaN(column) && line - 1 in indices) {
+      return (indices[line - 2] || 0) + column - 1 || 0
+    }
+
+    return -1
+  }
+}
+
+// Get indices of line-breaks in `value`.
+function indices(value) {
+  var result = []
+  var index = value.indexOf('\n')
+
+  while (index !== -1) {
+    result.push(index + 1)
+    index = value.indexOf('\n', index + 1)
+  }
+
+  result.push(value.length + 1)
+
+  return result
+}
+
+
+/***/ }),
 /* 863 */,
 /* 864 */,
 /* 865 */
@@ -56905,7 +56928,7 @@ module.exports = new Type('tag:yaml.org,2002:omap', {
 /* 873 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const compareBuild = __webpack_require__(997)
+const compareBuild = __webpack_require__(405)
 const rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose))
 module.exports = rsort
 
@@ -58545,36 +58568,7 @@ function indentation(value, maximum) {
 /* 892 */,
 /* 893 */,
 /* 894 */,
-/* 895 */
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-function isEventTarget(target) {
-    return typeof target.addEventListener === 'function';
-}
-function addListener(source, name, listener) {
-    if (isEventTarget(source)) {
-        source.addEventListener(name, listener);
-    }
-    else {
-        source.on(name, listener);
-    }
-}
-exports.addListener = addListener;
-function removeListener(source, name, listener) {
-    if (isEventTarget(source)) {
-        source.removeEventListener(name, listener);
-    }
-    else {
-        source.off(name, listener);
-    }
-}
-exports.removeListener = removeListener;
-//# sourceMappingURL=event-source.js.map
-
-/***/ }),
+/* 895 */,
 /* 896 */,
 /* 897 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -59420,59 +59414,7 @@ module.exports.writeChangelog = async ({ changelog }) => {
 
 
 /***/ }),
-/* 917 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const effection_1 = __webpack_require__(700);
-const events_1 = __webpack_require__(370);
-const childProcess = __webpack_require__(129);
-function* supervise(child) {
-    // Killing all child processes started by this command is surprisingly
-    // tricky. If a process spawns another processes and we kill the parent,
-    // then the child process is NOT automatically killed. Instead we're using
-    // the `detached` option to force the child into its own process group,
-    // which all of its children in turn will inherit. By sending the signal to
-    // `-pid` rather than `pid`, we are sending it to the entire process group
-    // instead. This will send the signal to all processes started by the child
-    // process.
-    //
-    // More information here: https://unix.stackexchange.com/questions/14815/process-descendants
-    try {
-        yield events_1.throwOnErrorEvent(child);
-        let [code] = yield events_1.once(child, "exit");
-        if (code !== 0) {
-            throw new Error("child exited with non-zero exit code");
-        }
-    }
-    finally {
-        try {
-            process.kill(-child.pid, "SIGTERM");
-        }
-        catch (e) {
-            // do nothing, process is probably already dead
-        }
-    }
-}
-function* spawn(command, args, options) {
-    let child = childProcess.spawn(command, args, Object.assign({}, options, {
-        detached: true,
-    }));
-    return yield effection_1.resource(child, supervise(child));
-}
-exports.spawn = spawn;
-function* fork(module, args, options) {
-    let child = childProcess.fork(module, args, Object.assign({}, options, {
-        detached: true,
-    }));
-    return yield effection_1.resource(child, supervise(child));
-}
-exports.fork = fork;
-//# sourceMappingURL=child_process.js.map
-
-/***/ }),
+/* 917 */,
 /* 918 */,
 /* 919 */
 /***/ (function(module) {
@@ -59550,7 +59492,317 @@ function locate(value, fromIndex) {
 /***/ }),
 /* 924 */,
 /* 925 */,
-/* 926 */,
+/* 926 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+var effection = __webpack_require__(700);
+
+function matcher(reference) {
+  return function (value) {
+    if (typeof value === 'object' && typeof reference === 'object') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      var castedValue = value; // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+      var castedReference = reference;
+      return Object.entries(castedReference).every(function (_ref) {
+        var key = _ref[0],
+            ref = _ref[1];
+        return matcher(ref)(castedValue[key]);
+      });
+    } else {
+      return value === reference;
+    }
+  };
+}
+
+var ChainableSubscription = /*#__PURE__*/function () {
+  function ChainableSubscription(subscription) {
+    this.subscription = subscription;
+  }
+
+  var _proto = ChainableSubscription.prototype;
+
+  _proto.filter = function filter(predicate) {
+    var subscription = this.subscription;
+    return new ChainableSubscription({
+      next: function* next() {
+        while (true) {
+          var result = yield subscription.next();
+
+          if (result.done) {
+            return result;
+          } else if (predicate(result.value)) {
+            return result;
+          }
+        }
+      }
+    });
+  };
+
+  _proto.match = function match(reference) {
+    return this.filter(matcher(reference));
+  };
+
+  _proto.map = function map(mapper) {
+    var subscription = this.subscription;
+    return new ChainableSubscription({
+      next: function* next() {
+        while (true) {
+          var result = yield subscription.next();
+
+          if (result.done) {
+            return result;
+          } else {
+            return {
+              done: false,
+              value: mapper(result.value)
+            };
+          }
+        }
+      }
+    });
+  };
+
+  _proto.first = function* first() {
+    var result = yield this.subscription.next();
+
+    if (result.done) {
+      return undefined;
+    } else {
+      return result.value;
+    }
+  };
+
+  _proto.expect = function* expect() {
+    var result = yield this.subscription.next();
+
+    if (result.done) {
+      throw new Error('expected subscription to contain a value');
+    } else {
+      return result.value;
+    }
+  };
+
+  _proto.forEach = function* forEach(visit) {
+    while (true) {
+      var result = yield this.subscription.next();
+
+      if (result.done) {
+        return result.value;
+      } else {
+        yield visit(result.value);
+      }
+    }
+  };
+
+  _proto.next = function next() {
+    return this.subscription.next();
+  };
+
+  return ChainableSubscription;
+}();
+
+var Semaphore = function Semaphore() {
+  var _this = this;
+
+  this.waiters = [];
+
+  this.signal = function (value) {
+    var next = _this.waiters.pop();
+
+    if (next) {
+      next(value);
+    }
+  };
+
+  this.wait = function () {
+    return new Promise(function (resolve) {
+      return _this.waiters.push(resolve);
+    });
+  };
+};
+
+function createSubscription(subscribe) {
+  return function* () {
+    var results = [];
+    var semaphore = new Semaphore();
+
+    var publish = function publish(value) {
+      results.push({
+        done: false,
+        value: value
+      });
+      semaphore.signal();
+    };
+
+    var next = function next() {
+      try {
+        var wait = semaphore.wait();
+
+        if (results.length > 0) {
+          semaphore.signal();
+        }
+
+        return Promise.resolve(wait.then(function () {
+          return results.shift();
+        }));
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    };
+
+    var subscription = yield effection.resource(new ChainableSubscription({
+      next: next
+    }), function* () {
+      try {
+        var value = yield subscribe(function (value) {
+          return publish(value);
+        });
+        results.push({
+          done: true,
+          value: value
+        });
+        semaphore.signal();
+      } finally {
+        publish = function publish(value) {
+          throw InvalidPublication(value);
+        };
+      }
+    });
+    return subscription;
+  };
+}
+
+function InvalidPublication(value) {
+  var error = new Error("tried to publish a value: " + value + " on an already finished subscription");
+  error.name = 'TypeError';
+  return error;
+}
+
+var SymbolSubscribable = /*#__PURE__*/Symbol["for"]('Symbol.subscription');
+
+function* _forEach(source, visit) {
+  var subscription = yield subscribe(source);
+
+  while (true) {
+    var result = yield subscription.next();
+
+    if (result.done) {
+      return result.value;
+    } else {
+      yield visit(result.value);
+    }
+  }
+}
+var Subscribable = {
+  from: function from(source) {
+    return new Chain(source);
+  }
+};
+var Chain = /*#__PURE__*/function () {
+  function Chain(source) {
+    this.source = source;
+  }
+
+  var _proto = Chain.prototype;
+
+  _proto[SymbolSubscribable] = function () {
+    return subscribe(this.source);
+  };
+
+  _proto.map = function map(fn) {
+    return this.chain(function (source) {
+      return function (publish) {
+        return _forEach(source, function* (item) {
+          publish(fn(item));
+        });
+      };
+    });
+  };
+
+  _proto.filter = function filter(predicate) {
+    return this.chain(function (source) {
+      return function (publish) {
+        return _forEach(source, function* (item) {
+          if (predicate(item)) {
+            publish(item);
+          }
+        });
+      };
+    });
+  };
+
+  _proto.match = function match(reference) {
+    return this.filter(matcher(reference));
+  };
+
+  _proto.chain = function chain(next) {
+    return new Chain(createSubscription(next(this.source)));
+  };
+
+  _proto.forEach = function forEach(visit) {
+    return _forEach(this.source, visit);
+  };
+
+  _proto.first = function* first() {
+    var subscription = yield subscribe(this.source);
+
+    var _yield$subscription$n = yield subscription.next(),
+        done = _yield$subscription$n.done,
+        value = _yield$subscription$n.value;
+
+    if (done) {
+      return undefined;
+    } else {
+      return value;
+    }
+  };
+
+  return Chain;
+}();
+function subscribe(source) {
+  if (isSubscribable(source)) {
+    var subscriber = getSubscriber(source);
+
+    if (subscriber) {
+      return subscriber.call(source);
+    } else {
+      var error = new Error("cannot subscribe to " + source + " because it does not contain Symbol.subscription");
+      error.name = 'TypeError';
+      throw error;
+    }
+  } else {
+    return source;
+  }
+}
+
+function isSubscribable(value) {
+  return !!getSubscriber(value);
+} // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+
+function getSubscriber(source) {
+  return source[SymbolSubscribable];
+}
+
+function* subscribe$1(source) {
+  var inner = yield subscribe(source);
+  return new ChainableSubscription(inner);
+}
+
+exports.ChainableSubscription = ChainableSubscription;
+exports.Subscribable = Subscribable;
+exports.SymbolSubscribable = SymbolSubscribable;
+exports.createSubscription = createSubscription;
+exports.forEach = _forEach;
+exports.subscribe = subscribe$1;
+//# sourceMappingURL=subscription.cjs.development.js.map
+
+
+/***/ }),
 /* 927 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -60479,7 +60731,95 @@ function indentedCode(eat, value, silent) {
 
 
 /***/ }),
-/* 950 */,
+/* 950 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+var subscription = __webpack_require__(568);
+var effection = __webpack_require__(700);
+
+function isEventTarget(target) {
+  return typeof target.addEventListener === 'function';
+}
+
+function addListener(source, name, listener) {
+  if (isEventTarget(source)) {
+    source.addEventListener(name, listener);
+  } else {
+    source.on(name, listener);
+  }
+}
+function removeListener(source, name, listener) {
+  if (isEventTarget(source)) {
+    source.removeEventListener(name, listener);
+  } else {
+    source.off(name, listener);
+  }
+}
+
+/**
+ * Takes an event source and event name and returns a yieldable
+ * operation which resumes when the event occurs.
+ */
+
+function* once(source, eventName) {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  var onceListener = function onceListener() {};
+
+  try {
+    return yield new Promise(function (resolve) {
+      onceListener = function onceListener() {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        return resolve(args);
+      };
+
+      addListener(source, eventName, onceListener);
+    });
+  } finally {
+    removeListener(source, eventName, onceListener);
+  }
+}
+
+function on(source, name) {
+  return subscription.createSubscription(function* (publish) {
+    var listener = function listener() {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return publish(args);
+    };
+
+    try {
+      addListener(source, name, listener);
+      yield;
+    } finally {
+      removeListener(source, name, listener);
+    }
+  });
+}
+
+function throwOnErrorEvent(source) {
+  return effection.spawn(function* () {
+    var _yield$once = yield once(source, 'error'),
+        error = _yield$once[0];
+
+    throw error;
+  });
+}
+
+exports.on = on;
+exports.once = once;
+exports.throwOnErrorEvent = throwOnErrorEvent;
+//# sourceMappingURL=events.cjs.development.js.map
+
+
+/***/ }),
 /* 951 */,
 /* 952 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -62916,10 +63256,10 @@ function autoLink(eat, value, silent) {
 
 const { spawn, timeout } = __webpack_require__(700);
 const { ChildProcess } = __webpack_require__(142);
-const { once, on, throwOnErrorEvent } = __webpack_require__(370);
+const { once, on } = __webpack_require__(370);
 const { configFile, changeFiles } = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(749);
-const { fillChangelogs } = __webpack_require__(528);
+const { fillChangelogs } = __webpack_require__(72);
 const { apply } = __webpack_require__(334);
 const path = __webpack_require__(622);
 
@@ -62978,29 +63318,15 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
 
     for (let pkg of commands) {
       if (!!pkg.getPublishedVersion) {
-        console.log(
-          `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`
-        );
-        const publishedVersionCommand = yield ChildProcess.spawn(
-          pkg.getPublishedVersion,
-          [],
-          {
-            cwd: path.join(cwd, pkg.path),
-            shell: process.env.shell || true,
-            stdio: "pipe",
-            windowsHide: true,
-          }
-        );
-        yield throwOnErrorEvent(publishedVersionCommand);
-        let version = "";
-        let events = yield on(publishedVersionCommand.stdout, "data");
-        while (version === "" || version === "undefined") {
-          let data = yield events.next();
-          version += !data.value
-            ? data.toString().trim()
-            : data.value.toString().trim();
-        }
-        yield once(publishedVersionCommand, "exit");
+        const version = runCommand({
+          command: pkg.getPublishedVersion,
+          cwd,
+          pkg: pkg.pkg,
+          pkgPath: pkg.path,
+          stdio: "pipe",
+          log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
+        });
+
         if (pkg.pkgFile.version === version) {
           console.log(
             `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
@@ -63008,24 +63334,15 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
           continue;
         }
       }
-      console.log(`publishing ${pkg.pkg} with ${pkg.publish}`);
-      let child = yield ChildProcess.spawn(pkg.publish, [], {
-        cwd: path.join(cwd, pkg.path),
-        shell: process.env.shell || true,
-        stdio: "pipe",
-        windowsHide: true,
+
+      const response = yield runCommand({
+        command: pkg.publish,
+        cwd,
+        pkg: pkg.pkg,
+        pkgPath: pkg.path,
+        log: `publishing ${pkg.pkg} with ${pkg.publish}`,
       });
-      yield throwOnErrorEvent(child);
-      let response = "";
-      let resEvents = yield on(child.stdout, "data");
-      while (response === "" || response === "undefined") {
-        let data = yield resEvents.next();
-        response += !data.value
-          ? data.toString().trim()
-          : data.value.toString().trim();
-      }
-      yield once(child, "exit");
-      console.log(response);
+
       published[pkg.pkg] = true;
     }
     return published;
@@ -63042,23 +63359,50 @@ function raceTime(
   });
 }
 
+const runCommand = function* ({
+  pkg,
+  command,
+  cwd,
+  pkgPath,
+  stdio = "inherit",
+  log = `running command for ${pkg}`,
+}) {
+  try {
+    return yield function* () {
+      console.log(log);
+      let child = yield ChildProcess.spawn(command, [], {
+        cwd: path.join(cwd, pkgPath),
+        shell: process.env.shell || true,
+        stdio,
+        windowsHide: true,
+      });
+
+      if (stdio === "pipe") {
+        let response = "";
+        let resEvents = yield on(child.stdout, "data");
+        while (response === "" || response === "undefined") {
+          let data = yield resEvents.next();
+          response += !data.value
+            ? data.toString().trim()
+            : data.value.toString().trim();
+        }
+        yield once(child, "exit");
+        console.log(response);
+        return response;
+      } else {
+        return;
+      }
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 /***/ }),
 /* 995 */,
 /* 996 */,
-/* 997 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const SemVer = __webpack_require__(54)
-const compareBuild = (a, b, loose) => {
-  const versionA = new SemVer(a, loose)
-  const versionB = new SemVer(b, loose)
-  return versionA.compare(versionB) || versionA.compareBuild(versionB)
-}
-module.exports = compareBuild
-
-
-/***/ }),
+/* 997 */,
 /* 998 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 

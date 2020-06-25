@@ -76,6 +76,7 @@ describe("integration test", () => {
       consoleInfo: console.info.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
+    expect(covectored).toThrow();
     restoreConsole();
   });
 });
