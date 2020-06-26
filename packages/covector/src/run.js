@@ -1,5 +1,5 @@
 const { spawn, timeout } = require("effection");
-const { ChildProcess } = require("@effection/node");
+const execa = require("execa");
 const { once, on } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
@@ -108,34 +108,21 @@ const runCommand = function* ({
   command,
   cwd,
   pkgPath,
-  stdio = "inherit",
+  stdio = "pipe",
   log = `running command for ${pkg}`,
 }) {
+  let child;
   try {
     return yield function* () {
       console.log(log);
-      let child = yield ChildProcess.spawn(command, [], {
+      child = yield execa.command(command, {
         cwd: path.join(cwd, pkgPath),
         shell: process.env.shell || true,
-        stdio,
         windowsHide: true,
       });
 
-      if (stdio === "pipe") {
-        let response = "";
-        let resEvents = yield on(child.stdout, "data");
-        while (response === "" || response === "undefined") {
-          let data = yield resEvents.next();
-          response += !data.value
-            ? data.toString().trim()
-            : data.value.toString().trim();
-        }
-        yield once(child, "exit");
-        console.log(response);
-        return response;
-      } else {
-        return;
-      }
+      console.log(child.stdout);
+      return child.stdout;
     };
   } catch (error) {
     throw error;

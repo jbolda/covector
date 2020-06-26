@@ -18,6 +18,7 @@
     "@effection/events": "0.7.5",
     "@effection/node": "0.7.0",
     "effection": "0.7.0",
+    "execa": "^4.0.2",
     "yargs": "^15.3.1"
   }
 }
