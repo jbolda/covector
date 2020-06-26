@@ -1,5 +1,7 @@
 const { covector } = require("./index");
 const { main } = require("effection");
+const toVFile = require("to-vfile");
+const path = require("path");
 const mockConsole = require("jest-mock-console");
 const fixtures = require("fixturez");
 const f = fixtures(__dirname);
@@ -42,6 +44,20 @@ describe("integration test", () => {
         return pkg;
       }),
     }).toMatchSnapshot();
+
+    await expect(
+      toVFile.read(
+        path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
+        "utf-8"
+      ).contents
+    ).toBe(
+      "# Changelog\n\n" +
+        "## [0.5.6]\n\n" +
+        "-   This is a test.\n" +
+        "-   This is another test.\n" +
+        "-   This is the last test.\n"
+    );
+
     restoreConsole();
   });
 

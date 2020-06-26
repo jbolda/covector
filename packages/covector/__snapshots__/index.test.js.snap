@@ -5,7 +5,78 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
+      "publishing tauri.js with echo publishing tauri.js would happen here",
+    ],
+    Array [
       "publishing tauri.js with npm publish",
+    ],
+    Array [
+      "publishing tauri.js would happen here",
+    ],
+    Array [
+      "publishing tauri-bundler with echo publishing tauri-bundler would happen here",
+    ],
+    Array [
+      "publishing tauri-bundler would happen here",
+    ],
+    Array [
+      "publishing tauri with echo publishing tauri would happen here",
+    ],
+    Array [
+      "publishing tauri would happen here",
+    ],
+    Array [
+      "publishing tauri-api with echo publishing tauri-api would happen here",
+    ],
+    Array [
+      "publishing tauri-api would happen here",
+    ],
+    Array [
+      "publishing tauri-utils with echo publishing tauri-utils would happen here",
+    ],
+    Array [
+      "publishing tauri-utils would happen here",
+    ],
+  ],
+  "covectorReturn": Object {
+    "tauri": true,
+    "tauri-api": true,
+    "tauri-bundler": true,
+    "tauri-updater": false,
+    "tauri-utils": true,
+    "tauri.js": true,
+  },
+}
+`;
+
+exports[`integration test fails with error 2`] = `
+Object {
+  "consoleInfo": Array [
+    Array [
+      ".changes/first-change.md was deleted",
+    ],
+    Array [
+      ".changes/second-change.md was deleted",
+    ],
+  ],
+  "consoleLog": Array [
+    Array [
+      "bumping tauri with minor",
+    ],
+    Array [
+      "bumping tauri-updater with patch",
+    ],
+    Array [
+      "bumping tauri.js with minor",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
     ],
   ],
 }
