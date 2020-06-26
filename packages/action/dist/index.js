@@ -61361,12 +61361,14 @@ module.exports.changeFiles = async ({
     .map((v) => v.contents);
 
   if (remove) {
-    for (let changePath of paths) {
-      await fs.unlink(path.posix.join(cwd, changePath), (err) => {
-        if (err) throw err;
-        console.info(`${changePath} was deleted`);
-      });
-    }
+    await Promise.all(
+      paths.map(async (changeFilePath) =>
+        fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
+          if (err) throw err;
+          console.info(`${changeFilePath} was deleted`);
+        })
+      )
+    );
   }
 
   return vfiles;
