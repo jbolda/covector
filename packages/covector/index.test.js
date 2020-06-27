@@ -45,17 +45,22 @@ describe("integration test", () => {
       }),
     }).toMatchSnapshot();
 
-    await expect(
-      toVFile.read(
-        path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-        "utf-8"
-      ).contents
-    ).toBe(
+    const changelogTauriCore = await toVFile.read(
+      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    expect(changelogTauriCore.contents).toBe(
       "# Changelog\n\n" +
-        "## [0.5.6]\n\n" +
-        "-   This is a test.\n" +
-        "-   This is another test.\n" +
-        "-   This is the last test.\n"
+        "## [0.6.0]\n\n" +
+        "-   Summary about the changes in tauri\n"
+    );
+
+    const changelogTaurijs = await toVFile.read(
+      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    expect(changelogTaurijs.contents).toBe(
+      "# Changelog\n\n" + "## [0.7.0]\n\n" + "Bumped due to dependency.\n"
     );
 
     restoreConsole();

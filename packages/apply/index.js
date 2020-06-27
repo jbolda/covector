@@ -47,16 +47,17 @@ const readAll = async ({ changes, config, cwd = process.cwd() }) => {
   const pkgs = Object.keys(files);
   const pkgFiles = await Promise.all(
     Object.keys(files).map((pkg) =>
-      readPkgFile(
-        path.join(
+      readPkgFile({
+        file: path.join(
           cwd,
           config.packages[pkg].path,
           !!config.packages[pkg].manager &&
             config.packages[pkg].manager === "rust"
             ? "Cargo.toml"
             : "package.json"
-        )
-      )
+        ),
+        nickname: pkg,
+      })
     )
   );
 

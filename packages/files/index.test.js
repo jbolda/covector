@@ -6,14 +6,20 @@ const f = fixtures(__dirname);
 describe("file test", () => {
   it("parses toml", async () => {
     const cargoFolder = f.copy("pkg.rust-single");
-    const cargoVfile = await readPkgFile(cargoFolder + "/Cargo.toml");
+    const cargoVfile = await readPkgFile({
+      file: cargoFolder + "/Cargo.toml",
+      nickname: "rust-single-fixture",
+    });
     expect(cargoVfile.name).toBe("rust-single-fixture");
     expect(cargoVfile.version).toBe("0.5.0");
   });
 
   it("parses json", async () => {
     const jsonFolder = f.copy("pkg.js-single-json");
-    const jsonVfile = await readPkgFile(jsonFolder + "/package.json");
+    const jsonVfile = await readPkgFile({
+      file: jsonFolder + "/package.json",
+      nickname: "js-single-json-fixture",
+    });
     expect(jsonVfile.name).toBe("js-single-json-fixture");
     expect(jsonVfile.version).toBe("0.5.9");
   });

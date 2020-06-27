@@ -135,16 +135,17 @@ module.exports.mergeIntoConfig = ({
       command !== "publish"
         ? {}
         : {
-            pkgFile: await readPkgFile(
-              path.join(
+            pkgFile: await readPkgFile({
+              file: path.join(
                 cwd,
                 config.packages[pkg].path,
                 !!config.packages[pkg].manager &&
                   config.packages[pkg].manager === "rust"
                   ? "Cargo.toml"
                   : "package.json"
-              )
-            ),
+              ),
+              nickname: pkg,
+            }),
             ...(!pkgCommands[pkg].getPublishedVersion
               ? {}
               : {
