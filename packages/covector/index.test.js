@@ -99,5 +99,5 @@ describe("integration test", () => {
       // covectorReturn: covectored, // skip this as npm publish has fs dep output which creates false positives
     }).toMatchSnapshot();
     restoreConsole();
-  }, 20000); // increase timeout to 20s, windows seems to take forever on a fail
+  }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 });
