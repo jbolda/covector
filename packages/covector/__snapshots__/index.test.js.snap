@@ -319,7 +319,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
       },
     },
     Object {
-      "name": "tauri",
+      "name": "tauri.js",
       "pkg": Object {
         "bin": Object {
           "tauri": "./bin/tauri.js",

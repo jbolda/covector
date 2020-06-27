@@ -1,5 +1,7 @@
 const { covector } = require("./index");
 const { main } = require("effection");
+const toVFile = require("to-vfile");
+const path = require("path");
 const mockConsole = require("jest-mock-console");
 const fixtures = require("fixturez");
 const f = fixtures(__dirname);
@@ -42,6 +44,25 @@ describe("integration test", () => {
         return pkg;
       }),
     }).toMatchSnapshot();
+
+    const changelogTauriCore = await toVFile.read(
+      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    expect(changelogTauriCore.contents).toBe(
+      "# Changelog\n\n" +
+        "## [0.6.0]\n\n" +
+        "-   Summary about the changes in tauri\n"
+    );
+
+    const changelogTaurijs = await toVFile.read(
+      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    expect(changelogTaurijs.contents).toBe(
+      "# Changelog\n\n" + "## [0.7.0]\n\n" + "Bumped due to dependency.\n"
+    );
+
     restoreConsole();
   });
 
@@ -78,5 +99,5 @@ describe("integration test", () => {
       // covectorReturn: covectored, // skip this as npm publish has fs dep output which creates false positives
     }).toMatchSnapshot();
     restoreConsole();
-  }, 20000); // increase timeout to 20s, windows seems to take forever on a fail
+  }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 });

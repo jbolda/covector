@@ -9,14 +9,12 @@ const parsePkg = (file) => {
     case ".toml":
       const parsedTOML = TOML.parse(file.contents);
       return {
-        name: parsedTOML.package.name,
         version: parsedTOML.package.version,
         pkg: parsedTOML,
       };
     case ".json":
       const parsedJSON = JSON.parse(file.contents);
       return {
-        name: parsedJSON.name,
         version: parsedJSON.version,
         pkg: parsedJSON,
       };
@@ -33,12 +31,13 @@ const stringifyPkg = ({ newContents, extname }) => {
   throw new Error("Unknown package file type.");
 };
 
-module.exports.readPkgFile = async (file) => {
+module.exports.readPkgFile = async ({ file, nickname }) => {
   const inputVfile = await vfile.read(file, "utf8");
   const parsed = parsePkg(inputVfile);
   return {
     vfile: inputVfile,
     ...parsed,
+    name: nickname,
   };
 };
 

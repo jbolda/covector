@@ -16172,7 +16172,38 @@ var e=__webpack_require__(700),r=__webpack_require__(370),o=__webpack_require__(
 
 /***/ }),
 /* 55 */,
-/* 56 */,
+/* 56 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+// JS-YAML's default schema for `load` function.
+// It is not described in the YAML specification.
+//
+// This schema is based on JS-YAML's default safe schema and includes
+// JavaScript-specific types: !!js/undefined, !!js/regexp and !!js/function.
+//
+// Also this schema is used as default base schema at `Schema.create` function.
+
+
+
+
+
+var Schema = __webpack_require__(717);
+
+
+module.exports = Schema.DEFAULT = new Schema({
+  include: [
+    __webpack_require__(959)
+  ],
+  explicit: [
+    __webpack_require__(457),
+    __webpack_require__(657),
+    __webpack_require__(170)
+  ]
+});
+
+
+/***/ }),
 /* 57 */,
 /* 58 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -16523,25 +16554,18 @@ exports.request = request;
 
 /***/ }),
 /* 60 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-
-const pathKey = (options = {}) => {
-	const environment = options.env || process.env;
-	const platform = options.platform || process.platform;
-
-	if (platform !== 'win32') {
-		return 'PATH';
-	}
-
-	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
-};
-
-module.exports = pathKey;
-// TODO: Remove this for the next major release
-module.exports.default = pathKey;
+const Range = __webpack_require__(378)
+const satisfies = (version, range, options) => {
+  try {
+    range = new Range(range, options)
+  } catch (er) {
+    return false
+  }
+  return range.test(version)
+}
+module.exports = satisfies
 
 
 /***/ }),
@@ -18484,52 +18508,7 @@ return{name,number,description,supported,action,forced,standard};
 //# sourceMappingURL=signals.js.map
 
 /***/ }),
-/* 112 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const path = __webpack_require__(622);
-const pathKey = __webpack_require__(697);
-
-module.exports = opts => {
-	opts = Object.assign({
-		cwd: process.cwd(),
-		path: process.env[pathKey()]
-	}, opts);
-
-	let prev;
-	let pth = path.resolve(opts.cwd);
-	const ret = [];
-
-	while (prev !== pth) {
-		ret.push(path.join(pth, 'node_modules/.bin'));
-		prev = pth;
-		pth = path.resolve(pth, '..');
-	}
-
-	// ensure the running `node` binary is used
-	ret.push(path.dirname(process.execPath));
-
-	return ret.concat(opts.path).join(path.delimiter);
-};
-
-module.exports.env = opts => {
-	opts = Object.assign({
-		env: process.env
-	}, opts);
-
-	const env = Object.assign({}, opts.env);
-	const path = pathKey({env});
-
-	opts.path = env[path];
-	env[path] = module.exports(opts);
-
-	return env;
-};
-
-
-/***/ }),
+/* 112 */,
 /* 113 */,
 /* 114 */,
 /* 115 */
@@ -18767,33 +18746,25 @@ module.exports = function isExtglob(str) {
 "use strict";
 
 
-const isStream = stream =>
-	stream !== null &&
-	typeof stream === 'object' &&
-	typeof stream.pipe === 'function';
+var isStream = module.exports = function (stream) {
+	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
+};
 
-isStream.writable = stream =>
-	isStream(stream) &&
-	stream.writable !== false &&
-	typeof stream._write === 'function' &&
-	typeof stream._writableState === 'object';
+isStream.writable = function (stream) {
+	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
+};
 
-isStream.readable = stream =>
-	isStream(stream) &&
-	stream.readable !== false &&
-	typeof stream._read === 'function' &&
-	typeof stream._readableState === 'object';
+isStream.readable = function (stream) {
+	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
+};
 
-isStream.duplex = stream =>
-	isStream.writable(stream) &&
-	isStream.readable(stream);
+isStream.duplex = function (stream) {
+	return isStream.writable(stream) && isStream.readable(stream);
+};
 
-isStream.transform = stream =>
-	isStream.duplex(stream) &&
-	typeof stream._transform === 'function' &&
-	typeof stream._transformState === 'object';
-
-module.exports = isStream;
+isStream.transform = function (stream) {
+	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
+};
 
 
 /***/ }),
@@ -18816,7 +18787,60 @@ module.exports = reInterpolate;
 
 
 /***/ }),
-/* 126 */,
+/* 126 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const path = __webpack_require__(622);
+const pathKey = __webpack_require__(853);
+
+const npmRunPath = options => {
+	options = {
+		cwd: process.cwd(),
+		path: process.env[pathKey()],
+		execPath: process.execPath,
+		...options
+	};
+
+	let previous;
+	let cwdPath = path.resolve(options.cwd);
+	const result = [];
+
+	while (previous !== cwdPath) {
+		result.push(path.join(cwdPath, 'node_modules/.bin'));
+		previous = cwdPath;
+		cwdPath = path.resolve(cwdPath, '..');
+	}
+
+	// Ensure the running `node` binary is used
+	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
+	result.push(execPathDir);
+
+	return result.concat(options.path).join(path.delimiter);
+};
+
+module.exports = npmRunPath;
+// TODO: Remove this for the next major release
+module.exports.default = npmRunPath;
+
+module.exports.env = options => {
+	options = {
+		env: process.env,
+		...options
+	};
+
+	const env = {...options.env};
+	const path = pathKey({env});
+
+	options.path = env[path];
+	env[path] = module.exports(options);
+
+	return env;
+};
+
+
+/***/ }),
 /* 127 */,
 /* 128 */,
 /* 129 */
@@ -20129,7 +20153,7 @@ proto.visitors = {
   imageReference: __webpack_require__(99),
   definition: __webpack_require__(135),
   image: __webpack_require__(980),
-  table: __webpack_require__(501),
+  table: __webpack_require__(803),
   tableCell: __webpack_require__(220)
 }
 
@@ -22800,25 +22824,21 @@ class MaxBufferError extends Error {
 	}
 }
 
-async function getStream(inputStream, options) {
+function getStream(inputStream, options) {
 	if (!inputStream) {
 		return Promise.reject(new Error('Expected a stream'));
 	}
 
-	options = {
-		maxBuffer: Infinity,
-		...options
-	};
+	options = Object.assign({maxBuffer: Infinity}, options);
 
 	const {maxBuffer} = options;
 
 	let stream;
-	await new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		const rejectPromise = error => {
 			if (error) { // A null check
 				error.bufferedData = stream.getBufferedValue();
 			}
-
 			reject(error);
 		};
 
@@ -22836,16 +22856,12 @@ async function getStream(inputStream, options) {
 				rejectPromise(new MaxBufferError());
 			}
 		});
-	});
-
-	return stream.getBufferedValue();
+	}).then(() => stream.getBufferedValue());
 }
 
 module.exports = getStream;
-// TODO: Remove this for the next major release
-module.exports.default = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
-module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
+module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
 module.exports.MaxBufferError = MaxBufferError;
 
 
@@ -26933,7 +26949,7 @@ function construct() {
 
 const Range = __webpack_require__(378)
 const { ANY } = __webpack_require__(9)
-const satisfies = __webpack_require__(845)
+const satisfies = __webpack_require__(60)
 const compare = __webpack_require__(217)
 
 // Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
@@ -28833,63 +28849,7 @@ module.exports = {
 
 
 /***/ }),
-/* 314 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const pump = __webpack_require__(957);
-const bufferStream = __webpack_require__(565);
-
-class MaxBufferError extends Error {
-	constructor() {
-		super('maxBuffer exceeded');
-		this.name = 'MaxBufferError';
-	}
-}
-
-function getStream(inputStream, options) {
-	if (!inputStream) {
-		return Promise.reject(new Error('Expected a stream'));
-	}
-
-	options = Object.assign({maxBuffer: Infinity}, options);
-
-	const {maxBuffer} = options;
-
-	let stream;
-	return new Promise((resolve, reject) => {
-		const rejectPromise = error => {
-			if (error) { // A null check
-				error.bufferedData = stream.getBufferedValue();
-			}
-			reject(error);
-		};
-
-		stream = pump(inputStream, bufferStream(options), error => {
-			if (error) {
-				rejectPromise(error);
-				return;
-			}
-
-			resolve();
-		});
-
-		stream.on('data', () => {
-			if (stream.getBufferedLength() > maxBuffer) {
-				rejectPromise(new MaxBufferError());
-			}
-		});
-	}).then(() => stream.getBufferedValue());
-}
-
-module.exports = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
-module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
-module.exports.MaxBufferError = MaxBufferError;
-
-
-/***/ }),
+/* 314 */,
 /* 315 */,
 /* 316 */,
 /* 317 */,
@@ -29192,48 +29152,40 @@ module.exports._enoent = enoent;
 "use strict";
 
 const path = __webpack_require__(622);
-const pathKey = __webpack_require__(60);
+const pathKey = __webpack_require__(697);
 
-const npmRunPath = options => {
-	options = {
+module.exports = opts => {
+	opts = Object.assign({
 		cwd: process.cwd(),
-		path: process.env[pathKey()],
-		execPath: process.execPath,
-		...options
-	};
+		path: process.env[pathKey()]
+	}, opts);
 
-	let previous;
-	let cwdPath = path.resolve(options.cwd);
-	const result = [];
+	let prev;
+	let pth = path.resolve(opts.cwd);
+	const ret = [];
 
-	while (previous !== cwdPath) {
-		result.push(path.join(cwdPath, 'node_modules/.bin'));
-		previous = cwdPath;
-		cwdPath = path.resolve(cwdPath, '..');
+	while (prev !== pth) {
+		ret.push(path.join(pth, 'node_modules/.bin'));
+		prev = pth;
+		pth = path.resolve(pth, '..');
 	}
 
-	// Ensure the running `node` binary is used
-	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
-	result.push(execPathDir);
+	// ensure the running `node` binary is used
+	ret.push(path.dirname(process.execPath));
 
-	return result.concat(options.path).join(path.delimiter);
+	return ret.concat(opts.path).join(path.delimiter);
 };
 
-module.exports = npmRunPath;
-// TODO: Remove this for the next major release
-module.exports.default = npmRunPath;
+module.exports.env = opts => {
+	opts = Object.assign({
+		env: process.env
+	}, opts);
 
-module.exports.env = options => {
-	options = {
-		env: process.env,
-		...options
-	};
-
-	const env = {...options.env};
+	const env = Object.assign({}, opts.env);
 	const path = pathKey({env});
 
-	options.path = env[path];
-	env[path] = module.exports(options);
+	opts.path = env[path];
+	env[path] = module.exports(opts);
 
 	return env;
 };
@@ -29296,16 +29248,17 @@ const readAll = async ({ changes, config, cwd = process.cwd() }) => {
   const pkgs = Object.keys(files);
   const pkgFiles = await Promise.all(
     Object.keys(files).map((pkg) =>
-      readPkgFile(
-        path.join(
+      readPkgFile({
+        file: path.join(
           cwd,
           config.packages[pkg].path,
           !!config.packages[pkg].manager &&
             config.packages[pkg].manager === "rust"
             ? "Cargo.toml"
             : "package.json"
-        )
-      )
+        ),
+        nickname: pkg,
+      })
     )
   );
 
@@ -30830,54 +30783,53 @@ module.exports = parse;
 
 "use strict";
 
-const {PassThrough: PassThroughStream} = __webpack_require__(413);
+const {PassThrough} = __webpack_require__(413);
 
 module.exports = options => {
-	options = {...options};
+	options = Object.assign({}, options);
 
 	const {array} = options;
 	let {encoding} = options;
-	const isBuffer = encoding === 'buffer';
+	const buffer = encoding === 'buffer';
 	let objectMode = false;
 
 	if (array) {
-		objectMode = !(encoding || isBuffer);
+		objectMode = !(encoding || buffer);
 	} else {
 		encoding = encoding || 'utf8';
 	}
 
-	if (isBuffer) {
+	if (buffer) {
 		encoding = null;
 	}
 
-	const stream = new PassThroughStream({objectMode});
+	let len = 0;
+	const ret = [];
+	const stream = new PassThrough({objectMode});
 
 	if (encoding) {
 		stream.setEncoding(encoding);
 	}
 
-	let length = 0;
-	const chunks = [];
-
 	stream.on('data', chunk => {
-		chunks.push(chunk);
+		ret.push(chunk);
 
 		if (objectMode) {
-			length = chunks.length;
+			len = ret.length;
 		} else {
-			length += chunk.length;
+			len += chunk.length;
 		}
 	});
 
 	stream.getBufferedValue = () => {
 		if (array) {
-			return chunks;
+			return ret;
 		}
 
-		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+		return buffer ? Buffer.concat(ret, len) : ret.join('');
 	};
 
-	stream.getBufferedLength = () => length;
+	stream.getBufferedLength = () => len;
 
 	return stream;
 };
@@ -39309,127 +39261,101 @@ exports.default = AsyncReader;
 
 /***/ }),
 /* 501 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
 
-var markdownTable = __webpack_require__(445)
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
 
-module.exports = table
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
 
-// Stringify table.
-//
-// Creates a fenced table.
-// The table has aligned delimiters by default, but not in
-// `tablePipeAlign: false`:
-//
-// ```markdown
-// | Header 1 | Header 2 |
-// | :-: | - |
-// | Alpha | Bravo |
-// ```
-//
-// The table is spaced by default, but not in `tableCellPadding: false`:
-//
-// ```markdown
-// |Foo|Bar|
-// |:-:|---|
-// |Baz|Qux|
-// ```
-function table(node) {
-  var self = this
-  var options = self.options
-  var padding = options.tableCellPadding
-  var alignDelimiters = options.tablePipeAlign
-  var stringLength = options.stringLength
-  var rows = node.children
-  var index = rows.length
-  var exit = self.enterTable()
-  var result = []
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
 
-  while (index--) {
-    result[index] = self.all(rows[index])
-  }
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
 
-  exit()
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function' &&
+	typeof stream._transformState === 'object';
 
-  return markdownTable(result, {
-    align: node.align,
-    alignDelimiters: alignDelimiters,
-    padding: padding,
-    stringLength: stringLength
-  })
-}
+module.exports = isStream;
 
 
 /***/ }),
 /* 502 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const SemVer = __webpack_require__(840)
+const Range = __webpack_require__(378)
+const gt = __webpack_require__(855)
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(17);
-const partial_1 = __webpack_require__(858);
-class DeepFilter {
-    constructor(_settings, _micromatchOptions) {
-        this._settings = _settings;
-        this._micromatchOptions = _micromatchOptions;
-    }
-    getFilter(basePath, positive, negative) {
-        const matcher = this._getMatcher(positive);
-        const negativeRe = this._getNegativePatternsRe(negative);
-        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
-    }
-    _getMatcher(patterns) {
-        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
-    }
-    _getNegativePatternsRe(patterns) {
-        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
-        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
-    }
-    _filter(basePath, entry, matcher, negativeRe) {
-        if (this._isSkippedByDeep(basePath, entry.path)) {
-            return false;
-        }
-        if (this._isSkippedSymbolicLink(entry)) {
-            return false;
-        }
-        const filepath = utils.path.removeLeadingDotSegment(entry.path);
-        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
-            return false;
-        }
-        return this._isSkippedByNegativePatterns(filepath, negativeRe);
-    }
-    _isSkippedByDeep(basePath, entryPath) {
-        /**
-         * Avoid unnecessary depth calculations when it doesn't matter.
-         */
-        if (this._settings.deep === Infinity) {
-            return false;
-        }
-        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
-    }
-    _getEntryLevel(basePath, entryPath) {
-        const entryPathDepth = entryPath.split('/').length;
-        if (basePath === '') {
-            return entryPathDepth;
-        }
-        const basePathDepth = basePath.split('/').length;
-        return entryPathDepth - basePathDepth;
-    }
-    _isSkippedSymbolicLink(entry) {
-        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
-    }
-    _isSkippedByPositivePatterns(entryPath, matcher) {
-        return !this._settings.baseNameMatch && !matcher.match(entryPath);
-    }
-    _isSkippedByNegativePatterns(entryPath, patternsRe) {
-        return !utils.pattern.matchAny(entryPath, patternsRe);
-    }
+const minVersion = (range, loose) => {
+  range = new Range(range, loose)
+
+  let minver = new SemVer('0.0.0')
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = new SemVer('0.0.0-0')
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = null
+  for (let i = 0; i < range.set.length; ++i) {
+    const comparators = range.set[i]
+
+    comparators.forEach((comparator) => {
+      // Clone to avoid manipulating the comparator's semver object.
+      const compver = new SemVer(comparator.semver.version)
+      switch (comparator.operator) {
+        case '>':
+          if (compver.prerelease.length === 0) {
+            compver.patch++
+          } else {
+            compver.prerelease.push(0)
+          }
+          compver.raw = compver.format()
+          /* fallthrough */
+        case '':
+        case '>=':
+          if (!minver || gt(minver, compver)) {
+            minver = compver
+          }
+          break
+        case '<':
+        case '<=':
+          /* Ignore maximum versions */
+          break
+        /* istanbul ignore next */
+        default:
+          throw new Error(`Unexpected operation: ${comparator.operator}`)
+      }
+    })
+  }
+
+  if (minver && range.test(minver)) {
+    return minver
+  }
+
+  return null
 }
-exports.default = DeepFilter;
+module.exports = minVersion
 
 
 /***/ }),
@@ -40020,7 +39946,7 @@ module.exports = templateSettings;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(622);
-const deep_1 = __webpack_require__(502);
+const deep_1 = __webpack_require__(565);
 const entry_1 = __webpack_require__(148);
 const error_1 = __webpack_require__(952);
 const entry_2 = __webpack_require__(653);
@@ -40196,69 +40122,7 @@ function withAuthorizationPrefix(authorization) {
 /* 517 */,
 /* 518 */,
 /* 519 */,
-/* 520 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const SemVer = __webpack_require__(840)
-const Range = __webpack_require__(378)
-const gt = __webpack_require__(855)
-
-const minVersion = (range, loose) => {
-  range = new Range(range, loose)
-
-  let minver = new SemVer('0.0.0')
-  if (range.test(minver)) {
-    return minver
-  }
-
-  minver = new SemVer('0.0.0-0')
-  if (range.test(minver)) {
-    return minver
-  }
-
-  minver = null
-  for (let i = 0; i < range.set.length; ++i) {
-    const comparators = range.set[i]
-
-    comparators.forEach((comparator) => {
-      // Clone to avoid manipulating the comparator's semver object.
-      const compver = new SemVer(comparator.semver.version)
-      switch (comparator.operator) {
-        case '>':
-          if (compver.prerelease.length === 0) {
-            compver.patch++
-          } else {
-            compver.prerelease.push(0)
-          }
-          compver.raw = compver.format()
-          /* fallthrough */
-        case '':
-        case '>=':
-          if (!minver || gt(minver, compver)) {
-            minver = compver
-          }
-          break
-        case '<':
-        case '<=':
-          /* Ignore maximum versions */
-          break
-        /* istanbul ignore next */
-        default:
-          throw new Error(`Unexpected operation: ${comparator.operator}`)
-      }
-    })
-  }
-
-  if (minver && range.test(minver)) {
-    return minver
-  }
-
-  return null
-}
-module.exports = minVersion
-
-
-/***/ }),
+/* 520 */,
 /* 521 */,
 /* 522 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -40661,7 +40525,7 @@ const path = __webpack_require__(622);
 const childProcess = __webpack_require__(129);
 const crossSpawn = __webpack_require__(224);
 const stripFinalNewline = __webpack_require__(839);
-const npmRunPath = __webpack_require__(329);
+const npmRunPath = __webpack_require__(126);
 const onetime = __webpack_require__(530);
 const makeError = __webpack_require__(978);
 const normalizeStdio = __webpack_require__(784);
@@ -41488,7 +41352,7 @@ main(function* run() {
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
-const satisfies = __webpack_require__(845)
+const satisfies = __webpack_require__(60)
 const compare = __webpack_require__(217)
 module.exports = (versions, range, options) => {
   const set = []
@@ -42359,60 +42223,71 @@ exports.default = Settings;
 /* 563 */,
 /* 564 */,
 /* 565 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-const {PassThrough} = __webpack_require__(413);
-
-module.exports = options => {
-	options = Object.assign({}, options);
-
-	const {array} = options;
-	let {encoding} = options;
-	const buffer = encoding === 'buffer';
-	let objectMode = false;
-
-	if (array) {
-		objectMode = !(encoding || buffer);
-	} else {
-		encoding = encoding || 'utf8';
-	}
-
-	if (buffer) {
-		encoding = null;
-	}
-
-	let len = 0;
-	const ret = [];
-	const stream = new PassThrough({objectMode});
-
-	if (encoding) {
-		stream.setEncoding(encoding);
-	}
-
-	stream.on('data', chunk => {
-		ret.push(chunk);
-
-		if (objectMode) {
-			len = ret.length;
-		} else {
-			len += chunk.length;
-		}
-	});
-
-	stream.getBufferedValue = () => {
-		if (array) {
-			return ret;
-		}
-
-		return buffer ? Buffer.concat(ret, len) : ret.join('');
-	};
-
-	stream.getBufferedLength = () => len;
-
-	return stream;
-};
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(17);
+const partial_1 = __webpack_require__(858);
+class DeepFilter {
+    constructor(_settings, _micromatchOptions) {
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+    }
+    getFilter(basePath, positive, negative) {
+        const matcher = this._getMatcher(positive);
+        const negativeRe = this._getNegativePatternsRe(negative);
+        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
+    }
+    _getMatcher(patterns) {
+        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
+    }
+    _getNegativePatternsRe(patterns) {
+        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
+        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
+    }
+    _filter(basePath, entry, matcher, negativeRe) {
+        if (this._isSkippedByDeep(basePath, entry.path)) {
+            return false;
+        }
+        if (this._isSkippedSymbolicLink(entry)) {
+            return false;
+        }
+        const filepath = utils.path.removeLeadingDotSegment(entry.path);
+        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
+            return false;
+        }
+        return this._isSkippedByNegativePatterns(filepath, negativeRe);
+    }
+    _isSkippedByDeep(basePath, entryPath) {
+        /**
+         * Avoid unnecessary depth calculations when it doesn't matter.
+         */
+        if (this._settings.deep === Infinity) {
+            return false;
+        }
+        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
+    }
+    _getEntryLevel(basePath, entryPath) {
+        const entryPathDepth = entryPath.split('/').length;
+        if (basePath === '') {
+            return entryPathDepth;
+        }
+        const basePathDepth = basePath.split('/').length;
+        return entryPathDepth - basePathDepth;
+    }
+    _isSkippedSymbolicLink(entry) {
+        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
+    }
+    _isSkippedByPositivePatterns(entryPath, matcher) {
+        return !this._settings.baseNameMatch && !matcher.match(entryPath);
+    }
+    _isSkippedByNegativePatterns(entryPath, patternsRe) {
+        return !utils.pattern.matchAny(entryPath, patternsRe);
+    }
+}
+exports.default = DeepFilter;
 
 
 /***/ }),
@@ -43361,11 +43236,11 @@ module.exports = {
   coerce: __webpack_require__(408),
   Comparator: __webpack_require__(9),
   Range: __webpack_require__(378),
-  satisfies: __webpack_require__(845),
+  satisfies: __webpack_require__(60),
   toComparators: __webpack_require__(510),
   maxSatisfying: __webpack_require__(266),
   minSatisfying: __webpack_require__(38),
-  minVersion: __webpack_require__(520),
+  minVersion: __webpack_require__(502),
   validRange: __webpack_require__(319),
   outside: __webpack_require__(783),
   gtr: __webpack_require__(557),
@@ -43636,34 +43511,7 @@ function matter(option) {
 
 
 /***/ }),
-/* 580 */
-/***/ (function(module) {
-
-"use strict";
-
-
-var isStream = module.exports = function (stream) {
-	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
-};
-
-isStream.writable = function (stream) {
-	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
-};
-
-isStream.readable = function (stream) {
-	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
-};
-
-isStream.duplex = function (stream) {
-	return isStream.writable(stream) && isStream.readable(stream);
-};
-
-isStream.transform = function (stream) {
-	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
-};
-
-
-/***/ }),
+/* 580 */,
 /* 581 */,
 /* 582 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -45240,7 +45088,71 @@ function isGfmAtext(code) {
 
 
 /***/ }),
-/* 652 */,
+/* 652 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const pump = __webpack_require__(957);
+const bufferStream = __webpack_require__(972);
+
+class MaxBufferError extends Error {
+	constructor() {
+		super('maxBuffer exceeded');
+		this.name = 'MaxBufferError';
+	}
+}
+
+async function getStream(inputStream, options) {
+	if (!inputStream) {
+		return Promise.reject(new Error('Expected a stream'));
+	}
+
+	options = {
+		maxBuffer: Infinity,
+		...options
+	};
+
+	const {maxBuffer} = options;
+
+	let stream;
+	await new Promise((resolve, reject) => {
+		const rejectPromise = error => {
+			if (error) { // A null check
+				error.bufferedData = stream.getBufferedValue();
+			}
+
+			reject(error);
+		};
+
+		stream = pump(inputStream, bufferStream(options), error => {
+			if (error) {
+				rejectPromise(error);
+				return;
+			}
+
+			resolve();
+		});
+
+		stream.on('data', () => {
+			if (stream.getBufferedLength() > maxBuffer) {
+				rejectPromise(new MaxBufferError());
+			}
+		});
+	});
+
+	return stream.getBufferedValue();
+}
+
+module.exports = getStream;
+// TODO: Remove this for the next major release
+module.exports.default = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
+module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.MaxBufferError = MaxBufferError;
+
+
+/***/ }),
 /* 653 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -46897,7 +46809,7 @@ var common              = __webpack_require__(422);
 var YAMLException       = __webpack_require__(848);
 var Mark                = __webpack_require__(767);
 var DEFAULT_SAFE_SCHEMA = __webpack_require__(959);
-var DEFAULT_FULL_SCHEMA = __webpack_require__(803);
+var DEFAULT_FULL_SCHEMA = __webpack_require__(56);
 
 
 var _hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -52506,16 +52418,17 @@ module.exports.mergeIntoConfig = ({
       command !== "publish"
         ? {}
         : {
-            pkgFile: await readPkgFile(
-              path.join(
+            pkgFile: await readPkgFile({
+              file: path.join(
                 cwd,
                 config.packages[pkg].path,
                 !!config.packages[pkg].manager &&
                   config.packages[pkg].manager === "rust"
                   ? "Cargo.toml"
                   : "package.json"
-              )
-            ),
+              ),
+              nickname: pkg,
+            }),
             ...(!pkgCommands[pkg].getPublishedVersion
               ? {}
               : {
@@ -53866,7 +53779,7 @@ const SemVer = __webpack_require__(840)
 const Comparator = __webpack_require__(9)
 const {ANY} = Comparator
 const Range = __webpack_require__(378)
-const satisfies = __webpack_require__(845)
+const satisfies = __webpack_require__(60)
 const gt = __webpack_require__(855)
 const lt = __webpack_require__(618)
 const lte = __webpack_require__(508)
@@ -54396,31 +54309,55 @@ exports.Deprecation = Deprecation;
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
-// JS-YAML's default schema for `load` function.
-// It is not described in the YAML specification.
+
+
+var markdownTable = __webpack_require__(445)
+
+module.exports = table
+
+// Stringify table.
 //
-// This schema is based on JS-YAML's default safe schema and includes
-// JavaScript-specific types: !!js/undefined, !!js/regexp and !!js/function.
+// Creates a fenced table.
+// The table has aligned delimiters by default, but not in
+// `tablePipeAlign: false`:
 //
-// Also this schema is used as default base schema at `Schema.create` function.
+// ```markdown
+// | Header 1 | Header 2 |
+// | :-: | - |
+// | Alpha | Bravo |
+// ```
+//
+// The table is spaced by default, but not in `tableCellPadding: false`:
+//
+// ```markdown
+// |Foo|Bar|
+// |:-:|---|
+// |Baz|Qux|
+// ```
+function table(node) {
+  var self = this
+  var options = self.options
+  var padding = options.tableCellPadding
+  var alignDelimiters = options.tablePipeAlign
+  var stringLength = options.stringLength
+  var rows = node.children
+  var index = rows.length
+  var exit = self.enterTable()
+  var result = []
 
+  while (index--) {
+    result[index] = self.all(rows[index])
+  }
 
+  exit()
 
-
-
-var Schema = __webpack_require__(717);
-
-
-module.exports = Schema.DEFAULT = new Schema({
-  include: [
-    __webpack_require__(959)
-  ],
-  explicit: [
-    __webpack_require__(457),
-    __webpack_require__(657),
-    __webpack_require__(170)
-  ]
-});
+  return markdownTable(result, {
+    align: node.align,
+    alignDelimiters: alignDelimiters,
+    padding: padding,
+    stringLength: stringLength
+  })
+}
 
 
 /***/ }),
@@ -54554,8 +54491,8 @@ function ccount(value, character) {
 
 "use strict";
 
-const isStream = __webpack_require__(124);
-const getStream = __webpack_require__(209);
+const isStream = __webpack_require__(501);
+const getStream = __webpack_require__(652);
 const mergeStream = __webpack_require__(74);
 
 // `input` option
@@ -55535,22 +55472,7 @@ function authenticationPlugin(octokit, options) {
 
 /***/ }),
 /* 844 */,
-/* 845 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const Range = __webpack_require__(378)
-const satisfies = (version, range, options) => {
-  try {
-    range = new Range(range, options)
-  } catch (er) {
-    return false
-  }
-  return range.test(version)
-}
-module.exports = satisfies
-
-
-/***/ }),
+/* 845 */,
 /* 846 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -61284,14 +61206,12 @@ const parsePkg = (file) => {
     case ".toml":
       const parsedTOML = TOML.parse(file.contents);
       return {
-        name: parsedTOML.package.name,
         version: parsedTOML.package.version,
         pkg: parsedTOML,
       };
     case ".json":
       const parsedJSON = JSON.parse(file.contents);
       return {
-        name: parsedJSON.name,
         version: parsedJSON.version,
         pkg: parsedJSON,
       };
@@ -61308,12 +61228,13 @@ const stringifyPkg = ({ newContents, extname }) => {
   throw new Error("Unknown package file type.");
 };
 
-module.exports.readPkgFile = async (file) => {
+module.exports.readPkgFile = async ({ file, nickname }) => {
   const inputVfile = await vfile.read(file, "utf8");
   const parsed = parsePkg(inputVfile);
   return {
     vfile: inputVfile,
     ...parsed,
+    name: nickname,
   };
 };
 
@@ -62981,9 +62902,9 @@ const path = __webpack_require__(622);
 const childProcess = __webpack_require__(129);
 const crossSpawn = __webpack_require__(328);
 const stripEof = __webpack_require__(922);
-const npmRunPath = __webpack_require__(112);
-const isStream = __webpack_require__(580);
-const _getStream = __webpack_require__(314);
+const npmRunPath = __webpack_require__(329);
+const isStream = __webpack_require__(124);
+const _getStream = __webpack_require__(209);
 const pFinally = __webpack_require__(990);
 const onExit = __webpack_require__(145);
 const errname = __webpack_require__(758);
@@ -63629,7 +63550,65 @@ function hexadecimal(character) {
 
 /***/ }),
 /* 971 */,
-/* 972 */,
+/* 972 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {PassThrough: PassThroughStream} = __webpack_require__(413);
+
+module.exports = options => {
+	options = {...options};
+
+	const {array} = options;
+	let {encoding} = options;
+	const isBuffer = encoding === 'buffer';
+	let objectMode = false;
+
+	if (array) {
+		objectMode = !(encoding || isBuffer);
+	} else {
+		encoding = encoding || 'utf8';
+	}
+
+	if (isBuffer) {
+		encoding = null;
+	}
+
+	const stream = new PassThroughStream({objectMode});
+
+	if (encoding) {
+		stream.setEncoding(encoding);
+	}
+
+	let length = 0;
+	const chunks = [];
+
+	stream.on('data', chunk => {
+		chunks.push(chunk);
+
+		if (objectMode) {
+			length = chunks.length;
+		} else {
+			length += chunk.length;
+		}
+	});
+
+	stream.getBufferedValue = () => {
+		if (array) {
+			return chunks;
+		}
+
+		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+	};
+
+	stream.getBufferedLength = () => length;
+
+	return stream;
+};
+
+
+/***/ }),
 /* 973 */
 /***/ (function(module) {
 
@@ -63661,7 +63640,7 @@ function alphabetical(character) {
 
 var common              = __webpack_require__(422);
 var YAMLException       = __webpack_require__(848);
-var DEFAULT_FULL_SCHEMA = __webpack_require__(803);
+var DEFAULT_FULL_SCHEMA = __webpack_require__(56);
 var DEFAULT_SAFE_SCHEMA = __webpack_require__(959);
 
 var _toString       = Object.prototype.toString;
@@ -65522,7 +65501,7 @@ module.exports.FAILSAFE_SCHEMA     = __webpack_require__(738);
 module.exports.JSON_SCHEMA         = __webpack_require__(754);
 module.exports.CORE_SCHEMA         = __webpack_require__(242);
 module.exports.DEFAULT_SAFE_SCHEMA = __webpack_require__(959);
-module.exports.DEFAULT_FULL_SCHEMA = __webpack_require__(803);
+module.exports.DEFAULT_FULL_SCHEMA = __webpack_require__(56);
 module.exports.load                = loader.load;
 module.exports.loadAll             = loader.loadAll;
 module.exports.safeLoad            = loader.safeLoad;
@@ -65534,7 +65513,7 @@ module.exports.YAMLException       = __webpack_require__(848);
 // Deprecated schema names from JS-YAML 2.0.x
 module.exports.MINIMAL_SCHEMA = __webpack_require__(738);
 module.exports.SAFE_SCHEMA    = __webpack_require__(959);
-module.exports.DEFAULT_SCHEMA = __webpack_require__(803);
+module.exports.DEFAULT_SCHEMA = __webpack_require__(56);
 
 // Deprecated functions from JS-YAML 1.x.x
 module.exports.scan           = deprecated('scan');

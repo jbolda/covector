@@ -80,6 +80,75 @@ describe("changelog", () => {
     );
   });
 
+  it("creates a changelog for nicknamed pkgs", function* () {
+    const projectFolder = f.copy("pkg.js-single-json");
+    // note the name in this package file is js-single-json-fixture
+    // we use a "nickname" in our change files
+
+    const applied = [
+      {
+        name: "pkg-nickname",
+        version: "0.5.6",
+      },
+    ];
+
+    const assembledChanges = {
+      releases: {
+        "pkg-nickname": {
+          changes: [
+            {
+              releases: {
+                "pkg-nickname": "patch",
+              },
+              summary: "This is a test.",
+            },
+            {
+              releases: {
+                "pkg-nickname": "patch",
+              },
+              summary: "This is another test.",
+            },
+            {
+              releases: {
+                "pkg-nickname": "patch",
+              },
+              summary: "This is the last test.",
+            },
+          ],
+          type: "patch",
+        },
+      },
+    };
+
+    const config = {
+      packages: {
+        "pkg-nickname": {
+          path: "./",
+          manager: "javascript",
+        },
+      },
+    };
+
+    yield fillChangelogs({
+      applied,
+      assembledChanges,
+      config,
+      cwd: projectFolder,
+    });
+
+    const changelog = yield toVFile.read(
+      projectFolder + "/CHANGELOG.md",
+      "utf-8"
+    );
+    expect(changelog.contents).toBe(
+      "# Changelog\n\n" +
+        "## [0.5.6]\n\n" +
+        "-   This is a test.\n" +
+        "-   This is another test.\n" +
+        "-   This is the last test.\n"
+    );
+  });
+
   it("inserts into an existing changelog", function* () {
     const projectFolder = f.copy("changelog.js-single-exists");
 
