@@ -75,6 +75,7 @@ module.exports.mergeIntoConfig = ({
   assembledChanges,
   command,
   cwd,
+  dryRun = false,
 }) => {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
@@ -145,6 +146,11 @@ module.exports.mergeIntoConfig = ({
     if (command === "publish" && !!extraPublishParams.pkgFile) {
       pipeToTemplate.pkgFile = extraPublishParams.pkgFile;
     }
+
+    if (dryRun) {
+      console.log(pkg, "pipe", pipeToTemplate);
+    }
+
     const merged = {
       pkg,
       ...extraPublishParams,
