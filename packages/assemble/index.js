@@ -80,35 +80,25 @@ module.exports.mergeIntoConfig = ({
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce((pkged, pkg) => {
     const pkgManager = config.packages[pkg].manager;
-    const managerCommand =
-      !!pkgManager &&
-      !!config.pkgManagers[pkgManager] &&
-      !!config.pkgManagers[pkgManager][command]
-        ? config.pkgManagers[pkgManager][command]
-        : null;
-    const mergedCommand =
-      !config.packages[pkg][command] && config.packages[pkg][command] !== false
-        ? managerCommand
-        : config.packages[pkg][command];
+    const commandItems = { pkg, pkgManager, config };
+    const mergedCommand = mergeCommand({ ...commandItems, command });
     let getPublishedVersion;
     if (command === "publish") {
-      const managerVersionCommand =
-        !!pkgManager &&
-        !!config.pkgManagers[pkgManager] &&
-        !!config.pkgManagers[pkgManager].getPublishedVersion
-          ? config.pkgManagers[pkgManager].getPublishedVersion
-          : null;
-      getPublishedVersion =
-        !config.packages[pkg].getPublishedVersion &&
-        config.packages[pkg].getPublishedVersion !== false
-          ? managerVersionCommand
-          : config.packages[pkg].getPublishedVersion;
+      getPublishedVersion = mergeCommand({
+        ...commandItems,
+        command: "getPublishedVersion",
+      });
     }
     if (!!mergedCommand) {
       pkged[pkg] = {
         pkg: pkg,
         path: config.packages[pkg].path,
-        [command]: mergedCommand,
+        precommand: mergeCommand({ ...commandItems, command: `pre${command}` }),
+        command: mergedCommand,
+        postcommand: mergeCommand({
+          ...commandItems,
+          command: `post${command}`,
+        }),
         ...(!getPublishedVersion ? {} : { getPublishedVersion }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
@@ -127,10 +117,7 @@ module.exports.mergeIntoConfig = ({
       pkg: pkgCommands[pkg],
     };
     if (!pkgCommands[pkg]) return null;
-    const pkgCommand = pkgCommands[pkg][command];
-    const templatedString = !pkgCommand
-      ? null
-      : template(pkgCommand, pipeToTemplate);
+
     const extraPublishParams =
       command !== "publish"
         ? {}
@@ -154,6 +141,7 @@ module.exports.mergeIntoConfig = ({
                   )(pipeToTemplate),
                 }),
           };
+
     const merged = {
       pkg,
       ...extraPublishParams,
@@ -161,7 +149,12 @@ module.exports.mergeIntoConfig = ({
       type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
       dependencies: pkgCommands[pkg].dependencies,
-      [command]: !pkgCommand ? null : templatedString(pipeToTemplate),
+      precommand: templateCommands(pkgCommands[pkg].precommand, pipeToTemplate),
+      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate),
+      postcommand: templateCommands(
+        pkgCommands[pkg].postcommand,
+        pipeToTemplate
+      ),
     };
 
     return merged;
@@ -175,34 +168,24 @@ module.exports.mergeIntoConfig = ({
   );
 };
 
-// TODO: finish it, but do we need this even?
-module.exports.removeSameGraphBumps = ({
-  mergedChanges,
-  assembledChanges,
-  config,
-  command,
-}) => {
-  if (command === "publish") return mergedChanges;
+const mergeCommand = ({ pkg, pkgManager, command, config }) => {
+  const managerCommand =
+    !!pkgManager &&
+    !!config.pkgManagers[pkgManager] &&
+    !!config.pkgManagers[pkgManager][command]
+      ? config.pkgManagers[pkgManager][command]
+      : null;
 
-  const graph = Object.keys(config.packages).reduce((graph, pkg) => {
-    if (!!config.packages[pkg].dependencies) {
-      graph[pkg] = config.packages[pkg].dependencies;
-    }
-    return graph;
-  }, {});
+  const mergedCommand =
+    !config.packages[pkg][command] && config.packages[pkg][command] !== false
+      ? managerCommand
+      : config.packages[pkg][command];
 
-  const releases = mergedChanges.reduce((releases, release) => {
-    releases[release.pkg] = release;
-    return releases;
-  }, {});
+  return mergedCommand;
+};
 
-  return mergedChanges.reduce((finalChanges, currentChange) => {
-    if (!!graph[currentChange.pkg] && !!graph[currentChange.pkg].dependencies) {
-      let graphBumps = graph[currentChange.pkg].dependencies.map(
-        (dep) => releases[dep].type
-      );
-    }
-
-    return [...finalChanges, currentChange];
-  }, []);
+const templateCommands = (command, pipe) => {
+  if (!command) return null;
+  const commands = !Array.isArray(command) ? [command] : command;
+  return commands.map((c) => template(c)(pipe));
 };
