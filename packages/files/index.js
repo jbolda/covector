@@ -86,13 +86,17 @@ module.exports.changeFiles = async ({
 
   if (remove) {
     await Promise.all(
-      paths.map(async (changeFilePath) =>
-        fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
+      paths.map(async (changeFilePath) => {
+        await fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
           if (err) throw err;
-          console.info(`${changeFilePath} was deleted`);
-        })
-      )
-    );
+        });
+        return changeFilePath;
+      })
+    ).then((deletedPaths) => {
+      deletedPaths.forEach((changeFilePath) =>
+        console.info(`${changeFilePath} was deleted`)
+      );
+    });
   }
 
   return vfiles;

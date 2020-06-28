@@ -5,7 +5,7 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "publishing tauri.js with npm publish",
+      "tauri.js [publish]: npm publish",
     ],
   ],
 }
@@ -55,34 +55,130 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "publishing tauri.js with echo publishing tauri.js would happen here",
+      "tauri-bundler [prepublish]: echo premode for tauri-bundler",
+    ],
+    Array [
+      "premode for tauri-bundler",
+    ],
+    Array [
+      "tauri [prepublish]: echo premode for tauri",
+    ],
+    Array [
+      "premode for tauri",
+    ],
+    Array [
+      "tauri-api [prepublish]: echo premode for tauri-api",
+    ],
+    Array [
+      "premode for tauri-api",
+    ],
+    Array [
+      "tauri-utils [prepublish]: echo premode for tauri-utils",
+    ],
+    Array [
+      "premode for tauri-utils",
+    ],
+    Array [
+      "tauri.js [publish]: echo publishing tauri.js would happen here",
     ],
     Array [
       "publishing tauri.js would happen here",
     ],
     Array [
-      "publishing tauri-bundler with echo publishing tauri-bundler would happen here",
+      "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
     ],
     Array [
       "publishing tauri-bundler would happen here",
     ],
     Array [
-      "publishing tauri with echo publishing tauri would happen here",
+      "tauri-bundler [publish]: echo running in ./cli/tauri-bundler",
+    ],
+    Array [
+      "running in ./cli/tauri-bundler",
+    ],
+    Array [
+      "tauri-bundler [publish]: ls",
+    ],
+    Array [
+      "Cargo.toml",
+    ],
+    Array [
+      "tauri [publish]: echo publishing tauri would happen here",
     ],
     Array [
       "publishing tauri would happen here",
     ],
     Array [
-      "publishing tauri-api with echo publishing tauri-api would happen here",
+      "tauri [publish]: echo running in ./tauri",
+    ],
+    Array [
+      "running in ./tauri",
+    ],
+    Array [
+      "tauri [publish]: ls",
+    ],
+    Array [
+      "Cargo.toml",
+    ],
+    Array [
+      "tauri-api [publish]: echo publishing tauri-api would happen here",
     ],
     Array [
       "publishing tauri-api would happen here",
     ],
     Array [
-      "publishing tauri-utils with echo publishing tauri-utils would happen here",
+      "tauri-api [publish]: echo running in ./tauri-api",
+    ],
+    Array [
+      "running in ./tauri-api",
+    ],
+    Array [
+      "tauri-api [publish]: ls",
+    ],
+    Array [
+      "Cargo.toml",
+    ],
+    Array [
+      "tauri-utils [publish]: echo publishing tauri-utils would happen here",
     ],
     Array [
       "publishing tauri-utils would happen here",
+    ],
+    Array [
+      "tauri-utils [publish]: echo running in ./tauri-utils",
+    ],
+    Array [
+      "running in ./tauri-utils",
+    ],
+    Array [
+      "tauri-utils [publish]: ls",
+    ],
+    Array [
+      "Cargo.toml",
+    ],
+    Array [
+      "tauri-bundler [postpublish]: echo postmode for tauri-bundler",
+    ],
+    Array [
+      "postmode for tauri-bundler",
+    ],
+    Array [
+      "tauri [postpublish]: echo postmode for tauri",
+    ],
+    Array [
+      "postmode for tauri",
+    ],
+    Array [
+      "tauri-api [postpublish]: echo postmode for tauri-api",
+    ],
+    Array [
+      "postmode for tauri-api",
+    ],
+    Array [
+      "tauri-utils [postpublish]: echo postmode for tauri-utils",
+    ],
+    Array [
+      "postmode for tauri-utils",
     ],
   ],
   "covectorReturn": Object {
@@ -575,11 +671,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
           "zip": "0.5.3",
         },
         "package": Object {
-          "authors": Array [
-            "Lucas Fernandes Gonçalves Nogueira <lucas@tauri.studio>",
-            "Daniel Thompson-Yvetot <denjell@sfosc.org>",
-            "Tensor Programming <tensordeveloper@gmail.com>",
-          ],
+          "authors": "test",
           "description": "Updater for Tauri",
           "edition": "2018",
           "exclude": Array [
@@ -597,7 +689,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
         "contents": "[package]
 name = \\"tauri-updater\\"
 version = \\"0.4.2\\"
-authors = [\\"Lucas Fernandes Gonçalves Nogueira <lucas@tauri.studio>\\", \\"Daniel Thompson-Yvetot <denjell@sfosc.org>\\", \\"Tensor Programming <tensordeveloper@gmail.com>\\"]
+authors = \\"test\\"
 license = \\"MIT\\"
 homepage = \\"https://tauri.studio\\"
 repository = \\"https://github.com/tauri-apps/tauri\\"

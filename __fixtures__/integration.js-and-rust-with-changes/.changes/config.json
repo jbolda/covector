@@ -2,8 +2,13 @@
   "pkgManagers": {
     "rust": {
       "version": true,
-      "prepublish": "cargo package --no-verify",
-      "publish": "echo publishing ${ pkg.pkg } would happen here"
+      "prepublish": "echo premode for ${ pkg.pkg }",
+      "publish": [
+        "echo publishing ${ pkg.pkg } would happen here",
+        "echo running in ${ pkg.path }",
+        "ls"
+      ],
+      "postpublish": "echo postmode for ${ pkg.pkg }"
     },
     "javascript": {
       "version": true,

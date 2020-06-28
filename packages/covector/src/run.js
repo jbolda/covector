@@ -60,35 +60,25 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       return pkgs;
     }, {});
 
-    for (let pkg of commands) {
-      if (!!pkg.getPublishedVersion) {
-        const version = runCommand({
-          command: pkg.getPublishedVersion,
-          cwd,
-          pkg: pkg.pkg,
-          pkgPath: pkg.path,
-          stdio: "pipe",
-          log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
-        });
+    yield attemptCommands({
+      cwd,
+      commands,
+      commandPrefix: "pre",
+      command: "publish",
+    });
+    published = yield attemptCommands({
+      cwd,
+      commands,
+      command: "publish",
+      published,
+    });
+    yield attemptCommands({
+      cwd,
+      commands,
+      commandPrefix: "post",
+      command: "publish",
+    });
 
-        if (pkg.pkgFile.version === version) {
-          console.log(
-            `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
-          );
-          continue;
-        }
-      }
-
-      const response = yield runCommand({
-        command: pkg.publish,
-        cwd,
-        pkg: pkg.pkg,
-        pkgPath: pkg.path,
-        log: `publishing ${pkg.pkg} with ${pkg.publish}`,
-      });
-
-      published[pkg.pkg] = true;
-    }
     return published;
   }
 };
@@ -102,6 +92,53 @@ function raceTime(
     throw new Error(msg);
   });
 }
+
+const attemptCommands = function* ({
+  cwd,
+  commands,
+  command,
+  commandPrefix = "",
+  published,
+}) {
+  let _published = { ...published };
+  for (let pkg of commands) {
+    if (!!pkg.getPublishedVersion) {
+      const version = runCommand({
+        command: pkg.getPublishedVersion,
+        cwd,
+        pkg: pkg.pkg,
+        pkgPath: pkg.path,
+        stdio: "pipe",
+        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
+      });
+
+      if (pkg.pkgFile.version === version) {
+        console.log(
+          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
+        );
+        continue;
+      }
+    }
+
+    if (!pkg[`${commandPrefix}command`]) continue;
+    const pubCommands =
+      typeof pkg[`${commandPrefix}command`] === "string"
+        ? [pkg[`${commandPrefix}command`]]
+        : pkg[`${commandPrefix}command`];
+    for (let pubCommand of pubCommands) {
+      yield runCommand({
+        command: pubCommand,
+        cwd,
+        pkg: pkg.pkg,
+        pkgPath: pkg.path,
+        log: `${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`,
+      });
+    }
+
+    if (!!published) _published[pkg.pkg] = true;
+  }
+  return _published;
+};
 
 const runCommand = function* ({
   pkg,
