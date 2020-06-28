@@ -3,7 +3,11 @@
     "rust": {
       "version": true,
       "prepublish": "cargo package --no-verify",
-      "publish": "echo publishing ${ pkg.pkg } would happen here"
+      "publish": [
+        "echo publishing ${ pkg.pkg } would happen here",
+        "echo running in ${ pkg.path }",
+        "ls"
+      ]
     },
     "javascript": {
       "version": true,

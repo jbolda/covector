@@ -5,7 +5,7 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "publishing tauri.js with npm publish",
+      "tauri.js [publish]: npm publish",
     ],
   ],
 }
@@ -55,34 +55,82 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "publishing tauri.js with echo publishing tauri.js would happen here",
+      "tauri.js [publish]: echo publishing tauri.js would happen here",
     ],
     Array [
       "publishing tauri.js would happen here",
     ],
     Array [
-      "publishing tauri-bundler with echo publishing tauri-bundler would happen here",
+      "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
     ],
     Array [
       "publishing tauri-bundler would happen here",
     ],
     Array [
-      "publishing tauri with echo publishing tauri would happen here",
+      "tauri-bundler [publish]: echo running in ./cli/tauri-bundler",
+    ],
+    Array [
+      "running in ./cli/tauri-bundler",
+    ],
+    Array [
+      "tauri-bundler [publish]: ls",
+    ],
+    Array [
+      "Cargo.toml",
+    ],
+    Array [
+      "tauri [publish]: echo publishing tauri would happen here",
     ],
     Array [
       "publishing tauri would happen here",
     ],
     Array [
-      "publishing tauri-api with echo publishing tauri-api would happen here",
+      "tauri [publish]: echo running in ./tauri",
+    ],
+    Array [
+      "running in ./tauri",
+    ],
+    Array [
+      "tauri [publish]: ls",
+    ],
+    Array [
+      "Cargo.toml",
+    ],
+    Array [
+      "tauri-api [publish]: echo publishing tauri-api would happen here",
     ],
     Array [
       "publishing tauri-api would happen here",
     ],
     Array [
-      "publishing tauri-utils with echo publishing tauri-utils would happen here",
+      "tauri-api [publish]: echo running in ./tauri-api",
+    ],
+    Array [
+      "running in ./tauri-api",
+    ],
+    Array [
+      "tauri-api [publish]: ls",
+    ],
+    Array [
+      "Cargo.toml",
+    ],
+    Array [
+      "tauri-utils [publish]: echo publishing tauri-utils would happen here",
     ],
     Array [
       "publishing tauri-utils would happen here",
+    ],
+    Array [
+      "tauri-utils [publish]: echo running in ./tauri-utils",
+    ],
+    Array [
+      "running in ./tauri-utils",
+    ],
+    Array [
+      "tauri-utils [publish]: ls",
+    ],
+    Array [
+      "Cargo.toml",
     ],
   ],
   "covectorReturn": Object {

@@ -111,30 +111,42 @@ Object {
 exports[`merge config test merges version 1`] = `
 Array [
   Object {
+    "command": Array [
+      "cargo version patch",
+    ],
     "dependencies": Array [
       "assemble2",
     ],
     "manager": "cargo",
     "path": "./packages/namespaced-assemble2",
     "pkg": "@namespaced/assemble2",
+    "postcommand": null,
+    "precommand": null,
     "type": "patch",
-    "version": "cargo version patch",
   },
   Object {
+    "command": Array [
+      "lerna version minor --no-git-tag-version --no-push",
+    ],
     "dependencies": undefined,
     "manager": "javascript",
     "path": "./packages/assemble1",
     "pkg": "assemble1",
+    "postcommand": null,
+    "precommand": null,
     "type": "minor",
-    "version": "lerna version minor --no-git-tag-version --no-push",
   },
   Object {
+    "command": Array [
+      "lerna version major",
+    ],
     "dependencies": undefined,
     "manager": undefined,
     "path": "./packages/assemble2",
     "pkg": "assemble2",
+    "postcommand": null,
+    "precommand": null,
     "type": "major",
-    "version": "lerna version major",
   },
 ]
 `;

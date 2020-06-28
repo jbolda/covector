@@ -79,13 +79,17 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
         }
       }
 
-      const response = yield runCommand({
-        command: pkg.publish,
-        cwd,
-        pkg: pkg.pkg,
-        pkgPath: pkg.path,
-        log: `publishing ${pkg.pkg} with ${pkg.publish}`,
-      });
+      const pubCommands =
+        typeof pkg.command === "string" ? [pkg.command] : pkg.command;
+      for (let pubCommand of pubCommands) {
+        yield runCommand({
+          command: pubCommand,
+          cwd,
+          pkg: pkg.pkg,
+          pkgPath: pkg.path,
+          log: `${pkg.pkg} [publish]: ${pubCommand}`,
+        });
+      }
 
       published[pkg.pkg] = true;
     }
