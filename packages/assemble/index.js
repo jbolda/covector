@@ -142,6 +142,9 @@ module.exports.mergeIntoConfig = ({
                 }),
           };
 
+    if (command === "publish" && !!extraPublishParams.pkgFile) {
+      pipeToTemplate.pkgFile = extraPublishParams.pkgFile;
+    }
     const merged = {
       pkg,
       ...extraPublishParams,
