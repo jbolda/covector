@@ -1,6 +1,7 @@
 {
   "pkgManagers": {
     "javascript": {
+      "build": "echo build run",
       "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
       "publish": "npm publish --access public",
