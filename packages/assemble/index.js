@@ -83,6 +83,7 @@ module.exports.mergeIntoConfig = ({
     const pkgManager = config.packages[pkg].manager;
     const commandItems = { pkg, pkgManager, config };
     const mergedCommand = mergeCommand({ ...commandItems, command });
+
     let getPublishedVersion;
     if (command === "publish") {
       getPublishedVersion = mergeCommand({
@@ -90,6 +91,7 @@ module.exports.mergeIntoConfig = ({
         command: "getPublishedVersion",
       });
     }
+
     if (!!mergedCommand) {
       pkged[pkg] = {
         pkg: pkg,
@@ -105,22 +107,24 @@ module.exports.mergeIntoConfig = ({
         dependencies: config.packages[pkg].dependencies,
       };
     }
+
     return pkged;
   }, {});
 
   const commands = Object.keys(
     command !== "version" ? pkgCommands : assembledChanges.releases
   ).map(async (pkg) => {
+    if (!pkgCommands[pkg]) return null;
+
     const pkgs =
       command !== "version" ? config.packages : assembledChanges.releases;
     const pipeToTemplate = {
       release: pkgs[pkg],
       pkg: pkgCommands[pkg],
     };
-    if (!pkgCommands[pkg]) return null;
-    console.log(config.packages[pkg].path);
+
     const extraPublishParams =
-      command !== "version"
+      command == "version"
         ? {}
         : {
             pkgFile: await readPkgFile({
