@@ -52450,7 +52450,11 @@ module.exports.mergeIntoConfig = ({
           };
 
     if (command === "publish" && !!extraPublishParams.pkgFile) {
-      pipeToTemplate.pkgFile = extraPublishParams.pkgFile;
+      pipeToTemplate.pkgFile = {
+        name: extraPublishParams.pkgFile.name,
+        version: extraPublishParams.pkgFile.version,
+        pkg: extraPublishParams.pkgFile.pkg,
+      };
     }
 
     if (dryRun) {
