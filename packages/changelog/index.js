@@ -11,13 +11,18 @@ module.exports.fillChangelogs = async ({
   assembledChanges,
   config,
   cwd,
+  create = true,
 }) => {
   const changelogs = await readAllChangelogs({ applied, config, cwd });
   const writtenChanges = applyChanges({
     changelogs,
     assembledChanges,
   });
-  return await writeAllChangelogs({ writtenChanges });
+  if (create) {
+    return await writeAllChangelogs({ writtenChanges });
+  } else {
+    return;
+  }
 };
 
 const readAllChangelogs = ({ applied, config, cwd }) => {

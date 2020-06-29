@@ -16920,13 +16920,18 @@ module.exports.fillChangelogs = async ({
   assembledChanges,
   config,
   cwd,
+  create = true,
 }) => {
   const changelogs = await readAllChangelogs({ applied, config, cwd });
   const writtenChanges = applyChanges({
     changelogs,
     assembledChanges,
   });
-  return await writeAllChangelogs({ writtenChanges });
+  if (create) {
+    return await writeAllChangelogs({ writtenChanges });
+  } else {
+    return;
+  }
 };
 
 const readAllChangelogs = ({ applied, config, cwd }) => {
@@ -29204,7 +29209,12 @@ const { compareBumps } = __webpack_require__(749);
 const semver = __webpack_require__(571);
 const path = __webpack_require__(622);
 
-module.exports.apply = function* ({ changeList, config, cwd = process.cwd() }) {
+module.exports.apply = function* ({
+  changeList,
+  config,
+  cwd = process.cwd(),
+  bump = true,
+}) {
   const parents = resolveParents({ config });
   let changes = changeList.reduce((list, change) => {
     list[change.pkg] = change;
@@ -29233,7 +29243,13 @@ module.exports.apply = function* ({ changeList, config, cwd = process.cwd() }) {
   let allPackages = yield readAll({ changes, config, cwd });
 
   const bumps = bumpAll({ changes, allPackages });
-  yield writeAll({ bumps });
+  if (bump) {
+    yield writeAll({ bumps });
+  } else {
+    bumps.forEach((b) =>
+      console.log(`${b.name} planned to be bumped to ${b.version}`)
+    );
+  }
   return bumps;
 };
 
@@ -37856,15 +37872,22 @@ module.exports.cli = function* (argv, covector) {
 function parseOptions(argv) {
   let rawOptions = yargs({})
     .scriptName("covector")
-    .command("status", "run status command")
+    .command(["status", "*"], "run status command")
     .command("config", "output current config")
     .command("version", "run version command")
     .command("publish", "run publish command")
+    .option("dry-run", {
+      describe:
+        "run a command that shows the expected command without executing",
+    })
     .demandCommand(1)
     .help()
+    .epilogue(
+      "For more information on covector, see: https://www.github.com/jbolda/covector"
+    )
     .parse(argv);
 
-  return { command: rawOptions._[0] };
+  return { command: rawOptions._[0], dryRun: rawOptions.dryRun };
 }
 
 
@@ -52358,40 +52381,31 @@ module.exports.mergeIntoConfig = ({
   assembledChanges,
   command,
   cwd,
+  dryRun = false,
 }) => {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce((pkged, pkg) => {
     const pkgManager = config.packages[pkg].manager;
-    const managerCommand =
-      !!pkgManager &&
-      !!config.pkgManagers[pkgManager] &&
-      !!config.pkgManagers[pkgManager][command]
-        ? config.pkgManagers[pkgManager][command]
-        : null;
-    const mergedCommand =
-      !config.packages[pkg][command] && config.packages[pkg][command] !== false
-        ? managerCommand
-        : config.packages[pkg][command];
+    const commandItems = { pkg, pkgManager, config };
+    const mergedCommand = mergeCommand({ ...commandItems, command });
     let getPublishedVersion;
     if (command === "publish") {
-      const managerVersionCommand =
-        !!pkgManager &&
-        !!config.pkgManagers[pkgManager] &&
-        !!config.pkgManagers[pkgManager].getPublishedVersion
-          ? config.pkgManagers[pkgManager].getPublishedVersion
-          : null;
-      getPublishedVersion =
-        !config.packages[pkg].getPublishedVersion &&
-        config.packages[pkg].getPublishedVersion !== false
-          ? managerVersionCommand
-          : config.packages[pkg].getPublishedVersion;
+      getPublishedVersion = mergeCommand({
+        ...commandItems,
+        command: "getPublishedVersion",
+      });
     }
     if (!!mergedCommand) {
       pkged[pkg] = {
         pkg: pkg,
         path: config.packages[pkg].path,
-        [command]: mergedCommand,
+        precommand: mergeCommand({ ...commandItems, command: `pre${command}` }),
+        command: mergedCommand,
+        postcommand: mergeCommand({
+          ...commandItems,
+          command: `post${command}`,
+        }),
         ...(!getPublishedVersion ? {} : { getPublishedVersion }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
@@ -52410,10 +52424,7 @@ module.exports.mergeIntoConfig = ({
       pkg: pkgCommands[pkg],
     };
     if (!pkgCommands[pkg]) return null;
-    const pkgCommand = pkgCommands[pkg][command];
-    const templatedString = !pkgCommand
-      ? null
-      : template(pkgCommand, pipeToTemplate);
+
     const extraPublishParams =
       command !== "publish"
         ? {}
@@ -52437,6 +52448,19 @@ module.exports.mergeIntoConfig = ({
                   )(pipeToTemplate),
                 }),
           };
+
+    if (command === "publish" && !!extraPublishParams.pkgFile) {
+      pipeToTemplate.pkgFile = {
+        name: extraPublishParams.pkgFile.name,
+        version: extraPublishParams.pkgFile.version,
+        pkg: extraPublishParams.pkgFile.pkg,
+      };
+    }
+
+    if (dryRun) {
+      console.log(pkg, "pipe", pipeToTemplate);
+    }
+
     const merged = {
       pkg,
       ...extraPublishParams,
@@ -52444,7 +52468,12 @@ module.exports.mergeIntoConfig = ({
       type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
       dependencies: pkgCommands[pkg].dependencies,
-      [command]: !pkgCommand ? null : templatedString(pipeToTemplate),
+      precommand: templateCommands(pkgCommands[pkg].precommand, pipeToTemplate),
+      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate),
+      postcommand: templateCommands(
+        pkgCommands[pkg].postcommand,
+        pipeToTemplate
+      ),
     };
 
     return merged;
@@ -52458,36 +52487,26 @@ module.exports.mergeIntoConfig = ({
   );
 };
 
-// TODO: finish it, but do we need this even?
-module.exports.removeSameGraphBumps = ({
-  mergedChanges,
-  assembledChanges,
-  config,
-  command,
-}) => {
-  if (command === "publish") return mergedChanges;
+const mergeCommand = ({ pkg, pkgManager, command, config }) => {
+  const managerCommand =
+    !!pkgManager &&
+    !!config.pkgManagers[pkgManager] &&
+    !!config.pkgManagers[pkgManager][command]
+      ? config.pkgManagers[pkgManager][command]
+      : null;
 
-  const graph = Object.keys(config.packages).reduce((graph, pkg) => {
-    if (!!config.packages[pkg].dependencies) {
-      graph[pkg] = config.packages[pkg].dependencies;
-    }
-    return graph;
-  }, {});
+  const mergedCommand =
+    !config.packages[pkg][command] && config.packages[pkg][command] !== false
+      ? managerCommand
+      : config.packages[pkg][command];
 
-  const releases = mergedChanges.reduce((releases, release) => {
-    releases[release.pkg] = release;
-    return releases;
-  }, {});
+  return mergedCommand;
+};
 
-  return mergedChanges.reduce((finalChanges, currentChange) => {
-    if (!!graph[currentChange.pkg] && !!graph[currentChange.pkg].dependencies) {
-      let graphBumps = graph[currentChange.pkg].dependencies.map(
-        (dep) => releases[dep].type
-      );
-    }
-
-    return [...finalChanges, currentChange];
-  }, []);
+const templateCommands = (command, pipe) => {
+  if (!command) return null;
+  const commands = !Array.isArray(command) ? [command] : command;
+  return commands.map((c) => template(c)(pipe));
 };
 
 
@@ -61283,13 +61302,17 @@ module.exports.changeFiles = async ({
 
   if (remove) {
     await Promise.all(
-      paths.map(async (changeFilePath) =>
-        fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
+      paths.map(async (changeFilePath) => {
+        await fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
           if (err) throw err;
-          console.info(`${changeFilePath} was deleted`);
-        })
-      )
-    );
+        });
+        return changeFilePath;
+      })
+    ).then((deletedPaths) => {
+      deletedPaths.forEach((changeFilePath) =>
+        console.info(`${changeFilePath} was deleted`)
+      );
+    });
   }
 
   return vfiles;
@@ -65297,15 +65320,19 @@ const { fillChangelogs } = __webpack_require__(72);
 const { apply } = __webpack_require__(334);
 const path = __webpack_require__(622);
 
-module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
+module.exports.covector = function* covector({
+  command,
+  dryRun = false,
+  cwd = process.cwd(),
+}) {
   const config = yield configFile({ cwd });
   const changesArray = yield changeFiles({
     cwd,
-    remove: command === "version",
+    remove: command === "version" && !dryRun,
   });
   const assembledChanges = assemble(changesArray);
 
-  if (command === "status") {
+  if (command === "status" || !command) {
     if (changesArray.length === 0) {
       console.info("There are no changes.");
       return "No changes.";
@@ -65331,10 +65358,22 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       assembledChanges,
       config,
       command: "version",
+      dryRun,
     });
 
-    const applied = yield apply({ changeList: commands, config, cwd });
-    yield fillChangelogs({ applied, assembledChanges, config, cwd });
+    const applied = yield apply({
+      changeList: commands,
+      config,
+      cwd,
+      bump: !dryRun,
+    });
+    yield fillChangelogs({
+      applied,
+      assembledChanges,
+      config,
+      cwd,
+      create: !dryRun,
+    });
     return applied;
   } else if (command === "publish") {
     yield raceTime();
@@ -65343,6 +65382,7 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       config,
       command: "publish",
       cwd,
+      dryRun,
     });
 
     let published = Object.keys(config.packages).reduce((pkgs, pkg) => {
@@ -65350,35 +65390,28 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       return pkgs;
     }, {});
 
-    for (let pkg of commands) {
-      if (!!pkg.getPublishedVersion) {
-        const version = runCommand({
-          command: pkg.getPublishedVersion,
-          cwd,
-          pkg: pkg.pkg,
-          pkgPath: pkg.path,
-          stdio: "pipe",
-          log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
-        });
+    yield attemptCommands({
+      cwd,
+      commands,
+      commandPrefix: "pre",
+      command: "publish",
+      dryRun,
+    });
+    published = yield attemptCommands({
+      cwd,
+      commands,
+      command: "publish",
+      published,
+      dryRun,
+    });
+    yield attemptCommands({
+      cwd,
+      commands,
+      commandPrefix: "post",
+      command: "publish",
+      dryRun,
+    });
 
-        if (pkg.pkgFile.version === version) {
-          console.log(
-            `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
-          );
-          continue;
-        }
-      }
-
-      const response = yield runCommand({
-        command: pkg.publish,
-        cwd,
-        pkg: pkg.pkg,
-        pkgPath: pkg.path,
-        log: `publishing ${pkg.pkg} with ${pkg.publish}`,
-      });
-
-      published[pkg.pkg] = true;
-    }
     return published;
   }
 };
@@ -65392,6 +65425,60 @@ function raceTime(
     throw new Error(msg);
   });
 }
+
+const attemptCommands = function* ({
+  cwd,
+  commands,
+  command,
+  commandPrefix = "",
+  published,
+  dryRun,
+}) {
+  let _published = { ...published };
+  for (let pkg of commands) {
+    if (!!pkg.getPublishedVersion) {
+      const version = runCommand({
+        command: pkg.getPublishedVersion,
+        cwd,
+        pkg: pkg.pkg,
+        pkgPath: pkg.path,
+        stdio: "pipe",
+        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
+      });
+
+      if (pkg.pkgFile.version === version) {
+        console.log(
+          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
+        );
+        continue;
+      }
+    }
+
+    if (!pkg[`${commandPrefix}command`]) continue;
+    const pubCommands =
+      typeof pkg[`${commandPrefix}command`] === "string"
+        ? [pkg[`${commandPrefix}command`]]
+        : pkg[`${commandPrefix}command`];
+    for (let pubCommand of pubCommands) {
+      if (!dryRun) {
+        yield runCommand({
+          command: pubCommand,
+          cwd,
+          pkg: pkg.pkg,
+          pkgPath: pkg.path,
+          log: `${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`,
+        });
+      } else {
+        console.log(
+          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`
+        );
+      }
+    }
+
+    if (!!published) _published[pkg.pkg] = true;
+  }
+  return _published;
+};
 
 const runCommand = function* ({
   pkg,

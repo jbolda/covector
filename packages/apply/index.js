@@ -3,7 +3,12 @@ const { compareBumps } = require("@covector/assemble");
 const semver = require("semver");
 const path = require("path");
 
-module.exports.apply = function* ({ changeList, config, cwd = process.cwd() }) {
+module.exports.apply = function* ({
+  changeList,
+  config,
+  cwd = process.cwd(),
+  bump = true,
+}) {
   const parents = resolveParents({ config });
   let changes = changeList.reduce((list, change) => {
     list[change.pkg] = change;
@@ -32,7 +37,13 @@ module.exports.apply = function* ({ changeList, config, cwd = process.cwd() }) {
   let allPackages = yield readAll({ changes, config, cwd });
 
   const bumps = bumpAll({ changes, allPackages });
-  yield writeAll({ bumps });
+  if (bump) {
+    yield writeAll({ bumps });
+  } else {
+    bumps.forEach((b) =>
+      console.log(`${b.name} planned to be bumped to ${b.version}`)
+    );
+  }
   return bumps;
 };
 

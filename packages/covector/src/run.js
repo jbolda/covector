@@ -7,15 +7,19 @@ const { fillChangelogs } = require("@covector/changelog");
 const { apply } = require("@covector/apply");
 const path = require("path");
 
-module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
+module.exports.covector = function* covector({
+  command,
+  dryRun = false,
+  cwd = process.cwd(),
+}) {
   const config = yield configFile({ cwd });
   const changesArray = yield changeFiles({
     cwd,
-    remove: command === "version",
+    remove: command === "version" && !dryRun,
   });
   const assembledChanges = assemble(changesArray);
 
-  if (command === "status") {
+  if (command === "status" || !command) {
     if (changesArray.length === 0) {
       console.info("There are no changes.");
       return "No changes.";
@@ -41,10 +45,22 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       assembledChanges,
       config,
       command: "version",
+      dryRun,
     });
 
-    const applied = yield apply({ changeList: commands, config, cwd });
-    yield fillChangelogs({ applied, assembledChanges, config, cwd });
+    const applied = yield apply({
+      changeList: commands,
+      config,
+      cwd,
+      bump: !dryRun,
+    });
+    yield fillChangelogs({
+      applied,
+      assembledChanges,
+      config,
+      cwd,
+      create: !dryRun,
+    });
     return applied;
   } else if (command === "publish") {
     yield raceTime();
@@ -53,6 +69,7 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       config,
       command: "publish",
       cwd,
+      dryRun,
     });
 
     let published = Object.keys(config.packages).reduce((pkgs, pkg) => {
@@ -65,18 +82,21 @@ module.exports.covector = function* covector({ command, cwd = process.cwd() }) {
       commands,
       commandPrefix: "pre",
       command: "publish",
+      dryRun,
     });
     published = yield attemptCommands({
       cwd,
       commands,
       command: "publish",
       published,
+      dryRun,
     });
     yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "post",
       command: "publish",
+      dryRun,
     });
 
     return published;
@@ -99,6 +119,7 @@ const attemptCommands = function* ({
   command,
   commandPrefix = "",
   published,
+  dryRun,
 }) {
   let _published = { ...published };
   for (let pkg of commands) {
@@ -126,13 +147,19 @@ const attemptCommands = function* ({
         ? [pkg[`${commandPrefix}command`]]
         : pkg[`${commandPrefix}command`];
     for (let pubCommand of pubCommands) {
-      yield runCommand({
-        command: pubCommand,
-        cwd,
-        pkg: pkg.pkg,
-        pkgPath: pkg.path,
-        log: `${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`,
-      });
+      if (!dryRun) {
+        yield runCommand({
+          command: pubCommand,
+          cwd,
+          pkg: pkg.pkg,
+          pkgPath: pkg.path,
+          log: `${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`,
+        });
+      } else {
+        console.log(
+          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`
+        );
+      }
     }
 
     if (!!published) _published[pkg.pkg] = true;
