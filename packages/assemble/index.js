@@ -109,18 +109,18 @@ module.exports.mergeIntoConfig = ({
   }, {});
 
   const commands = Object.keys(
-    command === "publish" ? pkgCommands : assembledChanges.releases
+    command !== "version" ? pkgCommands : assembledChanges.releases
   ).map(async (pkg) => {
     const pkgs =
-      command === "publish" ? config.packages : assembledChanges.releases;
+      command !== "version" ? config.packages : assembledChanges.releases;
     const pipeToTemplate = {
       release: pkgs[pkg],
       pkg: pkgCommands[pkg],
     };
     if (!pkgCommands[pkg]) return null;
-
+    console.log(config.packages[pkg].path);
     const extraPublishParams =
-      command !== "publish"
+      command !== "version"
         ? {}
         : {
             pkgFile: await readPkgFile({
@@ -143,7 +143,7 @@ module.exports.mergeIntoConfig = ({
                 }),
           };
 
-    if (command === "publish" && !!extraPublishParams.pkgFile) {
+    if (command !== "version" && !!extraPublishParams.pkgFile) {
       pipeToTemplate.pkgFile = {
         name: extraPublishParams.pkgFile.name,
         version: extraPublishParams.pkgFile.version,
