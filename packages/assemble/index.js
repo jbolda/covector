@@ -111,6 +111,7 @@ module.exports.mergeIntoConfig = ({
     return pkged;
   }, {});
 
+  const pipeOutput = {};
   const commands = Object.keys(
     command !== "version" ? pkgCommands : assembledChanges.releases
   ).map(async (pkg) => {
@@ -156,7 +157,9 @@ module.exports.mergeIntoConfig = ({
     }
 
     if (dryRun) {
-      console.log(pkg, "pipe", pipeToTemplate);
+      pipeOutput[pkg] = {};
+      pipeOutput[pkg].name = pkg;
+      pipeOutput[pkg].pipe = pipeToTemplate;
     }
 
     const merged = {
@@ -176,6 +179,11 @@ module.exports.mergeIntoConfig = ({
 
     return merged;
   });
+
+  if (dryRun)
+    Object.keys(pipeOutput).forEach((pkg) =>
+      console.log(pkg, "pipe", pipeOutput[pkg].pipe)
+    );
 
   return Promise.all(commands).then((values) =>
     values.reduce(
