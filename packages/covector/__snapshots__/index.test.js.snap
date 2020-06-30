@@ -44,7 +44,96 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "tauri-bundler",
+      "tauri-api",
+      "pipe",
+      Object {
+        "pkg": Object {
+          "command": Array [
+            "echo the files in the \${ pkg.pkg } folder are",
+            "ls",
+          ],
+          "dependencies": Array [
+            "tauri-utils",
+          ],
+          "manager": "rust",
+          "path": "./tauri-api",
+          "pkg": "tauri-api",
+          "postcommand": null,
+          "precommand": null,
+        },
+        "pkgFile": Object {
+          "name": "tauri-api",
+          "pkg": Object {
+            "dependencies": Object {
+              "anyhow": "1.0.31",
+              "attohttpc": Object {
+                "__tomlInline": true,
+                "features": Array [
+                  "json",
+                  "form",
+                ],
+                "version": "0.13.0",
+              },
+              "dirs": "2.0.2",
+              "either": "1.5.3",
+              "flate2": "1",
+              "http": "0.2",
+              "ignore": "0.4.16",
+              "nfd": "0.0.4",
+              "rand": "0.7",
+              "semver": "0.10",
+              "serde": Object {
+                "__tomlInline": true,
+                "features": Array [
+                  "derive",
+                ],
+                "version": "1.0",
+              },
+              "serde_json": "1.0",
+              "serde_repr": "0.1",
+              "tar": "0.4",
+              "tauri-utils": Object {
+                "__tomlInline": true,
+                "path": "../tauri-utils",
+                "version": "0.5",
+              },
+              "tempdir": "0.3",
+              "tempfile": "3",
+              "thiserror": "1.0.19",
+              "zip": "0.5.5",
+            },
+            "dev-dependencies": Object {
+              "quickcheck": "0.9.2",
+              "quickcheck_macros": "0.9.1",
+              "totems": "0.2.7",
+            },
+            "package": Object {
+              "authors": "test",
+              "description": "Make tiny, secure apps for all desktop platforms with Tauri",
+              "edition": "2018",
+              "exclude": Array [
+                "test/fixture/**",
+              ],
+              "homepage": "https://tauri.studio",
+              "license": "MIT",
+              "name": "tauri-api",
+              "repository": "https://github.com/tauri-apps/tauri",
+              "version": "0.5.1",
+            },
+          },
+          "version": "0.5.1",
+        },
+        "release": Object {
+          "dependencies": Array [
+            "tauri-utils",
+          ],
+          "manager": "rust",
+          "path": "./tauri-api",
+        },
+      },
+    ],
+    Array [
+      "tauri-utils",
       "pipe",
       Object {
         "pkg": Object {
@@ -54,120 +143,35 @@ Object {
           ],
           "dependencies": undefined,
           "manager": "rust",
-          "path": "./cli/tauri-bundler",
-          "pkg": "tauri-bundler",
+          "path": "./tauri-utils",
+          "pkg": "tauri-utils",
           "postcommand": null,
           "precommand": null,
         },
         "pkgFile": Object {
-          "name": "tauri-bundler",
+          "name": "tauri-utils",
           "pkg": Object {
-            "bin": Array [
-              Object {
-                "name": "cargo-tauri-bundler",
-                "path": "src/main.rs",
-              },
-            ],
             "dependencies": Object {
-              "anyhow": "1.0",
-              "ar": "0.8.0",
-              "chrono": "0.4",
-              "clap": "^2",
-              "dirs": "2.0.2",
-              "glob": "0.3.0",
-              "handlebars": Object {
-                "__tomlInline": true,
-                "version": "3.1",
-              },
-              "icns": "0.3",
-              "image": "0.23.4",
-              "lazy_static": Object {
-                "__tomlInline": true,
-                "version": "1.4",
-              },
-              "libflate": "1.0",
-              "md5": "0.7.0",
-              "msi": "0.2",
-              "serde": Object {
-                "__tomlInline": true,
-                "features": Array [
-                  "derive",
-                ],
-                "version": "1.0",
-              },
-              "serde_json": "1.0",
-              "strsim": "0.10.0",
-              "tar": "0.4",
-              "target_build_utils": "0.3",
-              "term": "0.6.1",
-              "thiserror": "1.0",
-              "toml": "0.5.6",
-              "uuid": Object {
-                "__tomlInline": true,
-                "features": Array [
-                  "v5",
-                ],
-                "version": "0.8",
-              },
-              "walkdir": "2",
-            },
-            "dev-dependencies": Object {
-              "tempfile": "3",
+              "anyhow": "1.0.31",
+              "sysinfo": "0.10",
+              "thiserror": "1.0.19",
             },
             "package": Object {
               "authors": "test",
-              "description": "Wrap rust executables in OS-specific app bundles for Tauri",
+              "description": "Utilities for Tauri",
               "edition": "2018",
-              "keywords": Array [
-                "bundle",
-                "cargo",
-                "tauri",
-              ],
-              "license": "MIT/Apache-2.0",
-              "name": "tauri-bundler",
+              "homepage": "https://tauri.studio",
+              "license": "MIT",
+              "name": "tauri-utils",
               "repository": "https://github.com/tauri-apps/tauri",
-              "version": "0.6.0",
-            },
-            "target": Object {
-              "cfg(not(target_os = \\"linux\\"))": Object {
-                "dependencies": Object {
-                  "hex": Object {
-                    "__tomlInline": true,
-                    "version": "0.4",
-                  },
-                  "sha2": Object {
-                    "__tomlInline": true,
-                    "version": "0.8",
-                  },
-                  "zip": Object {
-                    "__tomlInline": true,
-                    "version": "0.5",
-                  },
-                },
-              },
-              "cfg(target_os = \\"windows\\")": Object {
-                "dependencies": Object {
-                  "attohttpc": Object {
-                    "__tomlInline": true,
-                    "version": "0.13.0",
-                  },
-                  "regex": Object {
-                    "__tomlInline": true,
-                    "version": "1",
-                  },
-                  "runas": "0.2",
-                },
-              },
-            },
-            "workspace": Object {
-              "__tomlInline": true,
+              "version": "0.5.0",
             },
           },
-          "version": "0.6.0",
+          "version": "0.5.0",
         },
         "release": Object {
           "manager": "rust",
-          "path": "./cli/tauri-bundler",
+          "path": "./tauri-utils",
         },
       },
     ],
@@ -319,96 +323,7 @@ Object {
       },
     ],
     Array [
-      "tauri-api",
-      "pipe",
-      Object {
-        "pkg": Object {
-          "command": Array [
-            "echo the files in the \${ pkg.pkg } folder are",
-            "ls",
-          ],
-          "dependencies": Array [
-            "tauri-utils",
-          ],
-          "manager": "rust",
-          "path": "./tauri-api",
-          "pkg": "tauri-api",
-          "postcommand": null,
-          "precommand": null,
-        },
-        "pkgFile": Object {
-          "name": "tauri-api",
-          "pkg": Object {
-            "dependencies": Object {
-              "anyhow": "1.0.31",
-              "attohttpc": Object {
-                "__tomlInline": true,
-                "features": Array [
-                  "json",
-                  "form",
-                ],
-                "version": "0.13.0",
-              },
-              "dirs": "2.0.2",
-              "either": "1.5.3",
-              "flate2": "1",
-              "http": "0.2",
-              "ignore": "0.4.16",
-              "nfd": "0.0.4",
-              "rand": "0.7",
-              "semver": "0.10",
-              "serde": Object {
-                "__tomlInline": true,
-                "features": Array [
-                  "derive",
-                ],
-                "version": "1.0",
-              },
-              "serde_json": "1.0",
-              "serde_repr": "0.1",
-              "tar": "0.4",
-              "tauri-utils": Object {
-                "__tomlInline": true,
-                "path": "../tauri-utils",
-                "version": "0.5",
-              },
-              "tempdir": "0.3",
-              "tempfile": "3",
-              "thiserror": "1.0.19",
-              "zip": "0.5.5",
-            },
-            "dev-dependencies": Object {
-              "quickcheck": "0.9.2",
-              "quickcheck_macros": "0.9.1",
-              "totems": "0.2.7",
-            },
-            "package": Object {
-              "authors": "test",
-              "description": "Make tiny, secure apps for all desktop platforms with Tauri",
-              "edition": "2018",
-              "exclude": Array [
-                "test/fixture/**",
-              ],
-              "homepage": "https://tauri.studio",
-              "license": "MIT",
-              "name": "tauri-api",
-              "repository": "https://github.com/tauri-apps/tauri",
-              "version": "0.5.1",
-            },
-          },
-          "version": "0.5.1",
-        },
-        "release": Object {
-          "dependencies": Array [
-            "tauri-utils",
-          ],
-          "manager": "rust",
-          "path": "./tauri-api",
-        },
-      },
-    ],
-    Array [
-      "tauri-utils",
+      "tauri-bundler",
       "pipe",
       Object {
         "pkg": Object {
@@ -418,35 +333,120 @@ Object {
           ],
           "dependencies": undefined,
           "manager": "rust",
-          "path": "./tauri-utils",
-          "pkg": "tauri-utils",
+          "path": "./cli/tauri-bundler",
+          "pkg": "tauri-bundler",
           "postcommand": null,
           "precommand": null,
         },
         "pkgFile": Object {
-          "name": "tauri-utils",
+          "name": "tauri-bundler",
           "pkg": Object {
+            "bin": Array [
+              Object {
+                "name": "cargo-tauri-bundler",
+                "path": "src/main.rs",
+              },
+            ],
             "dependencies": Object {
-              "anyhow": "1.0.31",
-              "sysinfo": "0.10",
-              "thiserror": "1.0.19",
+              "anyhow": "1.0",
+              "ar": "0.8.0",
+              "chrono": "0.4",
+              "clap": "^2",
+              "dirs": "2.0.2",
+              "glob": "0.3.0",
+              "handlebars": Object {
+                "__tomlInline": true,
+                "version": "3.1",
+              },
+              "icns": "0.3",
+              "image": "0.23.4",
+              "lazy_static": Object {
+                "__tomlInline": true,
+                "version": "1.4",
+              },
+              "libflate": "1.0",
+              "md5": "0.7.0",
+              "msi": "0.2",
+              "serde": Object {
+                "__tomlInline": true,
+                "features": Array [
+                  "derive",
+                ],
+                "version": "1.0",
+              },
+              "serde_json": "1.0",
+              "strsim": "0.10.0",
+              "tar": "0.4",
+              "target_build_utils": "0.3",
+              "term": "0.6.1",
+              "thiserror": "1.0",
+              "toml": "0.5.6",
+              "uuid": Object {
+                "__tomlInline": true,
+                "features": Array [
+                  "v5",
+                ],
+                "version": "0.8",
+              },
+              "walkdir": "2",
+            },
+            "dev-dependencies": Object {
+              "tempfile": "3",
             },
             "package": Object {
               "authors": "test",
-              "description": "Utilities for Tauri",
+              "description": "Wrap rust executables in OS-specific app bundles for Tauri",
               "edition": "2018",
-              "homepage": "https://tauri.studio",
-              "license": "MIT",
-              "name": "tauri-utils",
+              "keywords": Array [
+                "bundle",
+                "cargo",
+                "tauri",
+              ],
+              "license": "MIT/Apache-2.0",
+              "name": "tauri-bundler",
               "repository": "https://github.com/tauri-apps/tauri",
-              "version": "0.5.0",
+              "version": "0.6.0",
+            },
+            "target": Object {
+              "cfg(not(target_os = \\"linux\\"))": Object {
+                "dependencies": Object {
+                  "hex": Object {
+                    "__tomlInline": true,
+                    "version": "0.4",
+                  },
+                  "sha2": Object {
+                    "__tomlInline": true,
+                    "version": "0.8",
+                  },
+                  "zip": Object {
+                    "__tomlInline": true,
+                    "version": "0.5",
+                  },
+                },
+              },
+              "cfg(target_os = \\"windows\\")": Object {
+                "dependencies": Object {
+                  "attohttpc": Object {
+                    "__tomlInline": true,
+                    "version": "0.13.0",
+                  },
+                  "regex": Object {
+                    "__tomlInline": true,
+                    "version": "1",
+                  },
+                  "runas": "0.2",
+                },
+              },
+            },
+            "workspace": Object {
+              "__tomlInline": true,
             },
           },
-          "version": "0.5.0",
+          "version": "0.6.0",
         },
         "release": Object {
           "manager": "rust",
-          "path": "./tauri-utils",
+          "path": "./cli/tauri-bundler",
         },
       },
     ],
@@ -565,6 +565,135 @@ exports[`integration test in --dry-run mode runs publish for js and rust 1`] = `
 Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
+    Array [
+      "tauri-bundler",
+      "pipe",
+      Object {
+        "pkg": Object {
+          "command": Array [
+            "echo publishing \${ pkg.pkg } would happen here",
+            "echo running in \${ pkg.path }",
+            "ls",
+          ],
+          "dependencies": undefined,
+          "manager": "rust",
+          "path": "./cli/tauri-bundler",
+          "pkg": "tauri-bundler",
+          "postcommand": "echo postmode for \${ pkg.pkg }",
+          "precommand": "echo premode for \${ pkg.pkg }",
+        },
+        "pkgFile": Object {
+          "name": "tauri-bundler",
+          "pkg": Object {
+            "bin": Array [
+              Object {
+                "name": "cargo-tauri-bundler",
+                "path": "src/main.rs",
+              },
+            ],
+            "dependencies": Object {
+              "anyhow": "1.0",
+              "ar": "0.8.0",
+              "chrono": "0.4",
+              "clap": "^2",
+              "dirs": "2.0.2",
+              "glob": "0.3.0",
+              "handlebars": Object {
+                "__tomlInline": true,
+                "version": "3.1",
+              },
+              "icns": "0.3",
+              "image": "0.23.4",
+              "lazy_static": Object {
+                "__tomlInline": true,
+                "version": "1.4",
+              },
+              "libflate": "1.0",
+              "md5": "0.7.0",
+              "msi": "0.2",
+              "serde": Object {
+                "__tomlInline": true,
+                "features": Array [
+                  "derive",
+                ],
+                "version": "1.0",
+              },
+              "serde_json": "1.0",
+              "strsim": "0.10.0",
+              "tar": "0.4",
+              "target_build_utils": "0.3",
+              "term": "0.6.1",
+              "thiserror": "1.0",
+              "toml": "0.5.6",
+              "uuid": Object {
+                "__tomlInline": true,
+                "features": Array [
+                  "v5",
+                ],
+                "version": "0.8",
+              },
+              "walkdir": "2",
+            },
+            "dev-dependencies": Object {
+              "tempfile": "3",
+            },
+            "package": Object {
+              "authors": "test",
+              "description": "Wrap rust executables in OS-specific app bundles for Tauri",
+              "edition": "2018",
+              "keywords": Array [
+                "bundle",
+                "cargo",
+                "tauri",
+              ],
+              "license": "MIT/Apache-2.0",
+              "name": "tauri-bundler",
+              "repository": "https://github.com/tauri-apps/tauri",
+              "version": "0.6.0",
+            },
+            "target": Object {
+              "cfg(not(target_os = \\"linux\\"))": Object {
+                "dependencies": Object {
+                  "hex": Object {
+                    "__tomlInline": true,
+                    "version": "0.4",
+                  },
+                  "sha2": Object {
+                    "__tomlInline": true,
+                    "version": "0.8",
+                  },
+                  "zip": Object {
+                    "__tomlInline": true,
+                    "version": "0.5",
+                  },
+                },
+              },
+              "cfg(target_os = \\"windows\\")": Object {
+                "dependencies": Object {
+                  "attohttpc": Object {
+                    "__tomlInline": true,
+                    "version": "0.13.0",
+                  },
+                  "regex": Object {
+                    "__tomlInline": true,
+                    "version": "1",
+                  },
+                  "runas": "0.2",
+                },
+              },
+            },
+            "workspace": Object {
+              "__tomlInline": true,
+            },
+          },
+          "version": "0.6.0",
+        },
+        "release": Object {
+          "manager": "rust",
+          "path": "./cli/tauri-bundler",
+        },
+      },
+    ],
     Array [
       "tauri.js",
       "pipe",
@@ -703,96 +832,6 @@ Object {
       },
     ],
     Array [
-      "tauri-api",
-      "pipe",
-      Object {
-        "pkg": Object {
-          "command": Array [
-            "echo publishing \${ pkg.pkg } would happen here",
-            "echo running in \${ pkg.path }",
-            "ls",
-          ],
-          "dependencies": Array [
-            "tauri-utils",
-          ],
-          "manager": "rust",
-          "path": "./tauri-api",
-          "pkg": "tauri-api",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
-        },
-        "pkgFile": Object {
-          "name": "tauri-api",
-          "pkg": Object {
-            "dependencies": Object {
-              "anyhow": "1.0.31",
-              "attohttpc": Object {
-                "__tomlInline": true,
-                "features": Array [
-                  "json",
-                  "form",
-                ],
-                "version": "0.13.0",
-              },
-              "dirs": "2.0.2",
-              "either": "1.5.3",
-              "flate2": "1",
-              "http": "0.2",
-              "ignore": "0.4.16",
-              "nfd": "0.0.4",
-              "rand": "0.7",
-              "semver": "0.10",
-              "serde": Object {
-                "__tomlInline": true,
-                "features": Array [
-                  "derive",
-                ],
-                "version": "1.0",
-              },
-              "serde_json": "1.0",
-              "serde_repr": "0.1",
-              "tar": "0.4",
-              "tauri-utils": Object {
-                "__tomlInline": true,
-                "path": "../tauri-utils",
-                "version": "0.5",
-              },
-              "tempdir": "0.3",
-              "tempfile": "3",
-              "thiserror": "1.0.19",
-              "zip": "0.5.5",
-            },
-            "dev-dependencies": Object {
-              "quickcheck": "0.9.2",
-              "quickcheck_macros": "0.9.1",
-              "totems": "0.2.7",
-            },
-            "package": Object {
-              "authors": "test",
-              "description": "Make tiny, secure apps for all desktop platforms with Tauri",
-              "edition": "2018",
-              "exclude": Array [
-                "test/fixture/**",
-              ],
-              "homepage": "https://tauri.studio",
-              "license": "MIT",
-              "name": "tauri-api",
-              "repository": "https://github.com/tauri-apps/tauri",
-              "version": "0.5.1",
-            },
-          },
-          "version": "0.5.1",
-        },
-        "release": Object {
-          "dependencies": Array [
-            "tauri-utils",
-          ],
-          "manager": "rust",
-          "path": "./tauri-api",
-        },
-      },
-    ],
-    Array [
       "tauri",
       "pipe",
       Object {
@@ -941,7 +980,7 @@ Object {
       },
     ],
     Array [
-      "tauri-bundler",
+      "tauri-api",
       "pipe",
       Object {
         "pkg": Object {
@@ -950,42 +989,36 @@ Object {
             "echo running in \${ pkg.path }",
             "ls",
           ],
-          "dependencies": undefined,
+          "dependencies": Array [
+            "tauri-utils",
+          ],
           "manager": "rust",
-          "path": "./cli/tauri-bundler",
-          "pkg": "tauri-bundler",
+          "path": "./tauri-api",
+          "pkg": "tauri-api",
           "postcommand": "echo postmode for \${ pkg.pkg }",
           "precommand": "echo premode for \${ pkg.pkg }",
         },
         "pkgFile": Object {
-          "name": "tauri-bundler",
+          "name": "tauri-api",
           "pkg": Object {
-            "bin": Array [
-              Object {
-                "name": "cargo-tauri-bundler",
-                "path": "src/main.rs",
-              },
-            ],
             "dependencies": Object {
-              "anyhow": "1.0",
-              "ar": "0.8.0",
-              "chrono": "0.4",
-              "clap": "^2",
+              "anyhow": "1.0.31",
+              "attohttpc": Object {
+                "__tomlInline": true,
+                "features": Array [
+                  "json",
+                  "form",
+                ],
+                "version": "0.13.0",
+              },
               "dirs": "2.0.2",
-              "glob": "0.3.0",
-              "handlebars": Object {
-                "__tomlInline": true,
-                "version": "3.1",
-              },
-              "icns": "0.3",
-              "image": "0.23.4",
-              "lazy_static": Object {
-                "__tomlInline": true,
-                "version": "1.4",
-              },
-              "libflate": "1.0",
-              "md5": "0.7.0",
-              "msi": "0.2",
+              "either": "1.5.3",
+              "flate2": "1",
+              "http": "0.2",
+              "ignore": "0.4.16",
+              "nfd": "0.0.4",
+              "rand": "0.7",
+              "semver": "0.10",
               "serde": Object {
                 "__tomlInline": true,
                 "features": Array [
@@ -994,78 +1027,45 @@ Object {
                 "version": "1.0",
               },
               "serde_json": "1.0",
-              "strsim": "0.10.0",
+              "serde_repr": "0.1",
               "tar": "0.4",
-              "target_build_utils": "0.3",
-              "term": "0.6.1",
-              "thiserror": "1.0",
-              "toml": "0.5.6",
-              "uuid": Object {
+              "tauri-utils": Object {
                 "__tomlInline": true,
-                "features": Array [
-                  "v5",
-                ],
-                "version": "0.8",
+                "path": "../tauri-utils",
+                "version": "0.5",
               },
-              "walkdir": "2",
+              "tempdir": "0.3",
+              "tempfile": "3",
+              "thiserror": "1.0.19",
+              "zip": "0.5.5",
             },
             "dev-dependencies": Object {
-              "tempfile": "3",
+              "quickcheck": "0.9.2",
+              "quickcheck_macros": "0.9.1",
+              "totems": "0.2.7",
             },
             "package": Object {
               "authors": "test",
-              "description": "Wrap rust executables in OS-specific app bundles for Tauri",
+              "description": "Make tiny, secure apps for all desktop platforms with Tauri",
               "edition": "2018",
-              "keywords": Array [
-                "bundle",
-                "cargo",
-                "tauri",
+              "exclude": Array [
+                "test/fixture/**",
               ],
-              "license": "MIT/Apache-2.0",
-              "name": "tauri-bundler",
+              "homepage": "https://tauri.studio",
+              "license": "MIT",
+              "name": "tauri-api",
               "repository": "https://github.com/tauri-apps/tauri",
-              "version": "0.6.0",
-            },
-            "target": Object {
-              "cfg(not(target_os = \\"linux\\"))": Object {
-                "dependencies": Object {
-                  "hex": Object {
-                    "__tomlInline": true,
-                    "version": "0.4",
-                  },
-                  "sha2": Object {
-                    "__tomlInline": true,
-                    "version": "0.8",
-                  },
-                  "zip": Object {
-                    "__tomlInline": true,
-                    "version": "0.5",
-                  },
-                },
-              },
-              "cfg(target_os = \\"windows\\")": Object {
-                "dependencies": Object {
-                  "attohttpc": Object {
-                    "__tomlInline": true,
-                    "version": "0.13.0",
-                  },
-                  "regex": Object {
-                    "__tomlInline": true,
-                    "version": "1",
-                  },
-                  "runas": "0.2",
-                },
-              },
-            },
-            "workspace": Object {
-              "__tomlInline": true,
+              "version": "0.5.1",
             },
           },
-          "version": "0.6.0",
+          "version": "0.5.1",
         },
         "release": Object {
+          "dependencies": Array [
+            "tauri-utils",
+          ],
           "manager": "rust",
-          "path": "./cli/tauri-bundler",
+          "path": "./tauri-api",
         },
       },
     ],
