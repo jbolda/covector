@@ -83,6 +83,7 @@ module.exports.mergeIntoConfig = ({
     const pkgManager = config.packages[pkg].manager;
     const commandItems = { pkg, pkgManager, config };
     const mergedCommand = mergeCommand({ ...commandItems, command });
+
     let getPublishedVersion;
     if (command === "publish") {
       getPublishedVersion = mergeCommand({
@@ -90,6 +91,7 @@ module.exports.mergeIntoConfig = ({
         command: "getPublishedVersion",
       });
     }
+
     if (!!mergedCommand) {
       pkged[pkg] = {
         pkg: pkg,
@@ -105,22 +107,25 @@ module.exports.mergeIntoConfig = ({
         dependencies: config.packages[pkg].dependencies,
       };
     }
+
     return pkged;
   }, {});
 
+  const pipeOutput = {};
   const commands = Object.keys(
-    command === "publish" ? pkgCommands : assembledChanges.releases
+    command !== "version" ? pkgCommands : assembledChanges.releases
   ).map(async (pkg) => {
+    if (!pkgCommands[pkg]) return null;
+
     const pkgs =
-      command === "publish" ? config.packages : assembledChanges.releases;
+      command !== "version" ? config.packages : assembledChanges.releases;
     const pipeToTemplate = {
       release: pkgs[pkg],
       pkg: pkgCommands[pkg],
     };
-    if (!pkgCommands[pkg]) return null;
 
     const extraPublishParams =
-      command !== "publish"
+      command == "version"
         ? {}
         : {
             pkgFile: await readPkgFile({
@@ -143,7 +148,7 @@ module.exports.mergeIntoConfig = ({
                 }),
           };
 
-    if (command === "publish" && !!extraPublishParams.pkgFile) {
+    if (command !== "version" && !!extraPublishParams.pkgFile) {
       pipeToTemplate.pkgFile = {
         name: extraPublishParams.pkgFile.name,
         version: extraPublishParams.pkgFile.version,
@@ -152,7 +157,9 @@ module.exports.mergeIntoConfig = ({
     }
 
     if (dryRun) {
-      console.log(pkg, "pipe", pipeToTemplate);
+      pipeOutput[pkg] = {};
+      pipeOutput[pkg].name = pkg;
+      pipeOutput[pkg].pipe = pipeToTemplate;
     }
 
     const merged = {
@@ -172,6 +179,11 @@ module.exports.mergeIntoConfig = ({
 
     return merged;
   });
+
+  if (dryRun)
+    Object.keys(pipeOutput).forEach((pkg) =>
+      console.log(pkg, "pipe", pipeOutput[pkg].pipe)
+    );
 
   return Promise.all(commands).then((values) =>
     values.reduce(

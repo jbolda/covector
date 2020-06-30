@@ -8,7 +8,8 @@
         "echo running in ${ pkg.path }",
         "ls"
       ],
-      "postpublish": "echo postmode for ${ pkg.pkg }"
+      "postpublish": "echo postmode for ${ pkg.pkg }",
+      "build": ["echo the files in the ${ pkg.pkg } folder are", "ls"]
     },
     "javascript": {
       "version": true,
