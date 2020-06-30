@@ -99,6 +99,40 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
     restoreConsole();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
+
+  it("runs test for js and rust", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "test",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs build for js and rust", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "build",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
 });
 
 describe("integration test in --dry-run mode", () => {
@@ -162,6 +196,42 @@ describe("integration test in --dry-run mode", () => {
     const covectored = await main(
       covector({
         command: "publish",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs test for js and rust", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "test",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs build for js and rust", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "build",
         cwd: fullIntegration,
         dryRun: true,
       })
