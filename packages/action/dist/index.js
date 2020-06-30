@@ -52389,6 +52389,7 @@ module.exports.mergeIntoConfig = ({
     const pkgManager = config.packages[pkg].manager;
     const commandItems = { pkg, pkgManager, config };
     const mergedCommand = mergeCommand({ ...commandItems, command });
+
     let getPublishedVersion;
     if (command === "publish") {
       getPublishedVersion = mergeCommand({
@@ -52396,6 +52397,7 @@ module.exports.mergeIntoConfig = ({
         command: "getPublishedVersion",
       });
     }
+
     if (!!mergedCommand) {
       pkged[pkg] = {
         pkg: pkg,
@@ -52411,22 +52413,24 @@ module.exports.mergeIntoConfig = ({
         dependencies: config.packages[pkg].dependencies,
       };
     }
+
     return pkged;
   }, {});
 
   const commands = Object.keys(
-    command === "publish" ? pkgCommands : assembledChanges.releases
+    command !== "version" ? pkgCommands : assembledChanges.releases
   ).map(async (pkg) => {
+    if (!pkgCommands[pkg]) return null;
+
     const pkgs =
-      command === "publish" ? config.packages : assembledChanges.releases;
+      command !== "version" ? config.packages : assembledChanges.releases;
     const pipeToTemplate = {
       release: pkgs[pkg],
       pkg: pkgCommands[pkg],
     };
-    if (!pkgCommands[pkg]) return null;
 
     const extraPublishParams =
-      command !== "publish"
+      command == "version"
         ? {}
         : {
             pkgFile: await readPkgFile({
@@ -52449,7 +52453,7 @@ module.exports.mergeIntoConfig = ({
                 }),
           };
 
-    if (command === "publish" && !!extraPublishParams.pkgFile) {
+    if (command !== "version" && !!extraPublishParams.pkgFile) {
       pipeToTemplate.pkgFile = {
         name: extraPublishParams.pkgFile.name,
         version: extraPublishParams.pkgFile.version,
@@ -65357,10 +65361,17 @@ module.exports.covector = function* covector({
     const commands = yield mergeIntoConfig({
       assembledChanges,
       config,
-      command: "version",
+      command,
       dryRun,
     });
 
+    yield attemptCommands({
+      cwd,
+      commands,
+      commandPrefix: "pre",
+      command,
+      dryRun,
+    });
     const applied = yield apply({
       changeList: commands,
       config,
@@ -65374,18 +65385,30 @@ module.exports.covector = function* covector({
       cwd,
       create: !dryRun,
     });
+    yield attemptCommands({
+      cwd,
+      commands,
+      commandPrefix: "post",
+      command,
+      dryRun,
+    });
     return applied;
-  } else if (command === "publish") {
+  } else {
     yield raceTime();
     const commands = yield mergeIntoConfig({
       assembledChanges,
       config,
-      command: "publish",
+      command,
       cwd,
       dryRun,
     });
 
-    let published = Object.keys(config.packages).reduce((pkgs, pkg) => {
+    if (commands.length === 0) {
+      console.log(`No commands configured to run on [${command}].`);
+      return `No commands configured to run on [${command}].`;
+    }
+
+    let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
       pkgs[pkg] = false;
       return pkgs;
     }, {});
@@ -65394,25 +65417,25 @@ module.exports.covector = function* covector({
       cwd,
       commands,
       commandPrefix: "pre",
-      command: "publish",
+      command,
       dryRun,
     });
-    published = yield attemptCommands({
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
-      command: "publish",
-      published,
+      command,
+      pkgCommandsRan,
       dryRun,
     });
     yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "post",
-      command: "publish",
+      command,
       dryRun,
     });
 
-    return published;
+    return pkgCommandsRan;
   }
 };
 
@@ -65431,10 +65454,10 @@ const attemptCommands = function* ({
   commands,
   command,
   commandPrefix = "",
-  published,
+  pkgCommandsRan,
   dryRun,
 }) {
-  let _published = { ...published };
+  let _pkgCommandsRan = { ...pkgCommandsRan };
   for (let pkg of commands) {
     if (!!pkg.getPublishedVersion) {
       const version = runCommand({
@@ -65475,9 +65498,9 @@ const attemptCommands = function* ({
       }
     }
 
-    if (!!published) _published[pkg.pkg] = true;
+    if (!!pkgCommandsRan) _pkgCommandsRan[pkg.pkg] = true;
   }
-  return _published;
+  return _pkgCommandsRan;
 };
 
 const runCommand = function* ({
