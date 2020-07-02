@@ -1,5 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`package file apply bump bumps multi js json 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping yarn-workspace-base-pkg-a with minor",
+    ],
+    Array [
+      "bumping yarn-workspace-base-pkg-b with minor",
+    ],
+  ],
+}
+`;
+
 exports[`package file apply bump bumps multi rust toml 1`] = `
 Object {
   "consoleDir": Array [],
