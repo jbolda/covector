@@ -13,7 +13,14 @@ module.exports.fillChangelogs = async ({
   cwd,
   create = true,
 }) => {
-  const changelogs = await readAllChangelogs({ applied, config, cwd });
+  const changelogs = await readAllChangelogs({
+    applied: applied.reduce(
+      (final, current) => (!current.vfile ? final : final.concat([current])),
+      []
+    ),
+    config,
+    cwd,
+  });
   const writtenChanges = applyChanges({
     changelogs,
     assembledChanges,
