@@ -108,6 +108,52 @@ Object {
 }
 `;
 
+exports[`merge config test merges nested bumps 1`] = `
+Array [
+  Object {
+    "command": Array [
+      "true",
+    ],
+    "dependencies": Array [
+      "assemble1",
+      "all",
+    ],
+    "manager": undefined,
+    "path": "./packages/assemble1",
+    "pkg": "assemble1",
+    "postcommand": null,
+    "precommand": null,
+    "type": "minor",
+  },
+  Object {
+    "command": Array [
+      "true",
+    ],
+    "dependencies": Array [
+      "all",
+    ],
+    "manager": undefined,
+    "path": "./packages/assemble2",
+    "pkg": "assemble2",
+    "postcommand": null,
+    "precommand": null,
+    "type": "minor",
+  },
+  Object {
+    "command": Array [
+      "true",
+    ],
+    "dependencies": undefined,
+    "manager": undefined,
+    "path": undefined,
+    "pkg": "all",
+    "postcommand": null,
+    "precommand": null,
+    "type": "minor",
+  },
+]
+`;
+
 exports[`merge config test merges version 1`] = `
 Array [
   Object {

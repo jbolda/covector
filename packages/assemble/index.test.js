@@ -1,4 +1,4 @@
-const { assemble, mergeIntoConfig, removeSameGraphBumps } = require("./index");
+const { assemble, mergeIntoConfig } = require("./index");
 
 describe("assemble changes", () => {
   const testTextOne = `
@@ -45,117 +45,116 @@ This is a test.
   });
 });
 
+const assembledChanges = {
+  releases: {
+    "@namespaced/assemble2": {
+      changes: [
+        {
+          releases: {
+            "@namespaced/assemble2": "patch",
+            assemble1: "patch",
+          },
+          summary: "This is a test.",
+        },
+      ],
+      type: "patch",
+    },
+    assemble1: {
+      changes: [
+        {
+          releases: {
+            assemble1: "patch",
+            assemble2: "patch",
+          },
+          summary: "This is a test.",
+        },
+        {
+          releases: {
+            assemble1: "minor",
+            assemble2: "patch",
+          },
+          summary: "This is a test.",
+        },
+        {
+          releases: {
+            assemble1: "patch",
+            assemble2: "major",
+          },
+          summary: "This is a test.",
+        },
+        {
+          releases: {
+            "@namespaced/assemble2": "patch",
+            assemble1: "patch",
+          },
+          summary: "This is a test.",
+        },
+      ],
+      type: "minor",
+    },
+    assemble2: {
+      changes: [
+        {
+          releases: {
+            assemble1: "patch",
+            assemble2: "patch",
+          },
+          summary: "This is a test.",
+        },
+        {
+          releases: {
+            assemble1: "minor",
+            assemble2: "patch",
+          },
+          summary: "This is a test.",
+        },
+        {
+          releases: {
+            assemble1: "patch",
+            assemble2: "major",
+          },
+          summary: "This is a test.",
+        },
+      ],
+      type: "major",
+    },
+  },
+};
+
+const config = {
+  pkgManagers: {
+    javascript: {
+      version: "lerna version ${ release.type } --no-git-tag-version --no-push",
+      publish: "npm publish",
+    },
+  },
+  packages: {
+    assemble1: {
+      path: "./packages/assemble1",
+      manager: "javascript",
+    },
+    assemble2: {
+      path: "./packages/assemble2",
+      version: "lerna version ${ release.type }",
+    },
+    "@namespaced/assemble1": {
+      path: "./packages/namespaced-assemble2",
+      manager: "cargo",
+      version: "cargo version ${ release.type }",
+      publish: "cargo publish",
+      dependencies: ["assemble1"],
+    },
+    "@namespaced/assemble2": {
+      path: "./packages/namespaced-assemble2",
+      manager: "cargo",
+      version: "cargo version ${ release.type }",
+      publish: "cargo publish",
+      dependencies: ["assemble2"],
+    },
+  },
+};
+
 describe("merge config test", () => {
-  const assembledChanges = {
-    releases: {
-      "@namespaced/assemble2": {
-        changes: [
-          {
-            releases: {
-              "@namespaced/assemble2": "patch",
-              assemble1: "patch",
-            },
-            summary: "This is a test.",
-          },
-        ],
-        type: "patch",
-      },
-      assemble1: {
-        changes: [
-          {
-            releases: {
-              assemble1: "patch",
-              assemble2: "patch",
-            },
-            summary: "This is a test.",
-          },
-          {
-            releases: {
-              assemble1: "minor",
-              assemble2: "patch",
-            },
-            summary: "This is a test.",
-          },
-          {
-            releases: {
-              assemble1: "patch",
-              assemble2: "major",
-            },
-            summary: "This is a test.",
-          },
-          {
-            releases: {
-              "@namespaced/assemble2": "patch",
-              assemble1: "patch",
-            },
-            summary: "This is a test.",
-          },
-        ],
-        type: "minor",
-      },
-      assemble2: {
-        changes: [
-          {
-            releases: {
-              assemble1: "patch",
-              assemble2: "patch",
-            },
-            summary: "This is a test.",
-          },
-          {
-            releases: {
-              assemble1: "minor",
-              assemble2: "patch",
-            },
-            summary: "This is a test.",
-          },
-          {
-            releases: {
-              assemble1: "patch",
-              assemble2: "major",
-            },
-            summary: "This is a test.",
-          },
-        ],
-        type: "major",
-      },
-    },
-  };
-
-  const config = {
-    pkgManagers: {
-      javascript: {
-        version:
-          "lerna version ${ release.type } --no-git-tag-version --no-push",
-        publish: "npm publish",
-      },
-    },
-    packages: {
-      assemble1: {
-        path: "./packages/assemble1",
-        manager: "javascript",
-      },
-      assemble2: {
-        path: "./packages/assemble2",
-        version: "lerna version ${ release.type }",
-      },
-      "@namespaced/assemble1": {
-        path: "./packages/namespaced-assemble2",
-        manager: "cargo",
-        version: "cargo version ${ release.type }",
-        publish: "cargo publish",
-        dependencies: ["assemble1"],
-      },
-      "@namespaced/assemble2": {
-        path: "./packages/namespaced-assemble2",
-        manager: "cargo",
-        version: "cargo version ${ release.type }",
-        publish: "cargo publish",
-        dependencies: ["assemble2"],
-      },
-    },
-  };
-
   it("merges version", async () => {
     const mergedVersionConfig = await mergeIntoConfig({
       config,
@@ -175,6 +174,71 @@ describe("merge config test", () => {
     const mergedVersionConfig = await mergeIntoConfig({
       config: modifiedConfig,
       assembledChanges,
+      command: "version",
+    });
+    expect(mergedVersionConfig).toMatchSnapshot();
+  });
+
+  it("merges nested bumps", async () => {
+    const nestedAssembledChanges = {
+      releases: {
+        assemble1: {
+          changes: [
+            {
+              releases: {
+                assemble1: "patch",
+              },
+              summary: "This is a test.",
+            },
+          ],
+          type: "minor",
+        },
+        assemble2: {
+          changes: [
+            {
+              releases: {
+                all: "minor",
+              },
+              summary: "This is a test.",
+            },
+          ],
+          type: "minor",
+        },
+        all: {
+          changes: [
+            {
+              releases: {
+                all: "minor",
+              },
+              summary: "This is a test.",
+            },
+          ],
+          type: "minor",
+        },
+      },
+    };
+
+    const nestedConfig = {
+      packages: {
+        assemble1: {
+          path: "./packages/assemble1",
+          version: true,
+          dependencies: ["assemble1", "all"],
+        },
+        assemble2: {
+          path: "./packages/assemble2",
+          version: true,
+          dependencies: ["all"],
+        },
+        all: {
+          version: true,
+        },
+      },
+    };
+
+    const mergedVersionConfig = await mergeIntoConfig({
+      config: nestedConfig,
+      assembledChanges: nestedAssembledChanges,
       command: "version",
     });
     expect(mergedVersionConfig).toMatchSnapshot();
