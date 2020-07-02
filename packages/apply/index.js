@@ -38,7 +38,12 @@ module.exports.apply = function* ({
 
   const bumps = bumpAll({ changes, allPackages });
   if (bump) {
-    yield writeAll({ bumps });
+    yield writeAll({
+      bumps: bumps.reduce(
+        (final, current) => (!current.vfile ? final : final.concat([current])),
+        []
+      ),
+    });
   } else {
     bumps.forEach((b) => {
       if (!!b) console.log(`${b.name} planned to be bumped to ${b.version}`);
