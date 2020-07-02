@@ -1,50 +1,5 @@
 const { assemble, mergeIntoConfig } = require("./index");
 
-describe("assemble changes", () => {
-  const testTextOne = `
----
-"assemble1": patch
-"assemble2": patch
----
-    
-This is a test.
-`;
-  const testTextTwo = `
----
-"assemble1": minor
-"assemble2": patch
----
-    
-This is a test.
-`;
-  const testTextThree = `
----
-"assemble1": patch
-"assemble2": major
----
-    
-This is a test.
-`;
-  const testTextFour = `
----
-"assemble1": patch
-"@namespaced/assemble2": patch
----
-    
-This is a test.
-`;
-
-  it("runs", () => {
-    const assembled = assemble([
-      testTextOne,
-      testTextTwo,
-      testTextThree,
-      testTextFour,
-    ]);
-    expect(assembled).toMatchSnapshot();
-  });
-});
-
 const assembledChanges = {
   releases: {
     "@namespaced/assemble2": {
@@ -132,27 +87,89 @@ const config = {
     assemble1: {
       path: "./packages/assemble1",
       manager: "javascript",
+      dependencies: ["all"],
     },
     assemble2: {
       path: "./packages/assemble2",
       version: "lerna version ${ release.type }",
+      dependencies: ["all"],
     },
     "@namespaced/assemble1": {
       path: "./packages/namespaced-assemble2",
       manager: "cargo",
       version: "cargo version ${ release.type }",
       publish: "cargo publish",
-      dependencies: ["assemble1"],
+      dependencies: ["assemble1", "all"],
     },
     "@namespaced/assemble2": {
       path: "./packages/namespaced-assemble2",
       manager: "cargo",
       version: "cargo version ${ release.type }",
       publish: "cargo publish",
-      dependencies: ["assemble2"],
+      dependencies: ["assemble2", "all"],
+    },
+    all: {
+      version: true,
     },
   },
 };
+
+const testTextOne = `
+---
+"assemble1": patch
+"assemble2": patch
+---
+    
+This is a test.
+`;
+const testTextTwo = `
+---
+"assemble1": minor
+"assemble2": patch
+---
+    
+This is a test.
+`;
+const testTextThree = `
+---
+"assemble1": patch
+"assemble2": major
+---
+    
+This is a test.
+`;
+const testTextFour = `
+---
+"assemble1": patch
+"@namespaced/assemble2": patch
+---
+    
+This is a test.
+`;
+const testTextFive = `
+---
+"all": minor
+---
+  
+This is a test.
+`;
+
+describe("assemble changes", () => {
+  it("runs", () => {
+    const assembled = assemble([
+      testTextOne,
+      testTextTwo,
+      testTextThree,
+      testTextFour,
+    ]);
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("assembles deps", () => {
+    const assembled = assemble([testTextFive], config.packages);
+    expect(assembled).toMatchSnapshot();
+  });
+});
 
 describe("merge config test", () => {
   it("merges version", async () => {
