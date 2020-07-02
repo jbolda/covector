@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.0]
+
+-   Log change file deletes after all delete operations have been completed. This provides a stable output easier for testing.
+
 ## [0.0.8]
 
 -   Properly delete the change files in an order that is determinate.
