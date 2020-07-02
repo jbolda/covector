@@ -14,19 +14,20 @@ module.exports.fillChangelogs = async ({
   create = true,
 }) => {
   const changelogs = await readAllChangelogs({
-    applied,
-    packages: Object.keys(config.packages).reduce((final, pkg) => {
-      if (!!config.packages[pkg].path) {
-        final[pkg] = config.packages[pkg];
-      }
-      return final;
-    }, {}),
+    applied: applied.reduce(
+      (final, current) =>
+        !config.packages[current.name].path ? final : final.concat([current]),
+      []
+    ),
+    packages: config.packages,
     cwd,
   });
+
   const writtenChanges = applyChanges({
     changelogs,
     assembledChanges,
   });
+
   if (create) {
     return await writeAllChangelogs({ writtenChanges });
   } else {
