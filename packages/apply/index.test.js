@@ -101,14 +101,7 @@ describe("package file apply bump", () => {
         manager: "javascript",
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
-        type: "minor",
-      },
-      {
-        dependencies: ["all"],
-        manager: "javascript",
-        path: "./",
-        pkg: "yarn-workspace-base-pkg-b",
-        type: "minor",
+        type: "patch",
       },
       {
         dependencies: undefined,
@@ -124,10 +117,12 @@ describe("package file apply bump", () => {
         "yarn-workspace-base-pkg-a": {
           path: "./packages/pkg-a/",
           manager: "javascript",
+          dependencies: ["yarn-workspace-base-pkg-b", "all"],
         },
         "yarn-workspace-base-pkg-b": {
           path: "./packages/pkg-b/",
           manager: "javascript",
+          dependencies: ["all"],
         },
         all: { version: true },
       },

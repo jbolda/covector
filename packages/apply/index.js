@@ -17,7 +17,7 @@ module.exports.apply = function* ({
   }, {});
 
   Object.keys(changes).forEach((main) => {
-    if (!!changes[main].parents) {
+    if (changes[main].parents.length > 0) {
       changes[main].parents.forEach((pkg) => {
         if (!!changes[pkg]) {
           changes[pkg].type = compareBumps(
