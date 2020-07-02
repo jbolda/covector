@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.1.0]
+
+Bumped due to dependency.
+
 ## [0.0.3]
 
 Bumped due to dependency.

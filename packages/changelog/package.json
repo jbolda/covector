@@ -1,12 +1,12 @@
 {
   "name": "@covector/changelog",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "license": "Apache-2.0",
   "files": [
     "index.js"
   ],
   "dependencies": {
-    "@covector/files": "0.0.8",
+    "@covector/files": "0.1.0",
     "lodash.template": "^4.5.0",
     "remark-parse": "^8.0.2",
     "remark-stringify": "^8.1.0",
