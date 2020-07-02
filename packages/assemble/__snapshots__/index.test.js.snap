@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`assemble changes assembles deps 1`] = `
+Object {
+  "changes": Array [
+    Object {
+      "releases": Object {
+        "all": "minor",
+      },
+      "summary": "This is a test.",
+    },
+  ],
+  "releases": Object {
+    "all": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "all": "minor",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "minor",
+    },
+  },
+}
+`;
+
 exports[`assemble changes runs 1`] = `
 Object {
   "changes": Array [
@@ -162,6 +188,7 @@ Array [
     ],
     "dependencies": Array [
       "assemble2",
+      "all",
     ],
     "manager": "cargo",
     "path": "./packages/namespaced-assemble2",
@@ -174,7 +201,9 @@ Array [
     "command": Array [
       "lerna version minor --no-git-tag-version --no-push",
     ],
-    "dependencies": undefined,
+    "dependencies": Array [
+      "all",
+    ],
     "manager": "javascript",
     "path": "./packages/assemble1",
     "pkg": "assemble1",
@@ -186,7 +215,9 @@ Array [
     "command": Array [
       "lerna version major",
     ],
-    "dependencies": undefined,
+    "dependencies": Array [
+      "all",
+    ],
     "manager": undefined,
     "path": "./packages/assemble2",
     "pkg": "assemble2",
