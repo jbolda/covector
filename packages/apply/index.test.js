@@ -92,6 +92,74 @@ describe("package file apply bump", () => {
     }).toMatchSnapshot();
   });
 
+  it("bumps multi js json", function* () {
+    const jsonFolder = f.copy("pkg.js-yarn-workspace");
+
+    const changeList = [
+      {
+        dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        manager: "javascript",
+        path: "./",
+        pkg: "yarn-workspace-base-pkg-a",
+        type: "patch",
+      },
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: undefined,
+        pkg: "all",
+        type: "minor",
+      },
+    ];
+
+    const config = {
+      packages: {
+        "yarn-workspace-base-pkg-a": {
+          path: "./packages/pkg-a/",
+          manager: "javascript",
+          dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        },
+        "yarn-workspace-base-pkg-b": {
+          path: "./packages/pkg-b/",
+          manager: "javascript",
+          dependencies: ["all"],
+        },
+        all: { version: true },
+      },
+    };
+
+    yield apply({ changeList, config, cwd: jsonFolder });
+    const modifiedPkgAVFile = yield toVFile.read(
+      jsonFolder + "/packages/pkg-a/package.json",
+      "utf-8"
+    );
+    expect(modifiedPkgAVFile.contents).toBe(
+      "{\n" +
+        '  "name": "yarn-workspace-base-pkg-a",\n' +
+        '  "version": "1.1.0",\n' +
+        '  "dependencies": {\n' +
+        '    "yarn-workspace-base-pkg-b": "1.1.0"\n' +
+        "  }\n" +
+        "}\n"
+    );
+
+    const modifiedPkgBVFile = yield toVFile.read(
+      jsonFolder + "/packages/pkg-b/package.json",
+      "utf-8"
+    );
+    expect(modifiedPkgBVFile.contents).toBe(
+      "{\n" +
+        '  "name": "yarn-workspace-base-pkg-b",\n' +
+        '  "version": "1.1.0"\n' +
+        "}\n"
+    );
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+
   it("bumps multi rust toml", function* () {
     const rustFolder = f.copy("pkg.rust-multi");
 

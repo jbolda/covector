@@ -52,7 +52,7 @@
       "dependencies": ["covector"]
     },
     "all": {
-      "version": false,
+      "version": true,
       "publish": false
     }
   }

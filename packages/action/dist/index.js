@@ -16922,11 +16922,21 @@ module.exports.fillChangelogs = async ({
   cwd,
   create = true,
 }) => {
-  const changelogs = await readAllChangelogs({ applied, config, cwd });
+  const changelogs = await readAllChangelogs({
+    applied: applied.reduce(
+      (final, current) =>
+        !config.packages[current.name].path ? final : final.concat([current]),
+      []
+    ),
+    packages: config.packages,
+    cwd,
+  });
+
   const writtenChanges = applyChanges({
     changelogs,
     assembledChanges,
   });
+
   if (create) {
     return await writeAllChangelogs({ writtenChanges });
   } else {
@@ -16934,12 +16944,12 @@ module.exports.fillChangelogs = async ({
   }
 };
 
-const readAllChangelogs = ({ applied, config, cwd }) => {
+const readAllChangelogs = ({ applied, packages, cwd }) => {
   return Promise.all(
     applied.map((change) =>
       readChangelog({
         change,
-        cwd: path.join(cwd, config.packages[change.name].path),
+        cwd: path.join(cwd, packages[change.name].path),
       })
     )
   ).then((changelogs) =>
@@ -29223,7 +29233,7 @@ module.exports.apply = function* ({
   }, {});
 
   Object.keys(changes).forEach((main) => {
-    if (!!changes[main].parents) {
+    if (changes[main].parents.length > 0) {
       changes[main].parents.forEach((pkg) => {
         if (!!changes[pkg]) {
           changes[pkg].type = compareBumps(
@@ -29244,11 +29254,16 @@ module.exports.apply = function* ({
 
   const bumps = bumpAll({ changes, allPackages });
   if (bump) {
-    yield writeAll({ bumps });
+    yield writeAll({
+      bumps: bumps.reduce(
+        (final, current) => (!current.vfile ? final : final.concat([current])),
+        []
+      ),
+    });
   } else {
-    bumps.forEach((b) =>
-      console.log(`${b.name} planned to be bumped to ${b.version}`)
-    );
+    bumps.forEach((b) => {
+      if (!!b) console.log(`${b.name} planned to be bumped to ${b.version}`);
+    });
   }
   return bumps;
 };
@@ -29264,17 +29279,19 @@ const readAll = async ({ changes, config, cwd = process.cwd() }) => {
   const pkgs = Object.keys(files);
   const pkgFiles = await Promise.all(
     Object.keys(files).map((pkg) =>
-      readPkgFile({
-        file: path.join(
-          cwd,
-          config.packages[pkg].path,
-          !!config.packages[pkg].manager &&
-            config.packages[pkg].manager === "rust"
-            ? "Cargo.toml"
-            : "package.json"
-        ),
-        nickname: pkg,
-      })
+      !config.packages[pkg].path
+        ? { name: pkg }
+        : readPkgFile({
+            file: path.join(
+              cwd,
+              config.packages[pkg].path,
+              !!config.packages[pkg].manager &&
+                config.packages[pkg].manager === "rust"
+                ? "Cargo.toml"
+                : "package.json"
+            ),
+            nickname: pkg,
+          })
     )
   );
 
@@ -29307,6 +29324,7 @@ const resolveParents = ({ config }) => {
 const bumpAll = ({ changes, allPackages }) => {
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
+    if (!packageFiles[pkg].vfile) continue;
     console.log(`bumping ${pkg} with ${changes[pkg].type}`);
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
@@ -52417,6 +52435,7 @@ module.exports.mergeIntoConfig = ({
     return pkged;
   }, {});
 
+  const pipeOutput = {};
   const commands = Object.keys(
     command !== "version" ? pkgCommands : assembledChanges.releases
   ).map(async (pkg) => {
@@ -52462,7 +52481,9 @@ module.exports.mergeIntoConfig = ({
     }
 
     if (dryRun) {
-      console.log(pkg, "pipe", pipeToTemplate);
+      pipeOutput[pkg] = {};
+      pipeOutput[pkg].name = pkg;
+      pipeOutput[pkg].pipe = pipeToTemplate;
     }
 
     const merged = {
@@ -52482,6 +52503,11 @@ module.exports.mergeIntoConfig = ({
 
     return merged;
   });
+
+  if (dryRun)
+    Object.keys(pipeOutput).forEach((pkg) =>
+      console.log(pkg, "pipe", pipeOutput[pkg].pipe)
+    );
 
   return Promise.all(commands).then((values) =>
     values.reduce(

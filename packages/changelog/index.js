@@ -13,11 +13,21 @@ module.exports.fillChangelogs = async ({
   cwd,
   create = true,
 }) => {
-  const changelogs = await readAllChangelogs({ applied, config, cwd });
+  const changelogs = await readAllChangelogs({
+    applied: applied.reduce(
+      (final, current) =>
+        !config.packages[current.name].path ? final : final.concat([current]),
+      []
+    ),
+    packages: config.packages,
+    cwd,
+  });
+
   const writtenChanges = applyChanges({
     changelogs,
     assembledChanges,
   });
+
   if (create) {
     return await writeAllChangelogs({ writtenChanges });
   } else {
@@ -25,12 +35,12 @@ module.exports.fillChangelogs = async ({
   }
 };
 
-const readAllChangelogs = ({ applied, config, cwd }) => {
+const readAllChangelogs = ({ applied, packages, cwd }) => {
   return Promise.all(
     applied.map((change) =>
       readChangelog({
         change,
-        cwd: path.join(cwd, config.packages[change.name].path),
+        cwd: path.join(cwd, packages[change.name].path),
       })
     )
   ).then((changelogs) =>
