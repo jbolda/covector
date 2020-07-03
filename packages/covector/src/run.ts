@@ -1,17 +1,21 @@
-const { spawn, timeout } = require("effection");
-const execa = require("execa");
-const { once, on } = require("@effection/events");
-const { configFile, changeFiles } = require("@covector/files");
-const { assemble, mergeIntoConfig } = require("@covector/assemble");
-const { fillChangelogs } = require("@covector/changelog");
-const { apply } = require("@covector/apply");
-const path = require("path");
+import { spawn, timeout } from "effection"
+import execa from "execa"
+// @ts-ignore
+import { configFile, changeFiles } from "@covector/files"
+// @ts-ignore
+import { assemble, mergeIntoConfig } from "@covector/assemble"
+// @ts-ignore
+import { fillChangelogs } from "@covector/changelog"
+// @ts-ignore
+import { apply } from "@covector/apply"
+import path from "path"
 
-module.exports.covector = function* covector({
+
+export function* covector({
   command,
   dryRun = false,
   cwd = process.cwd(),
-}) {
+}: { command: string, dryRun: boolean, cwd?: string }) {
   const config = yield configFile({ cwd });
   const changesArray = yield changeFiles({
     cwd,
@@ -31,10 +35,10 @@ module.exports.covector = function* covector({
       });
       return `There are ${
         Object.keys(assembledChanges.releases).length
-      } changes which include${Object.keys(assembledChanges.releases).map(
-        (release) =>
-          ` ${release} with ${assembledChanges.releases[release].type}`
-      )}`;
+        } changes which include${Object.keys(assembledChanges.releases).map(
+          (release) =>
+            ` ${release} with ${assembledChanges.releases[release].type}`
+        )}`;
     }
   } else if (command === "config") {
     delete config.vfile;
@@ -91,7 +95,7 @@ module.exports.covector = function* covector({
       return `No commands configured to run on [${command}].`;
     }
 
-    let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
+    let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs: any, pkg: string): object => {
       pkgs[pkg] = false;
       return pkgs;
     }, {});
@@ -123,8 +127,8 @@ module.exports.covector = function* covector({
 };
 
 function raceTime(
-  t = 120000,
-  msg = `timeout out waiting ${t / 1000}s for command`
+  t: number = 120000,
+  msg: string = `timeout out waiting ${t / 1000}s for command`
 ) {
   return spawn(function* () {
     yield timeout(t);
@@ -132,13 +136,20 @@ function raceTime(
   });
 }
 
-const attemptCommands = function* ({
+function* attemptCommands({
   cwd,
   commands,
   command,
   commandPrefix = "",
   pkgCommandsRan,
   dryRun,
+}: {
+  cwd: string,
+  commands: any,
+  command: string,
+  commandPrefix?: string,
+  pkgCommandsRan?: any,
+  dryRun: boolean
 }) {
   let _pkgCommandsRan = { ...pkgCommandsRan };
   for (let pkg of commands) {
@@ -186,13 +197,20 @@ const attemptCommands = function* ({
   return _pkgCommandsRan;
 };
 
-const runCommand = function* ({
+function* runCommand({
   pkg,
   command,
   cwd,
   pkgPath,
   stdio = "pipe",
   log = `running command for ${pkg}`,
+}: {
+  pkg: string,
+  command: string,
+  cwd: string,
+  pkgPath: string,
+  stdio?: string,
+  log: string,
 }) {
   let child;
   try {
