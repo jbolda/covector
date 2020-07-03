@@ -10,6 +10,9 @@
   "bin": {
     "covector": "./bin/covector.js"
   },
+  "scripts": {
+    "build": "rollup --config"
+  },
   "dependencies": {
     "@covector/apply": "0.1.0",
     "@covector/assemble": "0.1.0",
@@ -20,5 +23,13 @@
     "effection": "0.7.0",
     "execa": "^4.0.2",
     "yargs": "^15.3.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^13.0.0",
+    "@rollup/plugin-node-resolve": "^8.1.0",
+    "@rollup/plugin-typescript": "^5.0.1",
+    "rollup": "^2.18.2",
+    "tslib": "^2.0.0",
+    "typescript": "^3.9.6"
   }
 }

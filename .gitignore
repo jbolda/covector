@@ -42,3 +42,6 @@ target
 
 # lockfiles, as a lib we don't need to lock
 yarn.lock
+
+# rollup output
+dist
