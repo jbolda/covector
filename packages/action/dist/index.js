@@ -65486,7 +65486,7 @@ const attemptCommands = function* ({
   let _pkgCommandsRan = { ...pkgCommandsRan };
   for (let pkg of commands) {
     if (!!pkg.getPublishedVersion) {
-      const version = runCommand({
+      const version = yield runCommand({
         command: pkg.getPublishedVersion,
         cwd,
         pkg: pkg.pkg,
