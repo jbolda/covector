@@ -1,15 +1,46 @@
-const vfile = require("to-vfile");
-const globby = require("globby");
-const fs = require("fs");
-const path = require("path");
-const TOML = require("@tauri-apps/toml");
+// @ts-ignore
+import vfile from "to-vfile"
+import globby from "globby"
+import fs from "fs"
+import path from "path"
+import TOML from "@tauri-apps/toml"
 
-const parsePkg = (file) => {
+interface VFile {
+  contents: string,
+  path: string,
+  extname: string,
+}
+
+interface Pkg {
+  name: string,
+  version: string,
+  dependencies?: object
+}
+
+interface PkgMinimum {
+  version: string,
+  pkg: Pkg,
+}
+
+interface PackageFile extends PkgMinimum {
+  vfile: VFile,
+  name: string,
+}
+
+type ConfigFile = {
+  vfile: VFile,
+  packages: {},
+  pkgManagers: {},
+}
+
+const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
   switch (file.extname) {
     case ".toml":
       const parsedTOML = TOML.parse(file.contents);
       return {
+        // @ts-ignore
         version: parsedTOML.package.version,
+        // @ts-ignore
         pkg: parsedTOML,
       };
     case ".json":
@@ -19,9 +50,10 @@ const parsePkg = (file) => {
         pkg: parsedJSON,
       };
   }
+  throw new Error("Unknown package file type.");
 };
 
-const stringifyPkg = ({ newContents, extname }) => {
+const stringifyPkg = ({ newContents, extname }: { newContents: any, extname: string }): string => {
   switch (extname) {
     case ".toml":
       return TOML.stringify(newContents);
@@ -31,7 +63,7 @@ const stringifyPkg = ({ newContents, extname }) => {
   throw new Error("Unknown package file type.");
 };
 
-module.exports.readPkgFile = async ({ file, nickname }) => {
+module.exports.readPkgFile = async ({ file, nickname }: { file: string, nickname: string }): Promise<PackageFile> => {
   const inputVfile = await vfile.read(file, "utf8");
   const parsed = parsePkg(inputVfile);
   return {
@@ -41,7 +73,7 @@ module.exports.readPkgFile = async ({ file, nickname }) => {
   };
 };
 
-module.exports.writePkgFile = async ({ packageFile }) => {
+module.exports.writePkgFile = async ({ packageFile }: { packageFile: PackageFile }): Promise<VFile> => {
   const vFileNext = { ...packageFile.vfile };
   vFileNext.contents = stringifyPkg({
     newContents: packageFile.pkg,
@@ -51,7 +83,7 @@ module.exports.writePkgFile = async ({ packageFile }) => {
   return inputVfile;
 };
 
-module.exports.configFile = async ({ cwd, changeFolder = ".changes" }) => {
+module.exports.configFile = async ({ cwd, changeFolder = ".changes" }: { cwd: string, changeFolder: string }): Promise<ConfigFile> => {
   const inputVfile = await vfile.read(
     path.join(cwd, changeFolder, "config.json"),
     "utf8"
@@ -67,7 +99,7 @@ module.exports.changeFiles = async ({
   cwd,
   changeFolder = ".changes",
   remove = true,
-}) => {
+}: { cwd: string, changeFolder: string, remove: boolean }): Promise<VFile[]> => {
   const paths = await globby(
     [
       path.posix.join(changeFolder, "*.md"),
@@ -102,7 +134,7 @@ module.exports.changeFiles = async ({
   return vfiles;
 };
 
-module.exports.readChangelog = async ({ cwd }) => {
+module.exports.readChangelog = async ({ cwd }: { cwd: string }): Promise<VFile> => {
   let file = null;
   try {
     file = await vfile.read(path.join(cwd, "CHANGELOG.md"), "utf8");
@@ -116,7 +148,7 @@ module.exports.readChangelog = async ({ cwd }) => {
   return file;
 };
 
-module.exports.writeChangelog = async ({ changelog }) => {
+module.exports.writeChangelog = async ({ changelog }: { changelog: VFile }): Promise<VFile> => {
   const inputVfile = await vfile.write(changelog, "utf8");
   return inputVfile;
 };
