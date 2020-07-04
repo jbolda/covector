@@ -90,19 +90,49 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
+      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
+    ],
+    Array [
       "dryRun >> tauri-bundler [prepublish]: echo premode for tauri-bundler",
     ],
     Array [
-      "dryRun >> tauri [prepublish]: echo premode for tauri",
+      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
+    ],
+    Array [
+      "tauri@0.5.2 is already published. Skipping.",
+    ],
+    Array [
+      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-api [prepublish]: echo premode for tauri-api",
+    ],
+    Array [
+      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-utils [prepublish]: echo premode for tauri-utils",
     ],
     Array [
       "dryRun >> tauri.js [publish]: echo publishing tauri.js would happen here",
+    ],
+    Array [
+      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
@@ -114,13 +144,19 @@ Object {
       "dryRun >> tauri-bundler [publish]: ls",
     ],
     Array [
-      "dryRun >> tauri [publish]: echo publishing tauri would happen here",
+      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
     ],
     Array [
-      "dryRun >> tauri [publish]: echo running in ./tauri",
+      "0.5.2",
     ],
     Array [
-      "dryRun >> tauri [publish]: ls",
+      "tauri@0.5.2 is already published. Skipping.",
+    ],
+    Array [
+      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-api [publish]: echo publishing tauri-api would happen here",
@@ -132,6 +168,12 @@ Object {
       "dryRun >> tauri-api [publish]: ls",
     ],
     Array [
+      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
+    ],
+    Array [
       "dryRun >> tauri-utils [publish]: echo publishing tauri-utils would happen here",
     ],
     Array [
@@ -141,20 +183,44 @@ Object {
       "dryRun >> tauri-utils [publish]: ls",
     ],
     Array [
+      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
+    ],
+    Array [
       "dryRun >> tauri-bundler [postpublish]: echo postmode for tauri-bundler",
     ],
     Array [
-      "dryRun >> tauri [postpublish]: echo postmode for tauri",
+      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
+    ],
+    Array [
+      "tauri@0.5.2 is already published. Skipping.",
+    ],
+    Array [
+      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-api [postpublish]: echo postmode for tauri-api",
+    ],
+    Array [
+      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-utils [postpublish]: echo postmode for tauri-utils",
     ],
   ],
   "covectorReturn": Object {
-    "tauri": true,
+    "tauri": false,
     "tauri-api": true,
     "tauri-bundler": true,
     "tauri-updater": false,
