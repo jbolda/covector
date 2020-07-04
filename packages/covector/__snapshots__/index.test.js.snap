@@ -676,22 +676,43 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
+      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
+    ],
+    Array [
       "tauri-bundler [prepublish]: echo premode for tauri-bundler",
     ],
     Array [
       "premode for tauri-bundler",
     ],
     Array [
-      "tauri [prepublish]: echo premode for tauri",
+      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
     ],
     Array [
-      "premode for tauri",
+      "0.5.2",
+    ],
+    Array [
+      "tauri@0.5.2 is already published. Skipping.",
+    ],
+    Array [
+      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "tauri-api [prepublish]: echo premode for tauri-api",
     ],
     Array [
       "premode for tauri-api",
+    ],
+    Array [
+      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "tauri-utils [prepublish]: echo premode for tauri-utils",
@@ -704,6 +725,12 @@ Object {
     ],
     Array [
       "publishing tauri.js would happen here",
+    ],
+    Array [
+      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
@@ -724,22 +751,19 @@ Object {
       "Cargo.toml",
     ],
     Array [
-      "tauri [publish]: echo publishing tauri would happen here",
+      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
     ],
     Array [
-      "publishing tauri would happen here",
+      "0.5.2",
     ],
     Array [
-      "tauri [publish]: echo running in ./tauri",
+      "tauri@0.5.2 is already published. Skipping.",
     ],
     Array [
-      "running in ./tauri",
+      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
     ],
     Array [
-      "tauri [publish]: ls",
-    ],
-    Array [
-      "Cargo.toml",
+      "0.5.2",
     ],
     Array [
       "tauri-api [publish]: echo publishing tauri-api would happen here",
@@ -760,6 +784,12 @@ Object {
       "Cargo.toml",
     ],
     Array [
+      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
+    ],
+    Array [
       "tauri-utils [publish]: echo publishing tauri-utils would happen here",
     ],
     Array [
@@ -778,22 +808,43 @@ Object {
       "Cargo.toml",
     ],
     Array [
+      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
+    ],
+    Array [
       "tauri-bundler [postpublish]: echo postmode for tauri-bundler",
     ],
     Array [
       "postmode for tauri-bundler",
     ],
     Array [
-      "tauri [postpublish]: echo postmode for tauri",
+      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
     ],
     Array [
-      "postmode for tauri",
+      "0.5.2",
+    ],
+    Array [
+      "tauri@0.5.2 is already published. Skipping.",
+    ],
+    Array [
+      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "tauri-api [postpublish]: echo postmode for tauri-api",
     ],
     Array [
       "postmode for tauri-api",
+    ],
+    Array [
+      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+    ],
+    Array [
+      "0.5.2",
     ],
     Array [
       "tauri-utils [postpublish]: echo postmode for tauri-utils",
@@ -803,7 +854,7 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "tauri": true,
+    "tauri": false,
     "tauri-api": true,
     "tauri-bundler": true,
     "tauri-updater": false,
