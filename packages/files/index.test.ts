@@ -1,6 +1,6 @@
-const { readPkgFile, configFile, changeFiles } = require("./index");
-const mockConsole = require("jest-mock-console");
-const fixtures = require("fixturez");
+import { readPkgFile, configFile, changeFiles } from "./index"
+import mockConsole from "jest-mock-console"
+import fixtures from "fixturez"
 const f = fixtures(__dirname);
 
 describe("file test", () => {

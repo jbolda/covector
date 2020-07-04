@@ -16,6 +16,7 @@
     "to-vfile": "^6.1.0"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.3",
     "fixturez": "^1.1.0"
   }
 }
