@@ -63,7 +63,7 @@ const stringifyPkg = ({ newContents, extname }: { newContents: any, extname: str
   throw new Error("Unknown package file type.");
 };
 
-module.exports.readPkgFile = async ({ file, nickname }: { file: string, nickname: string }): Promise<PackageFile> => {
+export const readPkgFile = async ({ file, nickname }: { file: string, nickname: string }): Promise<PackageFile> => {
   const inputVfile = await vfile.read(file, "utf8");
   const parsed = parsePkg(inputVfile);
   return {
@@ -73,7 +73,7 @@ module.exports.readPkgFile = async ({ file, nickname }: { file: string, nickname
   };
 };
 
-module.exports.writePkgFile = async ({ packageFile }: { packageFile: PackageFile }): Promise<VFile> => {
+export const writePkgFile = async ({ packageFile }: { packageFile: PackageFile }): Promise<VFile> => {
   const vFileNext = { ...packageFile.vfile };
   vFileNext.contents = stringifyPkg({
     newContents: packageFile.pkg,
@@ -83,7 +83,7 @@ module.exports.writePkgFile = async ({ packageFile }: { packageFile: PackageFile
   return inputVfile;
 };
 
-module.exports.configFile = async ({ cwd, changeFolder = ".changes" }: { cwd: string, changeFolder: string }): Promise<ConfigFile> => {
+export const configFile = async ({ cwd, changeFolder = ".changes" }: { cwd: string, changeFolder: string }): Promise<ConfigFile> => {
   const inputVfile = await vfile.read(
     path.join(cwd, changeFolder, "config.json"),
     "utf8"
@@ -95,7 +95,7 @@ module.exports.configFile = async ({ cwd, changeFolder = ".changes" }: { cwd: st
   };
 };
 
-module.exports.changeFiles = async ({
+export const changeFiles = async ({
   cwd,
   changeFolder = ".changes",
   remove = true,
@@ -134,7 +134,7 @@ module.exports.changeFiles = async ({
   return vfiles;
 };
 
-module.exports.readChangelog = async ({ cwd }: { cwd: string }): Promise<VFile> => {
+export const readChangelog = async ({ cwd }: { cwd: string }): Promise<VFile> => {
   let file = null;
   try {
     file = await vfile.read(path.join(cwd, "CHANGELOG.md"), "utf8");
@@ -148,7 +148,7 @@ module.exports.readChangelog = async ({ cwd }: { cwd: string }): Promise<VFile> 
   return file;
 };
 
-module.exports.writeChangelog = async ({ changelog }: { changelog: VFile }): Promise<VFile> => {
+export const writeChangelog = async ({ changelog }: { changelog: VFile }): Promise<VFile> => {
   const inputVfile = await vfile.write(changelog, "utf8");
   return inputVfile;
 };
