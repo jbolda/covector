@@ -59,7 +59,9 @@ describe("integration test in production mode", () => {
       "utf-8"
     );
     expect(changelogTaurijs.contents).toBe(
-      "# Changelog\n\n" + "## [0.7.0]\n\n" + "Bumped due to dependency.\n"
+      "# Changelog\n\n" +
+        "## [0.7.0]\n\n" +
+        "-   Summary about the changes in tauri\n"
     );
 
     restoreConsole();
