@@ -41,3 +41,11 @@ Given a version number MAJOR.MINOR.PATCH, increment the:
 - PATCH version when you make backwards compatible bug fixes.
 
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format, but will be discussed prior to usage (as extra steps will be necessary in consideration of merging and publishing).
+
+## Power of Configuration
+
+Covector is driven by your configuration, and creates rather open ended use cases. The two to level properties are `packages` and `pkgManagers`. The `packages` is an object of your packages with the key being name of your package (or even a nickname!), a `path` to it's folder, the package `manager`, and an array of `dependencies` if applicable (which operates across languages too!).
+
+Each package is driven by commands. When using a command such as `covector publish`, we look up the relevant command for each package and run it, `publish` in this instance. Managing your changes are never that easy though. We support an array of commands letting you chain multiple commands together for each package. Even more, we support both `pre` and `post` versions of your commands both which accept arrays of commands. Running a Typescript build, tests, an audit, publishing the packages and applying git tags is no longer too complex of a workflow.
+
+To those of you using a monorepo with multiple packages, the `pkgManagers` will be quite useful. Each package can opt into a package `manager` that matches a key in `pkgManagers`. Specifying a command in a `pkgManager` will apply to all packages with that `manager` key if the package hasn't specified the command.
