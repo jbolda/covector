@@ -4,7 +4,7 @@ const { once, on } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { fillChangelogs } = require("@covector/changelog");
-const { apply } = require("@covector/apply");
+const { apply, changesConsideringParents } = require("@covector/apply");
 const path = require("path");
 
 module.exports.covector = function* covector({
@@ -41,8 +41,12 @@ module.exports.covector = function* covector({
     return console.dir(config);
   } else if (command === "version") {
     yield raceTime();
-    const commands = yield mergeIntoConfig({
+    const changes = changesConsideringParents({
       assembledChanges,
+      config,
+    });
+    const commands = yield mergeIntoConfig({
+      assembledChanges: changes,
       config,
       command,
       dryRun,
@@ -56,14 +60,14 @@ module.exports.covector = function* covector({
       dryRun,
     });
     const applied = yield apply({
-      changeList: commands,
+      commands,
       config,
       cwd,
       bump: !dryRun,
     });
     yield fillChangelogs({
       applied,
-      assembledChanges,
+      assembledChanges: changes,
       config,
       cwd,
       create: !dryRun,
@@ -159,7 +163,6 @@ const attemptCommands = function* ({
         continue;
       }
     }
-
     if (!pkg[`${commandPrefix}command`]) continue;
     const pubCommands =
       typeof pkg[`${commandPrefix}command`] === "string"

@@ -4,36 +4,15 @@ const semver = require("semver");
 const path = require("path");
 
 module.exports.apply = function* ({
-  changeList,
+  commands,
   config,
   cwd = process.cwd(),
   bump = true,
 }) {
-  const parents = resolveParents({ config });
-  let changes = changeList.reduce((list, change) => {
-    list[change.pkg] = change;
-    list[change.pkg].parents = parents[change.pkg];
-    return list;
+  const changes = commands.reduce((finalChanges, command) => {
+    finalChanges[command.pkg] = command;
+    return finalChanges;
   }, {});
-
-  Object.keys(changes).forEach((main) => {
-    if (changes[main].parents.length > 0) {
-      changes[main].parents.forEach((pkg) => {
-        if (!!changes[pkg]) {
-          changes[pkg].type = compareBumps(
-            changes[main].type,
-            changes[pkg].type
-          );
-        } else {
-          changes[pkg] = config.packages[pkg];
-          changes[pkg].parents = [];
-          changes[pkg].pkg = pkg;
-          changes[pkg].type = changes[main].type;
-        }
-      });
-    }
-  });
-
   let allPackages = yield readAll({ changes, config, cwd });
 
   const bumps = bumpAll({ changes, allPackages });
@@ -103,6 +82,37 @@ const resolveParents = ({ config }) => {
     });
     return parents;
   }, {});
+};
+
+module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
+  const parents = resolveParents({ config });
+
+  let changes = Object.keys(assembledChanges.releases).reduce(
+    (list, change) => {
+      list[change] = assembledChanges.releases[change];
+      list[change].parents = parents[change];
+      return list;
+    },
+    {}
+  );
+
+  Object.keys(changes).forEach((main) => {
+    if (changes[main].parents.length > 0) {
+      changes[main].parents.forEach((pkg) => {
+        if (!!changes[pkg]) {
+          changes[pkg].type = compareBumps(
+            changes[main].type,
+            changes[pkg].type
+          );
+        } else {
+          changes[pkg] = { ...changes[main] };
+          changes[pkg].parents = parents[pkg];
+        }
+      });
+    }
+  });
+
+  return { releases: changes, changes: assembledChanges.changes };
 };
 
 const bumpAll = ({ changes, allPackages }) => {

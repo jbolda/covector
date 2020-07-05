@@ -164,6 +164,7 @@ module.exports.mergeIntoConfig = ({
 
     const merged = {
       pkg,
+      ...(!pkgs[pkg].parents ? {} : { parents: pkgs[pkg].parents }),
       ...extraPublishParams,
       path: pkgCommands[pkg].path,
       type: pkgs[pkg].type || null,
@@ -176,7 +177,6 @@ module.exports.mergeIntoConfig = ({
         pipeToTemplate
       ),
     };
-
     return merged;
   });
 
