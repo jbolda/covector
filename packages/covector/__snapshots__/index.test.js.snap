@@ -270,6 +270,9 @@ Object {
               "summary": "Summary about the changes in tauri",
             },
           ],
+          "parents": Array [
+            "tauri.js",
+          ],
           "type": "minor",
         },
       },
@@ -296,7 +299,37 @@ Object {
               "summary": "Summary about the changes in tauri-updater",
             },
           ],
+          "parents": Array [],
           "type": "patch",
+        },
+      },
+    ],
+    Array [
+      "tauri.js",
+      "pipe",
+      Object {
+        "pkg": Object {
+          "command": true,
+          "dependencies": Array [
+            "tauri",
+          ],
+          "manager": "javascript",
+          "path": "./cli/tauri.js",
+          "pkg": "tauri.js",
+          "postcommand": null,
+          "precommand": null,
+        },
+        "release": Object {
+          "changes": Array [
+            Object {
+              "releases": Object {
+                "tauri": "minor",
+              },
+              "summary": "Summary about the changes in tauri",
+            },
+          ],
+          "parents": Array [],
+          "type": "minor",
         },
       },
     ],
