@@ -1,6 +1,6 @@
 ---
 "covector": patch
-"@covector/apply": patch
+"@covector/apply": minor
 "@covector/assemble": patch
 ---
 
