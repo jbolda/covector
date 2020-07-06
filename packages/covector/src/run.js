@@ -96,15 +96,16 @@ module.exports.covector = function* covector({
     }
 
     let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
-      pkgs[pkg] = false;
+      pkgs[pkg] = { precommand: false, command: false, postcommand: false };
       return pkgs;
     }, {});
 
-    yield attemptCommands({
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "pre",
       command,
+      pkgCommandsRan,
       dryRun,
     });
     pkgCommandsRan = yield attemptCommands({
@@ -114,11 +115,12 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       dryRun,
     });
-    yield attemptCommands({
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "post",
       command,
+      pkgCommandsRan,
       dryRun,
     });
 
@@ -165,18 +167,26 @@ const attemptCommands = function* ({
     }
     if (!pkg[`${commandPrefix}command`]) continue;
     const pubCommands =
-      typeof pkg[`${commandPrefix}command`] === "string"
+      typeof pkg[`${commandPrefix}command`] === "string" ||
+      !Array.isArray(pkg[`${commandPrefix}command`])
         ? [pkg[`${commandPrefix}command`]]
         : pkg[`${commandPrefix}command`];
+    let stdout = "";
     for (let pubCommand of pubCommands) {
+      const runningCommand =
+        typeof pubCommand === "object" ? pubCommand.command : pubCommand;
       if (!dryRun) {
-        yield runCommand({
-          command: pubCommand,
+        const ranCommand = yield runCommand({
+          command: runningCommand,
           cwd,
           pkg: pkg.pkg,
           pkgPath: pkg.path,
-          log: `${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`,
+          log: `${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand}`,
         });
+
+        if (pubCommand.pipe) {
+          stdout = `${stdout}${ranCommand}\n`;
+        }
       } else {
         console.log(
           `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`
@@ -184,7 +194,9 @@ const attemptCommands = function* ({
       }
     }
 
-    if (!!pkgCommandsRan) _pkgCommandsRan[pkg.pkg] = true;
+    if (!!pkgCommandsRan)
+      _pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] =
+        stdout !== "" ? stdout : true;
   }
   return _pkgCommandsRan;
 };
@@ -205,10 +217,11 @@ const runCommand = function* ({
         cwd: path.join(cwd, pkgPath),
         shell: process.env.shell || true,
         windowsHide: true,
+        all: true,
       });
 
-      console.log(child.stdout);
-      return child.stdout;
+      console.log(child.all);
+      return child.all;
     };
   } catch (error) {
     throw error;

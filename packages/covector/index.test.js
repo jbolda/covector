@@ -250,12 +250,11 @@ describe("integration test in --dry-run mode", () => {
 describe("integration test for complex commands", () => {
   it("runs version", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
-    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
       covector({
         command: "version",
         cwd: fullIntegration,
-        dryRun: true,
       })
     );
     expect({
@@ -286,12 +285,11 @@ describe("integration test for complex commands", () => {
 
   it("runs publish", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
-    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
       covector({
         command: "publish",
         cwd: fullIntegration,
-        dryRun: true,
       })
     );
     expect({
@@ -304,12 +302,11 @@ describe("integration test for complex commands", () => {
 
   it("runs test", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
-    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
       covector({
         command: "test",
         cwd: fullIntegration,
-        dryRun: true,
       })
     );
     expect({
@@ -322,12 +319,11 @@ describe("integration test for complex commands", () => {
 
   it("runs build", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
-    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
       covector({
         command: "build",
         cwd: fullIntegration,
-        dryRun: true,
       })
     );
     expect({
