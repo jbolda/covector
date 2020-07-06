@@ -65,8 +65,8 @@ published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsons
     Array [
       "[2K[1G[33mwarning[39m package.json: No license field
 [2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command isn't piped, it is run from scripts for pk2[22m
-this command isn't piped, it is run from scripts for pk2",
+[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
+this command is not piped, it is run from scripts for pk2",
     ],
   ],
   "covectorReturn": Object {
@@ -128,8 +128,8 @@ published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsons
     "package-two": Object {
       "command": "[2K[1G[33mwarning[39m package.json: No license field
 [2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command isn't piped, it is run from scripts for pk2[22m
-this command isn't piped, it is run from scripts for pk2
+[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
+this command is not piped, it is run from scripts for pk2
 ",
       "postcommand": false,
       "precommand": false,
@@ -332,8 +332,8 @@ published [33m4 days ago[39m by [33mjbolda[39m <[36mme@jacobbolda.com[39m>
     Array [
       "[2K[1G[33mwarning[39m package.json: No license field
 [2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command isn't piped, it is run from scripts for pk2[22m
-this command isn't piped, it is run from scripts for pk2",
+[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
+this command is not piped, it is run from scripts for pk2",
     ],
     Array [
       "package-two [test]: yarn test",
@@ -341,8 +341,8 @@ this command isn't piped, it is run from scripts for pk2",
     Array [
       "[2K[1G[33mwarning[39m package.json: No license field
 [2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command isn't piped, it is run from the test script[22m
-this command isn't piped, it is run from the test script",
+[2K[1G[2m$ echo this command is not piped, it is run from the test script[22m
+this command is not piped, it is run from the test script",
     ],
     Array [
       "package-two [test]: echo deboop",
@@ -410,8 +410,8 @@ published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsons
     "package-two": Object {
       "command": "[2K[1G[33mwarning[39m package.json: No license field
 [2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command isn't piped, it is run from scripts for pk2[22m
-this command isn't piped, it is run from scripts for pk2
+[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
+this command is not piped, it is run from scripts for pk2
 ",
       "postcommand": false,
       "precommand": false,
