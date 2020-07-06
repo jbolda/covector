@@ -248,7 +248,7 @@ describe("integration test in --dry-run mode", () => {
 });
 
 describe("integration test for complex commands", () => {
-  it("runs version", async () => {
+  it("runs version for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
@@ -283,7 +283,7 @@ describe("integration test for complex commands", () => {
     restoreConsole();
   });
 
-  it("runs publish", async () => {
+  it("runs publish for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
@@ -300,7 +300,7 @@ describe("integration test for complex commands", () => {
     restoreConsole();
   });
 
-  it("runs test", async () => {
+  it("runs test for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
@@ -317,13 +317,103 @@ describe("integration test for complex commands", () => {
     restoreConsole();
   });
 
-  it("runs build", async () => {
+  it("runs build for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
       covector({
         command: "build",
         cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs version in --dry-run mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
+    }).toMatchSnapshot();
+
+    const changelogTauriCore = toVFile.read(
+      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    await expect(changelogTauriCore).rejects.toThrow();
+
+    const changelogTaurijs = toVFile.read(
+      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    await expect(changelogTaurijs).rejects.toThrow();
+
+    restoreConsole();
+  });
+
+  it("runs publish in --dry-run mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "publish",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs test in --dry-run mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "test",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs build in --dry-run mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "build",
+        cwd: fullIntegration,
+        dryRun: true,
       })
     );
     expect({

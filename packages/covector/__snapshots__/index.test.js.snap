@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`integration test for complex commands runs build 1`] = `
+exports[`integration test for complex commands runs build for prod 1`] = `
 Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
@@ -138,7 +138,33 @@ this command isn't piped, it is run from scripts for pk2
 }
 `;
 
-exports[`integration test for complex commands runs publish 1`] = `
+exports[`integration test for complex commands runs build in --dry-run mode 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "dryRun >> package-one [build]: yarn build",
+    ],
+    Array [
+      "dryRun >> package-two [build]: yarn build",
+    ],
+  ],
+  "covectorReturn": Object {
+    "package-one": Object {
+      "command": true,
+      "postcommand": false,
+      "precommand": false,
+    },
+    "package-two": Object {
+      "command": true,
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
+exports[`integration test for complex commands runs publish for prod 1`] = `
 Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
@@ -172,10 +198,91 @@ Object {
 }
 `;
 
-exports[`integration test for complex commands runs test 1`] = `
+exports[`integration test for complex commands runs publish in --dry-run mode 1`] = `
 Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
+    Array [
+      "dryRun >> package-one [publish]: echo publish",
+    ],
+    Array [
+      "dryRun >> package-two [publish]: echo publish",
+    ],
+  ],
+  "covectorReturn": Object {
+    "package-one": Object {
+      "command": true,
+      "postcommand": false,
+      "precommand": false,
+    },
+    "package-two": Object {
+      "command": true,
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
+exports[`integration test for complex commands runs test for prod 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "package-one [test]: yarn build",
+    ],
+    Array [
+      "[2K[1G[33mwarning[39m package.json: No license field
+[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
+[2K[1G[2m$ npm view tauri@0.8.0[22m
+
+[4m[1m[32mtauri[39m@[32m0.8.0[39m[22m[24m | [32mMIT[39m | deps: [36m23[39m | versions: [33m33[39m
+Multi-binding collection of libraries and templates for building Tauri apps
+[36mhttps://github.com/tauri-apps/tauri#readme[39m
+
+bin: [33mtauri[39m
+
+dist
+.tarball: [36mhttps://registry.npmjs.org/tauri/-/tauri-0.8.0.tgz[39m
+.shasum: [33mf6e9309aa7d9a5f16f875a8f9131986610f9f876[39m
+.integrity: [33msha512-nr628nE3Sv1aUL5TFcYiecEau59aduGJRDKbXUUVRa98kHek0l1G0peAtRKp1h1kzXSzfrKQ0pEiYVCUEDKgcg==[39m
+.unpackedSize: [33m3.2[39m MB
+
+dependencies:
+[33m@tauri-apps/tauri-inliner[39m: 1.14.1
+[33m@tauri-apps/toml[39m: 2.2.4
+[33mchalk[39m: 4.1.0
+[33mchokidar[39m: 3.4.0
+[33mcross-spawn[39m: 7.0.3
+[33mfast-glob[39m: 3.2.4
+[33mfs-extra[39m: 9.0.1
+[33mhttp-proxy[39m: 1.18.1
+[33mimagemin-optipng[39m: 8.0.0
+[33mimagemin-pngquant[39m: 9.0.0
+[33mimagemin-zopfli[39m: 7.0.0
+[33mimagemin[39m: 7.0.1
+[33mis-png[39m: 2.0.0
+[33misbinaryfile[39m: 4.0.6
+[33mjsdom[39m: 16.2.2
+[33mlodash[39m: 4.17.15
+[33mminimist[39m: 1.2.5
+[33mms[39m: 2.1.2
+[33mpng2icons[39m: 2.0.1
+[33mread-chunk[39m: 3.2.0
+[33msharp[39m: 0.25.4
+[33mwebpack-merge[39m: 4.2.2
+[33mwebpack-shell-plugin[39m: 0.5.0
+
+maintainers:
+- [33mlucasfernog[39m <[36mlucasfernandesnog@gmail.com[39m>
+- [33mnothingismagick[39m <[36mdenjell@sfosc.org[39m>
+- [33mtauri-apps-ci-user[39m <[36mdrthompsonsmagickindustries+npmtauri@gmail.com[39m>
+
+dist-tags:
+[1m[32mlatest[39m[22m: 0.8.1
+
+published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsonsmagickindustries+npmtauri@gmail.com[39m>",
+    ],
     Array [
       "package-one [test]: yarn test",
     ],
@@ -214,6 +321,21 @@ dist-tags:
 published [33m4 days ago[39m by [33mjbolda[39m <[36mme@jacobbolda.com[39m>",
     ],
     Array [
+      "package-one [test]: echo deboop",
+    ],
+    Array [
+      "deboop",
+    ],
+    Array [
+      "package-two [test]: yarn build",
+    ],
+    Array [
+      "[2K[1G[33mwarning[39m package.json: No license field
+[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
+[2K[1G[2m$ echo this command isn't piped, it is run from scripts for pk2[22m
+this command isn't piped, it is run from scripts for pk2",
+    ],
+    Array [
       "package-two [test]: yarn test",
     ],
     Array [
@@ -222,41 +344,65 @@ published [33m4 days ago[39m by [33mjbolda[39m <[36mme@jacobbolda.com[39m>
 [2K[1G[2m$ echo this command isn't piped, it is run from the test script[22m
 this command isn't piped, it is run from the test script",
     ],
+    Array [
+      "package-two [test]: echo deboop",
+    ],
+    Array [
+      "deboop",
+    ],
   ],
   "covectorReturn": Object {
     "package-one": Object {
       "command": "[2K[1G[33mwarning[39m package.json: No license field
 [2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ npm view covector@0.1.0[22m
+[2K[1G[2m$ npm view tauri@0.8.0[22m
 
-[4m[1m[32mcovector[39m@[32m0.1.0[39m[22m[24m | [32mApache-2.0[39m | deps: [36m9[39m | versions: [33m18[39m
+[4m[1m[32mtauri[39m@[32m0.8.0[39m[22m[24m | [32mMIT[39m | deps: [36m23[39m | versions: [33m33[39m
+Multi-binding collection of libraries and templates for building Tauri apps
+[36mhttps://github.com/tauri-apps/tauri#readme[39m
 
-bin: [33mcovector[39m
+bin: [33mtauri[39m
 
 dist
-.tarball: [36mhttps://registry.npmjs.org/covector/-/covector-0.1.0.tgz[39m
-.shasum: [33maa207a30fb4a1cf80b10f8d7ecac671aec7add6a[39m
-.integrity: [33msha512-29LHVba16de3FTbd6Ru12315M+nfte3vfj+4eAt88gHfoNr8ipGE0Oq1CS9EW1hTUN9xiK1Z/k+INOoMw7Q7KA==[39m
-.unpackedSize: [33m7.3[39m kB
+.tarball: [36mhttps://registry.npmjs.org/tauri/-/tauri-0.8.0.tgz[39m
+.shasum: [33mf6e9309aa7d9a5f16f875a8f9131986610f9f876[39m
+.integrity: [33msha512-nr628nE3Sv1aUL5TFcYiecEau59aduGJRDKbXUUVRa98kHek0l1G0peAtRKp1h1kzXSzfrKQ0pEiYVCUEDKgcg==[39m
+.unpackedSize: [33m3.2[39m MB
 
 dependencies:
-[33m@covector/apply[39m: 0.1.0
-[33m@covector/assemble[39m: 0.1.0
-[33m@covector/changelog[39m: 0.1.0
-[33m@covector/files[39m: 0.1.0
-[33m@effection/events[39m: 0.7.5
-[33m@effection/node[39m: 0.7.0
-[33meffection[39m: 0.7.0
-[33mexeca[39m: ^4.0.2
-[33myargs[39m: ^15.3.1
+[33m@tauri-apps/tauri-inliner[39m: 1.14.1
+[33m@tauri-apps/toml[39m: 2.2.4
+[33mchalk[39m: 4.1.0
+[33mchokidar[39m: 3.4.0
+[33mcross-spawn[39m: 7.0.3
+[33mfast-glob[39m: 3.2.4
+[33mfs-extra[39m: 9.0.1
+[33mhttp-proxy[39m: 1.18.1
+[33mimagemin-optipng[39m: 8.0.0
+[33mimagemin-pngquant[39m: 9.0.0
+[33mimagemin-zopfli[39m: 7.0.0
+[33mimagemin[39m: 7.0.1
+[33mis-png[39m: 2.0.0
+[33misbinaryfile[39m: 4.0.6
+[33mjsdom[39m: 16.2.2
+[33mlodash[39m: 4.17.15
+[33mminimist[39m: 1.2.5
+[33mms[39m: 2.1.2
+[33mpng2icons[39m: 2.0.1
+[33mread-chunk[39m: 3.2.0
+[33msharp[39m: 0.25.4
+[33mwebpack-merge[39m: 4.2.2
+[33mwebpack-shell-plugin[39m: 0.5.0
 
 maintainers:
-- [33mjbolda[39m <[36mme@jacobbolda.com[39m>
+- [33mlucasfernog[39m <[36mlucasfernandesnog@gmail.com[39m>
+- [33mnothingismagick[39m <[36mdenjell@sfosc.org[39m>
+- [33mtauri-apps-ci-user[39m <[36mdrthompsonsmagickindustries+npmtauri@gmail.com[39m>
 
 dist-tags:
-[1m[32mlatest[39m[22m: 0.1.1
+[1m[32mlatest[39m[22m: 0.8.1
 
-published [33m4 days ago[39m by [33mjbolda[39m <[36mme@jacobbolda.com[39m>
+published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsonsmagickindustries+npmtauri@gmail.com[39m>
 ",
       "postcommand": false,
       "precommand": false,
@@ -264,8 +410,8 @@ published [33m4 days ago[39m by [33mjbolda[39m <[36mme@jacobbolda.com[39m>
     "package-two": Object {
       "command": "[2K[1G[33mwarning[39m package.json: No license field
 [2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command isn't piped, it is run from the test script[22m
-this command isn't piped, it is run from the test script
+[2K[1G[2m$ echo this command isn't piped, it is run from scripts for pk2[22m
+this command isn't piped, it is run from scripts for pk2
 ",
       "postcommand": false,
       "precommand": false,
@@ -274,7 +420,66 @@ this command isn't piped, it is run from the test script
 }
 `;
 
-exports[`integration test for complex commands runs version 1`] = `
+exports[`integration test for complex commands runs test in --dry-run mode 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "dryRun >> package-one [test]: yarn build",
+    ],
+    Array [
+      "dryRun >> package-one [test]: yarn test",
+    ],
+    Array [
+      "dryRun >> package-one [test]: echo deboop",
+    ],
+    Array [
+      "dryRun >> package-two [test]: yarn build",
+    ],
+    Array [
+      "dryRun >> package-two [test]: yarn test",
+    ],
+    Array [
+      "dryRun >> package-two [test]: echo deboop",
+    ],
+  ],
+  "covectorReturn": Object {
+    "package-one": Object {
+      "command": true,
+      "postcommand": false,
+      "precommand": false,
+    },
+    "package-two": Object {
+      "command": true,
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
+exports[`integration test for complex commands runs version for prod 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [],
+  "covectorReturn": Object {
+    "package-one": Object {
+      "applied": false,
+      "command": false,
+      "postcommand": false,
+      "precommand": false,
+    },
+    "package-two": Object {
+      "applied": false,
+      "command": false,
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
+exports[`integration test for complex commands runs version in --dry-run mode 1`] = `
 Object {
   "consoleInfo": Array [],
   "consoleLog": Array [],

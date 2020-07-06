@@ -193,15 +193,36 @@ const attemptCommands = function* ({
         : pkg[`${commandPrefix}command`];
     let stdout = "";
     for (let pubCommand of pubCommands) {
-      const runningCommand =
-        typeof pubCommand === "object" ? pubCommand.command : pubCommand;
-      if (!dryRun) {
+      const runningCommand = {};
+      if (
+        typeof pubCommand === "object" &&
+        pubCommand.dryRunCommand === false
+      ) {
+        runningCommand.command = pubCommand.command;
+        runningCommand.shouldRunCommand = !dryRun;
+      } else if (typeof pubCommand === "object") {
+        // dryRunCommand will either be a !string (false) or !undefined (true) or !true (false)
+        if (pubCommand.dryRunCommand === true) {
+          runningCommand.command = pubCommand.command;
+          runningCommand.shouldRunCommand = true;
+        } else {
+          runningCommand.command = !pubCommand.dryRunCommand
+            ? pubCommand.command
+            : pubCommand.dryRunCommand;
+          runningCommand.shouldRunCommand = !dryRun;
+        }
+      } else {
+        runningCommand.command = pubCommand;
+        runningCommand.shouldRunCommand = !dryRun;
+      }
+
+      if (runningCommand.shouldRunCommand) {
         const ranCommand = yield runCommand({
-          command: runningCommand,
+          command: runningCommand.command,
           cwd,
           pkg: pkg.pkg,
           pkgPath: pkg.path,
-          log: `${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand}`,
+          log: `${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand.command}`,
         });
 
         if (pubCommand.pipe) {
@@ -209,7 +230,7 @@ const attemptCommands = function* ({
         }
       } else {
         console.log(
-          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`
+          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand.command}`
         );
       }
     }
