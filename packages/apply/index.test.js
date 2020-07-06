@@ -1,4 +1,4 @@
-const { apply } = require("./index");
+const { apply, changesConsideringParents } = require("./index");
 const toVFile = require("to-vfile");
 const mockConsole = require("jest-mock-console");
 const fixtures = require("fixturez");
@@ -489,6 +489,99 @@ describe("package file apply bump", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+});
+
+describe("list changes considering parents", () => {
+  let restoreConsole;
+  beforeEach(() => {
+    restoreConsole = mockConsole(["log", "dir"]);
+  });
+  afterEach(() => {
+    restoreConsole();
+  });
+
+  it("adds changes for dependency", () => {
+    const assembledChanges = {
+      releases: {
+        all: {
+          dependencies: undefined,
+          manager: "javascript",
+          path: undefined,
+          pkg: "all",
+          type: "minor",
+        },
+      },
+    };
+
+    const config = {
+      packages: {
+        "yarn-workspace-base-pkg-a": {
+          path: "./packages/pkg-a/",
+          manager: "javascript",
+          dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        },
+        "yarn-workspace-base-pkg-b": {
+          path: "./packages/pkg-b/",
+          manager: "javascript",
+          dependencies: ["all"],
+        },
+        all: { version: true },
+      },
+    };
+
+    const changes = changesConsideringParents({ assembledChanges, config });
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+      changes,
+    }).toMatchSnapshot();
+  });
+
+  it("bumps higher due to dependency bump", () => {
+    const assembledChanges = {
+      releases: {
+        "yarn-workspace-base-pkg-a": {
+          dependencies: undefined,
+          manager: "javascript",
+          path: undefined,
+          pkg: "all",
+          type: "patch",
+        },
+        all: {
+          dependencies: undefined,
+          manager: "javascript",
+          path: undefined,
+          pkg: "all",
+          type: "minor",
+        },
+      },
+    };
+
+    const config = {
+      packages: {
+        "yarn-workspace-base-pkg-a": {
+          path: "./packages/pkg-a/",
+          manager: "javascript",
+          dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        },
+        "yarn-workspace-base-pkg-b": {
+          path: "./packages/pkg-b/",
+          manager: "javascript",
+          dependencies: ["all"],
+        },
+        all: { version: true },
+      },
+    };
+
+    const changes = changesConsideringParents({ assembledChanges, config });
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+      changes,
     }).toMatchSnapshot();
   });
 });
