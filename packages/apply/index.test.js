@@ -103,8 +103,16 @@ describe("package file apply bump", () => {
         manager: "javascript",
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
-        type: "patch",
+        type: "minor",
         parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: undefined,
+        pkg: "yarn-workspace-base-pkg-b",
+        type: "minor",
+        parents: ["yarn-workspace-base-pkg-a"],
       },
       {
         dependencies: undefined,
@@ -112,7 +120,7 @@ describe("package file apply bump", () => {
         path: undefined,
         pkg: "all",
         type: "minor",
-        parents: [],
+        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
       },
     ];
 
