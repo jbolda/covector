@@ -246,3 +246,95 @@ describe("integration test in --dry-run mode", () => {
     restoreConsole();
   });
 });
+
+describe("integration test for complex commands", () => {
+  it("runs version", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored.map((pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
+        delete pkg.vfile;
+        return pkg;
+      }),
+    }).toMatchSnapshot();
+
+    const changelogTauriCore = toVFile.read(
+      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    await expect(changelogTauriCore).rejects.toThrow();
+
+    const changelogTaurijs = toVFile.read(
+      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    await expect(changelogTaurijs).rejects.toThrow();
+
+    restoreConsole();
+  });
+
+  it("runs publish", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "publish",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs test", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "test",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs build", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "build",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+});

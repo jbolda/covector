@@ -1,0 +1,20 @@
+{
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "publish": { "command": "npm publish", "pipe": true },
+      "build": { "command": "yarn build", "pipe": true },
+      "test": { "command": "yarn test", "pipe": true }
+    }
+  },
+  "packages": {
+    "package-one": {
+      "path": "./packages/package-one",
+      "manager": "javascript"
+    },
+    "package-two": {
+      "path": "./packages/package-two",
+      "manager": "javascript"
+    }
+  }
+}
