@@ -2,7 +2,7 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "publish": { "command": "npm publish", "pipe": true },
+      "publish": { "command": "echo publish", "pipe": true },
       "build": { "command": "yarn build", "pipe": true },
       "test": { "command": "yarn test", "pipe": true }
     }
