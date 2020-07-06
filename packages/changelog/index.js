@@ -11,6 +11,7 @@ module.exports.fillChangelogs = async ({
   assembledChanges,
   config,
   cwd,
+  pkgCommandsRan,
   create = true,
 }) => {
   const changelogs = await readAllChangelogs({
@@ -29,9 +30,22 @@ module.exports.fillChangelogs = async ({
   });
 
   if (create) {
-    return await writeAllChangelogs({ writtenChanges });
-  } else {
+    await writeAllChangelogs({ writtenChanges });
+  }
+
+  if (!pkgCommandsRan) {
     return;
+  } else {
+    pkgCommandsRan = Object.keys(pkgCommandsRan).reduce((pkgs, pkg) => {
+      writtenChanges.forEach((change) => {
+        if (change.pkg === pkg) {
+          pkgs[pkg].command = change.addition;
+        }
+      });
+      return pkgs;
+    }, pkgCommandsRan);
+
+    return pkgCommandsRan;
   }
 };
 
@@ -72,12 +86,12 @@ const applyChanges = ({ changelogs, assembledChanges }) => {
       changelogRemainingElements
     );
     change.changelog.contents = processor.stringify(changelog);
-    return change;
+    return { pkg: change.changes.name, change, addition };
   });
 };
 
 const writeAllChangelogs = ({ writtenChanges }) => {
   return Promise.all(
-    writtenChanges.map((changelog) => writeChangelog({ ...changelog }))
+    writtenChanges.map((changelog) => writeChangelog({ ...changelog.change }))
   );
 };

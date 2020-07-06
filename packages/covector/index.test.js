@@ -36,12 +36,12 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored.map((pkg) => {
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
-        delete pkg.vfile;
-        return pkg;
-      }),
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
     }).toMatchSnapshot();
 
     const changelogTauriCore = await toVFile.read(
@@ -169,12 +169,12 @@ describe("integration test in --dry-run mode", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored.map((pkg) => {
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
-        delete pkg.vfile;
-        return pkg;
-      }),
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
     }).toMatchSnapshot();
 
     const changelogTauriCore = toVFile.read(
@@ -260,12 +260,12 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored.map((pkg) => {
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
-        delete pkg.vfile;
-        return pkg;
-      }),
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
     }).toMatchSnapshot();
 
     const changelogTauriCore = toVFile.read(

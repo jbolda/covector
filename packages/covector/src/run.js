@@ -52,11 +52,22 @@ module.exports.covector = function* covector({
       dryRun,
     });
 
-    yield attemptCommands({
+    let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
+      pkgs[pkg] = {
+        precommand: false,
+        command: false,
+        postcommand: false,
+        applied: false,
+      };
+      return pkgs;
+    }, {});
+
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "pre",
       command,
+      pkgCommandsRan,
       dryRun,
     });
     const applied = yield apply({
@@ -65,21 +76,30 @@ module.exports.covector = function* covector({
       cwd,
       bump: !dryRun,
     });
-    yield fillChangelogs({
+
+    pkgCommandsRan = applied.reduce((pkgs, result) => {
+      pkgs[result.name].applied = result;
+      return pkgs;
+    }, pkgCommandsRan);
+
+    pkgCommandsRan = yield fillChangelogs({
       applied,
       assembledChanges: changes,
       config,
       cwd,
+      pkgCommandsRan,
       create: !dryRun,
     });
-    yield attemptCommands({
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "post",
       command,
+      pkgCommandsRan,
       dryRun,
     });
-    return applied;
+
+    return pkgCommandsRan;
   } else {
     yield raceTime();
     const commands = yield mergeIntoConfig({
