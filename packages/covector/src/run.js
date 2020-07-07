@@ -259,6 +259,7 @@ const runCommand = function* ({
         shell: process.env.shell || true,
         windowsHide: true,
         all: true,
+        env: { FORCE_COLOR: 0 },
       });
 
       console.log(child.all);

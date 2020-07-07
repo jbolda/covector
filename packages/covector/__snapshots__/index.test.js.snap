@@ -8,9 +8,9 @@ Object {
       "package-one [build]: yarn build",
     ],
     Array [
-      "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ npm view tauri@0.8.0[22m
+      "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ npm view tauri@0.8.0
 
 [4m[1m[32mtauri[39m@[32m0.8.0[39m[22m[24m | [32mMIT[39m | deps: [36m23[39m | versions: [33m33[39m
 Multi-binding collection of libraries and templates for building Tauri apps
@@ -63,17 +63,17 @@ published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsons
       "package-two [build]: yarn build",
     ],
     Array [
-      "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
+      "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ echo this command is not piped, it is run from scripts for pk2
 this command is not piped, it is run from scripts for pk2",
     ],
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ npm view tauri@0.8.0[22m
+      "command": "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ npm view tauri@0.8.0
 
 [4m[1m[32mtauri[39m@[32m0.8.0[39m[22m[24m | [32mMIT[39m | deps: [36m23[39m | versions: [33m33[39m
 Multi-binding collection of libraries and templates for building Tauri apps
@@ -126,9 +126,9 @@ published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsons
       "precommand": false,
     },
     "package-two": Object {
-      "command": "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
+      "command": "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ echo this command is not piped, it is run from scripts for pk2
 this command is not piped, it is run from scripts for pk2
 ",
       "postcommand": false,
@@ -232,9 +232,9 @@ Object {
       "package-one [test]: yarn build",
     ],
     Array [
-      "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ npm view tauri@0.8.0[22m
+      "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ npm view tauri@0.8.0
 
 [4m[1m[32mtauri[39m@[32m0.8.0[39m[22m[24m | [32mMIT[39m | deps: [36m23[39m | versions: [33m33[39m
 Multi-binding collection of libraries and templates for building Tauri apps
@@ -287,9 +287,9 @@ published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsons
       "package-one [test]: yarn test",
     ],
     Array [
-      "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ npm view covector@0.1.0[22m
+      "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ npm view covector@0.1.0
 
 [4m[1m[32mcovector[39m@[32m0.1.0[39m[22m[24m | [32mApache-2.0[39m | deps: [36m9[39m | versions: [33m18[39m
 
@@ -330,18 +330,18 @@ published [33m4 days ago[39m by [33mjbolda[39m <[36mme@jacobbolda.com[39m>
       "package-two [test]: yarn build",
     ],
     Array [
-      "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
+      "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ echo this command is not piped, it is run from scripts for pk2
 this command is not piped, it is run from scripts for pk2",
     ],
     Array [
       "package-two [test]: yarn test",
     ],
     Array [
-      "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command is not piped, it is run from the test script[22m
+      "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ echo this command is not piped, it is run from the test script
 this command is not piped, it is run from the test script",
     ],
     Array [
@@ -353,9 +353,9 @@ this command is not piped, it is run from the test script",
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ npm view tauri@0.8.0[22m
+      "command": "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ npm view tauri@0.8.0
 
 [4m[1m[32mtauri[39m@[32m0.8.0[39m[22m[24m | [32mMIT[39m | deps: [36m23[39m | versions: [33m33[39m
 Multi-binding collection of libraries and templates for building Tauri apps
@@ -408,9 +408,9 @@ published [33m3 days ago[39m by [33mtauri-apps-ci-user[39m <[36mdrthompsons
       "precommand": false,
     },
     "package-two": Object {
-      "command": "[2K[1G[33mwarning[39m package.json: No license field
-[2K[1G[33mwarning[39m ..\\\\..\\\\package.json: No license field
-[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
+      "command": "warning package.json: No license field
+warning ..\\\\..\\\\package.json: No license field
+$ echo this command is not piped, it is run from scripts for pk2
 this command is not piped, it is run from scripts for pk2
 ",
       "postcommand": false,
