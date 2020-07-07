@@ -7,18 +7,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: yarn
-      - name: covector build
-        uses: ./packages/action
-        with:
-          command: 'build'
       - name: covector status
         uses: ./packages/action
         with:
           command: 'status'
-      - name: covector publish
+      - name: covector version
         uses: ./packages/action
         with:
-          command: 'publish'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          createRelease: true
+          command: 'version'

@@ -29,7 +29,7 @@ main(function* run() {
         return text;
       }, "");
       core.setOutput("change", covectoredSmushed);
-      const payload = JSON.stringify(covectored, undefined, 2);
+      const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       console.log(`The covector output: ${payload}`);
     } else if (command === "publish" && core.getInput("createRelease")) {
       core.setOutput("change", covectored);
