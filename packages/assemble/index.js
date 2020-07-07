@@ -164,6 +164,7 @@ module.exports.mergeIntoConfig = ({
 
     const merged = {
       pkg,
+      ...(!pkgs[pkg].parents ? {} : { parents: pkgs[pkg].parents }),
       ...extraPublishParams,
       path: pkgCommands[pkg].path,
       type: pkgs[pkg].type || null,
@@ -176,7 +177,6 @@ module.exports.mergeIntoConfig = ({
         pipeToTemplate
       ),
     };
-
     return merged;
   });
 
@@ -212,5 +212,17 @@ const mergeCommand = ({ pkg, pkgManager, command, config }) => {
 const templateCommands = (command, pipe) => {
   if (!command) return null;
   const commands = !Array.isArray(command) ? [command] : command;
-  return commands.map((c) => template(c)(pipe));
+  return commands.map((c) => {
+    if (typeof c === "object") {
+      const command =
+        typeof c.command === "string" ? template(c.command)(pipe) : c.command;
+      const dryRunCommand =
+        typeof c.dryRunCommand === "string"
+          ? template(c.dryRunCommand)(pipe)
+          : c.dryRunCommand;
+      return { ...c, command, dryRunCommand };
+    } else {
+      return template(c)(pipe);
+    }
+  });
 };

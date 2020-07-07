@@ -1,4 +1,4 @@
-const { apply } = require("./index");
+const { apply, changesConsideringParents } = require("./index");
 const toVFile = require("to-vfile");
 const mockConsole = require("jest-mock-console");
 const fixtures = require("fixturez");
@@ -16,13 +16,14 @@ describe("package file apply bump", () => {
   it("bumps single js json", function* () {
     const jsonFolder = f.copy("pkg.js-single-json");
 
-    const changeList = [
+    const commands = [
       {
         dependencies: undefined,
         manager: "javascript",
         path: "./",
         pkg: "js-single-json-fixture",
         type: "minor",
+        parents: [],
       },
     ];
 
@@ -35,7 +36,7 @@ describe("package file apply bump", () => {
       },
     };
 
-    yield apply({ changeList, config, cwd: jsonFolder });
+    yield apply({ commands, config, cwd: jsonFolder });
     const modifiedVFile = yield toVFile.read(
       jsonFolder + "/package.json",
       "utf-8"
@@ -58,13 +59,14 @@ describe("package file apply bump", () => {
   it("bumps single rust toml", function* () {
     const rustFolder = f.copy("pkg.rust-single");
 
-    const changeList = [
+    const commands = [
       {
         dependencies: undefined,
         manager: "rust",
         path: "./",
         pkg: "rust-single-fixture",
         type: "minor",
+        parents: [],
       },
     ];
 
@@ -77,7 +79,7 @@ describe("package file apply bump", () => {
       },
     };
 
-    yield apply({ changeList, config, cwd: rustFolder });
+    yield apply({ commands, config, cwd: rustFolder });
     const modifiedVFile = yield toVFile.read(
       rustFolder + "/Cargo.toml",
       "utf-8"
@@ -95,13 +97,22 @@ describe("package file apply bump", () => {
   it("bumps multi js json", function* () {
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
-    const changeList = [
+    const commands = [
       {
         dependencies: ["yarn-workspace-base-pkg-b", "all"],
         manager: "javascript",
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
-        type: "patch",
+        type: "minor",
+        parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: undefined,
+        pkg: "yarn-workspace-base-pkg-b",
+        type: "minor",
+        parents: ["yarn-workspace-base-pkg-a"],
       },
       {
         dependencies: undefined,
@@ -109,6 +120,7 @@ describe("package file apply bump", () => {
         path: undefined,
         pkg: "all",
         type: "minor",
+        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
       },
     ];
 
@@ -128,7 +140,7 @@ describe("package file apply bump", () => {
       },
     };
 
-    yield apply({ changeList, config, cwd: jsonFolder });
+    yield apply({ commands, config, cwd: jsonFolder });
     const modifiedPkgAVFile = yield toVFile.read(
       jsonFolder + "/packages/pkg-a/package.json",
       "utf-8"
@@ -163,13 +175,14 @@ describe("package file apply bump", () => {
   it("bumps multi rust toml", function* () {
     const rustFolder = f.copy("pkg.rust-multi");
 
-    const changeList = [
+    const commands = [
       {
         dependencies: ["rust_pkg_b_fixture"],
         manager: "rust",
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
+        parents: [],
       },
       {
         dependencies: undefined,
@@ -177,6 +190,7 @@ describe("package file apply bump", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
+        parents: [],
       },
     ];
 
@@ -193,7 +207,7 @@ describe("package file apply bump", () => {
       },
     };
 
-    yield apply({ changeList, config, cwd: rustFolder });
+    yield apply({ commands, config, cwd: rustFolder });
 
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
@@ -225,13 +239,14 @@ describe("package file apply bump", () => {
   it("bumps multi rust toml with object dep", function* () {
     const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
-    const changeList = [
+    const commands = [
       {
         dependencies: ["rust_pkg_b_fixture"],
         manager: "rust",
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
+        parents: [],
       },
       {
         dependencies: undefined,
@@ -239,6 +254,7 @@ describe("package file apply bump", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
+        parents: [],
       },
     ];
 
@@ -255,7 +271,7 @@ describe("package file apply bump", () => {
       },
     };
 
-    yield apply({ changeList, config, cwd: rustFolder });
+    yield apply({ commands, config, cwd: rustFolder });
 
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
@@ -287,13 +303,14 @@ describe("package file apply bump", () => {
   it("bumps multi rust toml with dep missing patch", function* () {
     const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
-    const changeList = [
+    const commands = [
       {
         dependencies: ["rust_pkg_b_fixture"],
         manager: "rust",
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
+        parents: [],
       },
       {
         dependencies: undefined,
@@ -301,6 +318,7 @@ describe("package file apply bump", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
+        parents: [],
       },
     ];
 
@@ -317,7 +335,7 @@ describe("package file apply bump", () => {
       },
     };
 
-    yield apply({ changeList, config, cwd: rustFolder });
+    yield apply({ commands, config, cwd: rustFolder });
 
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
@@ -349,13 +367,14 @@ describe("package file apply bump", () => {
   it("bumps multi rust toml as patch with object dep missing patch", function* () {
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
-    const changeList = [
+    const commands = [
       {
         dependencies: ["rust_pkg_b_fixture"],
         manager: "rust",
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "patch",
+        parents: [],
       },
       {
         dependencies: undefined,
@@ -363,6 +382,7 @@ describe("package file apply bump", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "patch",
+        parents: [],
       },
     ];
 
@@ -379,7 +399,7 @@ describe("package file apply bump", () => {
       },
     };
 
-    yield apply({ changeList, config, cwd: rustFolder });
+    yield apply({ commands, config, cwd: rustFolder });
 
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
@@ -411,13 +431,14 @@ describe("package file apply bump", () => {
   it("bumps multi rust toml as minor with object dep missing patch", function* () {
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
-    const changeList = [
+    const commands = [
       {
         dependencies: ["rust_pkg_b_fixture"],
         manager: "rust",
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
+        parents: [],
       },
       {
         dependencies: undefined,
@@ -425,6 +446,7 @@ describe("package file apply bump", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
+        parents: [],
       },
     ];
 
@@ -441,7 +463,7 @@ describe("package file apply bump", () => {
       },
     };
 
-    yield apply({ changeList, config, cwd: rustFolder });
+    yield apply({ commands, config, cwd: rustFolder });
 
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
@@ -467,6 +489,99 @@ describe("package file apply bump", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+});
+
+describe("list changes considering parents", () => {
+  let restoreConsole;
+  beforeEach(() => {
+    restoreConsole = mockConsole(["log", "dir"]);
+  });
+  afterEach(() => {
+    restoreConsole();
+  });
+
+  it("adds changes for dependency", () => {
+    const assembledChanges = {
+      releases: {
+        all: {
+          dependencies: undefined,
+          manager: "javascript",
+          path: undefined,
+          pkg: "all",
+          type: "minor",
+        },
+      },
+    };
+
+    const config = {
+      packages: {
+        "yarn-workspace-base-pkg-a": {
+          path: "./packages/pkg-a/",
+          manager: "javascript",
+          dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        },
+        "yarn-workspace-base-pkg-b": {
+          path: "./packages/pkg-b/",
+          manager: "javascript",
+          dependencies: ["all"],
+        },
+        all: { version: true },
+      },
+    };
+
+    const changes = changesConsideringParents({ assembledChanges, config });
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+      changes,
+    }).toMatchSnapshot();
+  });
+
+  it("bumps higher due to dependency bump", () => {
+    const assembledChanges = {
+      releases: {
+        "yarn-workspace-base-pkg-a": {
+          dependencies: undefined,
+          manager: "javascript",
+          path: undefined,
+          pkg: "all",
+          type: "patch",
+        },
+        all: {
+          dependencies: undefined,
+          manager: "javascript",
+          path: undefined,
+          pkg: "all",
+          type: "minor",
+        },
+      },
+    };
+
+    const config = {
+      packages: {
+        "yarn-workspace-base-pkg-a": {
+          path: "./packages/pkg-a/",
+          manager: "javascript",
+          dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        },
+        "yarn-workspace-base-pkg-b": {
+          path: "./packages/pkg-b/",
+          manager: "javascript",
+          dependencies: ["all"],
+        },
+        all: { version: true },
+      },
+    };
+
+    const changes = changesConsideringParents({ assembledChanges, config });
+
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+      changes,
     }).toMatchSnapshot();
   });
 });

@@ -4,7 +4,7 @@ const { once, on } = require("@effection/events");
 const { configFile, changeFiles } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { fillChangelogs } = require("@covector/changelog");
-const { apply } = require("@covector/apply");
+const { apply, changesConsideringParents } = require("@covector/apply");
 const path = require("path");
 
 module.exports.covector = function* covector({
@@ -41,41 +41,65 @@ module.exports.covector = function* covector({
     return console.dir(config);
   } else if (command === "version") {
     yield raceTime();
-    const commands = yield mergeIntoConfig({
+    const changes = changesConsideringParents({
       assembledChanges,
+      config,
+    });
+    const commands = yield mergeIntoConfig({
+      assembledChanges: changes,
       config,
       command,
       dryRun,
     });
 
-    yield attemptCommands({
+    let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
+      pkgs[pkg] = {
+        precommand: false,
+        command: false,
+        postcommand: false,
+        applied: false,
+      };
+      return pkgs;
+    }, {});
+
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "pre",
       command,
+      pkgCommandsRan,
       dryRun,
     });
     const applied = yield apply({
-      changeList: commands,
+      commands,
       config,
       cwd,
       bump: !dryRun,
     });
-    yield fillChangelogs({
+
+    pkgCommandsRan = applied.reduce((pkgs, result) => {
+      pkgs[result.name].applied = result;
+      return pkgs;
+    }, pkgCommandsRan);
+
+    pkgCommandsRan = yield fillChangelogs({
       applied,
-      assembledChanges,
+      assembledChanges: changes,
       config,
       cwd,
+      pkgCommandsRan,
       create: !dryRun,
     });
-    yield attemptCommands({
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "post",
       command,
+      pkgCommandsRan,
       dryRun,
     });
-    return applied;
+
+    return pkgCommandsRan;
   } else {
     yield raceTime();
     const commands = yield mergeIntoConfig({
@@ -92,15 +116,16 @@ module.exports.covector = function* covector({
     }
 
     let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
-      pkgs[pkg] = false;
+      pkgs[pkg] = { precommand: false, command: false, postcommand: false };
       return pkgs;
     }, {});
 
-    yield attemptCommands({
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "pre",
       command,
+      pkgCommandsRan,
       dryRun,
     });
     pkgCommandsRan = yield attemptCommands({
@@ -110,11 +135,12 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       dryRun,
     });
-    yield attemptCommands({
+    pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
       commandPrefix: "post",
       command,
+      pkgCommandsRan,
       dryRun,
     });
 
@@ -159,29 +185,59 @@ const attemptCommands = function* ({
         continue;
       }
     }
-
     if (!pkg[`${commandPrefix}command`]) continue;
     const pubCommands =
-      typeof pkg[`${commandPrefix}command`] === "string"
+      typeof pkg[`${commandPrefix}command`] === "string" ||
+      !Array.isArray(pkg[`${commandPrefix}command`])
         ? [pkg[`${commandPrefix}command`]]
         : pkg[`${commandPrefix}command`];
+    let stdout = "";
     for (let pubCommand of pubCommands) {
-      if (!dryRun) {
-        yield runCommand({
-          command: pubCommand,
+      const runningCommand = {};
+      if (
+        typeof pubCommand === "object" &&
+        pubCommand.dryRunCommand === false
+      ) {
+        runningCommand.command = pubCommand.command;
+        runningCommand.shouldRunCommand = !dryRun;
+      } else if (typeof pubCommand === "object") {
+        // dryRunCommand will either be a !string (false) or !undefined (true) or !true (false)
+        if (pubCommand.dryRunCommand === true) {
+          runningCommand.command = pubCommand.command;
+          runningCommand.shouldRunCommand = true;
+        } else {
+          runningCommand.command = !pubCommand.dryRunCommand
+            ? pubCommand.command
+            : pubCommand.dryRunCommand;
+          runningCommand.shouldRunCommand = !dryRun;
+        }
+      } else {
+        runningCommand.command = pubCommand;
+        runningCommand.shouldRunCommand = !dryRun;
+      }
+
+      if (runningCommand.shouldRunCommand) {
+        const ranCommand = yield runCommand({
+          command: runningCommand.command,
           cwd,
           pkg: pkg.pkg,
           pkgPath: pkg.path,
-          log: `${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`,
+          log: `${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand.command}`,
         });
+
+        if (pubCommand.pipe) {
+          stdout = `${stdout}${ranCommand}\n`;
+        }
       } else {
         console.log(
-          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${pubCommand}`
+          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand.command}`
         );
       }
     }
 
-    if (!!pkgCommandsRan) _pkgCommandsRan[pkg.pkg] = true;
+    if (!!pkgCommandsRan)
+      _pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] =
+        stdout !== "" ? stdout : true;
   }
   return _pkgCommandsRan;
 };
@@ -202,10 +258,12 @@ const runCommand = function* ({
         cwd: path.join(cwd, pkgPath),
         shell: process.env.shell || true,
         windowsHide: true,
+        all: true,
+        env: { FORCE_COLOR: 0 },
       });
 
-      console.log(child.stdout);
-      return child.stdout;
+      console.log(child.all);
+      return child.all;
     };
   } catch (error) {
     throw error;

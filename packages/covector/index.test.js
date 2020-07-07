@@ -36,12 +36,12 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored.map((pkg) => {
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
-        delete pkg.vfile;
-        return pkg;
-      }),
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
     }).toMatchSnapshot();
 
     const changelogTauriCore = await toVFile.read(
@@ -59,7 +59,9 @@ describe("integration test in production mode", () => {
       "utf-8"
     );
     expect(changelogTaurijs.contents).toBe(
-      "# Changelog\n\n" + "## [0.7.0]\n\n" + "Bumped due to dependency.\n"
+      "# Changelog\n\n" +
+        "## [0.7.0]\n\n" +
+        "-   Summary about the changes in tauri\n"
     );
 
     restoreConsole();
@@ -167,12 +169,12 @@ describe("integration test in --dry-run mode", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored.map((pkg) => {
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
-        delete pkg.vfile;
-        return pkg;
-      }),
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
     }).toMatchSnapshot();
 
     const changelogTauriCore = toVFile.read(
@@ -229,6 +231,184 @@ describe("integration test in --dry-run mode", () => {
   it("runs build for js and rust", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await main(
+      covector({
+        command: "build",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+});
+
+describe("integration test for complex commands", () => {
+  it("runs version for prod", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
+    }).toMatchSnapshot();
+
+    const changelogTauriCore = toVFile.read(
+      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    await expect(changelogTauriCore).rejects.toThrow();
+
+    const changelogTaurijs = toVFile.read(
+      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    await expect(changelogTaurijs).rejects.toThrow();
+
+    restoreConsole();
+  });
+
+  it("runs publish for prod", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "publish",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs test for prod", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "test",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs build for prod", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "build",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs version in --dry-run mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
+    }).toMatchSnapshot();
+
+    const changelogTauriCore = toVFile.read(
+      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    await expect(changelogTauriCore).rejects.toThrow();
+
+    const changelogTaurijs = toVFile.read(
+      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
+      "utf-8"
+    );
+    await expect(changelogTaurijs).rejects.toThrow();
+
+    restoreConsole();
+  });
+
+  it("runs publish in --dry-run mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "publish",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs test in --dry-run mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
+    const covectored = await main(
+      covector({
+        command: "test",
+        cwd: fullIntegration,
+        dryRun: true,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs build in --dry-run mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = await main(
       covector({
         command: "build",
