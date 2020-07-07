@@ -1,5 +1,5 @@
 const core = require("@actions/core");
-const github, {context} = require("@actions/github");
+const github = require("@actions/github");
 const { main } = require("@effection/node");
 const { covector } = require("../covector");
 
@@ -17,22 +17,58 @@ main(function* run() {
       }
     }
     const covectored = yield covector({ command });
-    core.setOutput("change", covectored);
-    const payload = JSON.stringify(covectored, undefined, 2);
-    console.log(`The covector output: ${payload}`);
 
-    const octokit = github.getOctokit(token);
-    const { owner, repo } = context.repo;
-    Object.keys(covectored).forEach(pkg => {
-      yield octokit.repos.createRelease({
-        owner,
-        repo,
-        tag_name: pkg,
-        name: pkg,
-        body: `${covectored[pkg].precommand}\n${covectored[pkg].command}\n${covectored[pkg].postcommand}\n`,
-      });
-    })
+    if (command === "version" || command === "publish") {
+      if (command === "version") {
+        const covectoredSmushed = Object.keys(covectored).reduce(
+          (text, pkg) => {
+            if (typeof covectored[pkg].command === "string") {
+              text = `${text}\n\n\n# ${pkg}\n\n${commandText(covectored[pkg])}`;
+            }
+            return text;
+          },
+          ""
+        );
+        core.setOutput("change", covectoredSmushed);
+        const payload = JSON.stringify(covectored, undefined, 2);
+        console.log(`The covector output: ${payload}`);
+      } else if (command === "publish") {
+        core.setOutput("change", covectored);
+        const payload = JSON.stringify(covectored, undefined, 2);
+        console.log(`The covector output: ${payload}`);
+        const octokit = github.getOctokit(token);
+        const { owner, repo } = github.context.repo;
+        let releases = {};
+        for (let pkg of Object.keys(covectored)) {
+          if (covectored[pkg].command !== false || true) {
+            // true to test
+            const createReleaseResponse = yield octokit.repos.createRelease({
+              owner,
+              repo,
+              tag_name: `${pkg}-v${covectored[pkg].pkg.pkgFile.version}`,
+              name: `${pkg} v${covectored[pkg].pkg.pkgFile.version}`,
+              body: commandText(covectored[pkg]),
+            });
+            const { data } = createReleaseResponse;
+            releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
+          }
+        }
+      }
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
 });
+
+const commandText = (pkg) => {
+  const { precommand, command, postcommand } = pkg;
+  let text = "";
+  if (typeof precommand !== "boolean") {
+    text = `${precommand}\n`;
+  } else if (typeof command !== "boolean") {
+    text = `${command}\n`;
+  } else if (typeof postcommand !== "boolean") {
+    text = `${postcommand}\n`;
+  }
+  return text === "" ? "Publish complete." : text;
+};
