@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: yarn
-      - run: yarn workspace covector build
-      - run: yarn covector build
+      - name: covector build
+        uses: ./packages/action
+        with:
+          command: build
       - run: yarn test
