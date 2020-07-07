@@ -1,10 +1,6 @@
 {
   "pkgManagers": {
     "javascript": {
-      "build": {
-        "command": "echo build run",
-        "dryRunCommand": true
-      },
       "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
       "publish": "npm publish --access public",
@@ -51,6 +47,7 @@
       "manager": "javascript",
       "preversion": "yarn build",
       "publish": false,
+      "build": "yarn build",
       "getPublishedVersion": false,
       "dependencies": ["covector"]
     },
