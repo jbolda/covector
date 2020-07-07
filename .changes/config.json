@@ -38,6 +38,7 @@
     "@covector/files": {
       "path": "./packages/files",
       "manager": "javascript",
+      "build": false,
       "dependencies": ["all"]
     },
     "@covector/changelog": {

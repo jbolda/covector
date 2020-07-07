@@ -83,7 +83,13 @@ export const writePkgFile = async ({ packageFile }: { packageFile: PackageFile }
   return inputVfile;
 };
 
-export const configFile = async ({ cwd, changeFolder = ".changes" }: { cwd: string, changeFolder: string }): Promise<ConfigFile> => {
+export const configFile = async ({
+  cwd,
+  changeFolder = ".changes",
+}: {
+  cwd: string,
+  changeFolder?: string,
+}): Promise<ConfigFile> => {
   const inputVfile = await vfile.read(
     path.join(cwd, changeFolder, "config.json"),
     "utf8"
@@ -99,7 +105,11 @@ export const changeFiles = async ({
   cwd,
   changeFolder = ".changes",
   remove = true,
-}: { cwd: string, changeFolder: string, remove: boolean }): Promise<VFile[]> => {
+}: {
+  cwd: string,
+  changeFolder?: string,
+  remove?: boolean,
+}): Promise<VFile[]> => {
   const paths = await globby(
     [
       path.posix.join(changeFolder, "*.md"),
