@@ -5,6 +5,14 @@ inputs:
     description: 'covector cli command to run'
     required: false
     default: 'status'
+  token:
+    description: Github Token or PAT for creating releases / posting messages
+    required: false
+    default: ''
+  createRelease:
+    description: Opt-in to create a release on publish
+    required: false
+    default: false
 outputs:
   change:
     description: 'The time we greeted you'
