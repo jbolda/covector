@@ -9,15 +9,13 @@ jobs:
       - uses: actions/checkout@v2
       - name: covector status
         uses: ./packages/action
-        id: covector
         with:
           command: 'build'
       - name: covector status
         uses: ./packages/action
-        id: covector
         with:
           command: 'status'
-      - name: dump output
-        env:
-          COVECTOR_DUMP: ${{ toJson(steps.covector) }}
-        run: echo "$COVECTOR_DUMP"
+      - name: covector publish
+        uses: ./packages/action
+        with:
+          command: 'publish'
