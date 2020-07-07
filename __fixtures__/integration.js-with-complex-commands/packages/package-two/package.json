@@ -1,6 +1,7 @@
 {
   "name": "package-two",
   "version": "1.9.0",
+  "license": "MIT",
   "scripts": {
     "build": "echo this command is not piped, it is run from scripts for pk2",
     "test": "echo this command is not piped, it is run from the test script"
