@@ -115,8 +115,13 @@ module.exports.covector = function* covector({
       return `No commands configured to run on [${command}].`;
     }
 
-    let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
-      pkgs[pkg] = { precommand: false, command: false, postcommand: false };
+    let pkgCommandsRan = commands.reduce((pkgs, pkg) => {
+      pkgs[pkg.pkg] = {
+        precommand: false,
+        command: false,
+        postcommand: false,
+        pkg,
+      };
       return pkgs;
     }, {});
 
