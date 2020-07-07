@@ -7,6 +7,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - run: yarn
+      - name: covector build
+        uses: ./packages/action
+        with:
+          command: 'build'
       - name: covector status
         uses: ./packages/action
         with:
