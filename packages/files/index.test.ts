@@ -1,6 +1,6 @@
-const { readPkgFile, configFile, changeFiles } = require("./index");
-const mockConsole = require("jest-mock-console");
-const fixtures = require("fixturez");
+import { readPkgFile, configFile, changeFiles } from "./index"
+import mockConsole from "jest-mock-console"
+import fixtures from "fixturez"
 const f = fixtures(__dirname);
 
 describe("file test", () => {
@@ -27,7 +27,7 @@ describe("file test", () => {
   it("parses config", async () => {
     const configFolder = f.copy("config.simple");
     const configArray = await configFile({ cwd: configFolder });
-    expect(configArray.stuff).toBe("here");
+    expect((configArray as any).stuff).toBe("here");
   });
 
   it("globs changes", async () => {

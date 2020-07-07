@@ -2,9 +2,21 @@ const { covector } = require("./index");
 const { main } = require("effection");
 const toVFile = require("to-vfile");
 const path = require("path");
-const mockConsole = require("jest-mock-console");
 const fixtures = require("fixturez");
 const f = fixtures(__dirname);
+
+let consoleMock = console as jest.Mocked<Console>
+const mockConsole = (toMock: string[]) => {
+  const originalConsole = { ...console }
+  debugger
+  toMock.forEach((mock) => {
+    (console as any)[mock] = jest.fn()
+  })
+  consoleMock = console as jest.Mocked<Console>
+  return () => {
+    global.console = originalConsole
+  }
+}
 
 describe("integration test in production mode", () => {
   it("passes correct config for js and rust", async () => {
@@ -17,8 +29,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleDir: console.dir.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleDir: consoleMock.dir.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -34,9 +46,9 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored.map((pkg) => {
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      covectorReturn: covectored.map((pkg: any) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
         delete pkg.vfile;
@@ -75,8 +87,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -93,8 +105,8 @@ describe("integration test in production mode", () => {
     );
     await expect(covectored).rejects.toThrow();
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       // covectorReturn: covectored, // skip this as npm publish has fs dep output which creates false positives
     }).toMatchSnapshot();
     restoreConsole();
@@ -110,8 +122,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -127,8 +139,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -147,8 +159,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleDir: console.dir.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleDir: consoleMock.dir.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -165,9 +177,9 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored.map((pkg) => {
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      covectorReturn: covectored.map((pkg: any) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
         delete pkg.vfile;
@@ -201,8 +213,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -219,8 +231,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -237,8 +249,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();

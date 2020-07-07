@@ -5,6 +5,10 @@
   "files": [
     "index.js"
   ],
+  "scripts": {
+    "build": "rollup --config",
+    "prepublishOnly": "yarn build"
+  },
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "@tauri-apps/toml": "^2.2.4",
@@ -12,6 +16,7 @@
     "to-vfile": "^6.1.0"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.3",
     "fixturez": "^1.1.0"
   }
 }
