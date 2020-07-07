@@ -6,7 +6,7 @@ const { covector } = require("../covector");
 main(function* run() {
   try {
     const token =
-      core.getInput("token") === "" || !core.getInput("token")
+      core.getInput("token") === ""
         ? process.env.GITHUB_TOKEN
         : core.getInput("token");
     const inputCommand = core.getInput("command");

@@ -20,4 +20,5 @@ jobs:
         uses: ./packages/action
         with:
           command: 'publish'
+          token: ${{ secrets.GITHUB_TOKEN }}
           createRelease: true
