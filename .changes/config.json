@@ -1,17 +1,9 @@
 {
   "pkgManagers": {
     "javascript": {
-      "build": {
-        "command": "echo build run",
-        "dryRunCommand": true
-      },
       "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
-      "publish": "npm publish --access public",
-      "postpublish": [
-        "git tag ${ pkg.pkg }-v${ pkgFile.version }",
-        "git push --tags"
-      ]
+      "publish": "npm publish --access public"
     }
   },
   "packages": {
@@ -51,6 +43,7 @@
       "manager": "javascript",
       "preversion": "yarn build",
       "publish": false,
+      "build": "yarn build",
       "getPublishedVersion": false,
       "dependencies": ["covector"]
     },

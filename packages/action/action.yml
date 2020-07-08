@@ -1,10 +1,18 @@
 name: 'covector'
-description: 'Sane change management in polyglot, monorepos, single '
+description: 'Sane change management in polyglot, monorepos, single'
 inputs:
   command:
     description: 'covector cli command to run'
     required: false
     default: 'status'
+  token:
+    description: Github Token or PAT for creating releases / posting messages
+    required: false
+    default: ''
+  createRelease:
+    description: Opt-in to create a release on publish
+    required: false
+    default: false
 outputs:
   change:
     description: 'The time we greeted you'
