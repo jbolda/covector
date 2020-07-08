@@ -18,5 +18,10 @@ jobs:
           command: 'status'
       - name: covector version
         uses: ./packages/action
+        id: covector
         with:
           command: 'version'
+      - name: Dump covector context
+        env:
+          JOB_CONTEXT: ${{ toJson(steps.covector.outputs.change) }}
+        run: echo "$JOB_CONTEXT"

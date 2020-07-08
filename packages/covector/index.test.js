@@ -79,7 +79,7 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -131,7 +131,7 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -205,7 +205,7 @@ describe("integration test in --dry-run mode", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -241,7 +241,7 @@ describe("integration test in --dry-run mode", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -295,7 +295,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -312,7 +312,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -329,7 +329,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -383,7 +383,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -401,7 +401,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -419,8 +419,16 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: console.log.mock.calls,
       consoleInfo: console.info.mock.calls,
-      covectorReturn: covectored,
+      covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
   });
 });
+
+// vfile returns fs information that is flaky between machines, scrub it
+const scrubVfile = (covectored) => {
+  return Object.keys(covectored).reduce((c, pkg) => {
+    delete c[pkg].pkg.pkgFile.vfile;
+    return c;
+  }, covectored);
+};

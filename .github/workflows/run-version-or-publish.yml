@@ -36,3 +36,4 @@ jobs:
           title: "Publish New Versions"
           labels: "version updates"
           branch: "release"
+          body: ${{ covector.change }}
