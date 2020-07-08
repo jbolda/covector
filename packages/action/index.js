@@ -27,7 +27,7 @@ main(function* run() {
           text = `${text}\n\n\n# ${pkg}\n\n${commandText(covectored[pkg])}`;
         }
         return text;
-      }, "");
+      }, "# Version Updates\n\nMerging this PR will bump all of the applicable packages based on your change files.\n\n");
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       console.log(`The covector output: ${payload}`);
