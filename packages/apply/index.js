@@ -142,7 +142,11 @@ const bumpAll = ({ changes, allPackages }) => {
 
 const bumpMain = ({ packageFile, bumpType }) => {
   let pkg = { ...packageFile };
-  pkg.version = semver.inc(pkg.version, bumpType);
+  let next = semver.inc(pkg.version, bumpType);
+  pkg.version = next;
+  pkg.versionMajor = semver.major(next);
+  pkg.versionMinor = semver.minor(next);
+  pkg.versionPatch = semver.patch(next);
   if (pkg.vfile.extname === ".json") {
     // for javascript
     pkg.pkg.version = semver.inc(pkg.pkg.version, bumpType);

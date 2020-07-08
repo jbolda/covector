@@ -9,6 +9,7 @@
     "@iarna/toml": "^2.2.5",
     "@tauri-apps/toml": "^2.2.4",
     "globby": "^11.0.0",
+    "semver": "^7.3.2",
     "to-vfile": "^6.1.0"
   },
   "devDependencies": {
