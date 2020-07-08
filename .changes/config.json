@@ -3,7 +3,11 @@
     "javascript": {
       "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
-      "publish": "npm publish --access public"
+      "publish": "npm publish --access public",
+      "postpublish": [
+        "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor } -f",
+        "git push --tags"
+      ]
     }
   },
   "packages": {

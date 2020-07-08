@@ -3,6 +3,7 @@ const globby = require("globby");
 const fs = require("fs");
 const path = require("path");
 const TOML = require("@tauri-apps/toml");
+const semver = require("semver");
 
 const parsePkg = (file) => {
   switch (file.extname) {
@@ -10,12 +11,18 @@ const parsePkg = (file) => {
       const parsedTOML = TOML.parse(file.contents);
       return {
         version: parsedTOML.package.version,
+        versionMajor: semver.major(parsedTOML.package.version),
+        versionMinor: semver.minor(parsedTOML.package.version),
+        versionPatch: semver.patch(parsedTOML.package.version),
         pkg: parsedTOML,
       };
     case ".json":
       const parsedJSON = JSON.parse(file.contents);
       return {
         version: parsedJSON.version,
+        versionMajor: semver.major(parsedJSON.version),
+        versionMinor: semver.minor(parsedJSON.version),
+        versionPatch: semver.patch(parsedJSON.version),
         pkg: parsedJSON,
       };
   }
