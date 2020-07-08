@@ -18,6 +18,11 @@ jobs:
         run: |
           git config --global user.name "${{ github.event.pusher.name }}"
           git config --global user.email "${{ github.event.pusher.email }}"
+      - run: yarn
+      - name: covector build
+        uses: ./packages/action
+        with:
+          command: 'build'
       - name: covector version-or-publish
         uses: ./packages/action
         id: covector
@@ -25,10 +30,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           command: 'version-or-publish'
-      - name: dump output
-        env:
-          COVECTOR_DUMP: ${{ toJson(steps.covector.change) }}
-        run: echo "$COVECTOR_DUMP"
       - name: create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v2
@@ -36,4 +37,4 @@ jobs:
           title: "Publish New Versions"
           labels: "version updates"
           branch: "release"
-          body: ${{ covector.change }}
+          body: ${{ steps.covector.outputs.change }}
