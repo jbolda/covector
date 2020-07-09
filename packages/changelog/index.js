@@ -27,6 +27,7 @@ module.exports.fillChangelogs = async ({
   const writtenChanges = applyChanges({
     changelogs,
     assembledChanges,
+    config,
   });
 
   if (create) {
@@ -65,7 +66,10 @@ const readAllChangelogs = ({ applied, packages, cwd }) => {
   );
 };
 
-const applyChanges = ({ changelogs, assembledChanges }) => {
+const applyChanges = ({ changelogs, assembledChanges, config }) => {
+  const gitSiteUrl = !config.gitSiteUrl
+    ? "/"
+    : config.gitUrl.replace(/\/$/, "") + "/";
   return changelogs.map((change) => {
     let changelog = processor.parse(change.changelog.contents);
     let addition = "";
@@ -73,7 +77,18 @@ const applyChanges = ({ changelogs, assembledChanges }) => {
       addition = `## [${change.changes.version}]\nBumped due to dependency.`;
     } else {
       addition = assembledChanges.releases[change.changes.name].changes.reduce(
-        (finalString, release) => `${finalString}\n - ${release.summary}`,
+        (finalString, release) =>
+          !release.meta || (!!release.meta && !release.meta.hashShort)
+            ? `${finalString}\n - ${release.summary}`
+            : `${finalString}\n - ${release.summary} { [${
+                release.meta.hashShort
+              }](${gitSiteUrl}commit/${
+                release.meta.hashLong
+              }) ${release.meta.commitSubject.replace(
+                /(#[0-9])\w/g,
+                (match) =>
+                  `[${match}](${gitSiteUrl}pull/${match.substr(1, 999999)})`
+              )} on ${release.meta.date} }`,
         `## [${change.changes.version}]`
       );
     }

@@ -2,18 +2,30 @@
 
 exports[`file test globs changes 1`] = `
 Array [
-  "---
+  VFile {
+    "contents": "---
 \\"package-a\\": minor
 ---
 
 Summary about the changes in pkg-a
 ",
-  "---
+    "data": Object {
+      "filename": ".changes/first-change.md",
+    },
+    "messages": Array [],
+  },
+  VFile {
+    "contents": "---
 \\"package-b\\": patch
 ---
 
 Summary about the changes in pkg-b
 ",
+    "data": Object {
+      "filename": ".changes/second-change.md",
+    },
+    "messages": Array [],
+  },
 ]
 `;
 

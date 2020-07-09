@@ -1,0 +1,13 @@
+{
+  "name": "@covector/command",
+  "version": "0.0.0",
+  "files": [
+    "index.js"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@effection/events": "^0.7.6",
+    "effection": "^0.7.0",
+    "execa": "^4.0.3"
+  }
+}

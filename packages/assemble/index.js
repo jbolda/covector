@@ -5,12 +5,13 @@ const frontmatter = require("remark-frontmatter");
 const parseFrontmatter = require("remark-parse-yaml");
 const template = require("lodash.template");
 const { readPkgFile } = require("@covector/files");
+const { runCommand } = require("@covector/command");
 const path = require("path");
 
 const processor = unified().use(parse).use(frontmatter).use(parseFrontmatter);
 
-const parseChange = (testText) => {
-  const parsed = processor.parse(testText);
+const parseChange = function* ({ cwd, vfile }) {
+  const parsed = processor.parse(vfile.contents);
   const processed = processor.runSync(parsed);
   let changeset = {};
   changeset.releases = processed.children[0].data.parsedValue;
@@ -24,6 +25,28 @@ const parseChange = (testText) => {
       return summary;
     }
   }, "");
+  if (cwd) {
+    try {
+      let gitInfo = yield runCommand({
+        cwd,
+        pkgPath: "",
+        command: `git log --reverse --format="%h %H %as %s" -n 1 ${vfile.data.filename}`,
+        log: false,
+      });
+      const [hashShort, hashLong, date, ...rest] = gitInfo.split(" ");
+      changeset.meta = {
+        ...vfile.data,
+        hashShort,
+        hashLong,
+        date,
+        commitSubject: rest.join(" "),
+      };
+    } catch (e) {
+      changeset.meta = {
+        ...vfile.data,
+      };
+    }
+  }
   return changeset;
 };
 
@@ -63,10 +86,18 @@ const mergeReleases = (changes) => {
   }, {});
 };
 
-module.exports.assemble = (texts) => {
+module.exports.assemble = function* ({ cwd, vfiles }) {
   let plan = {};
-  plan.changes = texts.map((text) => parseChange(text));
-  plan.releases = mergeReleases(plan.changes);
+  let changes = yield function* () {
+    let allVfiles = vfiles.map((vfile) => parseChange({ cwd, vfile }));
+    let yieldedV = [];
+    for (let v of allVfiles) {
+      yieldedV = [...yieldedV, yield v];
+    }
+    return yieldedV;
+  };
+  plan.changes = changes;
+  plan.releases = mergeReleases(changes);
   return plan;
 };
 

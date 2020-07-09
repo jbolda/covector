@@ -690,6 +690,9 @@ Object {
     Array [
       Array [
         Object {
+          "meta": Object {
+            "filename": ".changes/first-change.md",
+          },
           "releases": Object {
             "tauri": "minor",
           },
@@ -700,6 +703,9 @@ Object {
     Array [
       Array [
         Object {
+          "meta": Object {
+            "filename": ".changes/second-change.md",
+          },
           "releases": Object {
             "tauri-updater": "patch",
           },
@@ -1955,6 +1961,9 @@ Object {
         "release": Object {
           "changes": Array [
             Object {
+              "meta": Object {
+                "filename": ".changes/first-change.md",
+              },
               "releases": Object {
                 "tauri": "minor",
               },
@@ -1984,6 +1993,9 @@ Object {
         "release": Object {
           "changes": Array [
             Object {
+              "meta": Object {
+                "filename": ".changes/second-change.md",
+              },
               "releases": Object {
                 "tauri-updater": "patch",
               },
@@ -2013,6 +2025,9 @@ Object {
         "release": Object {
           "changes": Array [
             Object {
+              "meta": Object {
+                "filename": ".changes/first-change.md",
+              },
               "releases": Object {
                 "tauri": "minor",
               },
@@ -2397,6 +2412,9 @@ Object {
     Array [
       Array [
         Object {
+          "meta": Object {
+            "filename": ".changes/first-change.md",
+          },
           "releases": Object {
             "tauri": "minor",
           },
@@ -2407,6 +2425,9 @@ Object {
     Array [
       Array [
         Object {
+          "meta": Object {
+            "filename": ".changes/second-change.md",
+          },
           "releases": Object {
             "tauri-updater": "patch",
           },

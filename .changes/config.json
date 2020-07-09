@@ -1,4 +1,5 @@
 {
+  "gitSiteUrl": "https://www.github.com/jbolda/covector/",
   "pkgManagers": {
     "javascript": {
       "version": true,
@@ -32,15 +33,20 @@
       "manager": "javascript",
       "dependencies": ["all"]
     },
+    "@covector/changelog": {
+      "path": "./packages/changelog",
+      "manager": "javascript",
+      "dependencies": ["@covector/files", "all"]
+    },
     "@covector/files": {
       "path": "./packages/files",
       "manager": "javascript",
       "dependencies": ["all"]
     },
-    "@covector/changelog": {
-      "path": "./packages/changelog",
+    "@covector/command": {
+      "path": "./packages/command",
       "manager": "javascript",
-      "dependencies": ["@covector/files", "all"]
+      "dependencies": ["all"]
     },
     "action": {
       "path": "./packages/action",
