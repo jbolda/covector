@@ -98,7 +98,7 @@ const runCommand = function* ({
   let child;
   try {
     return yield function* () {
-      console.log(log);
+      if (log !== false) console.log(log);
       child = yield execa.command(command, {
         cwd: path.join(cwd, pkgPath),
         shell: process.env.shell || true,
@@ -107,7 +107,7 @@ const runCommand = function* ({
         env: { FORCE_COLOR: 0 },
       });
 
-      console.log(child.all);
+      if (log !== false) console.log(child.all);
       return child.all;
     };
   } catch (error) {

@@ -14,7 +14,7 @@ module.exports.covector = function* covector({
     cwd,
     remove: command === "version" && !dryRun,
   });
-  const assembledChanges = assemble(changesArray);
+  const assembledChanges = yield assemble({ cwd, vfiles: changesArray });
 
   if (command === "status" || !command) {
     if (changesArray.length === 0) {

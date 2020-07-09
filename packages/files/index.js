@@ -87,9 +87,13 @@ module.exports.changeFiles = async ({
     }
   );
 
-  const vfiles = paths
-    .map((file) => vfile.readSync(path.join(cwd, file), "utf8"))
-    .map((v) => v.contents);
+  const vfiles = paths.map((file) => {
+    let v = vfile.readSync(path.join(cwd, file), "utf8");
+    delete v.history;
+    delete v.cwd;
+    v.data.filename = file;
+    return v;
+  });
 
   if (remove) {
     await Promise.all(

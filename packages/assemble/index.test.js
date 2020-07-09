@@ -114,59 +114,66 @@ const config = {
   },
 };
 
-const testTextOne = `
+const testTextOne = {
+  contents: `
 ---
 "assemble1": patch
 "assemble2": patch
 ---
     
 This is a test.
-`;
-const testTextTwo = `
+`,
+};
+const testTextTwo = {
+  contents: `
 ---
 "assemble1": minor
 "assemble2": patch
 ---
     
 This is a test.
-`;
-const testTextThree = `
+`,
+};
+const testTextThree = {
+  contents: `
 ---
 "assemble1": patch
 "assemble2": major
 ---
     
 This is a test.
-`;
-const testTextFour = `
+`,
+};
+const testTextFour = {
+  contents: `
 ---
 "assemble1": patch
 "@namespaced/assemble2": patch
 ---
     
 This is a test.
-`;
-const testTextFive = `
+`,
+};
+const testTextFive = {
+  contents: `
 ---
 "all": minor
 ---
   
 This is a test.
-`;
+`,
+};
 
 describe("assemble changes", () => {
-  it("runs", () => {
-    const assembled = assemble([
-      testTextOne,
-      testTextTwo,
-      testTextThree,
-      testTextFour,
-    ]);
+  it("runs", function* () {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+    });
     expect(assembled).toMatchSnapshot();
   });
 
-  it("assembles deps", () => {
-    const assembled = assemble([testTextFive], config.packages);
+  it("assembles deps", function* () {
+    const assembled = yield assemble({ vfiles: [testTextFive] });
     expect(assembled).toMatchSnapshot();
   });
 });
