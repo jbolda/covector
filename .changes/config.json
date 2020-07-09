@@ -1,4 +1,5 @@
 {
+  "gitSiteUrl": "https://www.github.com/jbolda/covector/",
   "pkgManagers": {
     "javascript": {
       "version": true,
