@@ -69,7 +69,7 @@ const readAllChangelogs = ({ applied, packages, cwd }) => {
 const applyChanges = ({ changelogs, assembledChanges, config }) => {
   const gitSiteUrl = !config.gitSiteUrl
     ? "/"
-    : config.gitUrl.replace(/\/$/, "") + "/";
+    : config.gitSiteUrl.replace(/\/$/, "") + "/";
   return changelogs.map((change) => {
     let changelog = processor.parse(change.changelog.contents);
     let addition = "";
