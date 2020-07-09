@@ -30,7 +30,7 @@ const parseChange = function* ({ cwd, vfile }) {
       let gitInfo = yield runCommand({
         cwd,
         pkgPath: "",
-        command: `git log --reverse --format="%h %H %as %s" ${vfile.data.filename}`,
+        command: `git log --reverse --format="%h %H %as %s" -n 1 ${vfile.data.filename}`,
         log: false,
       });
       const [hashShort, hashLong, date, ...rest] = gitInfo.split(" ");
