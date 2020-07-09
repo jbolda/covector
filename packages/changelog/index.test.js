@@ -162,9 +162,9 @@ describe("changelog", () => {
     expect(changelog.contents).toBe(
       "# Changelog\n\n" +
         "## [0.5.6]\n\n" +
-        "-   This is a test. [[3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#43](/pull/43) ([#71](/pull/71))]\n" +
-        "-   This is another test. [[3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#23](/pull/23) ([#72](/pull/72))]\n" +
-        "-   This is the last test. [[3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#49](/pull/49) ([#73](/pull/73))]\n"
+        "-   This is a test. { [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#43](/pull/43) ([#71](/pull/71)) on 2020-07-06 }\n" +
+        "-   This is another test. { [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#23](/pull/23) ([#72](/pull/72)) on 2020-07-06 }\n" +
+        "-   This is the last test. { [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#49](/pull/49) ([#73](/pull/73)) on 2020-07-06 }\n"
     );
   });
 
