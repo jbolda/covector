@@ -1,4 +1,9 @@
-const { readPkgFile, configFile, changeFiles } = require("./index");
+const {
+  readPkgFile,
+  configFile,
+  changeFiles,
+  changeFilesToVfile,
+} = require("./index");
 const mockConsole = require("jest-mock-console");
 const fixtures = require("fixturez");
 const f = fixtures(__dirname);
@@ -33,8 +38,12 @@ describe("file test", () => {
   it("globs changes", async () => {
     const restoreConsole = mockConsole(["info"]);
     const changesFolder = f.copy("changes.multiple-changes");
-    const changesArray = await changeFiles({ cwd: changesFolder });
-    expect(changesArray).toMatchSnapshot();
+    const changesPaths = await changeFiles({ cwd: changesFolder });
+    const changesVfiles = changeFilesToVfile({
+      cwd: changesFolder,
+      paths: changesPaths,
+    });
+    expect(changesVfiles).toMatchSnapshot();
     restoreConsole();
   });
 

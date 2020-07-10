@@ -15,7 +15,3 @@ jobs:
         uses: ./packages/action
         with:
           command: 'status'
-      - name: covector version
-        uses: ./packages/action
-        with:
-          command: 'version'

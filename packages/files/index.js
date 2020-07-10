@@ -70,12 +70,8 @@ module.exports.configFile = async ({ cwd, changeFolder = ".changes" }) => {
   };
 };
 
-module.exports.changeFiles = async ({
-  cwd,
-  changeFolder = ".changes",
-  remove = true,
-}) => {
-  const paths = await globby(
+module.exports.changeFiles = async ({ cwd, changeFolder = ".changes" }) => {
+  return await globby(
     [
       path.posix.join(changeFolder, "*.md"),
       `!${path.posix.join(changeFolder, "README.md")}`,
@@ -86,31 +82,31 @@ module.exports.changeFiles = async ({
       cwd,
     }
   );
+};
 
-  const vfiles = paths.map((file) => {
+module.exports.changeFilesToVfile = ({ cwd, paths }) => {
+  return paths.map((file) => {
     let v = vfile.readSync(path.join(cwd, file), "utf8");
     delete v.history;
     delete v.cwd;
     v.data.filename = file;
     return v;
   });
+};
 
-  if (remove) {
-    await Promise.all(
-      paths.map(async (changeFilePath) => {
-        await fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
-          if (err) throw err;
-        });
-        return changeFilePath;
-      })
-    ).then((deletedPaths) => {
-      deletedPaths.forEach((changeFilePath) =>
-        console.info(`${changeFilePath} was deleted`)
-      );
-    });
-  }
-
-  return vfiles;
+module.exports.changeFilesRemove = ({ cwd, paths }) => {
+  return Promise.all(
+    paths.map(async (changeFilePath) => {
+      await fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
+        if (err) throw err;
+      });
+      return changeFilePath;
+    })
+  ).then((deletedPaths) => {
+    deletedPaths.forEach((changeFilePath) =>
+      console.info(`${changeFilePath} was deleted`)
+    );
+  });
 };
 
 module.exports.readChangelog = async ({ cwd }) => {

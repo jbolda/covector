@@ -1,5 +1,10 @@
 const { attemptCommands, raceTime } = require("@covector/command");
-const { configFile, changeFiles } = require("@covector/files");
+const {
+  configFile,
+  changeFiles,
+  changeFilesToVfile,
+  changeFilesRemove,
+} = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { fillChangelogs } = require("@covector/changelog");
 const { apply, changesConsideringParents } = require("@covector/apply");
@@ -10,14 +15,18 @@ module.exports.covector = function* covector({
   cwd = process.cwd(),
 }) {
   const config = yield configFile({ cwd });
-  const changesArray = yield changeFiles({
+  const changesPaths = yield changeFiles({
     cwd,
-    remove: command === "version" && !dryRun,
+    changeFolder: config.changeFolder,
   });
-  const assembledChanges = yield assemble({ cwd, vfiles: changesArray });
+  const changesVfiles = changeFilesToVfile({
+    cwd,
+    paths: changesPaths,
+  });
+  const assembledChanges = yield assemble({ cwd, vfiles: changesVfiles });
 
   if (command === "status" || !command) {
-    if (changesArray.length === 0) {
+    if (changesVfiles.length === 0) {
       console.info("There are no changes.");
       return "No changes.";
     } else {
@@ -67,6 +76,7 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       dryRun,
     });
+
     const applied = yield apply({
       commands,
       config,
@@ -87,6 +97,7 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       create: !dryRun,
     });
+
     pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
@@ -95,6 +106,9 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       dryRun,
     });
+
+    if (command === "version" && !dryRun)
+      yield changeFilesRemove({ cwd, paths: changesPaths });
 
     return pkgCommandsRan;
   } else {
