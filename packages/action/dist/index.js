@@ -4161,7 +4161,7 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
                     `    - [${commit.hashShort}](${gitSiteUrl}commit/${
                       commit.hashLong
                     }) ${commit.commitSubject.replace(
-                      /(#[0-9])\w/g,
+                      /(#[0-9]+)/g,
                       (match) =>
                         `[${match}](${gitSiteUrl}pull/${match.substr(
                           1,
@@ -22197,6 +22197,7 @@ const { spawn, timeout } = __webpack_require__(700);
 const { once, on } = __webpack_require__(910);
 const execa = __webpack_require__(949);
 const path = __webpack_require__(622);
+const { cpuUsage } = __webpack_require__(765);
 
 const attemptCommands = function* ({
   cwd,
@@ -22208,23 +22209,6 @@ const attemptCommands = function* ({
 }) {
   let _pkgCommandsRan = { ...pkgCommandsRan };
   for (let pkg of commands) {
-    if (!!pkg.getPublishedVersion) {
-      const version = yield runCommand({
-        command: pkg.getPublishedVersion,
-        cwd,
-        pkg: pkg.pkg,
-        pkgPath: pkg.path,
-        stdio: "pipe",
-        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
-      });
-
-      if (pkg.pkgFile.version === version) {
-        console.log(
-          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
-        );
-        continue;
-      }
-    }
     if (!pkg[`${commandPrefix}command`]) continue;
     const pubCommands =
       typeof pkg[`${commandPrefix}command`] === "string" ||
@@ -22282,6 +22266,33 @@ const attemptCommands = function* ({
   return _pkgCommandsRan;
 };
 
+const confirmCommandsToRun = function* ({ cwd, commands }) {
+  let commandsToRun = [];
+  for (let pkg of commands) {
+    if (!!pkg.getPublishedVersion) {
+      const version = yield runCommand({
+        command: pkg.getPublishedVersion,
+        cwd,
+        pkg: pkg.pkg,
+        pkgPath: pkg.path,
+        stdio: "pipe",
+        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
+      });
+
+      if (pkg.pkgFile.version === version) {
+        console.log(
+          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
+        );
+        // early return if published already
+        continue;
+      }
+    }
+    commandsToRun = commandsToRun.concat([pkg]);
+  }
+
+  return commandsToRun;
+};
+
 const runCommand = function* ({
   pkg,
   command,
@@ -22320,7 +22331,12 @@ const raceTime = function (
   });
 };
 
-module.exports = { attemptCommands, runCommand, raceTime };
+module.exports = {
+  attemptCommands,
+  confirmCommandsToRun,
+  runCommand,
+  raceTime,
+};
 
 
 /***/ }),
@@ -31341,7 +31357,10 @@ main(function* run() {
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       console.log(`The covector output: ${payload}`);
-    } else if (command === "publish" && core.getInput("createRelease")) {
+    } else if (
+      command === "publish" &&
+      core.getInput("createRelease") === true
+    ) {
       core.setOutput("change", covectored);
       const payload = JSON.stringify(covectored, undefined, 2);
       console.log(`The covector output: ${payload}`);
@@ -31363,24 +31382,14 @@ main(function* run() {
 
           const { releaseId } = data;
 
-          // Determine content-length for header to upload asset
-          const contentLength = (filePath) => fs.statSync(filePath).size;
-
           if (covectored[pkg].pkg.assets) {
             for (let asset in covectored[pkg].pkg.assetPaths) {
-              // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
-              const headers = {
-                "content-type": assetContentType,
-                "content-length": contentLength(assetPath),
-              };
-
               const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
                 owner,
                 repo,
-                headers,
-                release_id,
+                release_Id: releaseId,
                 name: asset.name,
-                file: fs.readFileSync(asset.path),
+                data: fs.readFileSync(asset.path),
               });
             }
           }
@@ -42956,7 +42965,12 @@ module.exports = isStream;
 
 
 /***/ }),
-/* 765 */,
+/* 765 */
+/***/ (function(module) {
+
+module.exports = require("process");
+
+/***/ }),
 /* 766 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -60640,7 +60654,11 @@ function autoLink(eat, value, silent) {
 /* 994 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const { attemptCommands, raceTime } = __webpack_require__(378);
+const {
+  attemptCommands,
+  confirmCommandsToRun,
+  raceTime,
+} = __webpack_require__(378);
 const {
   configFile,
   changeFiles,
@@ -60768,6 +60786,8 @@ module.exports.covector = function* covector({
       return `No commands configured to run on [${command}].`;
     }
 
+    const commandsToRun = yield confirmCommandsToRun({ cwd, commands });
+
     let pkgCommandsRan = commands.reduce((pkgs, pkg) => {
       pkgs[pkg.pkg] = {
         precommand: false,
@@ -60780,7 +60800,7 @@ module.exports.covector = function* covector({
 
     pkgCommandsRan = yield attemptCommands({
       cwd,
-      commands,
+      commands: commandsToRun,
       commandPrefix: "pre",
       command,
       pkgCommandsRan,
@@ -60788,14 +60808,14 @@ module.exports.covector = function* covector({
     });
     pkgCommandsRan = yield attemptCommands({
       cwd,
-      commands,
+      commands: commandsToRun,
       command,
       pkgCommandsRan,
       dryRun,
     });
     pkgCommandsRan = yield attemptCommands({
       cwd,
-      commands,
+      commands: commandsToRun,
       commandPrefix: "post",
       command,
       pkgCommandsRan,

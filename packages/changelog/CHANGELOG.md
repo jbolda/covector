@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1]
+
+-   Find all numbers in a PR no matter the quantity.
+    -   [4a39f15](https://www.github.com/jbolda/covector/commit/4a39f15b3b774ce171b3fa917db8f47d19823874) fix: find changelog PR numbers of any size ([#89](https://www.github.com/jbolda/covector/pull/89)) on 2020-07-10
+
 ## [0.2.0]
 
 -   Pipe git info into changelog using sub-bullet points for each commit it was involved in.
