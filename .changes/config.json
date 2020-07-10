@@ -21,7 +21,7 @@
       "postpublish": [
         "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor } -f",
         "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor }.${ pkgFile.versionMinor } -f",
-        "git push --tags"
+        "git push --tags -f"
       ],
       "dependencies": [
         "@covector/apply",
@@ -53,7 +53,6 @@
       "dependencies": ["all"]
     },
     "@covector/command": {
-      "getPublishedVersion": false,
       "path": "./packages/command",
       "manager": "javascript",
       "dependencies": ["all"]
