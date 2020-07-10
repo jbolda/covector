@@ -7,11 +7,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - run: yarn
-      - name: covector build
-        uses: ./packages/action
         with:
-          command: 'build'
+          fetch-depth: 0
+      - run: yarn
+      - run: yarn workspace action build
       - name: covector status
         uses: ./packages/action
         with:
