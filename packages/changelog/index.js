@@ -90,7 +90,7 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
                     `    - [${commit.hashShort}](${gitSiteUrl}commit/${
                       commit.hashLong
                     }) ${commit.commitSubject.replace(
-                      /(#[0-9])\w/g,
+                      /(#[0-9]+)/g,
                       (match) =>
                         `[${match}](${gitSiteUrl}pull/${match.substr(
                           1,
