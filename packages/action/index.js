@@ -57,20 +57,22 @@ main(function* run() {
           // Determine content-length for header to upload asset
           const contentLength = (filePath) => fs.statSync(filePath).size;
 
-          for (let assetPath in covectored[pkg].pkg.assetPaths) {
-            // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
-            const headers = {
-              "content-type": assetContentType,
-              "content-length": contentLength(assetPath),
-            };
+          if (covectored[pkg].pkg.assets) {
+            for (let asset in covectored[pkg].pkg.assetPaths) {
+              // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
+              const headers = {
+                "content-type": assetContentType,
+                "content-length": contentLength(assetPath),
+              };
 
-            const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
-              owner,
-              repo,
-              release_id,
-              name: assetName,
-              file: fs.readFileSync(assetPath),
-            });
+              const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
+                owner,
+                repo,
+                release_id,
+                name: asset.name,
+                file: fs.readFileSync(asset.path),
+              });
+            }
           }
         }
       }
