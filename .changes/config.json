@@ -7,6 +7,7 @@
       "publish": "npm publish --access public",
       "postpublish": [
         "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor } -f",
+        "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor }.${ pkgFile.versionMinor } -f",
         "git push --tags"
       ]
     }
@@ -51,9 +52,7 @@
     "action": {
       "path": "./packages/action",
       "manager": "javascript",
-      "preversion": "yarn build",
       "publish": false,
-      "build": "yarn build",
       "getPublishedVersion": false,
       "dependencies": ["covector"]
     },
