@@ -84,16 +84,21 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
                 !release.meta.dependencies
                   ? ""
                   : `    - ${release.meta.dependencies}\n`
-              }${release.meta.commits.map(
-                (commit) =>
-                  `    - [${commit.hashShort}](${gitSiteUrl}commit/${
-                    commit.hashLong
-                  }) ${commit.commitSubject.replace(
-                    /(#[0-9])\w/g,
-                    (match) =>
-                      `[${match}](${gitSiteUrl}pull/${match.substr(1, 999999)})`
-                  )} on ${commit.date}`
-              )}`,
+              }${release.meta.commits
+                .map(
+                  (commit) =>
+                    `    - [${commit.hashShort}](${gitSiteUrl}commit/${
+                      commit.hashLong
+                    }) ${commit.commitSubject.replace(
+                      /(#[0-9])\w/g,
+                      (match) =>
+                        `[${match}](${gitSiteUrl}pull/${match.substr(
+                          1,
+                          999999
+                        )})`
+                    )} on ${commit.date}`
+                )
+                .join("\n")}`,
         `## [${change.changes.version}]`
       );
     }
