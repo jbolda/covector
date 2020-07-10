@@ -79,8 +79,8 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
       addition = assembledChanges.releases[change.changes.name].changes.reduce(
         (finalString, release) =>
           !release.meta || (!!release.meta && !release.meta.hashShort)
-            ? `${finalString}\n - ${release.summary}`
-            : `${finalString}\n - ${release.summary}\n  - [${
+            ? `${finalString}\n- ${release.summary}`
+            : `${finalString}\n- ${release.summary}\n    - [${
                 release.meta.hashShort
               }](${gitSiteUrl}commit/${
                 release.meta.hashLong

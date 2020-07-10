@@ -2193,7 +2193,7 @@ Object {
         "versionPatch": 0,
       },
       "command": "## [0.6.0]
- - Summary about the changes in tauri",
+- Summary about the changes in tauri",
       "postcommand": false,
       "precommand": false,
     },
@@ -2259,7 +2259,7 @@ Object {
         "versionPatch": 3,
       },
       "command": "## [0.4.3]
- - Summary about the changes in tauri-updater",
+- Summary about the changes in tauri-updater",
       "postcommand": false,
       "precommand": false,
     },
@@ -2387,7 +2387,7 @@ Object {
         "versionPatch": 0,
       },
       "command": "## [0.7.0]
- - Summary about the changes in tauri",
+- Summary about the changes in tauri",
       "postcommand": false,
       "precommand": false,
     },
@@ -3895,7 +3895,7 @@ Object {
         "versionPatch": 0,
       },
       "command": "## [0.6.0]
- - Summary about the changes in tauri",
+- Summary about the changes in tauri",
       "postcommand": false,
       "precommand": false,
     },
@@ -3961,7 +3961,7 @@ Object {
         "versionPatch": 3,
       },
       "command": "## [0.4.3]
- - Summary about the changes in tauri-updater",
+- Summary about the changes in tauri-updater",
       "postcommand": false,
       "precommand": false,
     },
@@ -4089,7 +4089,7 @@ Object {
         "versionPatch": 0,
       },
       "command": "## [0.7.0]
- - Summary about the changes in tauri",
+- Summary about the changes in tauri",
       "postcommand": false,
       "precommand": false,
     },
