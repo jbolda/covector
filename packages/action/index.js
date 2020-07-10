@@ -2,6 +2,7 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const { main } = require("@effection/node");
 const { covector } = require("../covector");
+const fs = require("fs");
 
 main(function* run() {
   try {
@@ -39,7 +40,7 @@ main(function* run() {
       const { owner, repo } = github.context.repo;
       let releases = {};
       for (let pkg of Object.keys(covectored)) {
-        if (covectored[pkg].command !== false || true) {
+        if (covectored[pkg].command !== false) {
           // true to test
           const createReleaseResponse = yield octokit.repos.createRelease({
             owner,
@@ -50,6 +51,29 @@ main(function* run() {
           });
           const { data } = createReleaseResponse;
           releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
+
+          const { releaseId } = data;
+
+          // Determine content-length for header to upload asset
+          const contentLength = (filePath) => fs.statSync(filePath).size;
+
+          if (covectored[pkg].pkg.assets) {
+            for (let asset in covectored[pkg].pkg.assetPaths) {
+              // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
+              const headers = {
+                "content-type": assetContentType,
+                "content-length": contentLength(assetPath),
+              };
+
+              const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
+                owner,
+                repo,
+                release_id,
+                name: asset.name,
+                file: fs.readFileSync(asset.path),
+              });
+            }
+          }
         }
       }
     }

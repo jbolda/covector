@@ -4,11 +4,18 @@
     "javascript": {
       "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
+      "prepublish": ["npm pack"],
       "publish": "npm publish --access public",
       "postpublish": [
         "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor } -f",
         "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor }.${ pkgFile.versionMinor } -f",
         "git push --tags"
+      ],
+      "assets": [
+        {
+          "path": "./${ pkg.pkg }-${ pkgFile.version }.tgz",
+          "name": "${ pkg.pkg }-${ pkgFile.version }.tgz"
+        }
       ]
     }
   },
@@ -45,6 +52,7 @@
       "dependencies": ["all"]
     },
     "@covector/command": {
+      "getPublishedVersion": false,
       "path": "./packages/command",
       "manager": "javascript",
       "dependencies": ["all"]
