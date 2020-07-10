@@ -80,7 +80,7 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
         (finalString, release) =>
           !release.meta || (!!release.meta && !release.meta.hashShort)
             ? `${finalString}\n - ${release.summary}`
-            : `${finalString}\n - ${release.summary} { [${
+            : `${finalString}\n - ${release.summary}\n  - [${
                 release.meta.hashShort
               }](${gitSiteUrl}commit/${
                 release.meta.hashLong
@@ -88,7 +88,7 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
                 /(#[0-9])\w/g,
                 (match) =>
                   `[${match}](${gitSiteUrl}pull/${match.substr(1, 999999)})`
-              )} on ${release.meta.date} }`,
+              )} on ${release.meta.date}`,
         `## [${change.changes.version}]`
       );
     }
