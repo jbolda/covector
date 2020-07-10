@@ -116,11 +116,13 @@ module.exports.mergeIntoConfig = ({
     const mergedCommand = mergeCommand({ ...commandItems, command });
 
     let getPublishedVersion;
+    let assets;
     if (command === "publish") {
       getPublishedVersion = mergeCommand({
         ...commandItems,
         command: "getPublishedVersion",
       });
+      assets = mergeCommand({ ...commandItems, command: "assets" });
     }
 
     if (!!mergedCommand) {
@@ -134,6 +136,7 @@ module.exports.mergeIntoConfig = ({
           command: `post${command}`,
         }),
         ...(!getPublishedVersion ? {} : { getPublishedVersion }),
+        ...(!assets ? {} : { assets }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
       };
@@ -155,7 +158,7 @@ module.exports.mergeIntoConfig = ({
       pkg: pkgCommands[pkg],
     };
 
-    const extraPublishParams =
+    let extraPublishParams =
       command == "version"
         ? {}
         : {
@@ -170,13 +173,6 @@ module.exports.mergeIntoConfig = ({
               ),
               nickname: pkg,
             }),
-            ...(!pkgCommands[pkg].getPublishedVersion
-              ? {}
-              : {
-                  getPublishedVersion: template(
-                    pkgCommands[pkg].getPublishedVersion
-                  )(pipeToTemplate),
-                }),
           };
 
     if (command !== "version" && !!extraPublishParams.pkgFile) {
@@ -184,6 +180,29 @@ module.exports.mergeIntoConfig = ({
         name: extraPublishParams.pkgFile.name,
         version: extraPublishParams.pkgFile.version,
         pkg: extraPublishParams.pkgFile.pkg,
+      };
+    }
+
+    if (command !== "version") {
+      // add these after that they can use pkgFile
+      extraPublishParams = {
+        ...extraPublishParams,
+        ...(!pkgCommands[pkg].getPublishedVersion
+          ? {}
+          : {
+              getPublishedVersion: template(
+                pkgCommands[pkg].getPublishedVersion
+              )(pipeToTemplate),
+            }),
+        ...(!pkgCommands[pkg].assets
+          ? {}
+          : {
+              assets: templateCommands(
+                pkgCommands[pkg].assets,
+                pipeToTemplate,
+                ["path", "name"]
+              ),
+            }),
       };
     }
 
@@ -201,11 +220,19 @@ module.exports.mergeIntoConfig = ({
       type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
       dependencies: pkgCommands[pkg].dependencies,
-      precommand: templateCommands(pkgCommands[pkg].precommand, pipeToTemplate),
-      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate),
+      precommand: templateCommands(
+        pkgCommands[pkg].precommand,
+        pipeToTemplate,
+        ["command", "dryRunCommand"]
+      ),
+      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate, [
+        "command",
+        "dryRunCommand",
+      ]),
       postcommand: templateCommands(
         pkgCommands[pkg].postcommand,
-        pipeToTemplate
+        pipeToTemplate,
+        ["command", "dryRunCommand"]
       ),
     };
     return merged;
@@ -240,18 +267,21 @@ const mergeCommand = ({ pkg, pkgManager, command, config }) => {
   return mergedCommand;
 };
 
-const templateCommands = (command, pipe) => {
+const templateCommands = (command, pipe, complexCommands) => {
   if (!command) return null;
   const commands = !Array.isArray(command) ? [command] : command;
   return commands.map((c) => {
     if (typeof c === "object") {
-      const command =
-        typeof c.command === "string" ? template(c.command)(pipe) : c.command;
-      const dryRunCommand =
-        typeof c.dryRunCommand === "string"
-          ? template(c.dryRunCommand)(pipe)
-          : c.dryRunCommand;
-      return { ...c, command, dryRunCommand };
+      return {
+        ...c,
+        ...complexCommands.reduce((templated, complex) => {
+          templated[complex] =
+            typeof c[complex] === "string"
+              ? template(c[complex])(pipe)
+              : c[complex];
+          return templated;
+        }, {}),
+      };
     } else {
       return template(c)(pipe);
     }
