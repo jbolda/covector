@@ -96,11 +96,15 @@ describe("changelog", () => {
           changes: [
             {
               meta: {
-                filename: ".changes/change-file.md",
-                hashShort: "3ca0504",
-                hashLong: "3ca05042c51821d229209e18391535c266b6b200",
-                date: "2020-07-06",
-                commitSubject: "feat: advanced commands, closes #43 (#71)",
+                commits: [
+                  {
+                    filename: ".changes/change-file.md",
+                    hashShort: "3ca0504",
+                    hashLong: "3ca05042c51821d229209e18391535c266b6b200",
+                    date: "2020-07-06",
+                    commitSubject: "feat: advanced commands, closes #43 (#71)",
+                  },
+                ],
               },
               releases: {
                 "js-single-json-fixture": "patch",
@@ -109,11 +113,15 @@ describe("changelog", () => {
             },
             {
               meta: {
-                filename: ".changes/change-file.md",
-                hashShort: "3ca0504",
-                hashLong: "3ca05042c51821d229209e18391535c266b6b200",
-                date: "2020-07-06",
-                commitSubject: "feat: advanced commands, closes #23 (#72)",
+                commits: [
+                  {
+                    filename: ".changes/change-file.md",
+                    hashShort: "3ca0504",
+                    hashLong: "3ca05042c51821d229209e18391535c266b6b200",
+                    date: "2020-07-06",
+                    commitSubject: "feat: advanced commands, closes #23 (#72)",
+                  },
+                ],
               },
               releases: {
                 "js-single-json-fixture": "patch",
@@ -122,11 +130,15 @@ describe("changelog", () => {
             },
             {
               meta: {
-                filename: ".changes/change-file.md",
-                hashShort: "3ca0504",
-                hashLong: "3ca05042c51821d229209e18391535c266b6b200",
-                date: "2020-07-06",
-                commitSubject: "feat: advanced commands, closes #49 (#73)",
+                commits: [
+                  {
+                    filename: ".changes/change-file.md",
+                    hashShort: "3ca0504",
+                    hashLong: "3ca05042c51821d229209e18391535c266b6b200",
+                    date: "2020-07-06",
+                    commitSubject: "feat: advanced commands, closes #49 (#73)",
+                  },
+                ],
               },
               releases: {
                 "js-single-json-fixture": "patch",
