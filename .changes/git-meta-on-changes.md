@@ -5,4 +5,4 @@
 "@covector/assemble": minor
 ---
 
-Pull and set git meta information on change files. This can then be piped into changelogs.
+Pull and set git meta information on change files as an array of commits. This can then be piped into changelogs.

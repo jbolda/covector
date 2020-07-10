@@ -100,12 +100,21 @@ module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
     if (changes[main].parents.length > 0) {
       changes[main].parents.forEach((pkg) => {
         if (!!changes[pkg]) {
+          // if a change is planned on the parent
+          // compare and bump the parent if the child is higher
           changes[pkg].type = compareBumps(
             changes[main].type,
             changes[pkg].type
           );
         } else {
+          // if the parent doesn't have a release
+          // add one to adopt the next version of it's child
           changes[pkg] = { ...changes[main] };
+          if (changes[pkg].changes) {
+            changes[pkg].changes.forEach((parentChange) => {
+              parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
+            });
+          }
           changes[pkg].parents = parents[pkg];
         }
       });

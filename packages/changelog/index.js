@@ -78,17 +78,22 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
     } else {
       addition = assembledChanges.releases[change.changes.name].changes.reduce(
         (finalString, release) =>
-          !release.meta || (!!release.meta && !release.meta.hashShort)
+          !release.meta || (!!release.meta && !release.meta.commits)
             ? `${finalString}\n- ${release.summary}`
-            : `${finalString}\n- ${release.summary}\n    - [${
-                release.meta.hashShort
-              }](${gitSiteUrl}commit/${
-                release.meta.hashLong
-              }) ${release.meta.commitSubject.replace(
-                /(#[0-9])\w/g,
-                (match) =>
-                  `[${match}](${gitSiteUrl}pull/${match.substr(1, 999999)})`
-              )} on ${release.meta.date}`,
+            : `${finalString}\n- ${release.summary}\n${
+                !release.meta.dependencies
+                  ? ""
+                  : `    - ${release.meta.dependencies}\n`
+              }${release.meta.commits.map(
+                (commit) =>
+                  `    - [${commit.hashShort}](${gitSiteUrl}commit/${
+                    commit.hashLong
+                  }) ${commit.commitSubject.replace(
+                    /(#[0-9])\w/g,
+                    (match) =>
+                      `[${match}](${gitSiteUrl}pull/${match.substr(1, 999999)})`
+                  )} on ${commit.date}`
+              )}`,
         `## [${change.changes.version}]`
       );
     }
