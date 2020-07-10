@@ -8,11 +8,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: yarn
-      - name: covector build
-        uses: ./packages/action
-        with:
-          command: 'build'
+      - run: yarn workspace action build
       - name: covector status
         uses: ./packages/action
         with:
           command: 'status'
+      - name: covector version
+        uses: ./packages/action
+        id: covector
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          command: 'version'
