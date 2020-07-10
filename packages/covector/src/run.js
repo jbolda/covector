@@ -1,4 +1,8 @@
-const { attemptCommands, raceTime } = require("@covector/command");
+const {
+  attemptCommands,
+  confirmCommandsToRun,
+  raceTime,
+} = require("@covector/command");
 const {
   configFile,
   changeFiles,
@@ -126,6 +130,8 @@ module.exports.covector = function* covector({
       return `No commands configured to run on [${command}].`;
     }
 
+    const commandsToRun = yield confirmCommandsToRun({ cwd, commands });
+
     let pkgCommandsRan = commands.reduce((pkgs, pkg) => {
       pkgs[pkg.pkg] = {
         precommand: false,
@@ -138,7 +144,7 @@ module.exports.covector = function* covector({
 
     pkgCommandsRan = yield attemptCommands({
       cwd,
-      commands,
+      commands: commandsToRun,
       commandPrefix: "pre",
       command,
       pkgCommandsRan,
@@ -146,14 +152,14 @@ module.exports.covector = function* covector({
     });
     pkgCommandsRan = yield attemptCommands({
       cwd,
-      commands,
+      commands: commandsToRun,
       command,
       pkgCommandsRan,
       dryRun,
     });
     pkgCommandsRan = yield attemptCommands({
       cwd,
-      commands,
+      commands: commandsToRun,
       commandPrefix: "post",
       command,
       pkgCommandsRan,
