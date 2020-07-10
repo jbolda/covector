@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.2]
+
+-   Shift getPublishedVersion check prior to commands running. Without this, postpublished would never run (since packages were just published and are update to date).
+    -   Bumped due to a bump in covector.
+    -   [922d224](https://www.github.com/jbolda/covector/commit/922d224c34a4e3e2f711877fe42fddd4faba55ab) fix: getPublishedVersion check shift ([#92](https://www.github.com/jbolda/covector/pull/92)) on 2020-07-10
+
 ## [0.0.1]
 
 -   Pull and set git meta information on change files as an array of commits. This can then be piped into changelogs.
