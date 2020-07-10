@@ -1243,9 +1243,6 @@ Object {
       "0.5.2",
     ],
     Array [
-      "dryRun >> tauri-bundler [prepublish]: echo premode for tauri-bundler",
-    ],
-    Array [
       "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
     ],
     Array [
@@ -1261,25 +1258,22 @@ Object {
       "0.5.2",
     ],
     Array [
-      "dryRun >> tauri-api [prepublish]: echo premode for tauri-api",
-    ],
-    Array [
       "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
     ],
     Array [
       "0.5.2",
     ],
     Array [
+      "dryRun >> tauri-bundler [prepublish]: echo premode for tauri-bundler",
+    ],
+    Array [
+      "dryRun >> tauri-api [prepublish]: echo premode for tauri-api",
+    ],
+    Array [
       "dryRun >> tauri-utils [prepublish]: echo premode for tauri-utils",
     ],
     Array [
       "dryRun >> tauri.js [publish]: echo publishing tauri.js would happen here",
-    ],
-    Array [
-      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
@@ -1291,21 +1285,6 @@ Object {
       "dryRun >> tauri-bundler [publish]: ls",
     ],
     Array [
-      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
-      "tauri@0.5.2 is already published. Skipping.",
-    ],
-    Array [
-      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
       "dryRun >> tauri-api [publish]: echo publishing tauri-api would happen here",
     ],
     Array [
@@ -1313,12 +1292,6 @@ Object {
     ],
     Array [
       "dryRun >> tauri-api [publish]: ls",
-    ],
-    Array [
-      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-utils [publish]: echo publishing tauri-utils would happen here",
@@ -1330,37 +1303,10 @@ Object {
       "dryRun >> tauri-utils [publish]: ls",
     ],
     Array [
-      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
       "dryRun >> tauri-bundler [postpublish]: echo postmode for tauri-bundler",
     ],
     Array [
-      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
-      "tauri@0.5.2 is already published. Skipping.",
-    ],
-    Array [
-      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
       "dryRun >> tauri-api [postpublish]: echo postmode for tauri-api",
-    ],
-    Array [
-      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
     ],
     Array [
       "dryRun >> tauri-utils [postpublish]: echo postmode for tauri-utils",
@@ -2997,12 +2943,6 @@ Object {
       "0.5.2",
     ],
     Array [
-      "tauri-bundler [prepublish]: echo premode for tauri-bundler",
-    ],
-    Array [
-      "premode for tauri-bundler",
-    ],
-    Array [
       "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
     ],
     Array [
@@ -3018,16 +2958,22 @@ Object {
       "0.5.2",
     ],
     Array [
-      "tauri-api [prepublish]: echo premode for tauri-api",
-    ],
-    Array [
-      "premode for tauri-api",
-    ],
-    Array [
       "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
     ],
     Array [
       "0.5.2",
+    ],
+    Array [
+      "tauri-bundler [prepublish]: echo premode for tauri-bundler",
+    ],
+    Array [
+      "premode for tauri-bundler",
+    ],
+    Array [
+      "tauri-api [prepublish]: echo premode for tauri-api",
+    ],
+    Array [
+      "premode for tauri-api",
     ],
     Array [
       "tauri-utils [prepublish]: echo premode for tauri-utils",
@@ -3040,12 +2986,6 @@ Object {
     ],
     Array [
       "publishing tauri.js would happen here",
-    ],
-    Array [
-      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
     ],
     Array [
       "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
@@ -3066,21 +3006,6 @@ Object {
       "Cargo.toml",
     ],
     Array [
-      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
-      "tauri@0.5.2 is already published. Skipping.",
-    ],
-    Array [
-      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
       "tauri-api [publish]: echo publishing tauri-api would happen here",
     ],
     Array [
@@ -3097,12 +3022,6 @@ Object {
     ],
     Array [
       "Cargo.toml",
-    ],
-    Array [
-      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
     ],
     Array [
       "tauri-utils [publish]: echo publishing tauri-utils would happen here",
@@ -3123,43 +3042,16 @@ Object {
       "Cargo.toml",
     ],
     Array [
-      "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
       "tauri-bundler [postpublish]: echo postmode for tauri-bundler",
     ],
     Array [
       "postmode for tauri-bundler",
     ],
     Array [
-      "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
-      "tauri@0.5.2 is already published. Skipping.",
-    ],
-    Array [
-      "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
-    ],
-    Array [
       "tauri-api [postpublish]: echo postmode for tauri-api",
     ],
     Array [
       "postmode for tauri-api",
-    ],
-    Array [
-      "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
-    ],
-    Array [
-      "0.5.2",
     ],
     Array [
       "tauri-utils [postpublish]: echo postmode for tauri-utils",

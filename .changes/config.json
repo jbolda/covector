@@ -28,6 +28,7 @@
         "@covector/assemble",
         "@covector/files",
         "@covector/changelog",
+        "@covector/command",
         "all"
       ]
     },

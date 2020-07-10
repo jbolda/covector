@@ -2,6 +2,7 @@ const { spawn, timeout } = require("effection");
 const { once, on } = require("@effection/events");
 const execa = require("execa");
 const path = require("path");
+const { cpuUsage } = require("process");
 
 const attemptCommands = function* ({
   cwd,
@@ -13,23 +14,6 @@ const attemptCommands = function* ({
 }) {
   let _pkgCommandsRan = { ...pkgCommandsRan };
   for (let pkg of commands) {
-    if (!!pkg.getPublishedVersion) {
-      const version = yield runCommand({
-        command: pkg.getPublishedVersion,
-        cwd,
-        pkg: pkg.pkg,
-        pkgPath: pkg.path,
-        stdio: "pipe",
-        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
-      });
-
-      if (pkg.pkgFile.version === version) {
-        console.log(
-          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
-        );
-        continue;
-      }
-    }
     if (!pkg[`${commandPrefix}command`]) continue;
     const pubCommands =
       typeof pkg[`${commandPrefix}command`] === "string" ||
@@ -87,6 +71,33 @@ const attemptCommands = function* ({
   return _pkgCommandsRan;
 };
 
+const confirmCommandsToRun = function* ({ cwd, commands }) {
+  let commandsToRun = [];
+  for (let pkg of commands) {
+    if (!!pkg.getPublishedVersion) {
+      const version = yield runCommand({
+        command: pkg.getPublishedVersion,
+        cwd,
+        pkg: pkg.pkg,
+        pkgPath: pkg.path,
+        stdio: "pipe",
+        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
+      });
+
+      if (pkg.pkgFile.version === version) {
+        console.log(
+          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
+        );
+        // early return if published already
+        continue;
+      }
+    }
+    commandsToRun = commandsToRun.concat([pkg]);
+  }
+
+  return commandsToRun;
+};
+
 const runCommand = function* ({
   pkg,
   command,
@@ -125,4 +136,9 @@ const raceTime = function (
   });
 };
 
-module.exports = { attemptCommands, runCommand, raceTime };
+module.exports = {
+  attemptCommands,
+  confirmCommandsToRun,
+  runCommand,
+  raceTime,
+};
