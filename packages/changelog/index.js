@@ -76,6 +76,7 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
     if (!assembledChanges.releases[change.changes.name]) {
       addition = `## [${change.changes.version}]\nBumped due to dependency.`;
     } else {
+      console.log(assembledChanges.releases[change.changes.name].changes);
       addition = assembledChanges.releases[change.changes.name].changes.reduce(
         (finalString, release) =>
           !release.meta || (!!release.meta && !release.meta.hashShort)
@@ -95,6 +96,7 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
     const parsedAddition = processor.parse(addition);
     const changelogFirstElement = changelog.children.shift();
     const changelogRemainingElements = changelog.children;
+    console.log(addition);
     changelog.children = [].concat(
       changelogFirstElement,
       parsedAddition.children,
