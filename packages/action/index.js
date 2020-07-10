@@ -32,7 +32,10 @@ main(function* run() {
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       console.log(`The covector output: ${payload}`);
-    } else if (command === "publish" && core.getInput("createRelease")) {
+    } else if (
+      command === "publish" &&
+      core.getInput("createRelease") === true
+    ) {
       core.setOutput("change", covectored);
       const payload = JSON.stringify(covectored, undefined, 2);
       console.log(`The covector output: ${payload}`);
@@ -54,24 +57,14 @@ main(function* run() {
 
           const { releaseId } = data;
 
-          // Determine content-length for header to upload asset
-          const contentLength = (filePath) => fs.statSync(filePath).size;
-
           if (covectored[pkg].pkg.assets) {
             for (let asset in covectored[pkg].pkg.assetPaths) {
-              // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
-              const headers = {
-                "content-type": assetContentType,
-                "content-length": contentLength(assetPath),
-              };
-
               const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
                 owner,
                 repo,
-                headers,
-                release_id,
+                release_Id: releaseId,
                 name: asset.name,
-                file: fs.readFileSync(asset.path),
+                data: fs.readFileSync(asset.path),
               });
             }
           }
