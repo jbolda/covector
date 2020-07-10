@@ -68,6 +68,7 @@ main(function* run() {
               const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
                 owner,
                 repo,
+                headers,
                 release_id,
                 name: asset.name,
                 file: fs.readFileSync(asset.path),
