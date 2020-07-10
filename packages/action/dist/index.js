@@ -50,7 +50,22 @@ module.exports =
 /******/ })
 /************************************************************************/
 /******/ ([
-/* 0 */,
+/* 0 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+var internalObjectKeys = __webpack_require__(14);
+var enumBugKeys = __webpack_require__(407);
+
+var hiddenKeys = enumBugKeys.concat('length', 'prototype');
+
+// `Object.getOwnPropertyNames` method
+// https://tc39.github.io/ecma262/#sec-object.getownpropertynames
+exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O) {
+  return internalObjectKeys(O, hiddenKeys);
+};
+
+
+/***/ }),
 /* 1 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -64,8 +79,21 @@ exports.fs = fs;
 /***/ }),
 /* 2 */,
 /* 3 */,
-/* 4 */,
-/* 5 */,
+/* 4 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(203);
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(566);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 6 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -269,145 +297,51 @@ module.exports = function globParent(str, opts) {
 /* 9 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const ANY = Symbol('SemVer ANY')
-// hoisted class for cyclic dependency
-class Comparator {
-  static get ANY () {
-    return ANY
-  }
-  constructor (comp, options) {
-    if (!options || typeof options !== 'object') {
-      options = {
-        loose: !!options,
-        includePrerelease: false
+"use strict";
+
+
+var Type = __webpack_require__(773);
+
+var _hasOwnProperty = Object.prototype.hasOwnProperty;
+var _toString       = Object.prototype.toString;
+
+function resolveYamlOmap(data) {
+  if (data === null) return true;
+
+  var objectKeys = [], index, length, pair, pairKey, pairHasKey,
+      object = data;
+
+  for (index = 0, length = object.length; index < length; index += 1) {
+    pair = object[index];
+    pairHasKey = false;
+
+    if (_toString.call(pair) !== '[object Object]') return false;
+
+    for (pairKey in pair) {
+      if (_hasOwnProperty.call(pair, pairKey)) {
+        if (!pairHasKey) pairHasKey = true;
+        else return false;
       }
     }
 
-    if (comp instanceof Comparator) {
-      if (comp.loose === !!options.loose) {
-        return comp
-      } else {
-        comp = comp.value
-      }
-    }
+    if (!pairHasKey) return false;
 
-    debug('comparator', comp, options)
-    this.options = options
-    this.loose = !!options.loose
-    this.parse(comp)
-
-    if (this.semver === ANY) {
-      this.value = ''
-    } else {
-      this.value = this.operator + this.semver.version
-    }
-
-    debug('comp', this)
+    if (objectKeys.indexOf(pairKey) === -1) objectKeys.push(pairKey);
+    else return false;
   }
 
-  parse (comp) {
-    const r = this.options.loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR]
-    const m = comp.match(r)
-
-    if (!m) {
-      throw new TypeError(`Invalid comparator: ${comp}`)
-    }
-
-    this.operator = m[1] !== undefined ? m[1] : ''
-    if (this.operator === '=') {
-      this.operator = ''
-    }
-
-    // if it literally is just '>' or '' then allow anything.
-    if (!m[2]) {
-      this.semver = ANY
-    } else {
-      this.semver = new SemVer(m[2], this.options.loose)
-    }
-  }
-
-  toString () {
-    return this.value
-  }
-
-  test (version) {
-    debug('Comparator.test', version, this.options.loose)
-
-    if (this.semver === ANY || version === ANY) {
-      return true
-    }
-
-    if (typeof version === 'string') {
-      try {
-        version = new SemVer(version, this.options)
-      } catch (er) {
-        return false
-      }
-    }
-
-    return cmp(version, this.operator, this.semver, this.options)
-  }
-
-  intersects (comp, options) {
-    if (!(comp instanceof Comparator)) {
-      throw new TypeError('a Comparator is required')
-    }
-
-    if (!options || typeof options !== 'object') {
-      options = {
-        loose: !!options,
-        includePrerelease: false
-      }
-    }
-
-    if (this.operator === '') {
-      if (this.value === '') {
-        return true
-      }
-      return new Range(comp.value, options).test(this.value)
-    } else if (comp.operator === '') {
-      if (comp.value === '') {
-        return true
-      }
-      return new Range(this.value, options).test(comp.semver)
-    }
-
-    const sameDirectionIncreasing =
-      (this.operator === '>=' || this.operator === '>') &&
-      (comp.operator === '>=' || comp.operator === '>')
-    const sameDirectionDecreasing =
-      (this.operator === '<=' || this.operator === '<') &&
-      (comp.operator === '<=' || comp.operator === '<')
-    const sameSemVer = this.semver.version === comp.semver.version
-    const differentDirectionsInclusive =
-      (this.operator === '>=' || this.operator === '<=') &&
-      (comp.operator === '>=' || comp.operator === '<=')
-    const oppositeDirectionsLessThan =
-      cmp(this.semver, '<', comp.semver, options) &&
-      (this.operator === '>=' || this.operator === '>') &&
-        (comp.operator === '<=' || comp.operator === '<')
-    const oppositeDirectionsGreaterThan =
-      cmp(this.semver, '>', comp.semver, options) &&
-      (this.operator === '<=' || this.operator === '<') &&
-        (comp.operator === '>=' || comp.operator === '>')
-
-    return (
-      sameDirectionIncreasing ||
-      sameDirectionDecreasing ||
-      (sameSemVer && differentDirectionsInclusive) ||
-      oppositeDirectionsLessThan ||
-      oppositeDirectionsGreaterThan
-    )
-  }
+  return true;
 }
 
-module.exports = Comparator
+function constructYamlOmap(data) {
+  return data !== null ? data : [];
+}
 
-const {re, t} = __webpack_require__(398)
-const cmp = __webpack_require__(299)
-const debug = __webpack_require__(940)
-const SemVer = __webpack_require__(840)
-const Range = __webpack_require__(318)
+module.exports = new Type('tag:yaml.org,2002:omap', {
+  kind: 'sequence',
+  resolve: resolveYamlOmap,
+  construct: constructYamlOmap
+});
 
 
 /***/ }),
@@ -545,7 +479,29 @@ function html(node) {
 /***/ }),
 /* 12 */,
 /* 13 */,
-/* 14 */,
+/* 14 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var has = __webpack_require__(35);
+var toIndexedObject = __webpack_require__(882);
+var indexOf = __webpack_require__(689).indexOf;
+var hiddenKeys = __webpack_require__(56);
+
+module.exports = function (object, names) {
+  var O = toIndexedObject(object);
+  var i = 0;
+  var result = [];
+  var key;
+  for (key in O) !has(hiddenKeys, key) && has(O, key) && result.push(key);
+  // Don't enum bug & hidden keys
+  while (names.length > i) if (has(O, key = names[i++])) {
+    ~indexOf(result, key) || result.push(key);
+  }
+  return result;
+};
+
+
+/***/ }),
 /* 15 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -659,7 +615,22 @@ exports.string = string;
 
 
 /***/ }),
-/* 18 */,
+/* 18 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(778);
+var Iterators = __webpack_require__(218);
+
+var ITERATOR = wellKnownSymbol('iterator');
+var ArrayPrototype = Array.prototype;
+
+// check on default Array iterator
+module.exports = function (it) {
+  return it !== undefined && (Iterators.Array === it || ArrayPrototype[ITERATOR] === it);
+};
+
+
+/***/ }),
 /* 19 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -734,52 +705,549 @@ exports.getApiBaseUrl = getApiBaseUrl;
 
 /***/ }),
 /* 21 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-const stripAnsi = __webpack_require__(598);
-const isFullwidthCodePoint = __webpack_require__(759);
-const emojiRegex = __webpack_require__(439);
-
-const stringWidth = string => {
-	string = string.replace(emojiRegex(), '  ');
-
-	if (typeof string !== 'string' || string.length === 0) {
-		return 0;
-	}
-
-	string = stripAnsi(string);
-
-	let width = 0;
-
-	for (let i = 0; i < string.length; i++) {
-		const code = string.codePointAt(i);
-
-		// Ignore control characters
-		if (code <= 0x1F || (code >= 0x7F && code <= 0x9F)) {
-			continue;
-		}
-
-		// Ignore combining characters
-		if (code >= 0x300 && code <= 0x36F) {
-			continue;
-		}
-
-		// Surrogates
-		if (code > 0xFFFF) {
-			i++;
-		}
-
-		width += isFullwidthCodePoint(code) ? 2 : 1;
-	}
-
-	return width;
-};
-
-module.exports = stringWidth;
-// TODO: remove this in the next major version
-module.exports.default = stringWidth;
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.usage = void 0;
+// this file handles outputting usage instructions,
+// failures, etc. keeps logging in one place.
+const common_types_1 = __webpack_require__(45);
+const obj_filter_1 = __webpack_require__(816);
+const path = __webpack_require__(622);
+const yerror_1 = __webpack_require__(946);
+const decamelize = __webpack_require__(597);
+const setBlocking = __webpack_require__(411);
+const stringWidth = __webpack_require__(330);
+function usage(yargs, y18n) {
+    const __ = y18n.__;
+    const self = {};
+    // methods for ouputting/building failure message.
+    const fails = [];
+    self.failFn = function failFn(f) {
+        fails.push(f);
+    };
+    let failMessage = null;
+    let showHelpOnFail = true;
+    self.showHelpOnFail = function showHelpOnFailFn(arg1 = true, arg2) {
+        function parseFunctionArgs() {
+            return typeof arg1 === 'string' ? [true, arg1] : [arg1, arg2];
+        }
+        const [enabled, message] = parseFunctionArgs();
+        failMessage = message;
+        showHelpOnFail = enabled;
+        return self;
+    };
+    let failureOutput = false;
+    self.fail = function fail(msg, err) {
+        const logger = yargs._getLoggerInstance();
+        if (fails.length) {
+            for (let i = fails.length - 1; i >= 0; --i) {
+                fails[i](msg, err, self);
+            }
+        }
+        else {
+            if (yargs.getExitProcess())
+                setBlocking(true);
+            // don't output failure message more than once
+            if (!failureOutput) {
+                failureOutput = true;
+                if (showHelpOnFail) {
+                    yargs.showHelp('error');
+                    logger.error();
+                }
+                if (msg || err)
+                    logger.error(msg || err);
+                if (failMessage) {
+                    if (msg || err)
+                        logger.error('');
+                    logger.error(failMessage);
+                }
+            }
+            err = err || new yerror_1.YError(msg);
+            if (yargs.getExitProcess()) {
+                return yargs.exit(1);
+            }
+            else if (yargs._hasParseCallback()) {
+                return yargs.exit(1, err);
+            }
+            else {
+                throw err;
+            }
+        }
+    };
+    // methods for ouputting/building help (usage) message.
+    let usages = [];
+    let usageDisabled = false;
+    self.usage = (msg, description) => {
+        if (msg === null) {
+            usageDisabled = true;
+            usages = [];
+            return self;
+        }
+        usageDisabled = false;
+        usages.push([msg, description || '']);
+        return self;
+    };
+    self.getUsage = () => {
+        return usages;
+    };
+    self.getUsageDisabled = () => {
+        return usageDisabled;
+    };
+    self.getPositionalGroupName = () => {
+        return __('Positionals:');
+    };
+    let examples = [];
+    self.example = (cmd, description) => {
+        examples.push([cmd, description || '']);
+    };
+    let commands = [];
+    self.command = function command(cmd, description, isDefault, aliases, deprecated = false) {
+        // the last default wins, so cancel out any previously set default
+        if (isDefault) {
+            commands = commands.map((cmdArray) => {
+                cmdArray[2] = false;
+                return cmdArray;
+            });
+        }
+        commands.push([cmd, description || '', isDefault, aliases, deprecated]);
+    };
+    self.getCommands = () => commands;
+    let descriptions = {};
+    self.describe = function describe(keyOrKeys, desc) {
+        if (Array.isArray(keyOrKeys)) {
+            keyOrKeys.forEach((k) => {
+                self.describe(k, desc);
+            });
+        }
+        else if (typeof keyOrKeys === 'object') {
+            Object.keys(keyOrKeys).forEach((k) => {
+                self.describe(k, keyOrKeys[k]);
+            });
+        }
+        else {
+            descriptions[keyOrKeys] = desc;
+        }
+    };
+    self.getDescriptions = () => descriptions;
+    let epilogs = [];
+    self.epilog = (msg) => {
+        epilogs.push(msg);
+    };
+    let wrapSet = false;
+    let wrap;
+    self.wrap = (cols) => {
+        wrapSet = true;
+        wrap = cols;
+    };
+    function getWrap() {
+        if (!wrapSet) {
+            wrap = windowWidth();
+            wrapSet = true;
+        }
+        return wrap;
+    }
+    const deferY18nLookupPrefix = '__yargsString__:';
+    self.deferY18nLookup = str => deferY18nLookupPrefix + str;
+    self.help = function help() {
+        if (cachedHelpMessage)
+            return cachedHelpMessage;
+        normalizeAliases();
+        // handle old demanded API
+        const base$0 = yargs.customScriptName ? yargs.$0 : path.basename(yargs.$0);
+        const demandedOptions = yargs.getDemandedOptions();
+        const demandedCommands = yargs.getDemandedCommands();
+        const deprecatedOptions = yargs.getDeprecatedOptions();
+        const groups = yargs.getGroups();
+        const options = yargs.getOptions();
+        let keys = [];
+        keys = keys.concat(Object.keys(descriptions));
+        keys = keys.concat(Object.keys(demandedOptions));
+        keys = keys.concat(Object.keys(demandedCommands));
+        keys = keys.concat(Object.keys(options.default));
+        keys = keys.filter(filterHiddenOptions);
+        keys = Object.keys(keys.reduce((acc, key) => {
+            if (key !== '_')
+                acc[key] = true;
+            return acc;
+        }, {}));
+        const theWrap = getWrap();
+        const ui = __webpack_require__(369)({
+            width: theWrap,
+            wrap: !!theWrap
+        });
+        // the usage string.
+        if (!usageDisabled) {
+            if (usages.length) {
+                // user-defined usage.
+                usages.forEach((usage) => {
+                    ui.div(`${usage[0].replace(/\$0/g, base$0)}`);
+                    if (usage[1]) {
+                        ui.div({ text: `${usage[1]}`, padding: [1, 0, 0, 0] });
+                    }
+                });
+                ui.div();
+            }
+            else if (commands.length) {
+                let u = null;
+                // demonstrate how commands are used.
+                if (demandedCommands._) {
+                    u = `${base$0} <${__('command')}>\n`;
+                }
+                else {
+                    u = `${base$0} [${__('command')}]\n`;
+                }
+                ui.div(`${u}`);
+            }
+        }
+        // your application's commands, i.e., non-option
+        // arguments populated in '_'.
+        if (commands.length) {
+            ui.div(__('Commands:'));
+            const context = yargs.getContext();
+            const parentCommands = context.commands.length ? `${context.commands.join(' ')} ` : '';
+            if (yargs.getParserConfiguration()['sort-commands'] === true) {
+                commands = commands.sort((a, b) => a[0].localeCompare(b[0]));
+            }
+            commands.forEach((command) => {
+                const commandString = `${base$0} ${parentCommands}${command[0].replace(/^\$0 ?/, '')}`; // drop $0 from default commands.
+                ui.span({
+                    text: commandString,
+                    padding: [0, 2, 0, 2],
+                    width: maxWidth(commands, theWrap, `${base$0}${parentCommands}`) + 4
+                }, { text: command[1] });
+                const hints = [];
+                if (command[2])
+                    hints.push(`[${__('default')}]`);
+                if (command[3] && command[3].length) {
+                    hints.push(`[${__('aliases:')} ${command[3].join(', ')}]`);
+                }
+                if (command[4]) {
+                    if (typeof command[4] === 'string') {
+                        hints.push(`[${__('deprecated: %s', command[4])}]`);
+                    }
+                    else {
+                        hints.push(`[${__('deprecated')}]`);
+                    }
+                }
+                if (hints.length) {
+                    ui.div({ text: hints.join(' '), padding: [0, 0, 0, 2], align: 'right' });
+                }
+                else {
+                    ui.div();
+                }
+            });
+            ui.div();
+        }
+        // perform some cleanup on the keys array, making it
+        // only include top-level keys not their aliases.
+        const aliasKeys = (Object.keys(options.alias) || [])
+            .concat(Object.keys(yargs.parsed.newAliases) || []);
+        keys = keys.filter(key => !yargs.parsed.newAliases[key] && aliasKeys.every(alias => (options.alias[alias] || []).indexOf(key) === -1));
+        // populate 'Options:' group with any keys that have not
+        // explicitly had a group set.
+        const defaultGroup = __('Options:');
+        if (!groups[defaultGroup])
+            groups[defaultGroup] = [];
+        addUngroupedKeys(keys, options.alias, groups, defaultGroup);
+        // display 'Options:' table along with any custom tables:
+        Object.keys(groups).forEach((groupName) => {
+            if (!groups[groupName].length)
+                return;
+            // if we've grouped the key 'f', but 'f' aliases 'foobar',
+            // normalizedKeys should contain only 'foobar'.
+            const normalizedKeys = groups[groupName].filter(filterHiddenOptions).map((key) => {
+                if (~aliasKeys.indexOf(key))
+                    return key;
+                for (let i = 0, aliasKey; (aliasKey = aliasKeys[i]) !== undefined; i++) {
+                    if (~(options.alias[aliasKey] || []).indexOf(key))
+                        return aliasKey;
+                }
+                return key;
+            });
+            if (normalizedKeys.length < 1)
+                return;
+            ui.div(groupName);
+            // actually generate the switches string --foo, -f, --bar.
+            const switches = normalizedKeys.reduce((acc, key) => {
+                acc[key] = [key].concat(options.alias[key] || [])
+                    .map(sw => {
+                    // for the special positional group don't
+                    // add '--' or '-' prefix.
+                    if (groupName === self.getPositionalGroupName())
+                        return sw;
+                    else {
+                        return (
+                        // matches yargs-parser logic in which single-digits
+                        // aliases declared with a boolean type are now valid
+                        /^[0-9]$/.test(sw)
+                            ? ~options.boolean.indexOf(key) ? '-' : '--'
+                            : sw.length > 1 ? '--' : '-') + sw;
+                    }
+                })
+                    .join(', ');
+                return acc;
+            }, {});
+            normalizedKeys.forEach((key) => {
+                const kswitch = switches[key];
+                let desc = descriptions[key] || '';
+                let type = null;
+                if (~desc.lastIndexOf(deferY18nLookupPrefix))
+                    desc = __(desc.substring(deferY18nLookupPrefix.length));
+                if (~options.boolean.indexOf(key))
+                    type = `[${__('boolean')}]`;
+                if (~options.count.indexOf(key))
+                    type = `[${__('count')}]`;
+                if (~options.string.indexOf(key))
+                    type = `[${__('string')}]`;
+                if (~options.normalize.indexOf(key))
+                    type = `[${__('string')}]`;
+                if (~options.array.indexOf(key))
+                    type = `[${__('array')}]`;
+                if (~options.number.indexOf(key))
+                    type = `[${__('number')}]`;
+                const deprecatedExtra = (deprecated) => typeof deprecated === 'string'
+                    ? `[${__('deprecated: %s', deprecated)}]`
+                    : `[${__('deprecated')}]`;
+                const extra = [
+                    (key in deprecatedOptions) ? deprecatedExtra(deprecatedOptions[key]) : null,
+                    type,
+                    (key in demandedOptions) ? `[${__('required')}]` : null,
+                    options.choices && options.choices[key] ? `[${__('choices:')} ${self.stringifiedValues(options.choices[key])}]` : null,
+                    defaultString(options.default[key], options.defaultDescription[key])
+                ].filter(Boolean).join(' ');
+                ui.span({ text: kswitch, padding: [0, 2, 0, 2], width: maxWidth(switches, theWrap) + 4 }, desc);
+                if (extra)
+                    ui.div({ text: extra, padding: [0, 0, 0, 2], align: 'right' });
+                else
+                    ui.div();
+            });
+            ui.div();
+        });
+        // describe some common use-cases for your application.
+        if (examples.length) {
+            ui.div(__('Examples:'));
+            examples.forEach((example) => {
+                example[0] = example[0].replace(/\$0/g, base$0);
+            });
+            examples.forEach((example) => {
+                if (example[1] === '') {
+                    ui.div({
+                        text: example[0],
+                        padding: [0, 2, 0, 2]
+                    });
+                }
+                else {
+                    ui.div({
+                        text: example[0],
+                        padding: [0, 2, 0, 2],
+                        width: maxWidth(examples, theWrap) + 4
+                    }, {
+                        text: example[1]
+                    });
+                }
+            });
+            ui.div();
+        }
+        // the usage string.
+        if (epilogs.length > 0) {
+            const e = epilogs.map(epilog => epilog.replace(/\$0/g, base$0)).join('\n');
+            ui.div(`${e}\n`);
+        }
+        // Remove the trailing white spaces
+        return ui.toString().replace(/\s*$/, '');
+    };
+    // return the maximum width of a string
+    // in the left-hand column of a table.
+    function maxWidth(table, theWrap, modifier) {
+        let width = 0;
+        // table might be of the form [leftColumn],
+        // or {key: leftColumn}
+        if (!Array.isArray(table)) {
+            table = Object.values(table).map(v => [v]);
+        }
+        table.forEach((v) => {
+            width = Math.max(stringWidth(modifier ? `${modifier} ${v[0]}` : v[0]), width);
+        });
+        // if we've enabled 'wrap' we should limit
+        // the max-width of the left-column.
+        if (theWrap)
+            width = Math.min(width, parseInt((theWrap * 0.5).toString(), 10));
+        return width;
+    }
+    // make sure any options set for aliases,
+    // are copied to the keys being aliased.
+    function normalizeAliases() {
+        // handle old demanded API
+        const demandedOptions = yargs.getDemandedOptions();
+        const options = yargs.getOptions();
+        (Object.keys(options.alias) || []).forEach((key) => {
+            options.alias[key].forEach((alias) => {
+                // copy descriptions.
+                if (descriptions[alias])
+                    self.describe(key, descriptions[alias]);
+                // copy demanded.
+                if (alias in demandedOptions)
+                    yargs.demandOption(key, demandedOptions[alias]);
+                // type messages.
+                if (~options.boolean.indexOf(alias))
+                    yargs.boolean(key);
+                if (~options.count.indexOf(alias))
+                    yargs.count(key);
+                if (~options.string.indexOf(alias))
+                    yargs.string(key);
+                if (~options.normalize.indexOf(alias))
+                    yargs.normalize(key);
+                if (~options.array.indexOf(alias))
+                    yargs.array(key);
+                if (~options.number.indexOf(alias))
+                    yargs.number(key);
+            });
+        });
+    }
+    // if yargs is executing an async handler, we take a snapshot of the
+    // help message to display on failure:
+    let cachedHelpMessage;
+    self.cacheHelpMessage = function () {
+        cachedHelpMessage = this.help();
+    };
+    // however this snapshot must be cleared afterwards
+    // not to be be used by next calls to parse
+    self.clearCachedHelpMessage = function () {
+        cachedHelpMessage = undefined;
+    };
+    // given a set of keys, place any keys that are
+    // ungrouped under the 'Options:' grouping.
+    function addUngroupedKeys(keys, aliases, groups, defaultGroup) {
+        let groupedKeys = [];
+        let toCheck = null;
+        Object.keys(groups).forEach((group) => {
+            groupedKeys = groupedKeys.concat(groups[group]);
+        });
+        keys.forEach((key) => {
+            toCheck = [key].concat(aliases[key]);
+            if (!toCheck.some(k => groupedKeys.indexOf(k) !== -1)) {
+                groups[defaultGroup].push(key);
+            }
+        });
+        return groupedKeys;
+    }
+    function filterHiddenOptions(key) {
+        return yargs.getOptions().hiddenOptions.indexOf(key) < 0 || yargs.parsed.argv[yargs.getOptions().showHiddenOpt];
+    }
+    self.showHelp = (level) => {
+        const logger = yargs._getLoggerInstance();
+        if (!level)
+            level = 'error';
+        const emit = typeof level === 'function' ? level : logger[level];
+        emit(self.help());
+    };
+    self.functionDescription = (fn) => {
+        const description = fn.name ? decamelize(fn.name, '-') : __('generated-value');
+        return ['(', description, ')'].join('');
+    };
+    self.stringifiedValues = function stringifiedValues(values, separator) {
+        let string = '';
+        const sep = separator || ', ';
+        const array = [].concat(values);
+        if (!values || !array.length)
+            return string;
+        array.forEach((value) => {
+            if (string.length)
+                string += sep;
+            string += JSON.stringify(value);
+        });
+        return string;
+    };
+    // format the default-value-string displayed in
+    // the right-hand column.
+    function defaultString(value, defaultDescription) {
+        let string = `[${__('default:')} `;
+        if (value === undefined && !defaultDescription)
+            return null;
+        if (defaultDescription) {
+            string += defaultDescription;
+        }
+        else {
+            switch (typeof value) {
+                case 'string':
+                    string += `"${value}"`;
+                    break;
+                case 'object':
+                    string += JSON.stringify(value);
+                    break;
+                default:
+                    string += value;
+            }
+        }
+        return `${string}]`;
+    }
+    // guess the width of the console window, max-width 80.
+    function windowWidth() {
+        const maxWidth = 80;
+        // CI is not a TTY
+        /* c8 ignore next 2 */
+        if (typeof process === 'object' && process.stdout && process.stdout.columns) {
+            return Math.min(maxWidth, process.stdout.columns);
+        }
+        else {
+            return maxWidth;
+        }
+    }
+    // logic for displaying application version.
+    let version = null;
+    self.version = (ver) => {
+        version = ver;
+    };
+    self.showVersion = () => {
+        const logger = yargs._getLoggerInstance();
+        logger.log(version);
+    };
+    self.reset = function reset(localLookup) {
+        // do not reset wrap here
+        // do not reset fails here
+        failMessage = null;
+        failureOutput = false;
+        usages = [];
+        usageDisabled = false;
+        epilogs = [];
+        examples = [];
+        commands = [];
+        descriptions = obj_filter_1.objFilter(descriptions, k => !localLookup[k]);
+        return self;
+    };
+    const frozens = [];
+    self.freeze = function freeze() {
+        frozens.push({
+            failMessage,
+            failureOutput,
+            usages,
+            usageDisabled,
+            epilogs,
+            examples,
+            commands,
+            descriptions
+        });
+    };
+    self.unfreeze = function unfreeze() {
+        const frozen = frozens.pop();
+        common_types_1.assertNotStrictEqual(frozen, undefined);
+        ({
+            failMessage,
+            failureOutput,
+            usages,
+            usageDisabled,
+            epilogs,
+            examples,
+            commands,
+            descriptions
+        } = frozen);
+    };
+    return self;
+}
+exports.usage = usage;
 
 
 /***/ }),
@@ -1983,7 +2451,15 @@ exports.restEndpointMethods = restEndpointMethods;
 
 
 /***/ }),
-/* 24 */,
+/* 24 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(362);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 25 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2033,14 +2509,45 @@ function onceStrict (fn) {
 
 /***/ }),
 /* 26 */,
-/* 27 */,
-/* 28 */,
+/* 27 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(114);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('Array').includes;
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var anObject = __webpack_require__(589);
+
+// `RegExp.prototype.flags` getter implementation
+// https://tc39.github.io/ecma262/#sec-get-regexp.prototype.flags
+module.exports = function () {
+  var that = anObject(this);
+  var result = '';
+  if (that.global) result += 'g';
+  if (that.ignoreCase) result += 'i';
+  if (that.multiline) result += 'm';
+  if (that.dotAll) result += 's';
+  if (that.unicode) result += 'u';
+  if (that.sticky) result += 'y';
+  return result;
+};
+
+
+/***/ }),
 /* 29 */,
 /* 30 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
-var n=__webpack_require__(700);function r(n){return function(t){if("object"==typeof t&&"object"==typeof n){var e=t;return Object.entries(n).every((function(n){var t=n[0];return r(n[1])(e[t])}))}return t===n}}var t=function(){function n(n){this.subscription=n}var t=n.prototype;return t.filter=function(r){var t=this.subscription;return new n({next:function*(){for(;;){var n=yield t.next();if(n.done)return n;if(r(n.value))return n}}})},t.match=function(n){return this.filter(r(n))},t.map=function(r){var t=this.subscription;return new n({next:function*(){for(;;){var n=yield t.next();return n.done?n:{done:!1,value:r(n.value)}}}})},t.first=function*(){var n=yield this.subscription.next();return n.done?void 0:n.value},t.expect=function*(){var n=yield this.subscription.next();if(n.done)throw new Error("expected subscription to contain a value");return n.value},t.forEach=function*(n){for(;;){var r=yield this.subscription.next();if(r.done)return r.value;yield n(r.value)}},t.next=function(){return this.subscription.next()},n}(),e=function(){var n=this;this.waiters=[],this.signal=function(r){var t=n.waiters.pop();t&&t(r)},this.wait=function(){return new Promise((function(r){return n.waiters.push(r)}))}};function i(r){return function*(){var i=[],u=new e,o=function(n){i.push({done:!1,value:n}),u.signal()};return yield n.resource(new t({next:function(){try{var n=u.wait();return i.length>0&&u.signal(),Promise.resolve(n.then((function(){return i.shift()})))}catch(n){return Promise.reject(n)}}}),(function*(){try{var n=yield r((function(n){return o(n)}));i.push({done:!0,value:n}),u.signal()}finally{o=function(n){throw function(n){var r=new Error("tried to publish a value: "+n+" on an already finished subscription");return r.name="TypeError",r}(n)}}}))}}var u=Symbol.for("Symbol.subscription");function*o(n,r){for(var t=yield a(n);;){var e=yield t.next();if(e.done)return e.value;yield r(e.value)}}var c={from:function(n){return new s(n)}},s=function(){function n(n){this.source=n}var t=n.prototype;return t[u]=function(){return a(this.source)},t.map=function(n){return this.chain((function(r){return function(t){return o(r,(function*(r){t(n(r))}))}}))},t.filter=function(n){return this.chain((function(r){return function(t){return o(r,(function*(r){n(r)&&t(r)}))}}))},t.match=function(n){return this.filter(r(n))},t.chain=function(r){return new n(i(r(this.source)))},t.forEach=function(n){return o(this.source,n)},t.first=function*(){var n=yield a(this.source),r=yield n.next();return r.done?void 0:r.value},n}();function a(n){if(f(n)){var r=f(n);if(r)return r.call(n);var t=new Error("cannot subscribe to "+n+" because it does not contain Symbol.subscription");throw t.name="TypeError",t}return n}function f(n){return n[u]}exports.ChainableSubscription=t,exports.Subscribable=c,exports.SymbolSubscribable=u,exports.createSubscription=i,exports.forEach=o,exports.subscribe=function*(n){var r=yield a(n);return new t(r)};
+var n=__webpack_require__(700);function r(n){return function(t){if("object"==typeof t&&"object"==typeof n){var e=t;return Object.entries(n).every((function(n){var t=n[0];return r(n[1])(e[t])}))}return t===n}}var t=Symbol.for("Symbol.subscription");function*e(n,r){for(var t=yield o(n);;){var e=yield t.next();if(e.done)return e.value;yield r(e.value)}}var i={from:function(n){return new u(n)}},u=function(){function n(n){this.source=n}var i=n.prototype;return i[t]=function(){return o(this.source)},i.map=function(n){return this.chain((function(r){return function(t){return e(r,(function*(r){t(n(r))}))}}))},i.filter=function(n){return this.chain((function(r){return function(t){return e(r,(function*(r){n(r)&&t(r)}))}}))},i.match=function(n){return this.filter(r(n))},i.chain=function(r){return new n(a(r(this.source)))},i.forEach=function(n){return e(this.source,n)},i.first=function*(){var n=yield o(this.source),r=yield n.next();return r.done?void 0:r.value},n}();function o(n){return n[t]?n[t]():n}var c={next:function(){throw new Error("dummy")}},s=function(){function t(n){this.subscription=n}t.of=function*(r){var e=new t(c);return yield n.resource(e,(function*(){e.subscription=yield o(r),yield}))};var e=t.prototype;return e.filter=function(n){var r=this.subscription;return new t({next:function*(){for(;;){var t=yield r.next();if(t.done)return t;if(n(t.value))return t}}})},e.match=function(n){return this.filter(r(n))},e.map=function(n){var r=this.subscription;return new t({next:function*(){for(;;){var t=yield r.next();return t.done?t:{done:!1,value:n(t.value)}}}})},e.first=function*(){var n=yield this.subscription.next();return n.done?void 0:n.value},e.expect=function*(){var n=yield this.subscription.next();if(n.done)throw new Error("expected subscription to contain a value");return n.value},e.forEach=function*(n){for(;;){var r=yield this.subscription.next();if(r.done)return r.value;yield n(r.value)}},e.next=function(){return this.subscription.next()},t}(),f=function(){var n=this;this.waiters=[],this.signal=function(r){var t=n.waiters.pop();t&&t(r)},this.wait=function(){return new Promise((function(r){return n.waiters.push(r)}))}};function a(r){return function*(){var t=[],e=new f,i=function(n){t.push({done:!1,value:n}),e.signal()};return yield n.resource(new s({next:function(){try{var n=e.wait();return t.length>0&&e.signal(),Promise.resolve(n.then((function(){return t.shift()})))}catch(n){return Promise.reject(n)}}}),(function*(){try{var n=yield r((function(n){return i(n)}));t.push({done:!0,value:n}),e.signal()}finally{i=function(n){throw function(n){var r=new Error("tried to publish a value: "+n+" on an already finished subscription");return r.name="TypeError",r}(n)}}}))}}exports.ChainableSubscription=s,exports.Subscribable=i,exports.SymbolSubscribable=t,exports.createSubscription=a,exports.forEach=e,exports.subscribe=function*(n){return yield s.of(n)};
 //# sourceMappingURL=subscription.cjs.production.min.js.map
 
 
@@ -2088,7 +2595,21 @@ function factory(ctx, key) {
 
 
 /***/ }),
-/* 32 */,
+/* 32 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var $ = __webpack_require__(52);
+var DESCRIPTORS = __webpack_require__(624);
+var create = __webpack_require__(889);
+
+// `Object.create` method
+// https://tc39.github.io/ecma262/#sec-object.create
+$({ target: 'Object', stat: true, sham: !DESCRIPTORS }, {
+  create: create
+});
+
+
+/***/ }),
 /* 33 */
 /***/ (function(module) {
 
@@ -2170,7 +2691,17 @@ function locate(value, fromIndex) {
 
 
 /***/ }),
-/* 35 */,
+/* 35 */
+/***/ (function(module) {
+
+var hasOwnProperty = {}.hasOwnProperty;
+
+module.exports = function (it, key) {
+  return hasOwnProperty.call(it, key);
+};
+
+
+/***/ }),
 /* 36 */,
 /* 37 */,
 /* 38 */
@@ -2203,9 +2734,58 @@ module.exports = minSatisfying
 
 
 /***/ }),
-/* 39 */,
-/* 40 */,
-/* 41 */,
+/* 39 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var TO_STRING_TAG_SUPPORT = __webpack_require__(688);
+var classof = __webpack_require__(241);
+
+// `Object.prototype.toString` method implementation
+// https://tc39.github.io/ecma262/#sec-object.prototype.tostring
+module.exports = TO_STRING_TAG_SUPPORT ? {}.toString : function toString() {
+  return '[object ' + classof(this) + ']';
+};
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(464);
+
+/***/ }),
+/* 41 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var aFunction = __webpack_require__(166);
+
+// optional / simple context binding
+module.exports = function (fn, that, length) {
+  aFunction(fn);
+  if (that === undefined) return fn;
+  switch (length) {
+    case 0: return function () {
+      return fn.call(that);
+    };
+    case 1: return function (a) {
+      return fn.call(that, a);
+    };
+    case 2: return function (a, b) {
+      return fn.call(that, a, b);
+    };
+    case 3: return function (a, b, c) {
+      return fn.call(that, a, b, c);
+    };
+  }
+  return function (/* ...args */) {
+    return fn.apply(that, arguments);
+  };
+};
+
+
+/***/ }),
 /* 42 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2446,146 +3026,39 @@ module.exports = cmp
 
 
 /***/ }),
-/* 44 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/* 44 */,
+/* 45 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
-const path = __webpack_require__(622)
-
-// add bash completions to your
-//  yargs-powered applications.
-module.exports = function completion (yargs, usage, command) {
-  const self = {
-    completionKey: 'get-yargs-completions'
-  }
-
-  let aliases
-  self.setParsed = function setParsed (parsed) {
-    aliases = parsed.aliases
-  }
-
-  const zshShell = (process.env.SHELL && process.env.SHELL.indexOf('zsh') !== -1) ||
-    (process.env.ZSH_NAME && process.env.ZSH_NAME.indexOf('zsh') !== -1)
-  // get a list of completion commands.
-  // 'args' is the array of strings from the line to be completed
-  self.getCompletion = function getCompletion (args, done) {
-    const completions = []
-    const current = args.length ? args[args.length - 1] : ''
-    const argv = yargs.parse(args, true)
-    const parentCommands = yargs.getContext().commands
-
-    // a custom completion function can be provided
-    // to completion().
-    if (completionFunction) {
-      if (completionFunction.length < 3) {
-        const result = completionFunction(current, argv)
-
-        // promise based completion function.
-        if (typeof result.then === 'function') {
-          return result.then((list) => {
-            process.nextTick(() => { done(list) })
-          }).catch((err) => {
-            process.nextTick(() => { throw err })
-          })
-        }
-
-        // synchronous completion function.
-        return done(result)
-      } else {
-        // asynchronous completion function
-        return completionFunction(current, argv, (completions) => {
-          done(completions)
-        })
-      }
-    }
-
-    const handlers = command.getCommandHandlers()
-    for (let i = 0, ii = args.length; i < ii; ++i) {
-      if (handlers[args[i]] && handlers[args[i]].builder) {
-        const builder = handlers[args[i]].builder
-        if (typeof builder === 'function') {
-          const y = yargs.reset()
-          builder(y)
-          return y.argv
-        }
-      }
-    }
-
-    if (!current.match(/^-/) && parentCommands[parentCommands.length - 1] !== current) {
-      usage.getCommands().forEach((usageCommand) => {
-        const commandName = command.parseCommand(usageCommand[0]).cmd
-        if (args.indexOf(commandName) === -1) {
-          if (!zshShell) {
-            completions.push(commandName)
-          } else {
-            const desc = usageCommand[1] || ''
-            completions.push(commandName.replace(/:/g, '\\:') + ':' + desc)
-          }
-        }
-      })
-    }
-
-    if (current.match(/^-/) || (current === '' && completions.length === 0)) {
-      const descs = usage.getDescriptions()
-      const options = yargs.getOptions()
-      Object.keys(options.key).forEach((key) => {
-        const negable = !!options.configuration['boolean-negation'] && options.boolean.includes(key)
-        // If the key and its aliases aren't in 'args', add the key to 'completions'
-        let keyAndAliases = [key].concat(aliases[key] || [])
-        if (negable) keyAndAliases = keyAndAliases.concat(keyAndAliases.map(key => `no-${key}`))
-
-        function completeOptionKey (key) {
-          const notInArgs = keyAndAliases.every(val => args.indexOf(`--${val}`) === -1)
-          if (notInArgs) {
-            const startsByTwoDashes = s => /^--/.test(s)
-            const isShortOption = s => /^[^0-9]$/.test(s)
-            const dashes = !startsByTwoDashes(current) && isShortOption(key) ? '-' : '--'
-            if (!zshShell) {
-              completions.push(dashes + key)
-            } else {
-              const desc = descs[key] || ''
-              completions.push(dashes + `${key.replace(/:/g, '\\:')}:${desc.replace('__yargsString__:', '')}`)
-            }
-          }
-        }
-
-        completeOptionKey(key)
-        if (negable && !!options.default[key]) completeOptionKey(`no-${key}`)
-      })
-    }
-
-    done(completions)
-  }
-
-  // generate the completion script to add to your .bashrc.
-  self.generateCompletionScript = function generateCompletionScript ($0, cmd) {
-    const templates = __webpack_require__(942)
-    let script = zshShell ? templates.completionZshTemplate : templates.completionShTemplate
-    const name = path.basename($0)
-
-    // add ./to applications not yet installed as bin.
-    if ($0.match(/\.js$/)) $0 = `./${$0}`
-
-    script = script.replace(/{{app_name}}/g, name)
-    script = script.replace(/{{completion_command}}/g, cmd)
-    return script.replace(/{{app_path}}/g, $0)
-  }
-
-  // register a function to perform your own custom
-  // completions., this function can be either
-  // synchrnous or asynchronous.
-  let completionFunction = null
-  self.registerFunction = (fn) => {
-    completionFunction = fn
-  }
-
-  return self
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.objectKeys = exports.assertSingleKey = exports.assertNotStrictEqual = void 0;
+const assert_1 = __webpack_require__(357);
+/**
+ * Typing wrapper around assert.notStrictEqual()
+ */
+function assertNotStrictEqual(actual, expected, message) {
+    assert_1.notStrictEqual(actual, expected, message);
 }
+exports.assertNotStrictEqual = assertNotStrictEqual;
+/**
+ * Asserts actual is a single key, not a key array or a key map.
+ */
+function assertSingleKey(actual) {
+    assert_1.strictEqual(typeof actual, 'string');
+}
+exports.assertSingleKey = assertSingleKey;
+/**
+ * Typing wrapper around Object.keys()
+ */
+function objectKeys(object) {
+    return Object.keys(object);
+}
+exports.objectKeys = objectKeys;
 
 
 /***/ }),
-/* 45 */,
 /* 46 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2616,7 +3089,17 @@ module.exports = readShebang;
 
 
 /***/ }),
-/* 47 */,
+/* 47 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.match` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.match
+defineWellKnownSymbol('match');
+
+
+/***/ }),
 /* 48 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2761,7 +3244,21 @@ exports.flatten = (...args) => {
 
 
 /***/ }),
-/* 50 */,
+/* 50 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(759);
+__webpack_require__(414);
+__webpack_require__(635);
+__webpack_require__(58);
+__webpack_require__(590);
+// TODO: Remove from `core-js@4`
+__webpack_require__(665);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 51 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2771,7 +3268,111 @@ module.exports = gte
 
 
 /***/ }),
-/* 52 */,
+/* 52 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var global = __webpack_require__(813);
+var getOwnPropertyDescriptor = __webpack_require__(777).f;
+var isForced = __webpack_require__(278);
+var path = __webpack_require__(628);
+var bind = __webpack_require__(41);
+var createNonEnumerableProperty = __webpack_require__(315);
+var has = __webpack_require__(35);
+
+var wrapConstructor = function (NativeConstructor) {
+  var Wrapper = function (a, b, c) {
+    if (this instanceof NativeConstructor) {
+      switch (arguments.length) {
+        case 0: return new NativeConstructor();
+        case 1: return new NativeConstructor(a);
+        case 2: return new NativeConstructor(a, b);
+      } return new NativeConstructor(a, b, c);
+    } return NativeConstructor.apply(this, arguments);
+  };
+  Wrapper.prototype = NativeConstructor.prototype;
+  return Wrapper;
+};
+
+/*
+  options.target      - name of the target object
+  options.global      - target is the global object
+  options.stat        - export as static methods of target
+  options.proto       - export as prototype methods of target
+  options.real        - real prototype method for the `pure` version
+  options.forced      - export even if the native feature is available
+  options.bind        - bind methods to the target, required for the `pure` version
+  options.wrap        - wrap constructors to preventing global pollution, required for the `pure` version
+  options.unsafe      - use the simple assignment of property instead of delete + defineProperty
+  options.sham        - add a flag to not completely full polyfills
+  options.enumerable  - export as enumerable property
+  options.noTargetGet - prevent calling a getter on target
+*/
+module.exports = function (options, source) {
+  var TARGET = options.target;
+  var GLOBAL = options.global;
+  var STATIC = options.stat;
+  var PROTO = options.proto;
+
+  var nativeSource = GLOBAL ? global : STATIC ? global[TARGET] : (global[TARGET] || {}).prototype;
+
+  var target = GLOBAL ? path : path[TARGET] || (path[TARGET] = {});
+  var targetPrototype = target.prototype;
+
+  var FORCED, USE_NATIVE, VIRTUAL_PROTOTYPE;
+  var key, sourceProperty, targetProperty, nativeProperty, resultProperty, descriptor;
+
+  for (key in source) {
+    FORCED = isForced(GLOBAL ? key : TARGET + (STATIC ? '.' : '#') + key, options.forced);
+    // contains in native
+    USE_NATIVE = !FORCED && nativeSource && has(nativeSource, key);
+
+    targetProperty = target[key];
+
+    if (USE_NATIVE) if (options.noTargetGet) {
+      descriptor = getOwnPropertyDescriptor(nativeSource, key);
+      nativeProperty = descriptor && descriptor.value;
+    } else nativeProperty = nativeSource[key];
+
+    // export native or implementation
+    sourceProperty = (USE_NATIVE && nativeProperty) ? nativeProperty : source[key];
+
+    if (USE_NATIVE && typeof targetProperty === typeof sourceProperty) continue;
+
+    // bind timers to global for call from export context
+    if (options.bind && USE_NATIVE) resultProperty = bind(sourceProperty, global);
+    // wrap global constructors for prevent changs in this version
+    else if (options.wrap && USE_NATIVE) resultProperty = wrapConstructor(sourceProperty);
+    // make static versions for prototype methods
+    else if (PROTO && typeof sourceProperty == 'function') resultProperty = bind(Function.call, sourceProperty);
+    // default case
+    else resultProperty = sourceProperty;
+
+    // add a flag to not completely full polyfills
+    if (options.sham || (sourceProperty && sourceProperty.sham) || (targetProperty && targetProperty.sham)) {
+      createNonEnumerableProperty(resultProperty, 'sham', true);
+    }
+
+    target[key] = resultProperty;
+
+    if (PROTO) {
+      VIRTUAL_PROTOTYPE = TARGET + 'Prototype';
+      if (!has(path, VIRTUAL_PROTOTYPE)) {
+        createNonEnumerableProperty(path, VIRTUAL_PROTOTYPE, {});
+      }
+      // export virtual prototype methods
+      path[VIRTUAL_PROTOTYPE][key] = sourceProperty;
+      // export real prototype methods
+      if (options.real && targetPrototype && !targetPrototype[key]) {
+        createNonEnumerableProperty(targetPrototype, key, sourceProperty);
+      }
+    }
+  }
+};
+
+
+/***/ }),
 /* 53 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2887,198 +3488,32 @@ var e=__webpack_require__(700),r=__webpack_require__(910),o=__webpack_require__(
 
 /***/ }),
 /* 55 */,
-/* 56 */,
-/* 57 */,
+/* 56 */
+/***/ (function(module) {
+
+module.exports = {};
+
+
+/***/ }),
+/* 57 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.split` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.split
+defineWellKnownSymbol('split');
+
+
+/***/ }),
 /* 58 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-"use strict";
+var defineWellKnownSymbol = __webpack_require__(308);
 
-const stringWidth = __webpack_require__(21);
-const stripAnsi = __webpack_require__(598);
-const ansiStyles = __webpack_require__(745);
-
-const ESCAPES = new Set([
-	'\u001B',
-	'\u009B'
-]);
-
-const END_CODE = 39;
-
-const wrapAnsi = code => `${ESCAPES.values().next().value}[${code}m`;
-
-// Calculate the length of words split on ' ', ignoring
-// the extra characters added by ansi escape codes
-const wordLengths = string => string.split(' ').map(character => stringWidth(character));
-
-// Wrap a long word across multiple rows
-// Ansi escape codes do not count towards length
-const wrapWord = (rows, word, columns) => {
-	const characters = [...word];
-
-	let isInsideEscape = false;
-	let visible = stringWidth(stripAnsi(rows[rows.length - 1]));
-
-	for (const [index, character] of characters.entries()) {
-		const characterLength = stringWidth(character);
-
-		if (visible + characterLength <= columns) {
-			rows[rows.length - 1] += character;
-		} else {
-			rows.push(character);
-			visible = 0;
-		}
-
-		if (ESCAPES.has(character)) {
-			isInsideEscape = true;
-		} else if (isInsideEscape && character === 'm') {
-			isInsideEscape = false;
-			continue;
-		}
-
-		if (isInsideEscape) {
-			continue;
-		}
-
-		visible += characterLength;
-
-		if (visible === columns && index < characters.length - 1) {
-			rows.push('');
-			visible = 0;
-		}
-	}
-
-	// It's possible that the last row we copy over is only
-	// ansi escape characters, handle this edge-case
-	if (!visible && rows[rows.length - 1].length > 0 && rows.length > 1) {
-		rows[rows.length - 2] += rows.pop();
-	}
-};
-
-// Trims spaces from a string ignoring invisible sequences
-const stringVisibleTrimSpacesRight = str => {
-	const words = str.split(' ');
-	let last = words.length;
-
-	while (last > 0) {
-		if (stringWidth(words[last - 1]) > 0) {
-			break;
-		}
-
-		last--;
-	}
-
-	if (last === words.length) {
-		return str;
-	}
-
-	return words.slice(0, last).join(' ') + words.slice(last).join('');
-};
-
-// The wrap-ansi module can be invoked in either 'hard' or 'soft' wrap mode
-//
-// 'hard' will never allow a string to take up more than columns characters
-//
-// 'soft' allows long words to expand past the column length
-const exec = (string, columns, options = {}) => {
-	if (options.trim !== false && string.trim() === '') {
-		return '';
-	}
-
-	let pre = '';
-	let ret = '';
-	let escapeCode;
-
-	const lengths = wordLengths(string);
-	let rows = [''];
-
-	for (const [index, word] of string.split(' ').entries()) {
-		if (options.trim !== false) {
-			rows[rows.length - 1] = rows[rows.length - 1].trimLeft();
-		}
-
-		let rowLength = stringWidth(rows[rows.length - 1]);
-
-		if (index !== 0) {
-			if (rowLength >= columns && (options.wordWrap === false || options.trim === false)) {
-				// If we start with a new word but the current row length equals the length of the columns, add a new row
-				rows.push('');
-				rowLength = 0;
-			}
-
-			if (rowLength > 0 || options.trim === false) {
-				rows[rows.length - 1] += ' ';
-				rowLength++;
-			}
-		}
-
-		// In 'hard' wrap mode, the length of a line is never allowed to extend past 'columns'
-		if (options.hard && lengths[index] > columns) {
-			const remainingColumns = (columns - rowLength);
-			const breaksStartingThisLine = 1 + Math.floor((lengths[index] - remainingColumns - 1) / columns);
-			const breaksStartingNextLine = Math.floor((lengths[index] - 1) / columns);
-			if (breaksStartingNextLine < breaksStartingThisLine) {
-				rows.push('');
-			}
-
-			wrapWord(rows, word, columns);
-			continue;
-		}
-
-		if (rowLength + lengths[index] > columns && rowLength > 0 && lengths[index] > 0) {
-			if (options.wordWrap === false && rowLength < columns) {
-				wrapWord(rows, word, columns);
-				continue;
-			}
-
-			rows.push('');
-		}
-
-		if (rowLength + lengths[index] > columns && options.wordWrap === false) {
-			wrapWord(rows, word, columns);
-			continue;
-		}
-
-		rows[rows.length - 1] += word;
-	}
-
-	if (options.trim !== false) {
-		rows = rows.map(stringVisibleTrimSpacesRight);
-	}
-
-	pre = rows.join('\n');
-
-	for (const [index, character] of [...pre].entries()) {
-		ret += character;
-
-		if (ESCAPES.has(character)) {
-			const code = parseFloat(/\d[^m]*/.exec(pre.slice(index, index + 4)));
-			escapeCode = code === END_CODE ? null : code;
-		}
-
-		const code = ansiStyles.codes.get(Number(escapeCode));
-
-		if (escapeCode && code) {
-			if (pre[index + 1] === '\n') {
-				ret += wrapAnsi(code);
-			} else if (character === '\n') {
-				ret += wrapAnsi(escapeCode);
-			}
-		}
-	}
-
-	return ret;
-};
-
-// For each newline, invoke the method separately
-module.exports = (string, columns, options) => {
-	return String(string)
-		.normalize()
-		.replace(/\r\n/g, '\n')
-		.split('\n')
-		.map(line => exec(line, columns, options))
-		.join('\n');
-};
+// `Symbol.observable` well-known symbol
+// https://github.com/tc39/proposal-observable
+defineWellKnownSymbol('observable');
 
 
 /***/ }),
@@ -3238,25 +3673,18 @@ exports.request = request;
 
 /***/ }),
 /* 60 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-
-const pathKey = (options = {}) => {
-	const environment = options.env || process.env;
-	const platform = options.platform || process.platform;
-
-	if (platform !== 'win32') {
-		return 'PATH';
-	}
-
-	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
-};
-
-module.exports = pathKey;
-// TODO: Remove this for the next major release
-module.exports.default = pathKey;
+const Range = __webpack_require__(318)
+const satisfies = (version, range, options) => {
+  try {
+    range = new Range(range, options)
+  } catch (er) {
+    return false
+  }
+  return range.test(version)
+}
+module.exports = satisfies
 
 
 /***/ }),
@@ -3380,8 +3808,35 @@ module.exports = expand;
 
 
 /***/ }),
-/* 62 */,
-/* 63 */,
+/* 62 */
+/***/ (function(module) {
+
+module.exports = function (bitmap, value) {
+  return {
+    enumerable: !(bitmap & 1),
+    configurable: !(bitmap & 2),
+    writable: !(bitmap & 4),
+    value: value
+  };
+};
+
+
+/***/ }),
+/* 63 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var anObject = __webpack_require__(589);
+var getIteratorMethod = __webpack_require__(206);
+
+module.exports = function (it) {
+  var iteratorMethod = getIteratorMethod(it);
+  if (typeof iteratorMethod != 'function') {
+    throw TypeError(String(it) + ' is not iterable');
+  } return anObject(iteratorMethod.call(it));
+};
+
+
+/***/ }),
 /* 64 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -3602,7 +4057,15 @@ module.exports = prerelease
 
 
 /***/ }),
-/* 71 */,
+/* 71 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(143);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 72 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -3686,17 +4149,27 @@ const applyChanges = ({ changelogs, assembledChanges, config }) => {
     } else {
       addition = assembledChanges.releases[change.changes.name].changes.reduce(
         (finalString, release) =>
-          !release.meta || (!!release.meta && !release.meta.hashShort)
-            ? `${finalString}\n - ${release.summary}`
-            : `${finalString}\n - ${release.summary} { [${
-                release.meta.hashShort
-              }](${gitSiteUrl}commit/${
-                release.meta.hashLong
-              }) ${release.meta.commitSubject.replace(
-                /(#[0-9])\w/g,
-                (match) =>
-                  `[${match}](${gitSiteUrl}pull/${match.substr(1, 999999)})`
-              )} on ${release.meta.date} }`,
+          !release.meta || (!!release.meta && !release.meta.commits)
+            ? `${finalString}\n- ${release.summary}`
+            : `${finalString}\n- ${release.summary}\n${
+                !release.meta.dependencies
+                  ? ""
+                  : `    - ${release.meta.dependencies}\n`
+              }${release.meta.commits
+                .map(
+                  (commit) =>
+                    `    - [${commit.hashShort}](${gitSiteUrl}commit/${
+                      commit.hashLong
+                    }) ${commit.commitSubject.replace(
+                      /(#[0-9])\w/g,
+                      (match) =>
+                        `[${match}](${gitSiteUrl}pull/${match.substr(
+                          1,
+                          999999
+                        )})`
+                    )} on ${commit.date}`
+                )
+                .join("\n")}`,
         `## [${change.changes.version}]`
       );
     }
@@ -3721,7 +4194,18 @@ const writeAllChangelogs = ({ writtenChanges }) => {
 
 
 /***/ }),
-/* 73 */,
+/* 73 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var global = __webpack_require__(813);
+var inspectSource = __webpack_require__(529);
+
+var WeakMap = global.WeakMap;
+
+module.exports = typeof WeakMap === 'function' && /native code/.test(inspectSource(WeakMap));
+
+
+/***/ }),
 /* 74 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -3770,7 +4254,16 @@ module.exports = function (/*streams...*/) {
 
 
 /***/ }),
-/* 75 */,
+/* 75 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(739);
+var path = __webpack_require__(628);
+
+module.exports = path.parseInt;
+
+
+/***/ }),
 /* 76 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -3865,7 +4358,19 @@ module.exports = patch
 
 
 /***/ }),
-/* 79 */,
+/* 79 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isRegExp = __webpack_require__(336);
+
+module.exports = function (it) {
+  if (isRegExp(it)) {
+    throw TypeError("The method doesn't accept regular expressions");
+  } return it;
+};
+
+
+/***/ }),
 /* 80 */,
 /* 81 */
 /***/ (function(module) {
@@ -3917,89 +4422,16 @@ function locate(value, fromIndex) {
 
 /***/ }),
 /* 83 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-const conversions = __webpack_require__(161);
-const route = __webpack_require__(672);
+var ceil = Math.ceil;
+var floor = Math.floor;
 
-const convert = {};
-
-const models = Object.keys(conversions);
-
-function wrapRaw(fn) {
-	const wrappedFn = function (...args) {
-		const arg0 = args[0];
-		if (arg0 === undefined || arg0 === null) {
-			return arg0;
-		}
-
-		if (arg0.length > 1) {
-			args = arg0;
-		}
-
-		return fn(args);
-	};
-
-	// Preserve .conversion property if there is one
-	if ('conversion' in fn) {
-		wrappedFn.conversion = fn.conversion;
-	}
-
-	return wrappedFn;
-}
-
-function wrapRounded(fn) {
-	const wrappedFn = function (...args) {
-		const arg0 = args[0];
-
-		if (arg0 === undefined || arg0 === null) {
-			return arg0;
-		}
-
-		if (arg0.length > 1) {
-			args = arg0;
-		}
-
-		const result = fn(args);
-
-		// We're assuming the result is an array here.
-		// see notice in conversions.js; don't use box types
-		// in conversion functions.
-		if (typeof result === 'object') {
-			for (let len = result.length, i = 0; i < len; i++) {
-				result[i] = Math.round(result[i]);
-			}
-		}
-
-		return result;
-	};
-
-	// Preserve .conversion property if there is one
-	if ('conversion' in fn) {
-		wrappedFn.conversion = fn.conversion;
-	}
-
-	return wrappedFn;
-}
-
-models.forEach(fromModel => {
-	convert[fromModel] = {};
-
-	Object.defineProperty(convert[fromModel], 'channels', {value: conversions[fromModel].channels});
-	Object.defineProperty(convert[fromModel], 'labels', {value: conversions[fromModel].labels});
-
-	const routes = route(fromModel);
-	const routeModels = Object.keys(routes);
-
-	routeModels.forEach(toModel => {
-		const fn = routes[toModel];
-
-		convert[fromModel][toModel] = wrapRounded(fn);
-		convert[fromModel][toModel].raw = wrapRaw(fn);
-	});
-});
-
-module.exports = convert;
+// `ToInteger` abstract operation
+// https://tc39.github.io/ecma262/#sec-tointeger
+module.exports = function (argument) {
+  return isNaN(argument = +argument) ? 0 : (argument > 0 ? floor : ceil)(argument);
+};
 
 
 /***/ }),
@@ -4063,7 +4495,18 @@ module.exports = windowsRelease;
 
 
 /***/ }),
-/* 86 */,
+/* 86 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var createNonEnumerableProperty = __webpack_require__(315);
+
+module.exports = function (target, key, value, options) {
+  if (options && options.enumerable) target[key] = value;
+  else createNonEnumerableProperty(target, key, value);
+};
+
+
+/***/ }),
 /* 87 */
 /***/ (function(module) {
 
@@ -4117,8 +4560,34 @@ module.exports = eq
 
 
 /***/ }),
-/* 90 */,
-/* 91 */,
+/* 90 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(571);
+var flags = __webpack_require__(28);
+
+module.exports = function (it) {
+  return flags.call(it);
+};
+
+
+/***/ }),
+/* 91 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isPromise = void 0;
+function isPromise(maybePromise) {
+    return !!maybePromise &&
+        !!maybePromise.then &&
+        (typeof maybePromise.then === 'function');
+}
+exports.isPromise = isPromise;
+
+
+/***/ }),
 /* 92 */
 /***/ (function(module) {
 
@@ -4489,7 +4958,12 @@ module.exports = {
 
 
 /***/ }),
-/* 95 */,
+/* 95 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(982);
+
+/***/ }),
 /* 96 */
 /***/ (function(module) {
 
@@ -4649,8 +5123,8 @@ function imageReference(node) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const Range = __webpack_require__(318)
-const { ANY } = __webpack_require__(9)
-const satisfies = __webpack_require__(845)
+const { ANY } = __webpack_require__(517)
+const satisfies = __webpack_require__(60)
 const compare = __webpack_require__(217)
 
 // Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
@@ -4988,7 +5462,19 @@ function stringify(options) {
 
 
 /***/ }),
-/* 105 */,
+/* 105 */
+/***/ (function(module) {
+
+module.exports = function (exec) {
+  try {
+    return !!exec();
+  } catch (error) {
+    return true;
+  }
+};
+
+
+/***/ }),
 /* 106 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -5029,8 +5515,33 @@ module.exports = readShebang;
 
 /***/ }),
 /* 107 */,
-/* 108 */,
-/* 109 */,
+/* 108 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(915);
+__webpack_require__(118);
+var isIterable = __webpack_require__(555);
+
+module.exports = isIterable;
+
+
+/***/ }),
+/* 109 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var global = __webpack_require__(813);
+var isObject = __webpack_require__(195);
+
+var document = global.document;
+// typeof document.createElement is 'object' in old IE
+var EXISTS = isObject(document) && isObject(document.createElement);
+
+module.exports = function (it) {
+  return EXISTS ? document.createElement(it) : {};
+};
+
+
+/***/ }),
 /* 110 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -6157,54 +6668,77 @@ return{name,number,description,supported,action,forced,standard};
 //# sourceMappingURL=signals.js.map
 
 /***/ }),
-/* 112 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/* 112 */,
+/* 113 */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-const path = __webpack_require__(622);
-const pathKey = __webpack_require__(697);
 
-module.exports = opts => {
-	opts = Object.assign({
-		cwd: process.cwd(),
-		path: process.env[pathKey()]
-	}, opts);
+var _interopRequireDefault = __webpack_require__(395);
 
-	let prev;
-	let pth = path.resolve(opts.cwd);
-	const ret = [];
+var _Object$defineProperty = __webpack_require__(617);
 
-	while (prev !== pth) {
-		ret.push(path.join(pth, 'node_modules/.bin'));
-		prev = pth;
-		pth = path.resolve(pth, '..');
-	}
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
 
-	// ensure the running `node` binary is used
-	ret.push(path.dirname(process.execPath));
+exports.default = void 0;
 
-	return ret.concat(opts.path).join(path.delimiter);
+var _blocks = _interopRequireDefault(__webpack_require__(924));
+
+/*!
+ * XRegExp Unicode Blocks 4.3.0
+ * <xregexp.com>
+ * Steven Levithan (c) 2010-present MIT License
+ * Unicode data by Mathias Bynens <mathiasbynens.be>
+ */
+var _default = function _default(XRegExp) {
+  /**
+   * Adds support for all Unicode blocks. Block names use the prefix 'In'. E.g.,
+   * `\p{InBasicLatin}`. Token names are case insensitive, and any spaces, hyphens, and
+   * underscores are ignored.
+   *
+   * Uses Unicode 12.1.0.
+   *
+   * @requires XRegExp, Unicode Base
+   */
+  if (!XRegExp.addUnicodeData) {
+    throw new ReferenceError('Unicode Base must be loaded before Unicode Blocks');
+  }
+
+  XRegExp.addUnicodeData(_blocks.default);
 };
 
-module.exports.env = opts => {
-	opts = Object.assign({
-		env: process.env
-	}, opts);
+exports.default = _default;
+module.exports = exports["default"];
 
-	const env = Object.assign({}, opts.env);
-	const path = pathKey({env});
+/***/ }),
+/* 114 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-	opts.path = env[path];
-	env[path] = module.exports(opts);
+"use strict";
 
-	return env;
-};
+var $ = __webpack_require__(52);
+var $includes = __webpack_require__(689).includes;
+var addToUnscopables = __webpack_require__(497);
+var arrayMethodUsesToLength = __webpack_require__(877);
+
+var USES_TO_LENGTH = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
+
+// `Array.prototype.includes` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.includes
+$({ target: 'Array', proto: true, forced: !USES_TO_LENGTH }, {
+  includes: function includes(el /* , fromIndex = 0 */) {
+    return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
+  }
+});
+
+// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
+addToUnscopables('includes');
 
 
 /***/ }),
-/* 113 */,
-/* 114 */,
 /* 115 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -6230,7 +6764,42 @@ module.exports = eval("require")("encoding");
 
 /***/ }),
 /* 117 */,
-/* 118 */,
+/* 118 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var charAt = __webpack_require__(131).charAt;
+var InternalStateModule = __webpack_require__(304);
+var defineIterator = __webpack_require__(623);
+
+var STRING_ITERATOR = 'String Iterator';
+var setInternalState = InternalStateModule.set;
+var getInternalState = InternalStateModule.getterFor(STRING_ITERATOR);
+
+// `String.prototype[@@iterator]` method
+// https://tc39.github.io/ecma262/#sec-string.prototype-@@iterator
+defineIterator(String, 'String', function (iterated) {
+  setInternalState(this, {
+    type: STRING_ITERATOR,
+    string: String(iterated),
+    index: 0
+  });
+// `%StringIteratorPrototype%.next` method
+// https://tc39.github.io/ecma262/#sec-%stringiteratorprototype%.next
+}, function next() {
+  var state = getInternalState(this);
+  var string = state.string;
+  var index = state.index;
+  var point;
+  if (index >= string.length) return { value: undefined, done: true };
+  point = charAt(string, index);
+  state.index += point.length;
+  return { value: point, done: false };
+});
+
+
+/***/ }),
 /* 119 */,
 /* 120 */
 /***/ (function(__unusedmodule, exports) {
@@ -6300,41 +6869,63 @@ function length(value) {
 
 
 /***/ }),
-/* 122 */,
-/* 123 */,
+/* 122 */
+/***/ (function(module) {
+
+/*!
+ * is-extglob <https://github.com/jonschlinkert/is-extglob>
+ *
+ * Copyright (c) 2014-2016, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
+
+module.exports = function isExtglob(str) {
+  if (typeof str !== 'string' || str === '') {
+    return false;
+  }
+
+  var match;
+  while ((match = /(\\).|([@?!+*]\(.*\))/g.exec(str))) {
+    if (match[2]) return true;
+    str = str.slice(match.index + match[0].length);
+  }
+
+  return false;
+};
+
+
+/***/ }),
+/* 123 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(800);
+
+/***/ }),
 /* 124 */
 /***/ (function(module) {
 
 "use strict";
 
 
-const isStream = stream =>
-	stream !== null &&
-	typeof stream === 'object' &&
-	typeof stream.pipe === 'function';
+var isStream = module.exports = function (stream) {
+	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
+};
 
-isStream.writable = stream =>
-	isStream(stream) &&
-	stream.writable !== false &&
-	typeof stream._write === 'function' &&
-	typeof stream._writableState === 'object';
+isStream.writable = function (stream) {
+	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
+};
 
-isStream.readable = stream =>
-	isStream(stream) &&
-	stream.readable !== false &&
-	typeof stream._read === 'function' &&
-	typeof stream._readableState === 'object';
+isStream.readable = function (stream) {
+	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
+};
 
-isStream.duplex = stream =>
-	isStream.writable(stream) &&
-	isStream.readable(stream);
+isStream.duplex = function (stream) {
+	return isStream.writable(stream) && isStream.readable(stream);
+};
 
-isStream.transform = stream =>
-	isStream.duplex(stream) &&
-	typeof stream._transform === 'function' &&
-	typeof stream._transformState === 'object';
-
-module.exports = isStream;
+isStream.transform = function (stream) {
+	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
+};
 
 
 /***/ }),
@@ -6359,7 +6950,12 @@ module.exports = reInterpolate;
 /***/ }),
 /* 126 */,
 /* 127 */,
-/* 128 */,
+/* 128 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(820);
+
+/***/ }),
 /* 129 */
 /***/ (function(module) {
 
@@ -6385,7 +6981,39 @@ module.exports = new Type('tag:yaml.org,2002:merge', {
 
 
 /***/ }),
-/* 131 */,
+/* 131 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var toInteger = __webpack_require__(83);
+var requireObjectCoercible = __webpack_require__(611);
+
+// `String.prototype.{ codePointAt, at }` methods implementation
+var createMethod = function (CONVERT_TO_STRING) {
+  return function ($this, pos) {
+    var S = String(requireObjectCoercible($this));
+    var position = toInteger(pos);
+    var size = S.length;
+    var first, second;
+    if (position < 0 || position >= size) return CONVERT_TO_STRING ? '' : undefined;
+    first = S.charCodeAt(position);
+    return first < 0xD800 || first > 0xDBFF || position + 1 === size
+      || (second = S.charCodeAt(position + 1)) < 0xDC00 || second > 0xDFFF
+        ? CONVERT_TO_STRING ? S.charAt(position) : first
+        : CONVERT_TO_STRING ? S.slice(position, position + 2) : (first - 0xD800 << 10) + (second - 0xDC00) + 0x10000;
+  };
+};
+
+module.exports = {
+  // `String.prototype.codePointAt` method
+  // https://tc39.github.io/ecma262/#sec-string.prototype.codepointat
+  codeAt: createMethod(false),
+  // `String.prototype.at` method
+  // https://github.com/mathiasbynens/String.prototype.at
+  charAt: createMethod(true)
+};
+
+
+/***/ }),
 /* 132 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -6440,7 +7068,22 @@ function definition(node) {
 
 
 /***/ }),
-/* 136 */,
+/* 136 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(908);
+var path = __webpack_require__(628);
+
+var Object = path.Object;
+
+var defineProperty = module.exports = function defineProperty(it, key, desc) {
+  return Object.defineProperty(it, key, desc);
+};
+
+if (Object.defineProperty.sham) defineProperty.sham = true;
+
+
+/***/ }),
 /* 137 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -6740,7 +7383,88 @@ module.exports = new Type('tag:yaml.org,2002:null', {
 
 
 /***/ }),
-/* 141 */,
+/* 141 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(395);
+
+var _Object$defineProperty = __webpack_require__(617);
+
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = void 0;
+
+var _properties = _interopRequireDefault(__webpack_require__(618));
+
+/*!
+ * XRegExp Unicode Properties 4.3.0
+ * <xregexp.com>
+ * Steven Levithan (c) 2012-present MIT License
+ * Unicode data by Mathias Bynens <mathiasbynens.be>
+ */
+var _default = function _default(XRegExp) {
+  /**
+   * Adds properties to meet the UTS #18 Level 1 RL1.2 requirements for Unicode regex support. See
+   * <http://unicode.org/reports/tr18/#RL1.2>. Following are definitions of these properties from
+   * UAX #44 <http://unicode.org/reports/tr44/>:
+   *
+   * - Alphabetic
+   *   Characters with the Alphabetic property. Generated from: Lowercase + Uppercase + Lt + Lm +
+   *   Lo + Nl + Other_Alphabetic.
+   *
+   * - Default_Ignorable_Code_Point
+   *   For programmatic determination of default ignorable code points. New characters that should
+   *   be ignored in rendering (unless explicitly supported) will be assigned in these ranges,
+   *   permitting programs to correctly handle the default rendering of such characters when not
+   *   otherwise supported.
+   *
+   * - Lowercase
+   *   Characters with the Lowercase property. Generated from: Ll + Other_Lowercase.
+   *
+   * - Noncharacter_Code_Point
+   *   Code points permanently reserved for internal use.
+   *
+   * - Uppercase
+   *   Characters with the Uppercase property. Generated from: Lu + Other_Uppercase.
+   *
+   * - White_Space
+   *   Spaces, separator characters and other control characters which should be treated by
+   *   programming languages as "white space" for the purpose of parsing elements.
+   *
+   * The properties ASCII, Any, and Assigned are also included but are not defined in UAX #44. UTS
+   * #18 RL1.2 additionally requires support for Unicode scripts and general categories. These are
+   * included in XRegExp's Unicode Categories and Unicode Scripts addons.
+   *
+   * Token names are case insensitive, and any spaces, hyphens, and underscores are ignored.
+   *
+   * Uses Unicode 12.1.0.
+   *
+   * @requires XRegExp, Unicode Base
+   */
+  if (!XRegExp.addUnicodeData) {
+    throw new ReferenceError('Unicode Base must be loaded before Unicode Properties');
+  }
+
+  var unicodeData = _properties.default; // Add non-generated data
+
+  unicodeData.push({
+    name: 'Assigned',
+    // Since this is defined as the inverse of Unicode category Cn (Unassigned), the Unicode
+    // Categories addon is required to use this property
+    inverseOf: 'Cn'
+  });
+  XRegExp.addUnicodeData(unicodeData);
+};
+
+exports.default = _default;
+module.exports = exports["default"];
+
+/***/ }),
 /* 142 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -6756,7 +7480,25 @@ if (process.env.NODE_ENV === 'production') {
 
 
 /***/ }),
-/* 143 */,
+/* 143 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var arrayIncludes = __webpack_require__(27);
+var stringIncludes = __webpack_require__(267);
+
+var ArrayPrototype = Array.prototype;
+var StringPrototype = String.prototype;
+
+module.exports = function (it) {
+  var own = it.includes;
+  if (it === ArrayPrototype || (it instanceof Array && own === ArrayPrototype.includes)) return arrayIncludes;
+  if (typeof it === 'string' || it === StringPrototype || (it instanceof String && own === StringPrototype.includes)) {
+    return stringIncludes;
+  } return own;
+};
+
+
+/***/ }),
 /* 144 */
 /***/ (function(module) {
 
@@ -7605,7 +8347,7 @@ proto.enterLinkReference = __webpack_require__(743)
 
 // Configuration.
 proto.options = __webpack_require__(730)
-proto.setOptions = __webpack_require__(241)
+proto.setOptions = __webpack_require__(325)
 
 proto.compile = __webpack_require__(202)
 proto.visit = __webpack_require__(826)
@@ -7668,14 +8410,57 @@ function locate(value, fromIndex) {
 
 /***/ }),
 /* 158 */,
-/* 159 */,
+/* 159 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(395);
+
+var _Object$defineProperty = __webpack_require__(617);
+
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = void 0;
+
+var _scripts = _interopRequireDefault(__webpack_require__(423));
+
+/*!
+ * XRegExp Unicode Scripts 4.3.0
+ * <xregexp.com>
+ * Steven Levithan (c) 2010-present MIT License
+ * Unicode data by Mathias Bynens <mathiasbynens.be>
+ */
+var _default = function _default(XRegExp) {
+  /**
+   * Adds support for all Unicode scripts. E.g., `\p{Latin}`. Token names are case insensitive,
+   * and any spaces, hyphens, and underscores are ignored.
+   *
+   * Uses Unicode 12.1.0.
+   *
+   * @requires XRegExp, Unicode Base
+   */
+  if (!XRegExp.addUnicodeData) {
+    throw new ReferenceError('Unicode Base must be loaded before Unicode Scripts');
+  }
+
+  XRegExp.addUnicodeData(_scripts.default);
+};
+
+exports.default = _default;
+module.exports = exports["default"];
+
+/***/ }),
 /* 160 */,
 /* 161 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 /* MIT license */
 /* eslint-disable no-mixed-operators */
-const cssKeywords = __webpack_require__(837);
+const cssKeywords = __webpack_require__(832);
 
 // NOTE: conversions should only return primitive values (i.e. arrays, or
 //       values that give correct `typeof` results).
@@ -9014,7 +9799,17 @@ module.exports.default = pathKey;
 
 /***/ }),
 /* 165 */,
-/* 166 */,
+/* 166 */
+/***/ (function(module) {
+
+module.exports = function (it) {
+  if (typeof it != 'function') {
+    throw TypeError(String(it) + ' is not a function');
+  } return it;
+};
+
+
+/***/ }),
 /* 167 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -9490,7 +10285,22 @@ module.exports = new Type('tag:yaml.org,2002:js/function', {
 
 
 /***/ }),
-/* 171 */,
+/* 171 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__(624);
+var fails = __webpack_require__(105);
+var createElement = __webpack_require__(109);
+
+// Thank's IE8 for his funny defineProperty
+module.exports = !DESCRIPTORS && !fails(function () {
+  return Object.defineProperty(createElement('div'), 'a', {
+    get: function () { return 7; }
+  }).a != 7;
+});
+
+
+/***/ }),
 /* 172 */,
 /* 173 */,
 /* 174 */
@@ -9617,7 +10427,20 @@ function orderedItems(node) {
 
 
 /***/ }),
-/* 177 */,
+/* 177 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var indexOf = __webpack_require__(845);
+
+var ArrayPrototype = Array.prototype;
+
+module.exports = function (it) {
+  var own = it.indexOf;
+  return it === ArrayPrototype || (it instanceof Array && own === ArrayPrototype.indexOf) ? indexOf : own;
+};
+
+
+/***/ }),
 /* 178 */
 /***/ (function(module) {
 
@@ -9841,7 +10664,20 @@ function checkMode (stat, options) {
 
 
 /***/ }),
-/* 187 */,
+/* 187 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var reduce = __webpack_require__(734);
+
+var ArrayPrototype = Array.prototype;
+
+module.exports = function (it) {
+  var own = it.reduce;
+  return it === ArrayPrototype || (it instanceof Array && own === ArrayPrototype.reduce) ? reduce : own;
+};
+
+
+/***/ }),
 /* 188 */
 /***/ (function(module) {
 
@@ -10103,7 +10939,15 @@ module.exports = fastqueue
 /***/ }),
 /* 193 */,
 /* 194 */,
-/* 195 */,
+/* 195 */
+/***/ (function(module) {
+
+module.exports = function (it) {
+  return typeof it === 'object' ? it !== null : typeof it === 'function';
+};
+
+
+/***/ }),
 /* 196 */
 /***/ (function(__unusedmodule, exports) {
 
@@ -10153,7 +10997,17 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 198 */,
+/* 198 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var setToStringTag = __webpack_require__(263);
+
+// Math[@@toStringTag] property
+// https://tc39.github.io/ecma262/#sec-math-@@tostringtag
+setToStringTag(Math, 'Math', true);
+
+
+/***/ }),
 /* 199 */,
 /* 200 */,
 /* 201 */
@@ -10214,7 +11068,15 @@ function compile() {
 
 
 /***/ }),
-/* 203 */,
+/* 203 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(887);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 204 */,
 /* 205 */
 /***/ (function(module) {
@@ -10268,7 +11130,23 @@ module.exports.argument = escapeArgument;
 
 
 /***/ }),
-/* 206 */,
+/* 206 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var classof = __webpack_require__(241);
+var Iterators = __webpack_require__(218);
+var wellKnownSymbol = __webpack_require__(778);
+
+var ITERATOR = wellKnownSymbol('iterator');
+
+module.exports = function (it) {
+  if (it != undefined) return it[ITERATOR]
+    || it['@@iterator']
+    || Iterators[classof(it)];
+};
+
+
+/***/ }),
 /* 207 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -10625,25 +11503,21 @@ class MaxBufferError extends Error {
 	}
 }
 
-async function getStream(inputStream, options) {
+function getStream(inputStream, options) {
 	if (!inputStream) {
 		return Promise.reject(new Error('Expected a stream'));
 	}
 
-	options = {
-		maxBuffer: Infinity,
-		...options
-	};
+	options = Object.assign({maxBuffer: Infinity}, options);
 
 	const {maxBuffer} = options;
 
 	let stream;
-	await new Promise((resolve, reject) => {
+	return new Promise((resolve, reject) => {
 		const rejectPromise = error => {
 			if (error) { // A null check
 				error.bufferedData = stream.getBufferedValue();
 			}
-
 			reject(error);
 		};
 
@@ -10661,21 +11535,87 @@ async function getStream(inputStream, options) {
 				rejectPromise(new MaxBufferError());
 			}
 		});
-	});
-
-	return stream.getBufferedValue();
+	}).then(() => stream.getBufferedValue());
 }
 
 module.exports = getStream;
-// TODO: Remove this for the next major release
-module.exports.default = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
-module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
+module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
 module.exports.MaxBufferError = MaxBufferError;
 
 
 /***/ }),
-/* 210 */,
+/* 210 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var bind = __webpack_require__(41);
+var IndexedObject = __webpack_require__(322);
+var toObject = __webpack_require__(375);
+var toLength = __webpack_require__(745);
+var arraySpeciesCreate = __webpack_require__(958);
+
+var push = [].push;
+
+// `Array.prototype.{ forEach, map, filter, some, every, find, findIndex }` methods implementation
+var createMethod = function (TYPE) {
+  var IS_MAP = TYPE == 1;
+  var IS_FILTER = TYPE == 2;
+  var IS_SOME = TYPE == 3;
+  var IS_EVERY = TYPE == 4;
+  var IS_FIND_INDEX = TYPE == 6;
+  var NO_HOLES = TYPE == 5 || IS_FIND_INDEX;
+  return function ($this, callbackfn, that, specificCreate) {
+    var O = toObject($this);
+    var self = IndexedObject(O);
+    var boundFunction = bind(callbackfn, that, 3);
+    var length = toLength(self.length);
+    var index = 0;
+    var create = specificCreate || arraySpeciesCreate;
+    var target = IS_MAP ? create($this, length) : IS_FILTER ? create($this, 0) : undefined;
+    var value, result;
+    for (;length > index; index++) if (NO_HOLES || index in self) {
+      value = self[index];
+      result = boundFunction(value, index, O);
+      if (TYPE) {
+        if (IS_MAP) target[index] = result; // map
+        else if (result) switch (TYPE) {
+          case 3: return true;              // some
+          case 5: return value;             // find
+          case 6: return index;             // findIndex
+          case 2: push.call(target, value); // filter
+        } else if (IS_EVERY) return false;  // every
+      }
+    }
+    return IS_FIND_INDEX ? -1 : IS_SOME || IS_EVERY ? IS_EVERY : target;
+  };
+};
+
+module.exports = {
+  // `Array.prototype.forEach` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.foreach
+  forEach: createMethod(0),
+  // `Array.prototype.map` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.map
+  map: createMethod(1),
+  // `Array.prototype.filter` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.filter
+  filter: createMethod(2),
+  // `Array.prototype.some` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.some
+  some: createMethod(3),
+  // `Array.prototype.every` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.every
+  every: createMethod(4),
+  // `Array.prototype.find` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.find
+  find: createMethod(5),
+  // `Array.prototype.findIndex` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.findIndex
+  findIndex: createMethod(6)
+};
+
+
+/***/ }),
 /* 211 */
 /***/ (function(module) {
 
@@ -10745,7 +11685,65 @@ module.exports = isPlainObject;
 
 /***/ }),
 /* 215 */,
-/* 216 */,
+/* 216 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {PassThrough: PassThroughStream} = __webpack_require__(413);
+
+module.exports = options => {
+	options = {...options};
+
+	const {array} = options;
+	let {encoding} = options;
+	const isBuffer = encoding === 'buffer';
+	let objectMode = false;
+
+	if (array) {
+		objectMode = !(encoding || isBuffer);
+	} else {
+		encoding = encoding || 'utf8';
+	}
+
+	if (isBuffer) {
+		encoding = null;
+	}
+
+	const stream = new PassThroughStream({objectMode});
+
+	if (encoding) {
+		stream.setEncoding(encoding);
+	}
+
+	let length = 0;
+	const chunks = [];
+
+	stream.on('data', chunk => {
+		chunks.push(chunk);
+
+		if (objectMode) {
+			length = chunks.length;
+		} else {
+			length += chunk.length;
+		}
+	});
+
+	stream.getBufferedValue = () => {
+		if (array) {
+			return chunks;
+		}
+
+		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+	};
+
+	stream.getBufferedLength = () => length;
+
+	return stream;
+};
+
+
+/***/ }),
 /* 217 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -10757,8 +11755,19 @@ module.exports = compare
 
 
 /***/ }),
-/* 218 */,
-/* 219 */,
+/* 218 */
+/***/ (function(module) {
+
+module.exports = {};
+
+
+/***/ }),
+/* 219 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(506);
+
+/***/ }),
 /* 220 */
 /***/ (function(module) {
 
@@ -11118,7 +12127,17 @@ function url(eat, value, silent) {
 
 
 /***/ }),
-/* 226 */,
+/* 226 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.replace` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.replace
+defineWellKnownSymbol('replace');
+
+
+/***/ }),
 /* 227 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -11158,7 +12177,15 @@ function getSettings(settingsOrOptions = {}) {
 
 
 /***/ }),
-/* 228 */,
+/* 228 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var getBuiltIn = __webpack_require__(967);
+
+module.exports = getBuiltIn('navigator', 'userAgent') || '';
+
+
+/***/ }),
 /* 229 */
 /***/ (function(__unusedmodule, exports) {
 
@@ -11357,7 +12384,70 @@ module.exports = (string = '') => {
 
 
 /***/ }),
-/* 233 */,
+/* 233 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.applyMiddleware = exports.commandMiddlewareFactory = exports.globalMiddlewareFactory = void 0;
+const argsert_1 = __webpack_require__(997);
+const is_promise_1 = __webpack_require__(91);
+function globalMiddlewareFactory(globalMiddleware, context) {
+    return function (callback, applyBeforeValidation = false) {
+        argsert_1.argsert('<array|function> [boolean]', [callback, applyBeforeValidation], arguments.length);
+        if (Array.isArray(callback)) {
+            for (let i = 0; i < callback.length; i++) {
+                if (typeof callback[i] !== 'function') {
+                    throw Error('middleware must be a function');
+                }
+                callback[i].applyBeforeValidation = applyBeforeValidation;
+            }
+            Array.prototype.push.apply(globalMiddleware, callback);
+        }
+        else if (typeof callback === 'function') {
+            callback.applyBeforeValidation = applyBeforeValidation;
+            globalMiddleware.push(callback);
+        }
+        return context;
+    };
+}
+exports.globalMiddlewareFactory = globalMiddlewareFactory;
+function commandMiddlewareFactory(commandMiddleware) {
+    if (!commandMiddleware)
+        return [];
+    return commandMiddleware.map(middleware => {
+        middleware.applyBeforeValidation = false;
+        return middleware;
+    });
+}
+exports.commandMiddlewareFactory = commandMiddlewareFactory;
+function applyMiddleware(argv, yargs, middlewares, beforeValidation) {
+    const beforeValidationError = new Error('middleware cannot return a promise when applyBeforeValidation is true');
+    return middlewares
+        .reduce((acc, middleware) => {
+        if (middleware.applyBeforeValidation !== beforeValidation) {
+            return acc;
+        }
+        if (is_promise_1.isPromise(acc)) {
+            return acc
+                .then(initialObj => Promise.all([initialObj, middleware(initialObj, yargs)]))
+                .then(([initialObj, middlewareObj]) => Object.assign(initialObj, middlewareObj));
+        }
+        else {
+            const result = middleware(acc, yargs);
+            if (beforeValidation && is_promise_1.isPromise(result))
+                throw beforeValidationError;
+            return is_promise_1.isPromise(result)
+                ? result.then(middlewareObj => Object.assign(acc, middlewareObj))
+                : Object.assign(acc, result);
+        }
+    }, argv);
+}
+exports.applyMiddleware = applyMiddleware;
+
+
+/***/ }),
 /* 234 */,
 /* 235 */
 /***/ (function(module, exports) {
@@ -11586,171 +12676,49 @@ module.exports.stop = stop;
 
 
 /***/ }),
-/* 240 */,
+/* 240 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var map = __webpack_require__(250);
+
+var ArrayPrototype = Array.prototype;
+
+module.exports = function (it) {
+  var own = it.map;
+  return it === ArrayPrototype || (it instanceof Array && own === ArrayPrototype.map) ? map : own;
+};
+
+
+/***/ }),
 /* 241 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+var TO_STRING_TAG_SUPPORT = __webpack_require__(688);
+var classofRaw = __webpack_require__(404);
+var wellKnownSymbol = __webpack_require__(778);
 
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+// ES3 wrong here
+var CORRECT_ARGUMENTS = classofRaw(function () { return arguments; }()) == 'Arguments';
 
-var xtend = __webpack_require__(81)
-var encode = __webpack_require__(291)
-var defaults = __webpack_require__(730)
-var escapeFactory = __webpack_require__(567)
-var identity = __webpack_require__(491)
+// fallback for IE11 Script Access Denied error
+var tryGet = function (it, key) {
+  try {
+    return it[key];
+  } catch (error) { /* empty */ }
+};
 
-module.exports = setOptions
-
-// Map of applicable enums.
-var maps = {
-  entities: {true: true, false: true, numbers: true, escape: true},
-  bullet: {'*': true, '-': true, '+': true},
-  rule: {'-': true, _: true, '*': true},
-  listItemIndent: {tab: true, mixed: true, 1: true},
-  emphasis: {_: true, '*': true},
-  strong: {_: true, '*': true},
-  fence: {'`': true, '~': true}
-}
-
-// Expose `validate`.
-var validate = {
-  boolean: validateBoolean,
-  string: validateString,
-  number: validateNumber,
-  function: validateFunction
-}
-
-// Set options.  Does not overwrite previously set options.
-function setOptions(options) {
-  var self = this
-  var current = self.options
-  var ruleRepetition
-  var key
-
-  if (options == null) {
-    options = {}
-  } else if (typeof options === 'object') {
-    options = xtend(options)
-  } else {
-    throw new Error('Invalid value `' + options + '` for setting `options`')
-  }
-
-  for (key in defaults) {
-    validate[typeof defaults[key]](options, key, current[key], maps[key])
-  }
-
-  ruleRepetition = options.ruleRepetition
-
-  if (ruleRepetition && ruleRepetition < 3) {
-    raise(ruleRepetition, 'options.ruleRepetition')
-  }
-
-  self.encode = encodeFactory(String(options.entities))
-  self.escape = escapeFactory(options)
-
-  self.options = options
-
-  return self
-}
-
-// Validate a value to be boolean. Defaults to `def`.  Raises an exception with
-// `context[name]` when not a boolean.
-function validateBoolean(context, name, def) {
-  var value = context[name]
-
-  if (value == null) {
-    value = def
-  }
-
-  if (typeof value !== 'boolean') {
-    raise(value, 'options.' + name)
-  }
-
-  context[name] = value
-}
-
-// Validate a value to be boolean. Defaults to `def`.  Raises an exception with
-// `context[name]` when not a boolean.
-function validateNumber(context, name, def) {
-  var value = context[name]
-
-  if (value == null) {
-    value = def
-  }
-
-  if (isNaN(value)) {
-    raise(value, 'options.' + name)
-  }
-
-  context[name] = value
-}
-
-// Validate a value to be in `map`. Defaults to `def`.  Raises an exception
-// with `context[name]` when not in `map`.
-function validateString(context, name, def, map) {
-  var value = context[name]
-
-  if (value == null) {
-    value = def
-  }
-
-  value = String(value)
-
-  if (!(value in map)) {
-    raise(value, 'options.' + name)
-  }
-
-  context[name] = value
-}
-
-// Validate a value to be function. Defaults to `def`.  Raises an exception
-// with `context[name]` when not a function.
-function validateFunction(context, name, def) {
-  var value = context[name]
-
-  if (value == null) {
-    value = def
-  }
-
-  if (typeof value !== 'function') {
-    raise(value, 'options.' + name)
-  }
-
-  context[name] = value
-}
-
-// Factory to encode HTML entities.  Creates a no-operation function when
-// `type` is `'false'`, a function which encodes using named references when
-// `type` is `'true'`, and a function which encodes using numbered references
-// when `type` is `'numbers'`.
-function encodeFactory(type) {
-  var options = {}
-
-  if (type === 'false') {
-    return identity
-  }
-
-  if (type === 'true') {
-    options.useNamedReferences = true
-  }
-
-  if (type === 'escape') {
-    options.escapeOnly = true
-    options.useNamedReferences = true
-  }
-
-  return wrapped
-
-  // Encode HTML entities using the bound options.
-  function wrapped(value) {
-    return encode(value, options)
-  }
-}
-
-// Throw an exception with in its `message` `value` and `name`.
-function raise(value, name) {
-  throw new Error('Invalid value `' + value + '` for setting `' + name + '`')
-}
+// getting tag from ES6+ `Object.prototype.toString`
+module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
+  var O, tag, result;
+  return it === undefined ? 'Undefined' : it === null ? 'Null'
+    // @@toStringTag case
+    : typeof (tag = tryGet(O = Object(it), TO_STRING_TAG)) == 'string' ? tag
+    // builtinTag case
+    : CORRECT_ARGUMENTS ? classofRaw(O)
+    // ES3 arguments fallback
+    : (result = classofRaw(O)) == 'Object' && typeof O.callee == 'function' ? 'Arguments' : result;
+};
 
 
 /***/ }),
@@ -12016,7 +12984,16 @@ module.exports = parse
 
 
 /***/ }),
-/* 250 */,
+/* 250 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(774);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('Array').map;
+
+
+/***/ }),
 /* 251 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -12052,7 +13029,27 @@ function paragraph(node) {
 
 /***/ }),
 /* 259 */,
-/* 260 */,
+/* 260 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var notARegExp = __webpack_require__(79);
+var requireObjectCoercible = __webpack_require__(611);
+var correctIsRegExpLogic = __webpack_require__(591);
+
+// `String.prototype.includes` method
+// https://tc39.github.io/ecma262/#sec-string.prototype.includes
+$({ target: 'String', proto: true, forced: !correctIsRegExpLogic('includes') }, {
+  includes: function includes(searchString /* , position = 0 */) {
+    return !!~String(requireObjectCoercible(this))
+      .indexOf(notARegExp(searchString), arguments.length > 1 ? arguments[1] : undefined);
+  }
+});
+
+
+/***/ }),
 /* 261 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -12134,8 +13131,48 @@ function trough() {
 
 
 /***/ }),
-/* 262 */,
-/* 263 */,
+/* 262 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var IS_PURE = __webpack_require__(746);
+var store = __webpack_require__(338);
+
+(module.exports = function (key, value) {
+  return store[key] || (store[key] = value !== undefined ? value : {});
+})('versions', []).push({
+  version: '3.6.4',
+  mode: IS_PURE ? 'pure' : 'global',
+  copyright: '© 2020 Denis Pushkarev (zloirock.ru)'
+});
+
+
+/***/ }),
+/* 263 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var TO_STRING_TAG_SUPPORT = __webpack_require__(688);
+var defineProperty = __webpack_require__(690).f;
+var createNonEnumerableProperty = __webpack_require__(315);
+var has = __webpack_require__(35);
+var toString = __webpack_require__(39);
+var wellKnownSymbol = __webpack_require__(778);
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+
+module.exports = function (it, TAG, STATIC, SET_METHOD) {
+  if (it) {
+    var target = STATIC ? it : it.prototype;
+    if (!has(target, TO_STRING_TAG)) {
+      defineProperty(target, TO_STRING_TAG, { configurable: true, value: TAG });
+    }
+    if (SET_METHOD && !TO_STRING_TAG_SUPPORT) {
+      createNonEnumerableProperty(target, 'toString', toString);
+    }
+  }
+};
+
+
+/***/ }),
 /* 264 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -12283,7 +13320,16 @@ module.exports = maxSatisfying
 
 
 /***/ }),
-/* 267 */,
+/* 267 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(260);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('String').includes;
+
+
+/***/ }),
 /* 268 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -13169,8 +14215,49 @@ function text(node, parent) {
 
 
 /***/ }),
-/* 277 */,
-/* 278 */,
+/* 277 */
+/***/ (function(module) {
+
+function _arrayLikeToArray(arr, len) {
+  if (len == null || len > arr.length) len = arr.length;
+
+  for (var i = 0, arr2 = new Array(len); i < len; i++) {
+    arr2[i] = arr[i];
+  }
+
+  return arr2;
+}
+
+module.exports = _arrayLikeToArray;
+
+/***/ }),
+/* 278 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var fails = __webpack_require__(105);
+
+var replacement = /#|\.prototype\./;
+
+var isForced = function (feature, detection) {
+  var value = data[normalize(feature)];
+  return value == POLYFILL ? true
+    : value == NATIVE ? false
+    : typeof detection == 'function' ? fails(detection)
+    : !!detection;
+};
+
+var normalize = isForced.normalize = function (string) {
+  return String(string).replace(replacement, '.').toLowerCase();
+};
+
+var data = isForced.data = {};
+var NATIVE = isForced.NATIVE = 'N';
+var POLYFILL = isForced.POLYFILL = 'P';
+
+module.exports = isForced;
+
+
+/***/ }),
 /* 279 */
 /***/ (function(module) {
 
@@ -13319,8 +14406,61 @@ function parseOrigin(origin) {
 
 /***/ }),
 /* 281 */,
-/* 282 */,
-/* 283 */,
+/* 282 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(509);
+
+module.exports = parent;
+
+
+/***/ }),
+/* 283 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var aFunction = __webpack_require__(166);
+var toObject = __webpack_require__(375);
+var IndexedObject = __webpack_require__(322);
+var toLength = __webpack_require__(745);
+
+// `Array.prototype.{ reduce, reduceRight }` methods implementation
+var createMethod = function (IS_RIGHT) {
+  return function (that, callbackfn, argumentsLength, memo) {
+    aFunction(callbackfn);
+    var O = toObject(that);
+    var self = IndexedObject(O);
+    var length = toLength(O.length);
+    var index = IS_RIGHT ? length - 1 : 0;
+    var i = IS_RIGHT ? -1 : 1;
+    if (argumentsLength < 2) while (true) {
+      if (index in self) {
+        memo = self[index];
+        index += i;
+        break;
+      }
+      index += i;
+      if (IS_RIGHT ? index < 0 : length <= index) {
+        throw TypeError('Reduce of empty array with no initial value');
+      }
+    }
+    for (;IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
+      memo = callbackfn(memo, self[index], index, O);
+    }
+    return memo;
+  };
+};
+
+module.exports = {
+  // `Array.prototype.reduce` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
+  left: createMethod(false),
+  // `Array.prototype.reduceRight` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.reduceright
+  right: createMethod(true)
+};
+
+
+/***/ }),
 /* 284 */,
 /* 285 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -14704,15 +15844,7 @@ function makeParserClass (Parser) {
 /***/ }),
 /* 286 */,
 /* 287 */,
-/* 288 */
-/***/ (function(module) {
-
-module.exports = function isPromise (maybePromise) {
-  return !!maybePromise && !!maybePromise.then && (typeof maybePromise.then === 'function')
-}
-
-
-/***/ }),
+/* 288 */,
 /* 289 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -15155,7 +16287,15 @@ module.exports = {
 
 
 /***/ }),
-/* 294 */,
+/* 294 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(681);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 295 */,
 /* 296 */
 /***/ (function(module) {
@@ -15259,82 +16399,134 @@ exports.default = Settings;
 /* 301 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+var isObject = __webpack_require__(195);
 
-
-// hoisted due to circular dependency on command.
-module.exports = argsert
-const command = __webpack_require__(556)()
-const YError = __webpack_require__(574)
-
-const positionName = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth']
-function argsert (expected, callerArguments, length) {
-  // TODO: should this eventually raise an exception.
-  try {
-    // preface the argument description with "cmd", so
-    // that we can run it through yargs' command parser.
-    let position = 0
-    let parsed = { demanded: [], optional: [] }
-    if (typeof expected === 'object') {
-      length = callerArguments
-      callerArguments = expected
-    } else {
-      parsed = command.parseCommand(`cmd ${expected}`)
-    }
-    const args = [].slice.call(callerArguments)
-
-    while (args.length && args[args.length - 1] === undefined) args.pop()
-    length = length || args.length
-
-    if (length < parsed.demanded.length) {
-      throw new YError(`Not enough arguments provided. Expected ${parsed.demanded.length} but received ${args.length}.`)
-    }
-
-    const totalCommands = parsed.demanded.length + parsed.optional.length
-    if (length > totalCommands) {
-      throw new YError(`Too many arguments provided. Expected max ${totalCommands} but received ${length}.`)
-    }
-
-    parsed.demanded.forEach((demanded) => {
-      const arg = args.shift()
-      const observedType = guessType(arg)
-      const matchingTypes = demanded.cmd.filter(type => type === observedType || type === '*')
-      if (matchingTypes.length === 0) argumentTypeError(observedType, demanded.cmd, position, false)
-      position += 1
-    })
-
-    parsed.optional.forEach((optional) => {
-      if (args.length === 0) return
-      const arg = args.shift()
-      const observedType = guessType(arg)
-      const matchingTypes = optional.cmd.filter(type => type === observedType || type === '*')
-      if (matchingTypes.length === 0) argumentTypeError(observedType, optional.cmd, position, true)
-      position += 1
-    })
-  } catch (err) {
-    console.warn(err.stack)
-  }
-}
-
-function guessType (arg) {
-  if (Array.isArray(arg)) {
-    return 'array'
-  } else if (arg === null) {
-    return 'null'
-  }
-  return typeof arg
-}
-
-function argumentTypeError (observedType, allowedTypes, position, optional) {
-  throw new YError(`Invalid ${positionName[position] || 'manyith'} argument. Expected ${allowedTypes.join(' or ')} but received ${observedType}.`)
-}
+// `ToPrimitive` abstract operation
+// https://tc39.github.io/ecma262/#sec-toprimitive
+// instead of the ES6 spec version, we didn't implement @@toPrimitive case
+// and the second argument - flag - preferred type is a string
+module.exports = function (input, PREFERRED_STRING) {
+  if (!isObject(input)) return input;
+  var fn, val;
+  if (PREFERRED_STRING && typeof (fn = input.toString) == 'function' && !isObject(val = fn.call(input))) return val;
+  if (typeof (fn = input.valueOf) == 'function' && !isObject(val = fn.call(input))) return val;
+  if (!PREFERRED_STRING && typeof (fn = input.toString) == 'function' && !isObject(val = fn.call(input))) return val;
+  throw TypeError("Can't convert object to primitive value");
+};
 
 
 /***/ }),
-/* 302 */,
-/* 303 */,
-/* 304 */,
-/* 305 */,
+/* 302 */
+/***/ (function(module) {
+
+var id = 0;
+var postfix = Math.random();
+
+module.exports = function (key) {
+  return 'Symbol(' + String(key === undefined ? '' : key) + ')_' + (++id + postfix).toString(36);
+};
+
+
+/***/ }),
+/* 303 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isObject = __webpack_require__(195);
+
+module.exports = function (it) {
+  if (!isObject(it) && it !== null) {
+    throw TypeError("Can't set " + String(it) + ' as a prototype');
+  } return it;
+};
+
+
+/***/ }),
+/* 304 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var NATIVE_WEAK_MAP = __webpack_require__(73);
+var global = __webpack_require__(813);
+var isObject = __webpack_require__(195);
+var createNonEnumerableProperty = __webpack_require__(315);
+var objectHas = __webpack_require__(35);
+var sharedKey = __webpack_require__(642);
+var hiddenKeys = __webpack_require__(56);
+
+var WeakMap = global.WeakMap;
+var set, get, has;
+
+var enforce = function (it) {
+  return has(it) ? get(it) : set(it, {});
+};
+
+var getterFor = function (TYPE) {
+  return function (it) {
+    var state;
+    if (!isObject(it) || (state = get(it)).type !== TYPE) {
+      throw TypeError('Incompatible receiver, ' + TYPE + ' required');
+    } return state;
+  };
+};
+
+if (NATIVE_WEAK_MAP) {
+  var store = new WeakMap();
+  var wmget = store.get;
+  var wmhas = store.has;
+  var wmset = store.set;
+  set = function (it, metadata) {
+    wmset.call(store, it, metadata);
+    return metadata;
+  };
+  get = function (it) {
+    return wmget.call(store, it) || {};
+  };
+  has = function (it) {
+    return wmhas.call(store, it);
+  };
+} else {
+  var STATE = sharedKey('state');
+  hiddenKeys[STATE] = true;
+  set = function (it, metadata) {
+    createNonEnumerableProperty(it, STATE, metadata);
+    return metadata;
+  };
+  get = function (it) {
+    return objectHas(it, STATE) ? it[STATE] : {};
+  };
+  has = function (it) {
+    return objectHas(it, STATE);
+  };
+}
+
+module.exports = {
+  set: set,
+  get: get,
+  has: has,
+  enforce: enforce,
+  getterFor: getterFor
+};
+
+
+/***/ }),
+/* 305 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var anObject = __webpack_require__(589);
+
+// call something on iterator step with safe closing on error
+module.exports = function (iterator, fn, value, ENTRIES) {
+  try {
+    return ENTRIES ? fn(anObject(value)[0], value[1]) : fn(value);
+  // 7.4.6 IteratorClose(iterator, completion)
+  } catch (error) {
+    var returnMethod = iterator['return'];
+    if (returnMethod !== undefined) anObject(returnMethod.call(iterator));
+    throw error;
+  }
+};
+
+
+/***/ }),
 /* 306 */,
 /* 307 */
 /***/ (function(module) {
@@ -15350,7 +16542,23 @@ function locate(value, fromIndex) {
 
 
 /***/ }),
-/* 308 */,
+/* 308 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var path = __webpack_require__(628);
+var has = __webpack_require__(35);
+var wrappedWellKnownSymbolModule = __webpack_require__(844);
+var defineProperty = __webpack_require__(690).f;
+
+module.exports = function (NAME) {
+  var Symbol = path.Symbol || (path.Symbol = {});
+  if (!has(Symbol, NAME)) defineProperty(Symbol, NAME, {
+    value: wrappedWellKnownSymbolModule.f(NAME)
+  });
+};
+
+
+/***/ }),
 /* 309 */,
 /* 310 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -16911,64 +18119,23 @@ function indentation(value) {
 
 
 /***/ }),
-/* 314 */
+/* 314 */,
+/* 315 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+var DESCRIPTORS = __webpack_require__(624);
+var definePropertyModule = __webpack_require__(690);
+var createPropertyDescriptor = __webpack_require__(62);
 
-const pump = __webpack_require__(957);
-const bufferStream = __webpack_require__(565);
-
-class MaxBufferError extends Error {
-	constructor() {
-		super('maxBuffer exceeded');
-		this.name = 'MaxBufferError';
-	}
-}
-
-function getStream(inputStream, options) {
-	if (!inputStream) {
-		return Promise.reject(new Error('Expected a stream'));
-	}
-
-	options = Object.assign({maxBuffer: Infinity}, options);
-
-	const {maxBuffer} = options;
-
-	let stream;
-	return new Promise((resolve, reject) => {
-		const rejectPromise = error => {
-			if (error) { // A null check
-				error.bufferedData = stream.getBufferedValue();
-			}
-			reject(error);
-		};
-
-		stream = pump(inputStream, bufferStream(options), error => {
-			if (error) {
-				rejectPromise(error);
-				return;
-			}
-
-			resolve();
-		});
-
-		stream.on('data', () => {
-			if (stream.getBufferedLength() > maxBuffer) {
-				rejectPromise(new MaxBufferError());
-			}
-		});
-	}).then(() => stream.getBufferedValue());
-}
-
-module.exports = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
-module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
-module.exports.MaxBufferError = MaxBufferError;
+module.exports = DESCRIPTORS ? function (object, key, value) {
+  return definePropertyModule.f(object, key, createPropertyDescriptor(1, value));
+} : function (object, key, value) {
+  object[key] = value;
+  return object;
+};
 
 
 /***/ }),
-/* 315 */,
 /* 316 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -16998,7 +18165,32 @@ module.exports = diff
 
 
 /***/ }),
-/* 317 */,
+/* 317 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var global = __webpack_require__(813);
+var userAgent = __webpack_require__(228);
+
+var process = global.process;
+var versions = process && process.versions;
+var v8 = versions && versions.v8;
+var match, version;
+
+if (v8) {
+  match = v8.split('.');
+  version = match[0] + match[1];
+} else if (userAgent) {
+  match = userAgent.match(/Edge\/(\d+)/);
+  if (!match || match[1] >= 74) {
+    match = userAgent.match(/Chrome\/(\d+)/);
+    if (match) version = match[1];
+  }
+}
+
+module.exports = version && +version;
+
+
+/***/ }),
 /* 318 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -17148,7 +18340,7 @@ class Range {
 }
 module.exports = Range
 
-const Comparator = __webpack_require__(9)
+const Comparator = __webpack_require__(517)
 const debug = __webpack_require__(940)
 const SemVer = __webpack_require__(840)
 const {
@@ -17487,8 +18679,35 @@ module.exports = validRange
 /***/ }),
 /* 320 */,
 /* 321 */,
-/* 322 */,
-/* 323 */,
+/* 322 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var fails = __webpack_require__(105);
+var classof = __webpack_require__(404);
+
+var split = ''.split;
+
+// fallback for non-array-like ES3 and non-enumerable old V8 strings
+module.exports = fails(function () {
+  // throws an error in rhino, see https://github.com/mozilla/rhino/issues/346
+  // eslint-disable-next-line no-prototype-builtins
+  return !Object('z').propertyIsEnumerable(0);
+}) ? function (it) {
+  return classof(it) == 'String' ? split.call(it, '') : Object(it);
+} : Object;
+
+
+/***/ }),
+/* 323 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(630);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('Array').slice;
+
+
+/***/ }),
 /* 324 */
 /***/ (function(module) {
 
@@ -17511,330 +18730,169 @@ function wordCharacter(character) {
 
 /***/ }),
 /* 325 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-var effection = __webpack_require__(700);
+var xtend = __webpack_require__(81)
+var encode = __webpack_require__(291)
+var defaults = __webpack_require__(730)
+var escapeFactory = __webpack_require__(567)
+var identity = __webpack_require__(491)
 
-function matcher(reference) {
-  return function (value) {
-    if (typeof value === 'object' && typeof reference === 'object') {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      var castedValue = value; // eslint-disable-next-line @typescript-eslint/no-explicit-any
+module.exports = setOptions
 
-      var castedReference = reference;
-      return Object.entries(castedReference).every(function (_ref) {
-        var key = _ref[0],
-            ref = _ref[1];
-        return matcher(ref)(castedValue[key]);
-      });
-    } else {
-      return value === reference;
-    }
-  };
+// Map of applicable enums.
+var maps = {
+  entities: {true: true, false: true, numbers: true, escape: true},
+  bullet: {'*': true, '-': true, '+': true},
+  rule: {'-': true, _: true, '*': true},
+  listItemIndent: {tab: true, mixed: true, 1: true},
+  emphasis: {_: true, '*': true},
+  strong: {_: true, '*': true},
+  fence: {'`': true, '~': true}
 }
 
-/**
- * Hack Zone!
- *
- * tl;dr not only the symbol value, but also the symbol type must be
- * global.
- *
- * In order to satisfy TypeScript that the SymbolSubscribable
- * represents the same value across different versions of the same
- * package, we need to declare a "fake" global variable that does not
- * actually exist, but has a theoretical type. Since it is global,
- * TypeScript will see it as the same type everywhere, and so we can
- * use the `typeof` for the value, as the type of of our local symbol
- * subscribable, and TypeScript will think that all of the types are
- * the same.
- *
- * See https://github.com/microsoft/TypeScript/issues/8099#issuecomment-210134773
- * for details.
- */
-var SymbolSubscribable = /*#__PURE__*/Symbol["for"]('Symbol.subscription');
-
-function* _forEach(source, visit) {
-  var subscription = yield subscribe(source);
-
-  while (true) {
-    var result = yield subscription.next();
-
-    if (result.done) {
-      return result.value;
-    } else {
-      yield visit(result.value);
-    }
-  }
+// Expose `validate`.
+var validate = {
+  boolean: validateBoolean,
+  string: validateString,
+  number: validateNumber,
+  function: validateFunction
 }
-var Subscribable = {
-  from: function from(source) {
-    return new Chain(source);
-  }
-};
-var Chain = /*#__PURE__*/function () {
-  function Chain(source) {
-    this.source = source;
-  }
 
-  var _proto = Chain.prototype;
+// Set options.  Does not overwrite previously set options.
+function setOptions(options) {
+  var self = this
+  var current = self.options
+  var ruleRepetition
+  var key
 
-  _proto[SymbolSubscribable] = function () {
-    return subscribe(this.source);
-  };
-
-  _proto.map = function map(fn) {
-    return this.chain(function (source) {
-      return function (publish) {
-        return _forEach(source, function* (item) {
-          publish(fn(item));
-        });
-      };
-    });
-  };
-
-  _proto.filter = function filter(predicate) {
-    return this.chain(function (source) {
-      return function (publish) {
-        return _forEach(source, function* (item) {
-          if (predicate(item)) {
-            publish(item);
-          }
-        });
-      };
-    });
-  };
-
-  _proto.match = function match(reference) {
-    return this.filter(matcher(reference));
-  };
-
-  _proto.chain = function chain(next) {
-    return new Chain(createSubscription(next(this.source)));
-  };
-
-  _proto.forEach = function forEach(visit) {
-    return _forEach(this.source, visit);
-  };
-
-  _proto.first = function* first() {
-    var subscription = yield subscribe(this.source);
-
-    var _yield$subscription$n = yield subscription.next(),
-        done = _yield$subscription$n.done,
-        value = _yield$subscription$n.value;
-
-    if (done) {
-      return undefined;
-    } else {
-      return value;
-    }
-  };
-
-  return Chain;
-}();
-function subscribe(source) {
-  if (isSubscribable(source)) {
-    return source[SymbolSubscribable]();
+  if (options == null) {
+    options = {}
+  } else if (typeof options === 'object') {
+    options = xtend(options)
   } else {
-    return source;
-  }
-} // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
-function isSubscribable(value) {
-  return !!value[SymbolSubscribable];
-}
-
-var DUMMY = {
-  next: function next() {
-    throw new Error('dummy');
-  }
-};
-var ChainableSubscription = /*#__PURE__*/function () {
-  function ChainableSubscription(subscription) {
-    this.subscription = subscription;
+    throw new Error('Invalid value `' + options + '` for setting `options`')
   }
 
-  ChainableSubscription.of = function* of(source) {
-    var chain = new ChainableSubscription(DUMMY);
-    return yield effection.resource(chain, function* () {
-      chain.subscription = yield subscribe(source);
-      yield;
-    });
-  };
+  for (key in defaults) {
+    validate[typeof defaults[key]](options, key, current[key], maps[key])
+  }
 
-  var _proto = ChainableSubscription.prototype;
+  ruleRepetition = options.ruleRepetition
 
-  _proto.filter = function filter(predicate) {
-    var subscription = this.subscription;
-    return new ChainableSubscription({
-      next: function* next() {
-        while (true) {
-          var result = yield subscription.next();
+  if (ruleRepetition && ruleRepetition < 3) {
+    raise(ruleRepetition, 'options.ruleRepetition')
+  }
 
-          if (result.done) {
-            return result;
-          } else if (predicate(result.value)) {
-            return result;
-          }
-        }
-      }
-    });
-  };
+  self.encode = encodeFactory(String(options.entities))
+  self.escape = escapeFactory(options)
 
-  _proto.match = function match(reference) {
-    return this.filter(matcher(reference));
-  };
+  self.options = options
 
-  _proto.map = function map(mapper) {
-    var subscription = this.subscription;
-    return new ChainableSubscription({
-      next: function* next() {
-        while (true) {
-          var result = yield subscription.next();
-
-          if (result.done) {
-            return result;
-          } else {
-            return {
-              done: false,
-              value: mapper(result.value)
-            };
-          }
-        }
-      }
-    });
-  };
-
-  _proto.first = function* first() {
-    var result = yield this.subscription.next();
-
-    if (result.done) {
-      return undefined;
-    } else {
-      return result.value;
-    }
-  };
-
-  _proto.expect = function* expect() {
-    var result = yield this.subscription.next();
-
-    if (result.done) {
-      throw new Error('expected subscription to contain a value');
-    } else {
-      return result.value;
-    }
-  };
-
-  _proto.forEach = function* forEach(visit) {
-    while (true) {
-      var result = yield this.subscription.next();
-
-      if (result.done) {
-        return result.value;
-      } else {
-        yield visit(result.value);
-      }
-    }
-  };
-
-  _proto.next = function next() {
-    return this.subscription.next();
-  };
-
-  return ChainableSubscription;
-}();
-
-var Semaphore = function Semaphore() {
-  var _this = this;
-
-  this.waiters = [];
-
-  this.signal = function (value) {
-    var next = _this.waiters.pop();
-
-    if (next) {
-      next(value);
-    }
-  };
-
-  this.wait = function () {
-    return new Promise(function (resolve) {
-      return _this.waiters.push(resolve);
-    });
-  };
-};
-
-function createSubscription(subscribe) {
-  return function* () {
-    var results = [];
-    var semaphore = new Semaphore();
-
-    var publish = function publish(value) {
-      results.push({
-        done: false,
-        value: value
-      });
-      semaphore.signal();
-    };
-
-    var next = function next() {
-      try {
-        var wait = semaphore.wait();
-
-        if (results.length > 0) {
-          semaphore.signal();
-        }
-
-        return Promise.resolve(wait.then(function () {
-          return results.shift();
-        }));
-      } catch (e) {
-        return Promise.reject(e);
-      }
-    };
-
-    var subscription = yield effection.resource(new ChainableSubscription({
-      next: next
-    }), function* () {
-      try {
-        var value = yield subscribe(function (value) {
-          return publish(value);
-        });
-        results.push({
-          done: true,
-          value: value
-        });
-        semaphore.signal();
-      } finally {
-        publish = function publish(value) {
-          throw InvalidPublication(value);
-        };
-      }
-    });
-    return subscription;
-  };
+  return self
 }
 
-function InvalidPublication(value) {
-  var error = new Error("tried to publish a value: " + value + " on an already finished subscription");
-  error.name = 'TypeError';
-  return error;
+// Validate a value to be boolean. Defaults to `def`.  Raises an exception with
+// `context[name]` when not a boolean.
+function validateBoolean(context, name, def) {
+  var value = context[name]
+
+  if (value == null) {
+    value = def
+  }
+
+  if (typeof value !== 'boolean') {
+    raise(value, 'options.' + name)
+  }
+
+  context[name] = value
 }
 
-function* subscribe$1(source) {
-  return yield ChainableSubscription.of(source);
+// Validate a value to be boolean. Defaults to `def`.  Raises an exception with
+// `context[name]` when not a boolean.
+function validateNumber(context, name, def) {
+  var value = context[name]
+
+  if (value == null) {
+    value = def
+  }
+
+  if (isNaN(value)) {
+    raise(value, 'options.' + name)
+  }
+
+  context[name] = value
 }
 
-exports.ChainableSubscription = ChainableSubscription;
-exports.Subscribable = Subscribable;
-exports.SymbolSubscribable = SymbolSubscribable;
-exports.createSubscription = createSubscription;
-exports.forEach = _forEach;
-exports.subscribe = subscribe$1;
-//# sourceMappingURL=subscription.cjs.development.js.map
+// Validate a value to be in `map`. Defaults to `def`.  Raises an exception
+// with `context[name]` when not in `map`.
+function validateString(context, name, def, map) {
+  var value = context[name]
+
+  if (value == null) {
+    value = def
+  }
+
+  value = String(value)
+
+  if (!(value in map)) {
+    raise(value, 'options.' + name)
+  }
+
+  context[name] = value
+}
+
+// Validate a value to be function. Defaults to `def`.  Raises an exception
+// with `context[name]` when not a function.
+function validateFunction(context, name, def) {
+  var value = context[name]
+
+  if (value == null) {
+    value = def
+  }
+
+  if (typeof value !== 'function') {
+    raise(value, 'options.' + name)
+  }
+
+  context[name] = value
+}
+
+// Factory to encode HTML entities.  Creates a no-operation function when
+// `type` is `'false'`, a function which encodes using named references when
+// `type` is `'true'`, and a function which encodes using numbered references
+// when `type` is `'numbers'`.
+function encodeFactory(type) {
+  var options = {}
+
+  if (type === 'false') {
+    return identity
+  }
+
+  if (type === 'true') {
+    options.useNamedReferences = true
+  }
+
+  if (type === 'escape') {
+    options.escapeOnly = true
+    options.useNamedReferences = true
+  }
+
+  return wrapped
+
+  // Encode HTML entities using the bound options.
+  function wrapped(value) {
+    return encode(value, options)
+  }
+}
+
+// Throw an exception with in its `message` `value` and `name`.
+function raise(value, name) {
+  throw new Error('Invalid value `' + value + '` for setting `' + name + '`')
+}
 
 
 /***/ }),
@@ -18018,58 +19076,112 @@ module.exports._enoent = enoent;
 "use strict";
 
 const path = __webpack_require__(622);
-const pathKey = __webpack_require__(60);
+const pathKey = __webpack_require__(697);
 
-const npmRunPath = options => {
-	options = {
+module.exports = opts => {
+	opts = Object.assign({
 		cwd: process.cwd(),
-		path: process.env[pathKey()],
-		execPath: process.execPath,
-		...options
-	};
+		path: process.env[pathKey()]
+	}, opts);
 
-	let previous;
-	let cwdPath = path.resolve(options.cwd);
-	const result = [];
+	let prev;
+	let pth = path.resolve(opts.cwd);
+	const ret = [];
 
-	while (previous !== cwdPath) {
-		result.push(path.join(cwdPath, 'node_modules/.bin'));
-		previous = cwdPath;
-		cwdPath = path.resolve(cwdPath, '..');
+	while (prev !== pth) {
+		ret.push(path.join(pth, 'node_modules/.bin'));
+		prev = pth;
+		pth = path.resolve(pth, '..');
 	}
 
-	// Ensure the running `node` binary is used
-	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
-	result.push(execPathDir);
+	// ensure the running `node` binary is used
+	ret.push(path.dirname(process.execPath));
 
-	return result.concat(options.path).join(path.delimiter);
+	return ret.concat(opts.path).join(path.delimiter);
 };
 
-module.exports = npmRunPath;
-// TODO: Remove this for the next major release
-module.exports.default = npmRunPath;
+module.exports.env = opts => {
+	opts = Object.assign({
+		env: process.env
+	}, opts);
 
-module.exports.env = options => {
-	options = {
-		env: process.env,
-		...options
-	};
-
-	const env = {...options.env};
+	const env = Object.assign({}, opts.env);
 	const path = pathKey({env});
 
-	options.path = env[path];
-	env[path] = module.exports(options);
+	opts.path = env[path];
+	env[path] = module.exports(opts);
 
 	return env;
 };
 
 
 /***/ }),
-/* 330 */,
-/* 331 */,
+/* 330 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const stripAnsi = __webpack_require__(598);
+const isFullwidthCodePoint = __webpack_require__(866);
+const emojiRegex = __webpack_require__(439);
+
+const stringWidth = string => {
+	string = string.replace(emojiRegex(), '  ');
+
+	if (typeof string !== 'string' || string.length === 0) {
+		return 0;
+	}
+
+	string = stripAnsi(string);
+
+	let width = 0;
+
+	for (let i = 0; i < string.length; i++) {
+		const code = string.codePointAt(i);
+
+		// Ignore control characters
+		if (code <= 0x1F || (code >= 0x7F && code <= 0x9F)) {
+			continue;
+		}
+
+		// Ignore combining characters
+		if (code >= 0x300 && code <= 0x36F) {
+			continue;
+		}
+
+		// Surrogates
+		if (code > 0xFFFF) {
+			i++;
+		}
+
+		width += isFullwidthCodePoint(code) ? 2 : 1;
+	}
+
+	return width;
+};
+
+module.exports = stringWidth;
+// TODO: remove this in the next major version
+module.exports.default = stringWidth;
+
+
+/***/ }),
+/* 331 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(177);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 332 */,
-/* 333 */,
+/* 333 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(804);
+
+/***/ }),
 /* 334 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -18175,12 +19287,21 @@ module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
     if (changes[main].parents.length > 0) {
       changes[main].parents.forEach((pkg) => {
         if (!!changes[pkg]) {
+          // if a change is planned on the parent
+          // compare and bump the parent if the child is higher
           changes[pkg].type = compareBumps(
             changes[main].type,
             changes[pkg].type
           );
         } else {
+          // if the parent doesn't have a release
+          // add one to adopt the next version of it's child
           changes[pkg] = { ...changes[main] };
+          if (changes[pkg].changes) {
+            changes[pkg].changes.forEach((parentChange) => {
+              parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
+            });
+          }
           changes[pkg].parents = parents[pkg];
         }
       });
@@ -18348,7 +19469,24 @@ module.exports._enoent = enoent;
 
 
 /***/ }),
-/* 336 */,
+/* 336 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isObject = __webpack_require__(195);
+var classof = __webpack_require__(404);
+var wellKnownSymbol = __webpack_require__(778);
+
+var MATCH = wellKnownSymbol('match');
+
+// `IsRegExp` abstract operation
+// https://tc39.github.io/ecma262/#sec-isregexp
+module.exports = function (it) {
+  var isRegExp;
+  return isObject(it) && ((isRegExp = it[MATCH]) !== undefined ? !!isRegExp : classof(it) == 'RegExp');
+};
+
+
+/***/ }),
 /* 337 */
 /***/ (function(module) {
 
@@ -18364,8 +19502,42 @@ function list(node) {
 
 
 /***/ }),
-/* 338 */,
-/* 339 */,
+/* 338 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var global = __webpack_require__(813);
+var setGlobal = __webpack_require__(706);
+
+var SHARED = '__core-js_shared__';
+var store = global[SHARED] || setGlobal(SHARED, {});
+
+module.exports = store;
+
+
+/***/ }),
+/* 339 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var $reduce = __webpack_require__(283).left;
+var arrayMethodIsStrict = __webpack_require__(386);
+var arrayMethodUsesToLength = __webpack_require__(877);
+
+var STRICT_METHOD = arrayMethodIsStrict('reduce');
+var USES_TO_LENGTH = arrayMethodUsesToLength('reduce', { 1: 0 });
+
+// `Array.prototype.reduce` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.reduce
+$({ target: 'Array', proto: true, forced: !STRICT_METHOD || !USES_TO_LENGTH }, {
+  reduce: function reduce(callbackfn /* , initialValue */) {
+    return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
+  }
+});
+
+
+/***/ }),
 /* 340 */,
 /* 341 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -18665,77 +19837,301 @@ module.exports = SemVer
 /***/ }),
 /* 342 */,
 /* 343 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-const fs = __webpack_require__(747)
-const path = __webpack_require__(622)
-const YError = __webpack_require__(574)
+var _interopRequireDefault = __webpack_require__(395);
 
-let previouslyVisitedConfigs = []
+var _Object$defineProperty = __webpack_require__(617);
 
-function checkForCircularExtends (cfgPath) {
-  if (previouslyVisitedConfigs.indexOf(cfgPath) > -1) {
-    throw new YError(`Circular extended configurations: '${cfgPath}'.`)
-  }
-}
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
 
-function getPathToDefaultConfig (cwd, pathToExtend) {
-  return path.resolve(cwd, pathToExtend)
-}
+exports.default = void 0;
 
-function mergeDeep (config1, config2) {
-  const target = {}
-  const isObject = obj => obj && typeof obj === 'object' && !Array.isArray(obj)
-  Object.assign(target, config1)
-  for (const key of Object.keys(config2)) {
-    if (isObject(config2[key]) && isObject(target[key])) {
-      target[key] = mergeDeep(config1[key], config2[key])
-    } else {
-      target[key] = config2[key]
-    }
-  }
-  return target
-}
+var _getIterator2 = _interopRequireDefault(__webpack_require__(95));
 
-function applyExtends (config, cwd, mergeExtends) {
-  let defaultConfig = {}
+var _includes = _interopRequireDefault(__webpack_require__(913));
 
-  if (Object.prototype.hasOwnProperty.call(config, 'extends')) {
-    if (typeof config.extends !== 'string') return defaultConfig
-    const isPath = /\.json|\..*rc$/.test(config.extends)
-    let pathToDefault = null
-    if (!isPath) {
-      try {
-        pathToDefault = require.resolve(config.extends)
-      } catch (err) {
-        // most likely this simply isn't a module.
+var _concat = _interopRequireDefault(__webpack_require__(4));
+
+var _forEach = _interopRequireDefault(__webpack_require__(904));
+
+/*!
+ * XRegExp Unicode Base 4.3.0
+ * <xregexp.com>
+ * Steven Levithan (c) 2008-present MIT License
+ */
+var _default = function _default(XRegExp) {
+  /**
+   * Adds base support for Unicode matching:
+   * - Adds syntax `\p{..}` for matching Unicode tokens. Tokens can be inverted using `\P{..}` or
+   *   `\p{^..}`. Token names ignore case, spaces, hyphens, and underscores. You can omit the
+   *   braces for token names that are a single letter (e.g. `\pL` or `PL`).
+   * - Adds flag A (astral), which enables 21-bit Unicode support.
+   * - Adds the `XRegExp.addUnicodeData` method used by other addons to provide character data.
+   *
+   * Unicode Base relies on externally provided Unicode character data. Official addons are
+   * available to provide data for Unicode categories, scripts, blocks, and properties.
+   *
+   * @requires XRegExp
+   */
+  // ==--------------------------==
+  // Private stuff
+  // ==--------------------------==
+  // Storage for Unicode data
+  var unicode = {}; // Reuse utils
+
+  var dec = XRegExp._dec;
+  var hex = XRegExp._hex;
+  var pad4 = XRegExp._pad4; // Generates a token lookup name: lowercase, with hyphens, spaces, and underscores removed
+
+  function normalize(name) {
+    return name.replace(/[- _]+/g, '').toLowerCase();
+  } // Gets the decimal code of a literal code unit, \xHH, \uHHHH, or a backslash-escaped literal
+
+
+  function charCode(chr) {
+    var esc = /^\\[xu](.+)/.exec(chr);
+    return esc ? dec(esc[1]) : chr.charCodeAt(chr[0] === '\\' ? 1 : 0);
+  } // Inverts a list of ordered BMP characters and ranges
+
+
+  function invertBmp(range) {
+    var output = '';
+    var lastEnd = -1;
+    (0, _forEach.default)(XRegExp).call(XRegExp, range, /(\\x..|\\u....|\\?[\s\S])(?:-(\\x..|\\u....|\\?[\s\S]))?/, function (m) {
+      var start = charCode(m[1]);
+
+      if (start > lastEnd + 1) {
+        output += "\\u".concat(pad4(hex(lastEnd + 1)));
+
+        if (start > lastEnd + 2) {
+          output += "-\\u".concat(pad4(hex(start - 1)));
+        }
       }
-    } else {
-      pathToDefault = getPathToDefaultConfig(cwd, config.extends)
+
+      lastEnd = charCode(m[2] || m[1]);
+    });
+
+    if (lastEnd < 0xFFFF) {
+      output += "\\u".concat(pad4(hex(lastEnd + 1)));
+
+      if (lastEnd < 0xFFFE) {
+        output += '-\\uFFFF';
+      }
     }
-    // maybe the module uses key for some other reason,
-    // err on side of caution.
-    if (!pathToDefault && !isPath) return config
 
-    checkForCircularExtends(pathToDefault)
+    return output;
+  } // Generates an inverted BMP range on first use
 
-    previouslyVisitedConfigs.push(pathToDefault)
 
-    defaultConfig = isPath ? JSON.parse(fs.readFileSync(pathToDefault, 'utf8')) : require(config.extends)
-    delete config.extends
-    defaultConfig = applyExtends(defaultConfig, path.dirname(pathToDefault), mergeExtends)
-  }
+  function cacheInvertedBmp(slug) {
+    var prop = 'b!';
+    return unicode[slug][prop] || (unicode[slug][prop] = invertBmp(unicode[slug].bmp));
+  } // Combines and optionally negates BMP and astral data
 
-  previouslyVisitedConfigs = []
 
-  return mergeExtends ? mergeDeep(defaultConfig, config) : Object.assign({}, defaultConfig, config)
-}
+  function buildAstral(slug, isNegated) {
+    var item = unicode[slug];
+    var combined = '';
 
-module.exports = applyExtends
+    if (item.bmp && !item.isBmpLast) {
+      var _context;
 
+      combined = (0, _concat.default)(_context = "[".concat(item.bmp, "]")).call(_context, item.astral ? '|' : '');
+    }
+
+    if (item.astral) {
+      combined += item.astral;
+    }
+
+    if (item.isBmpLast && item.bmp) {
+      var _context2;
+
+      combined += (0, _concat.default)(_context2 = "".concat(item.astral ? '|' : '', "[")).call(_context2, item.bmp, "]");
+    } // Astral Unicode tokens always match a code point, never a code unit
+
+
+    return isNegated ? "(?:(?!".concat(combined, ")(?:[\uD800-\uDBFF][\uDC00-\uDFFF]|[\0-\uFFFF]))") : "(?:".concat(combined, ")");
+  } // Builds a complete astral pattern on first use
+
+
+  function cacheAstral(slug, isNegated) {
+    var prop = isNegated ? 'a!' : 'a=';
+    return unicode[slug][prop] || (unicode[slug][prop] = buildAstral(slug, isNegated));
+  } // ==--------------------------==
+  // Core functionality
+  // ==--------------------------==
+
+  /*
+   * Add astral mode (flag A) and Unicode token syntax: `\p{..}`, `\P{..}`, `\p{^..}`, `\pC`.
+   */
+
+
+  XRegExp.addToken( // Use `*` instead of `+` to avoid capturing `^` as the token name in `\p{^}`
+  /\\([pP])(?:{(\^?)([^}]*)}|([A-Za-z]))/, function (match, scope, flags) {
+    var ERR_DOUBLE_NEG = 'Invalid double negation ';
+    var ERR_UNKNOWN_NAME = 'Unknown Unicode token ';
+    var ERR_UNKNOWN_REF = 'Unicode token missing data ';
+    var ERR_ASTRAL_ONLY = 'Astral mode required for Unicode token ';
+    var ERR_ASTRAL_IN_CLASS = 'Astral mode does not support Unicode tokens within character classes'; // Negated via \P{..} or \p{^..}
+
+    var isNegated = match[1] === 'P' || !!match[2]; // Switch from BMP (0-FFFF) to astral (0-10FFFF) mode via flag A
+
+    var isAstralMode = (0, _includes.default)(flags).call(flags, 'A'); // Token lookup name. Check `[4]` first to avoid passing `undefined` via `\p{}`
+
+    var slug = normalize(match[4] || match[3]); // Token data object
+
+    var item = unicode[slug];
+
+    if (match[1] === 'P' && match[2]) {
+      throw new SyntaxError(ERR_DOUBLE_NEG + match[0]);
+    }
+
+    if (!unicode.hasOwnProperty(slug)) {
+      throw new SyntaxError(ERR_UNKNOWN_NAME + match[0]);
+    } // Switch to the negated form of the referenced Unicode token
+
+
+    if (item.inverseOf) {
+      slug = normalize(item.inverseOf);
+
+      if (!unicode.hasOwnProperty(slug)) {
+        var _context3;
+
+        throw new ReferenceError((0, _concat.default)(_context3 = "".concat(ERR_UNKNOWN_REF + match[0], " -> ")).call(_context3, item.inverseOf));
+      }
+
+      item = unicode[slug];
+      isNegated = !isNegated;
+    }
+
+    if (!(item.bmp || isAstralMode)) {
+      throw new SyntaxError(ERR_ASTRAL_ONLY + match[0]);
+    }
+
+    if (isAstralMode) {
+      if (scope === 'class') {
+        throw new SyntaxError(ERR_ASTRAL_IN_CLASS);
+      }
+
+      return cacheAstral(slug, isNegated);
+    }
+
+    return scope === 'class' ? isNegated ? cacheInvertedBmp(slug) : item.bmp : "".concat((isNegated ? '[^' : '[') + item.bmp, "]");
+  }, {
+    scope: 'all',
+    optionalFlags: 'A',
+    leadChar: '\\'
+  });
+  /**
+   * Adds to the list of Unicode tokens that XRegExp regexes can match via `\p` or `\P`.
+   *
+   * @memberOf XRegExp
+   * @param {Array} data Objects with named character ranges. Each object may have properties
+   *   `name`, `alias`, `isBmpLast`, `inverseOf`, `bmp`, and `astral`. All but `name` are
+   *   optional, although one of `bmp` or `astral` is required (unless `inverseOf` is set). If
+   *   `astral` is absent, the `bmp` data is used for BMP and astral modes. If `bmp` is absent,
+   *   the name errors in BMP mode but works in astral mode. If both `bmp` and `astral` are
+   *   provided, the `bmp` data only is used in BMP mode, and the combination of `bmp` and
+   *   `astral` data is used in astral mode. `isBmpLast` is needed when a token matches orphan
+   *   high surrogates *and* uses surrogate pairs to match astral code points. The `bmp` and
+   *   `astral` data should be a combination of literal characters and `\xHH` or `\uHHHH` escape
+   *   sequences, with hyphens to create ranges. Any regex metacharacters in the data should be
+   *   escaped, apart from range-creating hyphens. The `astral` data can additionally use
+   *   character classes and alternation, and should use surrogate pairs to represent astral code
+   *   points. `inverseOf` can be used to avoid duplicating character data if a Unicode token is
+   *   defined as the exact inverse of another token.
+   * @example
+   *
+   * // Basic use
+   * XRegExp.addUnicodeData([{
+   *   name: 'XDigit',
+   *   alias: 'Hexadecimal',
+   *   bmp: '0-9A-Fa-f'
+   * }]);
+   * XRegExp('\\p{XDigit}:\\p{Hexadecimal}+').test('0:3D'); // -> true
+   */
+
+  XRegExp.addUnicodeData = function (data) {
+    var ERR_NO_NAME = 'Unicode token requires name';
+    var ERR_NO_DATA = 'Unicode token has no character data ';
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = (0, _getIterator2.default)(data), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var item = _step.value;
+
+        if (!item.name) {
+          throw new Error(ERR_NO_NAME);
+        }
+
+        if (!(item.inverseOf || item.bmp || item.astral)) {
+          throw new Error(ERR_NO_DATA + item.name);
+        }
+
+        unicode[normalize(item.name)] = item;
+
+        if (item.alias) {
+          unicode[normalize(item.alias)] = item;
+        }
+      } // Reset the pattern cache used by the `XRegExp` constructor, since the same pattern and
+      // flags might now produce different results
+
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return != null) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    XRegExp.cache.flush('patterns');
+  };
+  /**
+   * @ignore
+   *
+   * Return a reference to the internal Unicode definition structure for the given Unicode
+   * Property if the given name is a legal Unicode Property for use in XRegExp `\p` or `\P` regex
+   * constructs.
+   *
+   * @memberOf XRegExp
+   * @param {String} name Name by which the Unicode Property may be recognized (case-insensitive),
+   *   e.g. `'N'` or `'Number'`. The given name is matched against all registered Unicode
+   *   Properties and Property Aliases.
+   * @returns {Object} Reference to definition structure when the name matches a Unicode Property.
+   *
+   * @note
+   * For more info on Unicode Properties, see also http://unicode.org/reports/tr18/#Categories.
+   *
+   * @note
+   * This method is *not* part of the officially documented API and may change or be removed in
+   * the future. It is meant for userland code that wishes to reuse the (large) internal Unicode
+   * structures set up by XRegExp.
+   */
+
+
+  XRegExp._getUnicodeProperty = function (name) {
+    var slug = normalize(name);
+    return unicode[slug];
+  };
+};
+
+exports.default = _default;
+module.exports = exports["default"];
 
 /***/ }),
 /* 344 */
@@ -18812,7 +20208,44 @@ module.exports = FastGlob;
 
 
 /***/ }),
-/* 345 */,
+/* 345 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.getProcessArgvBin = exports.getProcessArgvWithoutBin = void 0;
+function getProcessArgvBinIndex() {
+    // The binary name is the first command line argument for:
+    // - bundled Electron apps: bin argv1 argv2 ... argvn
+    if (isBundledElectronApp())
+        return 0;
+    // or the second one (default) for:
+    // - standard node apps: node bin.js argv1 argv2 ... argvn
+    // - unbundled Electron apps: electron bin.js argv1 arg2 ... argvn
+    return 1;
+}
+function isBundledElectronApp() {
+    // process.defaultApp is either set by electron in an electron unbundled app, or undefined
+    // see https://github.com/electron/electron/blob/master/docs/api/process.md#processdefaultapp-readonly
+    return isElectronApp() && !process.defaultApp;
+}
+function isElectronApp() {
+    // process.versions.electron is either set by electron, or undefined
+    // see https://github.com/electron/electron/blob/master/docs/api/process.md#processversionselectron-readonly
+    return !!process.versions.electron;
+}
+function getProcessArgvWithoutBin() {
+    return process.argv.slice(getProcessArgvBinIndex() + 1);
+}
+exports.getProcessArgvWithoutBin = getProcessArgvWithoutBin;
+function getProcessArgvBin() {
+    return process.argv[getProcessArgvBinIndex()];
+}
+exports.getProcessArgvBin = getProcessArgvBin;
+
+
+/***/ }),
 /* 346 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -18925,7 +20358,200 @@ module.exports.defaults = defaultOptions;
 
 
 /***/ }),
-/* 349 */,
+/* 349 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var fs = __webpack_require__(747)
+var path = __webpack_require__(622)
+var util = __webpack_require__(669)
+
+function Y18N (opts) {
+  // configurable options.
+  opts = opts || {}
+  this.directory = opts.directory || './locales'
+  this.updateFiles = typeof opts.updateFiles === 'boolean' ? opts.updateFiles : true
+  this.locale = opts.locale || 'en'
+  this.fallbackToLanguage = typeof opts.fallbackToLanguage === 'boolean' ? opts.fallbackToLanguage : true
+
+  // internal stuff.
+  this.cache = {}
+  this.writeQueue = []
+}
+
+Y18N.prototype.__ = function () {
+  if (typeof arguments[0] !== 'string') {
+    return this._taggedLiteral.apply(this, arguments)
+  }
+  var args = Array.prototype.slice.call(arguments)
+  var str = args.shift()
+  var cb = function () {} // start with noop.
+
+  if (typeof args[args.length - 1] === 'function') cb = args.pop()
+  cb = cb || function () {} // noop.
+
+  if (!this.cache[this.locale]) this._readLocaleFile()
+
+  // we've observed a new string, update the language file.
+  if (!this.cache[this.locale][str] && this.updateFiles) {
+    this.cache[this.locale][str] = str
+
+    // include the current directory and locale,
+    // since these values could change before the
+    // write is performed.
+    this._enqueueWrite([this.directory, this.locale, cb])
+  } else {
+    cb()
+  }
+
+  return util.format.apply(util, [this.cache[this.locale][str] || str].concat(args))
+}
+
+Y18N.prototype._taggedLiteral = function (parts) {
+  var args = arguments
+  var str = ''
+  parts.forEach(function (part, i) {
+    var arg = args[i + 1]
+    str += part
+    if (typeof arg !== 'undefined') {
+      str += '%s'
+    }
+  })
+  return this.__.apply(null, [str].concat([].slice.call(arguments, 1)))
+}
+
+Y18N.prototype._enqueueWrite = function (work) {
+  this.writeQueue.push(work)
+  if (this.writeQueue.length === 1) this._processWriteQueue()
+}
+
+Y18N.prototype._processWriteQueue = function () {
+  var _this = this
+  var work = this.writeQueue[0]
+
+  // destructure the enqueued work.
+  var directory = work[0]
+  var locale = work[1]
+  var cb = work[2]
+
+  var languageFile = this._resolveLocaleFile(directory, locale)
+  var serializedLocale = JSON.stringify(this.cache[locale], null, 2)
+
+  fs.writeFile(languageFile, serializedLocale, 'utf-8', function (err) {
+    _this.writeQueue.shift()
+    if (_this.writeQueue.length > 0) _this._processWriteQueue()
+    cb(err)
+  })
+}
+
+Y18N.prototype._readLocaleFile = function () {
+  var localeLookup = {}
+  var languageFile = this._resolveLocaleFile(this.directory, this.locale)
+
+  try {
+    localeLookup = JSON.parse(fs.readFileSync(languageFile, 'utf-8'))
+  } catch (err) {
+    if (err instanceof SyntaxError) {
+      err.message = 'syntax error in ' + languageFile
+    }
+
+    if (err.code === 'ENOENT') localeLookup = {}
+    else throw err
+  }
+
+  this.cache[this.locale] = localeLookup
+}
+
+Y18N.prototype._resolveLocaleFile = function (directory, locale) {
+  var file = path.resolve(directory, './', locale + '.json')
+  if (this.fallbackToLanguage && !this._fileExistsSync(file) && ~locale.lastIndexOf('_')) {
+    // attempt fallback to language only
+    var languageFile = path.resolve(directory, './', locale.split('_')[0] + '.json')
+    if (this._fileExistsSync(languageFile)) file = languageFile
+  }
+  return file
+}
+
+// this only exists because fs.existsSync() "will be deprecated"
+// see https://nodejs.org/api/fs.html#fs_fs_existssync_path
+Y18N.prototype._fileExistsSync = function (file) {
+  try {
+    return fs.statSync(file).isFile()
+  } catch (err) {
+    return false
+  }
+}
+
+Y18N.prototype.__n = function () {
+  var args = Array.prototype.slice.call(arguments)
+  var singular = args.shift()
+  var plural = args.shift()
+  var quantity = args.shift()
+
+  var cb = function () {} // start with noop.
+  if (typeof args[args.length - 1] === 'function') cb = args.pop()
+
+  if (!this.cache[this.locale]) this._readLocaleFile()
+
+  var str = quantity === 1 ? singular : plural
+  if (this.cache[this.locale][singular]) {
+    str = this.cache[this.locale][singular][quantity === 1 ? 'one' : 'other']
+  }
+
+  // we've observed a new string, update the language file.
+  if (!this.cache[this.locale][singular] && this.updateFiles) {
+    this.cache[this.locale][singular] = {
+      one: singular,
+      other: plural
+    }
+
+    // include the current directory and locale,
+    // since these values could change before the
+    // write is performed.
+    this._enqueueWrite([this.directory, this.locale, cb])
+  } else {
+    cb()
+  }
+
+  // if a %d placeholder is provided, add quantity
+  // to the arguments expanded by util.format.
+  var values = [str]
+  if (~str.indexOf('%d')) values.push(quantity)
+
+  return util.format.apply(util, values.concat(args))
+}
+
+Y18N.prototype.setLocale = function (locale) {
+  this.locale = locale
+}
+
+Y18N.prototype.getLocale = function () {
+  return this.locale
+}
+
+Y18N.prototype.updateLocale = function (obj) {
+  if (!this.cache[this.locale]) this._readLocaleFile()
+
+  for (var key in obj) {
+    this.cache[this.locale][key] = obj[key]
+  }
+}
+
+module.exports = function (opts) {
+  var y18n = new Y18N(opts)
+
+  // bind all functions to y18n, so that
+  // they can be used in isolation.
+  for (var key in y18n) {
+    if (typeof y18n[key] === 'function') {
+      y18n[key] = y18n[key].bind(y18n)
+    }
+  }
+
+  return y18n
+}
+
+
+/***/ }),
 /* 350 */,
 /* 351 */,
 /* 352 */
@@ -18933,54 +20559,53 @@ module.exports.defaults = defaultOptions;
 
 "use strict";
 
-const {PassThrough: PassThroughStream} = __webpack_require__(413);
+const {PassThrough} = __webpack_require__(413);
 
 module.exports = options => {
-	options = {...options};
+	options = Object.assign({}, options);
 
 	const {array} = options;
 	let {encoding} = options;
-	const isBuffer = encoding === 'buffer';
+	const buffer = encoding === 'buffer';
 	let objectMode = false;
 
 	if (array) {
-		objectMode = !(encoding || isBuffer);
+		objectMode = !(encoding || buffer);
 	} else {
 		encoding = encoding || 'utf8';
 	}
 
-	if (isBuffer) {
+	if (buffer) {
 		encoding = null;
 	}
 
-	const stream = new PassThroughStream({objectMode});
+	let len = 0;
+	const ret = [];
+	const stream = new PassThrough({objectMode});
 
 	if (encoding) {
 		stream.setEncoding(encoding);
 	}
 
-	let length = 0;
-	const chunks = [];
-
 	stream.on('data', chunk => {
-		chunks.push(chunk);
+		ret.push(chunk);
 
 		if (objectMode) {
-			length = chunks.length;
+			len = ret.length;
 		} else {
-			length += chunk.length;
+			len += chunk.length;
 		}
 	});
 
 	stream.getBufferedValue = () => {
 		if (array) {
-			return chunks;
+			return ret;
 		}
 
-		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+		return buffer ? Buffer.concat(ret, len) : ret.join('');
 	};
 
-	stream.getBufferedLength = () => length;
+	stream.getBufferedLength = () => len;
 
 	return stream;
 };
@@ -19237,7 +20862,429 @@ module.exports = braces;
 
 
 /***/ }),
-/* 359 */,
+/* 359 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isCommandBuilderCallback = exports.isCommandBuilderDefinition = exports.isCommandHandlerDefinition = exports.command = void 0;
+const common_types_1 = __webpack_require__(45);
+const is_promise_1 = __webpack_require__(91);
+const middleware_1 = __webpack_require__(233);
+const parse_command_1 = __webpack_require__(788);
+const path = __webpack_require__(622);
+const util_1 = __webpack_require__(669);
+const yargs_1 = __webpack_require__(834);
+const requireDirectory = __webpack_require__(348);
+const whichModule = __webpack_require__(867);
+const Parser = __webpack_require__(453);
+const DEFAULT_MARKER = /(^\*)|(^\$0)/;
+// handles parsing positional arguments,
+// and populating argv with said positional
+// arguments.
+function command(yargs, usage, validation, globalMiddleware = []) {
+    const self = {};
+    let handlers = {};
+    let aliasMap = {};
+    let defaultCommand;
+    self.addHandler = function addHandler(cmd, description, builder, handler, commandMiddleware, deprecated) {
+        let aliases = [];
+        const middlewares = middleware_1.commandMiddlewareFactory(commandMiddleware);
+        handler = handler || (() => { });
+        if (Array.isArray(cmd)) {
+            aliases = cmd.slice(1);
+            cmd = cmd[0];
+        }
+        else if (isCommandHandlerDefinition(cmd)) {
+            let command = (Array.isArray(cmd.command) || typeof cmd.command === 'string') ? cmd.command : moduleName(cmd);
+            if (cmd.aliases)
+                command = [].concat(command).concat(cmd.aliases);
+            self.addHandler(command, extractDesc(cmd), cmd.builder, cmd.handler, cmd.middlewares, cmd.deprecated);
+            return;
+        }
+        // allow a module to be provided instead of separate builder and handler
+        if (isCommandBuilderDefinition(builder)) {
+            self.addHandler([cmd].concat(aliases), description, builder.builder, builder.handler, builder.middlewares, builder.deprecated);
+            return;
+        }
+        // parse positionals out of cmd string
+        const parsedCommand = parse_command_1.parseCommand(cmd);
+        // remove positional args from aliases only
+        aliases = aliases.map(alias => parse_command_1.parseCommand(alias).cmd);
+        // check for default and filter out '*''
+        let isDefault = false;
+        const parsedAliases = [parsedCommand.cmd].concat(aliases).filter((c) => {
+            if (DEFAULT_MARKER.test(c)) {
+                isDefault = true;
+                return false;
+            }
+            return true;
+        });
+        // standardize on $0 for default command.
+        if (parsedAliases.length === 0 && isDefault)
+            parsedAliases.push('$0');
+        // shift cmd and aliases after filtering out '*'
+        if (isDefault) {
+            parsedCommand.cmd = parsedAliases[0];
+            aliases = parsedAliases.slice(1);
+            cmd = cmd.replace(DEFAULT_MARKER, parsedCommand.cmd);
+        }
+        // populate aliasMap
+        aliases.forEach((alias) => {
+            aliasMap[alias] = parsedCommand.cmd;
+        });
+        if (description !== false) {
+            usage.command(cmd, description, isDefault, aliases, deprecated);
+        }
+        handlers[parsedCommand.cmd] = {
+            original: cmd,
+            description,
+            handler,
+            builder: builder || {},
+            middlewares,
+            deprecated,
+            demanded: parsedCommand.demanded,
+            optional: parsedCommand.optional
+        };
+        if (isDefault)
+            defaultCommand = handlers[parsedCommand.cmd];
+    };
+    self.addDirectory = function addDirectory(dir, context, req, callerFile, opts) {
+        opts = opts || {};
+        // disable recursion to support nested directories of subcommands
+        if (typeof opts.recurse !== 'boolean')
+            opts.recurse = false;
+        // exclude 'json', 'coffee' from require-directory defaults
+        if (!Array.isArray(opts.extensions))
+            opts.extensions = ['js'];
+        // allow consumer to define their own visitor function
+        const parentVisit = typeof opts.visit === 'function' ? opts.visit : (o) => o;
+        // call addHandler via visitor function
+        opts.visit = function visit(obj, joined, filename) {
+            const visited = parentVisit(obj, joined, filename);
+            // allow consumer to skip modules with their own visitor
+            if (visited) {
+                // check for cyclic reference
+                // each command file path should only be seen once per execution
+                if (~context.files.indexOf(joined))
+                    return visited;
+                // keep track of visited files in context.files
+                context.files.push(joined);
+                self.addHandler(visited);
+            }
+            return visited;
+        };
+        requireDirectory({ require: req, filename: callerFile }, dir, opts);
+    };
+    // lookup module object from require()d command and derive name
+    // if module was not require()d and no name given, throw error
+    function moduleName(obj) {
+        const mod = whichModule(obj);
+        if (!mod)
+            throw new Error(`No command name given for module: ${util_1.inspect(obj)}`);
+        return commandFromFilename(mod.filename);
+    }
+    // derive command name from filename
+    function commandFromFilename(filename) {
+        return path.basename(filename, path.extname(filename));
+    }
+    function extractDesc({ describe, description, desc }) {
+        for (const test of [describe, description, desc]) {
+            if (typeof test === 'string' || test === false)
+                return test;
+            common_types_1.assertNotStrictEqual(test, true);
+        }
+        return false;
+    }
+    self.getCommands = () => Object.keys(handlers).concat(Object.keys(aliasMap));
+    self.getCommandHandlers = () => handlers;
+    self.hasDefaultCommand = () => !!defaultCommand;
+    self.runCommand = function runCommand(command, yargs, parsed, commandIndex) {
+        let aliases = parsed.aliases;
+        const commandHandler = handlers[command] || handlers[aliasMap[command]] || defaultCommand;
+        const currentContext = yargs.getContext();
+        let numFiles = currentContext.files.length;
+        const parentCommands = currentContext.commands.slice();
+        // what does yargs look like after the builder is run?
+        let innerArgv = parsed.argv;
+        let positionalMap = {};
+        if (command) {
+            currentContext.commands.push(command);
+            currentContext.fullCommands.push(commandHandler.original);
+        }
+        const builder = commandHandler.builder;
+        if (isCommandBuilderCallback(builder)) {
+            // a function can be provided, which builds
+            // up a yargs chain and possibly returns it.
+            const builderOutput = builder(yargs.reset(parsed.aliases));
+            const innerYargs = yargs_1.isYargsInstance(builderOutput) ? builderOutput : yargs;
+            if (shouldUpdateUsage(innerYargs)) {
+                innerYargs.getUsageInstance().usage(usageFromParentCommandsCommandHandler(parentCommands, commandHandler), commandHandler.description);
+            }
+            innerArgv = innerYargs._parseArgs(null, null, true, commandIndex);
+            aliases = innerYargs.parsed.aliases;
+        }
+        else if (isCommandBuilderOptionDefinitions(builder)) {
+            // as a short hand, an object can instead be provided, specifying
+            // the options that a command takes.
+            const innerYargs = yargs.reset(parsed.aliases);
+            if (shouldUpdateUsage(innerYargs)) {
+                innerYargs.getUsageInstance().usage(usageFromParentCommandsCommandHandler(parentCommands, commandHandler), commandHandler.description);
+            }
+            Object.keys(commandHandler.builder).forEach((key) => {
+                innerYargs.option(key, builder[key]);
+            });
+            innerArgv = innerYargs._parseArgs(null, null, true, commandIndex);
+            aliases = innerYargs.parsed.aliases;
+        }
+        if (!yargs._hasOutput()) {
+            positionalMap = populatePositionals(commandHandler, innerArgv, currentContext);
+        }
+        const middlewares = globalMiddleware.slice(0).concat(commandHandler.middlewares);
+        middleware_1.applyMiddleware(innerArgv, yargs, middlewares, true);
+        // we apply validation post-hoc, so that custom
+        // checks get passed populated positional arguments.
+        if (!yargs._hasOutput()) {
+            yargs._runValidation(innerArgv, aliases, positionalMap, yargs.parsed.error, !command);
+        }
+        if (commandHandler.handler && !yargs._hasOutput()) {
+            yargs._setHasOutput();
+            // to simplify the parsing of positionals in commands,
+            // we temporarily populate '--' rather than _, with arguments
+            const populateDoubleDash = !!yargs.getOptions().configuration['populate--'];
+            if (!populateDoubleDash)
+                yargs._copyDoubleDash(innerArgv);
+            innerArgv = middleware_1.applyMiddleware(innerArgv, yargs, middlewares, false);
+            let handlerResult;
+            if (is_promise_1.isPromise(innerArgv)) {
+                handlerResult = innerArgv.then(argv => commandHandler.handler(argv));
+            }
+            else {
+                handlerResult = commandHandler.handler(innerArgv);
+            }
+            const handlerFinishCommand = yargs.getHandlerFinishCommand();
+            if (is_promise_1.isPromise(handlerResult)) {
+                yargs.getUsageInstance().cacheHelpMessage();
+                handlerResult
+                    .then(value => {
+                    if (handlerFinishCommand) {
+                        handlerFinishCommand(value);
+                    }
+                })
+                    .catch(error => {
+                    try {
+                        yargs.getUsageInstance().fail(null, error);
+                    }
+                    catch (err) {
+                        // fail's throwing would cause an unhandled rejection.
+                    }
+                })
+                    .then(() => {
+                    yargs.getUsageInstance().clearCachedHelpMessage();
+                });
+            }
+            else {
+                if (handlerFinishCommand) {
+                    handlerFinishCommand(handlerResult);
+                }
+            }
+        }
+        if (command) {
+            currentContext.commands.pop();
+            currentContext.fullCommands.pop();
+        }
+        numFiles = currentContext.files.length - numFiles;
+        if (numFiles > 0)
+            currentContext.files.splice(numFiles * -1, numFiles);
+        return innerArgv;
+    };
+    function shouldUpdateUsage(yargs) {
+        return !yargs.getUsageInstance().getUsageDisabled() &&
+            yargs.getUsageInstance().getUsage().length === 0;
+    }
+    function usageFromParentCommandsCommandHandler(parentCommands, commandHandler) {
+        const c = DEFAULT_MARKER.test(commandHandler.original) ? commandHandler.original.replace(DEFAULT_MARKER, '').trim() : commandHandler.original;
+        const pc = parentCommands.filter((c) => { return !DEFAULT_MARKER.test(c); });
+        pc.push(c);
+        return `$0 ${pc.join(' ')}`;
+    }
+    self.runDefaultBuilderOn = function (yargs) {
+        common_types_1.assertNotStrictEqual(defaultCommand, undefined);
+        if (shouldUpdateUsage(yargs)) {
+            // build the root-level command string from the default string.
+            const commandString = DEFAULT_MARKER.test(defaultCommand.original)
+                ? defaultCommand.original : defaultCommand.original.replace(/^[^[\]<>]*/, '$0 ');
+            yargs.getUsageInstance().usage(commandString, defaultCommand.description);
+        }
+        const builder = defaultCommand.builder;
+        if (isCommandBuilderCallback(builder)) {
+            builder(yargs);
+        }
+        else {
+            Object.keys(builder).forEach((key) => {
+                yargs.option(key, builder[key]);
+            });
+        }
+    };
+    // transcribe all positional arguments "command <foo> <bar> [apple]"
+    // onto argv.
+    function populatePositionals(commandHandler, argv, context) {
+        argv._ = argv._.slice(context.commands.length); // nuke the current commands
+        const demanded = commandHandler.demanded.slice(0);
+        const optional = commandHandler.optional.slice(0);
+        const positionalMap = {};
+        validation.positionalCount(demanded.length, argv._.length);
+        while (demanded.length) {
+            const demand = demanded.shift();
+            populatePositional(demand, argv, positionalMap);
+        }
+        while (optional.length) {
+            const maybe = optional.shift();
+            populatePositional(maybe, argv, positionalMap);
+        }
+        argv._ = context.commands.concat(argv._);
+        postProcessPositionals(argv, positionalMap, self.cmdToParseOptions(commandHandler.original));
+        return positionalMap;
+    }
+    function populatePositional(positional, argv, positionalMap) {
+        const cmd = positional.cmd[0];
+        if (positional.variadic) {
+            positionalMap[cmd] = argv._.splice(0).map(String);
+        }
+        else {
+            if (argv._.length)
+                positionalMap[cmd] = [String(argv._.shift())];
+        }
+    }
+    // we run yargs-parser against the positional arguments
+    // applying the same parsing logic used for flags.
+    function postProcessPositionals(argv, positionalMap, parseOptions) {
+        // combine the parsing hints we've inferred from the command
+        // string with explicitly configured parsing hints.
+        const options = Object.assign({}, yargs.getOptions());
+        options.default = Object.assign(parseOptions.default, options.default);
+        for (const key of Object.keys(parseOptions.alias)) {
+            options.alias[key] = (options.alias[key] || []).concat(parseOptions.alias[key]);
+        }
+        options.array = options.array.concat(parseOptions.array);
+        delete options.config; //  don't load config when processing positionals.
+        const unparsed = [];
+        Object.keys(positionalMap).forEach((key) => {
+            positionalMap[key].map((value) => {
+                if (options.configuration['unknown-options-as-args'])
+                    options.key[key] = true;
+                unparsed.push(`--${key}`);
+                unparsed.push(value);
+            });
+        });
+        // short-circuit parse.
+        if (!unparsed.length)
+            return;
+        const config = Object.assign({}, options.configuration, {
+            'populate--': true
+        });
+        const parsed = Parser.detailed(unparsed, Object.assign({}, options, {
+            configuration: config
+        }));
+        if (parsed.error) {
+            yargs.getUsageInstance().fail(parsed.error.message, parsed.error);
+        }
+        else {
+            // only copy over positional keys (don't overwrite
+            // flag arguments that were already parsed).
+            const positionalKeys = Object.keys(positionalMap);
+            Object.keys(positionalMap).forEach((key) => {
+                positionalKeys.push(...parsed.aliases[key]);
+            });
+            Object.keys(parsed.argv).forEach((key) => {
+                if (positionalKeys.indexOf(key) !== -1) {
+                    // any new aliases need to be placed in positionalMap, which
+                    // is used for validation.
+                    if (!positionalMap[key])
+                        positionalMap[key] = parsed.argv[key];
+                    argv[key] = parsed.argv[key];
+                }
+            });
+        }
+    }
+    self.cmdToParseOptions = function (cmdString) {
+        const parseOptions = {
+            array: [],
+            default: {},
+            alias: {},
+            demand: {}
+        };
+        const parsed = parse_command_1.parseCommand(cmdString);
+        parsed.demanded.forEach((d) => {
+            const [cmd, ...aliases] = d.cmd;
+            if (d.variadic) {
+                parseOptions.array.push(cmd);
+                parseOptions.default[cmd] = [];
+            }
+            parseOptions.alias[cmd] = aliases;
+            parseOptions.demand[cmd] = true;
+        });
+        parsed.optional.forEach((o) => {
+            const [cmd, ...aliases] = o.cmd;
+            if (o.variadic) {
+                parseOptions.array.push(cmd);
+                parseOptions.default[cmd] = [];
+            }
+            parseOptions.alias[cmd] = aliases;
+        });
+        return parseOptions;
+    };
+    self.reset = () => {
+        handlers = {};
+        aliasMap = {};
+        defaultCommand = undefined;
+        return self;
+    };
+    // used by yargs.parse() to freeze
+    // the state of commands such that
+    // we can apply .parse() multiple times
+    // with the same yargs instance.
+    const frozens = [];
+    self.freeze = () => {
+        frozens.push({
+            handlers,
+            aliasMap,
+            defaultCommand
+        });
+    };
+    self.unfreeze = () => {
+        const frozen = frozens.pop();
+        common_types_1.assertNotStrictEqual(frozen, undefined);
+        ({
+            handlers,
+            aliasMap,
+            defaultCommand
+        } = frozen);
+    };
+    return self;
+}
+exports.command = command;
+function isCommandHandlerDefinition(cmd) {
+    return typeof cmd === 'object';
+}
+exports.isCommandHandlerDefinition = isCommandHandlerDefinition;
+function isCommandBuilderDefinition(builder) {
+    return typeof builder === 'object' &&
+        !!builder.builder &&
+        typeof builder.handler === 'function';
+}
+exports.isCommandBuilderDefinition = isCommandBuilderDefinition;
+function isCommandBuilderCallback(builder) {
+    return typeof builder === 'function';
+}
+exports.isCommandBuilderCallback = isCommandBuilderCallback;
+function isCommandBuilderOptionDefinitions(builder) {
+    return typeof builder === 'object';
+}
+
+
+/***/ }),
 /* 360 */
 /***/ (function(module) {
 
@@ -19315,8 +21362,49 @@ function repeat(str, num) {
 
 
 /***/ }),
-/* 361 */,
-/* 362 */,
+/* 361 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var anObject = __webpack_require__(589);
+var aPossiblePrototype = __webpack_require__(303);
+
+// `Object.setPrototypeOf` method
+// https://tc39.github.io/ecma262/#sec-object.setprototypeof
+// Works with __proto__ only. Old v8 can't work with null proto objects.
+/* eslint-disable no-proto */
+module.exports = Object.setPrototypeOf || ('__proto__' in {} ? function () {
+  var CORRECT_SETTER = false;
+  var test = {};
+  var setter;
+  try {
+    setter = Object.getOwnPropertyDescriptor(Object.prototype, '__proto__').set;
+    setter.call(test, []);
+    CORRECT_SETTER = test instanceof Array;
+  } catch (error) { /* empty */ }
+  return function setPrototypeOf(O, proto) {
+    anObject(O);
+    aPossiblePrototype(proto);
+    if (CORRECT_SETTER) setter.call(O, proto);
+    else O.__proto__ = proto;
+    return O;
+  };
+}() : undefined);
+
+
+/***/ }),
+/* 362 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var flags = __webpack_require__(90);
+
+var RegExpPrototype = RegExp.prototype;
+
+module.exports = function (it) {
+  return (it === RegExpPrototype || it instanceof RegExp) && !('flags' in it) ? flags(it) : it.flags;
+};
+
+
+/***/ }),
 /* 363 */,
 /* 364 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -19375,7 +21463,71 @@ exports.default = Matcher;
 
 
 /***/ }),
-/* 365 */,
+/* 365 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+/*
+Copyright (c) 2011 Andrei Mackenzie
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.levenshtein = void 0;
+// levenshtein distance algorithm, pulled from Andrei Mackenzie's MIT licensed.
+// gist, which can be found here: https://gist.github.com/andrei-m/982927
+// Compute the edit distance between the two given strings
+function levenshtein(a, b) {
+    if (a.length === 0)
+        return b.length;
+    if (b.length === 0)
+        return a.length;
+    const matrix = [];
+    // increment along the first column of each row
+    let i;
+    for (i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+    // increment each column in the first row
+    let j;
+    for (j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+    // Fill in the rest of the matrix
+    for (i = 1; i <= b.length; i++) {
+        for (j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            }
+            else {
+                matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
+                Math.min(matrix[i][j - 1] + 1, // insertion
+                matrix[i - 1][j] + 1)); // deletion
+            }
+        }
+    }
+    return matrix[b.length][a.length];
+}
+exports.levenshtein = levenshtein;
+
+
+/***/ }),
 /* 366 */,
 /* 367 */,
 /* 368 */,
@@ -19385,9 +21537,9 @@ exports.default = Matcher;
 "use strict";
 
 
-const stringWidth = __webpack_require__(21)
+const stringWidth = __webpack_require__(330)
 const stripAnsi = __webpack_require__(598)
-const wrap = __webpack_require__(58)
+const wrap = __webpack_require__(433)
 
 const align = {
   right: alignRight,
@@ -19800,7 +21952,93 @@ exports.getOctokitOptions = getOctokitOptions;
 //# sourceMappingURL=utils.js.map
 
 /***/ }),
-/* 371 */,
+/* 371 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const conversions = __webpack_require__(161);
+const route = __webpack_require__(672);
+
+const convert = {};
+
+const models = Object.keys(conversions);
+
+function wrapRaw(fn) {
+	const wrappedFn = function (...args) {
+		const arg0 = args[0];
+		if (arg0 === undefined || arg0 === null) {
+			return arg0;
+		}
+
+		if (arg0.length > 1) {
+			args = arg0;
+		}
+
+		return fn(args);
+	};
+
+	// Preserve .conversion property if there is one
+	if ('conversion' in fn) {
+		wrappedFn.conversion = fn.conversion;
+	}
+
+	return wrappedFn;
+}
+
+function wrapRounded(fn) {
+	const wrappedFn = function (...args) {
+		const arg0 = args[0];
+
+		if (arg0 === undefined || arg0 === null) {
+			return arg0;
+		}
+
+		if (arg0.length > 1) {
+			args = arg0;
+		}
+
+		const result = fn(args);
+
+		// We're assuming the result is an array here.
+		// see notice in conversions.js; don't use box types
+		// in conversion functions.
+		if (typeof result === 'object') {
+			for (let len = result.length, i = 0; i < len; i++) {
+				result[i] = Math.round(result[i]);
+			}
+		}
+
+		return result;
+	};
+
+	// Preserve .conversion property if there is one
+	if ('conversion' in fn) {
+		wrappedFn.conversion = fn.conversion;
+	}
+
+	return wrappedFn;
+}
+
+models.forEach(fromModel => {
+	convert[fromModel] = {};
+
+	Object.defineProperty(convert[fromModel], 'channels', {value: conversions[fromModel].channels});
+	Object.defineProperty(convert[fromModel], 'labels', {value: conversions[fromModel].labels});
+
+	const routes = route(fromModel);
+	const routeModels = Object.keys(routes);
+
+	routeModels.forEach(toModel => {
+		const fn = routes[toModel];
+
+		convert[fromModel][toModel] = wrapRounded(fn);
+		convert[fromModel][toModel].raw = wrapRaw(fn);
+	});
+});
+
+module.exports = convert;
+
+
+/***/ }),
 /* 372 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -19831,407 +22069,7 @@ exports.default = ProviderSync;
 
 
 /***/ }),
-/* 373 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const argsert = __webpack_require__(301)
-const objFilter = __webpack_require__(628)
-const specialKeys = ['$0', '--', '_']
-
-// validation-type-stuff, missing params,
-// bad implications, custom checks.
-module.exports = function validation (yargs, usage, y18n) {
-  const __ = y18n.__
-  const __n = y18n.__n
-  const self = {}
-
-  // validate appropriate # of non-option
-  // arguments were provided, i.e., '_'.
-  self.nonOptionCount = function nonOptionCount (argv) {
-    const demandedCommands = yargs.getDemandedCommands()
-    // don't count currently executing commands
-    const _s = argv._.length - yargs.getContext().commands.length
-
-    if (demandedCommands._ && (_s < demandedCommands._.min || _s > demandedCommands._.max)) {
-      if (_s < demandedCommands._.min) {
-        if (demandedCommands._.minMsg !== undefined) {
-          usage.fail(
-            // replace $0 with observed, $1 with expected.
-            demandedCommands._.minMsg ? demandedCommands._.minMsg.replace(/\$0/g, _s).replace(/\$1/, demandedCommands._.min) : null
-          )
-        } else {
-          usage.fail(
-            __n(
-              'Not enough non-option arguments: got %s, need at least %s',
-              'Not enough non-option arguments: got %s, need at least %s',
-              _s,
-              _s,
-              demandedCommands._.min
-            )
-          )
-        }
-      } else if (_s > demandedCommands._.max) {
-        if (demandedCommands._.maxMsg !== undefined) {
-          usage.fail(
-            // replace $0 with observed, $1 with expected.
-            demandedCommands._.maxMsg ? demandedCommands._.maxMsg.replace(/\$0/g, _s).replace(/\$1/, demandedCommands._.max) : null
-          )
-        } else {
-          usage.fail(
-            __n(
-              'Too many non-option arguments: got %s, maximum of %s',
-              'Too many non-option arguments: got %s, maximum of %s',
-              _s,
-              _s,
-              demandedCommands._.max
-            )
-          )
-        }
-      }
-    }
-  }
-
-  // validate the appropriate # of <required>
-  // positional arguments were provided:
-  self.positionalCount = function positionalCount (required, observed) {
-    if (observed < required) {
-      usage.fail(
-        __n(
-          'Not enough non-option arguments: got %s, need at least %s',
-          'Not enough non-option arguments: got %s, need at least %s',
-          observed,
-          observed,
-          required
-        )
-      )
-    }
-  }
-
-  // make sure all the required arguments are present.
-  self.requiredArguments = function requiredArguments (argv) {
-    const demandedOptions = yargs.getDemandedOptions()
-    let missing = null
-
-    Object.keys(demandedOptions).forEach((key) => {
-      if (!Object.prototype.hasOwnProperty.call(argv, key) || typeof argv[key] === 'undefined') {
-        missing = missing || {}
-        missing[key] = demandedOptions[key]
-      }
-    })
-
-    if (missing) {
-      const customMsgs = []
-      Object.keys(missing).forEach((key) => {
-        const msg = missing[key]
-        if (msg && customMsgs.indexOf(msg) < 0) {
-          customMsgs.push(msg)
-        }
-      })
-
-      const customMsg = customMsgs.length ? `\n${customMsgs.join('\n')}` : ''
-
-      usage.fail(__n(
-        'Missing required argument: %s',
-        'Missing required arguments: %s',
-        Object.keys(missing).length,
-        Object.keys(missing).join(', ') + customMsg
-      ))
-    }
-  }
-
-  // check for unknown arguments (strict-mode).
-  self.unknownArguments = function unknownArguments (argv, aliases, positionalMap) {
-    const commandKeys = yargs.getCommandInstance().getCommands()
-    const unknown = []
-    const currentContext = yargs.getContext()
-
-    Object.keys(argv).forEach((key) => {
-      if (specialKeys.indexOf(key) === -1 &&
-        !Object.prototype.hasOwnProperty.call(positionalMap, key) &&
-        !Object.prototype.hasOwnProperty.call(yargs._getParseContext(), key) &&
-        !self.isValidAndSomeAliasIsNotNew(key, aliases)
-      ) {
-        unknown.push(key)
-      }
-    })
-
-    if ((currentContext.commands.length > 0) || (commandKeys.length > 0)) {
-      argv._.slice(currentContext.commands.length).forEach((key) => {
-        if (commandKeys.indexOf(key) === -1) {
-          unknown.push(key)
-        }
-      })
-    }
-
-    if (unknown.length > 0) {
-      usage.fail(__n(
-        'Unknown argument: %s',
-        'Unknown arguments: %s',
-        unknown.length,
-        unknown.join(', ')
-      ))
-    }
-  }
-
-  self.unknownCommands = function unknownCommands (argv, aliases, positionalMap) {
-    const commandKeys = yargs.getCommandInstance().getCommands()
-    const unknown = []
-    const currentContext = yargs.getContext()
-
-    if ((currentContext.commands.length > 0) || (commandKeys.length > 0)) {
-      argv._.slice(currentContext.commands.length).forEach((key) => {
-        if (commandKeys.indexOf(key) === -1) {
-          unknown.push(key)
-        }
-      })
-    }
-
-    if (unknown.length > 0) {
-      usage.fail(__n(
-        'Unknown command: %s',
-        'Unknown commands: %s',
-        unknown.length,
-        unknown.join(', ')
-      ))
-      return true
-    } else {
-      return false
-    }
-  }
-
-  // check for a key that is not an alias, or for which every alias is new,
-  // implying that it was invented by the parser, e.g., during camelization
-  self.isValidAndSomeAliasIsNotNew = function isValidAndSomeAliasIsNotNew (key, aliases) {
-    if (!Object.prototype.hasOwnProperty.call(aliases, key)) {
-      return false
-    }
-    const newAliases = yargs.parsed.newAliases
-    for (const a of [key, ...aliases[key]]) {
-      if (!Object.prototype.hasOwnProperty.call(newAliases, a) || !newAliases[key]) {
-        return true
-      }
-    }
-    return false
-  }
-
-  // validate arguments limited to enumerated choices
-  self.limitedChoices = function limitedChoices (argv) {
-    const options = yargs.getOptions()
-    const invalid = {}
-
-    if (!Object.keys(options.choices).length) return
-
-    Object.keys(argv).forEach((key) => {
-      if (specialKeys.indexOf(key) === -1 &&
-        Object.prototype.hasOwnProperty.call(options.choices, key)) {
-        [].concat(argv[key]).forEach((value) => {
-          // TODO case-insensitive configurability
-          if (options.choices[key].indexOf(value) === -1 &&
-              value !== undefined) {
-            invalid[key] = (invalid[key] || []).concat(value)
-          }
-        })
-      }
-    })
-
-    const invalidKeys = Object.keys(invalid)
-
-    if (!invalidKeys.length) return
-
-    let msg = __('Invalid values:')
-    invalidKeys.forEach((key) => {
-      msg += `\n  ${__(
-        'Argument: %s, Given: %s, Choices: %s',
-        key,
-        usage.stringifiedValues(invalid[key]),
-        usage.stringifiedValues(options.choices[key])
-      )}`
-    })
-    usage.fail(msg)
-  }
-
-  // custom checks, added using the `check` option on yargs.
-  let checks = []
-  self.check = function check (f, global) {
-    checks.push({
-      func: f,
-      global
-    })
-  }
-
-  self.customChecks = function customChecks (argv, aliases) {
-    for (let i = 0, f; (f = checks[i]) !== undefined; i++) {
-      const func = f.func
-      let result = null
-      try {
-        result = func(argv, aliases)
-      } catch (err) {
-        usage.fail(err.message ? err.message : err, err)
-        continue
-      }
-
-      if (!result) {
-        usage.fail(__('Argument check failed: %s', func.toString()))
-      } else if (typeof result === 'string' || result instanceof Error) {
-        usage.fail(result.toString(), result)
-      }
-    }
-  }
-
-  // check implications, argument foo implies => argument bar.
-  let implied = {}
-  self.implies = function implies (key, value) {
-    argsert('<string|object> [array|number|string]', [key, value], arguments.length)
-
-    if (typeof key === 'object') {
-      Object.keys(key).forEach((k) => {
-        self.implies(k, key[k])
-      })
-    } else {
-      yargs.global(key)
-      if (!implied[key]) {
-        implied[key] = []
-      }
-      if (Array.isArray(value)) {
-        value.forEach((i) => self.implies(key, i))
-      } else {
-        implied[key].push(value)
-      }
-    }
-  }
-  self.getImplied = function getImplied () {
-    return implied
-  }
-
-  function keyExists (argv, val) {
-    // convert string '1' to number 1
-    const num = Number(val)
-    val = isNaN(num) ? val : num
-
-    if (typeof val === 'number') {
-      // check length of argv._
-      val = argv._.length >= val
-    } else if (val.match(/^--no-.+/)) {
-      // check if key/value doesn't exist
-      val = val.match(/^--no-(.+)/)[1]
-      val = !argv[val]
-    } else {
-      // check if key/value exists
-      val = argv[val]
-    }
-    return val
-  }
-
-  self.implications = function implications (argv) {
-    const implyFail = []
-
-    Object.keys(implied).forEach((key) => {
-      const origKey = key
-      ;(implied[key] || []).forEach((value) => {
-        let key = origKey
-        const origValue = value
-        key = keyExists(argv, key)
-        value = keyExists(argv, value)
-
-        if (key && !value) {
-          implyFail.push(` ${origKey} -> ${origValue}`)
-        }
-      })
-    })
-
-    if (implyFail.length) {
-      let msg = `${__('Implications failed:')}\n`
-
-      implyFail.forEach((value) => {
-        msg += (value)
-      })
-
-      usage.fail(msg)
-    }
-  }
-
-  let conflicting = {}
-  self.conflicts = function conflicts (key, value) {
-    argsert('<string|object> [array|string]', [key, value], arguments.length)
-
-    if (typeof key === 'object') {
-      Object.keys(key).forEach((k) => {
-        self.conflicts(k, key[k])
-      })
-    } else {
-      yargs.global(key)
-      if (!conflicting[key]) {
-        conflicting[key] = []
-      }
-      if (Array.isArray(value)) {
-        value.forEach((i) => self.conflicts(key, i))
-      } else {
-        conflicting[key].push(value)
-      }
-    }
-  }
-  self.getConflicting = () => conflicting
-
-  self.conflicting = function conflictingFn (argv) {
-    Object.keys(argv).forEach((key) => {
-      if (conflicting[key]) {
-        conflicting[key].forEach((value) => {
-          // we default keys to 'undefined' that have been configured, we should not
-          // apply conflicting check unless they are a value other than 'undefined'.
-          if (value && argv[key] !== undefined && argv[value] !== undefined) {
-            usage.fail(__('Arguments %s and %s are mutually exclusive', key, value))
-          }
-        })
-      }
-    })
-  }
-
-  self.recommendCommands = function recommendCommands (cmd, potentialCommands) {
-    const distance = __webpack_require__(386)
-    const threshold = 3 // if it takes more than three edits, let's move on.
-    potentialCommands = potentialCommands.sort((a, b) => b.length - a.length)
-
-    let recommended = null
-    let bestDistance = Infinity
-    for (let i = 0, candidate; (candidate = potentialCommands[i]) !== undefined; i++) {
-      const d = distance(cmd, candidate)
-      if (d <= threshold && d < bestDistance) {
-        bestDistance = d
-        recommended = candidate
-      }
-    }
-    if (recommended) usage.fail(__('Did you mean %s?', recommended))
-  }
-
-  self.reset = function reset (localLookup) {
-    implied = objFilter(implied, (k, v) => !localLookup[k])
-    conflicting = objFilter(conflicting, (k, v) => !localLookup[k])
-    checks = checks.filter(c => c.global)
-    return self
-  }
-
-  const frozens = []
-  self.freeze = function freeze () {
-    const frozen = {}
-    frozens.push(frozen)
-    frozen.implied = implied
-    frozen.checks = checks
-    frozen.conflicting = conflicting
-  }
-  self.unfreeze = function unfreeze () {
-    const frozen = frozens.pop()
-    implied = frozen.implied
-    checks = frozen.checks
-    conflicting = frozen.conflicting
-  }
-
-  return self
-}
-
-
-/***/ }),
+/* 373 */,
 /* 374 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -20337,14 +22175,26 @@ function paragraph(eat, value, silent) {
 
 
 /***/ }),
-/* 375 */,
+/* 375 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var requireObjectCoercible = __webpack_require__(611);
+
+// `ToObject` abstract operation
+// https://tc39.github.io/ecma262/#sec-toobject
+module.exports = function (argument) {
+  return Object(requireObjectCoercible(argument));
+};
+
+
+/***/ }),
 /* 376 */,
 /* 377 */,
 /* 378 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const { spawn, timeout } = __webpack_require__(700);
-const { once, on } = __webpack_require__(647);
+const { once, on } = __webpack_require__(910);
 const execa = __webpack_require__(949);
 const path = __webpack_require__(622);
 
@@ -20683,7 +22533,26 @@ function ok() {
 
 
 /***/ }),
-/* 381 */,
+/* 381 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $forEach = __webpack_require__(210).forEach;
+var arrayMethodIsStrict = __webpack_require__(386);
+var arrayMethodUsesToLength = __webpack_require__(877);
+
+var STRICT_METHOD = arrayMethodIsStrict('forEach');
+var USES_TO_LENGTH = arrayMethodUsesToLength('forEach');
+
+// `Array.prototype.forEach` method implementation
+// https://tc39.github.io/ecma262/#sec-array.prototype.foreach
+module.exports = (!STRICT_METHOD || !USES_TO_LENGTH) ? function forEach(callbackfn /* , thisArg */) {
+  return $forEach(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+} : [].forEach;
+
+
+/***/ }),
 /* 382 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -20746,156 +22615,29 @@ module.exports = resolveCommand;
 /* 383 */,
 /* 384 */,
 /* 385 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
-"use strict";
-
-
-var subscription = __webpack_require__(912);
-var effection = __webpack_require__(700);
-
-function isEventTarget(target) {
-  return typeof target.addEventListener === 'function';
+function _nonIterableRest() {
+  throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
 }
 
-function addListener(source, name, listener) {
-  if (isEventTarget(source)) {
-    source.addEventListener(name, listener);
-  } else {
-    source.on(name, listener);
-  }
-}
-function removeListener(source, name, listener) {
-  if (isEventTarget(source)) {
-    source.removeEventListener(name, listener);
-  } else {
-    source.off(name, listener);
-  }
-}
-
-/**
- * Takes an event source and event name and returns a yieldable
- * operation which resumes when the event occurs.
- */
-
-function* once(source, eventName) {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  var onceListener = function onceListener() {};
-
-  try {
-    return yield new Promise(function (resolve) {
-      onceListener = function onceListener() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-
-        return resolve(args);
-      };
-
-      addListener(source, eventName, onceListener);
-    });
-  } finally {
-    removeListener(source, eventName, onceListener);
-  }
-}
-
-function on(source, name) {
-  return subscription.createSubscription(function* (publish) {
-    var listener = function listener() {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      return publish(args);
-    };
-
-    try {
-      addListener(source, name, listener);
-      yield;
-    } finally {
-      removeListener(source, name, listener);
-    }
-  });
-}
-
-function throwOnErrorEvent(source) {
-  return effection.spawn(function* () {
-    var _yield$once = yield once(source, 'error'),
-        error = _yield$once[0];
-
-    throw error;
-  });
-}
-
-exports.on = on;
-exports.once = once;
-exports.throwOnErrorEvent = throwOnErrorEvent;
-//# sourceMappingURL=events.cjs.development.js.map
-
+module.exports = _nonIterableRest;
 
 /***/ }),
 /* 386 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
-/*
-Copyright (c) 2011 Andrei Mackenzie
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-the Software, and to permit persons to whom the Software is furnished to do so,
-subject to the following conditions:
+var fails = __webpack_require__(105);
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-*/
-
-// levenshtein distance algorithm, pulled from Andrei Mackenzie's MIT licensed.
-// gist, which can be found here: https://gist.github.com/andrei-m/982927
-
-// Compute the edit distance between the two given strings
-module.exports = function levenshtein (a, b) {
-  if (a.length === 0) return b.length
-  if (b.length === 0) return a.length
-
-  const matrix = []
-
-  // increment along the first column of each row
-  let i
-  for (i = 0; i <= b.length; i++) {
-    matrix[i] = [i]
-  }
-
-  // increment each column in the first row
-  let j
-  for (j = 0; j <= a.length; j++) {
-    matrix[0][j] = j
-  }
-
-  // Fill in the rest of the matrix
-  for (i = 1; i <= b.length; i++) {
-    for (j = 1; j <= a.length; j++) {
-      if (b.charAt(i - 1) === a.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1]
-      } else {
-        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, // substitution
-          Math.min(matrix[i][j - 1] + 1, // insertion
-            matrix[i - 1][j] + 1)) // deletion
-      }
-    }
-  }
-
-  return matrix[b.length][a.length]
-}
+module.exports = function (METHOD_NAME, argument) {
+  var method = [][METHOD_NAME];
+  return !!method && fails(function () {
+    // eslint-disable-next-line no-useless-call,no-throw-literal
+    method.call(null, argument || function () { throw 1; }, 1);
+  });
+};
 
 
 /***/ }),
@@ -21189,7 +22931,18 @@ module.exports.Collection = Hook.Collection
 
 
 /***/ }),
-/* 395 */,
+/* 395 */
+/***/ (function(module) {
+
+function _interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    "default": obj
+  };
+}
+
+module.exports = _interopRequireDefault;
+
+/***/ }),
 /* 396 */
 /***/ (function(module) {
 
@@ -22168,9 +23921,42 @@ module.exports = osName;
 
 
 /***/ }),
-/* 402 */,
+/* 402 */
+/***/ (function(module) {
+
+module.exports = function (_require) {
+  _require = _require || require
+  var main = _require.main
+  if (main && isIISNode(main)) return handleIISNode(main)
+  else return main ? main.filename : process.cwd()
+}
+
+function isIISNode (main) {
+  return /\\iisnode\\/.test(main.filename)
+}
+
+function handleIISNode (main) {
+  if (!main.children.length) {
+    return main.filename
+  } else {
+    return main.children[0].filename
+  }
+}
+
+
+/***/ }),
 /* 403 */,
-/* 404 */,
+/* 404 */
+/***/ (function(module) {
+
+var toString = {}.toString;
+
+module.exports = function (it) {
+  return toString.call(it).slice(8, -1);
+};
+
+
+/***/ }),
 /* 405 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -22194,196 +23980,18 @@ module.exports = __webpack_require__(769)
 
 /***/ }),
 /* 407 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-var fs = __webpack_require__(747)
-var path = __webpack_require__(622)
-var util = __webpack_require__(669)
-
-function Y18N (opts) {
-  // configurable options.
-  opts = opts || {}
-  this.directory = opts.directory || './locales'
-  this.updateFiles = typeof opts.updateFiles === 'boolean' ? opts.updateFiles : true
-  this.locale = opts.locale || 'en'
-  this.fallbackToLanguage = typeof opts.fallbackToLanguage === 'boolean' ? opts.fallbackToLanguage : true
-
-  // internal stuff.
-  this.cache = {}
-  this.writeQueue = []
-}
-
-Y18N.prototype.__ = function () {
-  if (typeof arguments[0] !== 'string') {
-    return this._taggedLiteral.apply(this, arguments)
-  }
-  var args = Array.prototype.slice.call(arguments)
-  var str = args.shift()
-  var cb = function () {} // start with noop.
-
-  if (typeof args[args.length - 1] === 'function') cb = args.pop()
-  cb = cb || function () {} // noop.
-
-  if (!this.cache[this.locale]) this._readLocaleFile()
-
-  // we've observed a new string, update the language file.
-  if (!this.cache[this.locale][str] && this.updateFiles) {
-    this.cache[this.locale][str] = str
-
-    // include the current directory and locale,
-    // since these values could change before the
-    // write is performed.
-    this._enqueueWrite([this.directory, this.locale, cb])
-  } else {
-    cb()
-  }
-
-  return util.format.apply(util, [this.cache[this.locale][str] || str].concat(args))
-}
-
-Y18N.prototype._taggedLiteral = function (parts) {
-  var args = arguments
-  var str = ''
-  parts.forEach(function (part, i) {
-    var arg = args[i + 1]
-    str += part
-    if (typeof arg !== 'undefined') {
-      str += '%s'
-    }
-  })
-  return this.__.apply(null, [str].concat([].slice.call(arguments, 1)))
-}
-
-Y18N.prototype._enqueueWrite = function (work) {
-  this.writeQueue.push(work)
-  if (this.writeQueue.length === 1) this._processWriteQueue()
-}
-
-Y18N.prototype._processWriteQueue = function () {
-  var _this = this
-  var work = this.writeQueue[0]
-
-  // destructure the enqueued work.
-  var directory = work[0]
-  var locale = work[1]
-  var cb = work[2]
-
-  var languageFile = this._resolveLocaleFile(directory, locale)
-  var serializedLocale = JSON.stringify(this.cache[locale], null, 2)
-
-  fs.writeFile(languageFile, serializedLocale, 'utf-8', function (err) {
-    _this.writeQueue.shift()
-    if (_this.writeQueue.length > 0) _this._processWriteQueue()
-    cb(err)
-  })
-}
-
-Y18N.prototype._readLocaleFile = function () {
-  var localeLookup = {}
-  var languageFile = this._resolveLocaleFile(this.directory, this.locale)
-
-  try {
-    localeLookup = JSON.parse(fs.readFileSync(languageFile, 'utf-8'))
-  } catch (err) {
-    if (err instanceof SyntaxError) {
-      err.message = 'syntax error in ' + languageFile
-    }
-
-    if (err.code === 'ENOENT') localeLookup = {}
-    else throw err
-  }
-
-  this.cache[this.locale] = localeLookup
-}
-
-Y18N.prototype._resolveLocaleFile = function (directory, locale) {
-  var file = path.resolve(directory, './', locale + '.json')
-  if (this.fallbackToLanguage && !this._fileExistsSync(file) && ~locale.lastIndexOf('_')) {
-    // attempt fallback to language only
-    var languageFile = path.resolve(directory, './', locale.split('_')[0] + '.json')
-    if (this._fileExistsSync(languageFile)) file = languageFile
-  }
-  return file
-}
-
-// this only exists because fs.existsSync() "will be deprecated"
-// see https://nodejs.org/api/fs.html#fs_fs_existssync_path
-Y18N.prototype._fileExistsSync = function (file) {
-  try {
-    return fs.statSync(file).isFile()
-  } catch (err) {
-    return false
-  }
-}
-
-Y18N.prototype.__n = function () {
-  var args = Array.prototype.slice.call(arguments)
-  var singular = args.shift()
-  var plural = args.shift()
-  var quantity = args.shift()
-
-  var cb = function () {} // start with noop.
-  if (typeof args[args.length - 1] === 'function') cb = args.pop()
-
-  if (!this.cache[this.locale]) this._readLocaleFile()
-
-  var str = quantity === 1 ? singular : plural
-  if (this.cache[this.locale][singular]) {
-    str = this.cache[this.locale][singular][quantity === 1 ? 'one' : 'other']
-  }
-
-  // we've observed a new string, update the language file.
-  if (!this.cache[this.locale][singular] && this.updateFiles) {
-    this.cache[this.locale][singular] = {
-      one: singular,
-      other: plural
-    }
-
-    // include the current directory and locale,
-    // since these values could change before the
-    // write is performed.
-    this._enqueueWrite([this.directory, this.locale, cb])
-  } else {
-    cb()
-  }
-
-  // if a %d placeholder is provided, add quantity
-  // to the arguments expanded by util.format.
-  var values = [str]
-  if (~str.indexOf('%d')) values.push(quantity)
-
-  return util.format.apply(util, values.concat(args))
-}
-
-Y18N.prototype.setLocale = function (locale) {
-  this.locale = locale
-}
-
-Y18N.prototype.getLocale = function () {
-  return this.locale
-}
-
-Y18N.prototype.updateLocale = function (obj) {
-  if (!this.cache[this.locale]) this._readLocaleFile()
-
-  for (var key in obj) {
-    this.cache[this.locale][key] = obj[key]
-  }
-}
-
-module.exports = function (opts) {
-  var y18n = new Y18N(opts)
-
-  // bind all functions to y18n, so that
-  // they can be used in isolation.
-  for (var key in y18n) {
-    if (typeof y18n[key] === 'function') {
-      y18n[key] = y18n[key].bind(y18n)
-    }
-  }
-
-  return y18n
-}
+// IE8- don't enum bug keys
+module.exports = [
+  'constructor',
+  'hasOwnProperty',
+  'isPrototypeOf',
+  'propertyIsEnumerable',
+  'toLocaleString',
+  'toString',
+  'valueOf'
+];
 
 
 /***/ }),
@@ -22452,28 +24060,32 @@ module.exports = coerce
 const os = __webpack_require__(87);
 
 const nameMap = new Map([
-	[19, 'Catalina'],
-	[18, 'Mojave'],
-	[17, 'High Sierra'],
-	[16, 'Sierra'],
-	[15, 'El Capitan'],
-	[14, 'Yosemite'],
-	[13, 'Mavericks'],
-	[12, 'Mountain Lion'],
-	[11, 'Lion'],
-	[10, 'Snow Leopard'],
-	[9, 'Leopard'],
-	[8, 'Tiger'],
-	[7, 'Panther'],
-	[6, 'Jaguar'],
-	[5, 'Puma']
+	[20, ['Big Sur', '11']],
+	[19, ['Catalina', '10.15']],
+	[18, ['Mojave', '10.14']],
+	[17, ['High Sierra', '10.13']],
+	[16, ['Sierra', '10.12']],
+	[15, ['El Capitan', '10.11']],
+	[14, ['Yosemite', '10.10']],
+	[13, ['Mavericks', '10.9']],
+	[12, ['Mountain Lion', '10.8']],
+	[11, ['Lion', '10.7']],
+	[10, ['Snow Leopard', '10.6']],
+	[9, ['Leopard', '10.5']],
+	[8, ['Tiger', '10.4']],
+	[7, ['Panther', '10.3']],
+	[6, ['Jaguar', '10.2']],
+	[5, ['Puma', '10.1']]
 ]);
 
 const macosRelease = release => {
 	release = Number((release || os.release()).split('.')[0]);
+
+	const [name, version] = nameMap.get(release);
+
 	return {
-		name: nameMap.get(release),
-		version: '10.' + (release - 4)
+		name,
+		version
 	};
 };
 
@@ -22535,7 +24147,17 @@ module.exports = new Type('tag:yaml.org,2002:str', {
 module.exports = require("stream");
 
 /***/ }),
-/* 414 */,
+/* 414 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.asyncDispose` well-known symbol
+// https://github.com/tc39/proposal-using-statement
+defineWellKnownSymbol('asyncDispose');
+
+
+/***/ }),
 /* 415 */
 /***/ (function(module) {
 
@@ -22591,7 +24213,50 @@ module.exports = minor
 /***/ }),
 /* 418 */,
 /* 419 */,
-/* 420 */,
+/* 420 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(395);
+
+var _Object$defineProperty = __webpack_require__(617);
+
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = void 0;
+
+var _xregexp = _interopRequireDefault(__webpack_require__(828));
+
+var _build = _interopRequireDefault(__webpack_require__(528));
+
+var _matchrecursive = _interopRequireDefault(__webpack_require__(963));
+
+var _unicodeBase = _interopRequireDefault(__webpack_require__(343));
+
+var _unicodeBlocks = _interopRequireDefault(__webpack_require__(113));
+
+var _unicodeCategories = _interopRequireDefault(__webpack_require__(560));
+
+var _unicodeProperties = _interopRequireDefault(__webpack_require__(141));
+
+var _unicodeScripts = _interopRequireDefault(__webpack_require__(159));
+
+(0, _build.default)(_xregexp.default);
+(0, _matchrecursive.default)(_xregexp.default);
+(0, _unicodeBase.default)(_xregexp.default);
+(0, _unicodeBlocks.default)(_xregexp.default);
+(0, _unicodeCategories.default)(_xregexp.default);
+(0, _unicodeProperties.default)(_xregexp.default);
+(0, _unicodeScripts.default)(_xregexp.default);
+var _default = _xregexp.default;
+exports.default = _default;
+module.exports = exports["default"];
+
+/***/ }),
 /* 421 */,
 /* 422 */
 /***/ (function(module) {
@@ -22659,8 +24324,694 @@ module.exports.extend         = extend;
 
 
 /***/ }),
-/* 423 */,
-/* 424 */,
+/* 423 */
+/***/ (function(module) {
+
+module.exports = [
+    {
+        'name': 'Adlam',
+        'astral': '\uD83A[\uDD00-\uDD4B\uDD50-\uDD59\uDD5E\uDD5F]'
+    },
+    {
+        'name': 'Ahom',
+        'astral': '\uD805[\uDF00-\uDF1A\uDF1D-\uDF2B\uDF30-\uDF3F]'
+    },
+    {
+        'name': 'Anatolian_Hieroglyphs',
+        'astral': '\uD811[\uDC00-\uDE46]'
+    },
+    {
+        'name': 'Arabic',
+        'bmp': '\u0600-\u0604\u0606-\u060B\u060D-\u061A\u061C\u061E\u0620-\u063F\u0641-\u064A\u0656-\u066F\u0671-\u06DC\u06DE-\u06FF\u0750-\u077F\u08A0-\u08B4\u08B6-\u08BD\u08D3-\u08E1\u08E3-\u08FF\uFB50-\uFBC1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFD\uFE70-\uFE74\uFE76-\uFEFC',
+        'astral': '\uD803[\uDE60-\uDE7E]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB\uDEF0\uDEF1]'
+    },
+    {
+        'name': 'Armenian',
+        'bmp': '\u0531-\u0556\u0559-\u0588\u058A\u058D-\u058F\uFB13-\uFB17'
+    },
+    {
+        'name': 'Avestan',
+        'astral': '\uD802[\uDF00-\uDF35\uDF39-\uDF3F]'
+    },
+    {
+        'name': 'Balinese',
+        'bmp': '\u1B00-\u1B4B\u1B50-\u1B7C'
+    },
+    {
+        'name': 'Bamum',
+        'bmp': '\uA6A0-\uA6F7',
+        'astral': '\uD81A[\uDC00-\uDE38]'
+    },
+    {
+        'name': 'Bassa_Vah',
+        'astral': '\uD81A[\uDED0-\uDEED\uDEF0-\uDEF5]'
+    },
+    {
+        'name': 'Batak',
+        'bmp': '\u1BC0-\u1BF3\u1BFC-\u1BFF'
+    },
+    {
+        'name': 'Bengali',
+        'bmp': '\u0980-\u0983\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BC-\u09C4\u09C7\u09C8\u09CB-\u09CE\u09D7\u09DC\u09DD\u09DF-\u09E3\u09E6-\u09FE'
+    },
+    {
+        'name': 'Bhaiksuki',
+        'astral': '\uD807[\uDC00-\uDC08\uDC0A-\uDC36\uDC38-\uDC45\uDC50-\uDC6C]'
+    },
+    {
+        'name': 'Bopomofo',
+        'bmp': '\u02EA\u02EB\u3105-\u312F\u31A0-\u31BA'
+    },
+    {
+        'name': 'Brahmi',
+        'astral': '\uD804[\uDC00-\uDC4D\uDC52-\uDC6F\uDC7F]'
+    },
+    {
+        'name': 'Braille',
+        'bmp': '\u2800-\u28FF'
+    },
+    {
+        'name': 'Buginese',
+        'bmp': '\u1A00-\u1A1B\u1A1E\u1A1F'
+    },
+    {
+        'name': 'Buhid',
+        'bmp': '\u1740-\u1753'
+    },
+    {
+        'name': 'Canadian_Aboriginal',
+        'bmp': '\u1400-\u167F\u18B0-\u18F5'
+    },
+    {
+        'name': 'Carian',
+        'astral': '\uD800[\uDEA0-\uDED0]'
+    },
+    {
+        'name': 'Caucasian_Albanian',
+        'astral': '\uD801[\uDD30-\uDD63\uDD6F]'
+    },
+    {
+        'name': 'Chakma',
+        'astral': '\uD804[\uDD00-\uDD34\uDD36-\uDD46]'
+    },
+    {
+        'name': 'Cham',
+        'bmp': '\uAA00-\uAA36\uAA40-\uAA4D\uAA50-\uAA59\uAA5C-\uAA5F'
+    },
+    {
+        'name': 'Cherokee',
+        'bmp': '\u13A0-\u13F5\u13F8-\u13FD\uAB70-\uABBF'
+    },
+    {
+        'name': 'Common',
+        'bmp': '\0-@\\[-`\\{-\xA9\xAB-\xB9\xBB-\xBF\xD7\xF7\u02B9-\u02DF\u02E5-\u02E9\u02EC-\u02FF\u0374\u037E\u0385\u0387\u0589\u0605\u060C\u061B\u061F\u0640\u06DD\u08E2\u0964\u0965\u0E3F\u0FD5-\u0FD8\u10FB\u16EB-\u16ED\u1735\u1736\u1802\u1803\u1805\u1CD3\u1CE1\u1CE9-\u1CEC\u1CEE-\u1CF3\u1CF5-\u1CF7\u1CFA\u2000-\u200B\u200E-\u2064\u2066-\u2070\u2074-\u207E\u2080-\u208E\u20A0-\u20BF\u2100-\u2125\u2127-\u2129\u212C-\u2131\u2133-\u214D\u214F-\u215F\u2189-\u218B\u2190-\u2426\u2440-\u244A\u2460-\u27FF\u2900-\u2B73\u2B76-\u2B95\u2B98-\u2BFF\u2E00-\u2E4F\u2FF0-\u2FFB\u3000-\u3004\u3006\u3008-\u3020\u3030-\u3037\u303C-\u303F\u309B\u309C\u30A0\u30FB\u30FC\u3190-\u319F\u31C0-\u31E3\u3220-\u325F\u327F-\u32CF\u32FF\u3358-\u33FF\u4DC0-\u4DFF\uA700-\uA721\uA788-\uA78A\uA830-\uA839\uA92E\uA9CF\uAB5B\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE66\uFE68-\uFE6B\uFEFF\uFF01-\uFF20\uFF3B-\uFF40\uFF5B-\uFF65\uFF70\uFF9E\uFF9F\uFFE0-\uFFE6\uFFE8-\uFFEE\uFFF9-\uFFFD',
+        'astral': '\uD800[\uDD00-\uDD02\uDD07-\uDD33\uDD37-\uDD3F\uDD90-\uDD9B\uDDD0-\uDDFC\uDEE1-\uDEFB]|\uD81B[\uDFE2\uDFE3]|\uD82F[\uDCA0-\uDCA3]|\uD834[\uDC00-\uDCF5\uDD00-\uDD26\uDD29-\uDD66\uDD6A-\uDD7A\uDD83\uDD84\uDD8C-\uDDA9\uDDAE-\uDDE8\uDEE0-\uDEF3\uDF00-\uDF56\uDF60-\uDF78]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDFCB\uDFCE-\uDFFF]|\uD83B[\uDC71-\uDCB4\uDD01-\uDD3D]|\uD83C[\uDC00-\uDC2B\uDC30-\uDC93\uDCA0-\uDCAE\uDCB1-\uDCBF\uDCC1-\uDCCF\uDCD1-\uDCF5\uDD00-\uDD0C\uDD10-\uDD6C\uDD70-\uDDAC\uDDE6-\uDDFF\uDE01\uDE02\uDE10-\uDE3B\uDE40-\uDE48\uDE50\uDE51\uDE60-\uDE65\uDF00-\uDFFF]|\uD83D[\uDC00-\uDED5\uDEE0-\uDEEC\uDEF0-\uDEFA\uDF00-\uDF73\uDF80-\uDFD8\uDFE0-\uDFEB]|\uD83E[\uDC00-\uDC0B\uDC10-\uDC47\uDC50-\uDC59\uDC60-\uDC87\uDC90-\uDCAD\uDD00-\uDD0B\uDD0D-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDE53\uDE60-\uDE6D\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95]|\uDB40[\uDC01\uDC20-\uDC7F]'
+    },
+    {
+        'name': 'Coptic',
+        'bmp': '\u03E2-\u03EF\u2C80-\u2CF3\u2CF9-\u2CFF'
+    },
+    {
+        'name': 'Cuneiform',
+        'astral': '\uD808[\uDC00-\uDF99]|\uD809[\uDC00-\uDC6E\uDC70-\uDC74\uDC80-\uDD43]'
+    },
+    {
+        'name': 'Cypriot',
+        'astral': '\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F]'
+    },
+    {
+        'name': 'Cyrillic',
+        'bmp': '\u0400-\u0484\u0487-\u052F\u1C80-\u1C88\u1D2B\u1D78\u2DE0-\u2DFF\uA640-\uA69F\uFE2E\uFE2F'
+    },
+    {
+        'name': 'Deseret',
+        'astral': '\uD801[\uDC00-\uDC4F]'
+    },
+    {
+        'name': 'Devanagari',
+        'bmp': '\u0900-\u0950\u0955-\u0963\u0966-\u097F\uA8E0-\uA8FF'
+    },
+    {
+        'name': 'Dogra',
+        'astral': '\uD806[\uDC00-\uDC3B]'
+    },
+    {
+        'name': 'Duployan',
+        'astral': '\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99\uDC9C-\uDC9F]'
+    },
+    {
+        'name': 'Egyptian_Hieroglyphs',
+        'astral': '\uD80C[\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2E\uDC30-\uDC38]'
+    },
+    {
+        'name': 'Elbasan',
+        'astral': '\uD801[\uDD00-\uDD27]'
+    },
+    {
+        'name': 'Elymaic',
+        'astral': '\uD803[\uDFE0-\uDFF6]'
+    },
+    {
+        'name': 'Ethiopic',
+        'bmp': '\u1200-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u135D-\u137C\u1380-\u1399\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E'
+    },
+    {
+        'name': 'Georgian',
+        'bmp': '\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u10FF\u1C90-\u1CBA\u1CBD-\u1CBF\u2D00-\u2D25\u2D27\u2D2D'
+    },
+    {
+        'name': 'Glagolitic',
+        'bmp': '\u2C00-\u2C2E\u2C30-\u2C5E',
+        'astral': '\uD838[\uDC00-\uDC06\uDC08-\uDC18\uDC1B-\uDC21\uDC23\uDC24\uDC26-\uDC2A]'
+    },
+    {
+        'name': 'Gothic',
+        'astral': '\uD800[\uDF30-\uDF4A]'
+    },
+    {
+        'name': 'Grantha',
+        'astral': '\uD804[\uDF00-\uDF03\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3C-\uDF44\uDF47\uDF48\uDF4B-\uDF4D\uDF50\uDF57\uDF5D-\uDF63\uDF66-\uDF6C\uDF70-\uDF74]'
+    },
+    {
+        'name': 'Greek',
+        'bmp': '\u0370-\u0373\u0375-\u0377\u037A-\u037D\u037F\u0384\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03E1\u03F0-\u03FF\u1D26-\u1D2A\u1D5D-\u1D61\u1D66-\u1D6A\u1DBF\u1F00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FC4\u1FC6-\u1FD3\u1FD6-\u1FDB\u1FDD-\u1FEF\u1FF2-\u1FF4\u1FF6-\u1FFE\u2126\uAB65',
+        'astral': '\uD800[\uDD40-\uDD8E\uDDA0]|\uD834[\uDE00-\uDE45]'
+    },
+    {
+        'name': 'Gujarati',
+        'bmp': '\u0A81-\u0A83\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABC-\u0AC5\u0AC7-\u0AC9\u0ACB-\u0ACD\u0AD0\u0AE0-\u0AE3\u0AE6-\u0AF1\u0AF9-\u0AFF'
+    },
+    {
+        'name': 'Gunjala_Gondi',
+        'astral': '\uD807[\uDD60-\uDD65\uDD67\uDD68\uDD6A-\uDD8E\uDD90\uDD91\uDD93-\uDD98\uDDA0-\uDDA9]'
+    },
+    {
+        'name': 'Gurmukhi',
+        'bmp': '\u0A01-\u0A03\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A3C\u0A3E-\u0A42\u0A47\u0A48\u0A4B-\u0A4D\u0A51\u0A59-\u0A5C\u0A5E\u0A66-\u0A76'
+    },
+    {
+        'name': 'Han',
+        'bmp': '\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u3005\u3007\u3021-\u3029\u3038-\u303B\u3400-\u4DB5\u4E00-\u9FEF\uF900-\uFA6D\uFA70-\uFAD9',
+        'astral': '[\uD840-\uD868\uD86A-\uD86C\uD86F-\uD872\uD874-\uD879][\uDC00-\uDFFF]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D\uDC20-\uDFFF]|\uD873[\uDC00-\uDEA1\uDEB0-\uDFFF]|\uD87A[\uDC00-\uDFE0]|\uD87E[\uDC00-\uDE1D]'
+    },
+    {
+        'name': 'Hangul',
+        'bmp': '\u1100-\u11FF\u302E\u302F\u3131-\u318E\u3200-\u321E\u3260-\u327E\uA960-\uA97C\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uFFA0-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC'
+    },
+    {
+        'name': 'Hanifi_Rohingya',
+        'astral': '\uD803[\uDD00-\uDD27\uDD30-\uDD39]'
+    },
+    {
+        'name': 'Hanunoo',
+        'bmp': '\u1720-\u1734'
+    },
+    {
+        'name': 'Hatran',
+        'astral': '\uD802[\uDCE0-\uDCF2\uDCF4\uDCF5\uDCFB-\uDCFF]'
+    },
+    {
+        'name': 'Hebrew',
+        'bmp': '\u0591-\u05C7\u05D0-\u05EA\u05EF-\u05F4\uFB1D-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFB4F'
+    },
+    {
+        'name': 'Hiragana',
+        'bmp': '\u3041-\u3096\u309D-\u309F',
+        'astral': '\uD82C[\uDC01-\uDD1E\uDD50-\uDD52]|\uD83C\uDE00'
+    },
+    {
+        'name': 'Imperial_Aramaic',
+        'astral': '\uD802[\uDC40-\uDC55\uDC57-\uDC5F]'
+    },
+    {
+        'name': 'Inherited',
+        'bmp': '\u0300-\u036F\u0485\u0486\u064B-\u0655\u0670\u0951-\u0954\u1AB0-\u1ABE\u1CD0-\u1CD2\u1CD4-\u1CE0\u1CE2-\u1CE8\u1CED\u1CF4\u1CF8\u1CF9\u1DC0-\u1DF9\u1DFB-\u1DFF\u200C\u200D\u20D0-\u20F0\u302A-\u302D\u3099\u309A\uFE00-\uFE0F\uFE20-\uFE2D',
+        'astral': '\uD800[\uDDFD\uDEE0]|\uD804\uDF3B|\uD834[\uDD67-\uDD69\uDD7B-\uDD82\uDD85-\uDD8B\uDDAA-\uDDAD]|\uDB40[\uDD00-\uDDEF]'
+    },
+    {
+        'name': 'Inscriptional_Pahlavi',
+        'astral': '\uD802[\uDF60-\uDF72\uDF78-\uDF7F]'
+    },
+    {
+        'name': 'Inscriptional_Parthian',
+        'astral': '\uD802[\uDF40-\uDF55\uDF58-\uDF5F]'
+    },
+    {
+        'name': 'Javanese',
+        'bmp': '\uA980-\uA9CD\uA9D0-\uA9D9\uA9DE\uA9DF'
+    },
+    {
+        'name': 'Kaithi',
+        'astral': '\uD804[\uDC80-\uDCC1\uDCCD]'
+    },
+    {
+        'name': 'Kannada',
+        'bmp': '\u0C80-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBC-\u0CC4\u0CC6-\u0CC8\u0CCA-\u0CCD\u0CD5\u0CD6\u0CDE\u0CE0-\u0CE3\u0CE6-\u0CEF\u0CF1\u0CF2'
+    },
+    {
+        'name': 'Katakana',
+        'bmp': '\u30A1-\u30FA\u30FD-\u30FF\u31F0-\u31FF\u32D0-\u32FE\u3300-\u3357\uFF66-\uFF6F\uFF71-\uFF9D',
+        'astral': '\uD82C[\uDC00\uDD64-\uDD67]'
+    },
+    {
+        'name': 'Kayah_Li',
+        'bmp': '\uA900-\uA92D\uA92F'
+    },
+    {
+        'name': 'Kharoshthi',
+        'astral': '\uD802[\uDE00-\uDE03\uDE05\uDE06\uDE0C-\uDE13\uDE15-\uDE17\uDE19-\uDE35\uDE38-\uDE3A\uDE3F-\uDE48\uDE50-\uDE58]'
+    },
+    {
+        'name': 'Khmer',
+        'bmp': '\u1780-\u17DD\u17E0-\u17E9\u17F0-\u17F9\u19E0-\u19FF'
+    },
+    {
+        'name': 'Khojki',
+        'astral': '\uD804[\uDE00-\uDE11\uDE13-\uDE3E]'
+    },
+    {
+        'name': 'Khudawadi',
+        'astral': '\uD804[\uDEB0-\uDEEA\uDEF0-\uDEF9]'
+    },
+    {
+        'name': 'Lao',
+        'bmp': '\u0E81\u0E82\u0E84\u0E86-\u0E8A\u0E8C-\u0EA3\u0EA5\u0EA7-\u0EBD\u0EC0-\u0EC4\u0EC6\u0EC8-\u0ECD\u0ED0-\u0ED9\u0EDC-\u0EDF'
+    },
+    {
+        'name': 'Latin',
+        'bmp': 'A-Za-z\xAA\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02B8\u02E0-\u02E4\u1D00-\u1D25\u1D2C-\u1D5C\u1D62-\u1D65\u1D6B-\u1D77\u1D79-\u1DBE\u1E00-\u1EFF\u2071\u207F\u2090-\u209C\u212A\u212B\u2132\u214E\u2160-\u2188\u2C60-\u2C7F\uA722-\uA787\uA78B-\uA7BF\uA7C2-\uA7C6\uA7F7-\uA7FF\uAB30-\uAB5A\uAB5C-\uAB64\uAB66\uAB67\uFB00-\uFB06\uFF21-\uFF3A\uFF41-\uFF5A'
+    },
+    {
+        'name': 'Lepcha',
+        'bmp': '\u1C00-\u1C37\u1C3B-\u1C49\u1C4D-\u1C4F'
+    },
+    {
+        'name': 'Limbu',
+        'bmp': '\u1900-\u191E\u1920-\u192B\u1930-\u193B\u1940\u1944-\u194F'
+    },
+    {
+        'name': 'Linear_A',
+        'astral': '\uD801[\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67]'
+    },
+    {
+        'name': 'Linear_B',
+        'astral': '\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA]'
+    },
+    {
+        'name': 'Lisu',
+        'bmp': '\uA4D0-\uA4FF'
+    },
+    {
+        'name': 'Lycian',
+        'astral': '\uD800[\uDE80-\uDE9C]'
+    },
+    {
+        'name': 'Lydian',
+        'astral': '\uD802[\uDD20-\uDD39\uDD3F]'
+    },
+    {
+        'name': 'Mahajani',
+        'astral': '\uD804[\uDD50-\uDD76]'
+    },
+    {
+        'name': 'Makasar',
+        'astral': '\uD807[\uDEE0-\uDEF8]'
+    },
+    {
+        'name': 'Malayalam',
+        'bmp': '\u0D00-\u0D03\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D44\u0D46-\u0D48\u0D4A-\u0D4F\u0D54-\u0D63\u0D66-\u0D7F'
+    },
+    {
+        'name': 'Mandaic',
+        'bmp': '\u0840-\u085B\u085E'
+    },
+    {
+        'name': 'Manichaean',
+        'astral': '\uD802[\uDEC0-\uDEE6\uDEEB-\uDEF6]'
+    },
+    {
+        'name': 'Marchen',
+        'astral': '\uD807[\uDC70-\uDC8F\uDC92-\uDCA7\uDCA9-\uDCB6]'
+    },
+    {
+        'name': 'Masaram_Gondi',
+        'astral': '\uD807[\uDD00-\uDD06\uDD08\uDD09\uDD0B-\uDD36\uDD3A\uDD3C\uDD3D\uDD3F-\uDD47\uDD50-\uDD59]'
+    },
+    {
+        'name': 'Medefaidrin',
+        'astral': '\uD81B[\uDE40-\uDE9A]'
+    },
+    {
+        'name': 'Meetei_Mayek',
+        'bmp': '\uAAE0-\uAAF6\uABC0-\uABED\uABF0-\uABF9'
+    },
+    {
+        'name': 'Mende_Kikakui',
+        'astral': '\uD83A[\uDC00-\uDCC4\uDCC7-\uDCD6]'
+    },
+    {
+        'name': 'Meroitic_Cursive',
+        'astral': '\uD802[\uDDA0-\uDDB7\uDDBC-\uDDCF\uDDD2-\uDDFF]'
+    },
+    {
+        'name': 'Meroitic_Hieroglyphs',
+        'astral': '\uD802[\uDD80-\uDD9F]'
+    },
+    {
+        'name': 'Miao',
+        'astral': '\uD81B[\uDF00-\uDF4A\uDF4F-\uDF87\uDF8F-\uDF9F]'
+    },
+    {
+        'name': 'Modi',
+        'astral': '\uD805[\uDE00-\uDE44\uDE50-\uDE59]'
+    },
+    {
+        'name': 'Mongolian',
+        'bmp': '\u1800\u1801\u1804\u1806-\u180E\u1810-\u1819\u1820-\u1878\u1880-\u18AA',
+        'astral': '\uD805[\uDE60-\uDE6C]'
+    },
+    {
+        'name': 'Mro',
+        'astral': '\uD81A[\uDE40-\uDE5E\uDE60-\uDE69\uDE6E\uDE6F]'
+    },
+    {
+        'name': 'Multani',
+        'astral': '\uD804[\uDE80-\uDE86\uDE88\uDE8A-\uDE8D\uDE8F-\uDE9D\uDE9F-\uDEA9]'
+    },
+    {
+        'name': 'Myanmar',
+        'bmp': '\u1000-\u109F\uA9E0-\uA9FE\uAA60-\uAA7F'
+    },
+    {
+        'name': 'Nabataean',
+        'astral': '\uD802[\uDC80-\uDC9E\uDCA7-\uDCAF]'
+    },
+    {
+        'name': 'Nandinagari',
+        'astral': '\uD806[\uDDA0-\uDDA7\uDDAA-\uDDD7\uDDDA-\uDDE4]'
+    },
+    {
+        'name': 'New_Tai_Lue',
+        'bmp': '\u1980-\u19AB\u19B0-\u19C9\u19D0-\u19DA\u19DE\u19DF'
+    },
+    {
+        'name': 'Newa',
+        'astral': '\uD805[\uDC00-\uDC59\uDC5B\uDC5D-\uDC5F]'
+    },
+    {
+        'name': 'Nko',
+        'bmp': '\u07C0-\u07FA\u07FD-\u07FF'
+    },
+    {
+        'name': 'Nushu',
+        'astral': '\uD81B\uDFE1|\uD82C[\uDD70-\uDEFB]'
+    },
+    {
+        'name': 'Nyiakeng_Puachue_Hmong',
+        'astral': '\uD838[\uDD00-\uDD2C\uDD30-\uDD3D\uDD40-\uDD49\uDD4E\uDD4F]'
+    },
+    {
+        'name': 'Ogham',
+        'bmp': '\u1680-\u169C'
+    },
+    {
+        'name': 'Ol_Chiki',
+        'bmp': '\u1C50-\u1C7F'
+    },
+    {
+        'name': 'Old_Hungarian',
+        'astral': '\uD803[\uDC80-\uDCB2\uDCC0-\uDCF2\uDCFA-\uDCFF]'
+    },
+    {
+        'name': 'Old_Italic',
+        'astral': '\uD800[\uDF00-\uDF23\uDF2D-\uDF2F]'
+    },
+    {
+        'name': 'Old_North_Arabian',
+        'astral': '\uD802[\uDE80-\uDE9F]'
+    },
+    {
+        'name': 'Old_Permic',
+        'astral': '\uD800[\uDF50-\uDF7A]'
+    },
+    {
+        'name': 'Old_Persian',
+        'astral': '\uD800[\uDFA0-\uDFC3\uDFC8-\uDFD5]'
+    },
+    {
+        'name': 'Old_Sogdian',
+        'astral': '\uD803[\uDF00-\uDF27]'
+    },
+    {
+        'name': 'Old_South_Arabian',
+        'astral': '\uD802[\uDE60-\uDE7F]'
+    },
+    {
+        'name': 'Old_Turkic',
+        'astral': '\uD803[\uDC00-\uDC48]'
+    },
+    {
+        'name': 'Oriya',
+        'bmp': '\u0B01-\u0B03\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3C-\u0B44\u0B47\u0B48\u0B4B-\u0B4D\u0B56\u0B57\u0B5C\u0B5D\u0B5F-\u0B63\u0B66-\u0B77'
+    },
+    {
+        'name': 'Osage',
+        'astral': '\uD801[\uDCB0-\uDCD3\uDCD8-\uDCFB]'
+    },
+    {
+        'name': 'Osmanya',
+        'astral': '\uD801[\uDC80-\uDC9D\uDCA0-\uDCA9]'
+    },
+    {
+        'name': 'Pahawh_Hmong',
+        'astral': '\uD81A[\uDF00-\uDF45\uDF50-\uDF59\uDF5B-\uDF61\uDF63-\uDF77\uDF7D-\uDF8F]'
+    },
+    {
+        'name': 'Palmyrene',
+        'astral': '\uD802[\uDC60-\uDC7F]'
+    },
+    {
+        'name': 'Pau_Cin_Hau',
+        'astral': '\uD806[\uDEC0-\uDEF8]'
+    },
+    {
+        'name': 'Phags_Pa',
+        'bmp': '\uA840-\uA877'
+    },
+    {
+        'name': 'Phoenician',
+        'astral': '\uD802[\uDD00-\uDD1B\uDD1F]'
+    },
+    {
+        'name': 'Psalter_Pahlavi',
+        'astral': '\uD802[\uDF80-\uDF91\uDF99-\uDF9C\uDFA9-\uDFAF]'
+    },
+    {
+        'name': 'Rejang',
+        'bmp': '\uA930-\uA953\uA95F'
+    },
+    {
+        'name': 'Runic',
+        'bmp': '\u16A0-\u16EA\u16EE-\u16F8'
+    },
+    {
+        'name': 'Samaritan',
+        'bmp': '\u0800-\u082D\u0830-\u083E'
+    },
+    {
+        'name': 'Saurashtra',
+        'bmp': '\uA880-\uA8C5\uA8CE-\uA8D9'
+    },
+    {
+        'name': 'Sharada',
+        'astral': '\uD804[\uDD80-\uDDCD\uDDD0-\uDDDF]'
+    },
+    {
+        'name': 'Shavian',
+        'astral': '\uD801[\uDC50-\uDC7F]'
+    },
+    {
+        'name': 'Siddham',
+        'astral': '\uD805[\uDD80-\uDDB5\uDDB8-\uDDDD]'
+    },
+    {
+        'name': 'SignWriting',
+        'astral': '\uD836[\uDC00-\uDE8B\uDE9B-\uDE9F\uDEA1-\uDEAF]'
+    },
+    {
+        'name': 'Sinhala',
+        'bmp': '\u0D82\u0D83\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0DCA\u0DCF-\u0DD4\u0DD6\u0DD8-\u0DDF\u0DE6-\u0DEF\u0DF2-\u0DF4',
+        'astral': '\uD804[\uDDE1-\uDDF4]'
+    },
+    {
+        'name': 'Sogdian',
+        'astral': '\uD803[\uDF30-\uDF59]'
+    },
+    {
+        'name': 'Sora_Sompeng',
+        'astral': '\uD804[\uDCD0-\uDCE8\uDCF0-\uDCF9]'
+    },
+    {
+        'name': 'Soyombo',
+        'astral': '\uD806[\uDE50-\uDEA2]'
+    },
+    {
+        'name': 'Sundanese',
+        'bmp': '\u1B80-\u1BBF\u1CC0-\u1CC7'
+    },
+    {
+        'name': 'Syloti_Nagri',
+        'bmp': '\uA800-\uA82B'
+    },
+    {
+        'name': 'Syriac',
+        'bmp': '\u0700-\u070D\u070F-\u074A\u074D-\u074F\u0860-\u086A'
+    },
+    {
+        'name': 'Tagalog',
+        'bmp': '\u1700-\u170C\u170E-\u1714'
+    },
+    {
+        'name': 'Tagbanwa',
+        'bmp': '\u1760-\u176C\u176E-\u1770\u1772\u1773'
+    },
+    {
+        'name': 'Tai_Le',
+        'bmp': '\u1950-\u196D\u1970-\u1974'
+    },
+    {
+        'name': 'Tai_Tham',
+        'bmp': '\u1A20-\u1A5E\u1A60-\u1A7C\u1A7F-\u1A89\u1A90-\u1A99\u1AA0-\u1AAD'
+    },
+    {
+        'name': 'Tai_Viet',
+        'bmp': '\uAA80-\uAAC2\uAADB-\uAADF'
+    },
+    {
+        'name': 'Takri',
+        'astral': '\uD805[\uDE80-\uDEB8\uDEC0-\uDEC9]'
+    },
+    {
+        'name': 'Tamil',
+        'bmp': '\u0B82\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0BD0\u0BD7\u0BE6-\u0BFA',
+        'astral': '\uD807[\uDFC0-\uDFF1\uDFFF]'
+    },
+    {
+        'name': 'Tangut',
+        'astral': '\uD81B\uDFE0|[\uD81C-\uD820][\uDC00-\uDFFF]|\uD821[\uDC00-\uDFF7]|\uD822[\uDC00-\uDEF2]'
+    },
+    {
+        'name': 'Telugu',
+        'bmp': '\u0C00-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D-\u0C44\u0C46-\u0C48\u0C4A-\u0C4D\u0C55\u0C56\u0C58-\u0C5A\u0C60-\u0C63\u0C66-\u0C6F\u0C77-\u0C7F'
+    },
+    {
+        'name': 'Thaana',
+        'bmp': '\u0780-\u07B1'
+    },
+    {
+        'name': 'Thai',
+        'bmp': '\u0E01-\u0E3A\u0E40-\u0E5B'
+    },
+    {
+        'name': 'Tibetan',
+        'bmp': '\u0F00-\u0F47\u0F49-\u0F6C\u0F71-\u0F97\u0F99-\u0FBC\u0FBE-\u0FCC\u0FCE-\u0FD4\u0FD9\u0FDA'
+    },
+    {
+        'name': 'Tifinagh',
+        'bmp': '\u2D30-\u2D67\u2D6F\u2D70\u2D7F'
+    },
+    {
+        'name': 'Tirhuta',
+        'astral': '\uD805[\uDC80-\uDCC7\uDCD0-\uDCD9]'
+    },
+    {
+        'name': 'Ugaritic',
+        'astral': '\uD800[\uDF80-\uDF9D\uDF9F]'
+    },
+    {
+        'name': 'Vai',
+        'bmp': '\uA500-\uA62B'
+    },
+    {
+        'name': 'Wancho',
+        'astral': '\uD838[\uDEC0-\uDEF9\uDEFF]'
+    },
+    {
+        'name': 'Warang_Citi',
+        'astral': '\uD806[\uDCA0-\uDCF2\uDCFF]'
+    },
+    {
+        'name': 'Yi',
+        'bmp': '\uA000-\uA48C\uA490-\uA4C6'
+    },
+    {
+        'name': 'Zanabazar_Square',
+        'astral': '\uD806[\uDE00-\uDE47]'
+    }
+];
+
+
+/***/ }),
+/* 424 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var toIndexedObject = __webpack_require__(882);
+var addToUnscopables = __webpack_require__(497);
+var Iterators = __webpack_require__(218);
+var InternalStateModule = __webpack_require__(304);
+var defineIterator = __webpack_require__(623);
+
+var ARRAY_ITERATOR = 'Array Iterator';
+var setInternalState = InternalStateModule.set;
+var getInternalState = InternalStateModule.getterFor(ARRAY_ITERATOR);
+
+// `Array.prototype.entries` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.entries
+// `Array.prototype.keys` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.keys
+// `Array.prototype.values` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.values
+// `Array.prototype[@@iterator]` method
+// https://tc39.github.io/ecma262/#sec-array.prototype-@@iterator
+// `CreateArrayIterator` internal method
+// https://tc39.github.io/ecma262/#sec-createarrayiterator
+module.exports = defineIterator(Array, 'Array', function (iterated, kind) {
+  setInternalState(this, {
+    type: ARRAY_ITERATOR,
+    target: toIndexedObject(iterated), // target
+    index: 0,                          // next index
+    kind: kind                         // kind
+  });
+// `%ArrayIteratorPrototype%.next` method
+// https://tc39.github.io/ecma262/#sec-%arrayiteratorprototype%.next
+}, function () {
+  var state = getInternalState(this);
+  var target = state.target;
+  var kind = state.kind;
+  var index = state.index++;
+  if (!target || index >= target.length) {
+    state.target = undefined;
+    return { value: undefined, done: true };
+  }
+  if (kind == 'keys') return { value: index, done: false };
+  if (kind == 'values') return { value: target[index], done: false };
+  return { value: [index, target[index]], done: false };
+}, 'values');
+
+// argumentsList[@@iterator] is %ArrayProto_values%
+// https://tc39.github.io/ecma262/#sec-createunmappedargumentsobject
+// https://tc39.github.io/ecma262/#sec-createmappedargumentsobject
+Iterators.Arguments = Iterators.Array;
+
+// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
+addToUnscopables('keys');
+addToUnscopables('values');
+addToUnscopables('entries');
+
+
+/***/ }),
 /* 425 */,
 /* 426 */,
 /* 427 */,
@@ -23136,9 +25487,211 @@ module.exports = lte
 
 
 /***/ }),
-/* 431 */,
+/* 431 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.hasInstance` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.hasinstance
+defineWellKnownSymbol('hasInstance');
+
+
+/***/ }),
 /* 432 */,
-/* 433 */,
+/* 433 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const stringWidth = __webpack_require__(330);
+const stripAnsi = __webpack_require__(598);
+const ansiStyles = __webpack_require__(776);
+
+const ESCAPES = new Set([
+	'\u001B',
+	'\u009B'
+]);
+
+const END_CODE = 39;
+
+const wrapAnsi = code => `${ESCAPES.values().next().value}[${code}m`;
+
+// Calculate the length of words split on ' ', ignoring
+// the extra characters added by ansi escape codes
+const wordLengths = string => string.split(' ').map(character => stringWidth(character));
+
+// Wrap a long word across multiple rows
+// Ansi escape codes do not count towards length
+const wrapWord = (rows, word, columns) => {
+	const characters = [...word];
+
+	let isInsideEscape = false;
+	let visible = stringWidth(stripAnsi(rows[rows.length - 1]));
+
+	for (const [index, character] of characters.entries()) {
+		const characterLength = stringWidth(character);
+
+		if (visible + characterLength <= columns) {
+			rows[rows.length - 1] += character;
+		} else {
+			rows.push(character);
+			visible = 0;
+		}
+
+		if (ESCAPES.has(character)) {
+			isInsideEscape = true;
+		} else if (isInsideEscape && character === 'm') {
+			isInsideEscape = false;
+			continue;
+		}
+
+		if (isInsideEscape) {
+			continue;
+		}
+
+		visible += characterLength;
+
+		if (visible === columns && index < characters.length - 1) {
+			rows.push('');
+			visible = 0;
+		}
+	}
+
+	// It's possible that the last row we copy over is only
+	// ansi escape characters, handle this edge-case
+	if (!visible && rows[rows.length - 1].length > 0 && rows.length > 1) {
+		rows[rows.length - 2] += rows.pop();
+	}
+};
+
+// Trims spaces from a string ignoring invisible sequences
+const stringVisibleTrimSpacesRight = str => {
+	const words = str.split(' ');
+	let last = words.length;
+
+	while (last > 0) {
+		if (stringWidth(words[last - 1]) > 0) {
+			break;
+		}
+
+		last--;
+	}
+
+	if (last === words.length) {
+		return str;
+	}
+
+	return words.slice(0, last).join(' ') + words.slice(last).join('');
+};
+
+// The wrap-ansi module can be invoked in either 'hard' or 'soft' wrap mode
+//
+// 'hard' will never allow a string to take up more than columns characters
+//
+// 'soft' allows long words to expand past the column length
+const exec = (string, columns, options = {}) => {
+	if (options.trim !== false && string.trim() === '') {
+		return '';
+	}
+
+	let pre = '';
+	let ret = '';
+	let escapeCode;
+
+	const lengths = wordLengths(string);
+	let rows = [''];
+
+	for (const [index, word] of string.split(' ').entries()) {
+		if (options.trim !== false) {
+			rows[rows.length - 1] = rows[rows.length - 1].trimLeft();
+		}
+
+		let rowLength = stringWidth(rows[rows.length - 1]);
+
+		if (index !== 0) {
+			if (rowLength >= columns && (options.wordWrap === false || options.trim === false)) {
+				// If we start with a new word but the current row length equals the length of the columns, add a new row
+				rows.push('');
+				rowLength = 0;
+			}
+
+			if (rowLength > 0 || options.trim === false) {
+				rows[rows.length - 1] += ' ';
+				rowLength++;
+			}
+		}
+
+		// In 'hard' wrap mode, the length of a line is never allowed to extend past 'columns'
+		if (options.hard && lengths[index] > columns) {
+			const remainingColumns = (columns - rowLength);
+			const breaksStartingThisLine = 1 + Math.floor((lengths[index] - remainingColumns - 1) / columns);
+			const breaksStartingNextLine = Math.floor((lengths[index] - 1) / columns);
+			if (breaksStartingNextLine < breaksStartingThisLine) {
+				rows.push('');
+			}
+
+			wrapWord(rows, word, columns);
+			continue;
+		}
+
+		if (rowLength + lengths[index] > columns && rowLength > 0 && lengths[index] > 0) {
+			if (options.wordWrap === false && rowLength < columns) {
+				wrapWord(rows, word, columns);
+				continue;
+			}
+
+			rows.push('');
+		}
+
+		if (rowLength + lengths[index] > columns && options.wordWrap === false) {
+			wrapWord(rows, word, columns);
+			continue;
+		}
+
+		rows[rows.length - 1] += word;
+	}
+
+	if (options.trim !== false) {
+		rows = rows.map(stringVisibleTrimSpacesRight);
+	}
+
+	pre = rows.join('\n');
+
+	for (const [index, character] of [...pre].entries()) {
+		ret += character;
+
+		if (ESCAPES.has(character)) {
+			const code = parseFloat(/\d[^m]*/.exec(pre.slice(index, index + 4)));
+			escapeCode = code === END_CODE ? null : code;
+		}
+
+		const code = ansiStyles.codes.get(Number(escapeCode));
+
+		if (escapeCode && code) {
+			if (pre[index + 1] === '\n') {
+				ret += wrapAnsi(code);
+			} else if (character === '\n') {
+				ret += wrapAnsi(escapeCode);
+			}
+		}
+	}
+
+	return ret;
+};
+
+// For each newline, invoke the method separately
+module.exports = (string, columns, options) => {
+	return String(string)
+		.normalize()
+		.replace(/\r\n/g, '\n')
+		.split('\n')
+		.map(line => exec(line, columns, options))
+		.join('\n');
+};
+
+
+/***/ }),
 /* 434 */
 /***/ (function(module) {
 
@@ -23154,7 +25707,24 @@ module.exports = debug
 
 
 /***/ }),
-/* 435 */,
+/* 435 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var toInteger = __webpack_require__(83);
+
+var max = Math.max;
+var min = Math.min;
+
+// Helper for a popular repeating case of the spec:
+// Let integer be ? ToInteger(index).
+// If integer < 0, let result be max((length + integer), 0); else let result be min(integer, length).
+module.exports = function (index, length) {
+  var integer = toInteger(index);
+  return integer < 0 ? max(integer + length, 0) : min(integer, length);
+};
+
+
+/***/ }),
 /* 436 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -23353,184 +25923,16 @@ module.exports = function () {
 
 
 /***/ }),
-/* 440 */
+/* 440 */,
+/* 441 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+var parent = __webpack_require__(633);
 
-
-var path = __webpack_require__(622)
-var replace = __webpack_require__(48)
-var buffer = __webpack_require__(155)
-
-module.exports = VFile
-
-var own = {}.hasOwnProperty
-var proto = VFile.prototype
-
-// Order of setting (least specific to most), we need this because otherwise
-// `{stem: 'a', path: '~/b.js'}` would throw, as a path is needed before a
-// stem can be set.
-var order = ['history', 'path', 'basename', 'stem', 'extname', 'dirname']
-
-proto.toString = toString
-
-// Access full path (`~/index.min.js`).
-Object.defineProperty(proto, 'path', {get: getPath, set: setPath})
-
-// Access parent path (`~`).
-Object.defineProperty(proto, 'dirname', {get: getDirname, set: setDirname})
-
-// Access basename (`index.min.js`).
-Object.defineProperty(proto, 'basename', {get: getBasename, set: setBasename})
-
-// Access extname (`.js`).
-Object.defineProperty(proto, 'extname', {get: getExtname, set: setExtname})
-
-// Access stem (`index.min`).
-Object.defineProperty(proto, 'stem', {get: getStem, set: setStem})
-
-// Construct a new file.
-function VFile(options) {
-  var prop
-  var index
-  var length
-
-  if (!options) {
-    options = {}
-  } else if (typeof options === 'string' || buffer(options)) {
-    options = {contents: options}
-  } else if ('message' in options && 'messages' in options) {
-    return options
-  }
-
-  if (!(this instanceof VFile)) {
-    return new VFile(options)
-  }
-
-  this.data = {}
-  this.messages = []
-  this.history = []
-  this.cwd = process.cwd()
-
-  // Set path related properties in the correct order.
-  index = -1
-  length = order.length
-
-  while (++index < length) {
-    prop = order[index]
-
-    if (own.call(options, prop)) {
-      this[prop] = options[prop]
-    }
-  }
-
-  // Set non-path related properties.
-  for (prop in options) {
-    if (order.indexOf(prop) === -1) {
-      this[prop] = options[prop]
-    }
-  }
-}
-
-function getPath() {
-  return this.history[this.history.length - 1]
-}
-
-function setPath(path) {
-  assertNonEmpty(path, 'path')
-
-  if (path !== this.path) {
-    this.history.push(path)
-  }
-}
-
-function getDirname() {
-  return typeof this.path === 'string' ? path.dirname(this.path) : undefined
-}
-
-function setDirname(dirname) {
-  assertPath(this.path, 'dirname')
-  this.path = path.join(dirname || '', this.basename)
-}
-
-function getBasename() {
-  return typeof this.path === 'string' ? path.basename(this.path) : undefined
-}
-
-function setBasename(basename) {
-  assertNonEmpty(basename, 'basename')
-  assertPart(basename, 'basename')
-  this.path = path.join(this.dirname || '', basename)
-}
-
-function getExtname() {
-  return typeof this.path === 'string' ? path.extname(this.path) : undefined
-}
-
-function setExtname(extname) {
-  var ext = extname || ''
-
-  assertPart(ext, 'extname')
-  assertPath(this.path, 'extname')
-
-  if (ext) {
-    if (ext.charAt(0) !== '.') {
-      throw new Error('`extname` must start with `.`')
-    }
-
-    if (ext.indexOf('.', 1) !== -1) {
-      throw new Error('`extname` cannot contain multiple dots')
-    }
-  }
-
-  this.path = replace(this.path, ext)
-}
-
-function getStem() {
-  return typeof this.path === 'string'
-    ? path.basename(this.path, this.extname)
-    : undefined
-}
-
-function setStem(stem) {
-  assertNonEmpty(stem, 'stem')
-  assertPart(stem, 'stem')
-  this.path = path.join(this.dirname || '', stem + (this.extname || ''))
-}
-
-// Get the value of the file.
-function toString(encoding) {
-  var value = this.contents || ''
-  return buffer(value) ? value.toString(encoding) : String(value)
-}
-
-// Assert that `part` is not a path (i.e., does not contain `path.sep`).
-function assertPart(part, name) {
-  if (part.indexOf(path.sep) !== -1) {
-    throw new Error(
-      '`' + name + '` cannot be a path: did not expect `' + path.sep + '`'
-    )
-  }
-}
-
-// Assert that `part` is not empty.
-function assertNonEmpty(part, name) {
-  if (!part) {
-    throw new Error('`' + name + '` cannot be empty')
-  }
-}
-
-// Assert `path` exists.
-function assertPath(path, name) {
-  if (!path) {
-    throw new Error('Setting `' + name + '` requires `path` to be set too')
-  }
-}
+module.exports = parent;
 
 
 /***/ }),
-/* 441 */,
 /* 442 */,
 /* 443 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -23953,7 +26355,7 @@ function enclose(uri, always) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const camelCase = __webpack_require__(825)
-const decamelize = __webpack_require__(597)
+const decamelize = __webpack_require__(978)
 const path = __webpack_require__(622)
 const tokenizeArgString = __webpack_require__(279)
 const util = __webpack_require__(669)
@@ -24987,7 +27389,23 @@ module.exports = Parser
 
 
 /***/ }),
-/* 454 */,
+/* 454 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var toPrimitive = __webpack_require__(301);
+var definePropertyModule = __webpack_require__(690);
+var createPropertyDescriptor = __webpack_require__(62);
+
+module.exports = function (object, key, value) {
+  var propertyKey = toPrimitive(key);
+  if (propertyKey in object) definePropertyModule.f(object, propertyKey, createPropertyDescriptor(0, value));
+  else object[propertyKey] = value;
+};
+
+
+/***/ }),
 /* 455 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -25093,9 +27511,24 @@ module.exports = new Type('tag:yaml.org,2002:js/undefined', {
 
 
 /***/ }),
-/* 458 */,
+/* 458 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(294);
+
+/***/ }),
 /* 459 */,
-/* 460 */,
+/* 460 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.toPrimitive` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.toprimitive
+defineWellKnownSymbol('toPrimitive');
+
+
+/***/ }),
 /* 461 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -25162,7 +27595,19 @@ function inlineHTML(eat, value, silent) {
 
 
 /***/ }),
-/* 462 */,
+/* 462 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var NATIVE_SYMBOL = __webpack_require__(603);
+
+module.exports = NATIVE_SYMBOL
+  // eslint-disable-next-line no-undef
+  && !Symbol.sham
+  // eslint-disable-next-line no-undef
+  && typeof Symbol.iterator == 'symbol';
+
+
+/***/ }),
 /* 463 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -25200,7 +27645,15 @@ function parseAsync (str, opts) {
 
 
 /***/ }),
-/* 464 */,
+/* 464 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(647);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 465 */,
 /* 466 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -25279,10 +27732,81 @@ function create(matter) {
 
 
 /***/ }),
-/* 469 */,
+/* 469 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var fails = __webpack_require__(105);
+var isArray = __webpack_require__(516);
+var isObject = __webpack_require__(195);
+var toObject = __webpack_require__(375);
+var toLength = __webpack_require__(745);
+var createProperty = __webpack_require__(454);
+var arraySpeciesCreate = __webpack_require__(958);
+var arrayMethodHasSpeciesSupport = __webpack_require__(837);
+var wellKnownSymbol = __webpack_require__(778);
+var V8_VERSION = __webpack_require__(317);
+
+var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
+var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded';
+
+// We can't use this feature detection in V8 since it causes
+// deoptimization and serious performance degradation
+// https://github.com/zloirock/core-js/issues/679
+var IS_CONCAT_SPREADABLE_SUPPORT = V8_VERSION >= 51 || !fails(function () {
+  var array = [];
+  array[IS_CONCAT_SPREADABLE] = false;
+  return array.concat()[0] !== array;
+});
+
+var SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('concat');
+
+var isConcatSpreadable = function (O) {
+  if (!isObject(O)) return false;
+  var spreadable = O[IS_CONCAT_SPREADABLE];
+  return spreadable !== undefined ? !!spreadable : isArray(O);
+};
+
+var FORCED = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT;
+
+// `Array.prototype.concat` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.concat
+// with adding support of @@isConcatSpreadable and @@species
+$({ target: 'Array', proto: true, forced: FORCED }, {
+  concat: function concat(arg) { // eslint-disable-line no-unused-vars
+    var O = toObject(this);
+    var A = arraySpeciesCreate(O, 0);
+    var n = 0;
+    var i, k, length, len, E;
+    for (i = -1, length = arguments.length; i < length; i++) {
+      E = i === -1 ? O : arguments[i];
+      if (isConcatSpreadable(E)) {
+        len = toLength(E.length);
+        if (n + len > MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+        for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
+      } else {
+        if (n >= MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+        createProperty(A, n++, E);
+      }
+    }
+    A.length = n;
+    return A;
+  }
+});
+
+
+/***/ }),
 /* 470 */,
 /* 471 */,
-/* 472 */,
+/* 472 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(331);
+
+/***/ }),
 /* 473 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -25733,11 +28257,179 @@ module.exports = minSatisfying
 
 /***/ }),
 /* 487 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
-var n=__webpack_require__(912),r=__webpack_require__(700);function e(n){return"function"==typeof n.addEventListener}function t(n,r,t){e(n)?n.addEventListener(r,t):n.on(r,t)}function o(n,r,t){e(n)?n.removeEventListener(r,t):n.off(r,t)}function*i(n,r){var e=function(){};try{return yield new Promise((function(o){t(n,r,e=function(){for(var n=arguments.length,r=new Array(n),e=0;e<n;e++)r[e]=arguments[e];return o(r)})}))}finally{o(n,r,e)}}exports.on=function(r,e){return n.createSubscription((function*(n){var i=function(){for(var r=arguments.length,e=new Array(r),t=0;t<r;t++)e[t]=arguments[t];return n(e)};try{t(r,e,i),yield}finally{o(r,e,i)}}))},exports.once=i,exports.throwOnErrorEvent=function(n){return r.spawn((function*(){throw(yield i(n,"error"))[0]}))};
-//# sourceMappingURL=events.cjs.production.min.js.map
+
+
+var path = __webpack_require__(622)
+var replace = __webpack_require__(48)
+var buffer = __webpack_require__(155)
+
+module.exports = VFile
+
+var own = {}.hasOwnProperty
+var proto = VFile.prototype
+
+// Order of setting (least specific to most), we need this because otherwise
+// `{stem: 'a', path: '~/b.js'}` would throw, as a path is needed before a
+// stem can be set.
+var order = ['history', 'path', 'basename', 'stem', 'extname', 'dirname']
+
+proto.toString = toString
+
+// Access full path (`~/index.min.js`).
+Object.defineProperty(proto, 'path', {get: getPath, set: setPath})
+
+// Access parent path (`~`).
+Object.defineProperty(proto, 'dirname', {get: getDirname, set: setDirname})
+
+// Access basename (`index.min.js`).
+Object.defineProperty(proto, 'basename', {get: getBasename, set: setBasename})
+
+// Access extname (`.js`).
+Object.defineProperty(proto, 'extname', {get: getExtname, set: setExtname})
+
+// Access stem (`index.min`).
+Object.defineProperty(proto, 'stem', {get: getStem, set: setStem})
+
+// Construct a new file.
+function VFile(options) {
+  var prop
+  var index
+  var length
+
+  if (!options) {
+    options = {}
+  } else if (typeof options === 'string' || buffer(options)) {
+    options = {contents: options}
+  } else if ('message' in options && 'messages' in options) {
+    return options
+  }
+
+  if (!(this instanceof VFile)) {
+    return new VFile(options)
+  }
+
+  this.data = {}
+  this.messages = []
+  this.history = []
+  this.cwd = process.cwd()
+
+  // Set path related properties in the correct order.
+  index = -1
+  length = order.length
+
+  while (++index < length) {
+    prop = order[index]
+
+    if (own.call(options, prop)) {
+      this[prop] = options[prop]
+    }
+  }
+
+  // Set non-path related properties.
+  for (prop in options) {
+    if (order.indexOf(prop) === -1) {
+      this[prop] = options[prop]
+    }
+  }
+}
+
+function getPath() {
+  return this.history[this.history.length - 1]
+}
+
+function setPath(path) {
+  assertNonEmpty(path, 'path')
+
+  if (path !== this.path) {
+    this.history.push(path)
+  }
+}
+
+function getDirname() {
+  return typeof this.path === 'string' ? path.dirname(this.path) : undefined
+}
+
+function setDirname(dirname) {
+  assertPath(this.path, 'dirname')
+  this.path = path.join(dirname || '', this.basename)
+}
+
+function getBasename() {
+  return typeof this.path === 'string' ? path.basename(this.path) : undefined
+}
+
+function setBasename(basename) {
+  assertNonEmpty(basename, 'basename')
+  assertPart(basename, 'basename')
+  this.path = path.join(this.dirname || '', basename)
+}
+
+function getExtname() {
+  return typeof this.path === 'string' ? path.extname(this.path) : undefined
+}
+
+function setExtname(extname) {
+  var ext = extname || ''
+
+  assertPart(ext, 'extname')
+  assertPath(this.path, 'extname')
+
+  if (ext) {
+    if (ext.charAt(0) !== '.') {
+      throw new Error('`extname` must start with `.`')
+    }
+
+    if (ext.indexOf('.', 1) !== -1) {
+      throw new Error('`extname` cannot contain multiple dots')
+    }
+  }
+
+  this.path = replace(this.path, ext)
+}
+
+function getStem() {
+  return typeof this.path === 'string'
+    ? path.basename(this.path, this.extname)
+    : undefined
+}
+
+function setStem(stem) {
+  assertNonEmpty(stem, 'stem')
+  assertPart(stem, 'stem')
+  this.path = path.join(this.dirname || '', stem + (this.extname || ''))
+}
+
+// Get the value of the file.
+function toString(encoding) {
+  var value = this.contents || ''
+  return buffer(value) ? value.toString(encoding) : String(value)
+}
+
+// Assert that `part` is not a path (i.e., does not contain `path.sep`).
+function assertPart(part, name) {
+  if (part.indexOf(path.sep) !== -1) {
+    throw new Error(
+      '`' + name + '` cannot be a path: did not expect `' + path.sep + '`'
+    )
+  }
+}
+
+// Assert that `part` is not empty.
+function assertNonEmpty(part, name) {
+  if (!part) {
+    throw new Error('`' + name + '` cannot be empty')
+  }
+}
+
+// Assert `path` exists.
+function assertPath(path, name) {
+  if (!path) {
+    throw new Error('Setting `' + name + '` requires `path` to be set too')
+  }
+}
 
 
 /***/ }),
@@ -26126,7 +28818,7 @@ module.exports = picomatch;
 
 "use strict";
 
-const pTry = __webpack_require__(834);
+const pTry = __webpack_require__(674);
 
 const pLimit = concurrency => {
 	if (!((Number.isInteger(concurrency) || concurrency === Infinity) && concurrency > 0)) {
@@ -26185,78 +28877,14 @@ module.exports.default = pLimit;
 
 
 /***/ }),
-/* 496 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/* 496 */,
+/* 497 */
+/***/ (function(module) {
 
-"use strict";
-
-
-// hoisted due to circular dependency on command.
-module.exports = {
-  applyMiddleware,
-  commandMiddlewareFactory,
-  globalMiddlewareFactory
-}
-const isPromise = __webpack_require__(288)
-const argsert = __webpack_require__(301)
-
-function globalMiddlewareFactory (globalMiddleware, context) {
-  return function (callback, applyBeforeValidation = false) {
-    argsert('<array|function> [boolean]', [callback, applyBeforeValidation], arguments.length)
-    if (Array.isArray(callback)) {
-      for (let i = 0; i < callback.length; i++) {
-        if (typeof callback[i] !== 'function') {
-          throw Error('middleware must be a function')
-        }
-        callback[i].applyBeforeValidation = applyBeforeValidation
-      }
-      Array.prototype.push.apply(globalMiddleware, callback)
-    } else if (typeof callback === 'function') {
-      callback.applyBeforeValidation = applyBeforeValidation
-      globalMiddleware.push(callback)
-    }
-    return context
-  }
-}
-
-function commandMiddlewareFactory (commandMiddleware) {
-  if (!commandMiddleware) return []
-  return commandMiddleware.map(middleware => {
-    middleware.applyBeforeValidation = false
-    return middleware
-  })
-}
-
-function applyMiddleware (argv, yargs, middlewares, beforeValidation) {
-  const beforeValidationError = new Error('middleware cannot return a promise when applyBeforeValidation is true')
-  return middlewares
-    .reduce((accumulation, middleware) => {
-      if (middleware.applyBeforeValidation !== beforeValidation) {
-        return accumulation
-      }
-
-      if (isPromise(accumulation)) {
-        return accumulation
-          .then(initialObj =>
-            Promise.all([initialObj, middleware(initialObj, yargs)])
-          )
-          .then(([initialObj, middlewareObj]) =>
-            Object.assign(initialObj, middlewareObj)
-          )
-      } else {
-        const result = middleware(argv, yargs)
-        if (beforeValidation && isPromise(result)) throw beforeValidationError
-
-        return isPromise(result)
-          ? result.then(middlewareObj => Object.assign(accumulation, middlewareObj))
-          : Object.assign(accumulation, result)
-      }
-    }, argv)
-}
+module.exports = function () { /* empty */ };
 
 
 /***/ }),
-/* 497 */,
 /* 498 */,
 /* 499 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -26476,71 +29104,65 @@ module.exports = outside
 
 /***/ }),
 /* 502 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const SemVer = __webpack_require__(840)
+const Range = __webpack_require__(318)
+const gt = __webpack_require__(855)
 
-Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(17);
-const partial_1 = __webpack_require__(790);
-class DeepFilter {
-    constructor(_settings, _micromatchOptions) {
-        this._settings = _settings;
-        this._micromatchOptions = _micromatchOptions;
-    }
-    getFilter(basePath, positive, negative) {
-        const matcher = this._getMatcher(positive);
-        const negativeRe = this._getNegativePatternsRe(negative);
-        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
-    }
-    _getMatcher(patterns) {
-        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
-    }
-    _getNegativePatternsRe(patterns) {
-        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
-        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
-    }
-    _filter(basePath, entry, matcher, negativeRe) {
-        if (this._isSkippedByDeep(basePath, entry.path)) {
-            return false;
-        }
-        if (this._isSkippedSymbolicLink(entry)) {
-            return false;
-        }
-        const filepath = utils.path.removeLeadingDotSegment(entry.path);
-        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
-            return false;
-        }
-        return this._isSkippedByNegativePatterns(filepath, negativeRe);
-    }
-    _isSkippedByDeep(basePath, entryPath) {
-        /**
-         * Avoid unnecessary depth calculations when it doesn't matter.
-         */
-        if (this._settings.deep === Infinity) {
-            return false;
-        }
-        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
-    }
-    _getEntryLevel(basePath, entryPath) {
-        const entryPathDepth = entryPath.split('/').length;
-        if (basePath === '') {
-            return entryPathDepth;
-        }
-        const basePathDepth = basePath.split('/').length;
-        return entryPathDepth - basePathDepth;
-    }
-    _isSkippedSymbolicLink(entry) {
-        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
-    }
-    _isSkippedByPositivePatterns(entryPath, matcher) {
-        return !this._settings.baseNameMatch && !matcher.match(entryPath);
-    }
-    _isSkippedByNegativePatterns(entryPath, patternsRe) {
-        return !utils.pattern.matchAny(entryPath, patternsRe);
-    }
+const minVersion = (range, loose) => {
+  range = new Range(range, loose)
+
+  let minver = new SemVer('0.0.0')
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = new SemVer('0.0.0-0')
+  if (range.test(minver)) {
+    return minver
+  }
+
+  minver = null
+  for (let i = 0; i < range.set.length; ++i) {
+    const comparators = range.set[i]
+
+    comparators.forEach((comparator) => {
+      // Clone to avoid manipulating the comparator's semver object.
+      const compver = new SemVer(comparator.semver.version)
+      switch (comparator.operator) {
+        case '>':
+          if (compver.prerelease.length === 0) {
+            compver.patch++
+          } else {
+            compver.prerelease.push(0)
+          }
+          compver.raw = compver.format()
+          /* fallthrough */
+        case '':
+        case '>=':
+          if (!minver || gt(minver, compver)) {
+            minver = compver
+          }
+          break
+        case '<':
+        case '<=':
+          /* Ignore maximum versions */
+          break
+        /* istanbul ignore next */
+        default:
+          throw new Error(`Unexpected operation: ${comparator.operator}`)
+      }
+    })
+  }
+
+  if (minver && range.test(minver)) {
+    return minver
+  }
+
+  return null
 }
-exports.default = DeepFilter;
+module.exports = minVersion
 
 
 /***/ }),
@@ -26701,7 +29323,15 @@ which.sync = whichSync
 
 
 /***/ }),
-/* 506 */,
+/* 506 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(75);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 507 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -26720,7 +29350,20 @@ module.exports = lte
 
 
 /***/ }),
-/* 509 */,
+/* 509 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var sort = __webpack_require__(821);
+
+var ArrayPrototype = Array.prototype;
+
+module.exports = function (it) {
+  var own = it.sort;
+  return it === ArrayPrototype || (it instanceof Array && own === ArrayPrototype.sort) ? sort : own;
+};
+
+
+/***/ }),
 /* 510 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -27131,7 +29774,7 @@ module.exports = templateSettings;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(622);
-const deep_1 = __webpack_require__(502);
+const deep_1 = __webpack_require__(565);
 const entry_1 = __webpack_require__(148);
 const error_1 = __webpack_require__(952);
 const entry_2 = __webpack_require__(272);
@@ -27327,74 +29970,213 @@ module.exports = {
 
 
 /***/ }),
-/* 516 */,
-/* 517 */,
-/* 518 */,
-/* 519 */,
-/* 520 */
+/* 516 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const SemVer = __webpack_require__(840)
-const Range = __webpack_require__(318)
-const gt = __webpack_require__(855)
+var classof = __webpack_require__(404);
 
-const minVersion = (range, loose) => {
-  range = new Range(range, loose)
-
-  let minver = new SemVer('0.0.0')
-  if (range.test(minver)) {
-    return minver
-  }
-
-  minver = new SemVer('0.0.0-0')
-  if (range.test(minver)) {
-    return minver
-  }
-
-  minver = null
-  for (let i = 0; i < range.set.length; ++i) {
-    const comparators = range.set[i]
-
-    comparators.forEach((comparator) => {
-      // Clone to avoid manipulating the comparator's semver object.
-      const compver = new SemVer(comparator.semver.version)
-      switch (comparator.operator) {
-        case '>':
-          if (compver.prerelease.length === 0) {
-            compver.patch++
-          } else {
-            compver.prerelease.push(0)
-          }
-          compver.raw = compver.format()
-          /* fallthrough */
-        case '':
-        case '>=':
-          if (!minver || gt(minver, compver)) {
-            minver = compver
-          }
-          break
-        case '<':
-        case '<=':
-          /* Ignore maximum versions */
-          break
-        /* istanbul ignore next */
-        default:
-          throw new Error(`Unexpected operation: ${comparator.operator}`)
-      }
-    })
-  }
-
-  if (minver && range.test(minver)) {
-    return minver
-  }
-
-  return null
-}
-module.exports = minVersion
+// `IsArray` abstract operation
+// https://tc39.github.io/ecma262/#sec-isarray
+module.exports = Array.isArray || function isArray(arg) {
+  return classof(arg) == 'Array';
+};
 
 
 /***/ }),
-/* 521 */,
+/* 517 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const ANY = Symbol('SemVer ANY')
+// hoisted class for cyclic dependency
+class Comparator {
+  static get ANY () {
+    return ANY
+  }
+  constructor (comp, options) {
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
+      }
+    }
+
+    if (comp instanceof Comparator) {
+      if (comp.loose === !!options.loose) {
+        return comp
+      } else {
+        comp = comp.value
+      }
+    }
+
+    debug('comparator', comp, options)
+    this.options = options
+    this.loose = !!options.loose
+    this.parse(comp)
+
+    if (this.semver === ANY) {
+      this.value = ''
+    } else {
+      this.value = this.operator + this.semver.version
+    }
+
+    debug('comp', this)
+  }
+
+  parse (comp) {
+    const r = this.options.loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR]
+    const m = comp.match(r)
+
+    if (!m) {
+      throw new TypeError(`Invalid comparator: ${comp}`)
+    }
+
+    this.operator = m[1] !== undefined ? m[1] : ''
+    if (this.operator === '=') {
+      this.operator = ''
+    }
+
+    // if it literally is just '>' or '' then allow anything.
+    if (!m[2]) {
+      this.semver = ANY
+    } else {
+      this.semver = new SemVer(m[2], this.options.loose)
+    }
+  }
+
+  toString () {
+    return this.value
+  }
+
+  test (version) {
+    debug('Comparator.test', version, this.options.loose)
+
+    if (this.semver === ANY || version === ANY) {
+      return true
+    }
+
+    if (typeof version === 'string') {
+      try {
+        version = new SemVer(version, this.options)
+      } catch (er) {
+        return false
+      }
+    }
+
+    return cmp(version, this.operator, this.semver, this.options)
+  }
+
+  intersects (comp, options) {
+    if (!(comp instanceof Comparator)) {
+      throw new TypeError('a Comparator is required')
+    }
+
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
+      }
+    }
+
+    if (this.operator === '') {
+      if (this.value === '') {
+        return true
+      }
+      return new Range(comp.value, options).test(this.value)
+    } else if (comp.operator === '') {
+      if (comp.value === '') {
+        return true
+      }
+      return new Range(this.value, options).test(comp.semver)
+    }
+
+    const sameDirectionIncreasing =
+      (this.operator === '>=' || this.operator === '>') &&
+      (comp.operator === '>=' || comp.operator === '>')
+    const sameDirectionDecreasing =
+      (this.operator === '<=' || this.operator === '<') &&
+      (comp.operator === '<=' || comp.operator === '<')
+    const sameSemVer = this.semver.version === comp.semver.version
+    const differentDirectionsInclusive =
+      (this.operator === '>=' || this.operator === '<=') &&
+      (comp.operator === '>=' || comp.operator === '<=')
+    const oppositeDirectionsLessThan =
+      cmp(this.semver, '<', comp.semver, options) &&
+      (this.operator === '>=' || this.operator === '>') &&
+        (comp.operator === '<=' || comp.operator === '<')
+    const oppositeDirectionsGreaterThan =
+      cmp(this.semver, '>', comp.semver, options) &&
+      (this.operator === '<=' || this.operator === '<') &&
+        (comp.operator === '>=' || comp.operator === '>')
+
+    return (
+      sameDirectionIncreasing ||
+      sameDirectionDecreasing ||
+      (sameSemVer && differentDirectionsInclusive) ||
+      oppositeDirectionsLessThan ||
+      oppositeDirectionsGreaterThan
+    )
+  }
+}
+
+module.exports = Comparator
+
+const {re, t} = __webpack_require__(398)
+const cmp = __webpack_require__(299)
+const debug = __webpack_require__(940)
+const SemVer = __webpack_require__(840)
+const Range = __webpack_require__(318)
+
+
+/***/ }),
+/* 518 */
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = ({onlyFirst = false} = {}) => {
+	const pattern = [
+		'[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
+		'(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))'
+	].join('|');
+
+	return new RegExp(pattern, onlyFirst ? undefined : 'g');
+};
+
+
+/***/ }),
+/* 519 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var arrayWithHoles = __webpack_require__(615);
+
+var iterableToArrayLimit = __webpack_require__(634);
+
+var unsupportedIterableToArray = __webpack_require__(569);
+
+var nonIterableRest = __webpack_require__(385);
+
+function _slicedToArray(arr, i) {
+  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || unsupportedIterableToArray(arr, i) || nonIterableRest();
+}
+
+module.exports = _slicedToArray;
+
+/***/ }),
+/* 520 */,
+/* 521 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var fails = __webpack_require__(105);
+
+module.exports = !fails(function () {
+  function F() { /* empty */ }
+  F.prototype.constructor = null;
+  return Object.getPrototypeOf(new F()) !== F.prototype;
+});
+
+
+/***/ }),
 /* 522 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -27469,7 +30251,12 @@ function label(node) {
 
 /***/ }),
 /* 525 */,
-/* 526 */,
+/* 526 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(988);
+
+/***/ }),
 /* 527 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -27593,8 +30380,290 @@ module.exports = new Type('tag:yaml.org,2002:float', {
 
 
 /***/ }),
-/* 528 */,
-/* 529 */,
+/* 528 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(395);
+
+var _Object$defineProperty = __webpack_require__(617);
+
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = void 0;
+
+var _concat = _interopRequireDefault(__webpack_require__(4));
+
+var _includes = _interopRequireDefault(__webpack_require__(913));
+
+var _map = _interopRequireDefault(__webpack_require__(526));
+
+var _reduce = _interopRequireDefault(__webpack_require__(123));
+
+/*!
+ * XRegExp.build 4.3.0
+ * <xregexp.com>
+ * Steven Levithan (c) 2012-present MIT License
+ */
+var _default = function _default(XRegExp) {
+  var REGEX_DATA = 'xregexp';
+  var subParts = /(\()(?!\?)|\\([1-9]\d*)|\\[\s\S]|\[(?:[^\\\]]|\\[\s\S])*\]/g;
+  var parts = XRegExp.union([/\({{([\w$]+)}}\)|{{([\w$]+)}}/, subParts], 'g', {
+    conjunction: 'or'
+  });
+  /**
+   * Strips a leading `^` and trailing unescaped `$`, if both are present.
+   *
+   * @private
+   * @param {String} pattern Pattern to process.
+   * @returns {String} Pattern with edge anchors removed.
+   */
+
+  function deanchor(pattern) {
+    // Allow any number of empty noncapturing groups before/after anchors, because regexes
+    // built/generated by XRegExp sometimes include them
+    var leadingAnchor = /^(?:\(\?:\))*\^/;
+    var trailingAnchor = /\$(?:\(\?:\))*$/;
+
+    if (leadingAnchor.test(pattern) && trailingAnchor.test(pattern) && // Ensure that the trailing `$` isn't escaped
+    trailingAnchor.test(pattern.replace(/\\[\s\S]/g, ''))) {
+      return pattern.replace(leadingAnchor, '').replace(trailingAnchor, '');
+    }
+
+    return pattern;
+  }
+  /**
+   * Converts the provided value to an XRegExp. Native RegExp flags are not preserved.
+   *
+   * @private
+   * @param {String|RegExp} value Value to convert.
+   * @param {Boolean} [addFlagX] Whether to apply the `x` flag in cases when `value` is not
+   *   already a regex generated by XRegExp
+   * @returns {RegExp} XRegExp object with XRegExp syntax applied.
+   */
+
+
+  function asXRegExp(value, addFlagX) {
+    var flags = addFlagX ? 'x' : '';
+    return XRegExp.isRegExp(value) ? value[REGEX_DATA] && value[REGEX_DATA].captureNames ? // Don't recompile, to preserve capture names
+    value : // Recompile as XRegExp
+    XRegExp(value.source, flags) : // Compile string as XRegExp
+    XRegExp(value, flags);
+  }
+
+  function interpolate(substitution) {
+    return substitution instanceof RegExp ? substitution : XRegExp.escape(substitution);
+  }
+
+  function reduceToSubpatternsObject(subpatterns, interpolated, subpatternIndex) {
+    subpatterns["subpattern".concat(subpatternIndex)] = interpolated;
+    return subpatterns;
+  }
+
+  function embedSubpatternAfter(raw, subpatternIndex, rawLiterals) {
+    var hasSubpattern = subpatternIndex < rawLiterals.length - 1;
+    return raw + (hasSubpattern ? "{{subpattern".concat(subpatternIndex, "}}") : '');
+  }
+  /**
+   * Provides tagged template literals that create regexes with XRegExp syntax and flags. The
+   * provided pattern is handled as a raw string, so backslashes don't need to be escaped.
+   *
+   * Interpolation of strings and regexes shares the features of `XRegExp.build`. Interpolated
+   * patterns are treated as atomic units when quantified, interpolated strings have their special
+   * characters escaped, a leading `^` and trailing unescaped `$` are stripped from interpolated
+   * regexes if both are present, and any backreferences within an interpolated regex are
+   * rewritten to work within the overall pattern.
+   *
+   * @memberOf XRegExp
+   * @param {String} [flags] Any combination of XRegExp flags.
+   * @returns {Function} Handler for template literals that construct regexes with XRegExp syntax.
+   * @example
+   *
+   * const h12 = /1[0-2]|0?[1-9]/;
+   * const h24 = /2[0-3]|[01][0-9]/;
+   * const hours = XRegExp.tag('x')`${h12} : | ${h24}`;
+   * const minutes = /^[0-5][0-9]$/;
+   * // Note that explicitly naming the 'minutes' group is required for named backreferences
+   * const time = XRegExp.tag('x')`^ ${hours} (?<minutes>${minutes}) $`;
+   * time.test('10:59'); // -> true
+   * XRegExp.exec('10:59', time).minutes; // -> '59'
+   */
+
+
+  XRegExp.tag = function (flags) {
+    return function (literals) {
+      var _context, _context2;
+
+      for (var _len = arguments.length, substitutions = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        substitutions[_key - 1] = arguments[_key];
+      }
+
+      var subpatterns = (0, _reduce.default)(_context = (0, _map.default)(substitutions).call(substitutions, interpolate)).call(_context, reduceToSubpatternsObject, {});
+      var pattern = (0, _map.default)(_context2 = literals.raw).call(_context2, embedSubpatternAfter).join('');
+      return XRegExp.build(pattern, subpatterns, flags);
+    };
+  };
+  /**
+   * Builds regexes using named subpatterns, for readability and pattern reuse. Backreferences in
+   * the outer pattern and provided subpatterns are automatically renumbered to work correctly.
+   * Native flags used by provided subpatterns are ignored in favor of the `flags` argument.
+   *
+   * @memberOf XRegExp
+   * @param {String} pattern XRegExp pattern using `{{name}}` for embedded subpatterns. Allows
+   *   `({{name}})` as shorthand for `(?<name>{{name}})`. Patterns cannot be embedded within
+   *   character classes.
+   * @param {Object} subs Lookup object for named subpatterns. Values can be strings or regexes. A
+   *   leading `^` and trailing unescaped `$` are stripped from subpatterns, if both are present.
+   * @param {String} [flags] Any combination of XRegExp flags.
+   * @returns {RegExp} Regex with interpolated subpatterns.
+   * @example
+   *
+   * const time = XRegExp.build('(?x)^ {{hours}} ({{minutes}}) $', {
+   *   hours: XRegExp.build('{{h12}} : | {{h24}}', {
+   *     h12: /1[0-2]|0?[1-9]/,
+   *     h24: /2[0-3]|[01][0-9]/
+   *   }, 'x'),
+   *   minutes: /^[0-5][0-9]$/
+   * });
+   * time.test('10:59'); // -> true
+   * XRegExp.exec('10:59', time).minutes; // -> '59'
+   */
+
+
+  XRegExp.build = function (pattern, subs, flags) {
+    flags = flags || ''; // Used with `asXRegExp` calls for `pattern` and subpatterns in `subs`, to work around how
+    // some browsers convert `RegExp('\n')` to a regex that contains the literal characters `\`
+    // and `n`. See more details at <https://github.com/slevithan/xregexp/pull/163>.
+
+    var addFlagX = (0, _includes.default)(flags).call(flags, 'x');
+    var inlineFlags = /^\(\?([\w$]+)\)/.exec(pattern); // Add flags within a leading mode modifier to the overall pattern's flags
+
+    if (inlineFlags) {
+      flags = XRegExp._clipDuplicates(flags + inlineFlags[1]);
+    }
+
+    var data = {};
+
+    for (var p in subs) {
+      if (subs.hasOwnProperty(p)) {
+        // Passing to XRegExp enables extended syntax and ensures independent validity,
+        // lest an unescaped `(`, `)`, `[`, or trailing `\` breaks the `(?:)` wrapper. For
+        // subpatterns provided as native regexes, it dies on octals and adds the property
+        // used to hold extended regex instance data, for simplicity.
+        var sub = asXRegExp(subs[p], addFlagX);
+        data[p] = {
+          // Deanchoring allows embedding independently useful anchored regexes. If you
+          // really need to keep your anchors, double them (i.e., `^^...$$`).
+          pattern: deanchor(sub.source),
+          names: sub[REGEX_DATA].captureNames || []
+        };
+      }
+    } // Passing to XRegExp dies on octals and ensures the outer pattern is independently valid;
+    // helps keep this simple. Named captures will be put back.
+
+
+    var patternAsRegex = asXRegExp(pattern, addFlagX); // 'Caps' is short for 'captures'
+
+    var numCaps = 0;
+    var numPriorCaps;
+    var numOuterCaps = 0;
+    var outerCapsMap = [0];
+    var outerCapNames = patternAsRegex[REGEX_DATA].captureNames || [];
+    var output = patternAsRegex.source.replace(parts, function ($0, $1, $2, $3, $4) {
+      var subName = $1 || $2;
+      var capName;
+      var intro;
+      var localCapIndex; // Named subpattern
+
+      if (subName) {
+        var _context3;
+
+        if (!data.hasOwnProperty(subName)) {
+          throw new ReferenceError("Undefined property ".concat($0));
+        } // Named subpattern was wrapped in a capturing group
+
+
+        if ($1) {
+          capName = outerCapNames[numOuterCaps];
+          outerCapsMap[++numOuterCaps] = ++numCaps; // If it's a named group, preserve the name. Otherwise, use the subpattern name
+          // as the capture name
+
+          intro = "(?<".concat(capName || subName, ">");
+        } else {
+          intro = '(?:';
+        }
+
+        numPriorCaps = numCaps;
+        var rewrittenSubpattern = data[subName].pattern.replace(subParts, function (match, paren, backref) {
+          // Capturing group
+          if (paren) {
+            capName = data[subName].names[numCaps - numPriorCaps];
+            ++numCaps; // If the current capture has a name, preserve the name
+
+            if (capName) {
+              return "(?<".concat(capName, ">");
+            } // Backreference
+
+          } else if (backref) {
+            localCapIndex = +backref - 1; // Rewrite the backreference
+
+            return data[subName].names[localCapIndex] ? // Need to preserve the backreference name in case using flag `n`
+            "\\k<".concat(data[subName].names[localCapIndex], ">") : "\\".concat(+backref + numPriorCaps);
+          }
+
+          return match;
+        });
+        return (0, _concat.default)(_context3 = "".concat(intro)).call(_context3, rewrittenSubpattern, ")");
+      } // Capturing group
+
+
+      if ($3) {
+        capName = outerCapNames[numOuterCaps];
+        outerCapsMap[++numOuterCaps] = ++numCaps; // If the current capture has a name, preserve the name
+
+        if (capName) {
+          return "(?<".concat(capName, ">");
+        } // Backreference
+
+      } else if ($4) {
+        localCapIndex = +$4 - 1; // Rewrite the backreference
+
+        return outerCapNames[localCapIndex] ? // Need to preserve the backreference name in case using flag `n`
+        "\\k<".concat(outerCapNames[localCapIndex], ">") : "\\".concat(outerCapsMap[+$4]);
+      }
+
+      return $0;
+    });
+    return XRegExp(output, flags);
+  };
+};
+
+exports.default = _default;
+module.exports = exports["default"];
+
+/***/ }),
+/* 529 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var store = __webpack_require__(338);
+
+var functionToString = Function.toString;
+
+// this helper broken in `3.4.1-3.4.4`, so we can't use `shared` helper
+if (typeof store.inspectSource != 'function') {
+  store.inspectSource = function (it) {
+    return functionToString.call(it);
+  };
+}
+
+module.exports = store.inspectSource;
+
+
+/***/ }),
 /* 530 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -27780,13 +30849,13 @@ module.exports = {
   lte: __webpack_require__(508),
   cmp: __webpack_require__(299),
   coerce: __webpack_require__(408),
-  Comparator: __webpack_require__(9),
+  Comparator: __webpack_require__(517),
   Range: __webpack_require__(318),
-  satisfies: __webpack_require__(845),
+  satisfies: __webpack_require__(60),
   toComparators: __webpack_require__(510),
   maxSatisfying: __webpack_require__(266),
   minSatisfying: __webpack_require__(38),
-  minVersion: __webpack_require__(520),
+  minVersion: __webpack_require__(502),
   validRange: __webpack_require__(319),
   outside: __webpack_require__(783),
   gtr: __webpack_require__(557),
@@ -28242,6 +31311,7 @@ const core = __webpack_require__(852);
 const github = __webpack_require__(983);
 const { main } = __webpack_require__(142);
 const { covector } = __webpack_require__(584);
+const fs = __webpack_require__(747);
 
 main(function* run() {
   try {
@@ -28279,7 +31349,7 @@ main(function* run() {
       const { owner, repo } = github.context.repo;
       let releases = {};
       for (let pkg of Object.keys(covectored)) {
-        if (covectored[pkg].command !== false || true) {
+        if (covectored[pkg].command !== false) {
           // true to test
           const createReleaseResponse = yield octokit.repos.createRelease({
             owner,
@@ -28290,6 +31360,30 @@ main(function* run() {
           });
           const { data } = createReleaseResponse;
           releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
+
+          const { releaseId } = data;
+
+          // Determine content-length for header to upload asset
+          const contentLength = (filePath) => fs.statSync(filePath).size;
+
+          if (covectored[pkg].pkg.assets) {
+            for (let asset in covectored[pkg].pkg.assetPaths) {
+              // Setup headers for API call, see Octokit Documentation: https://octokit.github.io/rest.js/#octokit-routes-repos-upload-release-asset for more information
+              const headers = {
+                "content-type": assetContentType,
+                "content-length": contentLength(assetPath),
+              };
+
+              const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
+                owner,
+                repo,
+                headers,
+                release_id,
+                name: asset.name,
+                file: fs.readFileSync(asset.path),
+              });
+            }
+          }
         }
       }
     }
@@ -28313,7 +31407,17 @@ const commandText = (pkg) => {
 
 
 /***/ }),
-/* 546 */,
+/* 546 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.asyncIterator` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.asynciterator
+defineWellKnownSymbol('asyncIterator');
+
+
+/***/ }),
 /* 547 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -28511,524 +31615,89 @@ module.exports = opts => {
 
 
 /***/ }),
-/* 551 */,
+/* 551 */
+/***/ (function() {
+
+// empty
+
+
+/***/ }),
 /* 552 */,
 /* 553 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
+const path = __webpack_require__(622);
+const pathKey = __webpack_require__(164);
 
-var map = __webpack_require__(906);
-var yaml = __webpack_require__(251);
+const npmRunPath = options => {
+	options = {
+		cwd: process.cwd(),
+		path: process.env[pathKey()],
+		execPath: process.execPath,
+		...options
+	};
 
-var yamlPlugin = function yamlPlugin(options) {
-    options = options || {};
+	let previous;
+	let cwdPath = path.resolve(options.cwd);
+	const result = [];
 
-    function transformer(ast) {
-        return map(ast, function (node) {
-            if (node.type == "yaml") {
-                var parsedValue = yaml.safeLoad(node.value, 'utf8');
-                var newNode = Object.assign({}, node, { data: { parsedValue: parsedValue } });
-                return newNode;
-            } else {
-                return node;
-            }
-        });
-    }
+	while (previous !== cwdPath) {
+		result.push(path.join(cwdPath, 'node_modules/.bin'));
+		previous = cwdPath;
+		cwdPath = path.resolve(cwdPath, '..');
+	}
 
-    // Stringify for yaml
-    var Compiler = this.Compiler;
+	// Ensure the running `node` binary is used
+	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
+	result.push(execPathDir);
 
-    if (Compiler != null) {
-        var visitors = Compiler.prototype.visitors;
-        if (visitors) {
-            visitors.yaml = function (node) {
-                if (node.data && node.data.parsedValue) {
-                    var yml = yaml.safeDump(node.data.parsedValue);
-                    return '---\n' + yml + '---';
-                }
-            };
-        }
-    }
-
-    return transformer;
+	return result.concat(options.path).join(path.delimiter);
 };
 
-module.exports = yamlPlugin;
+module.exports = npmRunPath;
+// TODO: Remove this for the next major release
+module.exports.default = npmRunPath;
+
+module.exports.env = options => {
+	options = {
+		env: process.env,
+		...options
+	};
+
+	const env = {...options.env};
+	const path = pathKey({env});
+
+	options.path = env[path];
+	env[path] = module.exports(options);
+
+	return env;
+};
+
 
 /***/ }),
 /* 554 */,
-/* 555 */,
-/* 556 */
+/* 555 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+var classof = __webpack_require__(241);
+var wellKnownSymbol = __webpack_require__(778);
+var Iterators = __webpack_require__(218);
 
+var ITERATOR = wellKnownSymbol('iterator');
 
-const inspect = __webpack_require__(669).inspect
-const isPromise = __webpack_require__(288)
-const { applyMiddleware, commandMiddlewareFactory } = __webpack_require__(496)
-const path = __webpack_require__(622)
-const Parser = __webpack_require__(453)
-
-const DEFAULT_MARKER = /(^\*)|(^\$0)/
-
-// handles parsing positional arguments,
-// and populating argv with said positional
-// arguments.
-module.exports = function command (yargs, usage, validation, globalMiddleware) {
-  const self = {}
-  let handlers = {}
-  let aliasMap = {}
-  let defaultCommand
-  globalMiddleware = globalMiddleware || []
-
-  self.addHandler = function addHandler (cmd, description, builder, handler, commandMiddleware) {
-    let aliases = []
-    const middlewares = commandMiddlewareFactory(commandMiddleware)
-    handler = handler || (() => {})
-
-    if (Array.isArray(cmd)) {
-      aliases = cmd.slice(1)
-      cmd = cmd[0]
-    } else if (typeof cmd === 'object') {
-      let command = (Array.isArray(cmd.command) || typeof cmd.command === 'string') ? cmd.command : moduleName(cmd)
-      if (cmd.aliases) command = [].concat(command).concat(cmd.aliases)
-      self.addHandler(command, extractDesc(cmd), cmd.builder, cmd.handler, cmd.middlewares)
-      return
-    }
-
-    // allow a module to be provided instead of separate builder and handler
-    if (typeof builder === 'object' && builder.builder && typeof builder.handler === 'function') {
-      self.addHandler([cmd].concat(aliases), description, builder.builder, builder.handler, builder.middlewares)
-      return
-    }
-
-    // parse positionals out of cmd string
-    const parsedCommand = self.parseCommand(cmd)
-
-    // remove positional args from aliases only
-    aliases = aliases.map(alias => self.parseCommand(alias).cmd)
-
-    // check for default and filter out '*''
-    let isDefault = false
-    const parsedAliases = [parsedCommand.cmd].concat(aliases).filter((c) => {
-      if (DEFAULT_MARKER.test(c)) {
-        isDefault = true
-        return false
-      }
-      return true
-    })
-
-    // standardize on $0 for default command.
-    if (parsedAliases.length === 0 && isDefault) parsedAliases.push('$0')
-
-    // shift cmd and aliases after filtering out '*'
-    if (isDefault) {
-      parsedCommand.cmd = parsedAliases[0]
-      aliases = parsedAliases.slice(1)
-      cmd = cmd.replace(DEFAULT_MARKER, parsedCommand.cmd)
-    }
-
-    // populate aliasMap
-    aliases.forEach((alias) => {
-      aliasMap[alias] = parsedCommand.cmd
-    })
-
-    if (description !== false) {
-      usage.command(cmd, description, isDefault, aliases)
-    }
-
-    handlers[parsedCommand.cmd] = {
-      original: cmd,
-      description: description,
-      handler,
-      builder: builder || {},
-      middlewares,
-      demanded: parsedCommand.demanded,
-      optional: parsedCommand.optional
-    }
-
-    if (isDefault) defaultCommand = handlers[parsedCommand.cmd]
-  }
-
-  self.addDirectory = function addDirectory (dir, context, req, callerFile, opts) {
-    opts = opts || {}
-    // disable recursion to support nested directories of subcommands
-    if (typeof opts.recurse !== 'boolean') opts.recurse = false
-    // exclude 'json', 'coffee' from require-directory defaults
-    if (!Array.isArray(opts.extensions)) opts.extensions = ['js']
-    // allow consumer to define their own visitor function
-    const parentVisit = typeof opts.visit === 'function' ? opts.visit : o => o
-    // call addHandler via visitor function
-    opts.visit = function visit (obj, joined, filename) {
-      const visited = parentVisit(obj, joined, filename)
-      // allow consumer to skip modules with their own visitor
-      if (visited) {
-        // check for cyclic reference
-        // each command file path should only be seen once per execution
-        if (~context.files.indexOf(joined)) return visited
-        // keep track of visited files in context.files
-        context.files.push(joined)
-        self.addHandler(visited)
-      }
-      return visited
-    }
-    __webpack_require__(348)({ require: req, filename: callerFile }, dir, opts)
-  }
-
-  // lookup module object from require()d command and derive name
-  // if module was not require()d and no name given, throw error
-  function moduleName (obj) {
-    const mod = __webpack_require__(867)(obj)
-    if (!mod) throw new Error(`No command name given for module: ${inspect(obj)}`)
-    return commandFromFilename(mod.filename)
-  }
-
-  // derive command name from filename
-  function commandFromFilename (filename) {
-    return path.basename(filename, path.extname(filename))
-  }
-
-  function extractDesc (obj) {
-    for (let keys = ['describe', 'description', 'desc'], i = 0, l = keys.length, test; i < l; i++) {
-      test = obj[keys[i]]
-      if (typeof test === 'string' || typeof test === 'boolean') return test
-    }
-    return false
-  }
-
-  self.parseCommand = function parseCommand (cmd) {
-    const extraSpacesStrippedCommand = cmd.replace(/\s{2,}/g, ' ')
-    const splitCommand = extraSpacesStrippedCommand.split(/\s+(?![^[]*]|[^<]*>)/)
-    const bregex = /\.*[\][<>]/g
-    const parsedCommand = {
-      cmd: (splitCommand.shift()).replace(bregex, ''),
-      demanded: [],
-      optional: []
-    }
-    splitCommand.forEach((cmd, i) => {
-      let variadic = false
-      cmd = cmd.replace(/\s/g, '')
-      if (/\.+[\]>]/.test(cmd) && i === splitCommand.length - 1) variadic = true
-      if (/^\[/.test(cmd)) {
-        parsedCommand.optional.push({
-          cmd: cmd.replace(bregex, '').split('|'),
-          variadic
-        })
-      } else {
-        parsedCommand.demanded.push({
-          cmd: cmd.replace(bregex, '').split('|'),
-          variadic
-        })
-      }
-    })
-    return parsedCommand
-  }
-
-  self.getCommands = () => Object.keys(handlers).concat(Object.keys(aliasMap))
-
-  self.getCommandHandlers = () => handlers
-
-  self.hasDefaultCommand = () => !!defaultCommand
-
-  self.runCommand = function runCommand (command, yargs, parsed, commandIndex) {
-    let aliases = parsed.aliases
-    const commandHandler = handlers[command] || handlers[aliasMap[command]] || defaultCommand
-    const currentContext = yargs.getContext()
-    let numFiles = currentContext.files.length
-    const parentCommands = currentContext.commands.slice()
-
-    // what does yargs look like after the builder is run?
-    let innerArgv = parsed.argv
-    let innerYargs = null
-    let positionalMap = {}
-    if (command) {
-      currentContext.commands.push(command)
-      currentContext.fullCommands.push(commandHandler.original)
-    }
-    if (typeof commandHandler.builder === 'function') {
-      // a function can be provided, which builds
-      // up a yargs chain and possibly returns it.
-      innerYargs = commandHandler.builder(yargs.reset(parsed.aliases))
-      if (!innerYargs || (typeof innerYargs._parseArgs !== 'function')) {
-        innerYargs = yargs
-      }
-      if (shouldUpdateUsage(innerYargs)) {
-        innerYargs.getUsageInstance().usage(
-          usageFromParentCommandsCommandHandler(parentCommands, commandHandler),
-          commandHandler.description
-        )
-      }
-      innerArgv = innerYargs._parseArgs(null, null, true, commandIndex)
-      aliases = innerYargs.parsed.aliases
-    } else if (typeof commandHandler.builder === 'object') {
-      // as a short hand, an object can instead be provided, specifying
-      // the options that a command takes.
-      innerYargs = yargs.reset(parsed.aliases)
-      if (shouldUpdateUsage(innerYargs)) {
-        innerYargs.getUsageInstance().usage(
-          usageFromParentCommandsCommandHandler(parentCommands, commandHandler),
-          commandHandler.description
-        )
-      }
-      Object.keys(commandHandler.builder).forEach((key) => {
-        innerYargs.option(key, commandHandler.builder[key])
-      })
-      innerArgv = innerYargs._parseArgs(null, null, true, commandIndex)
-      aliases = innerYargs.parsed.aliases
-    }
-
-    if (!yargs._hasOutput()) {
-      positionalMap = populatePositionals(commandHandler, innerArgv, currentContext, yargs)
-    }
-
-    const middlewares = globalMiddleware.slice(0).concat(commandHandler.middlewares)
-    applyMiddleware(innerArgv, yargs, middlewares, true)
-
-    // we apply validation post-hoc, so that custom
-    // checks get passed populated positional arguments.
-    if (!yargs._hasOutput()) yargs._runValidation(innerArgv, aliases, positionalMap, yargs.parsed.error)
-
-    if (commandHandler.handler && !yargs._hasOutput()) {
-      yargs._setHasOutput()
-      // to simplify the parsing of positionals in commands,
-      // we temporarily populate '--' rather than _, with arguments
-      const populateDoubleDash = !!yargs.getOptions().configuration['populate--']
-      if (!populateDoubleDash) yargs._copyDoubleDash(innerArgv)
-
-      innerArgv = applyMiddleware(innerArgv, yargs, middlewares, false)
-      let handlerResult
-      if (isPromise(innerArgv)) {
-        handlerResult = innerArgv.then(argv => commandHandler.handler(argv))
-      } else {
-        handlerResult = commandHandler.handler(innerArgv)
-      }
-
-      const handlerFinishCommand = yargs.getHandlerFinishCommand()
-      if (isPromise(handlerResult)) {
-        yargs.getUsageInstance().cacheHelpMessage()
-        handlerResult
-          .then(value => {
-            if (handlerFinishCommand) {
-              handlerFinishCommand(value)
-            }
-          })
-          .catch(error => {
-            try {
-              yargs.getUsageInstance().fail(null, error)
-            } catch (err) {
-            // fail's throwing would cause an unhandled rejection.
-            }
-          })
-          .then(() => {
-            yargs.getUsageInstance().clearCachedHelpMessage()
-          })
-      } else {
-        if (handlerFinishCommand) {
-          handlerFinishCommand(handlerResult)
-        }
-      }
-    }
-
-    if (command) {
-      currentContext.commands.pop()
-      currentContext.fullCommands.pop()
-    }
-    numFiles = currentContext.files.length - numFiles
-    if (numFiles > 0) currentContext.files.splice(numFiles * -1, numFiles)
-
-    return innerArgv
-  }
-
-  function shouldUpdateUsage (yargs) {
-    return !yargs.getUsageInstance().getUsageDisabled() &&
-      yargs.getUsageInstance().getUsage().length === 0
-  }
-
-  function usageFromParentCommandsCommandHandler (parentCommands, commandHandler) {
-    const c = DEFAULT_MARKER.test(commandHandler.original) ? commandHandler.original.replace(DEFAULT_MARKER, '').trim() : commandHandler.original
-    const pc = parentCommands.filter((c) => { return !DEFAULT_MARKER.test(c) })
-    pc.push(c)
-    return `$0 ${pc.join(' ')}`
-  }
-
-  self.runDefaultBuilderOn = function (yargs) {
-    if (shouldUpdateUsage(yargs)) {
-      // build the root-level command string from the default string.
-      const commandString = DEFAULT_MARKER.test(defaultCommand.original)
-        ? defaultCommand.original : defaultCommand.original.replace(/^[^[\]<>]*/, '$0 ')
-      yargs.getUsageInstance().usage(
-        commandString,
-        defaultCommand.description
-      )
-    }
-    const builder = defaultCommand.builder
-    if (typeof builder === 'function') {
-      builder(yargs)
-    } else {
-      Object.keys(builder).forEach((key) => {
-        yargs.option(key, builder[key])
-      })
-    }
-  }
-
-  // transcribe all positional arguments "command <foo> <bar> [apple]"
-  // onto argv.
-  function populatePositionals (commandHandler, argv, context, yargs) {
-    argv._ = argv._.slice(context.commands.length) // nuke the current commands
-    const demanded = commandHandler.demanded.slice(0)
-    const optional = commandHandler.optional.slice(0)
-    const positionalMap = {}
-
-    validation.positionalCount(demanded.length, argv._.length)
-
-    while (demanded.length) {
-      const demand = demanded.shift()
-      populatePositional(demand, argv, positionalMap)
-    }
-
-    while (optional.length) {
-      const maybe = optional.shift()
-      populatePositional(maybe, argv, positionalMap)
-    }
-
-    argv._ = context.commands.concat(argv._)
-
-    postProcessPositionals(argv, positionalMap, self.cmdToParseOptions(commandHandler.original))
-
-    return positionalMap
-  }
-
-  function populatePositional (positional, argv, positionalMap, parseOptions) {
-    const cmd = positional.cmd[0]
-    if (positional.variadic) {
-      positionalMap[cmd] = argv._.splice(0).map(String)
-    } else {
-      if (argv._.length) positionalMap[cmd] = [String(argv._.shift())]
-    }
-  }
-
-  // we run yargs-parser against the positional arguments
-  // applying the same parsing logic used for flags.
-  function postProcessPositionals (argv, positionalMap, parseOptions) {
-    // combine the parsing hints we've inferred from the command
-    // string with explicitly configured parsing hints.
-    const options = Object.assign({}, yargs.getOptions())
-    options.default = Object.assign(parseOptions.default, options.default)
-    options.alias = Object.assign(parseOptions.alias, options.alias)
-    options.array = options.array.concat(parseOptions.array)
-    delete options.config //  don't load config when processing positionals.
-
-    const unparsed = []
-    Object.keys(positionalMap).forEach((key) => {
-      positionalMap[key].map((value) => {
-        if (options.configuration['unknown-options-as-args']) options.key[key] = true
-        unparsed.push(`--${key}`)
-        unparsed.push(value)
-      })
-    })
-
-    // short-circuit parse.
-    if (!unparsed.length) return
-
-    const config = Object.assign({}, options.configuration, {
-      'populate--': true
-    })
-    const parsed = Parser.detailed(unparsed, Object.assign({}, options, {
-      configuration: config
-    }))
-
-    if (parsed.error) {
-      yargs.getUsageInstance().fail(parsed.error.message, parsed.error)
-    } else {
-      // only copy over positional keys (don't overwrite
-      // flag arguments that were already parsed).
-      const positionalKeys = Object.keys(positionalMap)
-      Object.keys(positionalMap).forEach((key) => {
-        [].push.apply(positionalKeys, parsed.aliases[key])
-      })
-
-      Object.keys(parsed.argv).forEach((key) => {
-        if (positionalKeys.indexOf(key) !== -1) {
-          // any new aliases need to be placed in positionalMap, which
-          // is used for validation.
-          if (!positionalMap[key]) positionalMap[key] = parsed.argv[key]
-          argv[key] = parsed.argv[key]
-        }
-      })
-    }
-  }
-
-  self.cmdToParseOptions = function (cmdString) {
-    const parseOptions = {
-      array: [],
-      default: {},
-      alias: {},
-      demand: {}
-    }
-
-    const parsed = self.parseCommand(cmdString)
-    parsed.demanded.forEach((d) => {
-      const cmds = d.cmd.slice(0)
-      const cmd = cmds.shift()
-      if (d.variadic) {
-        parseOptions.array.push(cmd)
-        parseOptions.default[cmd] = []
-      }
-      cmds.forEach((c) => {
-        parseOptions.alias[cmd] = c
-      })
-      parseOptions.demand[cmd] = true
-    })
-
-    parsed.optional.forEach((o) => {
-      const cmds = o.cmd.slice(0)
-      const cmd = cmds.shift()
-      if (o.variadic) {
-        parseOptions.array.push(cmd)
-        parseOptions.default[cmd] = []
-      }
-      cmds.forEach((c) => {
-        parseOptions.alias[cmd] = c
-      })
-    })
-
-    return parseOptions
-  }
-
-  self.reset = () => {
-    handlers = {}
-    aliasMap = {}
-    defaultCommand = undefined
-    return self
-  }
-
-  // used by yargs.parse() to freeze
-  // the state of commands such that
-  // we can apply .parse() multiple times
-  // with the same yargs instance.
-  const frozens = []
-  self.freeze = () => {
-    const frozen = {}
-    frozens.push(frozen)
-    frozen.handlers = handlers
-    frozen.aliasMap = aliasMap
-    frozen.defaultCommand = defaultCommand
-  }
-  self.unfreeze = () => {
-    const frozen = frozens.pop()
-    handlers = frozen.handlers
-    aliasMap = frozen.aliasMap
-    defaultCommand = frozen.defaultCommand
-  }
-
-  return self
-}
+module.exports = function (it) {
+  var O = Object(it);
+  return O[ITERATOR] !== undefined
+    || '@@iterator' in O
+    // eslint-disable-next-line no-prototype-builtins
+    || Iterators.hasOwnProperty(classof(O));
+};
 
 
 /***/ }),
+/* 556 */,
 /* 557 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -29197,7 +31866,51 @@ module.exports = new Type('tag:yaml.org,2002:pairs', {
 
 
 /***/ }),
-/* 560 */,
+/* 560 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(395);
+
+var _Object$defineProperty = __webpack_require__(617);
+
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = void 0;
+
+var _categories = _interopRequireDefault(__webpack_require__(564));
+
+/*!
+ * XRegExp Unicode Categories 4.3.0
+ * <xregexp.com>
+ * Steven Levithan (c) 2010-present MIT License
+ * Unicode data by Mathias Bynens <mathiasbynens.be>
+ */
+var _default = function _default(XRegExp) {
+  /**
+   * Adds support for Unicode's general categories. E.g., `\p{Lu}` or `\p{Uppercase Letter}`. See
+   * category descriptions in UAX #44 <http://unicode.org/reports/tr44/#GC_Values_Table>. Token
+   * names are case insensitive, and any spaces, hyphens, and underscores are ignored.
+   *
+   * Uses Unicode 12.1.0.
+   *
+   * @requires XRegExp, Unicode Base
+   */
+  if (!XRegExp.addUnicodeData) {
+    throw new ReferenceError('Unicode Base must be loaded before Unicode Categories');
+  }
+
+  XRegExp.addUnicodeData(_categories.default);
+};
+
+exports.default = _default;
+module.exports = exports["default"];
+
+/***/ }),
 /* 561 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -29258,68 +31971,347 @@ exports.default = Settings;
 
 
 /***/ }),
-/* 562 */,
-/* 563 */,
-/* 564 */,
-/* 565 */
+/* 562 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-const {PassThrough} = __webpack_require__(413);
+var IteratorPrototype = __webpack_require__(659).IteratorPrototype;
+var create = __webpack_require__(889);
+var createPropertyDescriptor = __webpack_require__(62);
+var setToStringTag = __webpack_require__(263);
+var Iterators = __webpack_require__(218);
 
-module.exports = options => {
-	options = Object.assign({}, options);
+var returnThis = function () { return this; };
 
-	const {array} = options;
-	let {encoding} = options;
-	const buffer = encoding === 'buffer';
-	let objectMode = false;
-
-	if (array) {
-		objectMode = !(encoding || buffer);
-	} else {
-		encoding = encoding || 'utf8';
-	}
-
-	if (buffer) {
-		encoding = null;
-	}
-
-	let len = 0;
-	const ret = [];
-	const stream = new PassThrough({objectMode});
-
-	if (encoding) {
-		stream.setEncoding(encoding);
-	}
-
-	stream.on('data', chunk => {
-		ret.push(chunk);
-
-		if (objectMode) {
-			len = ret.length;
-		} else {
-			len += chunk.length;
-		}
-	});
-
-	stream.getBufferedValue = () => {
-		if (array) {
-			return ret;
-		}
-
-		return buffer ? Buffer.concat(ret, len) : ret.join('');
-	};
-
-	stream.getBufferedLength = () => len;
-
-	return stream;
+module.exports = function (IteratorConstructor, NAME, next) {
+  var TO_STRING_TAG = NAME + ' Iterator';
+  IteratorConstructor.prototype = create(IteratorPrototype, { next: createPropertyDescriptor(1, next) });
+  setToStringTag(IteratorConstructor, TO_STRING_TAG, false, true);
+  Iterators[TO_STRING_TAG] = returnThis;
+  return IteratorConstructor;
 };
 
 
 /***/ }),
-/* 566 */,
+/* 563 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var forEach = __webpack_require__(381);
+
+// `Array.prototype.forEach` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.foreach
+$({ target: 'Array', proto: true, forced: [].forEach != forEach }, {
+  forEach: forEach
+});
+
+
+/***/ }),
+/* 564 */
+/***/ (function(module) {
+
+module.exports = [
+    {
+        'name': 'C',
+        'alias': 'Other',
+        'isBmpLast': true,
+        'bmp': '\0-\x1F\x7F-\x9F\xAD\u0378\u0379\u0380-\u0383\u038B\u038D\u03A2\u0530\u0557\u0558\u058B\u058C\u0590\u05C8-\u05CF\u05EB-\u05EE\u05F5-\u0605\u061C\u061D\u06DD\u070E\u070F\u074B\u074C\u07B2-\u07BF\u07FB\u07FC\u082E\u082F\u083F\u085C\u085D\u085F\u086B-\u089F\u08B5\u08BE-\u08D2\u08E2\u0984\u098D\u098E\u0991\u0992\u09A9\u09B1\u09B3-\u09B5\u09BA\u09BB\u09C5\u09C6\u09C9\u09CA\u09CF-\u09D6\u09D8-\u09DB\u09DE\u09E4\u09E5\u09FF\u0A00\u0A04\u0A0B-\u0A0E\u0A11\u0A12\u0A29\u0A31\u0A34\u0A37\u0A3A\u0A3B\u0A3D\u0A43-\u0A46\u0A49\u0A4A\u0A4E-\u0A50\u0A52-\u0A58\u0A5D\u0A5F-\u0A65\u0A77-\u0A80\u0A84\u0A8E\u0A92\u0AA9\u0AB1\u0AB4\u0ABA\u0ABB\u0AC6\u0ACA\u0ACE\u0ACF\u0AD1-\u0ADF\u0AE4\u0AE5\u0AF2-\u0AF8\u0B00\u0B04\u0B0D\u0B0E\u0B11\u0B12\u0B29\u0B31\u0B34\u0B3A\u0B3B\u0B45\u0B46\u0B49\u0B4A\u0B4E-\u0B55\u0B58-\u0B5B\u0B5E\u0B64\u0B65\u0B78-\u0B81\u0B84\u0B8B-\u0B8D\u0B91\u0B96-\u0B98\u0B9B\u0B9D\u0BA0-\u0BA2\u0BA5-\u0BA7\u0BAB-\u0BAD\u0BBA-\u0BBD\u0BC3-\u0BC5\u0BC9\u0BCE\u0BCF\u0BD1-\u0BD6\u0BD8-\u0BE5\u0BFB-\u0BFF\u0C0D\u0C11\u0C29\u0C3A-\u0C3C\u0C45\u0C49\u0C4E-\u0C54\u0C57\u0C5B-\u0C5F\u0C64\u0C65\u0C70-\u0C76\u0C8D\u0C91\u0CA9\u0CB4\u0CBA\u0CBB\u0CC5\u0CC9\u0CCE-\u0CD4\u0CD7-\u0CDD\u0CDF\u0CE4\u0CE5\u0CF0\u0CF3-\u0CFF\u0D04\u0D0D\u0D11\u0D45\u0D49\u0D50-\u0D53\u0D64\u0D65\u0D80\u0D81\u0D84\u0D97-\u0D99\u0DB2\u0DBC\u0DBE\u0DBF\u0DC7-\u0DC9\u0DCB-\u0DCE\u0DD5\u0DD7\u0DE0-\u0DE5\u0DF0\u0DF1\u0DF5-\u0E00\u0E3B-\u0E3E\u0E5C-\u0E80\u0E83\u0E85\u0E8B\u0EA4\u0EA6\u0EBE\u0EBF\u0EC5\u0EC7\u0ECE\u0ECF\u0EDA\u0EDB\u0EE0-\u0EFF\u0F48\u0F6D-\u0F70\u0F98\u0FBD\u0FCD\u0FDB-\u0FFF\u10C6\u10C8-\u10CC\u10CE\u10CF\u1249\u124E\u124F\u1257\u1259\u125E\u125F\u1289\u128E\u128F\u12B1\u12B6\u12B7\u12BF\u12C1\u12C6\u12C7\u12D7\u1311\u1316\u1317\u135B\u135C\u137D-\u137F\u139A-\u139F\u13F6\u13F7\u13FE\u13FF\u169D-\u169F\u16F9-\u16FF\u170D\u1715-\u171F\u1737-\u173F\u1754-\u175F\u176D\u1771\u1774-\u177F\u17DE\u17DF\u17EA-\u17EF\u17FA-\u17FF\u180E\u180F\u181A-\u181F\u1879-\u187F\u18AB-\u18AF\u18F6-\u18FF\u191F\u192C-\u192F\u193C-\u193F\u1941-\u1943\u196E\u196F\u1975-\u197F\u19AC-\u19AF\u19CA-\u19CF\u19DB-\u19DD\u1A1C\u1A1D\u1A5F\u1A7D\u1A7E\u1A8A-\u1A8F\u1A9A-\u1A9F\u1AAE\u1AAF\u1ABF-\u1AFF\u1B4C-\u1B4F\u1B7D-\u1B7F\u1BF4-\u1BFB\u1C38-\u1C3A\u1C4A-\u1C4C\u1C89-\u1C8F\u1CBB\u1CBC\u1CC8-\u1CCF\u1CFB-\u1CFF\u1DFA\u1F16\u1F17\u1F1E\u1F1F\u1F46\u1F47\u1F4E\u1F4F\u1F58\u1F5A\u1F5C\u1F5E\u1F7E\u1F7F\u1FB5\u1FC5\u1FD4\u1FD5\u1FDC\u1FF0\u1FF1\u1FF5\u1FFF\u200B-\u200F\u202A-\u202E\u2060-\u206F\u2072\u2073\u208F\u209D-\u209F\u20C0-\u20CF\u20F1-\u20FF\u218C-\u218F\u2427-\u243F\u244B-\u245F\u2B74\u2B75\u2B96\u2B97\u2C2F\u2C5F\u2CF4-\u2CF8\u2D26\u2D28-\u2D2C\u2D2E\u2D2F\u2D68-\u2D6E\u2D71-\u2D7E\u2D97-\u2D9F\u2DA7\u2DAF\u2DB7\u2DBF\u2DC7\u2DCF\u2DD7\u2DDF\u2E50-\u2E7F\u2E9A\u2EF4-\u2EFF\u2FD6-\u2FEF\u2FFC-\u2FFF\u3040\u3097\u3098\u3100-\u3104\u3130\u318F\u31BB-\u31BF\u31E4-\u31EF\u321F\u4DB6-\u4DBF\u9FF0-\u9FFF\uA48D-\uA48F\uA4C7-\uA4CF\uA62C-\uA63F\uA6F8-\uA6FF\uA7C0\uA7C1\uA7C7-\uA7F6\uA82C-\uA82F\uA83A-\uA83F\uA878-\uA87F\uA8C6-\uA8CD\uA8DA-\uA8DF\uA954-\uA95E\uA97D-\uA97F\uA9CE\uA9DA-\uA9DD\uA9FF\uAA37-\uAA3F\uAA4E\uAA4F\uAA5A\uAA5B\uAAC3-\uAADA\uAAF7-\uAB00\uAB07\uAB08\uAB0F\uAB10\uAB17-\uAB1F\uAB27\uAB2F\uAB68-\uAB6F\uABEE\uABEF\uABFA-\uABFF\uD7A4-\uD7AF\uD7C7-\uD7CA\uD7FC-\uF8FF\uFA6E\uFA6F\uFADA-\uFAFF\uFB07-\uFB12\uFB18-\uFB1C\uFB37\uFB3D\uFB3F\uFB42\uFB45\uFBC2-\uFBD2\uFD40-\uFD4F\uFD90\uFD91\uFDC8-\uFDEF\uFDFE\uFDFF\uFE1A-\uFE1F\uFE53\uFE67\uFE6C-\uFE6F\uFE75\uFEFD-\uFF00\uFFBF-\uFFC1\uFFC8\uFFC9\uFFD0\uFFD1\uFFD8\uFFD9\uFFDD-\uFFDF\uFFE7\uFFEF-\uFFFB\uFFFE\uFFFF',
+        'astral': '\uD800[\uDC0C\uDC27\uDC3B\uDC3E\uDC4E\uDC4F\uDC5E-\uDC7F\uDCFB-\uDCFF\uDD03-\uDD06\uDD34-\uDD36\uDD8F\uDD9C-\uDD9F\uDDA1-\uDDCF\uDDFE-\uDE7F\uDE9D-\uDE9F\uDED1-\uDEDF\uDEFC-\uDEFF\uDF24-\uDF2C\uDF4B-\uDF4F\uDF7B-\uDF7F\uDF9E\uDFC4-\uDFC7\uDFD6-\uDFFF]|\uD801[\uDC9E\uDC9F\uDCAA-\uDCAF\uDCD4-\uDCD7\uDCFC-\uDCFF\uDD28-\uDD2F\uDD64-\uDD6E\uDD70-\uDDFF\uDF37-\uDF3F\uDF56-\uDF5F\uDF68-\uDFFF]|\uD802[\uDC06\uDC07\uDC09\uDC36\uDC39-\uDC3B\uDC3D\uDC3E\uDC56\uDC9F-\uDCA6\uDCB0-\uDCDF\uDCF3\uDCF6-\uDCFA\uDD1C-\uDD1E\uDD3A-\uDD3E\uDD40-\uDD7F\uDDB8-\uDDBB\uDDD0\uDDD1\uDE04\uDE07-\uDE0B\uDE14\uDE18\uDE36\uDE37\uDE3B-\uDE3E\uDE49-\uDE4F\uDE59-\uDE5F\uDEA0-\uDEBF\uDEE7-\uDEEA\uDEF7-\uDEFF\uDF36-\uDF38\uDF56\uDF57\uDF73-\uDF77\uDF92-\uDF98\uDF9D-\uDFA8\uDFB0-\uDFFF]|\uD803[\uDC49-\uDC7F\uDCB3-\uDCBF\uDCF3-\uDCF9\uDD28-\uDD2F\uDD3A-\uDE5F\uDE7F-\uDEFF\uDF28-\uDF2F\uDF5A-\uDFDF\uDFF7-\uDFFF]|\uD804[\uDC4E-\uDC51\uDC70-\uDC7E\uDCBD\uDCC2-\uDCCF\uDCE9-\uDCEF\uDCFA-\uDCFF\uDD35\uDD47-\uDD4F\uDD77-\uDD7F\uDDCE\uDDCF\uDDE0\uDDF5-\uDDFF\uDE12\uDE3F-\uDE7F\uDE87\uDE89\uDE8E\uDE9E\uDEAA-\uDEAF\uDEEB-\uDEEF\uDEFA-\uDEFF\uDF04\uDF0D\uDF0E\uDF11\uDF12\uDF29\uDF31\uDF34\uDF3A\uDF45\uDF46\uDF49\uDF4A\uDF4E\uDF4F\uDF51-\uDF56\uDF58-\uDF5C\uDF64\uDF65\uDF6D-\uDF6F\uDF75-\uDFFF]|\uD805[\uDC5A\uDC5C\uDC60-\uDC7F\uDCC8-\uDCCF\uDCDA-\uDD7F\uDDB6\uDDB7\uDDDE-\uDDFF\uDE45-\uDE4F\uDE5A-\uDE5F\uDE6D-\uDE7F\uDEB9-\uDEBF\uDECA-\uDEFF\uDF1B\uDF1C\uDF2C-\uDF2F\uDF40-\uDFFF]|\uD806[\uDC3C-\uDC9F\uDCF3-\uDCFE\uDD00-\uDD9F\uDDA8\uDDA9\uDDD8\uDDD9\uDDE5-\uDDFF\uDE48-\uDE4F\uDEA3-\uDEBF\uDEF9-\uDFFF]|\uD807[\uDC09\uDC37\uDC46-\uDC4F\uDC6D-\uDC6F\uDC90\uDC91\uDCA8\uDCB7-\uDCFF\uDD07\uDD0A\uDD37-\uDD39\uDD3B\uDD3E\uDD48-\uDD4F\uDD5A-\uDD5F\uDD66\uDD69\uDD8F\uDD92\uDD99-\uDD9F\uDDAA-\uDEDF\uDEF9-\uDFBF\uDFF2-\uDFFE]|\uD808[\uDF9A-\uDFFF]|\uD809[\uDC6F\uDC75-\uDC7F\uDD44-\uDFFF]|[\uD80A\uD80B\uD80E-\uD810\uD812-\uD819\uD823-\uD82B\uD82D\uD82E\uD830-\uD833\uD837\uD839\uD83F\uD87B-\uD87D\uD87F-\uDB3F\uDB41-\uDBFF][\uDC00-\uDFFF]|\uD80D[\uDC2F-\uDFFF]|\uD811[\uDE47-\uDFFF]|\uD81A[\uDE39-\uDE3F\uDE5F\uDE6A-\uDE6D\uDE70-\uDECF\uDEEE\uDEEF\uDEF6-\uDEFF\uDF46-\uDF4F\uDF5A\uDF62\uDF78-\uDF7C\uDF90-\uDFFF]|\uD81B[\uDC00-\uDE3F\uDE9B-\uDEFF\uDF4B-\uDF4E\uDF88-\uDF8E\uDFA0-\uDFDF\uDFE4-\uDFFF]|\uD821[\uDFF8-\uDFFF]|\uD822[\uDEF3-\uDFFF]|\uD82C[\uDD1F-\uDD4F\uDD53-\uDD63\uDD68-\uDD6F\uDEFC-\uDFFF]|\uD82F[\uDC6B-\uDC6F\uDC7D-\uDC7F\uDC89-\uDC8F\uDC9A\uDC9B\uDCA0-\uDFFF]|\uD834[\uDCF6-\uDCFF\uDD27\uDD28\uDD73-\uDD7A\uDDE9-\uDDFF\uDE46-\uDEDF\uDEF4-\uDEFF\uDF57-\uDF5F\uDF79-\uDFFF]|\uD835[\uDC55\uDC9D\uDCA0\uDCA1\uDCA3\uDCA4\uDCA7\uDCA8\uDCAD\uDCBA\uDCBC\uDCC4\uDD06\uDD0B\uDD0C\uDD15\uDD1D\uDD3A\uDD3F\uDD45\uDD47-\uDD49\uDD51\uDEA6\uDEA7\uDFCC\uDFCD]|\uD836[\uDE8C-\uDE9A\uDEA0\uDEB0-\uDFFF]|\uD838[\uDC07\uDC19\uDC1A\uDC22\uDC25\uDC2B-\uDCFF\uDD2D-\uDD2F\uDD3E\uDD3F\uDD4A-\uDD4D\uDD50-\uDEBF\uDEFA-\uDEFE\uDF00-\uDFFF]|\uD83A[\uDCC5\uDCC6\uDCD7-\uDCFF\uDD4C-\uDD4F\uDD5A-\uDD5D\uDD60-\uDFFF]|\uD83B[\uDC00-\uDC70\uDCB5-\uDD00\uDD3E-\uDDFF\uDE04\uDE20\uDE23\uDE25\uDE26\uDE28\uDE33\uDE38\uDE3A\uDE3C-\uDE41\uDE43-\uDE46\uDE48\uDE4A\uDE4C\uDE50\uDE53\uDE55\uDE56\uDE58\uDE5A\uDE5C\uDE5E\uDE60\uDE63\uDE65\uDE66\uDE6B\uDE73\uDE78\uDE7D\uDE7F\uDE8A\uDE9C-\uDEA0\uDEA4\uDEAA\uDEBC-\uDEEF\uDEF2-\uDFFF]|\uD83C[\uDC2C-\uDC2F\uDC94-\uDC9F\uDCAF\uDCB0\uDCC0\uDCD0\uDCF6-\uDCFF\uDD0D-\uDD0F\uDD6D-\uDD6F\uDDAD-\uDDE5\uDE03-\uDE0F\uDE3C-\uDE3F\uDE49-\uDE4F\uDE52-\uDE5F\uDE66-\uDEFF]|\uD83D[\uDED6-\uDEDF\uDEED-\uDEEF\uDEFB-\uDEFF\uDF74-\uDF7F\uDFD9-\uDFDF\uDFEC-\uDFFF]|\uD83E[\uDC0C-\uDC0F\uDC48-\uDC4F\uDC5A-\uDC5F\uDC88-\uDC8F\uDCAE-\uDCFF\uDD0C\uDD72\uDD77-\uDD79\uDDA3\uDDA4\uDDAB-\uDDAD\uDDCB\uDDCC\uDE54-\uDE5F\uDE6E\uDE6F\uDE74-\uDE77\uDE7B-\uDE7F\uDE83-\uDE8F\uDE96-\uDFFF]|\uD869[\uDED7-\uDEFF]|\uD86D[\uDF35-\uDF3F]|\uD86E[\uDC1E\uDC1F]|\uD873[\uDEA2-\uDEAF]|\uD87A[\uDFE1-\uDFFF]|\uD87E[\uDE1E-\uDFFF]|\uDB40[\uDC00-\uDCFF\uDDF0-\uDFFF]'
+    },
+    {
+        'name': 'Cc',
+        'alias': 'Control',
+        'bmp': '\0-\x1F\x7F-\x9F'
+    },
+    {
+        'name': 'Cf',
+        'alias': 'Format',
+        'bmp': '\xAD\u0600-\u0605\u061C\u06DD\u070F\u08E2\u180E\u200B-\u200F\u202A-\u202E\u2060-\u2064\u2066-\u206F\uFEFF\uFFF9-\uFFFB',
+        'astral': '\uD804[\uDCBD\uDCCD]|\uD80D[\uDC30-\uDC38]|\uD82F[\uDCA0-\uDCA3]|\uD834[\uDD73-\uDD7A]|\uDB40[\uDC01\uDC20-\uDC7F]'
+    },
+    {
+        'name': 'Cn',
+        'alias': 'Unassigned',
+        'bmp': '\u0378\u0379\u0380-\u0383\u038B\u038D\u03A2\u0530\u0557\u0558\u058B\u058C\u0590\u05C8-\u05CF\u05EB-\u05EE\u05F5-\u05FF\u061D\u070E\u074B\u074C\u07B2-\u07BF\u07FB\u07FC\u082E\u082F\u083F\u085C\u085D\u085F\u086B-\u089F\u08B5\u08BE-\u08D2\u0984\u098D\u098E\u0991\u0992\u09A9\u09B1\u09B3-\u09B5\u09BA\u09BB\u09C5\u09C6\u09C9\u09CA\u09CF-\u09D6\u09D8-\u09DB\u09DE\u09E4\u09E5\u09FF\u0A00\u0A04\u0A0B-\u0A0E\u0A11\u0A12\u0A29\u0A31\u0A34\u0A37\u0A3A\u0A3B\u0A3D\u0A43-\u0A46\u0A49\u0A4A\u0A4E-\u0A50\u0A52-\u0A58\u0A5D\u0A5F-\u0A65\u0A77-\u0A80\u0A84\u0A8E\u0A92\u0AA9\u0AB1\u0AB4\u0ABA\u0ABB\u0AC6\u0ACA\u0ACE\u0ACF\u0AD1-\u0ADF\u0AE4\u0AE5\u0AF2-\u0AF8\u0B00\u0B04\u0B0D\u0B0E\u0B11\u0B12\u0B29\u0B31\u0B34\u0B3A\u0B3B\u0B45\u0B46\u0B49\u0B4A\u0B4E-\u0B55\u0B58-\u0B5B\u0B5E\u0B64\u0B65\u0B78-\u0B81\u0B84\u0B8B-\u0B8D\u0B91\u0B96-\u0B98\u0B9B\u0B9D\u0BA0-\u0BA2\u0BA5-\u0BA7\u0BAB-\u0BAD\u0BBA-\u0BBD\u0BC3-\u0BC5\u0BC9\u0BCE\u0BCF\u0BD1-\u0BD6\u0BD8-\u0BE5\u0BFB-\u0BFF\u0C0D\u0C11\u0C29\u0C3A-\u0C3C\u0C45\u0C49\u0C4E-\u0C54\u0C57\u0C5B-\u0C5F\u0C64\u0C65\u0C70-\u0C76\u0C8D\u0C91\u0CA9\u0CB4\u0CBA\u0CBB\u0CC5\u0CC9\u0CCE-\u0CD4\u0CD7-\u0CDD\u0CDF\u0CE4\u0CE5\u0CF0\u0CF3-\u0CFF\u0D04\u0D0D\u0D11\u0D45\u0D49\u0D50-\u0D53\u0D64\u0D65\u0D80\u0D81\u0D84\u0D97-\u0D99\u0DB2\u0DBC\u0DBE\u0DBF\u0DC7-\u0DC9\u0DCB-\u0DCE\u0DD5\u0DD7\u0DE0-\u0DE5\u0DF0\u0DF1\u0DF5-\u0E00\u0E3B-\u0E3E\u0E5C-\u0E80\u0E83\u0E85\u0E8B\u0EA4\u0EA6\u0EBE\u0EBF\u0EC5\u0EC7\u0ECE\u0ECF\u0EDA\u0EDB\u0EE0-\u0EFF\u0F48\u0F6D-\u0F70\u0F98\u0FBD\u0FCD\u0FDB-\u0FFF\u10C6\u10C8-\u10CC\u10CE\u10CF\u1249\u124E\u124F\u1257\u1259\u125E\u125F\u1289\u128E\u128F\u12B1\u12B6\u12B7\u12BF\u12C1\u12C6\u12C7\u12D7\u1311\u1316\u1317\u135B\u135C\u137D-\u137F\u139A-\u139F\u13F6\u13F7\u13FE\u13FF\u169D-\u169F\u16F9-\u16FF\u170D\u1715-\u171F\u1737-\u173F\u1754-\u175F\u176D\u1771\u1774-\u177F\u17DE\u17DF\u17EA-\u17EF\u17FA-\u17FF\u180F\u181A-\u181F\u1879-\u187F\u18AB-\u18AF\u18F6-\u18FF\u191F\u192C-\u192F\u193C-\u193F\u1941-\u1943\u196E\u196F\u1975-\u197F\u19AC-\u19AF\u19CA-\u19CF\u19DB-\u19DD\u1A1C\u1A1D\u1A5F\u1A7D\u1A7E\u1A8A-\u1A8F\u1A9A-\u1A9F\u1AAE\u1AAF\u1ABF-\u1AFF\u1B4C-\u1B4F\u1B7D-\u1B7F\u1BF4-\u1BFB\u1C38-\u1C3A\u1C4A-\u1C4C\u1C89-\u1C8F\u1CBB\u1CBC\u1CC8-\u1CCF\u1CFB-\u1CFF\u1DFA\u1F16\u1F17\u1F1E\u1F1F\u1F46\u1F47\u1F4E\u1F4F\u1F58\u1F5A\u1F5C\u1F5E\u1F7E\u1F7F\u1FB5\u1FC5\u1FD4\u1FD5\u1FDC\u1FF0\u1FF1\u1FF5\u1FFF\u2065\u2072\u2073\u208F\u209D-\u209F\u20C0-\u20CF\u20F1-\u20FF\u218C-\u218F\u2427-\u243F\u244B-\u245F\u2B74\u2B75\u2B96\u2B97\u2C2F\u2C5F\u2CF4-\u2CF8\u2D26\u2D28-\u2D2C\u2D2E\u2D2F\u2D68-\u2D6E\u2D71-\u2D7E\u2D97-\u2D9F\u2DA7\u2DAF\u2DB7\u2DBF\u2DC7\u2DCF\u2DD7\u2DDF\u2E50-\u2E7F\u2E9A\u2EF4-\u2EFF\u2FD6-\u2FEF\u2FFC-\u2FFF\u3040\u3097\u3098\u3100-\u3104\u3130\u318F\u31BB-\u31BF\u31E4-\u31EF\u321F\u4DB6-\u4DBF\u9FF0-\u9FFF\uA48D-\uA48F\uA4C7-\uA4CF\uA62C-\uA63F\uA6F8-\uA6FF\uA7C0\uA7C1\uA7C7-\uA7F6\uA82C-\uA82F\uA83A-\uA83F\uA878-\uA87F\uA8C6-\uA8CD\uA8DA-\uA8DF\uA954-\uA95E\uA97D-\uA97F\uA9CE\uA9DA-\uA9DD\uA9FF\uAA37-\uAA3F\uAA4E\uAA4F\uAA5A\uAA5B\uAAC3-\uAADA\uAAF7-\uAB00\uAB07\uAB08\uAB0F\uAB10\uAB17-\uAB1F\uAB27\uAB2F\uAB68-\uAB6F\uABEE\uABEF\uABFA-\uABFF\uD7A4-\uD7AF\uD7C7-\uD7CA\uD7FC-\uD7FF\uFA6E\uFA6F\uFADA-\uFAFF\uFB07-\uFB12\uFB18-\uFB1C\uFB37\uFB3D\uFB3F\uFB42\uFB45\uFBC2-\uFBD2\uFD40-\uFD4F\uFD90\uFD91\uFDC8-\uFDEF\uFDFE\uFDFF\uFE1A-\uFE1F\uFE53\uFE67\uFE6C-\uFE6F\uFE75\uFEFD\uFEFE\uFF00\uFFBF-\uFFC1\uFFC8\uFFC9\uFFD0\uFFD1\uFFD8\uFFD9\uFFDD-\uFFDF\uFFE7\uFFEF-\uFFF8\uFFFE\uFFFF',
+        'astral': '\uD800[\uDC0C\uDC27\uDC3B\uDC3E\uDC4E\uDC4F\uDC5E-\uDC7F\uDCFB-\uDCFF\uDD03-\uDD06\uDD34-\uDD36\uDD8F\uDD9C-\uDD9F\uDDA1-\uDDCF\uDDFE-\uDE7F\uDE9D-\uDE9F\uDED1-\uDEDF\uDEFC-\uDEFF\uDF24-\uDF2C\uDF4B-\uDF4F\uDF7B-\uDF7F\uDF9E\uDFC4-\uDFC7\uDFD6-\uDFFF]|\uD801[\uDC9E\uDC9F\uDCAA-\uDCAF\uDCD4-\uDCD7\uDCFC-\uDCFF\uDD28-\uDD2F\uDD64-\uDD6E\uDD70-\uDDFF\uDF37-\uDF3F\uDF56-\uDF5F\uDF68-\uDFFF]|\uD802[\uDC06\uDC07\uDC09\uDC36\uDC39-\uDC3B\uDC3D\uDC3E\uDC56\uDC9F-\uDCA6\uDCB0-\uDCDF\uDCF3\uDCF6-\uDCFA\uDD1C-\uDD1E\uDD3A-\uDD3E\uDD40-\uDD7F\uDDB8-\uDDBB\uDDD0\uDDD1\uDE04\uDE07-\uDE0B\uDE14\uDE18\uDE36\uDE37\uDE3B-\uDE3E\uDE49-\uDE4F\uDE59-\uDE5F\uDEA0-\uDEBF\uDEE7-\uDEEA\uDEF7-\uDEFF\uDF36-\uDF38\uDF56\uDF57\uDF73-\uDF77\uDF92-\uDF98\uDF9D-\uDFA8\uDFB0-\uDFFF]|\uD803[\uDC49-\uDC7F\uDCB3-\uDCBF\uDCF3-\uDCF9\uDD28-\uDD2F\uDD3A-\uDE5F\uDE7F-\uDEFF\uDF28-\uDF2F\uDF5A-\uDFDF\uDFF7-\uDFFF]|\uD804[\uDC4E-\uDC51\uDC70-\uDC7E\uDCC2-\uDCCC\uDCCE\uDCCF\uDCE9-\uDCEF\uDCFA-\uDCFF\uDD35\uDD47-\uDD4F\uDD77-\uDD7F\uDDCE\uDDCF\uDDE0\uDDF5-\uDDFF\uDE12\uDE3F-\uDE7F\uDE87\uDE89\uDE8E\uDE9E\uDEAA-\uDEAF\uDEEB-\uDEEF\uDEFA-\uDEFF\uDF04\uDF0D\uDF0E\uDF11\uDF12\uDF29\uDF31\uDF34\uDF3A\uDF45\uDF46\uDF49\uDF4A\uDF4E\uDF4F\uDF51-\uDF56\uDF58-\uDF5C\uDF64\uDF65\uDF6D-\uDF6F\uDF75-\uDFFF]|\uD805[\uDC5A\uDC5C\uDC60-\uDC7F\uDCC8-\uDCCF\uDCDA-\uDD7F\uDDB6\uDDB7\uDDDE-\uDDFF\uDE45-\uDE4F\uDE5A-\uDE5F\uDE6D-\uDE7F\uDEB9-\uDEBF\uDECA-\uDEFF\uDF1B\uDF1C\uDF2C-\uDF2F\uDF40-\uDFFF]|\uD806[\uDC3C-\uDC9F\uDCF3-\uDCFE\uDD00-\uDD9F\uDDA8\uDDA9\uDDD8\uDDD9\uDDE5-\uDDFF\uDE48-\uDE4F\uDEA3-\uDEBF\uDEF9-\uDFFF]|\uD807[\uDC09\uDC37\uDC46-\uDC4F\uDC6D-\uDC6F\uDC90\uDC91\uDCA8\uDCB7-\uDCFF\uDD07\uDD0A\uDD37-\uDD39\uDD3B\uDD3E\uDD48-\uDD4F\uDD5A-\uDD5F\uDD66\uDD69\uDD8F\uDD92\uDD99-\uDD9F\uDDAA-\uDEDF\uDEF9-\uDFBF\uDFF2-\uDFFE]|\uD808[\uDF9A-\uDFFF]|\uD809[\uDC6F\uDC75-\uDC7F\uDD44-\uDFFF]|[\uD80A\uD80B\uD80E-\uD810\uD812-\uD819\uD823-\uD82B\uD82D\uD82E\uD830-\uD833\uD837\uD839\uD83F\uD87B-\uD87D\uD87F-\uDB3F\uDB41-\uDB7F][\uDC00-\uDFFF]|\uD80D[\uDC2F\uDC39-\uDFFF]|\uD811[\uDE47-\uDFFF]|\uD81A[\uDE39-\uDE3F\uDE5F\uDE6A-\uDE6D\uDE70-\uDECF\uDEEE\uDEEF\uDEF6-\uDEFF\uDF46-\uDF4F\uDF5A\uDF62\uDF78-\uDF7C\uDF90-\uDFFF]|\uD81B[\uDC00-\uDE3F\uDE9B-\uDEFF\uDF4B-\uDF4E\uDF88-\uDF8E\uDFA0-\uDFDF\uDFE4-\uDFFF]|\uD821[\uDFF8-\uDFFF]|\uD822[\uDEF3-\uDFFF]|\uD82C[\uDD1F-\uDD4F\uDD53-\uDD63\uDD68-\uDD6F\uDEFC-\uDFFF]|\uD82F[\uDC6B-\uDC6F\uDC7D-\uDC7F\uDC89-\uDC8F\uDC9A\uDC9B\uDCA4-\uDFFF]|\uD834[\uDCF6-\uDCFF\uDD27\uDD28\uDDE9-\uDDFF\uDE46-\uDEDF\uDEF4-\uDEFF\uDF57-\uDF5F\uDF79-\uDFFF]|\uD835[\uDC55\uDC9D\uDCA0\uDCA1\uDCA3\uDCA4\uDCA7\uDCA8\uDCAD\uDCBA\uDCBC\uDCC4\uDD06\uDD0B\uDD0C\uDD15\uDD1D\uDD3A\uDD3F\uDD45\uDD47-\uDD49\uDD51\uDEA6\uDEA7\uDFCC\uDFCD]|\uD836[\uDE8C-\uDE9A\uDEA0\uDEB0-\uDFFF]|\uD838[\uDC07\uDC19\uDC1A\uDC22\uDC25\uDC2B-\uDCFF\uDD2D-\uDD2F\uDD3E\uDD3F\uDD4A-\uDD4D\uDD50-\uDEBF\uDEFA-\uDEFE\uDF00-\uDFFF]|\uD83A[\uDCC5\uDCC6\uDCD7-\uDCFF\uDD4C-\uDD4F\uDD5A-\uDD5D\uDD60-\uDFFF]|\uD83B[\uDC00-\uDC70\uDCB5-\uDD00\uDD3E-\uDDFF\uDE04\uDE20\uDE23\uDE25\uDE26\uDE28\uDE33\uDE38\uDE3A\uDE3C-\uDE41\uDE43-\uDE46\uDE48\uDE4A\uDE4C\uDE50\uDE53\uDE55\uDE56\uDE58\uDE5A\uDE5C\uDE5E\uDE60\uDE63\uDE65\uDE66\uDE6B\uDE73\uDE78\uDE7D\uDE7F\uDE8A\uDE9C-\uDEA0\uDEA4\uDEAA\uDEBC-\uDEEF\uDEF2-\uDFFF]|\uD83C[\uDC2C-\uDC2F\uDC94-\uDC9F\uDCAF\uDCB0\uDCC0\uDCD0\uDCF6-\uDCFF\uDD0D-\uDD0F\uDD6D-\uDD6F\uDDAD-\uDDE5\uDE03-\uDE0F\uDE3C-\uDE3F\uDE49-\uDE4F\uDE52-\uDE5F\uDE66-\uDEFF]|\uD83D[\uDED6-\uDEDF\uDEED-\uDEEF\uDEFB-\uDEFF\uDF74-\uDF7F\uDFD9-\uDFDF\uDFEC-\uDFFF]|\uD83E[\uDC0C-\uDC0F\uDC48-\uDC4F\uDC5A-\uDC5F\uDC88-\uDC8F\uDCAE-\uDCFF\uDD0C\uDD72\uDD77-\uDD79\uDDA3\uDDA4\uDDAB-\uDDAD\uDDCB\uDDCC\uDE54-\uDE5F\uDE6E\uDE6F\uDE74-\uDE77\uDE7B-\uDE7F\uDE83-\uDE8F\uDE96-\uDFFF]|\uD869[\uDED7-\uDEFF]|\uD86D[\uDF35-\uDF3F]|\uD86E[\uDC1E\uDC1F]|\uD873[\uDEA2-\uDEAF]|\uD87A[\uDFE1-\uDFFF]|\uD87E[\uDE1E-\uDFFF]|\uDB40[\uDC00\uDC02-\uDC1F\uDC80-\uDCFF\uDDF0-\uDFFF]|[\uDBBF\uDBFF][\uDFFE\uDFFF]'
+    },
+    {
+        'name': 'Co',
+        'alias': 'Private_Use',
+        'bmp': '\uE000-\uF8FF',
+        'astral': '[\uDB80-\uDBBE\uDBC0-\uDBFE][\uDC00-\uDFFF]|[\uDBBF\uDBFF][\uDC00-\uDFFD]'
+    },
+    {
+        'name': 'Cs',
+        'alias': 'Surrogate',
+        'bmp': '\uD800-\uDFFF'
+    },
+    {
+        'name': 'L',
+        'alias': 'Letter',
+        'bmp': 'A-Za-z\xAA\xB5\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u052F\u0531-\u0556\u0559\u0560-\u0588\u05D0-\u05EA\u05EF-\u05F2\u0620-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06E5\u06E6\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0815\u081A\u0824\u0828\u0840-\u0858\u0860-\u086A\u08A0-\u08B4\u08B6-\u08BD\u0904-\u0939\u093D\u0950\u0958-\u0961\u0971-\u0980\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u09FC\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0AF9\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D\u0C58-\u0C5A\u0C60\u0C61\u0C80\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D54-\u0D56\u0D5F-\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E46\u0E81\u0E82\u0E84\u0E86-\u0E8A\u0E8C-\u0EA3\u0EA5\u0EA7-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EC6\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F5\u13F8-\u13FD\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16F1-\u16F8\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17D7\u17DC\u1820-\u1878\u1880-\u1884\u1887-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191E\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19B0-\u19C9\u1A00-\u1A16\u1A20-\u1A54\u1AA7\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C7D\u1C80-\u1C88\u1C90-\u1CBA\u1CBD-\u1CBF\u1CE9-\u1CEC\u1CEE-\u1CF3\u1CF5\u1CF6\u1CFA\u1D00-\u1DBF\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2183\u2184\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2E2F\u3005\u3006\u3031-\u3035\u303B\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312F\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FEF\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA67F-\uA69D\uA6A0-\uA6E5\uA717-\uA71F\uA722-\uA788\uA78B-\uA7BF\uA7C2-\uA7C6\uA7F7-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA8FD\uA8FE\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9CF\uA9E0-\uA9E4\uA9E6-\uA9EF\uA9FA-\uA9FE\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA76\uAA7A\uAA7E-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEA\uAAF2-\uAAF4\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB67\uAB70-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC',
+        'astral': '\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA\uDE80-\uDE9C\uDEA0-\uDED0\uDF00-\uDF1F\uDF2D-\uDF40\uDF42-\uDF49\uDF50-\uDF75\uDF80-\uDF9D\uDFA0-\uDFC3\uDFC8-\uDFCF]|\uD801[\uDC00-\uDC9D\uDCB0-\uDCD3\uDCD8-\uDCFB\uDD00-\uDD27\uDD30-\uDD63\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67]|\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F-\uDC55\uDC60-\uDC76\uDC80-\uDC9E\uDCE0-\uDCF2\uDCF4\uDCF5\uDD00-\uDD15\uDD20-\uDD39\uDD80-\uDDB7\uDDBE\uDDBF\uDE00\uDE10-\uDE13\uDE15-\uDE17\uDE19-\uDE35\uDE60-\uDE7C\uDE80-\uDE9C\uDEC0-\uDEC7\uDEC9-\uDEE4\uDF00-\uDF35\uDF40-\uDF55\uDF60-\uDF72\uDF80-\uDF91]|\uD803[\uDC00-\uDC48\uDC80-\uDCB2\uDCC0-\uDCF2\uDD00-\uDD23\uDF00-\uDF1C\uDF27\uDF30-\uDF45\uDFE0-\uDFF6]|\uD804[\uDC03-\uDC37\uDC83-\uDCAF\uDCD0-\uDCE8\uDD03-\uDD26\uDD44\uDD50-\uDD72\uDD76\uDD83-\uDDB2\uDDC1-\uDDC4\uDDDA\uDDDC\uDE00-\uDE11\uDE13-\uDE2B\uDE80-\uDE86\uDE88\uDE8A-\uDE8D\uDE8F-\uDE9D\uDE9F-\uDEA8\uDEB0-\uDEDE\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3D\uDF50\uDF5D-\uDF61]|\uD805[\uDC00-\uDC34\uDC47-\uDC4A\uDC5F\uDC80-\uDCAF\uDCC4\uDCC5\uDCC7\uDD80-\uDDAE\uDDD8-\uDDDB\uDE00-\uDE2F\uDE44\uDE80-\uDEAA\uDEB8\uDF00-\uDF1A]|\uD806[\uDC00-\uDC2B\uDCA0-\uDCDF\uDCFF\uDDA0-\uDDA7\uDDAA-\uDDD0\uDDE1\uDDE3\uDE00\uDE0B-\uDE32\uDE3A\uDE50\uDE5C-\uDE89\uDE9D\uDEC0-\uDEF8]|\uD807[\uDC00-\uDC08\uDC0A-\uDC2E\uDC40\uDC72-\uDC8F\uDD00-\uDD06\uDD08\uDD09\uDD0B-\uDD30\uDD46\uDD60-\uDD65\uDD67\uDD68\uDD6A-\uDD89\uDD98\uDEE0-\uDEF2]|\uD808[\uDC00-\uDF99]|\uD809[\uDC80-\uDD43]|[\uD80C\uD81C-\uD820\uD840-\uD868\uD86A-\uD86C\uD86F-\uD872\uD874-\uD879][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2E]|\uD811[\uDC00-\uDE46]|\uD81A[\uDC00-\uDE38\uDE40-\uDE5E\uDED0-\uDEED\uDF00-\uDF2F\uDF40-\uDF43\uDF63-\uDF77\uDF7D-\uDF8F]|\uD81B[\uDE40-\uDE7F\uDF00-\uDF4A\uDF50\uDF93-\uDF9F\uDFE0\uDFE1\uDFE3]|\uD821[\uDC00-\uDFF7]|\uD822[\uDC00-\uDEF2]|\uD82C[\uDC00-\uDD1E\uDD50-\uDD52\uDD64-\uDD67\uDD70-\uDEFB]|\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDEC0\uDEC2-\uDEDA\uDEDC-\uDEFA\uDEFC-\uDF14\uDF16-\uDF34\uDF36-\uDF4E\uDF50-\uDF6E\uDF70-\uDF88\uDF8A-\uDFA8\uDFAA-\uDFC2\uDFC4-\uDFCB]|\uD838[\uDD00-\uDD2C\uDD37-\uDD3D\uDD4E\uDEC0-\uDEEB]|\uD83A[\uDC00-\uDCC4\uDD00-\uDD43\uDD4B]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D\uDC20-\uDFFF]|\uD873[\uDC00-\uDEA1\uDEB0-\uDFFF]|\uD87A[\uDC00-\uDFE0]|\uD87E[\uDC00-\uDE1D]'
+    },
+    {
+        'name': 'LC',
+        'alias': 'Cased_Letter',
+        'bmp': 'A-Za-z\xB5\xC0-\xD6\xD8-\xF6\xF8-\u01BA\u01BC-\u01BF\u01C4-\u0293\u0295-\u02AF\u0370-\u0373\u0376\u0377\u037B-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u052F\u0531-\u0556\u0560-\u0588\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FD-\u10FF\u13A0-\u13F5\u13F8-\u13FD\u1C80-\u1C88\u1C90-\u1CBA\u1CBD-\u1CBF\u1D00-\u1D2B\u1D6B-\u1D77\u1D79-\u1D9A\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2134\u2139\u213C-\u213F\u2145-\u2149\u214E\u2183\u2184\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2C7B\u2C7E-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\uA640-\uA66D\uA680-\uA69B\uA722-\uA76F\uA771-\uA787\uA78B-\uA78E\uA790-\uA7BF\uA7C2-\uA7C6\uA7FA\uAB30-\uAB5A\uAB60-\uAB67\uAB70-\uABBF\uFB00-\uFB06\uFB13-\uFB17\uFF21-\uFF3A\uFF41-\uFF5A',
+        'astral': '\uD801[\uDC00-\uDC4F\uDCB0-\uDCD3\uDCD8-\uDCFB]|\uD803[\uDC80-\uDCB2\uDCC0-\uDCF2]|\uD806[\uDCA0-\uDCDF]|\uD81B[\uDE40-\uDE7F]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDEC0\uDEC2-\uDEDA\uDEDC-\uDEFA\uDEFC-\uDF14\uDF16-\uDF34\uDF36-\uDF4E\uDF50-\uDF6E\uDF70-\uDF88\uDF8A-\uDFA8\uDFAA-\uDFC2\uDFC4-\uDFCB]|\uD83A[\uDD00-\uDD43]'
+    },
+    {
+        'name': 'Ll',
+        'alias': 'Lowercase_Letter',
+        'bmp': 'a-z\xB5\xDF-\xF6\xF8-\xFF\u0101\u0103\u0105\u0107\u0109\u010B\u010D\u010F\u0111\u0113\u0115\u0117\u0119\u011B\u011D\u011F\u0121\u0123\u0125\u0127\u0129\u012B\u012D\u012F\u0131\u0133\u0135\u0137\u0138\u013A\u013C\u013E\u0140\u0142\u0144\u0146\u0148\u0149\u014B\u014D\u014F\u0151\u0153\u0155\u0157\u0159\u015B\u015D\u015F\u0161\u0163\u0165\u0167\u0169\u016B\u016D\u016F\u0171\u0173\u0175\u0177\u017A\u017C\u017E-\u0180\u0183\u0185\u0188\u018C\u018D\u0192\u0195\u0199-\u019B\u019E\u01A1\u01A3\u01A5\u01A8\u01AA\u01AB\u01AD\u01B0\u01B4\u01B6\u01B9\u01BA\u01BD-\u01BF\u01C6\u01C9\u01CC\u01CE\u01D0\u01D2\u01D4\u01D6\u01D8\u01DA\u01DC\u01DD\u01DF\u01E1\u01E3\u01E5\u01E7\u01E9\u01EB\u01ED\u01EF\u01F0\u01F3\u01F5\u01F9\u01FB\u01FD\u01FF\u0201\u0203\u0205\u0207\u0209\u020B\u020D\u020F\u0211\u0213\u0215\u0217\u0219\u021B\u021D\u021F\u0221\u0223\u0225\u0227\u0229\u022B\u022D\u022F\u0231\u0233-\u0239\u023C\u023F\u0240\u0242\u0247\u0249\u024B\u024D\u024F-\u0293\u0295-\u02AF\u0371\u0373\u0377\u037B-\u037D\u0390\u03AC-\u03CE\u03D0\u03D1\u03D5-\u03D7\u03D9\u03DB\u03DD\u03DF\u03E1\u03E3\u03E5\u03E7\u03E9\u03EB\u03ED\u03EF-\u03F3\u03F5\u03F8\u03FB\u03FC\u0430-\u045F\u0461\u0463\u0465\u0467\u0469\u046B\u046D\u046F\u0471\u0473\u0475\u0477\u0479\u047B\u047D\u047F\u0481\u048B\u048D\u048F\u0491\u0493\u0495\u0497\u0499\u049B\u049D\u049F\u04A1\u04A3\u04A5\u04A7\u04A9\u04AB\u04AD\u04AF\u04B1\u04B3\u04B5\u04B7\u04B9\u04BB\u04BD\u04BF\u04C2\u04C4\u04C6\u04C8\u04CA\u04CC\u04CE\u04CF\u04D1\u04D3\u04D5\u04D7\u04D9\u04DB\u04DD\u04DF\u04E1\u04E3\u04E5\u04E7\u04E9\u04EB\u04ED\u04EF\u04F1\u04F3\u04F5\u04F7\u04F9\u04FB\u04FD\u04FF\u0501\u0503\u0505\u0507\u0509\u050B\u050D\u050F\u0511\u0513\u0515\u0517\u0519\u051B\u051D\u051F\u0521\u0523\u0525\u0527\u0529\u052B\u052D\u052F\u0560-\u0588\u10D0-\u10FA\u10FD-\u10FF\u13F8-\u13FD\u1C80-\u1C88\u1D00-\u1D2B\u1D6B-\u1D77\u1D79-\u1D9A\u1E01\u1E03\u1E05\u1E07\u1E09\u1E0B\u1E0D\u1E0F\u1E11\u1E13\u1E15\u1E17\u1E19\u1E1B\u1E1D\u1E1F\u1E21\u1E23\u1E25\u1E27\u1E29\u1E2B\u1E2D\u1E2F\u1E31\u1E33\u1E35\u1E37\u1E39\u1E3B\u1E3D\u1E3F\u1E41\u1E43\u1E45\u1E47\u1E49\u1E4B\u1E4D\u1E4F\u1E51\u1E53\u1E55\u1E57\u1E59\u1E5B\u1E5D\u1E5F\u1E61\u1E63\u1E65\u1E67\u1E69\u1E6B\u1E6D\u1E6F\u1E71\u1E73\u1E75\u1E77\u1E79\u1E7B\u1E7D\u1E7F\u1E81\u1E83\u1E85\u1E87\u1E89\u1E8B\u1E8D\u1E8F\u1E91\u1E93\u1E95-\u1E9D\u1E9F\u1EA1\u1EA3\u1EA5\u1EA7\u1EA9\u1EAB\u1EAD\u1EAF\u1EB1\u1EB3\u1EB5\u1EB7\u1EB9\u1EBB\u1EBD\u1EBF\u1EC1\u1EC3\u1EC5\u1EC7\u1EC9\u1ECB\u1ECD\u1ECF\u1ED1\u1ED3\u1ED5\u1ED7\u1ED9\u1EDB\u1EDD\u1EDF\u1EE1\u1EE3\u1EE5\u1EE7\u1EE9\u1EEB\u1EED\u1EEF\u1EF1\u1EF3\u1EF5\u1EF7\u1EF9\u1EFB\u1EFD\u1EFF-\u1F07\u1F10-\u1F15\u1F20-\u1F27\u1F30-\u1F37\u1F40-\u1F45\u1F50-\u1F57\u1F60-\u1F67\u1F70-\u1F7D\u1F80-\u1F87\u1F90-\u1F97\u1FA0-\u1FA7\u1FB0-\u1FB4\u1FB6\u1FB7\u1FBE\u1FC2-\u1FC4\u1FC6\u1FC7\u1FD0-\u1FD3\u1FD6\u1FD7\u1FE0-\u1FE7\u1FF2-\u1FF4\u1FF6\u1FF7\u210A\u210E\u210F\u2113\u212F\u2134\u2139\u213C\u213D\u2146-\u2149\u214E\u2184\u2C30-\u2C5E\u2C61\u2C65\u2C66\u2C68\u2C6A\u2C6C\u2C71\u2C73\u2C74\u2C76-\u2C7B\u2C81\u2C83\u2C85\u2C87\u2C89\u2C8B\u2C8D\u2C8F\u2C91\u2C93\u2C95\u2C97\u2C99\u2C9B\u2C9D\u2C9F\u2CA1\u2CA3\u2CA5\u2CA7\u2CA9\u2CAB\u2CAD\u2CAF\u2CB1\u2CB3\u2CB5\u2CB7\u2CB9\u2CBB\u2CBD\u2CBF\u2CC1\u2CC3\u2CC5\u2CC7\u2CC9\u2CCB\u2CCD\u2CCF\u2CD1\u2CD3\u2CD5\u2CD7\u2CD9\u2CDB\u2CDD\u2CDF\u2CE1\u2CE3\u2CE4\u2CEC\u2CEE\u2CF3\u2D00-\u2D25\u2D27\u2D2D\uA641\uA643\uA645\uA647\uA649\uA64B\uA64D\uA64F\uA651\uA653\uA655\uA657\uA659\uA65B\uA65D\uA65F\uA661\uA663\uA665\uA667\uA669\uA66B\uA66D\uA681\uA683\uA685\uA687\uA689\uA68B\uA68D\uA68F\uA691\uA693\uA695\uA697\uA699\uA69B\uA723\uA725\uA727\uA729\uA72B\uA72D\uA72F-\uA731\uA733\uA735\uA737\uA739\uA73B\uA73D\uA73F\uA741\uA743\uA745\uA747\uA749\uA74B\uA74D\uA74F\uA751\uA753\uA755\uA757\uA759\uA75B\uA75D\uA75F\uA761\uA763\uA765\uA767\uA769\uA76B\uA76D\uA76F\uA771-\uA778\uA77A\uA77C\uA77F\uA781\uA783\uA785\uA787\uA78C\uA78E\uA791\uA793-\uA795\uA797\uA799\uA79B\uA79D\uA79F\uA7A1\uA7A3\uA7A5\uA7A7\uA7A9\uA7AF\uA7B5\uA7B7\uA7B9\uA7BB\uA7BD\uA7BF\uA7C3\uA7FA\uAB30-\uAB5A\uAB60-\uAB67\uAB70-\uABBF\uFB00-\uFB06\uFB13-\uFB17\uFF41-\uFF5A',
+        'astral': '\uD801[\uDC28-\uDC4F\uDCD8-\uDCFB]|\uD803[\uDCC0-\uDCF2]|\uD806[\uDCC0-\uDCDF]|\uD81B[\uDE60-\uDE7F]|\uD835[\uDC1A-\uDC33\uDC4E-\uDC54\uDC56-\uDC67\uDC82-\uDC9B\uDCB6-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDCCF\uDCEA-\uDD03\uDD1E-\uDD37\uDD52-\uDD6B\uDD86-\uDD9F\uDDBA-\uDDD3\uDDEE-\uDE07\uDE22-\uDE3B\uDE56-\uDE6F\uDE8A-\uDEA5\uDEC2-\uDEDA\uDEDC-\uDEE1\uDEFC-\uDF14\uDF16-\uDF1B\uDF36-\uDF4E\uDF50-\uDF55\uDF70-\uDF88\uDF8A-\uDF8F\uDFAA-\uDFC2\uDFC4-\uDFC9\uDFCB]|\uD83A[\uDD22-\uDD43]'
+    },
+    {
+        'name': 'Lm',
+        'alias': 'Modifier_Letter',
+        'bmp': '\u02B0-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0374\u037A\u0559\u0640\u06E5\u06E6\u07F4\u07F5\u07FA\u081A\u0824\u0828\u0971\u0E46\u0EC6\u10FC\u17D7\u1843\u1AA7\u1C78-\u1C7D\u1D2C-\u1D6A\u1D78\u1D9B-\u1DBF\u2071\u207F\u2090-\u209C\u2C7C\u2C7D\u2D6F\u2E2F\u3005\u3031-\u3035\u303B\u309D\u309E\u30FC-\u30FE\uA015\uA4F8-\uA4FD\uA60C\uA67F\uA69C\uA69D\uA717-\uA71F\uA770\uA788\uA7F8\uA7F9\uA9CF\uA9E6\uAA70\uAADD\uAAF3\uAAF4\uAB5C-\uAB5F\uFF70\uFF9E\uFF9F',
+        'astral': '\uD81A[\uDF40-\uDF43]|\uD81B[\uDF93-\uDF9F\uDFE0\uDFE1\uDFE3]|\uD838[\uDD37-\uDD3D]|\uD83A\uDD4B'
+    },
+    {
+        'name': 'Lo',
+        'alias': 'Other_Letter',
+        'bmp': '\xAA\xBA\u01BB\u01C0-\u01C3\u0294\u05D0-\u05EA\u05EF-\u05F2\u0620-\u063F\u0641-\u064A\u066E\u066F\u0671-\u06D3\u06D5\u06EE\u06EF\u06FA-\u06FC\u06FF\u0710\u0712-\u072F\u074D-\u07A5\u07B1\u07CA-\u07EA\u0800-\u0815\u0840-\u0858\u0860-\u086A\u08A0-\u08B4\u08B6-\u08BD\u0904-\u0939\u093D\u0950\u0958-\u0961\u0972-\u0980\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD\u09CE\u09DC\u09DD\u09DF-\u09E1\u09F0\u09F1\u09FC\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A59-\u0A5C\u0A5E\u0A72-\u0A74\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD\u0AD0\u0AE0\u0AE1\u0AF9\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D\u0B5C\u0B5D\u0B5F-\u0B61\u0B71\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BD0\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D\u0C58-\u0C5A\u0C60\u0C61\u0C80\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD\u0CDE\u0CE0\u0CE1\u0CF1\u0CF2\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D\u0D4E\u0D54-\u0D56\u0D5F-\u0D61\u0D7A-\u0D7F\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0E01-\u0E30\u0E32\u0E33\u0E40-\u0E45\u0E81\u0E82\u0E84\u0E86-\u0E8A\u0E8C-\u0EA3\u0EA5\u0EA7-\u0EB0\u0EB2\u0EB3\u0EBD\u0EC0-\u0EC4\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F88-\u0F8C\u1000-\u102A\u103F\u1050-\u1055\u105A-\u105D\u1061\u1065\u1066\u106E-\u1070\u1075-\u1081\u108E\u1100-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16F1-\u16F8\u1700-\u170C\u170E-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176C\u176E-\u1770\u1780-\u17B3\u17DC\u1820-\u1842\u1844-\u1878\u1880-\u1884\u1887-\u18A8\u18AA\u18B0-\u18F5\u1900-\u191E\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19B0-\u19C9\u1A00-\u1A16\u1A20-\u1A54\u1B05-\u1B33\u1B45-\u1B4B\u1B83-\u1BA0\u1BAE\u1BAF\u1BBA-\u1BE5\u1C00-\u1C23\u1C4D-\u1C4F\u1C5A-\u1C77\u1CE9-\u1CEC\u1CEE-\u1CF3\u1CF5\u1CF6\u1CFA\u2135-\u2138\u2D30-\u2D67\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u3006\u303C\u3041-\u3096\u309F\u30A1-\u30FA\u30FF\u3105-\u312F\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FEF\uA000-\uA014\uA016-\uA48C\uA4D0-\uA4F7\uA500-\uA60B\uA610-\uA61F\uA62A\uA62B\uA66E\uA6A0-\uA6E5\uA78F\uA7F7\uA7FB-\uA801\uA803-\uA805\uA807-\uA80A\uA80C-\uA822\uA840-\uA873\uA882-\uA8B3\uA8F2-\uA8F7\uA8FB\uA8FD\uA8FE\uA90A-\uA925\uA930-\uA946\uA960-\uA97C\uA984-\uA9B2\uA9E0-\uA9E4\uA9E7-\uA9EF\uA9FA-\uA9FE\uAA00-\uAA28\uAA40-\uAA42\uAA44-\uAA4B\uAA60-\uAA6F\uAA71-\uAA76\uAA7A\uAA7E-\uAAAF\uAAB1\uAAB5\uAAB6\uAAB9-\uAABD\uAAC0\uAAC2\uAADB\uAADC\uAAE0-\uAAEA\uAAF2\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uABC0-\uABE2\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB1D\uFB1F-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF66-\uFF6F\uFF71-\uFF9D\uFFA0-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC',
+        'astral': '\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA\uDE80-\uDE9C\uDEA0-\uDED0\uDF00-\uDF1F\uDF2D-\uDF40\uDF42-\uDF49\uDF50-\uDF75\uDF80-\uDF9D\uDFA0-\uDFC3\uDFC8-\uDFCF]|\uD801[\uDC50-\uDC9D\uDD00-\uDD27\uDD30-\uDD63\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67]|\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F-\uDC55\uDC60-\uDC76\uDC80-\uDC9E\uDCE0-\uDCF2\uDCF4\uDCF5\uDD00-\uDD15\uDD20-\uDD39\uDD80-\uDDB7\uDDBE\uDDBF\uDE00\uDE10-\uDE13\uDE15-\uDE17\uDE19-\uDE35\uDE60-\uDE7C\uDE80-\uDE9C\uDEC0-\uDEC7\uDEC9-\uDEE4\uDF00-\uDF35\uDF40-\uDF55\uDF60-\uDF72\uDF80-\uDF91]|\uD803[\uDC00-\uDC48\uDD00-\uDD23\uDF00-\uDF1C\uDF27\uDF30-\uDF45\uDFE0-\uDFF6]|\uD804[\uDC03-\uDC37\uDC83-\uDCAF\uDCD0-\uDCE8\uDD03-\uDD26\uDD44\uDD50-\uDD72\uDD76\uDD83-\uDDB2\uDDC1-\uDDC4\uDDDA\uDDDC\uDE00-\uDE11\uDE13-\uDE2B\uDE80-\uDE86\uDE88\uDE8A-\uDE8D\uDE8F-\uDE9D\uDE9F-\uDEA8\uDEB0-\uDEDE\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3D\uDF50\uDF5D-\uDF61]|\uD805[\uDC00-\uDC34\uDC47-\uDC4A\uDC5F\uDC80-\uDCAF\uDCC4\uDCC5\uDCC7\uDD80-\uDDAE\uDDD8-\uDDDB\uDE00-\uDE2F\uDE44\uDE80-\uDEAA\uDEB8\uDF00-\uDF1A]|\uD806[\uDC00-\uDC2B\uDCFF\uDDA0-\uDDA7\uDDAA-\uDDD0\uDDE1\uDDE3\uDE00\uDE0B-\uDE32\uDE3A\uDE50\uDE5C-\uDE89\uDE9D\uDEC0-\uDEF8]|\uD807[\uDC00-\uDC08\uDC0A-\uDC2E\uDC40\uDC72-\uDC8F\uDD00-\uDD06\uDD08\uDD09\uDD0B-\uDD30\uDD46\uDD60-\uDD65\uDD67\uDD68\uDD6A-\uDD89\uDD98\uDEE0-\uDEF2]|\uD808[\uDC00-\uDF99]|\uD809[\uDC80-\uDD43]|[\uD80C\uD81C-\uD820\uD840-\uD868\uD86A-\uD86C\uD86F-\uD872\uD874-\uD879][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2E]|\uD811[\uDC00-\uDE46]|\uD81A[\uDC00-\uDE38\uDE40-\uDE5E\uDED0-\uDEED\uDF00-\uDF2F\uDF63-\uDF77\uDF7D-\uDF8F]|\uD81B[\uDF00-\uDF4A\uDF50]|\uD821[\uDC00-\uDFF7]|\uD822[\uDC00-\uDEF2]|\uD82C[\uDC00-\uDD1E\uDD50-\uDD52\uDD64-\uDD67\uDD70-\uDEFB]|\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99]|\uD838[\uDD00-\uDD2C\uDD4E\uDEC0-\uDEEB]|\uD83A[\uDC00-\uDCC4]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D\uDC20-\uDFFF]|\uD873[\uDC00-\uDEA1\uDEB0-\uDFFF]|\uD87A[\uDC00-\uDFE0]|\uD87E[\uDC00-\uDE1D]'
+    },
+    {
+        'name': 'Lt',
+        'alias': 'Titlecase_Letter',
+        'bmp': '\u01C5\u01C8\u01CB\u01F2\u1F88-\u1F8F\u1F98-\u1F9F\u1FA8-\u1FAF\u1FBC\u1FCC\u1FFC'
+    },
+    {
+        'name': 'Lu',
+        'alias': 'Uppercase_Letter',
+        'bmp': 'A-Z\xC0-\xD6\xD8-\xDE\u0100\u0102\u0104\u0106\u0108\u010A\u010C\u010E\u0110\u0112\u0114\u0116\u0118\u011A\u011C\u011E\u0120\u0122\u0124\u0126\u0128\u012A\u012C\u012E\u0130\u0132\u0134\u0136\u0139\u013B\u013D\u013F\u0141\u0143\u0145\u0147\u014A\u014C\u014E\u0150\u0152\u0154\u0156\u0158\u015A\u015C\u015E\u0160\u0162\u0164\u0166\u0168\u016A\u016C\u016E\u0170\u0172\u0174\u0176\u0178\u0179\u017B\u017D\u0181\u0182\u0184\u0186\u0187\u0189-\u018B\u018E-\u0191\u0193\u0194\u0196-\u0198\u019C\u019D\u019F\u01A0\u01A2\u01A4\u01A6\u01A7\u01A9\u01AC\u01AE\u01AF\u01B1-\u01B3\u01B5\u01B7\u01B8\u01BC\u01C4\u01C7\u01CA\u01CD\u01CF\u01D1\u01D3\u01D5\u01D7\u01D9\u01DB\u01DE\u01E0\u01E2\u01E4\u01E6\u01E8\u01EA\u01EC\u01EE\u01F1\u01F4\u01F6-\u01F8\u01FA\u01FC\u01FE\u0200\u0202\u0204\u0206\u0208\u020A\u020C\u020E\u0210\u0212\u0214\u0216\u0218\u021A\u021C\u021E\u0220\u0222\u0224\u0226\u0228\u022A\u022C\u022E\u0230\u0232\u023A\u023B\u023D\u023E\u0241\u0243-\u0246\u0248\u024A\u024C\u024E\u0370\u0372\u0376\u037F\u0386\u0388-\u038A\u038C\u038E\u038F\u0391-\u03A1\u03A3-\u03AB\u03CF\u03D2-\u03D4\u03D8\u03DA\u03DC\u03DE\u03E0\u03E2\u03E4\u03E6\u03E8\u03EA\u03EC\u03EE\u03F4\u03F7\u03F9\u03FA\u03FD-\u042F\u0460\u0462\u0464\u0466\u0468\u046A\u046C\u046E\u0470\u0472\u0474\u0476\u0478\u047A\u047C\u047E\u0480\u048A\u048C\u048E\u0490\u0492\u0494\u0496\u0498\u049A\u049C\u049E\u04A0\u04A2\u04A4\u04A6\u04A8\u04AA\u04AC\u04AE\u04B0\u04B2\u04B4\u04B6\u04B8\u04BA\u04BC\u04BE\u04C0\u04C1\u04C3\u04C5\u04C7\u04C9\u04CB\u04CD\u04D0\u04D2\u04D4\u04D6\u04D8\u04DA\u04DC\u04DE\u04E0\u04E2\u04E4\u04E6\u04E8\u04EA\u04EC\u04EE\u04F0\u04F2\u04F4\u04F6\u04F8\u04FA\u04FC\u04FE\u0500\u0502\u0504\u0506\u0508\u050A\u050C\u050E\u0510\u0512\u0514\u0516\u0518\u051A\u051C\u051E\u0520\u0522\u0524\u0526\u0528\u052A\u052C\u052E\u0531-\u0556\u10A0-\u10C5\u10C7\u10CD\u13A0-\u13F5\u1C90-\u1CBA\u1CBD-\u1CBF\u1E00\u1E02\u1E04\u1E06\u1E08\u1E0A\u1E0C\u1E0E\u1E10\u1E12\u1E14\u1E16\u1E18\u1E1A\u1E1C\u1E1E\u1E20\u1E22\u1E24\u1E26\u1E28\u1E2A\u1E2C\u1E2E\u1E30\u1E32\u1E34\u1E36\u1E38\u1E3A\u1E3C\u1E3E\u1E40\u1E42\u1E44\u1E46\u1E48\u1E4A\u1E4C\u1E4E\u1E50\u1E52\u1E54\u1E56\u1E58\u1E5A\u1E5C\u1E5E\u1E60\u1E62\u1E64\u1E66\u1E68\u1E6A\u1E6C\u1E6E\u1E70\u1E72\u1E74\u1E76\u1E78\u1E7A\u1E7C\u1E7E\u1E80\u1E82\u1E84\u1E86\u1E88\u1E8A\u1E8C\u1E8E\u1E90\u1E92\u1E94\u1E9E\u1EA0\u1EA2\u1EA4\u1EA6\u1EA8\u1EAA\u1EAC\u1EAE\u1EB0\u1EB2\u1EB4\u1EB6\u1EB8\u1EBA\u1EBC\u1EBE\u1EC0\u1EC2\u1EC4\u1EC6\u1EC8\u1ECA\u1ECC\u1ECE\u1ED0\u1ED2\u1ED4\u1ED6\u1ED8\u1EDA\u1EDC\u1EDE\u1EE0\u1EE2\u1EE4\u1EE6\u1EE8\u1EEA\u1EEC\u1EEE\u1EF0\u1EF2\u1EF4\u1EF6\u1EF8\u1EFA\u1EFC\u1EFE\u1F08-\u1F0F\u1F18-\u1F1D\u1F28-\u1F2F\u1F38-\u1F3F\u1F48-\u1F4D\u1F59\u1F5B\u1F5D\u1F5F\u1F68-\u1F6F\u1FB8-\u1FBB\u1FC8-\u1FCB\u1FD8-\u1FDB\u1FE8-\u1FEC\u1FF8-\u1FFB\u2102\u2107\u210B-\u210D\u2110-\u2112\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u2130-\u2133\u213E\u213F\u2145\u2183\u2C00-\u2C2E\u2C60\u2C62-\u2C64\u2C67\u2C69\u2C6B\u2C6D-\u2C70\u2C72\u2C75\u2C7E-\u2C80\u2C82\u2C84\u2C86\u2C88\u2C8A\u2C8C\u2C8E\u2C90\u2C92\u2C94\u2C96\u2C98\u2C9A\u2C9C\u2C9E\u2CA0\u2CA2\u2CA4\u2CA6\u2CA8\u2CAA\u2CAC\u2CAE\u2CB0\u2CB2\u2CB4\u2CB6\u2CB8\u2CBA\u2CBC\u2CBE\u2CC0\u2CC2\u2CC4\u2CC6\u2CC8\u2CCA\u2CCC\u2CCE\u2CD0\u2CD2\u2CD4\u2CD6\u2CD8\u2CDA\u2CDC\u2CDE\u2CE0\u2CE2\u2CEB\u2CED\u2CF2\uA640\uA642\uA644\uA646\uA648\uA64A\uA64C\uA64E\uA650\uA652\uA654\uA656\uA658\uA65A\uA65C\uA65E\uA660\uA662\uA664\uA666\uA668\uA66A\uA66C\uA680\uA682\uA684\uA686\uA688\uA68A\uA68C\uA68E\uA690\uA692\uA694\uA696\uA698\uA69A\uA722\uA724\uA726\uA728\uA72A\uA72C\uA72E\uA732\uA734\uA736\uA738\uA73A\uA73C\uA73E\uA740\uA742\uA744\uA746\uA748\uA74A\uA74C\uA74E\uA750\uA752\uA754\uA756\uA758\uA75A\uA75C\uA75E\uA760\uA762\uA764\uA766\uA768\uA76A\uA76C\uA76E\uA779\uA77B\uA77D\uA77E\uA780\uA782\uA784\uA786\uA78B\uA78D\uA790\uA792\uA796\uA798\uA79A\uA79C\uA79E\uA7A0\uA7A2\uA7A4\uA7A6\uA7A8\uA7AA-\uA7AE\uA7B0-\uA7B4\uA7B6\uA7B8\uA7BA\uA7BC\uA7BE\uA7C2\uA7C4-\uA7C6\uFF21-\uFF3A',
+        'astral': '\uD801[\uDC00-\uDC27\uDCB0-\uDCD3]|\uD803[\uDC80-\uDCB2]|\uD806[\uDCA0-\uDCBF]|\uD81B[\uDE40-\uDE5F]|\uD835[\uDC00-\uDC19\uDC34-\uDC4D\uDC68-\uDC81\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB5\uDCD0-\uDCE9\uDD04\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD38\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD6C-\uDD85\uDDA0-\uDDB9\uDDD4-\uDDED\uDE08-\uDE21\uDE3C-\uDE55\uDE70-\uDE89\uDEA8-\uDEC0\uDEE2-\uDEFA\uDF1C-\uDF34\uDF56-\uDF6E\uDF90-\uDFA8\uDFCA]|\uD83A[\uDD00-\uDD21]'
+    },
+    {
+        'name': 'M',
+        'alias': 'Mark',
+        'bmp': '\u0300-\u036F\u0483-\u0489\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u0711\u0730-\u074A\u07A6-\u07B0\u07EB-\u07F3\u07FD\u0816-\u0819\u081B-\u0823\u0825-\u0827\u0829-\u082D\u0859-\u085B\u08D3-\u08E1\u08E3-\u0903\u093A-\u093C\u093E-\u094F\u0951-\u0957\u0962\u0963\u0981-\u0983\u09BC\u09BE-\u09C4\u09C7\u09C8\u09CB-\u09CD\u09D7\u09E2\u09E3\u09FE\u0A01-\u0A03\u0A3C\u0A3E-\u0A42\u0A47\u0A48\u0A4B-\u0A4D\u0A51\u0A70\u0A71\u0A75\u0A81-\u0A83\u0ABC\u0ABE-\u0AC5\u0AC7-\u0AC9\u0ACB-\u0ACD\u0AE2\u0AE3\u0AFA-\u0AFF\u0B01-\u0B03\u0B3C\u0B3E-\u0B44\u0B47\u0B48\u0B4B-\u0B4D\u0B56\u0B57\u0B62\u0B63\u0B82\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCD\u0BD7\u0C00-\u0C04\u0C3E-\u0C44\u0C46-\u0C48\u0C4A-\u0C4D\u0C55\u0C56\u0C62\u0C63\u0C81-\u0C83\u0CBC\u0CBE-\u0CC4\u0CC6-\u0CC8\u0CCA-\u0CCD\u0CD5\u0CD6\u0CE2\u0CE3\u0D00-\u0D03\u0D3B\u0D3C\u0D3E-\u0D44\u0D46-\u0D48\u0D4A-\u0D4D\u0D57\u0D62\u0D63\u0D82\u0D83\u0DCA\u0DCF-\u0DD4\u0DD6\u0DD8-\u0DDF\u0DF2\u0DF3\u0E31\u0E34-\u0E3A\u0E47-\u0E4E\u0EB1\u0EB4-\u0EBC\u0EC8-\u0ECD\u0F18\u0F19\u0F35\u0F37\u0F39\u0F3E\u0F3F\u0F71-\u0F84\u0F86\u0F87\u0F8D-\u0F97\u0F99-\u0FBC\u0FC6\u102B-\u103E\u1056-\u1059\u105E-\u1060\u1062-\u1064\u1067-\u106D\u1071-\u1074\u1082-\u108D\u108F\u109A-\u109D\u135D-\u135F\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17B4-\u17D3\u17DD\u180B-\u180D\u1885\u1886\u18A9\u1920-\u192B\u1930-\u193B\u1A17-\u1A1B\u1A55-\u1A5E\u1A60-\u1A7C\u1A7F\u1AB0-\u1ABE\u1B00-\u1B04\u1B34-\u1B44\u1B6B-\u1B73\u1B80-\u1B82\u1BA1-\u1BAD\u1BE6-\u1BF3\u1C24-\u1C37\u1CD0-\u1CD2\u1CD4-\u1CE8\u1CED\u1CF4\u1CF7-\u1CF9\u1DC0-\u1DF9\u1DFB-\u1DFF\u20D0-\u20F0\u2CEF-\u2CF1\u2D7F\u2DE0-\u2DFF\u302A-\u302F\u3099\u309A\uA66F-\uA672\uA674-\uA67D\uA69E\uA69F\uA6F0\uA6F1\uA802\uA806\uA80B\uA823-\uA827\uA880\uA881\uA8B4-\uA8C5\uA8E0-\uA8F1\uA8FF\uA926-\uA92D\uA947-\uA953\uA980-\uA983\uA9B3-\uA9C0\uA9E5\uAA29-\uAA36\uAA43\uAA4C\uAA4D\uAA7B-\uAA7D\uAAB0\uAAB2-\uAAB4\uAAB7\uAAB8\uAABE\uAABF\uAAC1\uAAEB-\uAAEF\uAAF5\uAAF6\uABE3-\uABEA\uABEC\uABED\uFB1E\uFE00-\uFE0F\uFE20-\uFE2F',
+        'astral': '\uD800[\uDDFD\uDEE0\uDF76-\uDF7A]|\uD802[\uDE01-\uDE03\uDE05\uDE06\uDE0C-\uDE0F\uDE38-\uDE3A\uDE3F\uDEE5\uDEE6]|\uD803[\uDD24-\uDD27\uDF46-\uDF50]|\uD804[\uDC00-\uDC02\uDC38-\uDC46\uDC7F-\uDC82\uDCB0-\uDCBA\uDD00-\uDD02\uDD27-\uDD34\uDD45\uDD46\uDD73\uDD80-\uDD82\uDDB3-\uDDC0\uDDC9-\uDDCC\uDE2C-\uDE37\uDE3E\uDEDF-\uDEEA\uDF00-\uDF03\uDF3B\uDF3C\uDF3E-\uDF44\uDF47\uDF48\uDF4B-\uDF4D\uDF57\uDF62\uDF63\uDF66-\uDF6C\uDF70-\uDF74]|\uD805[\uDC35-\uDC46\uDC5E\uDCB0-\uDCC3\uDDAF-\uDDB5\uDDB8-\uDDC0\uDDDC\uDDDD\uDE30-\uDE40\uDEAB-\uDEB7\uDF1D-\uDF2B]|\uD806[\uDC2C-\uDC3A\uDDD1-\uDDD7\uDDDA-\uDDE0\uDDE4\uDE01-\uDE0A\uDE33-\uDE39\uDE3B-\uDE3E\uDE47\uDE51-\uDE5B\uDE8A-\uDE99]|\uD807[\uDC2F-\uDC36\uDC38-\uDC3F\uDC92-\uDCA7\uDCA9-\uDCB6\uDD31-\uDD36\uDD3A\uDD3C\uDD3D\uDD3F-\uDD45\uDD47\uDD8A-\uDD8E\uDD90\uDD91\uDD93-\uDD97\uDEF3-\uDEF6]|\uD81A[\uDEF0-\uDEF4\uDF30-\uDF36]|\uD81B[\uDF4F\uDF51-\uDF87\uDF8F-\uDF92]|\uD82F[\uDC9D\uDC9E]|\uD834[\uDD65-\uDD69\uDD6D-\uDD72\uDD7B-\uDD82\uDD85-\uDD8B\uDDAA-\uDDAD\uDE42-\uDE44]|\uD836[\uDE00-\uDE36\uDE3B-\uDE6C\uDE75\uDE84\uDE9B-\uDE9F\uDEA1-\uDEAF]|\uD838[\uDC00-\uDC06\uDC08-\uDC18\uDC1B-\uDC21\uDC23\uDC24\uDC26-\uDC2A\uDD30-\uDD36\uDEEC-\uDEEF]|\uD83A[\uDCD0-\uDCD6\uDD44-\uDD4A]|\uDB40[\uDD00-\uDDEF]'
+    },
+    {
+        'name': 'Mc',
+        'alias': 'Spacing_Mark',
+        'bmp': '\u0903\u093B\u093E-\u0940\u0949-\u094C\u094E\u094F\u0982\u0983\u09BE-\u09C0\u09C7\u09C8\u09CB\u09CC\u09D7\u0A03\u0A3E-\u0A40\u0A83\u0ABE-\u0AC0\u0AC9\u0ACB\u0ACC\u0B02\u0B03\u0B3E\u0B40\u0B47\u0B48\u0B4B\u0B4C\u0B57\u0BBE\u0BBF\u0BC1\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCC\u0BD7\u0C01-\u0C03\u0C41-\u0C44\u0C82\u0C83\u0CBE\u0CC0-\u0CC4\u0CC7\u0CC8\u0CCA\u0CCB\u0CD5\u0CD6\u0D02\u0D03\u0D3E-\u0D40\u0D46-\u0D48\u0D4A-\u0D4C\u0D57\u0D82\u0D83\u0DCF-\u0DD1\u0DD8-\u0DDF\u0DF2\u0DF3\u0F3E\u0F3F\u0F7F\u102B\u102C\u1031\u1038\u103B\u103C\u1056\u1057\u1062-\u1064\u1067-\u106D\u1083\u1084\u1087-\u108C\u108F\u109A-\u109C\u17B6\u17BE-\u17C5\u17C7\u17C8\u1923-\u1926\u1929-\u192B\u1930\u1931\u1933-\u1938\u1A19\u1A1A\u1A55\u1A57\u1A61\u1A63\u1A64\u1A6D-\u1A72\u1B04\u1B35\u1B3B\u1B3D-\u1B41\u1B43\u1B44\u1B82\u1BA1\u1BA6\u1BA7\u1BAA\u1BE7\u1BEA-\u1BEC\u1BEE\u1BF2\u1BF3\u1C24-\u1C2B\u1C34\u1C35\u1CE1\u1CF7\u302E\u302F\uA823\uA824\uA827\uA880\uA881\uA8B4-\uA8C3\uA952\uA953\uA983\uA9B4\uA9B5\uA9BA\uA9BB\uA9BE-\uA9C0\uAA2F\uAA30\uAA33\uAA34\uAA4D\uAA7B\uAA7D\uAAEB\uAAEE\uAAEF\uAAF5\uABE3\uABE4\uABE6\uABE7\uABE9\uABEA\uABEC',
+        'astral': '\uD804[\uDC00\uDC02\uDC82\uDCB0-\uDCB2\uDCB7\uDCB8\uDD2C\uDD45\uDD46\uDD82\uDDB3-\uDDB5\uDDBF\uDDC0\uDE2C-\uDE2E\uDE32\uDE33\uDE35\uDEE0-\uDEE2\uDF02\uDF03\uDF3E\uDF3F\uDF41-\uDF44\uDF47\uDF48\uDF4B-\uDF4D\uDF57\uDF62\uDF63]|\uD805[\uDC35-\uDC37\uDC40\uDC41\uDC45\uDCB0-\uDCB2\uDCB9\uDCBB-\uDCBE\uDCC1\uDDAF-\uDDB1\uDDB8-\uDDBB\uDDBE\uDE30-\uDE32\uDE3B\uDE3C\uDE3E\uDEAC\uDEAE\uDEAF\uDEB6\uDF20\uDF21\uDF26]|\uD806[\uDC2C-\uDC2E\uDC38\uDDD1-\uDDD3\uDDDC-\uDDDF\uDDE4\uDE39\uDE57\uDE58\uDE97]|\uD807[\uDC2F\uDC3E\uDCA9\uDCB1\uDCB4\uDD8A-\uDD8E\uDD93\uDD94\uDD96\uDEF5\uDEF6]|\uD81B[\uDF51-\uDF87]|\uD834[\uDD65\uDD66\uDD6D-\uDD72]'
+    },
+    {
+        'name': 'Me',
+        'alias': 'Enclosing_Mark',
+        'bmp': '\u0488\u0489\u1ABE\u20DD-\u20E0\u20E2-\u20E4\uA670-\uA672'
+    },
+    {
+        'name': 'Mn',
+        'alias': 'Nonspacing_Mark',
+        'bmp': '\u0300-\u036F\u0483-\u0487\u0591-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E4\u06E7\u06E8\u06EA-\u06ED\u0711\u0730-\u074A\u07A6-\u07B0\u07EB-\u07F3\u07FD\u0816-\u0819\u081B-\u0823\u0825-\u0827\u0829-\u082D\u0859-\u085B\u08D3-\u08E1\u08E3-\u0902\u093A\u093C\u0941-\u0948\u094D\u0951-\u0957\u0962\u0963\u0981\u09BC\u09C1-\u09C4\u09CD\u09E2\u09E3\u09FE\u0A01\u0A02\u0A3C\u0A41\u0A42\u0A47\u0A48\u0A4B-\u0A4D\u0A51\u0A70\u0A71\u0A75\u0A81\u0A82\u0ABC\u0AC1-\u0AC5\u0AC7\u0AC8\u0ACD\u0AE2\u0AE3\u0AFA-\u0AFF\u0B01\u0B3C\u0B3F\u0B41-\u0B44\u0B4D\u0B56\u0B62\u0B63\u0B82\u0BC0\u0BCD\u0C00\u0C04\u0C3E-\u0C40\u0C46-\u0C48\u0C4A-\u0C4D\u0C55\u0C56\u0C62\u0C63\u0C81\u0CBC\u0CBF\u0CC6\u0CCC\u0CCD\u0CE2\u0CE3\u0D00\u0D01\u0D3B\u0D3C\u0D41-\u0D44\u0D4D\u0D62\u0D63\u0DCA\u0DD2-\u0DD4\u0DD6\u0E31\u0E34-\u0E3A\u0E47-\u0E4E\u0EB1\u0EB4-\u0EBC\u0EC8-\u0ECD\u0F18\u0F19\u0F35\u0F37\u0F39\u0F71-\u0F7E\u0F80-\u0F84\u0F86\u0F87\u0F8D-\u0F97\u0F99-\u0FBC\u0FC6\u102D-\u1030\u1032-\u1037\u1039\u103A\u103D\u103E\u1058\u1059\u105E-\u1060\u1071-\u1074\u1082\u1085\u1086\u108D\u109D\u135D-\u135F\u1712-\u1714\u1732-\u1734\u1752\u1753\u1772\u1773\u17B4\u17B5\u17B7-\u17BD\u17C6\u17C9-\u17D3\u17DD\u180B-\u180D\u1885\u1886\u18A9\u1920-\u1922\u1927\u1928\u1932\u1939-\u193B\u1A17\u1A18\u1A1B\u1A56\u1A58-\u1A5E\u1A60\u1A62\u1A65-\u1A6C\u1A73-\u1A7C\u1A7F\u1AB0-\u1ABD\u1B00-\u1B03\u1B34\u1B36-\u1B3A\u1B3C\u1B42\u1B6B-\u1B73\u1B80\u1B81\u1BA2-\u1BA5\u1BA8\u1BA9\u1BAB-\u1BAD\u1BE6\u1BE8\u1BE9\u1BED\u1BEF-\u1BF1\u1C2C-\u1C33\u1C36\u1C37\u1CD0-\u1CD2\u1CD4-\u1CE0\u1CE2-\u1CE8\u1CED\u1CF4\u1CF8\u1CF9\u1DC0-\u1DF9\u1DFB-\u1DFF\u20D0-\u20DC\u20E1\u20E5-\u20F0\u2CEF-\u2CF1\u2D7F\u2DE0-\u2DFF\u302A-\u302D\u3099\u309A\uA66F\uA674-\uA67D\uA69E\uA69F\uA6F0\uA6F1\uA802\uA806\uA80B\uA825\uA826\uA8C4\uA8C5\uA8E0-\uA8F1\uA8FF\uA926-\uA92D\uA947-\uA951\uA980-\uA982\uA9B3\uA9B6-\uA9B9\uA9BC\uA9BD\uA9E5\uAA29-\uAA2E\uAA31\uAA32\uAA35\uAA36\uAA43\uAA4C\uAA7C\uAAB0\uAAB2-\uAAB4\uAAB7\uAAB8\uAABE\uAABF\uAAC1\uAAEC\uAAED\uAAF6\uABE5\uABE8\uABED\uFB1E\uFE00-\uFE0F\uFE20-\uFE2F',
+        'astral': '\uD800[\uDDFD\uDEE0\uDF76-\uDF7A]|\uD802[\uDE01-\uDE03\uDE05\uDE06\uDE0C-\uDE0F\uDE38-\uDE3A\uDE3F\uDEE5\uDEE6]|\uD803[\uDD24-\uDD27\uDF46-\uDF50]|\uD804[\uDC01\uDC38-\uDC46\uDC7F-\uDC81\uDCB3-\uDCB6\uDCB9\uDCBA\uDD00-\uDD02\uDD27-\uDD2B\uDD2D-\uDD34\uDD73\uDD80\uDD81\uDDB6-\uDDBE\uDDC9-\uDDCC\uDE2F-\uDE31\uDE34\uDE36\uDE37\uDE3E\uDEDF\uDEE3-\uDEEA\uDF00\uDF01\uDF3B\uDF3C\uDF40\uDF66-\uDF6C\uDF70-\uDF74]|\uD805[\uDC38-\uDC3F\uDC42-\uDC44\uDC46\uDC5E\uDCB3-\uDCB8\uDCBA\uDCBF\uDCC0\uDCC2\uDCC3\uDDB2-\uDDB5\uDDBC\uDDBD\uDDBF\uDDC0\uDDDC\uDDDD\uDE33-\uDE3A\uDE3D\uDE3F\uDE40\uDEAB\uDEAD\uDEB0-\uDEB5\uDEB7\uDF1D-\uDF1F\uDF22-\uDF25\uDF27-\uDF2B]|\uD806[\uDC2F-\uDC37\uDC39\uDC3A\uDDD4-\uDDD7\uDDDA\uDDDB\uDDE0\uDE01-\uDE0A\uDE33-\uDE38\uDE3B-\uDE3E\uDE47\uDE51-\uDE56\uDE59-\uDE5B\uDE8A-\uDE96\uDE98\uDE99]|\uD807[\uDC30-\uDC36\uDC38-\uDC3D\uDC3F\uDC92-\uDCA7\uDCAA-\uDCB0\uDCB2\uDCB3\uDCB5\uDCB6\uDD31-\uDD36\uDD3A\uDD3C\uDD3D\uDD3F-\uDD45\uDD47\uDD90\uDD91\uDD95\uDD97\uDEF3\uDEF4]|\uD81A[\uDEF0-\uDEF4\uDF30-\uDF36]|\uD81B[\uDF4F\uDF8F-\uDF92]|\uD82F[\uDC9D\uDC9E]|\uD834[\uDD67-\uDD69\uDD7B-\uDD82\uDD85-\uDD8B\uDDAA-\uDDAD\uDE42-\uDE44]|\uD836[\uDE00-\uDE36\uDE3B-\uDE6C\uDE75\uDE84\uDE9B-\uDE9F\uDEA1-\uDEAF]|\uD838[\uDC00-\uDC06\uDC08-\uDC18\uDC1B-\uDC21\uDC23\uDC24\uDC26-\uDC2A\uDD30-\uDD36\uDEEC-\uDEEF]|\uD83A[\uDCD0-\uDCD6\uDD44-\uDD4A]|\uDB40[\uDD00-\uDDEF]'
+    },
+    {
+        'name': 'N',
+        'alias': 'Number',
+        'bmp': '0-9\xB2\xB3\xB9\xBC-\xBE\u0660-\u0669\u06F0-\u06F9\u07C0-\u07C9\u0966-\u096F\u09E6-\u09EF\u09F4-\u09F9\u0A66-\u0A6F\u0AE6-\u0AEF\u0B66-\u0B6F\u0B72-\u0B77\u0BE6-\u0BF2\u0C66-\u0C6F\u0C78-\u0C7E\u0CE6-\u0CEF\u0D58-\u0D5E\u0D66-\u0D78\u0DE6-\u0DEF\u0E50-\u0E59\u0ED0-\u0ED9\u0F20-\u0F33\u1040-\u1049\u1090-\u1099\u1369-\u137C\u16EE-\u16F0\u17E0-\u17E9\u17F0-\u17F9\u1810-\u1819\u1946-\u194F\u19D0-\u19DA\u1A80-\u1A89\u1A90-\u1A99\u1B50-\u1B59\u1BB0-\u1BB9\u1C40-\u1C49\u1C50-\u1C59\u2070\u2074-\u2079\u2080-\u2089\u2150-\u2182\u2185-\u2189\u2460-\u249B\u24EA-\u24FF\u2776-\u2793\u2CFD\u3007\u3021-\u3029\u3038-\u303A\u3192-\u3195\u3220-\u3229\u3248-\u324F\u3251-\u325F\u3280-\u3289\u32B1-\u32BF\uA620-\uA629\uA6E6-\uA6EF\uA830-\uA835\uA8D0-\uA8D9\uA900-\uA909\uA9D0-\uA9D9\uA9F0-\uA9F9\uAA50-\uAA59\uABF0-\uABF9\uFF10-\uFF19',
+        'astral': '\uD800[\uDD07-\uDD33\uDD40-\uDD78\uDD8A\uDD8B\uDEE1-\uDEFB\uDF20-\uDF23\uDF41\uDF4A\uDFD1-\uDFD5]|\uD801[\uDCA0-\uDCA9]|\uD802[\uDC58-\uDC5F\uDC79-\uDC7F\uDCA7-\uDCAF\uDCFB-\uDCFF\uDD16-\uDD1B\uDDBC\uDDBD\uDDC0-\uDDCF\uDDD2-\uDDFF\uDE40-\uDE48\uDE7D\uDE7E\uDE9D-\uDE9F\uDEEB-\uDEEF\uDF58-\uDF5F\uDF78-\uDF7F\uDFA9-\uDFAF]|\uD803[\uDCFA-\uDCFF\uDD30-\uDD39\uDE60-\uDE7E\uDF1D-\uDF26\uDF51-\uDF54]|\uD804[\uDC52-\uDC6F\uDCF0-\uDCF9\uDD36-\uDD3F\uDDD0-\uDDD9\uDDE1-\uDDF4\uDEF0-\uDEF9]|\uD805[\uDC50-\uDC59\uDCD0-\uDCD9\uDE50-\uDE59\uDEC0-\uDEC9\uDF30-\uDF3B]|\uD806[\uDCE0-\uDCF2]|\uD807[\uDC50-\uDC6C\uDD50-\uDD59\uDDA0-\uDDA9\uDFC0-\uDFD4]|\uD809[\uDC00-\uDC6E]|\uD81A[\uDE60-\uDE69\uDF50-\uDF59\uDF5B-\uDF61]|\uD81B[\uDE80-\uDE96]|\uD834[\uDEE0-\uDEF3\uDF60-\uDF78]|\uD835[\uDFCE-\uDFFF]|\uD838[\uDD40-\uDD49\uDEF0-\uDEF9]|\uD83A[\uDCC7-\uDCCF\uDD50-\uDD59]|\uD83B[\uDC71-\uDCAB\uDCAD-\uDCAF\uDCB1-\uDCB4\uDD01-\uDD2D\uDD2F-\uDD3D]|\uD83C[\uDD00-\uDD0C]'
+    },
+    {
+        'name': 'Nd',
+        'alias': 'Decimal_Number',
+        'bmp': '0-9\u0660-\u0669\u06F0-\u06F9\u07C0-\u07C9\u0966-\u096F\u09E6-\u09EF\u0A66-\u0A6F\u0AE6-\u0AEF\u0B66-\u0B6F\u0BE6-\u0BEF\u0C66-\u0C6F\u0CE6-\u0CEF\u0D66-\u0D6F\u0DE6-\u0DEF\u0E50-\u0E59\u0ED0-\u0ED9\u0F20-\u0F29\u1040-\u1049\u1090-\u1099\u17E0-\u17E9\u1810-\u1819\u1946-\u194F\u19D0-\u19D9\u1A80-\u1A89\u1A90-\u1A99\u1B50-\u1B59\u1BB0-\u1BB9\u1C40-\u1C49\u1C50-\u1C59\uA620-\uA629\uA8D0-\uA8D9\uA900-\uA909\uA9D0-\uA9D9\uA9F0-\uA9F9\uAA50-\uAA59\uABF0-\uABF9\uFF10-\uFF19',
+        'astral': '\uD801[\uDCA0-\uDCA9]|\uD803[\uDD30-\uDD39]|\uD804[\uDC66-\uDC6F\uDCF0-\uDCF9\uDD36-\uDD3F\uDDD0-\uDDD9\uDEF0-\uDEF9]|\uD805[\uDC50-\uDC59\uDCD0-\uDCD9\uDE50-\uDE59\uDEC0-\uDEC9\uDF30-\uDF39]|\uD806[\uDCE0-\uDCE9]|\uD807[\uDC50-\uDC59\uDD50-\uDD59\uDDA0-\uDDA9]|\uD81A[\uDE60-\uDE69\uDF50-\uDF59]|\uD835[\uDFCE-\uDFFF]|\uD838[\uDD40-\uDD49\uDEF0-\uDEF9]|\uD83A[\uDD50-\uDD59]'
+    },
+    {
+        'name': 'Nl',
+        'alias': 'Letter_Number',
+        'bmp': '\u16EE-\u16F0\u2160-\u2182\u2185-\u2188\u3007\u3021-\u3029\u3038-\u303A\uA6E6-\uA6EF',
+        'astral': '\uD800[\uDD40-\uDD74\uDF41\uDF4A\uDFD1-\uDFD5]|\uD809[\uDC00-\uDC6E]'
+    },
+    {
+        'name': 'No',
+        'alias': 'Other_Number',
+        'bmp': '\xB2\xB3\xB9\xBC-\xBE\u09F4-\u09F9\u0B72-\u0B77\u0BF0-\u0BF2\u0C78-\u0C7E\u0D58-\u0D5E\u0D70-\u0D78\u0F2A-\u0F33\u1369-\u137C\u17F0-\u17F9\u19DA\u2070\u2074-\u2079\u2080-\u2089\u2150-\u215F\u2189\u2460-\u249B\u24EA-\u24FF\u2776-\u2793\u2CFD\u3192-\u3195\u3220-\u3229\u3248-\u324F\u3251-\u325F\u3280-\u3289\u32B1-\u32BF\uA830-\uA835',
+        'astral': '\uD800[\uDD07-\uDD33\uDD75-\uDD78\uDD8A\uDD8B\uDEE1-\uDEFB\uDF20-\uDF23]|\uD802[\uDC58-\uDC5F\uDC79-\uDC7F\uDCA7-\uDCAF\uDCFB-\uDCFF\uDD16-\uDD1B\uDDBC\uDDBD\uDDC0-\uDDCF\uDDD2-\uDDFF\uDE40-\uDE48\uDE7D\uDE7E\uDE9D-\uDE9F\uDEEB-\uDEEF\uDF58-\uDF5F\uDF78-\uDF7F\uDFA9-\uDFAF]|\uD803[\uDCFA-\uDCFF\uDE60-\uDE7E\uDF1D-\uDF26\uDF51-\uDF54]|\uD804[\uDC52-\uDC65\uDDE1-\uDDF4]|\uD805[\uDF3A\uDF3B]|\uD806[\uDCEA-\uDCF2]|\uD807[\uDC5A-\uDC6C\uDFC0-\uDFD4]|\uD81A[\uDF5B-\uDF61]|\uD81B[\uDE80-\uDE96]|\uD834[\uDEE0-\uDEF3\uDF60-\uDF78]|\uD83A[\uDCC7-\uDCCF]|\uD83B[\uDC71-\uDCAB\uDCAD-\uDCAF\uDCB1-\uDCB4\uDD01-\uDD2D\uDD2F-\uDD3D]|\uD83C[\uDD00-\uDD0C]'
+    },
+    {
+        'name': 'P',
+        'alias': 'Punctuation',
+        'bmp': '!-#%-\\*,-\\/:;\\?@\\[-\\]_\\{\\}\xA1\xA7\xAB\xB6\xB7\xBB\xBF\u037E\u0387\u055A-\u055F\u0589\u058A\u05BE\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u09FD\u0A76\u0AF0\u0C77\u0C84\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F3A-\u0F3D\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u1400\u166E\u169B\u169C\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2010-\u2027\u2030-\u2043\u2045-\u2051\u2053-\u205E\u207D\u207E\u208D\u208E\u2308-\u230B\u2329\u232A\u2768-\u2775\u27C5\u27C6\u27E6-\u27EF\u2983-\u2998\u29D8-\u29DB\u29FC\u29FD\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00-\u2E2E\u2E30-\u2E4F\u3001-\u3003\u3008-\u3011\u3014-\u301F\u3030\u303D\u30A0\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFD3E\uFD3F\uFE10-\uFE19\uFE30-\uFE52\uFE54-\uFE61\uFE63\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF0A\uFF0C-\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3B-\uFF3D\uFF3F\uFF5B\uFF5D\uFF5F-\uFF65',
+        'astral': '\uD800[\uDD00-\uDD02\uDF9F\uDFD0]|\uD801\uDD6F|\uD802[\uDC57\uDD1F\uDD3F\uDE50-\uDE58\uDE7F\uDEF0-\uDEF6\uDF39-\uDF3F\uDF99-\uDF9C]|\uD803[\uDF55-\uDF59]|\uD804[\uDC47-\uDC4D\uDCBB\uDCBC\uDCBE-\uDCC1\uDD40-\uDD43\uDD74\uDD75\uDDC5-\uDDC8\uDDCD\uDDDB\uDDDD-\uDDDF\uDE38-\uDE3D\uDEA9]|\uD805[\uDC4B-\uDC4F\uDC5B\uDC5D\uDCC6\uDDC1-\uDDD7\uDE41-\uDE43\uDE60-\uDE6C\uDF3C-\uDF3E]|\uD806[\uDC3B\uDDE2\uDE3F-\uDE46\uDE9A-\uDE9C\uDE9E-\uDEA2]|\uD807[\uDC41-\uDC45\uDC70\uDC71\uDEF7\uDEF8\uDFFF]|\uD809[\uDC70-\uDC74]|\uD81A[\uDE6E\uDE6F\uDEF5\uDF37-\uDF3B\uDF44]|\uD81B[\uDE97-\uDE9A\uDFE2]|\uD82F\uDC9F|\uD836[\uDE87-\uDE8B]|\uD83A[\uDD5E\uDD5F]'
+    },
+    {
+        'name': 'Pc',
+        'alias': 'Connector_Punctuation',
+        'bmp': '_\u203F\u2040\u2054\uFE33\uFE34\uFE4D-\uFE4F\uFF3F'
+    },
+    {
+        'name': 'Pd',
+        'alias': 'Dash_Punctuation',
+        'bmp': '\\-\u058A\u05BE\u1400\u1806\u2010-\u2015\u2E17\u2E1A\u2E3A\u2E3B\u2E40\u301C\u3030\u30A0\uFE31\uFE32\uFE58\uFE63\uFF0D'
+    },
+    {
+        'name': 'Pe',
+        'alias': 'Close_Punctuation',
+        'bmp': '\\)\\]\\}\u0F3B\u0F3D\u169C\u2046\u207E\u208E\u2309\u230B\u232A\u2769\u276B\u276D\u276F\u2771\u2773\u2775\u27C6\u27E7\u27E9\u27EB\u27ED\u27EF\u2984\u2986\u2988\u298A\u298C\u298E\u2990\u2992\u2994\u2996\u2998\u29D9\u29DB\u29FD\u2E23\u2E25\u2E27\u2E29\u3009\u300B\u300D\u300F\u3011\u3015\u3017\u3019\u301B\u301E\u301F\uFD3E\uFE18\uFE36\uFE38\uFE3A\uFE3C\uFE3E\uFE40\uFE42\uFE44\uFE48\uFE5A\uFE5C\uFE5E\uFF09\uFF3D\uFF5D\uFF60\uFF63'
+    },
+    {
+        'name': 'Pf',
+        'alias': 'Final_Punctuation',
+        'bmp': '\xBB\u2019\u201D\u203A\u2E03\u2E05\u2E0A\u2E0D\u2E1D\u2E21'
+    },
+    {
+        'name': 'Pi',
+        'alias': 'Initial_Punctuation',
+        'bmp': '\xAB\u2018\u201B\u201C\u201F\u2039\u2E02\u2E04\u2E09\u2E0C\u2E1C\u2E20'
+    },
+    {
+        'name': 'Po',
+        'alias': 'Other_Punctuation',
+        'bmp': '!-#%-\'\\*,\\.\\/:;\\?@\\\xA1\xA7\xB6\xB7\xBF\u037E\u0387\u055A-\u055F\u0589\u05C0\u05C3\u05C6\u05F3\u05F4\u0609\u060A\u060C\u060D\u061B\u061E\u061F\u066A-\u066D\u06D4\u0700-\u070D\u07F7-\u07F9\u0830-\u083E\u085E\u0964\u0965\u0970\u09FD\u0A76\u0AF0\u0C77\u0C84\u0DF4\u0E4F\u0E5A\u0E5B\u0F04-\u0F12\u0F14\u0F85\u0FD0-\u0FD4\u0FD9\u0FDA\u104A-\u104F\u10FB\u1360-\u1368\u166E\u16EB-\u16ED\u1735\u1736\u17D4-\u17D6\u17D8-\u17DA\u1800-\u1805\u1807-\u180A\u1944\u1945\u1A1E\u1A1F\u1AA0-\u1AA6\u1AA8-\u1AAD\u1B5A-\u1B60\u1BFC-\u1BFF\u1C3B-\u1C3F\u1C7E\u1C7F\u1CC0-\u1CC7\u1CD3\u2016\u2017\u2020-\u2027\u2030-\u2038\u203B-\u203E\u2041-\u2043\u2047-\u2051\u2053\u2055-\u205E\u2CF9-\u2CFC\u2CFE\u2CFF\u2D70\u2E00\u2E01\u2E06-\u2E08\u2E0B\u2E0E-\u2E16\u2E18\u2E19\u2E1B\u2E1E\u2E1F\u2E2A-\u2E2E\u2E30-\u2E39\u2E3C-\u2E3F\u2E41\u2E43-\u2E4F\u3001-\u3003\u303D\u30FB\uA4FE\uA4FF\uA60D-\uA60F\uA673\uA67E\uA6F2-\uA6F7\uA874-\uA877\uA8CE\uA8CF\uA8F8-\uA8FA\uA8FC\uA92E\uA92F\uA95F\uA9C1-\uA9CD\uA9DE\uA9DF\uAA5C-\uAA5F\uAADE\uAADF\uAAF0\uAAF1\uABEB\uFE10-\uFE16\uFE19\uFE30\uFE45\uFE46\uFE49-\uFE4C\uFE50-\uFE52\uFE54-\uFE57\uFE5F-\uFE61\uFE68\uFE6A\uFE6B\uFF01-\uFF03\uFF05-\uFF07\uFF0A\uFF0C\uFF0E\uFF0F\uFF1A\uFF1B\uFF1F\uFF20\uFF3C\uFF61\uFF64\uFF65',
+        'astral': '\uD800[\uDD00-\uDD02\uDF9F\uDFD0]|\uD801\uDD6F|\uD802[\uDC57\uDD1F\uDD3F\uDE50-\uDE58\uDE7F\uDEF0-\uDEF6\uDF39-\uDF3F\uDF99-\uDF9C]|\uD803[\uDF55-\uDF59]|\uD804[\uDC47-\uDC4D\uDCBB\uDCBC\uDCBE-\uDCC1\uDD40-\uDD43\uDD74\uDD75\uDDC5-\uDDC8\uDDCD\uDDDB\uDDDD-\uDDDF\uDE38-\uDE3D\uDEA9]|\uD805[\uDC4B-\uDC4F\uDC5B\uDC5D\uDCC6\uDDC1-\uDDD7\uDE41-\uDE43\uDE60-\uDE6C\uDF3C-\uDF3E]|\uD806[\uDC3B\uDDE2\uDE3F-\uDE46\uDE9A-\uDE9C\uDE9E-\uDEA2]|\uD807[\uDC41-\uDC45\uDC70\uDC71\uDEF7\uDEF8\uDFFF]|\uD809[\uDC70-\uDC74]|\uD81A[\uDE6E\uDE6F\uDEF5\uDF37-\uDF3B\uDF44]|\uD81B[\uDE97-\uDE9A\uDFE2]|\uD82F\uDC9F|\uD836[\uDE87-\uDE8B]|\uD83A[\uDD5E\uDD5F]'
+    },
+    {
+        'name': 'Ps',
+        'alias': 'Open_Punctuation',
+        'bmp': '\\(\\[\\{\u0F3A\u0F3C\u169B\u201A\u201E\u2045\u207D\u208D\u2308\u230A\u2329\u2768\u276A\u276C\u276E\u2770\u2772\u2774\u27C5\u27E6\u27E8\u27EA\u27EC\u27EE\u2983\u2985\u2987\u2989\u298B\u298D\u298F\u2991\u2993\u2995\u2997\u29D8\u29DA\u29FC\u2E22\u2E24\u2E26\u2E28\u2E42\u3008\u300A\u300C\u300E\u3010\u3014\u3016\u3018\u301A\u301D\uFD3F\uFE17\uFE35\uFE37\uFE39\uFE3B\uFE3D\uFE3F\uFE41\uFE43\uFE47\uFE59\uFE5B\uFE5D\uFF08\uFF3B\uFF5B\uFF5F\uFF62'
+    },
+    {
+        'name': 'S',
+        'alias': 'Symbol',
+        'bmp': '\\$\\+<->\\^`\\|~\xA2-\xA6\xA8\xA9\xAC\xAE-\xB1\xB4\xB8\xD7\xF7\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02EB\u02ED\u02EF-\u02FF\u0375\u0384\u0385\u03F6\u0482\u058D-\u058F\u0606-\u0608\u060B\u060E\u060F\u06DE\u06E9\u06FD\u06FE\u07F6\u07FE\u07FF\u09F2\u09F3\u09FA\u09FB\u0AF1\u0B70\u0BF3-\u0BFA\u0C7F\u0D4F\u0D79\u0E3F\u0F01-\u0F03\u0F13\u0F15-\u0F17\u0F1A-\u0F1F\u0F34\u0F36\u0F38\u0FBE-\u0FC5\u0FC7-\u0FCC\u0FCE\u0FCF\u0FD5-\u0FD8\u109E\u109F\u1390-\u1399\u166D\u17DB\u1940\u19DE-\u19FF\u1B61-\u1B6A\u1B74-\u1B7C\u1FBD\u1FBF-\u1FC1\u1FCD-\u1FCF\u1FDD-\u1FDF\u1FED-\u1FEF\u1FFD\u1FFE\u2044\u2052\u207A-\u207C\u208A-\u208C\u20A0-\u20BF\u2100\u2101\u2103-\u2106\u2108\u2109\u2114\u2116-\u2118\u211E-\u2123\u2125\u2127\u2129\u212E\u213A\u213B\u2140-\u2144\u214A-\u214D\u214F\u218A\u218B\u2190-\u2307\u230C-\u2328\u232B-\u2426\u2440-\u244A\u249C-\u24E9\u2500-\u2767\u2794-\u27C4\u27C7-\u27E5\u27F0-\u2982\u2999-\u29D7\u29DC-\u29FB\u29FE-\u2B73\u2B76-\u2B95\u2B98-\u2BFF\u2CE5-\u2CEA\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u2FF0-\u2FFB\u3004\u3012\u3013\u3020\u3036\u3037\u303E\u303F\u309B\u309C\u3190\u3191\u3196-\u319F\u31C0-\u31E3\u3200-\u321E\u322A-\u3247\u3250\u3260-\u327F\u328A-\u32B0\u32C0-\u33FF\u4DC0-\u4DFF\uA490-\uA4C6\uA700-\uA716\uA720\uA721\uA789\uA78A\uA828-\uA82B\uA836-\uA839\uAA77-\uAA79\uAB5B\uFB29\uFBB2-\uFBC1\uFDFC\uFDFD\uFE62\uFE64-\uFE66\uFE69\uFF04\uFF0B\uFF1C-\uFF1E\uFF3E\uFF40\uFF5C\uFF5E\uFFE0-\uFFE6\uFFE8-\uFFEE\uFFFC\uFFFD',
+        'astral': '\uD800[\uDD37-\uDD3F\uDD79-\uDD89\uDD8C-\uDD8E\uDD90-\uDD9B\uDDA0\uDDD0-\uDDFC]|\uD802[\uDC77\uDC78\uDEC8]|\uD805\uDF3F|\uD807[\uDFD5-\uDFF1]|\uD81A[\uDF3C-\uDF3F\uDF45]|\uD82F\uDC9C|\uD834[\uDC00-\uDCF5\uDD00-\uDD26\uDD29-\uDD64\uDD6A-\uDD6C\uDD83\uDD84\uDD8C-\uDDA9\uDDAE-\uDDE8\uDE00-\uDE41\uDE45\uDF00-\uDF56]|\uD835[\uDEC1\uDEDB\uDEFB\uDF15\uDF35\uDF4F\uDF6F\uDF89\uDFA9\uDFC3]|\uD836[\uDC00-\uDDFF\uDE37-\uDE3A\uDE6D-\uDE74\uDE76-\uDE83\uDE85\uDE86]|\uD838[\uDD4F\uDEFF]|\uD83B[\uDCAC\uDCB0\uDD2E\uDEF0\uDEF1]|\uD83C[\uDC00-\uDC2B\uDC30-\uDC93\uDCA0-\uDCAE\uDCB1-\uDCBF\uDCC1-\uDCCF\uDCD1-\uDCF5\uDD10-\uDD6C\uDD70-\uDDAC\uDDE6-\uDE02\uDE10-\uDE3B\uDE40-\uDE48\uDE50\uDE51\uDE60-\uDE65\uDF00-\uDFFF]|\uD83D[\uDC00-\uDED5\uDEE0-\uDEEC\uDEF0-\uDEFA\uDF00-\uDF73\uDF80-\uDFD8\uDFE0-\uDFEB]|\uD83E[\uDC00-\uDC0B\uDC10-\uDC47\uDC50-\uDC59\uDC60-\uDC87\uDC90-\uDCAD\uDD00-\uDD0B\uDD0D-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDE53\uDE60-\uDE6D\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95]'
+    },
+    {
+        'name': 'Sc',
+        'alias': 'Currency_Symbol',
+        'bmp': '\\$\xA2-\xA5\u058F\u060B\u07FE\u07FF\u09F2\u09F3\u09FB\u0AF1\u0BF9\u0E3F\u17DB\u20A0-\u20BF\uA838\uFDFC\uFE69\uFF04\uFFE0\uFFE1\uFFE5\uFFE6',
+        'astral': '\uD807[\uDFDD-\uDFE0]|\uD838\uDEFF|\uD83B\uDCB0'
+    },
+    {
+        'name': 'Sk',
+        'alias': 'Modifier_Symbol',
+        'bmp': '\\^`\xA8\xAF\xB4\xB8\u02C2-\u02C5\u02D2-\u02DF\u02E5-\u02EB\u02ED\u02EF-\u02FF\u0375\u0384\u0385\u1FBD\u1FBF-\u1FC1\u1FCD-\u1FCF\u1FDD-\u1FDF\u1FED-\u1FEF\u1FFD\u1FFE\u309B\u309C\uA700-\uA716\uA720\uA721\uA789\uA78A\uAB5B\uFBB2-\uFBC1\uFF3E\uFF40\uFFE3',
+        'astral': '\uD83C[\uDFFB-\uDFFF]'
+    },
+    {
+        'name': 'Sm',
+        'alias': 'Math_Symbol',
+        'bmp': '\\+<->\\|~\xAC\xB1\xD7\xF7\u03F6\u0606-\u0608\u2044\u2052\u207A-\u207C\u208A-\u208C\u2118\u2140-\u2144\u214B\u2190-\u2194\u219A\u219B\u21A0\u21A3\u21A6\u21AE\u21CE\u21CF\u21D2\u21D4\u21F4-\u22FF\u2320\u2321\u237C\u239B-\u23B3\u23DC-\u23E1\u25B7\u25C1\u25F8-\u25FF\u266F\u27C0-\u27C4\u27C7-\u27E5\u27F0-\u27FF\u2900-\u2982\u2999-\u29D7\u29DC-\u29FB\u29FE-\u2AFF\u2B30-\u2B44\u2B47-\u2B4C\uFB29\uFE62\uFE64-\uFE66\uFF0B\uFF1C-\uFF1E\uFF5C\uFF5E\uFFE2\uFFE9-\uFFEC',
+        'astral': '\uD835[\uDEC1\uDEDB\uDEFB\uDF15\uDF35\uDF4F\uDF6F\uDF89\uDFA9\uDFC3]|\uD83B[\uDEF0\uDEF1]'
+    },
+    {
+        'name': 'So',
+        'alias': 'Other_Symbol',
+        'bmp': '\xA6\xA9\xAE\xB0\u0482\u058D\u058E\u060E\u060F\u06DE\u06E9\u06FD\u06FE\u07F6\u09FA\u0B70\u0BF3-\u0BF8\u0BFA\u0C7F\u0D4F\u0D79\u0F01-\u0F03\u0F13\u0F15-\u0F17\u0F1A-\u0F1F\u0F34\u0F36\u0F38\u0FBE-\u0FC5\u0FC7-\u0FCC\u0FCE\u0FCF\u0FD5-\u0FD8\u109E\u109F\u1390-\u1399\u166D\u1940\u19DE-\u19FF\u1B61-\u1B6A\u1B74-\u1B7C\u2100\u2101\u2103-\u2106\u2108\u2109\u2114\u2116\u2117\u211E-\u2123\u2125\u2127\u2129\u212E\u213A\u213B\u214A\u214C\u214D\u214F\u218A\u218B\u2195-\u2199\u219C-\u219F\u21A1\u21A2\u21A4\u21A5\u21A7-\u21AD\u21AF-\u21CD\u21D0\u21D1\u21D3\u21D5-\u21F3\u2300-\u2307\u230C-\u231F\u2322-\u2328\u232B-\u237B\u237D-\u239A\u23B4-\u23DB\u23E2-\u2426\u2440-\u244A\u249C-\u24E9\u2500-\u25B6\u25B8-\u25C0\u25C2-\u25F7\u2600-\u266E\u2670-\u2767\u2794-\u27BF\u2800-\u28FF\u2B00-\u2B2F\u2B45\u2B46\u2B4D-\u2B73\u2B76-\u2B95\u2B98-\u2BFF\u2CE5-\u2CEA\u2E80-\u2E99\u2E9B-\u2EF3\u2F00-\u2FD5\u2FF0-\u2FFB\u3004\u3012\u3013\u3020\u3036\u3037\u303E\u303F\u3190\u3191\u3196-\u319F\u31C0-\u31E3\u3200-\u321E\u322A-\u3247\u3250\u3260-\u327F\u328A-\u32B0\u32C0-\u33FF\u4DC0-\u4DFF\uA490-\uA4C6\uA828-\uA82B\uA836\uA837\uA839\uAA77-\uAA79\uFDFD\uFFE4\uFFE8\uFFED\uFFEE\uFFFC\uFFFD',
+        'astral': '\uD800[\uDD37-\uDD3F\uDD79-\uDD89\uDD8C-\uDD8E\uDD90-\uDD9B\uDDA0\uDDD0-\uDDFC]|\uD802[\uDC77\uDC78\uDEC8]|\uD805\uDF3F|\uD807[\uDFD5-\uDFDC\uDFE1-\uDFF1]|\uD81A[\uDF3C-\uDF3F\uDF45]|\uD82F\uDC9C|\uD834[\uDC00-\uDCF5\uDD00-\uDD26\uDD29-\uDD64\uDD6A-\uDD6C\uDD83\uDD84\uDD8C-\uDDA9\uDDAE-\uDDE8\uDE00-\uDE41\uDE45\uDF00-\uDF56]|\uD836[\uDC00-\uDDFF\uDE37-\uDE3A\uDE6D-\uDE74\uDE76-\uDE83\uDE85\uDE86]|\uD838\uDD4F|\uD83B[\uDCAC\uDD2E]|\uD83C[\uDC00-\uDC2B\uDC30-\uDC93\uDCA0-\uDCAE\uDCB1-\uDCBF\uDCC1-\uDCCF\uDCD1-\uDCF5\uDD10-\uDD6C\uDD70-\uDDAC\uDDE6-\uDE02\uDE10-\uDE3B\uDE40-\uDE48\uDE50\uDE51\uDE60-\uDE65\uDF00-\uDFFA]|\uD83D[\uDC00-\uDED5\uDEE0-\uDEEC\uDEF0-\uDEFA\uDF00-\uDF73\uDF80-\uDFD8\uDFE0-\uDFEB]|\uD83E[\uDC00-\uDC0B\uDC10-\uDC47\uDC50-\uDC59\uDC60-\uDC87\uDC90-\uDCAD\uDD00-\uDD0B\uDD0D-\uDD71\uDD73-\uDD76\uDD7A-\uDDA2\uDDA5-\uDDAA\uDDAE-\uDDCA\uDDCD-\uDE53\uDE60-\uDE6D\uDE70-\uDE73\uDE78-\uDE7A\uDE80-\uDE82\uDE90-\uDE95]'
+    },
+    {
+        'name': 'Z',
+        'alias': 'Separator',
+        'bmp': ' \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000'
+    },
+    {
+        'name': 'Zl',
+        'alias': 'Line_Separator',
+        'bmp': '\u2028'
+    },
+    {
+        'name': 'Zp',
+        'alias': 'Paragraph_Separator',
+        'bmp': '\u2029'
+    },
+    {
+        'name': 'Zs',
+        'alias': 'Space_Separator',
+        'bmp': ' \xA0\u1680\u2000-\u200A\u202F\u205F\u3000'
+    }
+];
+
+
+/***/ }),
+/* 565 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(17);
+const partial_1 = __webpack_require__(790);
+class DeepFilter {
+    constructor(_settings, _micromatchOptions) {
+        this._settings = _settings;
+        this._micromatchOptions = _micromatchOptions;
+    }
+    getFilter(basePath, positive, negative) {
+        const matcher = this._getMatcher(positive);
+        const negativeRe = this._getNegativePatternsRe(negative);
+        return (entry) => this._filter(basePath, entry, matcher, negativeRe);
+    }
+    _getMatcher(patterns) {
+        return new partial_1.default(patterns, this._settings, this._micromatchOptions);
+    }
+    _getNegativePatternsRe(patterns) {
+        const affectDepthOfReadingPatterns = patterns.filter(utils.pattern.isAffectDepthOfReadingPattern);
+        return utils.pattern.convertPatternsToRe(affectDepthOfReadingPatterns, this._micromatchOptions);
+    }
+    _filter(basePath, entry, matcher, negativeRe) {
+        if (this._isSkippedByDeep(basePath, entry.path)) {
+            return false;
+        }
+        if (this._isSkippedSymbolicLink(entry)) {
+            return false;
+        }
+        const filepath = utils.path.removeLeadingDotSegment(entry.path);
+        if (this._isSkippedByPositivePatterns(filepath, matcher)) {
+            return false;
+        }
+        return this._isSkippedByNegativePatterns(filepath, negativeRe);
+    }
+    _isSkippedByDeep(basePath, entryPath) {
+        /**
+         * Avoid unnecessary depth calculations when it doesn't matter.
+         */
+        if (this._settings.deep === Infinity) {
+            return false;
+        }
+        return this._getEntryLevel(basePath, entryPath) >= this._settings.deep;
+    }
+    _getEntryLevel(basePath, entryPath) {
+        const entryPathDepth = entryPath.split('/').length;
+        if (basePath === '') {
+            return entryPathDepth;
+        }
+        const basePathDepth = basePath.split('/').length;
+        return entryPathDepth - basePathDepth;
+    }
+    _isSkippedSymbolicLink(entry) {
+        return !this._settings.followSymbolicLinks && entry.dirent.isSymbolicLink();
+    }
+    _isSkippedByPositivePatterns(entryPath, matcher) {
+        return !this._settings.baseNameMatch && !matcher.match(entryPath);
+    }
+    _isSkippedByNegativePatterns(entryPath, patternsRe) {
+        return !utils.pattern.matchAny(entryPath, patternsRe);
+    }
+}
+exports.default = DeepFilter;
+
+
+/***/ }),
+/* 566 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(563);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('Array').forEach;
+
+
+/***/ }),
 /* 567 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -29639,9 +32631,44 @@ if (process.env.NODE_ENV === 'production') {
 
 
 /***/ }),
-/* 569 */,
-/* 570 */,
-/* 571 */,
+/* 569 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var _Array$from = __webpack_require__(458);
+
+var _sliceInstanceProperty = __webpack_require__(128);
+
+var arrayLikeToArray = __webpack_require__(277);
+
+function _unsupportedIterableToArray(o, minLen) {
+  var _context;
+
+  if (!o) return;
+  if (typeof o === "string") return arrayLikeToArray(o, minLen);
+
+  var n = _sliceInstanceProperty(_context = Object.prototype.toString.call(o)).call(_context, 8, -1);
+
+  if (n === "Object" && o.constructor) n = o.constructor.name;
+  if (n === "Map" || n === "Set") return _Array$from(o);
+  if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return arrayLikeToArray(o, minLen);
+}
+
+module.exports = _unsupportedIterableToArray;
+
+/***/ }),
+/* 570 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(50);
+
+/***/ }),
+/* 571 */
+/***/ (function() {
+
+// empty
+
+
+/***/ }),
 /* 572 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -29766,24 +32793,7 @@ if (process.platform === 'linux') {
 
 
 /***/ }),
-/* 574 */
-/***/ (function(module) {
-
-"use strict";
-
-function YError (msg) {
-  this.name = 'YError'
-  this.message = msg || 'yargs error'
-  Error.captureStackTrace(this, YError)
-}
-
-YError.prototype = Object.create(Error.prototype)
-YError.prototype.constructor = YError
-
-module.exports = YError
-
-
-/***/ }),
+/* 574 */,
 /* 575 */,
 /* 576 */,
 /* 577 */,
@@ -29901,34 +32911,7 @@ function matter(option) {
 
 
 /***/ }),
-/* 580 */
-/***/ (function(module) {
-
-"use strict";
-
-
-var isStream = module.exports = function (stream) {
-	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
-};
-
-isStream.writable = function (stream) {
-	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
-};
-
-isStream.readable = function (stream) {
-	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
-};
-
-isStream.duplex = function (stream) {
-	return isStream.writable(stream) && isStream.readable(stream);
-};
-
-isStream.transform = function (stream) {
-	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
-};
-
-
-/***/ }),
+/* 580 */,
 /* 581 */,
 /* 582 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -31804,9 +34787,51 @@ function link(node) {
 
 
 /***/ }),
-/* 589 */,
-/* 590 */,
-/* 591 */,
+/* 589 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isObject = __webpack_require__(195);
+
+module.exports = function (it) {
+  if (!isObject(it)) {
+    throw TypeError(String(it) + ' is not an object');
+  } return it;
+};
+
+
+/***/ }),
+/* 590 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.patternMatch` well-known symbol
+// https://github.com/tc39/proposal-pattern-matching
+defineWellKnownSymbol('patternMatch');
+
+
+/***/ }),
+/* 591 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(778);
+
+var MATCH = wellKnownSymbol('match');
+
+module.exports = function (METHOD_NAME) {
+  var regexp = /./;
+  try {
+    '/./'[METHOD_NAME](regexp);
+  } catch (e) {
+    try {
+      regexp[MATCH] = false;
+      return '/./'[METHOD_NAME](regexp);
+    } catch (f) { /* empty */ }
+  } return false;
+};
+
+
+/***/ }),
 /* 592 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -31881,22 +34906,32 @@ module.exports = compareLoose
 /***/ }),
 /* 596 */,
 /* 597 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-module.exports = function (str, sep) {
-	if (typeof str !== 'string') {
-		throw new TypeError('Expected a string');
+const xRegExp = __webpack_require__(420);
+
+const decamelize = (text, separator = '_') => {
+	if (!(typeof text === 'string' && typeof separator === 'string')) {
+		throw new TypeError('The `text` and `separator` arguments should be of type `string`');
 	}
 
-	sep = typeof sep === 'undefined' ? '_' : sep;
+	const regex1 = xRegExp('([\\p{Ll}\\d])(\\p{Lu})', 'g');
+	const regex2 = xRegExp('(\\p{Lu}+)(\\p{Lu}[\\p{Ll}\\d]+)', 'g');
 
-	return str
-		.replace(/([a-z\d])([A-Z])/g, '$1' + sep + '$2')
-		.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + sep + '$2')
+	return text
+		// TODO: Use this instead of `xregexp` when targeting Node.js 10:
+		// .replace(/([\p{Lowercase_Letter}\d])(\p{Uppercase_Letter})/gu, `$1${separator}$2`)
+		// .replace(/(\p{Lowercase_Letter}+)(\p{Uppercase_Letter}[\p{Lowercase_Letter}\d]+)/gu, `$1${separator}$2`)
+		.replace(regex1, `$1${separator}$2`)
+		.replace(regex2, `$1${separator}$2`)
 		.toLowerCase();
 };
+
+module.exports = decamelize;
+// TODO: Remove this for the next major release
+module.exports.default = decamelize;
 
 
 /***/ }),
@@ -31905,13 +34940,41 @@ module.exports = function (str, sep) {
 
 "use strict";
 
-const ansiRegex = __webpack_require__(904);
+const ansiRegex = __webpack_require__(518);
 
 module.exports = string => typeof string === 'string' ? string.replace(ansiRegex(), '') : string;
 
 
 /***/ }),
-/* 599 */,
+/* 599 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var $indexOf = __webpack_require__(689).indexOf;
+var arrayMethodIsStrict = __webpack_require__(386);
+var arrayMethodUsesToLength = __webpack_require__(877);
+
+var nativeIndexOf = [].indexOf;
+
+var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
+var STRICT_METHOD = arrayMethodIsStrict('indexOf');
+var USES_TO_LENGTH = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
+
+// `Array.prototype.indexOf` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.indexof
+$({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD || !USES_TO_LENGTH }, {
+  indexOf: function indexOf(searchElement /* , fromIndex = 0 */) {
+    return NEGATIVE_ZERO
+      // convert -0 to +0
+      ? nativeIndexOf.apply(this, arguments) || 0
+      : $indexOf(this, searchElement, arguments.length > 1 ? arguments[1] : undefined);
+  }
+});
+
+
+/***/ }),
 /* 600 */
 /***/ (function(module) {
 
@@ -31946,7 +35009,45 @@ function register (state, name, method, options) {
 
 
 /***/ }),
-/* 601 */,
+/* 601 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var aFunction = __webpack_require__(166);
+var toObject = __webpack_require__(375);
+var fails = __webpack_require__(105);
+var arrayMethodIsStrict = __webpack_require__(386);
+
+var test = [];
+var nativeSort = test.sort;
+
+// IE8-
+var FAILS_ON_UNDEFINED = fails(function () {
+  test.sort(undefined);
+});
+// V8 bug
+var FAILS_ON_NULL = fails(function () {
+  test.sort(null);
+});
+// Old WebKit
+var STRICT_METHOD = arrayMethodIsStrict('sort');
+
+var FORCED = FAILS_ON_UNDEFINED || !FAILS_ON_NULL || !STRICT_METHOD;
+
+// `Array.prototype.sort` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.sort
+$({ target: 'Array', proto: true, forced: FORCED }, {
+  sort: function sort(comparefn) {
+    return comparefn === undefined
+      ? nativeSort.call(toObject(this))
+      : nativeSort.call(toObject(this), aFunction(comparefn));
+  }
+});
+
+
+/***/ }),
 /* 602 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -31985,7 +35086,19 @@ function thematic() {
 
 
 /***/ }),
-/* 603 */,
+/* 603 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var fails = __webpack_require__(105);
+
+module.exports = !!Object.getOwnPropertySymbols && !fails(function () {
+  // Chrome 38 Symbol has incorrect toString conversion
+  // eslint-disable-next-line no-undef
+  return !String(Symbol());
+});
+
+
+/***/ }),
 /* 604 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -32124,12 +35237,42 @@ module.exports = parse;
 module.exports = require("http");
 
 /***/ }),
-/* 606 */,
+/* 606 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+var nativePropertyIsEnumerable = {}.propertyIsEnumerable;
+var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+
+// Nashorn ~ JDK8 bug
+var NASHORN_BUG = getOwnPropertyDescriptor && !nativePropertyIsEnumerable.call({ 1: 2 }, 1);
+
+// `Object.prototype.propertyIsEnumerable` method implementation
+// https://tc39.github.io/ecma262/#sec-object.prototype.propertyisenumerable
+exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
+  var descriptor = getOwnPropertyDescriptor(this, V);
+  return !!descriptor && descriptor.enumerable;
+} : nativePropertyIsEnumerable;
+
+
+/***/ }),
 /* 607 */,
 /* 608 */,
 /* 609 */,
 /* 610 */,
-/* 611 */,
+/* 611 */
+/***/ (function(module) {
+
+// `RequireObjectCoercible` abstract operation
+// https://tc39.github.io/ecma262/#sec-requireobjectcoercible
+module.exports = function (it) {
+  if (it == undefined) throw TypeError("Can't call method on " + it);
+  return it;
+};
+
+
+/***/ }),
 /* 612 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -32149,60 +35292,13 @@ module.exports = require("events");
 /* 615 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+var _Array$isArray = __webpack_require__(333);
 
-const pLimit = __webpack_require__(495);
-
-class EndError extends Error {
-	constructor(value) {
-		super();
-		this.value = value;
-	}
+function _arrayWithHoles(arr) {
+  if (_Array$isArray(arr)) return arr;
 }
 
-// The input can also be a promise, so we await it
-const testElement = async (element, tester) => tester(await element);
-
-// The input can also be a promise, so we `Promise.all()` them both
-const finder = async element => {
-	const values = await Promise.all(element);
-	if (values[1] === true) {
-		throw new EndError(values[0]);
-	}
-
-	return false;
-};
-
-const pLocate = async (iterable, tester, options) => {
-	options = {
-		concurrency: Infinity,
-		preserveOrder: true,
-		...options
-	};
-
-	const limit = pLimit(options.concurrency);
-
-	// Start all the promises concurrently with optional limit
-	const items = [...iterable].map(element => [element, limit(testElement, element, tester)]);
-
-	// Check the promises either serially or concurrently
-	const checkLimit = pLimit(options.preserveOrder ? 1 : Infinity);
-
-	try {
-		await Promise.all(items.map(element => checkLimit(finder, element)));
-	} catch (error) {
-		if (error instanceof EndError) {
-			return error.value;
-		}
-
-		throw error;
-	}
-};
-
-module.exports = pLocate;
-// TODO: Remove this for the next major release
-module.exports.default = pLocate;
-
+module.exports = _arrayWithHoles;
 
 /***/ }),
 /* 616 */
@@ -32235,8 +35331,59 @@ function factory(key, state, ctx) {
 
 
 /***/ }),
-/* 617 */,
-/* 618 */,
+/* 617 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(652);
+
+/***/ }),
+/* 618 */
+/***/ (function(module) {
+
+module.exports = [
+    {
+        'name': 'ASCII',
+        'bmp': '\0-\x7F'
+    },
+    {
+        'name': 'Alphabetic',
+        'bmp': 'A-Za-z\xAA\xB5\xBA\xC0-\xD6\xD8-\xF6\xF8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0345\u0370-\u0374\u0376\u0377\u037A-\u037D\u037F\u0386\u0388-\u038A\u038C\u038E-\u03A1\u03A3-\u03F5\u03F7-\u0481\u048A-\u052F\u0531-\u0556\u0559\u0560-\u0588\u05B0-\u05BD\u05BF\u05C1\u05C2\u05C4\u05C5\u05C7\u05D0-\u05EA\u05EF-\u05F2\u0610-\u061A\u0620-\u0657\u0659-\u065F\u066E-\u06D3\u06D5-\u06DC\u06E1-\u06E8\u06ED-\u06EF\u06FA-\u06FC\u06FF\u0710-\u073F\u074D-\u07B1\u07CA-\u07EA\u07F4\u07F5\u07FA\u0800-\u0817\u081A-\u082C\u0840-\u0858\u0860-\u086A\u08A0-\u08B4\u08B6-\u08BD\u08D4-\u08DF\u08E3-\u08E9\u08F0-\u093B\u093D-\u094C\u094E-\u0950\u0955-\u0963\u0971-\u0983\u0985-\u098C\u098F\u0990\u0993-\u09A8\u09AA-\u09B0\u09B2\u09B6-\u09B9\u09BD-\u09C4\u09C7\u09C8\u09CB\u09CC\u09CE\u09D7\u09DC\u09DD\u09DF-\u09E3\u09F0\u09F1\u09FC\u0A01-\u0A03\u0A05-\u0A0A\u0A0F\u0A10\u0A13-\u0A28\u0A2A-\u0A30\u0A32\u0A33\u0A35\u0A36\u0A38\u0A39\u0A3E-\u0A42\u0A47\u0A48\u0A4B\u0A4C\u0A51\u0A59-\u0A5C\u0A5E\u0A70-\u0A75\u0A81-\u0A83\u0A85-\u0A8D\u0A8F-\u0A91\u0A93-\u0AA8\u0AAA-\u0AB0\u0AB2\u0AB3\u0AB5-\u0AB9\u0ABD-\u0AC5\u0AC7-\u0AC9\u0ACB\u0ACC\u0AD0\u0AE0-\u0AE3\u0AF9-\u0AFC\u0B01-\u0B03\u0B05-\u0B0C\u0B0F\u0B10\u0B13-\u0B28\u0B2A-\u0B30\u0B32\u0B33\u0B35-\u0B39\u0B3D-\u0B44\u0B47\u0B48\u0B4B\u0B4C\u0B56\u0B57\u0B5C\u0B5D\u0B5F-\u0B63\u0B71\u0B82\u0B83\u0B85-\u0B8A\u0B8E-\u0B90\u0B92-\u0B95\u0B99\u0B9A\u0B9C\u0B9E\u0B9F\u0BA3\u0BA4\u0BA8-\u0BAA\u0BAE-\u0BB9\u0BBE-\u0BC2\u0BC6-\u0BC8\u0BCA-\u0BCC\u0BD0\u0BD7\u0C00-\u0C03\u0C05-\u0C0C\u0C0E-\u0C10\u0C12-\u0C28\u0C2A-\u0C39\u0C3D-\u0C44\u0C46-\u0C48\u0C4A-\u0C4C\u0C55\u0C56\u0C58-\u0C5A\u0C60-\u0C63\u0C80-\u0C83\u0C85-\u0C8C\u0C8E-\u0C90\u0C92-\u0CA8\u0CAA-\u0CB3\u0CB5-\u0CB9\u0CBD-\u0CC4\u0CC6-\u0CC8\u0CCA-\u0CCC\u0CD5\u0CD6\u0CDE\u0CE0-\u0CE3\u0CF1\u0CF2\u0D00-\u0D03\u0D05-\u0D0C\u0D0E-\u0D10\u0D12-\u0D3A\u0D3D-\u0D44\u0D46-\u0D48\u0D4A-\u0D4C\u0D4E\u0D54-\u0D57\u0D5F-\u0D63\u0D7A-\u0D7F\u0D82\u0D83\u0D85-\u0D96\u0D9A-\u0DB1\u0DB3-\u0DBB\u0DBD\u0DC0-\u0DC6\u0DCF-\u0DD4\u0DD6\u0DD8-\u0DDF\u0DF2\u0DF3\u0E01-\u0E3A\u0E40-\u0E46\u0E4D\u0E81\u0E82\u0E84\u0E86-\u0E8A\u0E8C-\u0EA3\u0EA5\u0EA7-\u0EB9\u0EBB-\u0EBD\u0EC0-\u0EC4\u0EC6\u0ECD\u0EDC-\u0EDF\u0F00\u0F40-\u0F47\u0F49-\u0F6C\u0F71-\u0F81\u0F88-\u0F97\u0F99-\u0FBC\u1000-\u1036\u1038\u103B-\u103F\u1050-\u108F\u109A-\u109D\u10A0-\u10C5\u10C7\u10CD\u10D0-\u10FA\u10FC-\u1248\u124A-\u124D\u1250-\u1256\u1258\u125A-\u125D\u1260-\u1288\u128A-\u128D\u1290-\u12B0\u12B2-\u12B5\u12B8-\u12BE\u12C0\u12C2-\u12C5\u12C8-\u12D6\u12D8-\u1310\u1312-\u1315\u1318-\u135A\u1380-\u138F\u13A0-\u13F5\u13F8-\u13FD\u1401-\u166C\u166F-\u167F\u1681-\u169A\u16A0-\u16EA\u16EE-\u16F8\u1700-\u170C\u170E-\u1713\u1720-\u1733\u1740-\u1753\u1760-\u176C\u176E-\u1770\u1772\u1773\u1780-\u17B3\u17B6-\u17C8\u17D7\u17DC\u1820-\u1878\u1880-\u18AA\u18B0-\u18F5\u1900-\u191E\u1920-\u192B\u1930-\u1938\u1950-\u196D\u1970-\u1974\u1980-\u19AB\u19B0-\u19C9\u1A00-\u1A1B\u1A20-\u1A5E\u1A61-\u1A74\u1AA7\u1B00-\u1B33\u1B35-\u1B43\u1B45-\u1B4B\u1B80-\u1BA9\u1BAC-\u1BAF\u1BBA-\u1BE5\u1BE7-\u1BF1\u1C00-\u1C36\u1C4D-\u1C4F\u1C5A-\u1C7D\u1C80-\u1C88\u1C90-\u1CBA\u1CBD-\u1CBF\u1CE9-\u1CEC\u1CEE-\u1CF3\u1CF5\u1CF6\u1CFA\u1D00-\u1DBF\u1DE7-\u1DF4\u1E00-\u1F15\u1F18-\u1F1D\u1F20-\u1F45\u1F48-\u1F4D\u1F50-\u1F57\u1F59\u1F5B\u1F5D\u1F5F-\u1F7D\u1F80-\u1FB4\u1FB6-\u1FBC\u1FBE\u1FC2-\u1FC4\u1FC6-\u1FCC\u1FD0-\u1FD3\u1FD6-\u1FDB\u1FE0-\u1FEC\u1FF2-\u1FF4\u1FF6-\u1FFC\u2071\u207F\u2090-\u209C\u2102\u2107\u210A-\u2113\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u212F-\u2139\u213C-\u213F\u2145-\u2149\u214E\u2160-\u2188\u24B6-\u24E9\u2C00-\u2C2E\u2C30-\u2C5E\u2C60-\u2CE4\u2CEB-\u2CEE\u2CF2\u2CF3\u2D00-\u2D25\u2D27\u2D2D\u2D30-\u2D67\u2D6F\u2D80-\u2D96\u2DA0-\u2DA6\u2DA8-\u2DAE\u2DB0-\u2DB6\u2DB8-\u2DBE\u2DC0-\u2DC6\u2DC8-\u2DCE\u2DD0-\u2DD6\u2DD8-\u2DDE\u2DE0-\u2DFF\u2E2F\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303C\u3041-\u3096\u309D-\u309F\u30A1-\u30FA\u30FC-\u30FF\u3105-\u312F\u3131-\u318E\u31A0-\u31BA\u31F0-\u31FF\u3400-\u4DB5\u4E00-\u9FEF\uA000-\uA48C\uA4D0-\uA4FD\uA500-\uA60C\uA610-\uA61F\uA62A\uA62B\uA640-\uA66E\uA674-\uA67B\uA67F-\uA6EF\uA717-\uA71F\uA722-\uA788\uA78B-\uA7BF\uA7C2-\uA7C6\uA7F7-\uA805\uA807-\uA827\uA840-\uA873\uA880-\uA8C3\uA8C5\uA8F2-\uA8F7\uA8FB\uA8FD-\uA8FF\uA90A-\uA92A\uA930-\uA952\uA960-\uA97C\uA980-\uA9B2\uA9B4-\uA9BF\uA9CF\uA9E0-\uA9EF\uA9FA-\uA9FE\uAA00-\uAA36\uAA40-\uAA4D\uAA60-\uAA76\uAA7A-\uAABE\uAAC0\uAAC2\uAADB-\uAADD\uAAE0-\uAAEF\uAAF2-\uAAF5\uAB01-\uAB06\uAB09-\uAB0E\uAB11-\uAB16\uAB20-\uAB26\uAB28-\uAB2E\uAB30-\uAB5A\uAB5C-\uAB67\uAB70-\uABEA\uAC00-\uD7A3\uD7B0-\uD7C6\uD7CB-\uD7FB\uF900-\uFA6D\uFA70-\uFAD9\uFB00-\uFB06\uFB13-\uFB17\uFB1D-\uFB28\uFB2A-\uFB36\uFB38-\uFB3C\uFB3E\uFB40\uFB41\uFB43\uFB44\uFB46-\uFBB1\uFBD3-\uFD3D\uFD50-\uFD8F\uFD92-\uFDC7\uFDF0-\uFDFB\uFE70-\uFE74\uFE76-\uFEFC\uFF21-\uFF3A\uFF41-\uFF5A\uFF66-\uFFBE\uFFC2-\uFFC7\uFFCA-\uFFCF\uFFD2-\uFFD7\uFFDA-\uFFDC',
+        'astral': '\uD800[\uDC00-\uDC0B\uDC0D-\uDC26\uDC28-\uDC3A\uDC3C\uDC3D\uDC3F-\uDC4D\uDC50-\uDC5D\uDC80-\uDCFA\uDD40-\uDD74\uDE80-\uDE9C\uDEA0-\uDED0\uDF00-\uDF1F\uDF2D-\uDF4A\uDF50-\uDF7A\uDF80-\uDF9D\uDFA0-\uDFC3\uDFC8-\uDFCF\uDFD1-\uDFD5]|\uD801[\uDC00-\uDC9D\uDCB0-\uDCD3\uDCD8-\uDCFB\uDD00-\uDD27\uDD30-\uDD63\uDE00-\uDF36\uDF40-\uDF55\uDF60-\uDF67]|\uD802[\uDC00-\uDC05\uDC08\uDC0A-\uDC35\uDC37\uDC38\uDC3C\uDC3F-\uDC55\uDC60-\uDC76\uDC80-\uDC9E\uDCE0-\uDCF2\uDCF4\uDCF5\uDD00-\uDD15\uDD20-\uDD39\uDD80-\uDDB7\uDDBE\uDDBF\uDE00-\uDE03\uDE05\uDE06\uDE0C-\uDE13\uDE15-\uDE17\uDE19-\uDE35\uDE60-\uDE7C\uDE80-\uDE9C\uDEC0-\uDEC7\uDEC9-\uDEE4\uDF00-\uDF35\uDF40-\uDF55\uDF60-\uDF72\uDF80-\uDF91]|\uD803[\uDC00-\uDC48\uDC80-\uDCB2\uDCC0-\uDCF2\uDD00-\uDD27\uDF00-\uDF1C\uDF27\uDF30-\uDF45\uDFE0-\uDFF6]|\uD804[\uDC00-\uDC45\uDC82-\uDCB8\uDCD0-\uDCE8\uDD00-\uDD32\uDD44-\uDD46\uDD50-\uDD72\uDD76\uDD80-\uDDBF\uDDC1-\uDDC4\uDDDA\uDDDC\uDE00-\uDE11\uDE13-\uDE34\uDE37\uDE3E\uDE80-\uDE86\uDE88\uDE8A-\uDE8D\uDE8F-\uDE9D\uDE9F-\uDEA8\uDEB0-\uDEE8\uDF00-\uDF03\uDF05-\uDF0C\uDF0F\uDF10\uDF13-\uDF28\uDF2A-\uDF30\uDF32\uDF33\uDF35-\uDF39\uDF3D-\uDF44\uDF47\uDF48\uDF4B\uDF4C\uDF50\uDF57\uDF5D-\uDF63]|\uD805[\uDC00-\uDC41\uDC43-\uDC45\uDC47-\uDC4A\uDC5F\uDC80-\uDCC1\uDCC4\uDCC5\uDCC7\uDD80-\uDDB5\uDDB8-\uDDBE\uDDD8-\uDDDD\uDE00-\uDE3E\uDE40\uDE44\uDE80-\uDEB5\uDEB8\uDF00-\uDF1A\uDF1D-\uDF2A]|\uD806[\uDC00-\uDC38\uDCA0-\uDCDF\uDCFF\uDDA0-\uDDA7\uDDAA-\uDDD7\uDDDA-\uDDDF\uDDE1\uDDE3\uDDE4\uDE00-\uDE32\uDE35-\uDE3E\uDE50-\uDE97\uDE9D\uDEC0-\uDEF8]|\uD807[\uDC00-\uDC08\uDC0A-\uDC36\uDC38-\uDC3E\uDC40\uDC72-\uDC8F\uDC92-\uDCA7\uDCA9-\uDCB6\uDD00-\uDD06\uDD08\uDD09\uDD0B-\uDD36\uDD3A\uDD3C\uDD3D\uDD3F-\uDD41\uDD43\uDD46\uDD47\uDD60-\uDD65\uDD67\uDD68\uDD6A-\uDD8E\uDD90\uDD91\uDD93-\uDD96\uDD98\uDEE0-\uDEF6]|\uD808[\uDC00-\uDF99]|\uD809[\uDC00-\uDC6E\uDC80-\uDD43]|[\uD80C\uD81C-\uD820\uD840-\uD868\uD86A-\uD86C\uD86F-\uD872\uD874-\uD879][\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2E]|\uD811[\uDC00-\uDE46]|\uD81A[\uDC00-\uDE38\uDE40-\uDE5E\uDED0-\uDEED\uDF00-\uDF2F\uDF40-\uDF43\uDF63-\uDF77\uDF7D-\uDF8F]|\uD81B[\uDE40-\uDE7F\uDF00-\uDF4A\uDF4F-\uDF87\uDF8F-\uDF9F\uDFE0\uDFE1\uDFE3]|\uD821[\uDC00-\uDFF7]|\uD822[\uDC00-\uDEF2]|\uD82C[\uDC00-\uDD1E\uDD50-\uDD52\uDD64-\uDD67\uDD70-\uDEFB]|\uD82F[\uDC00-\uDC6A\uDC70-\uDC7C\uDC80-\uDC88\uDC90-\uDC99\uDC9E]|\uD835[\uDC00-\uDC54\uDC56-\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD1E-\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD52-\uDEA5\uDEA8-\uDEC0\uDEC2-\uDEDA\uDEDC-\uDEFA\uDEFC-\uDF14\uDF16-\uDF34\uDF36-\uDF4E\uDF50-\uDF6E\uDF70-\uDF88\uDF8A-\uDFA8\uDFAA-\uDFC2\uDFC4-\uDFCB]|\uD838[\uDC00-\uDC06\uDC08-\uDC18\uDC1B-\uDC21\uDC23\uDC24\uDC26-\uDC2A\uDD00-\uDD2C\uDD37-\uDD3D\uDD4E\uDEC0-\uDEEB]|\uD83A[\uDC00-\uDCC4\uDD00-\uDD43\uDD47\uDD4B]|\uD83B[\uDE00-\uDE03\uDE05-\uDE1F\uDE21\uDE22\uDE24\uDE27\uDE29-\uDE32\uDE34-\uDE37\uDE39\uDE3B\uDE42\uDE47\uDE49\uDE4B\uDE4D-\uDE4F\uDE51\uDE52\uDE54\uDE57\uDE59\uDE5B\uDE5D\uDE5F\uDE61\uDE62\uDE64\uDE67-\uDE6A\uDE6C-\uDE72\uDE74-\uDE77\uDE79-\uDE7C\uDE7E\uDE80-\uDE89\uDE8B-\uDE9B\uDEA1-\uDEA3\uDEA5-\uDEA9\uDEAB-\uDEBB]|\uD83C[\uDD30-\uDD49\uDD50-\uDD69\uDD70-\uDD89]|\uD869[\uDC00-\uDED6\uDF00-\uDFFF]|\uD86D[\uDC00-\uDF34\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1D\uDC20-\uDFFF]|\uD873[\uDC00-\uDEA1\uDEB0-\uDFFF]|\uD87A[\uDC00-\uDFE0]|\uD87E[\uDC00-\uDE1D]'
+    },
+    {
+        'name': 'Any',
+        'isBmpLast': true,
+        'bmp': '\0-\uFFFF',
+        'astral': '[\uD800-\uDBFF][\uDC00-\uDFFF]'
+    },
+    {
+        'name': 'Default_Ignorable_Code_Point',
+        'bmp': '\xAD\u034F\u061C\u115F\u1160\u17B4\u17B5\u180B-\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\u3164\uFE00-\uFE0F\uFEFF\uFFA0\uFFF0-\uFFF8',
+        'astral': '\uD82F[\uDCA0-\uDCA3]|\uD834[\uDD73-\uDD7A]|[\uDB40-\uDB43][\uDC00-\uDFFF]'
+    },
+    {
+        'name': 'Lowercase',
+        'bmp': 'a-z\xAA\xB5\xBA\xDF-\xF6\xF8-\xFF\u0101\u0103\u0105\u0107\u0109\u010B\u010D\u010F\u0111\u0113\u0115\u0117\u0119\u011B\u011D\u011F\u0121\u0123\u0125\u0127\u0129\u012B\u012D\u012F\u0131\u0133\u0135\u0137\u0138\u013A\u013C\u013E\u0140\u0142\u0144\u0146\u0148\u0149\u014B\u014D\u014F\u0151\u0153\u0155\u0157\u0159\u015B\u015D\u015F\u0161\u0163\u0165\u0167\u0169\u016B\u016D\u016F\u0171\u0173\u0175\u0177\u017A\u017C\u017E-\u0180\u0183\u0185\u0188\u018C\u018D\u0192\u0195\u0199-\u019B\u019E\u01A1\u01A3\u01A5\u01A8\u01AA\u01AB\u01AD\u01B0\u01B4\u01B6\u01B9\u01BA\u01BD-\u01BF\u01C6\u01C9\u01CC\u01CE\u01D0\u01D2\u01D4\u01D6\u01D8\u01DA\u01DC\u01DD\u01DF\u01E1\u01E3\u01E5\u01E7\u01E9\u01EB\u01ED\u01EF\u01F0\u01F3\u01F5\u01F9\u01FB\u01FD\u01FF\u0201\u0203\u0205\u0207\u0209\u020B\u020D\u020F\u0211\u0213\u0215\u0217\u0219\u021B\u021D\u021F\u0221\u0223\u0225\u0227\u0229\u022B\u022D\u022F\u0231\u0233-\u0239\u023C\u023F\u0240\u0242\u0247\u0249\u024B\u024D\u024F-\u0293\u0295-\u02B8\u02C0\u02C1\u02E0-\u02E4\u0345\u0371\u0373\u0377\u037A-\u037D\u0390\u03AC-\u03CE\u03D0\u03D1\u03D5-\u03D7\u03D9\u03DB\u03DD\u03DF\u03E1\u03E3\u03E5\u03E7\u03E9\u03EB\u03ED\u03EF-\u03F3\u03F5\u03F8\u03FB\u03FC\u0430-\u045F\u0461\u0463\u0465\u0467\u0469\u046B\u046D\u046F\u0471\u0473\u0475\u0477\u0479\u047B\u047D\u047F\u0481\u048B\u048D\u048F\u0491\u0493\u0495\u0497\u0499\u049B\u049D\u049F\u04A1\u04A3\u04A5\u04A7\u04A9\u04AB\u04AD\u04AF\u04B1\u04B3\u04B5\u04B7\u04B9\u04BB\u04BD\u04BF\u04C2\u04C4\u04C6\u04C8\u04CA\u04CC\u04CE\u04CF\u04D1\u04D3\u04D5\u04D7\u04D9\u04DB\u04DD\u04DF\u04E1\u04E3\u04E5\u04E7\u04E9\u04EB\u04ED\u04EF\u04F1\u04F3\u04F5\u04F7\u04F9\u04FB\u04FD\u04FF\u0501\u0503\u0505\u0507\u0509\u050B\u050D\u050F\u0511\u0513\u0515\u0517\u0519\u051B\u051D\u051F\u0521\u0523\u0525\u0527\u0529\u052B\u052D\u052F\u0560-\u0588\u10D0-\u10FA\u10FD-\u10FF\u13F8-\u13FD\u1C80-\u1C88\u1D00-\u1DBF\u1E01\u1E03\u1E05\u1E07\u1E09\u1E0B\u1E0D\u1E0F\u1E11\u1E13\u1E15\u1E17\u1E19\u1E1B\u1E1D\u1E1F\u1E21\u1E23\u1E25\u1E27\u1E29\u1E2B\u1E2D\u1E2F\u1E31\u1E33\u1E35\u1E37\u1E39\u1E3B\u1E3D\u1E3F\u1E41\u1E43\u1E45\u1E47\u1E49\u1E4B\u1E4D\u1E4F\u1E51\u1E53\u1E55\u1E57\u1E59\u1E5B\u1E5D\u1E5F\u1E61\u1E63\u1E65\u1E67\u1E69\u1E6B\u1E6D\u1E6F\u1E71\u1E73\u1E75\u1E77\u1E79\u1E7B\u1E7D\u1E7F\u1E81\u1E83\u1E85\u1E87\u1E89\u1E8B\u1E8D\u1E8F\u1E91\u1E93\u1E95-\u1E9D\u1E9F\u1EA1\u1EA3\u1EA5\u1EA7\u1EA9\u1EAB\u1EAD\u1EAF\u1EB1\u1EB3\u1EB5\u1EB7\u1EB9\u1EBB\u1EBD\u1EBF\u1EC1\u1EC3\u1EC5\u1EC7\u1EC9\u1ECB\u1ECD\u1ECF\u1ED1\u1ED3\u1ED5\u1ED7\u1ED9\u1EDB\u1EDD\u1EDF\u1EE1\u1EE3\u1EE5\u1EE7\u1EE9\u1EEB\u1EED\u1EEF\u1EF1\u1EF3\u1EF5\u1EF7\u1EF9\u1EFB\u1EFD\u1EFF-\u1F07\u1F10-\u1F15\u1F20-\u1F27\u1F30-\u1F37\u1F40-\u1F45\u1F50-\u1F57\u1F60-\u1F67\u1F70-\u1F7D\u1F80-\u1F87\u1F90-\u1F97\u1FA0-\u1FA7\u1FB0-\u1FB4\u1FB6\u1FB7\u1FBE\u1FC2-\u1FC4\u1FC6\u1FC7\u1FD0-\u1FD3\u1FD6\u1FD7\u1FE0-\u1FE7\u1FF2-\u1FF4\u1FF6\u1FF7\u2071\u207F\u2090-\u209C\u210A\u210E\u210F\u2113\u212F\u2134\u2139\u213C\u213D\u2146-\u2149\u214E\u2170-\u217F\u2184\u24D0-\u24E9\u2C30-\u2C5E\u2C61\u2C65\u2C66\u2C68\u2C6A\u2C6C\u2C71\u2C73\u2C74\u2C76-\u2C7D\u2C81\u2C83\u2C85\u2C87\u2C89\u2C8B\u2C8D\u2C8F\u2C91\u2C93\u2C95\u2C97\u2C99\u2C9B\u2C9D\u2C9F\u2CA1\u2CA3\u2CA5\u2CA7\u2CA9\u2CAB\u2CAD\u2CAF\u2CB1\u2CB3\u2CB5\u2CB7\u2CB9\u2CBB\u2CBD\u2CBF\u2CC1\u2CC3\u2CC5\u2CC7\u2CC9\u2CCB\u2CCD\u2CCF\u2CD1\u2CD3\u2CD5\u2CD7\u2CD9\u2CDB\u2CDD\u2CDF\u2CE1\u2CE3\u2CE4\u2CEC\u2CEE\u2CF3\u2D00-\u2D25\u2D27\u2D2D\uA641\uA643\uA645\uA647\uA649\uA64B\uA64D\uA64F\uA651\uA653\uA655\uA657\uA659\uA65B\uA65D\uA65F\uA661\uA663\uA665\uA667\uA669\uA66B\uA66D\uA681\uA683\uA685\uA687\uA689\uA68B\uA68D\uA68F\uA691\uA693\uA695\uA697\uA699\uA69B-\uA69D\uA723\uA725\uA727\uA729\uA72B\uA72D\uA72F-\uA731\uA733\uA735\uA737\uA739\uA73B\uA73D\uA73F\uA741\uA743\uA745\uA747\uA749\uA74B\uA74D\uA74F\uA751\uA753\uA755\uA757\uA759\uA75B\uA75D\uA75F\uA761\uA763\uA765\uA767\uA769\uA76B\uA76D\uA76F-\uA778\uA77A\uA77C\uA77F\uA781\uA783\uA785\uA787\uA78C\uA78E\uA791\uA793-\uA795\uA797\uA799\uA79B\uA79D\uA79F\uA7A1\uA7A3\uA7A5\uA7A7\uA7A9\uA7AF\uA7B5\uA7B7\uA7B9\uA7BB\uA7BD\uA7BF\uA7C3\uA7F8-\uA7FA\uAB30-\uAB5A\uAB5C-\uAB67\uAB70-\uABBF\uFB00-\uFB06\uFB13-\uFB17\uFF41-\uFF5A',
+        'astral': '\uD801[\uDC28-\uDC4F\uDCD8-\uDCFB]|\uD803[\uDCC0-\uDCF2]|\uD806[\uDCC0-\uDCDF]|\uD81B[\uDE60-\uDE7F]|\uD835[\uDC1A-\uDC33\uDC4E-\uDC54\uDC56-\uDC67\uDC82-\uDC9B\uDCB6-\uDCB9\uDCBB\uDCBD-\uDCC3\uDCC5-\uDCCF\uDCEA-\uDD03\uDD1E-\uDD37\uDD52-\uDD6B\uDD86-\uDD9F\uDDBA-\uDDD3\uDDEE-\uDE07\uDE22-\uDE3B\uDE56-\uDE6F\uDE8A-\uDEA5\uDEC2-\uDEDA\uDEDC-\uDEE1\uDEFC-\uDF14\uDF16-\uDF1B\uDF36-\uDF4E\uDF50-\uDF55\uDF70-\uDF88\uDF8A-\uDF8F\uDFAA-\uDFC2\uDFC4-\uDFC9\uDFCB]|\uD83A[\uDD22-\uDD43]'
+    },
+    {
+        'name': 'Noncharacter_Code_Point',
+        'bmp': '\uFDD0-\uFDEF\uFFFE\uFFFF',
+        'astral': '[\uD83F\uD87F\uD8BF\uD8FF\uD93F\uD97F\uD9BF\uD9FF\uDA3F\uDA7F\uDABF\uDAFF\uDB3F\uDB7F\uDBBF\uDBFF][\uDFFE\uDFFF]'
+    },
+    {
+        'name': 'Uppercase',
+        'bmp': 'A-Z\xC0-\xD6\xD8-\xDE\u0100\u0102\u0104\u0106\u0108\u010A\u010C\u010E\u0110\u0112\u0114\u0116\u0118\u011A\u011C\u011E\u0120\u0122\u0124\u0126\u0128\u012A\u012C\u012E\u0130\u0132\u0134\u0136\u0139\u013B\u013D\u013F\u0141\u0143\u0145\u0147\u014A\u014C\u014E\u0150\u0152\u0154\u0156\u0158\u015A\u015C\u015E\u0160\u0162\u0164\u0166\u0168\u016A\u016C\u016E\u0170\u0172\u0174\u0176\u0178\u0179\u017B\u017D\u0181\u0182\u0184\u0186\u0187\u0189-\u018B\u018E-\u0191\u0193\u0194\u0196-\u0198\u019C\u019D\u019F\u01A0\u01A2\u01A4\u01A6\u01A7\u01A9\u01AC\u01AE\u01AF\u01B1-\u01B3\u01B5\u01B7\u01B8\u01BC\u01C4\u01C7\u01CA\u01CD\u01CF\u01D1\u01D3\u01D5\u01D7\u01D9\u01DB\u01DE\u01E0\u01E2\u01E4\u01E6\u01E8\u01EA\u01EC\u01EE\u01F1\u01F4\u01F6-\u01F8\u01FA\u01FC\u01FE\u0200\u0202\u0204\u0206\u0208\u020A\u020C\u020E\u0210\u0212\u0214\u0216\u0218\u021A\u021C\u021E\u0220\u0222\u0224\u0226\u0228\u022A\u022C\u022E\u0230\u0232\u023A\u023B\u023D\u023E\u0241\u0243-\u0246\u0248\u024A\u024C\u024E\u0370\u0372\u0376\u037F\u0386\u0388-\u038A\u038C\u038E\u038F\u0391-\u03A1\u03A3-\u03AB\u03CF\u03D2-\u03D4\u03D8\u03DA\u03DC\u03DE\u03E0\u03E2\u03E4\u03E6\u03E8\u03EA\u03EC\u03EE\u03F4\u03F7\u03F9\u03FA\u03FD-\u042F\u0460\u0462\u0464\u0466\u0468\u046A\u046C\u046E\u0470\u0472\u0474\u0476\u0478\u047A\u047C\u047E\u0480\u048A\u048C\u048E\u0490\u0492\u0494\u0496\u0498\u049A\u049C\u049E\u04A0\u04A2\u04A4\u04A6\u04A8\u04AA\u04AC\u04AE\u04B0\u04B2\u04B4\u04B6\u04B8\u04BA\u04BC\u04BE\u04C0\u04C1\u04C3\u04C5\u04C7\u04C9\u04CB\u04CD\u04D0\u04D2\u04D4\u04D6\u04D8\u04DA\u04DC\u04DE\u04E0\u04E2\u04E4\u04E6\u04E8\u04EA\u04EC\u04EE\u04F0\u04F2\u04F4\u04F6\u04F8\u04FA\u04FC\u04FE\u0500\u0502\u0504\u0506\u0508\u050A\u050C\u050E\u0510\u0512\u0514\u0516\u0518\u051A\u051C\u051E\u0520\u0522\u0524\u0526\u0528\u052A\u052C\u052E\u0531-\u0556\u10A0-\u10C5\u10C7\u10CD\u13A0-\u13F5\u1C90-\u1CBA\u1CBD-\u1CBF\u1E00\u1E02\u1E04\u1E06\u1E08\u1E0A\u1E0C\u1E0E\u1E10\u1E12\u1E14\u1E16\u1E18\u1E1A\u1E1C\u1E1E\u1E20\u1E22\u1E24\u1E26\u1E28\u1E2A\u1E2C\u1E2E\u1E30\u1E32\u1E34\u1E36\u1E38\u1E3A\u1E3C\u1E3E\u1E40\u1E42\u1E44\u1E46\u1E48\u1E4A\u1E4C\u1E4E\u1E50\u1E52\u1E54\u1E56\u1E58\u1E5A\u1E5C\u1E5E\u1E60\u1E62\u1E64\u1E66\u1E68\u1E6A\u1E6C\u1E6E\u1E70\u1E72\u1E74\u1E76\u1E78\u1E7A\u1E7C\u1E7E\u1E80\u1E82\u1E84\u1E86\u1E88\u1E8A\u1E8C\u1E8E\u1E90\u1E92\u1E94\u1E9E\u1EA0\u1EA2\u1EA4\u1EA6\u1EA8\u1EAA\u1EAC\u1EAE\u1EB0\u1EB2\u1EB4\u1EB6\u1EB8\u1EBA\u1EBC\u1EBE\u1EC0\u1EC2\u1EC4\u1EC6\u1EC8\u1ECA\u1ECC\u1ECE\u1ED0\u1ED2\u1ED4\u1ED6\u1ED8\u1EDA\u1EDC\u1EDE\u1EE0\u1EE2\u1EE4\u1EE6\u1EE8\u1EEA\u1EEC\u1EEE\u1EF0\u1EF2\u1EF4\u1EF6\u1EF8\u1EFA\u1EFC\u1EFE\u1F08-\u1F0F\u1F18-\u1F1D\u1F28-\u1F2F\u1F38-\u1F3F\u1F48-\u1F4D\u1F59\u1F5B\u1F5D\u1F5F\u1F68-\u1F6F\u1FB8-\u1FBB\u1FC8-\u1FCB\u1FD8-\u1FDB\u1FE8-\u1FEC\u1FF8-\u1FFB\u2102\u2107\u210B-\u210D\u2110-\u2112\u2115\u2119-\u211D\u2124\u2126\u2128\u212A-\u212D\u2130-\u2133\u213E\u213F\u2145\u2160-\u216F\u2183\u24B6-\u24CF\u2C00-\u2C2E\u2C60\u2C62-\u2C64\u2C67\u2C69\u2C6B\u2C6D-\u2C70\u2C72\u2C75\u2C7E-\u2C80\u2C82\u2C84\u2C86\u2C88\u2C8A\u2C8C\u2C8E\u2C90\u2C92\u2C94\u2C96\u2C98\u2C9A\u2C9C\u2C9E\u2CA0\u2CA2\u2CA4\u2CA6\u2CA8\u2CAA\u2CAC\u2CAE\u2CB0\u2CB2\u2CB4\u2CB6\u2CB8\u2CBA\u2CBC\u2CBE\u2CC0\u2CC2\u2CC4\u2CC6\u2CC8\u2CCA\u2CCC\u2CCE\u2CD0\u2CD2\u2CD4\u2CD6\u2CD8\u2CDA\u2CDC\u2CDE\u2CE0\u2CE2\u2CEB\u2CED\u2CF2\uA640\uA642\uA644\uA646\uA648\uA64A\uA64C\uA64E\uA650\uA652\uA654\uA656\uA658\uA65A\uA65C\uA65E\uA660\uA662\uA664\uA666\uA668\uA66A\uA66C\uA680\uA682\uA684\uA686\uA688\uA68A\uA68C\uA68E\uA690\uA692\uA694\uA696\uA698\uA69A\uA722\uA724\uA726\uA728\uA72A\uA72C\uA72E\uA732\uA734\uA736\uA738\uA73A\uA73C\uA73E\uA740\uA742\uA744\uA746\uA748\uA74A\uA74C\uA74E\uA750\uA752\uA754\uA756\uA758\uA75A\uA75C\uA75E\uA760\uA762\uA764\uA766\uA768\uA76A\uA76C\uA76E\uA779\uA77B\uA77D\uA77E\uA780\uA782\uA784\uA786\uA78B\uA78D\uA790\uA792\uA796\uA798\uA79A\uA79C\uA79E\uA7A0\uA7A2\uA7A4\uA7A6\uA7A8\uA7AA-\uA7AE\uA7B0-\uA7B4\uA7B6\uA7B8\uA7BA\uA7BC\uA7BE\uA7C2\uA7C4-\uA7C6\uFF21-\uFF3A',
+        'astral': '\uD801[\uDC00-\uDC27\uDCB0-\uDCD3]|\uD803[\uDC80-\uDCB2]|\uD806[\uDCA0-\uDCBF]|\uD81B[\uDE40-\uDE5F]|\uD835[\uDC00-\uDC19\uDC34-\uDC4D\uDC68-\uDC81\uDC9C\uDC9E\uDC9F\uDCA2\uDCA5\uDCA6\uDCA9-\uDCAC\uDCAE-\uDCB5\uDCD0-\uDCE9\uDD04\uDD05\uDD07-\uDD0A\uDD0D-\uDD14\uDD16-\uDD1C\uDD38\uDD39\uDD3B-\uDD3E\uDD40-\uDD44\uDD46\uDD4A-\uDD50\uDD6C-\uDD85\uDDA0-\uDDB9\uDDD4-\uDDED\uDE08-\uDE21\uDE3C-\uDE55\uDE70-\uDE89\uDEA8-\uDEC0\uDEE2-\uDEFA\uDF1C-\uDF34\uDF56-\uDF6E\uDF90-\uDFA8\uDFCA]|\uD83A[\uDD00-\uDD21]|\uD83C[\uDD30-\uDD49\uDD50-\uDD69\uDD70-\uDD89]'
+    },
+    {
+        'name': 'White_Space',
+        'bmp': '\t-\r \x85\xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000'
+    }
+];
+
+
+/***/ }),
 /* 619 */
 /***/ (function(module) {
 
@@ -32283,8 +35430,115 @@ module.exports = /^#!.*/;
 module.exports = require("path");
 
 /***/ }),
-/* 623 */,
-/* 624 */,
+/* 623 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var createIteratorConstructor = __webpack_require__(562);
+var getPrototypeOf = __webpack_require__(972);
+var setPrototypeOf = __webpack_require__(361);
+var setToStringTag = __webpack_require__(263);
+var createNonEnumerableProperty = __webpack_require__(315);
+var redefine = __webpack_require__(86);
+var wellKnownSymbol = __webpack_require__(778);
+var IS_PURE = __webpack_require__(746);
+var Iterators = __webpack_require__(218);
+var IteratorsCore = __webpack_require__(659);
+
+var IteratorPrototype = IteratorsCore.IteratorPrototype;
+var BUGGY_SAFARI_ITERATORS = IteratorsCore.BUGGY_SAFARI_ITERATORS;
+var ITERATOR = wellKnownSymbol('iterator');
+var KEYS = 'keys';
+var VALUES = 'values';
+var ENTRIES = 'entries';
+
+var returnThis = function () { return this; };
+
+module.exports = function (Iterable, NAME, IteratorConstructor, next, DEFAULT, IS_SET, FORCED) {
+  createIteratorConstructor(IteratorConstructor, NAME, next);
+
+  var getIterationMethod = function (KIND) {
+    if (KIND === DEFAULT && defaultIterator) return defaultIterator;
+    if (!BUGGY_SAFARI_ITERATORS && KIND in IterablePrototype) return IterablePrototype[KIND];
+    switch (KIND) {
+      case KEYS: return function keys() { return new IteratorConstructor(this, KIND); };
+      case VALUES: return function values() { return new IteratorConstructor(this, KIND); };
+      case ENTRIES: return function entries() { return new IteratorConstructor(this, KIND); };
+    } return function () { return new IteratorConstructor(this); };
+  };
+
+  var TO_STRING_TAG = NAME + ' Iterator';
+  var INCORRECT_VALUES_NAME = false;
+  var IterablePrototype = Iterable.prototype;
+  var nativeIterator = IterablePrototype[ITERATOR]
+    || IterablePrototype['@@iterator']
+    || DEFAULT && IterablePrototype[DEFAULT];
+  var defaultIterator = !BUGGY_SAFARI_ITERATORS && nativeIterator || getIterationMethod(DEFAULT);
+  var anyNativeIterator = NAME == 'Array' ? IterablePrototype.entries || nativeIterator : nativeIterator;
+  var CurrentIteratorPrototype, methods, KEY;
+
+  // fix native
+  if (anyNativeIterator) {
+    CurrentIteratorPrototype = getPrototypeOf(anyNativeIterator.call(new Iterable()));
+    if (IteratorPrototype !== Object.prototype && CurrentIteratorPrototype.next) {
+      if (!IS_PURE && getPrototypeOf(CurrentIteratorPrototype) !== IteratorPrototype) {
+        if (setPrototypeOf) {
+          setPrototypeOf(CurrentIteratorPrototype, IteratorPrototype);
+        } else if (typeof CurrentIteratorPrototype[ITERATOR] != 'function') {
+          createNonEnumerableProperty(CurrentIteratorPrototype, ITERATOR, returnThis);
+        }
+      }
+      // Set @@toStringTag to native iterators
+      setToStringTag(CurrentIteratorPrototype, TO_STRING_TAG, true, true);
+      if (IS_PURE) Iterators[TO_STRING_TAG] = returnThis;
+    }
+  }
+
+  // fix Array#{values, @@iterator}.name in V8 / FF
+  if (DEFAULT == VALUES && nativeIterator && nativeIterator.name !== VALUES) {
+    INCORRECT_VALUES_NAME = true;
+    defaultIterator = function values() { return nativeIterator.call(this); };
+  }
+
+  // define iterator
+  if ((!IS_PURE || FORCED) && IterablePrototype[ITERATOR] !== defaultIterator) {
+    createNonEnumerableProperty(IterablePrototype, ITERATOR, defaultIterator);
+  }
+  Iterators[NAME] = defaultIterator;
+
+  // export additional methods
+  if (DEFAULT) {
+    methods = {
+      values: getIterationMethod(VALUES),
+      keys: IS_SET ? defaultIterator : getIterationMethod(KEYS),
+      entries: getIterationMethod(ENTRIES)
+    };
+    if (FORCED) for (KEY in methods) {
+      if (BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME || !(KEY in IterablePrototype)) {
+        redefine(IterablePrototype, KEY, methods[KEY]);
+      }
+    } else $({ target: NAME, proto: true, forced: BUGGY_SAFARI_ITERATORS || INCORRECT_VALUES_NAME }, methods);
+  }
+
+  return methods;
+};
+
+
+/***/ }),
+/* 624 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var fails = __webpack_require__(105);
+
+// Thank's IE8 for his funny defineProperty
+module.exports = !fails(function () {
+  return Object.defineProperty({}, 1, { get: function () { return 7; } })[1] != 7;
+});
+
+
+/***/ }),
 /* 625 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -32293,7 +35547,7 @@ module.exports = require("path");
 const path = __webpack_require__(622);
 const fs = __webpack_require__(747);
 const {promisify} = __webpack_require__(669);
-const pLocate = __webpack_require__(615);
+const pLocate = __webpack_require__(975);
 
 const fsStat = promisify(fs.stat);
 const fsLStat = promisify(fs.lstat);
@@ -32734,18 +35988,7 @@ module.exports = parse;
 /* 628 */
 /***/ (function(module) {
 
-"use strict";
-
-module.exports = function objFilter (original, filter) {
-  const obj = {}
-  filter = filter || ((k, v) => true)
-  Object.keys(original || {}).forEach((key) => {
-    if (filter(key, original[key])) {
-      obj[key] = original[key]
-    }
-  })
-  return obj
-}
+module.exports = {};
 
 
 /***/ }),
@@ -32803,26 +36046,58 @@ function create(matter) {
 
 /***/ }),
 /* 630 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-module.exports = function (_require) {
-  _require = _require || require
-  var main = _require.main
-  if (main && isIISNode(main)) return handleIISNode(main)
-  else return main ? main.filename : process.cwd()
-}
+"use strict";
 
-function isIISNode (main) {
-  return /\\iisnode\\/.test(main.filename)
-}
+var $ = __webpack_require__(52);
+var isObject = __webpack_require__(195);
+var isArray = __webpack_require__(516);
+var toAbsoluteIndex = __webpack_require__(435);
+var toLength = __webpack_require__(745);
+var toIndexedObject = __webpack_require__(882);
+var createProperty = __webpack_require__(454);
+var wellKnownSymbol = __webpack_require__(778);
+var arrayMethodHasSpeciesSupport = __webpack_require__(837);
+var arrayMethodUsesToLength = __webpack_require__(877);
 
-function handleIISNode (main) {
-  if (!main.children.length) {
-    return main.filename
-  } else {
-    return main.children[0].filename
+var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('slice');
+var USES_TO_LENGTH = arrayMethodUsesToLength('slice', { ACCESSORS: true, 0: 0, 1: 2 });
+
+var SPECIES = wellKnownSymbol('species');
+var nativeSlice = [].slice;
+var max = Math.max;
+
+// `Array.prototype.slice` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.slice
+// fallback for not array-like ES3 strings and DOM objects
+$({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH }, {
+  slice: function slice(start, end) {
+    var O = toIndexedObject(this);
+    var length = toLength(O.length);
+    var k = toAbsoluteIndex(start, length);
+    var fin = toAbsoluteIndex(end === undefined ? length : end, length);
+    // inline `ArraySpeciesCreate` for usage native `Array#slice` where it's possible
+    var Constructor, result, n;
+    if (isArray(O)) {
+      Constructor = O.constructor;
+      // cross-realm fallback
+      if (typeof Constructor == 'function' && (Constructor === Array || isArray(Constructor.prototype))) {
+        Constructor = undefined;
+      } else if (isObject(Constructor)) {
+        Constructor = Constructor[SPECIES];
+        if (Constructor === null) Constructor = undefined;
+      }
+      if (Constructor === Array || Constructor === undefined) {
+        return nativeSlice.call(O, k, fin);
+      }
+    }
+    result = new (Constructor === undefined ? Array : Constructor)(max(fin - k, 0));
+    for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
+    result.length = n;
+    return result;
   }
-}
+});
 
 
 /***/ }),
@@ -32832,10 +36107,90 @@ function handleIISNode (main) {
 module.exports = require("net");
 
 /***/ }),
-/* 632 */,
-/* 633 */,
-/* 634 */,
-/* 635 */,
+/* 632 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var global = __webpack_require__(813);
+var trim = __webpack_require__(795).trim;
+var whitespaces = __webpack_require__(960);
+
+var $parseInt = global.parseInt;
+var hex = /^[+-]?0[Xx]/;
+var FORCED = $parseInt(whitespaces + '08') !== 8 || $parseInt(whitespaces + '0x16') !== 22;
+
+// `parseInt` method
+// https://tc39.github.io/ecma262/#sec-parseint-string-radix
+module.exports = FORCED ? function parseInt(string, radix) {
+  var S = trim(String(string));
+  return $parseInt(S, (radix >>> 0) || (hex.test(S) ? 16 : 10));
+} : $parseInt;
+
+
+/***/ }),
+/* 633 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var slice = __webpack_require__(323);
+
+var ArrayPrototype = Array.prototype;
+
+module.exports = function (it) {
+  var own = it.slice;
+  return it === ArrayPrototype || (it instanceof Array && own === ArrayPrototype.slice) ? slice : own;
+};
+
+
+/***/ }),
+/* 634 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var _getIterator = __webpack_require__(95);
+
+var _isIterable = __webpack_require__(925);
+
+var _Symbol = __webpack_require__(570);
+
+function _iterableToArrayLimit(arr, i) {
+  if (typeof _Symbol === "undefined" || !_isIterable(Object(arr))) return;
+  var _arr = [];
+  var _n = true;
+  var _d = false;
+  var _e = undefined;
+
+  try {
+    for (var _i = _getIterator(arr), _s; !(_n = (_s = _i.next()).done); _n = true) {
+      _arr.push(_s.value);
+
+      if (i && _arr.length === i) break;
+    }
+  } catch (err) {
+    _d = true;
+    _e = err;
+  } finally {
+    try {
+      if (!_n && _i["return"] != null) _i["return"]();
+    } finally {
+      if (_d) throw _e;
+    }
+  }
+
+  return _arr;
+}
+
+module.exports = _iterableToArrayLimit;
+
+/***/ }),
+/* 635 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.dispose` well-known symbol
+// https://github.com/tc39/proposal-using-statement
+defineWellKnownSymbol('dispose');
+
+
+/***/ }),
 /* 636 */,
 /* 637 */
 /***/ (function(module) {
@@ -32870,7 +36225,28 @@ if (typeof Object.create === 'function') {
 
 
 /***/ }),
-/* 638 */,
+/* 638 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__(624);
+var definePropertyModule = __webpack_require__(690);
+var anObject = __webpack_require__(589);
+var objectKeys = __webpack_require__(748);
+
+// `Object.defineProperties` method
+// https://tc39.github.io/ecma262/#sec-object.defineproperties
+module.exports = DESCRIPTORS ? Object.defineProperties : function defineProperties(O, Properties) {
+  anObject(O);
+  var keys = objectKeys(Properties);
+  var length = keys.length;
+  var index = 0;
+  var key;
+  while (length > index) definePropertyModule.f(O, key = keys[index++], Properties[key]);
+  return O;
+};
+
+
+/***/ }),
 /* 639 */,
 /* 640 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -32907,8 +36283,31 @@ exports.createDirentFromStats = createDirentFromStats;
 
 
 /***/ }),
-/* 642 */,
-/* 643 */,
+/* 642 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var shared = __webpack_require__(262);
+var uid = __webpack_require__(302);
+
+var keys = shared('keys');
+
+module.exports = function (key) {
+  return keys[key] || (keys[key] = uid(key));
+};
+
+
+/***/ }),
+/* 643 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.toStringTag` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.tostringtag
+defineWellKnownSymbol('toStringTag');
+
+
+/***/ }),
 /* 644 */,
 /* 645 */,
 /* 646 */
@@ -32996,15 +36395,14 @@ function listItem(node, parent, position, bullet) {
 /* 647 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+__webpack_require__(32);
+var path = __webpack_require__(628);
 
+var Object = path.Object;
 
-
-if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(487)
-} else {
-  module.exports = __webpack_require__(385)
-}
+module.exports = function create(P, D) {
+  return Object.create(P, D);
+};
 
 
 /***/ }),
@@ -33218,10 +36616,354 @@ function isGfmAtext(code) {
 
 
 /***/ }),
-/* 652 */,
+/* 652 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(136);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 653 */,
 /* 654 */,
-/* 655 */,
+/* 655 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.validation = void 0;
+const argsert_1 = __webpack_require__(997);
+const common_types_1 = __webpack_require__(45);
+const levenshtein_1 = __webpack_require__(365);
+const obj_filter_1 = __webpack_require__(816);
+const specialKeys = ['$0', '--', '_'];
+// validation-type-stuff, missing params,
+// bad implications, custom checks.
+function validation(yargs, usage, y18n) {
+    const __ = y18n.__;
+    const __n = y18n.__n;
+    const self = {};
+    // validate appropriate # of non-option
+    // arguments were provided, i.e., '_'.
+    self.nonOptionCount = function nonOptionCount(argv) {
+        const demandedCommands = yargs.getDemandedCommands();
+        // don't count currently executing commands
+        const _s = argv._.length - yargs.getContext().commands.length;
+        if (demandedCommands._ && (_s < demandedCommands._.min || _s > demandedCommands._.max)) {
+            if (_s < demandedCommands._.min) {
+                if (demandedCommands._.minMsg !== undefined) {
+                    usage.fail(
+                    // replace $0 with observed, $1 with expected.
+                    demandedCommands._.minMsg
+                        ? demandedCommands._.minMsg.replace(/\$0/g, _s.toString()).replace(/\$1/, demandedCommands._.min.toString())
+                        : null);
+                }
+                else {
+                    usage.fail(__n('Not enough non-option arguments: got %s, need at least %s', 'Not enough non-option arguments: got %s, need at least %s', _s, _s, demandedCommands._.min));
+                }
+            }
+            else if (_s > demandedCommands._.max) {
+                if (demandedCommands._.maxMsg !== undefined) {
+                    usage.fail(
+                    // replace $0 with observed, $1 with expected.
+                    demandedCommands._.maxMsg
+                        ? demandedCommands._.maxMsg.replace(/\$0/g, _s.toString()).replace(/\$1/, demandedCommands._.max.toString())
+                        : null);
+                }
+                else {
+                    usage.fail(__n('Too many non-option arguments: got %s, maximum of %s', 'Too many non-option arguments: got %s, maximum of %s', _s, _s, demandedCommands._.max));
+                }
+            }
+        }
+    };
+    // validate the appropriate # of <required>
+    // positional arguments were provided:
+    self.positionalCount = function positionalCount(required, observed) {
+        if (observed < required) {
+            usage.fail(__n('Not enough non-option arguments: got %s, need at least %s', 'Not enough non-option arguments: got %s, need at least %s', observed, observed, required));
+        }
+    };
+    // make sure all the required arguments are present.
+    self.requiredArguments = function requiredArguments(argv) {
+        const demandedOptions = yargs.getDemandedOptions();
+        let missing = null;
+        for (const key of Object.keys(demandedOptions)) {
+            if (!Object.prototype.hasOwnProperty.call(argv, key) || typeof argv[key] === 'undefined') {
+                missing = missing || {};
+                missing[key] = demandedOptions[key];
+            }
+        }
+        if (missing) {
+            const customMsgs = [];
+            for (const key of Object.keys(missing)) {
+                const msg = missing[key];
+                if (msg && customMsgs.indexOf(msg) < 0) {
+                    customMsgs.push(msg);
+                }
+            }
+            const customMsg = customMsgs.length ? `\n${customMsgs.join('\n')}` : '';
+            usage.fail(__n('Missing required argument: %s', 'Missing required arguments: %s', Object.keys(missing).length, Object.keys(missing).join(', ') + customMsg));
+        }
+    };
+    // check for unknown arguments (strict-mode).
+    self.unknownArguments = function unknownArguments(argv, aliases, positionalMap, isDefaultCommand) {
+        const commandKeys = yargs.getCommandInstance().getCommands();
+        const unknown = [];
+        const currentContext = yargs.getContext();
+        Object.keys(argv).forEach((key) => {
+            if (specialKeys.indexOf(key) === -1 &&
+                !Object.prototype.hasOwnProperty.call(positionalMap, key) &&
+                !Object.prototype.hasOwnProperty.call(yargs._getParseContext(), key) &&
+                !self.isValidAndSomeAliasIsNotNew(key, aliases)) {
+                unknown.push(key);
+            }
+        });
+        if ((currentContext.commands.length > 0) || (commandKeys.length > 0) || isDefaultCommand) {
+            argv._.slice(currentContext.commands.length).forEach((key) => {
+                if (commandKeys.indexOf(key) === -1) {
+                    unknown.push(key);
+                }
+            });
+        }
+        if (unknown.length > 0) {
+            usage.fail(__n('Unknown argument: %s', 'Unknown arguments: %s', unknown.length, unknown.join(', ')));
+        }
+    };
+    self.unknownCommands = function unknownCommands(argv) {
+        const commandKeys = yargs.getCommandInstance().getCommands();
+        const unknown = [];
+        const currentContext = yargs.getContext();
+        if ((currentContext.commands.length > 0) || (commandKeys.length > 0)) {
+            argv._.slice(currentContext.commands.length).forEach((key) => {
+                if (commandKeys.indexOf(key) === -1) {
+                    unknown.push(key);
+                }
+            });
+        }
+        if (unknown.length > 0) {
+            usage.fail(__n('Unknown command: %s', 'Unknown commands: %s', unknown.length, unknown.join(', ')));
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    // check for a key that is not an alias, or for which every alias is new,
+    // implying that it was invented by the parser, e.g., during camelization
+    self.isValidAndSomeAliasIsNotNew = function isValidAndSomeAliasIsNotNew(key, aliases) {
+        if (!Object.prototype.hasOwnProperty.call(aliases, key)) {
+            return false;
+        }
+        const newAliases = yargs.parsed.newAliases;
+        for (const a of [key, ...aliases[key]]) {
+            if (!Object.prototype.hasOwnProperty.call(newAliases, a) || !newAliases[key]) {
+                return true;
+            }
+        }
+        return false;
+    };
+    // validate arguments limited to enumerated choices
+    self.limitedChoices = function limitedChoices(argv) {
+        const options = yargs.getOptions();
+        const invalid = {};
+        if (!Object.keys(options.choices).length)
+            return;
+        Object.keys(argv).forEach((key) => {
+            if (specialKeys.indexOf(key) === -1 &&
+                Object.prototype.hasOwnProperty.call(options.choices, key)) {
+                [].concat(argv[key]).forEach((value) => {
+                    // TODO case-insensitive configurability
+                    if (options.choices[key].indexOf(value) === -1 &&
+                        value !== undefined) {
+                        invalid[key] = (invalid[key] || []).concat(value);
+                    }
+                });
+            }
+        });
+        const invalidKeys = Object.keys(invalid);
+        if (!invalidKeys.length)
+            return;
+        let msg = __('Invalid values:');
+        invalidKeys.forEach((key) => {
+            msg += `\n  ${__('Argument: %s, Given: %s, Choices: %s', key, usage.stringifiedValues(invalid[key]), usage.stringifiedValues(options.choices[key]))}`;
+        });
+        usage.fail(msg);
+    };
+    // custom checks, added using the `check` option on yargs.
+    let checks = [];
+    self.check = function check(f, global) {
+        checks.push({
+            func: f,
+            global
+        });
+    };
+    self.customChecks = function customChecks(argv, aliases) {
+        for (let i = 0, f; (f = checks[i]) !== undefined; i++) {
+            const func = f.func;
+            let result = null;
+            try {
+                result = func(argv, aliases);
+            }
+            catch (err) {
+                usage.fail(err.message ? err.message : err, err);
+                continue;
+            }
+            if (!result) {
+                usage.fail(__('Argument check failed: %s', func.toString()));
+            }
+            else if (typeof result === 'string' || result instanceof Error) {
+                usage.fail(result.toString(), result);
+            }
+        }
+    };
+    // check implications, argument foo implies => argument bar.
+    let implied = {};
+    self.implies = function implies(key, value) {
+        argsert_1.argsert('<string|object> [array|number|string]', [key, value], arguments.length);
+        if (typeof key === 'object') {
+            Object.keys(key).forEach((k) => {
+                self.implies(k, key[k]);
+            });
+        }
+        else {
+            yargs.global(key);
+            if (!implied[key]) {
+                implied[key] = [];
+            }
+            if (Array.isArray(value)) {
+                value.forEach((i) => self.implies(key, i));
+            }
+            else {
+                common_types_1.assertNotStrictEqual(value, undefined);
+                implied[key].push(value);
+            }
+        }
+    };
+    self.getImplied = function getImplied() {
+        return implied;
+    };
+    function keyExists(argv, val) {
+        // convert string '1' to number 1
+        const num = Number(val);
+        val = isNaN(num) ? val : num;
+        if (typeof val === 'number') {
+            // check length of argv._
+            val = argv._.length >= val;
+        }
+        else if (val.match(/^--no-.+/)) {
+            // check if key/value doesn't exist
+            val = val.match(/^--no-(.+)/)[1];
+            val = !argv[val];
+        }
+        else {
+            // check if key/value exists
+            val = argv[val];
+        }
+        return val;
+    }
+    self.implications = function implications(argv) {
+        const implyFail = [];
+        Object.keys(implied).forEach((key) => {
+            const origKey = key;
+            (implied[key] || []).forEach((value) => {
+                let key = origKey;
+                const origValue = value;
+                key = keyExists(argv, key);
+                value = keyExists(argv, value);
+                if (key && !value) {
+                    implyFail.push(` ${origKey} -> ${origValue}`);
+                }
+            });
+        });
+        if (implyFail.length) {
+            let msg = `${__('Implications failed:')}\n`;
+            implyFail.forEach((value) => {
+                msg += (value);
+            });
+            usage.fail(msg);
+        }
+    };
+    let conflicting = {};
+    self.conflicts = function conflicts(key, value) {
+        argsert_1.argsert('<string|object> [array|string]', [key, value], arguments.length);
+        if (typeof key === 'object') {
+            Object.keys(key).forEach((k) => {
+                self.conflicts(k, key[k]);
+            });
+        }
+        else {
+            yargs.global(key);
+            if (!conflicting[key]) {
+                conflicting[key] = [];
+            }
+            if (Array.isArray(value)) {
+                value.forEach((i) => self.conflicts(key, i));
+            }
+            else {
+                conflicting[key].push(value);
+            }
+        }
+    };
+    self.getConflicting = () => conflicting;
+    self.conflicting = function conflictingFn(argv) {
+        Object.keys(argv).forEach((key) => {
+            if (conflicting[key]) {
+                conflicting[key].forEach((value) => {
+                    // we default keys to 'undefined' that have been configured, we should not
+                    // apply conflicting check unless they are a value other than 'undefined'.
+                    if (value && argv[key] !== undefined && argv[value] !== undefined) {
+                        usage.fail(__('Arguments %s and %s are mutually exclusive', key, value));
+                    }
+                });
+            }
+        });
+    };
+    self.recommendCommands = function recommendCommands(cmd, potentialCommands) {
+        const threshold = 3; // if it takes more than three edits, let's move on.
+        potentialCommands = potentialCommands.sort((a, b) => b.length - a.length);
+        let recommended = null;
+        let bestDistance = Infinity;
+        for (let i = 0, candidate; (candidate = potentialCommands[i]) !== undefined; i++) {
+            const d = levenshtein_1.levenshtein(cmd, candidate);
+            if (d <= threshold && d < bestDistance) {
+                bestDistance = d;
+                recommended = candidate;
+            }
+        }
+        if (recommended)
+            usage.fail(__('Did you mean %s?', recommended));
+    };
+    self.reset = function reset(localLookup) {
+        implied = obj_filter_1.objFilter(implied, k => !localLookup[k]);
+        conflicting = obj_filter_1.objFilter(conflicting, k => !localLookup[k]);
+        checks = checks.filter(c => c.global);
+        return self;
+    };
+    const frozens = [];
+    self.freeze = function freeze() {
+        frozens.push({
+            implied,
+            checks,
+            conflicting
+        });
+    };
+    self.unfreeze = function unfreeze() {
+        const frozen = frozens.pop();
+        common_types_1.assertNotStrictEqual(frozen, undefined);
+        ({
+            implied,
+            checks,
+            conflicting
+        } = frozen);
+    };
+    return self;
+}
+exports.validation = validation;
+
+
+/***/ }),
 /* 656 */
 /***/ (function(module) {
 
@@ -33354,8 +37096,94 @@ function interrupt(interruptors, tokenizers, ctx, parameters) {
 
 
 /***/ }),
-/* 659 */,
-/* 660 */,
+/* 659 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var getPrototypeOf = __webpack_require__(972);
+var createNonEnumerableProperty = __webpack_require__(315);
+var has = __webpack_require__(35);
+var wellKnownSymbol = __webpack_require__(778);
+var IS_PURE = __webpack_require__(746);
+
+var ITERATOR = wellKnownSymbol('iterator');
+var BUGGY_SAFARI_ITERATORS = false;
+
+var returnThis = function () { return this; };
+
+// `%IteratorPrototype%` object
+// https://tc39.github.io/ecma262/#sec-%iteratorprototype%-object
+var IteratorPrototype, PrototypeOfArrayIteratorPrototype, arrayIterator;
+
+if ([].keys) {
+  arrayIterator = [].keys();
+  // Safari 8 has buggy iterators w/o `next`
+  if (!('next' in arrayIterator)) BUGGY_SAFARI_ITERATORS = true;
+  else {
+    PrototypeOfArrayIteratorPrototype = getPrototypeOf(getPrototypeOf(arrayIterator));
+    if (PrototypeOfArrayIteratorPrototype !== Object.prototype) IteratorPrototype = PrototypeOfArrayIteratorPrototype;
+  }
+}
+
+if (IteratorPrototype == undefined) IteratorPrototype = {};
+
+// 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
+if (!IS_PURE && !has(IteratorPrototype, ITERATOR)) {
+  createNonEnumerableProperty(IteratorPrototype, ITERATOR, returnThis);
+}
+
+module.exports = {
+  IteratorPrototype: IteratorPrototype,
+  BUGGY_SAFARI_ITERATORS: BUGGY_SAFARI_ITERATORS
+};
+
+
+/***/ }),
+/* 660 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(778);
+
+var ITERATOR = wellKnownSymbol('iterator');
+var SAFE_CLOSING = false;
+
+try {
+  var called = 0;
+  var iteratorWithReturn = {
+    next: function () {
+      return { done: !!called++ };
+    },
+    'return': function () {
+      SAFE_CLOSING = true;
+    }
+  };
+  iteratorWithReturn[ITERATOR] = function () {
+    return this;
+  };
+  // eslint-disable-next-line no-throw-literal
+  Array.from(iteratorWithReturn, function () { throw 2; });
+} catch (error) { /* empty */ }
+
+module.exports = function (exec, SKIP_CLOSING) {
+  if (!SKIP_CLOSING && !SAFE_CLOSING) return false;
+  var ITERATION_SUPPORT = false;
+  try {
+    var object = {};
+    object[ITERATOR] = function () {
+      return {
+        next: function () {
+          return { done: ITERATION_SUPPORT = true };
+        }
+      };
+    };
+    exec(object);
+  } catch (error) { /* empty */ }
+  return ITERATION_SUPPORT;
+};
+
+
+/***/ }),
 /* 661 */
 /***/ (function(module) {
 
@@ -33802,44 +37630,70 @@ exports.endpoint = endpoint;
 
 /***/ }),
 /* 663 */,
-/* 664 */,
+/* 664 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.completionZshTemplate = exports.completionShTemplate = void 0;
+exports.completionShTemplate = `###-begin-{{app_name}}-completions-###
+#
+# yargs command completion script
+#
+# Installation: {{app_path}} {{completion_command}} >> ~/.bashrc
+#    or {{app_path}} {{completion_command}} >> ~/.bash_profile on OSX.
+#
+_yargs_completions()
+{
+    local cur_word args type_list
+
+    cur_word="\${COMP_WORDS[COMP_CWORD]}"
+    args=("\${COMP_WORDS[@]}")
+
+    # ask yargs to generate completions.
+    type_list=$({{app_path}} --get-yargs-completions "\${args[@]}")
+
+    COMPREPLY=( $(compgen -W "\${type_list}" -- \${cur_word}) )
+
+    # if no match was found, fall back to filename completion
+    if [ \${#COMPREPLY[@]} -eq 0 ]; then
+      COMPREPLY=()
+    fi
+
+    return 0
+}
+complete -o default -F _yargs_completions {{app_name}}
+###-end-{{app_name}}-completions-###
+`;
+exports.completionZshTemplate = `###-begin-{{app_name}}-completions-###
+#
+# yargs command completion script
+#
+# Installation: {{app_path}} {{completion_command}} >> ~/.zshrc
+#    or {{app_path}} {{completion_command}} >> ~/.zsh_profile on OSX.
+#
+_{{app_name}}_yargs_completions()
+{
+  local reply
+  local si=$IFS
+  IFS=$'\n' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" {{app_path}} --get-yargs-completions "\${words[@]}"))
+  IFS=$si
+  _describe 'values' reply
+}
+compdef _{{app_name}}_yargs_completions {{app_name}}
+###-end-{{app_name}}-completions-###
+`;
+
+
+/***/ }),
 /* 665 */
-/***/ (function(module) {
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
 
-function getProcessArgvBinIndex () {
-  // The binary name is the first command line argument for:
-  // - bundled Electron apps: bin argv1 argv2 ... argvn
-  if (isBundledElectronApp()) return 0
-  // or the second one (default) for:
-  // - standard node apps: node bin.js argv1 argv2 ... argvn
-  // - unbundled Electron apps: electron bin.js argv1 arg2 ... argvn
-  return 1
-}
+// TODO: remove from `core-js@4`
+var defineWellKnownSymbol = __webpack_require__(308);
 
-function isBundledElectronApp () {
-  // process.defaultApp is either set by electron in an electron unbundled app, or undefined
-  // see https://github.com/electron/electron/blob/master/docs/api/process.md#processdefaultapp-readonly
-  return isElectronApp() && !process.defaultApp
-}
-
-function isElectronApp () {
-  // process.versions.electron is either set by electron, or undefined
-  // see https://github.com/electron/electron/blob/master/docs/api/process.md#processversionselectron-readonly
-  return !!process.versions.electron
-}
-
-function getProcessArgvWithoutBin () {
-  return process.argv.slice(getProcessArgvBinIndex() + 1)
-}
-
-function getProcessArgvBin () {
-  return process.argv[getProcessArgvBinIndex()]
-}
-
-module.exports = {
-  getProcessArgvBin,
-  getProcessArgvWithoutBin
-}
+defineWellKnownSymbol('replaceAll');
 
 
 /***/ }),
@@ -34182,7 +38036,22 @@ module.exports = function (fromModel) {
 
 /***/ }),
 /* 673 */,
-/* 674 */,
+/* 674 */
+/***/ (function(module) {
+
+"use strict";
+
+
+const pTry = (fn, ...arguments_) => new Promise(resolve => {
+	resolve(fn(...arguments_));
+});
+
+module.exports = pTry;
+// TODO: remove this in the next major version
+module.exports.default = pTry;
+
+
+/***/ }),
 /* 675 */,
 /* 676 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -35921,7 +39790,17 @@ module.exports = value => {
 
 
 /***/ }),
-/* 681 */,
+/* 681 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(118);
+__webpack_require__(853);
+var path = __webpack_require__(628);
+
+module.exports = path.Array.from;
+
+
+/***/ }),
 /* 682 */
 /***/ (function(__unusedmodule, exports) {
 
@@ -36039,7 +39918,54 @@ function text(eat, value, silent) {
 
 /***/ }),
 /* 685 */,
-/* 686 */,
+/* 686 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var bind = __webpack_require__(41);
+var toObject = __webpack_require__(375);
+var callWithSafeIterationClosing = __webpack_require__(305);
+var isArrayIteratorMethod = __webpack_require__(18);
+var toLength = __webpack_require__(745);
+var createProperty = __webpack_require__(454);
+var getIteratorMethod = __webpack_require__(206);
+
+// `Array.from` method implementation
+// https://tc39.github.io/ecma262/#sec-array.from
+module.exports = function from(arrayLike /* , mapfn = undefined, thisArg = undefined */) {
+  var O = toObject(arrayLike);
+  var C = typeof this == 'function' ? this : Array;
+  var argumentsLength = arguments.length;
+  var mapfn = argumentsLength > 1 ? arguments[1] : undefined;
+  var mapping = mapfn !== undefined;
+  var iteratorMethod = getIteratorMethod(O);
+  var index = 0;
+  var length, result, step, iterator, next, value;
+  if (mapping) mapfn = bind(mapfn, argumentsLength > 2 ? arguments[2] : undefined, 2);
+  // if the target is not iterable or it's an array with the default iterator - use a simple case
+  if (iteratorMethod != undefined && !(C == Array && isArrayIteratorMethod(iteratorMethod))) {
+    iterator = iteratorMethod.call(O);
+    next = iterator.next;
+    result = new C();
+    for (;!(step = next.call(iterator)).done; index++) {
+      value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
+      createProperty(result, index, value);
+    }
+  } else {
+    length = toLength(O.length);
+    result = new C(length);
+    for (;length > index; index++) {
+      value = mapping ? mapfn(O[index], index) : O[index];
+      createProperty(result, index, value);
+    }
+  }
+  result.length = index;
+  return result;
+};
+
+
+/***/ }),
 /* 687 */
 /***/ (function(module) {
 
@@ -36137,9 +40063,84 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 
 /***/ }),
-/* 688 */,
-/* 689 */,
-/* 690 */,
+/* 688 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(778);
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+var test = {};
+
+test[TO_STRING_TAG] = 'z';
+
+module.exports = String(test) === '[object z]';
+
+
+/***/ }),
+/* 689 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var toIndexedObject = __webpack_require__(882);
+var toLength = __webpack_require__(745);
+var toAbsoluteIndex = __webpack_require__(435);
+
+// `Array.prototype.{ indexOf, includes }` methods implementation
+var createMethod = function (IS_INCLUDES) {
+  return function ($this, el, fromIndex) {
+    var O = toIndexedObject($this);
+    var length = toLength(O.length);
+    var index = toAbsoluteIndex(fromIndex, length);
+    var value;
+    // Array#includes uses SameValueZero equality algorithm
+    // eslint-disable-next-line no-self-compare
+    if (IS_INCLUDES && el != el) while (length > index) {
+      value = O[index++];
+      // eslint-disable-next-line no-self-compare
+      if (value != value) return true;
+    // Array#indexOf ignores holes, Array#includes - not
+    } else for (;length > index; index++) {
+      if ((IS_INCLUDES || index in O) && O[index] === el) return IS_INCLUDES || index || 0;
+    } return !IS_INCLUDES && -1;
+  };
+};
+
+module.exports = {
+  // `Array.prototype.includes` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.includes
+  includes: createMethod(true),
+  // `Array.prototype.indexOf` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.indexof
+  indexOf: createMethod(false)
+};
+
+
+/***/ }),
+/* 690 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__(624);
+var IE8_DOM_DEFINE = __webpack_require__(171);
+var anObject = __webpack_require__(589);
+var toPrimitive = __webpack_require__(301);
+
+var nativeDefineProperty = Object.defineProperty;
+
+// `Object.defineProperty` method
+// https://tc39.github.io/ecma262/#sec-object.defineproperty
+exports.f = DESCRIPTORS ? nativeDefineProperty : function defineProperty(O, P, Attributes) {
+  anObject(O);
+  P = toPrimitive(P, true);
+  anObject(Attributes);
+  if (IE8_DOM_DEFINE) try {
+    return nativeDefineProperty(O, P, Attributes);
+  } catch (error) { /* empty */ }
+  if ('get' in Attributes || 'set' in Attributes) throw TypeError('Accessors not supported');
+  if ('value' in Attributes) O[P] = Attributes.value;
+  return O;
+};
+
+
+/***/ }),
 /* 691 */
 /***/ (function(module) {
 
@@ -36260,8 +40261,38 @@ function emphasis(eat, value, silent) {
 
 /***/ }),
 /* 694 */,
-/* 695 */,
-/* 696 */,
+/* 695 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(836);
+var path = __webpack_require__(628);
+
+module.exports = path.Array.isArray;
+
+
+/***/ }),
+/* 696 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(915);
+var forEach = __webpack_require__(5);
+var classof = __webpack_require__(241);
+var ArrayPrototype = Array.prototype;
+
+var DOMIterables = {
+  DOMTokenList: true,
+  NodeList: true
+};
+
+module.exports = function (it) {
+  var own = it.forEach;
+  return it === ArrayPrototype || (it instanceof Array && own === ArrayPrototype.forEach)
+    // eslint-disable-next-line no-prototype-builtins
+    || DOMIterables.hasOwnProperty(classof(it)) ? forEach : own;
+};
+
+
+/***/ }),
 /* 697 */
 /***/ (function(module) {
 
@@ -36340,137 +40371,7 @@ module.exports = prerelease
 
 
 /***/ }),
-/* 703 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var trim = __webpack_require__(235)
-var interrupt = __webpack_require__(658)
-
-module.exports = blockquote
-
-var lineFeed = '\n'
-var tab = '\t'
-var space = ' '
-var greaterThan = '>'
-
-function blockquote(eat, value, silent) {
-  var self = this
-  var offsets = self.offset
-  var tokenizers = self.blockTokenizers
-  var interruptors = self.interruptBlockquote
-  var now = eat.now()
-  var currentLine = now.line
-  var length = value.length
-  var values = []
-  var contents = []
-  var indents = []
-  var add
-  var index = 0
-  var character
-  var rest
-  var nextIndex
-  var content
-  var line
-  var startIndex
-  var prefixed
-  var exit
-
-  while (index < length) {
-    character = value.charAt(index)
-
-    if (character !== space && character !== tab) {
-      break
-    }
-
-    index++
-  }
-
-  if (value.charAt(index) !== greaterThan) {
-    return
-  }
-
-  if (silent) {
-    return true
-  }
-
-  index = 0
-
-  while (index < length) {
-    nextIndex = value.indexOf(lineFeed, index)
-    startIndex = index
-    prefixed = false
-
-    if (nextIndex === -1) {
-      nextIndex = length
-    }
-
-    while (index < length) {
-      character = value.charAt(index)
-
-      if (character !== space && character !== tab) {
-        break
-      }
-
-      index++
-    }
-
-    if (value.charAt(index) === greaterThan) {
-      index++
-      prefixed = true
-
-      if (value.charAt(index) === space) {
-        index++
-      }
-    } else {
-      index = startIndex
-    }
-
-    content = value.slice(index, nextIndex)
-
-    if (!prefixed && !trim(content)) {
-      index = startIndex
-      break
-    }
-
-    if (!prefixed) {
-      rest = value.slice(index)
-
-      // Check if the following code contains a possible block.
-      if (interrupt(interruptors, tokenizers, self, [eat, rest, true])) {
-        break
-      }
-    }
-
-    line = startIndex === index ? content : value.slice(startIndex, nextIndex)
-
-    indents.push(index - startIndex)
-    values.push(line)
-    contents.push(content)
-
-    index = nextIndex + 1
-  }
-
-  index = -1
-  length = indents.length
-  add = eat(values.join(lineFeed))
-
-  while (++index < length) {
-    offsets[currentLine] = (offsets[currentLine] || 0) + indents[index]
-    currentLine++
-  }
-
-  exit = self.enterBlock()
-  contents = self.tokenizeBlock(contents.join(lineFeed), now)
-  exit()
-
-  return add({type: 'blockquote', children: contents})
-}
-
-
-/***/ }),
+/* 703 */,
 /* 704 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -36481,1308 +40382,34 @@ function blockquote(eat, value, silent) {
 async function requiresNode8OrGreater () {}
 requiresNode8OrGreater()
 
-const argsert = __webpack_require__(301)
-const fs = __webpack_require__(747)
-const Command = __webpack_require__(556)
-const Completion = __webpack_require__(44)
+const { Yargs, rebase } = __webpack_require__(834)
 const Parser = __webpack_require__(453)
-const path = __webpack_require__(622)
-const Usage = __webpack_require__(866)
-const Validation = __webpack_require__(373)
-const Y18n = __webpack_require__(407)
-const objFilter = __webpack_require__(628)
-const setBlocking = __webpack_require__(411)
-const applyExtends = __webpack_require__(343)
-const { globalMiddlewareFactory } = __webpack_require__(496)
-const YError = __webpack_require__(574)
-const processArgv = __webpack_require__(665)
 
 exports = module.exports = Yargs
-function Yargs (processArgs, cwd, parentRequire) {
-  processArgs = processArgs || [] // handle calling yargs().
-
-  const self = {}
-  let command = null
-  let completion = null
-  let groups = {}
-  const globalMiddleware = []
-  let output = ''
-  const preservedGroups = {}
-  let usage = null
-  let validation = null
-  let handlerFinishCommand = null
-
-  const y18n = Y18n({
-    directory: __webpack_require__.ab + "locales",
-    updateFiles: false
-  })
-
-  self.middleware = globalMiddlewareFactory(globalMiddleware, self)
-
-  if (!cwd) cwd = process.cwd()
-
-  self.scriptName = function (scriptName) {
-    self.customScriptName = true
-    self.$0 = scriptName
-    return self
-  }
-
-  // ignore the node bin, specify this in your
-  // bin file with #!/usr/bin/env node
-  if (/\b(node|iojs|electron)(\.exe)?$/.test(process.argv[0])) {
-    self.$0 = process.argv.slice(1, 2)
-  } else {
-    self.$0 = process.argv.slice(0, 1)
-  }
-
-  self.$0 = self.$0
-    .map((x, i) => {
-      const b = rebase(cwd, x)
-      return x.match(/^(\/|([a-zA-Z]:)?\\)/) && b.length < x.length ? b : x
-    })
-    .join(' ').trim()
-
-  if (process.env._ !== undefined && processArgv.getProcessArgvBin() === process.env._) {
-    self.$0 = process.env._.replace(
-      `${path.dirname(process.execPath)}/`, ''
-    )
-  }
-
-  // use context object to keep track of resets, subcommand execution, etc
-  // submodules should modify and check the state of context as necessary
-  const context = { resets: -1, commands: [], fullCommands: [], files: [] }
-  self.getContext = () => context
-
-  // puts yargs back into an initial state. any keys
-  // that have been set to "global" will not be reset
-  // by this action.
-  let options
-  self.resetOptions = self.reset = function resetOptions (aliases) {
-    context.resets++
-    aliases = aliases || {}
-    options = options || {}
-    // put yargs back into an initial state, this
-    // logic is used to build a nested command
-    // hierarchy.
-    const tmpOptions = {}
-    tmpOptions.local = options.local ? options.local : []
-    tmpOptions.configObjects = options.configObjects ? options.configObjects : []
-
-    // if a key has been explicitly set as local,
-    // we should reset it before passing options to command.
-    const localLookup = {}
-    tmpOptions.local.forEach((l) => {
-      localLookup[l] = true
-      ;(aliases[l] || []).forEach((a) => {
-        localLookup[a] = true
-      })
-    })
-
-    // add all groups not set to local to preserved groups
-    Object.assign(
-      preservedGroups,
-      Object.keys(groups).reduce((acc, groupName) => {
-        const keys = groups[groupName].filter(key => !(key in localLookup))
-        if (keys.length > 0) {
-          acc[groupName] = keys
-        }
-        return acc
-      }, {})
-    )
-    // groups can now be reset
-    groups = {}
-
-    const arrayOptions = [
-      'array', 'boolean', 'string', 'skipValidation',
-      'count', 'normalize', 'number',
-      'hiddenOptions'
-    ]
-
-    const objectOptions = [
-      'narg', 'key', 'alias', 'default', 'defaultDescription',
-      'config', 'choices', 'demandedOptions', 'demandedCommands', 'coerce',
-      'deprecatedOptions'
-    ]
-
-    arrayOptions.forEach((k) => {
-      tmpOptions[k] = (options[k] || []).filter(k => !localLookup[k])
-    })
-
-    objectOptions.forEach((k) => {
-      tmpOptions[k] = objFilter(options[k], (k, v) => !localLookup[k])
-    })
-
-    tmpOptions.envPrefix = options.envPrefix
-    options = tmpOptions
-
-    // if this is the first time being executed, create
-    // instances of all our helpers -- otherwise just reset.
-    usage = usage ? usage.reset(localLookup) : Usage(self, y18n)
-    validation = validation ? validation.reset(localLookup) : Validation(self, usage, y18n)
-    command = command ? command.reset() : Command(self, usage, validation, globalMiddleware)
-    if (!completion) completion = Completion(self, usage, command)
-
-    completionCommand = null
-    output = ''
-    exitError = null
-    hasOutput = false
-    self.parsed = false
-
-    return self
-  }
-  self.resetOptions()
-
-  // temporary hack: allow "freezing" of reset-able state for parse(msg, cb)
-  const frozens = []
-  function freeze () {
-    const frozen = {}
-    frozens.push(frozen)
-    frozen.options = options
-    frozen.configObjects = options.configObjects.slice(0)
-    frozen.exitProcess = exitProcess
-    frozen.groups = groups
-    usage.freeze()
-    validation.freeze()
-    command.freeze()
-    frozen.strict = strict
-    frozen.strictCommands = strictCommands
-    frozen.completionCommand = completionCommand
-    frozen.output = output
-    frozen.exitError = exitError
-    frozen.hasOutput = hasOutput
-    frozen.parsed = self.parsed
-    frozen.parseFn = parseFn
-    frozen.parseContext = parseContext
-    frozen.handlerFinishCommand = handlerFinishCommand
-  }
-  function unfreeze () {
-    const frozen = frozens.pop()
-    options = frozen.options
-    options.configObjects = frozen.configObjects
-    exitProcess = frozen.exitProcess
-    groups = frozen.groups
-    output = frozen.output
-    exitError = frozen.exitError
-    hasOutput = frozen.hasOutput
-    self.parsed = frozen.parsed
-    usage.unfreeze()
-    validation.unfreeze()
-    command.unfreeze()
-    strict = frozen.strict
-    strictCommands = frozen.strictCommands
-    completionCommand = frozen.completionCommand
-    parseFn = frozen.parseFn
-    parseContext = frozen.parseContext
-    handlerFinishCommand = frozen.handlerFinishCommand
-  }
-
-  self.boolean = function (keys) {
-    argsert('<array|string>', [keys], arguments.length)
-    populateParserHintArray('boolean', keys)
-    return self
-  }
-
-  self.array = function (keys) {
-    argsert('<array|string>', [keys], arguments.length)
-    populateParserHintArray('array', keys)
-    return self
-  }
-
-  self.number = function (keys) {
-    argsert('<array|string>', [keys], arguments.length)
-    populateParserHintArray('number', keys)
-    return self
-  }
-
-  self.normalize = function (keys) {
-    argsert('<array|string>', [keys], arguments.length)
-    populateParserHintArray('normalize', keys)
-    return self
-  }
-
-  self.count = function (keys) {
-    argsert('<array|string>', [keys], arguments.length)
-    populateParserHintArray('count', keys)
-    return self
-  }
-
-  self.string = function (keys) {
-    argsert('<array|string>', [keys], arguments.length)
-    populateParserHintArray('string', keys)
-    return self
-  }
-
-  self.requiresArg = function (keys, value) {
-    argsert('<array|string|object> [number]', [keys], arguments.length)
-    // If someone configures nargs at the same time as requiresArg,
-    // nargs should take precedent,
-    // see: https://github.com/yargs/yargs/pull/1572
-    // TODO: make this work with aliases, using a check similar to
-    // checkAllAliases() in yargs-parser.
-    if (typeof keys === 'string' && options.narg[keys]) {
-      return self
-    } else {
-      populateParserHintObject(self.requiresArg, false, 'narg', keys, NaN)
-    }
-    return self
-  }
-
-  self.skipValidation = function (keys) {
-    argsert('<array|string>', [keys], arguments.length)
-    populateParserHintArray('skipValidation', keys)
-    return self
-  }
-
-  function populateParserHintArray (type, keys, value) {
-    keys = [].concat(keys)
-    keys.forEach((key) => {
-      key = sanitizeKey(key)
-      options[type].push(key)
-    })
-  }
-
-  self.nargs = function (key, value) {
-    argsert('<string|object|array> [number]', [key, value], arguments.length)
-    populateParserHintObject(self.nargs, false, 'narg', key, value)
-    return self
-  }
-
-  self.choices = function (key, value) {
-    argsert('<object|string|array> [string|array]', [key, value], arguments.length)
-    populateParserHintObject(self.choices, true, 'choices', key, value)
-    return self
-  }
-
-  self.alias = function (key, value) {
-    argsert('<object|string|array> [string|array]', [key, value], arguments.length)
-    populateParserHintObject(self.alias, true, 'alias', key, value)
-    return self
-  }
-
-  // TODO: actually deprecate self.defaults.
-  self.default = self.defaults = function (key, value, defaultDescription) {
-    argsert('<object|string|array> [*] [string]', [key, value, defaultDescription], arguments.length)
-    if (defaultDescription) options.defaultDescription[key] = defaultDescription
-    if (typeof value === 'function') {
-      if (!options.defaultDescription[key]) options.defaultDescription[key] = usage.functionDescription(value)
-      value = value.call()
-    }
-    populateParserHintObject(self.default, false, 'default', key, value)
-    return self
-  }
-
-  self.describe = function (key, desc) {
-    argsert('<object|string|array> [string]', [key, desc], arguments.length)
-    populateParserHintObject(self.describe, false, 'key', key, true)
-    usage.describe(key, desc)
-    return self
-  }
-
-  self.demandOption = function (keys, msg) {
-    argsert('<object|string|array> [string]', [keys, msg], arguments.length)
-    populateParserHintObject(self.demandOption, false, 'demandedOptions', keys, msg)
-    return self
-  }
-
-  self.coerce = function (keys, value) {
-    argsert('<object|string|array> [function]', [keys, value], arguments.length)
-    populateParserHintObject(self.coerce, false, 'coerce', keys, value)
-    return self
-  }
-
-  function populateParserHintObject (builder, isArray, type, key, value) {
-    if (Array.isArray(key)) {
-      const temp = Object.create(null)
-      // an array of keys with one value ['x', 'y', 'z'], function parse () {}
-      key.forEach((k) => {
-        temp[k] = value
-      })
-      builder(temp)
-    } else if (typeof key === 'object') {
-      // an object of key value pairs: {'x': parse () {}, 'y': parse() {}}
-      Object.keys(key).forEach((k) => {
-        builder(k, key[k])
-      })
-    } else {
-      key = sanitizeKey(key)
-      // a single key value pair 'x', parse() {}
-      if (isArray) {
-        options[type][key] = (options[type][key] || []).concat(value)
-      } else {
-        options[type][key] = value
-      }
-    }
-  }
-
-  // TODO(bcoe): in future major versions move more objects towards
-  // Object.create(null):
-  function sanitizeKey (key) {
-    if (key === '__proto__') return '___proto___'
-    return key
-  }
-
-  function deleteFromParserHintObject (optionKey) {
-    // delete from all parsing hints:
-    // boolean, array, key, alias, etc.
-    Object.keys(options).forEach((hintKey) => {
-      const hint = options[hintKey]
-      if (Array.isArray(hint)) {
-        if (~hint.indexOf(optionKey)) hint.splice(hint.indexOf(optionKey), 1)
-      } else if (typeof hint === 'object') {
-        delete hint[optionKey]
-      }
-    })
-    // now delete the description from usage.js.
-    delete usage.getDescriptions()[optionKey]
-  }
-
-  self.config = function config (key, msg, parseFn) {
-    argsert('[object|string] [string|function] [function]', [key, msg, parseFn], arguments.length)
-    // allow a config object to be provided directly.
-    if (typeof key === 'object') {
-      key = applyExtends(key, cwd, self.getParserConfiguration()['deep-merge-config'])
-      options.configObjects = (options.configObjects || []).concat(key)
-      return self
-    }
-
-    // allow for a custom parsing function.
-    if (typeof msg === 'function') {
-      parseFn = msg
-      msg = null
-    }
-
-    key = key || 'config'
-    self.describe(key, msg || usage.deferY18nLookup('Path to JSON config file'))
-    ;(Array.isArray(key) ? key : [key]).forEach((k) => {
-      options.config[k] = parseFn || true
-    })
-
-    return self
-  }
-
-  self.example = function (cmd, description) {
-    argsert('<string> [string]', [cmd, description], arguments.length)
-    usage.example(cmd, description)
-    return self
-  }
-
-  self.command = function (cmd, description, builder, handler, middlewares) {
-    argsert('<string|array|object> [string|boolean] [function|object] [function] [array]', [cmd, description, builder, handler, middlewares], arguments.length)
-    command.addHandler(cmd, description, builder, handler, middlewares)
-    return self
-  }
-
-  self.commandDir = function (dir, opts) {
-    argsert('<string> [object]', [dir, opts], arguments.length)
-    const req = parentRequire || require
-    command.addDirectory(dir, self.getContext(), req, __webpack_require__(732)(), opts)
-    return self
-  }
-
-  // TODO: deprecate self.demand in favor of
-  // .demandCommand() .demandOption().
-  self.demand = self.required = self.require = function demand (keys, max, msg) {
-    // you can optionally provide a 'max' key,
-    // which will raise an exception if too many '_'
-    // options are provided.
-    if (Array.isArray(max)) {
-      max.forEach((key) => {
-        self.demandOption(key, msg)
-      })
-      max = Infinity
-    } else if (typeof max !== 'number') {
-      msg = max
-      max = Infinity
-    }
-
-    if (typeof keys === 'number') {
-      self.demandCommand(keys, max, msg, msg)
-    } else if (Array.isArray(keys)) {
-      keys.forEach((key) => {
-        self.demandOption(key, msg)
-      })
-    } else {
-      if (typeof msg === 'string') {
-        self.demandOption(keys, msg)
-      } else if (msg === true || typeof msg === 'undefined') {
-        self.demandOption(keys)
-      }
-    }
-
-    return self
-  }
-
-  self.demandCommand = function demandCommand (min, max, minMsg, maxMsg) {
-    argsert('[number] [number|string] [string|null|undefined] [string|null|undefined]', [min, max, minMsg, maxMsg], arguments.length)
-
-    if (typeof min === 'undefined') min = 1
-
-    if (typeof max !== 'number') {
-      minMsg = max
-      max = Infinity
-    }
-
-    self.global('_', false)
-
-    options.demandedCommands._ = {
-      min,
-      max,
-      minMsg,
-      maxMsg
-    }
-
-    return self
-  }
-
-  self.getDemandedOptions = () => {
-    argsert([], 0)
-    return options.demandedOptions
-  }
-
-  self.getDemandedCommands = () => {
-    argsert([], 0)
-    return options.demandedCommands
-  }
-
-  self.deprecateOption = function deprecateOption (option, message) {
-    argsert('<string> [string|boolean]', [option, message], arguments.length)
-    options.deprecatedOptions[option] = message
-    return self
-  }
-
-  self.getDeprecatedOptions = () => {
-    argsert([], 0)
-    return options.deprecatedOptions
-  }
-
-  self.implies = function (key, value) {
-    argsert('<string|object> [number|string|array]', [key, value], arguments.length)
-    validation.implies(key, value)
-    return self
-  }
-
-  self.conflicts = function (key1, key2) {
-    argsert('<string|object> [string|array]', [key1, key2], arguments.length)
-    validation.conflicts(key1, key2)
-    return self
-  }
-
-  self.usage = function (msg, description, builder, handler) {
-    argsert('<string|null|undefined> [string|boolean] [function|object] [function]', [msg, description, builder, handler], arguments.length)
-
-    if (description !== undefined) {
-      // .usage() can be used as an alias for defining
-      // a default command.
-      if ((msg || '').match(/^\$0( |$)/)) {
-        return self.command(msg, description, builder, handler)
-      } else {
-        throw new YError('.usage() description must start with $0 if being used as alias for .command()')
-      }
-    } else {
-      usage.usage(msg)
-      return self
-    }
-  }
-
-  self.epilogue = self.epilog = function (msg) {
-    argsert('<string>', [msg], arguments.length)
-    usage.epilog(msg)
-    return self
-  }
-
-  self.fail = function (f) {
-    argsert('<function>', [f], arguments.length)
-    usage.failFn(f)
-    return self
-  }
-
-  self.onFinishCommand = function (f) {
-    argsert('<function>', [f], arguments.length)
-    handlerFinishCommand = f
-    return self
-  }
-
-  self.getHandlerFinishCommand = () => handlerFinishCommand
-
-  self.check = function (f, _global) {
-    argsert('<function> [boolean]', [f, _global], arguments.length)
-    validation.check(f, _global !== false)
-    return self
-  }
-
-  self.global = function global (globals, global) {
-    argsert('<string|array> [boolean]', [globals, global], arguments.length)
-    globals = [].concat(globals)
-    if (global !== false) {
-      options.local = options.local.filter(l => globals.indexOf(l) === -1)
-    } else {
-      globals.forEach((g) => {
-        if (options.local.indexOf(g) === -1) options.local.push(g)
-      })
-    }
-    return self
-  }
-
-  self.pkgConf = function pkgConf (key, rootPath) {
-    argsert('<string> [string]', [key, rootPath], arguments.length)
-    let conf = null
-    // prefer cwd to require-main-filename in this method
-    // since we're looking for e.g. "nyc" config in nyc consumer
-    // rather than "yargs" config in nyc (where nyc is the main filename)
-    const obj = pkgUp(rootPath || cwd)
-
-    // If an object exists in the key, add it to options.configObjects
-    if (obj[key] && typeof obj[key] === 'object') {
-      conf = applyExtends(obj[key], rootPath || cwd, self.getParserConfiguration()['deep-merge-config'])
-      options.configObjects = (options.configObjects || []).concat(conf)
-    }
-
-    return self
-  }
-
-  const pkgs = {}
-  function pkgUp (rootPath) {
-    const npath = rootPath || '*'
-    if (pkgs[npath]) return pkgs[npath]
-    const findUp = __webpack_require__(239)
-
-    let obj = {}
-    try {
-      let startDir = rootPath || __webpack_require__(630)(parentRequire || require)
-
-      // When called in an environment that lacks require.main.filename, such as a jest test runner,
-      // startDir is already process.cwd(), and should not be shortened.
-      // Whether or not it is _actually_ a directory (e.g., extensionless bin) is irrelevant, find-up handles it.
-      if (!rootPath && path.extname(startDir)) {
-        startDir = path.dirname(startDir)
-      }
-
-      const pkgJsonPath = findUp.sync('package.json', {
-        cwd: startDir
-      })
-      obj = JSON.parse(fs.readFileSync(pkgJsonPath))
-    } catch (noop) {}
-
-    pkgs[npath] = obj || {}
-    return pkgs[npath]
-  }
-
-  let parseFn = null
-  let parseContext = null
-  self.parse = function parse (args, shortCircuit, _parseFn) {
-    argsert('[string|array] [function|boolean|object] [function]', [args, shortCircuit, _parseFn], arguments.length)
-    freeze()
-    if (typeof args === 'undefined') {
-      const argv = self._parseArgs(processArgs)
-      const tmpParsed = self.parsed
-      unfreeze()
-      // TODO: remove this compatibility hack when we release yargs@15.x:
-      self.parsed = tmpParsed
-      return argv
-    }
-
-    // a context object can optionally be provided, this allows
-    // additional information to be passed to a command handler.
-    if (typeof shortCircuit === 'object') {
-      parseContext = shortCircuit
-      shortCircuit = _parseFn
-    }
-
-    // by providing a function as a second argument to
-    // parse you can capture output that would otherwise
-    // default to printing to stdout/stderr.
-    if (typeof shortCircuit === 'function') {
-      parseFn = shortCircuit
-      shortCircuit = null
-    }
-    // completion short-circuits the parsing process,
-    // skipping validation, etc.
-    if (!shortCircuit) processArgs = args
-
-    if (parseFn) exitProcess = false
-
-    const parsed = self._parseArgs(args, shortCircuit)
-    completion.setParsed(self.parsed)
-    if (parseFn) parseFn(exitError, parsed, output)
-    unfreeze()
-
-    return parsed
-  }
-
-  self._getParseContext = () => parseContext || {}
-
-  self._hasParseCallback = () => !!parseFn
-
-  self.option = self.options = function option (key, opt) {
-    argsert('<string|object> [object]', [key, opt], arguments.length)
-    if (typeof key === 'object') {
-      Object.keys(key).forEach((k) => {
-        self.options(k, key[k])
-      })
-    } else {
-      if (typeof opt !== 'object') {
-        opt = {}
-      }
-
-      options.key[key] = true // track manually set keys.
-
-      if (opt.alias) self.alias(key, opt.alias)
-
-      const deprecate = opt.deprecate || opt.deprecated
-
-      if (deprecate) {
-        self.deprecateOption(key, deprecate)
-      }
-
-      const demand = opt.demand || opt.required || opt.require
-
-      // A required option can be specified via "demand: true".
-      if (demand) {
-        self.demand(key, demand)
-      }
-
-      if (opt.demandOption) {
-        self.demandOption(key, typeof opt.demandOption === 'string' ? opt.demandOption : undefined)
-      }
-
-      if ('conflicts' in opt) {
-        self.conflicts(key, opt.conflicts)
-      }
-
-      if ('default' in opt) {
-        self.default(key, opt.default)
-      }
-
-      if ('implies' in opt) {
-        self.implies(key, opt.implies)
-      }
-
-      if ('nargs' in opt) {
-        self.nargs(key, opt.nargs)
-      }
-
-      if (opt.config) {
-        self.config(key, opt.configParser)
-      }
-
-      if (opt.normalize) {
-        self.normalize(key)
-      }
-
-      if ('choices' in opt) {
-        self.choices(key, opt.choices)
-      }
-
-      if ('coerce' in opt) {
-        self.coerce(key, opt.coerce)
-      }
-
-      if ('group' in opt) {
-        self.group(key, opt.group)
-      }
-
-      if (opt.boolean || opt.type === 'boolean') {
-        self.boolean(key)
-        if (opt.alias) self.boolean(opt.alias)
-      }
-
-      if (opt.array || opt.type === 'array') {
-        self.array(key)
-        if (opt.alias) self.array(opt.alias)
-      }
-
-      if (opt.number || opt.type === 'number') {
-        self.number(key)
-        if (opt.alias) self.number(opt.alias)
-      }
-
-      if (opt.string || opt.type === 'string') {
-        self.string(key)
-        if (opt.alias) self.string(opt.alias)
-      }
-
-      if (opt.count || opt.type === 'count') {
-        self.count(key)
-      }
-
-      if (typeof opt.global === 'boolean') {
-        self.global(key, opt.global)
-      }
-
-      if (opt.defaultDescription) {
-        options.defaultDescription[key] = opt.defaultDescription
-      }
-
-      if (opt.skipValidation) {
-        self.skipValidation(key)
-      }
-
-      const desc = opt.describe || opt.description || opt.desc
-      self.describe(key, desc)
-      if (opt.hidden) {
-        self.hide(key)
-      }
-
-      if (opt.requiresArg) {
-        self.requiresArg(key)
-      }
-    }
-
-    return self
-  }
-  self.getOptions = () => options
-
-  self.positional = function (key, opts) {
-    argsert('<string> <object>', [key, opts], arguments.length)
-    if (context.resets === 0) {
-      throw new YError(".positional() can only be called in a command's builder function")
-    }
-
-    // .positional() only supports a subset of the configuration
-    // options available to .option().
-    const supportedOpts = ['default', 'defaultDescription', 'implies', 'normalize',
-      'choices', 'conflicts', 'coerce', 'type', 'describe',
-      'desc', 'description', 'alias']
-    opts = objFilter(opts, (k, v) => {
-      let accept = supportedOpts.indexOf(k) !== -1
-      // type can be one of string|number|boolean.
-      if (k === 'type' && ['string', 'number', 'boolean'].indexOf(v) === -1) accept = false
-      return accept
-    })
-
-    // copy over any settings that can be inferred from the command string.
-    const fullCommand = context.fullCommands[context.fullCommands.length - 1]
-    const parseOptions = fullCommand ? command.cmdToParseOptions(fullCommand) : {
-      array: [],
-      alias: {},
-      default: {},
-      demand: {}
-    }
-    Object.keys(parseOptions).forEach((pk) => {
-      if (Array.isArray(parseOptions[pk])) {
-        if (parseOptions[pk].indexOf(key) !== -1) opts[pk] = true
-      } else {
-        if (parseOptions[pk][key] && !(pk in opts)) opts[pk] = parseOptions[pk][key]
-      }
-    })
-    self.group(key, usage.getPositionalGroupName())
-    return self.option(key, opts)
-  }
-
-  self.group = function group (opts, groupName) {
-    argsert('<string|array> <string>', [opts, groupName], arguments.length)
-    const existing = preservedGroups[groupName] || groups[groupName]
-    if (preservedGroups[groupName]) {
-      // we now only need to track this group name in groups.
-      delete preservedGroups[groupName]
-    }
-
-    const seen = {}
-    groups[groupName] = (existing || []).concat(opts).filter((key) => {
-      if (seen[key]) return false
-      return (seen[key] = true)
-    })
-    return self
-  }
-  // combine explicit and preserved groups. explicit groups should be first
-  self.getGroups = () => Object.assign({}, groups, preservedGroups)
-
-  // as long as options.envPrefix is not undefined,
-  // parser will apply env vars matching prefix to argv
-  self.env = function (prefix) {
-    argsert('[string|boolean]', [prefix], arguments.length)
-    if (prefix === false) options.envPrefix = undefined
-    else options.envPrefix = prefix || ''
-    return self
-  }
-
-  self.wrap = function (cols) {
-    argsert('<number|null|undefined>', [cols], arguments.length)
-    usage.wrap(cols)
-    return self
-  }
-
-  let strict = false
-  self.strict = function (enabled) {
-    argsert('[boolean]', [enabled], arguments.length)
-    strict = enabled !== false
-    return self
-  }
-  self.getStrict = () => strict
-
-  let strictCommands = false
-  self.strictCommands = function (enabled) {
-    argsert('[boolean]', [enabled], arguments.length)
-    strictCommands = enabled !== false
-    return self
-  }
-  self.getStrictCommands = () => strictCommands
-
-  let parserConfig = {}
-  self.parserConfiguration = function parserConfiguration (config) {
-    argsert('<object>', [config], arguments.length)
-    parserConfig = config
-    return self
-  }
-  self.getParserConfiguration = () => parserConfig
-
-  self.showHelp = function (level) {
-    argsert('[string|function]', [level], arguments.length)
-    if (!self.parsed) self._parseArgs(processArgs) // run parser, if it has not already been executed.
-    if (command.hasDefaultCommand()) {
-      context.resets++ // override the restriction on top-level positoinals.
-      command.runDefaultBuilderOn(self, true)
-    }
-    usage.showHelp(level)
-    return self
-  }
-
-  let versionOpt = null
-  self.version = function version (opt, msg, ver) {
-    const defaultVersionOpt = 'version'
-    argsert('[boolean|string] [string] [string]', [opt, msg, ver], arguments.length)
-
-    // nuke the key previously configured
-    // to return version #.
-    if (versionOpt) {
-      deleteFromParserHintObject(versionOpt)
-      usage.version(undefined)
-      versionOpt = null
-    }
-
-    if (arguments.length === 0) {
-      ver = guessVersion()
-      opt = defaultVersionOpt
-    } else if (arguments.length === 1) {
-      if (opt === false) { // disable default 'version' key.
-        return self
-      }
-      ver = opt
-      opt = defaultVersionOpt
-    } else if (arguments.length === 2) {
-      ver = msg
-      msg = null
-    }
-
-    versionOpt = typeof opt === 'string' ? opt : defaultVersionOpt
-    msg = msg || usage.deferY18nLookup('Show version number')
-
-    usage.version(ver || undefined)
-    self.boolean(versionOpt)
-    self.describe(versionOpt, msg)
-    return self
-  }
-
-  function guessVersion () {
-    const obj = pkgUp()
-
-    return obj.version || 'unknown'
-  }
-
-  let helpOpt = null
-  self.addHelpOpt = self.help = function addHelpOpt (opt, msg) {
-    const defaultHelpOpt = 'help'
-    argsert('[string|boolean] [string]', [opt, msg], arguments.length)
-
-    // nuke the key previously configured
-    // to return help.
-    if (helpOpt) {
-      deleteFromParserHintObject(helpOpt)
-      helpOpt = null
-    }
-
-    if (arguments.length === 1) {
-      if (opt === false) return self
-    }
-
-    // use arguments, fallback to defaults for opt and msg
-    helpOpt = typeof opt === 'string' ? opt : defaultHelpOpt
-    self.boolean(helpOpt)
-    self.describe(helpOpt, msg || usage.deferY18nLookup('Show help'))
-    return self
-  }
-
-  const defaultShowHiddenOpt = 'show-hidden'
-  options.showHiddenOpt = defaultShowHiddenOpt
-  self.addShowHiddenOpt = self.showHidden = function addShowHiddenOpt (opt, msg) {
-    argsert('[string|boolean] [string]', [opt, msg], arguments.length)
-
-    if (arguments.length === 1) {
-      if (opt === false) return self
-    }
-
-    const showHiddenOpt = typeof opt === 'string' ? opt : defaultShowHiddenOpt
-    self.boolean(showHiddenOpt)
-    self.describe(showHiddenOpt, msg || usage.deferY18nLookup('Show hidden options'))
-    options.showHiddenOpt = showHiddenOpt
-    return self
-  }
-
-  self.hide = function hide (key) {
-    argsert('<string|object>', [key], arguments.length)
-    options.hiddenOptions.push(key)
-    return self
-  }
-
-  self.showHelpOnFail = function showHelpOnFail (enabled, message) {
-    argsert('[boolean|string] [string]', [enabled, message], arguments.length)
-    usage.showHelpOnFail(enabled, message)
-    return self
-  }
-
-  var exitProcess = true
-  self.exitProcess = function (enabled) {
-    argsert('[boolean]', [enabled], arguments.length)
-    if (typeof enabled !== 'boolean') {
-      enabled = true
-    }
-    exitProcess = enabled
-    return self
-  }
-  self.getExitProcess = () => exitProcess
-
-  var completionCommand = null
-  self.completion = function (cmd, desc, fn) {
-    argsert('[string] [string|boolean|function] [function]', [cmd, desc, fn], arguments.length)
-
-    // a function to execute when generating
-    // completions can be provided as the second
-    // or third argument to completion.
-    if (typeof desc === 'function') {
-      fn = desc
-      desc = null
-    }
-
-    // register the completion command.
-    completionCommand = cmd || completionCommand || 'completion'
-    if (!desc && desc !== false) {
-      desc = 'generate completion script'
-    }
-    self.command(completionCommand, desc)
-
-    // a function can be provided
-    if (fn) completion.registerFunction(fn)
-
-    return self
-  }
-
-  self.showCompletionScript = function ($0, cmd) {
-    argsert('[string] [string]', [$0, cmd], arguments.length)
-    $0 = $0 || self.$0
-    _logger.log(completion.generateCompletionScript($0, cmd || completionCommand || 'completion'))
-    return self
-  }
-
-  self.getCompletion = function (args, done) {
-    argsert('<array> <function>', [args, done], arguments.length)
-    completion.getCompletion(args, done)
-  }
-
-  self.locale = function (locale) {
-    argsert('[string]', [locale], arguments.length)
-    if (arguments.length === 0) {
-      guessLocale()
-      return y18n.getLocale()
-    }
-    detectLocale = false
-    y18n.setLocale(locale)
-    return self
-  }
-
-  self.updateStrings = self.updateLocale = function (obj) {
-    argsert('<object>', [obj], arguments.length)
-    detectLocale = false
-    y18n.updateLocale(obj)
-    return self
-  }
-
-  let detectLocale = true
-  self.detectLocale = function (detect) {
-    argsert('<boolean>', [detect], arguments.length)
-    detectLocale = detect
-    return self
-  }
-  self.getDetectLocale = () => detectLocale
-
-  var hasOutput = false
-  var exitError = null
-  // maybe exit, always capture
-  // context about why we wanted to exit.
-  self.exit = (code, err) => {
-    hasOutput = true
-    exitError = err
-    if (exitProcess) process.exit(code)
-  }
-
-  // we use a custom logger that buffers output,
-  // so that we can print to non-CLIs, e.g., chat-bots.
-  const _logger = {
-    log () {
-      const args = []
-      for (let i = 0; i < arguments.length; i++) args.push(arguments[i])
-      if (!self._hasParseCallback()) console.log.apply(console, args)
-      hasOutput = true
-      if (output.length) output += '\n'
-      output += args.join(' ')
-    },
-    error () {
-      const args = []
-      for (let i = 0; i < arguments.length; i++) args.push(arguments[i])
-      if (!self._hasParseCallback()) console.error.apply(console, args)
-      hasOutput = true
-      if (output.length) output += '\n'
-      output += args.join(' ')
-    }
-  }
-  self._getLoggerInstance = () => _logger
-  // has yargs output an error our help
-  // message in the current execution context.
-  self._hasOutput = () => hasOutput
-
-  self._setHasOutput = () => {
-    hasOutput = true
-  }
-
-  let recommendCommands
-  self.recommendCommands = function (recommend) {
-    argsert('[boolean]', [recommend], arguments.length)
-    recommendCommands = typeof recommend === 'boolean' ? recommend : true
-    return self
-  }
-
-  self.getUsageInstance = () => usage
-
-  self.getValidationInstance = () => validation
-
-  self.getCommandInstance = () => command
-
-  self.terminalWidth = () => {
-    argsert([], 0)
-    return typeof process.stdout.columns !== 'undefined' ? process.stdout.columns : null
-  }
-
-  Object.defineProperty(self, 'argv', {
-    get: () => self._parseArgs(processArgs),
-    enumerable: true
-  })
-
-  self._parseArgs = function parseArgs (args, shortCircuit, _calledFromCommand, commandIndex) {
-    let skipValidation = !!_calledFromCommand
-    args = args || processArgs
-
-    options.__ = y18n.__
-    options.configuration = self.getParserConfiguration()
-
-    const populateDoubleDash = !!options.configuration['populate--']
-    const config = Object.assign({}, options.configuration, {
-      'populate--': true
-    })
-    const parsed = Parser.detailed(args, Object.assign({}, options, {
-      configuration: config
-    }))
-
-    let argv = parsed.argv
-    if (parseContext) argv = Object.assign({}, argv, parseContext)
-    const aliases = parsed.aliases
-
-    argv.$0 = self.$0
-    self.parsed = parsed
-
-    try {
-      guessLocale() // guess locale lazily, so that it can be turned off in chain.
-
-      // while building up the argv object, there
-      // are two passes through the parser. If completion
-      // is being performed short-circuit on the first pass.
-      if (shortCircuit) {
-        return (populateDoubleDash || _calledFromCommand) ? argv : self._copyDoubleDash(argv)
-      }
-
-      // if there's a handler associated with a
-      // command defer processing to it.
-      if (helpOpt) {
-        // consider any multi-char helpOpt alias as a valid help command
-        // unless all helpOpt aliases are single-char
-        // note that parsed.aliases is a normalized bidirectional map :)
-        const helpCmds = [helpOpt]
-          .concat(aliases[helpOpt] || [])
-          .filter(k => k.length > 1)
-        // check if help should trigger and strip it from _.
-        if (~helpCmds.indexOf(argv._[argv._.length - 1])) {
-          argv._.pop()
-          argv[helpOpt] = true
-        }
-      }
-
-      const handlerKeys = command.getCommands()
-      const requestCompletions = completion.completionKey in argv
-      const skipRecommendation = argv[helpOpt] || requestCompletions
-      const skipDefaultCommand = skipRecommendation && (handlerKeys.length > 1 || handlerKeys[0] !== '$0')
-
-      if (argv._.length) {
-        if (handlerKeys.length) {
-          let firstUnknownCommand
-          for (let i = (commandIndex || 0), cmd; argv._[i] !== undefined; i++) {
-            cmd = String(argv._[i])
-            if (~handlerKeys.indexOf(cmd) && cmd !== completionCommand) {
-              // commands are executed using a recursive algorithm that executes
-              // the deepest command first; we keep track of the position in the
-              // argv._ array that is currently being executed.
-              const innerArgv = command.runCommand(cmd, self, parsed, i + 1)
-              return populateDoubleDash ? innerArgv : self._copyDoubleDash(innerArgv)
-            } else if (!firstUnknownCommand && cmd !== completionCommand) {
-              firstUnknownCommand = cmd
-              break
-            }
-          }
-
-          // run the default command, if defined
-          if (command.hasDefaultCommand() && !skipDefaultCommand) {
-            const innerArgv = command.runCommand(null, self, parsed)
-            return populateDoubleDash ? innerArgv : self._copyDoubleDash(innerArgv)
-          }
-
-          // recommend a command if recommendCommands() has
-          // been enabled, and no commands were found to execute
-          if (recommendCommands && firstUnknownCommand && !skipRecommendation) {
-            validation.recommendCommands(firstUnknownCommand, handlerKeys)
-          }
-        }
-
-        // generate a completion script for adding to ~/.bashrc.
-        if (completionCommand && ~argv._.indexOf(completionCommand) && !requestCompletions) {
-          if (exitProcess) setBlocking(true)
-          self.showCompletionScript()
-          self.exit(0)
-        }
-      } else if (command.hasDefaultCommand() && !skipDefaultCommand) {
-        const innerArgv = command.runCommand(null, self, parsed)
-        return populateDoubleDash ? innerArgv : self._copyDoubleDash(innerArgv)
-      }
-
-      // we must run completions first, a user might
-      // want to complete the --help or --version option.
-      if (requestCompletions) {
-        if (exitProcess) setBlocking(true)
-
-        // we allow for asynchronous completions,
-        // e.g., loading in a list of commands from an API.
-        const completionArgs = args.slice(args.indexOf(`--${completion.completionKey}`) + 1)
-        completion.getCompletion(completionArgs, (completions) => {
-          ;(completions || []).forEach((completion) => {
-            _logger.log(completion)
-          })
-
-          self.exit(0)
-        })
-        return (populateDoubleDash || _calledFromCommand) ? argv : self._copyDoubleDash(argv)
-      }
-
-      // Handle 'help' and 'version' options
-      // if we haven't already output help!
-      if (!hasOutput) {
-        Object.keys(argv).forEach((key) => {
-          if (key === helpOpt && argv[key]) {
-            if (exitProcess) setBlocking(true)
-
-            skipValidation = true
-            self.showHelp('log')
-            self.exit(0)
-          } else if (key === versionOpt && argv[key]) {
-            if (exitProcess) setBlocking(true)
-
-            skipValidation = true
-            usage.showVersion()
-            self.exit(0)
-          }
-        })
-      }
-
-      // Check if any of the options to skip validation were provided
-      if (!skipValidation && options.skipValidation.length > 0) {
-        skipValidation = Object.keys(argv).some(key => options.skipValidation.indexOf(key) >= 0 && argv[key] === true)
-      }
-
-      // If the help or version options where used and exitProcess is false,
-      // or if explicitly skipped, we won't run validations.
-      if (!skipValidation) {
-        if (parsed.error) throw new YError(parsed.error.message)
-
-        // if we're executed via bash completion, don't
-        // bother with validation.
-        if (!requestCompletions) {
-          self._runValidation(argv, aliases, {}, parsed.error)
-        }
-      }
-    } catch (err) {
-      if (err instanceof YError) usage.fail(err.message, err)
-      else throw err
-    }
-
-    return (populateDoubleDash || _calledFromCommand) ? argv : self._copyDoubleDash(argv)
-  }
-
-  // to simplify the parsing of positionals in commands,
-  // we temporarily populate '--' rather than _, with arguments
-  // after the '--' directive. After the parse, we copy these back.
-  self._copyDoubleDash = function (argv) {
-    if (!argv._ || !argv['--']) return argv
-    argv._.push.apply(argv._, argv['--'])
-
-    // TODO(bcoe): refactor command parsing such that this delete is not
-    // necessary: https://github.com/yargs/yargs/issues/1482
-    try {
-      delete argv['--']
-    } catch (_err) {}
-
-    return argv
-  }
-
-  self._runValidation = function runValidation (argv, aliases, positionalMap, parseErrors) {
-    if (parseErrors) throw new YError(parseErrors.message)
-    validation.nonOptionCount(argv)
-    validation.requiredArguments(argv)
-    let failedStrictCommands = false
-    if (strictCommands) {
-      failedStrictCommands = validation.unknownCommands(argv, aliases, positionalMap)
-    }
-    if (strict && !failedStrictCommands) {
-      validation.unknownArguments(argv, aliases, positionalMap)
-    }
-    validation.customChecks(argv, aliases)
-    validation.limitedChoices(argv)
-    validation.implications(argv)
-    validation.conflicting(argv)
-  }
-
-  function guessLocale () {
-    if (!detectLocale) return
-    const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || process.env.LANGUAGE || 'en_US'
-    self.locale(locale.replace(/[.:].*/, ''))
-  }
-
-  // an app should almost always have --version and --help,
-  // if you *really* want to disable this use .help(false)/.version(false).
-  self.help()
-  self.version()
-
-  return self
-}
+exports.rebase = rebase
 
 // allow consumers to directly use the version of yargs-parser used by yargs
 exports.Parser = Parser
 
-// rebase an absolute path to a relative one with respect to a base directory
-// exported for tests
-exports.rebase = rebase
-function rebase (base, dir) {
-  return path.relative(base, dir)
-}
-
 
 /***/ }),
 /* 705 */,
-/* 706 */,
+/* 706 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var global = __webpack_require__(813);
+var createNonEnumerableProperty = __webpack_require__(315);
+
+module.exports = function (key, value) {
+  try {
+    createNonEnumerableProperty(global, key, value);
+  } catch (error) {
+    global[key] = value;
+  } return value;
+};
+
+
+/***/ }),
 /* 707 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -37966,7 +40593,17 @@ exports.Octokit = Octokit;
 
 
 /***/ }),
-/* 708 */,
+/* 708 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var path = __webpack_require__(628);
+
+module.exports = function (CONSTRUCTOR) {
+  return path[CONSTRUCTOR + 'Prototype'];
+};
+
+
+/***/ }),
 /* 709 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -38505,7 +41142,16 @@ exports.Context = Context;
 /***/ }),
 /* 711 */,
 /* 712 */,
-/* 713 */,
+/* 713 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.matchAll` well-known symbol
+defineWellKnownSymbol('matchAll');
+
+
+/***/ }),
 /* 714 */,
 /* 715 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -38611,7 +41257,7 @@ proto.blockTokenizers = {
   blankLine: __webpack_require__(144),
   indentedCode: __webpack_require__(53),
   fencedCode: __webpack_require__(966),
-  blockquote: __webpack_require__(703),
+  blockquote: __webpack_require__(912),
   atxHeading: __webpack_require__(648),
   thematicBreak: __webpack_require__(389),
   list: __webpack_require__(429),
@@ -39208,7 +41854,47 @@ module.exports = makeError;
 
 
 /***/ }),
-/* 726 */,
+/* 726 */
+/***/ (function(module) {
+
+// iterable DOM collections
+// flag - `iterable` interface - 'entries', 'keys', 'values', 'forEach' methods
+module.exports = {
+  CSSRuleList: 0,
+  CSSStyleDeclaration: 0,
+  CSSValueList: 0,
+  ClientRectList: 0,
+  DOMRectList: 0,
+  DOMStringList: 0,
+  DOMTokenList: 1,
+  DataTransferItemList: 0,
+  FileList: 0,
+  HTMLAllCollection: 0,
+  HTMLCollection: 0,
+  HTMLFormElement: 0,
+  HTMLSelectElement: 0,
+  MediaList: 0,
+  MimeTypeArray: 0,
+  NamedNodeMap: 0,
+  NodeList: 1,
+  PaintRequestList: 0,
+  Plugin: 0,
+  PluginArray: 0,
+  SVGLengthList: 0,
+  SVGNumberList: 0,
+  SVGPathSegList: 0,
+  SVGPointList: 0,
+  SVGStringList: 0,
+  SVGTransformList: 0,
+  SourceBufferList: 0,
+  StyleSheetList: 0,
+  TextTrackCueList: 0,
+  TextTrackList: 0,
+  TouchList: 0
+};
+
+
+/***/ }),
 /* 727 */
 /***/ (function(module) {
 
@@ -39316,7 +42002,16 @@ module.exports = function getCallerFile(position) {
 
 /***/ }),
 /* 733 */,
-/* 734 */,
+/* 734 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(339);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('Array').reduce;
+
+
+/***/ }),
 /* 735 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -39401,7 +42096,20 @@ module.exports = new Schema({
 
 
 /***/ }),
-/* 739 */,
+/* 739 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var $ = __webpack_require__(52);
+var parseIntImplementation = __webpack_require__(632);
+
+// `parseInt` method
+// https://tc39.github.io/ecma262/#sec-parseint-string-radix
+$({ global: true, forced: parseInt != parseIntImplementation }, {
+  parseInt: parseIntImplementation
+});
+
+
+/***/ }),
 /* 740 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -39621,182 +42329,45 @@ function whichSync (cmd, opt) {
 /* 745 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-/* module decorator */ module = __webpack_require__.nmd(module);
+var toInteger = __webpack_require__(83);
 
+var min = Math.min;
 
-const wrapAnsi16 = (fn, offset) => (...args) => {
-	const code = fn(...args);
-	return `\u001B[${code + offset}m`;
+// `ToLength` abstract operation
+// https://tc39.github.io/ecma262/#sec-tolength
+module.exports = function (argument) {
+  return argument > 0 ? min(toInteger(argument), 0x1FFFFFFFFFFFFF) : 0; // 2 ** 53 - 1 == 9007199254740991
 };
-
-const wrapAnsi256 = (fn, offset) => (...args) => {
-	const code = fn(...args);
-	return `\u001B[${38 + offset};5;${code}m`;
-};
-
-const wrapAnsi16m = (fn, offset) => (...args) => {
-	const rgb = fn(...args);
-	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
-};
-
-const ansi2ansi = n => n;
-const rgb2rgb = (r, g, b) => [r, g, b];
-
-const setLazyProperty = (object, property, get) => {
-	Object.defineProperty(object, property, {
-		get: () => {
-			const value = get();
-
-			Object.defineProperty(object, property, {
-				value,
-				enumerable: true,
-				configurable: true
-			});
-
-			return value;
-		},
-		enumerable: true,
-		configurable: true
-	});
-};
-
-/** @type {typeof import('color-convert')} */
-let colorConvert;
-const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
-	if (colorConvert === undefined) {
-		colorConvert = __webpack_require__(83);
-	}
-
-	const offset = isBackground ? 10 : 0;
-	const styles = {};
-
-	for (const [sourceSpace, suite] of Object.entries(colorConvert)) {
-		const name = sourceSpace === 'ansi16' ? 'ansi' : sourceSpace;
-		if (sourceSpace === targetSpace) {
-			styles[name] = wrap(identity, offset);
-		} else if (typeof suite === 'object') {
-			styles[name] = wrap(suite[targetSpace], offset);
-		}
-	}
-
-	return styles;
-};
-
-function assembleStyles() {
-	const codes = new Map();
-	const styles = {
-		modifier: {
-			reset: [0, 0],
-			// 21 isn't widely supported and 22 does the same thing
-			bold: [1, 22],
-			dim: [2, 22],
-			italic: [3, 23],
-			underline: [4, 24],
-			inverse: [7, 27],
-			hidden: [8, 28],
-			strikethrough: [9, 29]
-		},
-		color: {
-			black: [30, 39],
-			red: [31, 39],
-			green: [32, 39],
-			yellow: [33, 39],
-			blue: [34, 39],
-			magenta: [35, 39],
-			cyan: [36, 39],
-			white: [37, 39],
-
-			// Bright color
-			blackBright: [90, 39],
-			redBright: [91, 39],
-			greenBright: [92, 39],
-			yellowBright: [93, 39],
-			blueBright: [94, 39],
-			magentaBright: [95, 39],
-			cyanBright: [96, 39],
-			whiteBright: [97, 39]
-		},
-		bgColor: {
-			bgBlack: [40, 49],
-			bgRed: [41, 49],
-			bgGreen: [42, 49],
-			bgYellow: [43, 49],
-			bgBlue: [44, 49],
-			bgMagenta: [45, 49],
-			bgCyan: [46, 49],
-			bgWhite: [47, 49],
-
-			// Bright color
-			bgBlackBright: [100, 49],
-			bgRedBright: [101, 49],
-			bgGreenBright: [102, 49],
-			bgYellowBright: [103, 49],
-			bgBlueBright: [104, 49],
-			bgMagentaBright: [105, 49],
-			bgCyanBright: [106, 49],
-			bgWhiteBright: [107, 49]
-		}
-	};
-
-	// Alias bright black as gray (and grey)
-	styles.color.gray = styles.color.blackBright;
-	styles.bgColor.bgGray = styles.bgColor.bgBlackBright;
-	styles.color.grey = styles.color.blackBright;
-	styles.bgColor.bgGrey = styles.bgColor.bgBlackBright;
-
-	for (const [groupName, group] of Object.entries(styles)) {
-		for (const [styleName, style] of Object.entries(group)) {
-			styles[styleName] = {
-				open: `\u001B[${style[0]}m`,
-				close: `\u001B[${style[1]}m`
-			};
-
-			group[styleName] = styles[styleName];
-
-			codes.set(style[0], style[1]);
-		}
-
-		Object.defineProperty(styles, groupName, {
-			value: group,
-			enumerable: false
-		});
-	}
-
-	Object.defineProperty(styles, 'codes', {
-		value: codes,
-		enumerable: false
-	});
-
-	styles.color.close = '\u001B[39m';
-	styles.bgColor.close = '\u001B[49m';
-
-	setLazyProperty(styles.color, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, false));
-	setLazyProperty(styles.color, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, false));
-	setLazyProperty(styles.color, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, false));
-	setLazyProperty(styles.bgColor, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, true));
-	setLazyProperty(styles.bgColor, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, true));
-	setLazyProperty(styles.bgColor, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, true));
-
-	return styles;
-}
-
-// Make the export immutable
-Object.defineProperty(module, 'exports', {
-	enumerable: true,
-	get: assembleStyles
-});
 
 
 /***/ }),
-/* 746 */,
+/* 746 */
+/***/ (function(module) {
+
+module.exports = true;
+
+
+/***/ }),
 /* 747 */
 /***/ (function(module) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 748 */,
+/* 748 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var internalObjectKeys = __webpack_require__(14);
+var enumBugKeys = __webpack_require__(407);
+
+// `Object.keys` method
+// https://tc39.github.io/ecma262/#sec-object.keys
+module.exports = Object.keys || function keys(O) {
+  return internalObjectKeys(O, enumBugKeys);
+};
+
+
+/***/ }),
 /* 749 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -39804,7 +42375,7 @@ const unified = __webpack_require__(709);
 const parse = __webpack_require__(64);
 const stringify = __webpack_require__(104);
 const frontmatter = __webpack_require__(221);
-const parseFrontmatter = __webpack_require__(553);
+const parseFrontmatter = __webpack_require__(872);
 const template = __webpack_require__(583);
 const { readPkgFile } = __webpack_require__(916);
 const { runCommand } = __webpack_require__(378);
@@ -39832,16 +42403,22 @@ const parseChange = function* ({ cwd, vfile }) {
       let gitInfo = yield runCommand({
         cwd,
         pkgPath: "",
-        command: `git log --reverse --format="%h %H %as %s" -n 1 ${vfile.data.filename}`,
+        command: `git log --reverse --format="%h %H %as %s" ${vfile.data.filename}`,
         log: false,
       });
-      const [hashShort, hashLong, date, ...rest] = gitInfo.split(" ");
+      const commits = gitInfo.split(/\n/).map((commit) => {
+        const [hashShort, hashLong, date, ...rest] = commit.split(" ");
+        return {
+          hashShort,
+          hashLong,
+          date,
+          commitSubject: rest.join(" "),
+        };
+      });
+
       changeset.meta = {
         ...vfile.data,
-        hashShort,
-        hashLong,
-        date,
-        commitSubject: rest.join(" "),
+        commits,
       };
     } catch (e) {
       changeset.meta = {
@@ -39918,11 +42495,13 @@ module.exports.mergeIntoConfig = ({
     const mergedCommand = mergeCommand({ ...commandItems, command });
 
     let getPublishedVersion;
+    let assets;
     if (command === "publish") {
       getPublishedVersion = mergeCommand({
         ...commandItems,
         command: "getPublishedVersion",
       });
+      assets = mergeCommand({ ...commandItems, command: "assets" });
     }
 
     if (!!mergedCommand) {
@@ -39936,6 +42515,7 @@ module.exports.mergeIntoConfig = ({
           command: `post${command}`,
         }),
         ...(!getPublishedVersion ? {} : { getPublishedVersion }),
+        ...(!assets ? {} : { assets }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
       };
@@ -39957,7 +42537,7 @@ module.exports.mergeIntoConfig = ({
       pkg: pkgCommands[pkg],
     };
 
-    const extraPublishParams =
+    let extraPublishParams =
       command == "version"
         ? {}
         : {
@@ -39972,13 +42552,6 @@ module.exports.mergeIntoConfig = ({
               ),
               nickname: pkg,
             }),
-            ...(!pkgCommands[pkg].getPublishedVersion
-              ? {}
-              : {
-                  getPublishedVersion: template(
-                    pkgCommands[pkg].getPublishedVersion
-                  )(pipeToTemplate),
-                }),
           };
 
     if (command !== "version" && !!extraPublishParams.pkgFile) {
@@ -39986,6 +42559,29 @@ module.exports.mergeIntoConfig = ({
         name: extraPublishParams.pkgFile.name,
         version: extraPublishParams.pkgFile.version,
         pkg: extraPublishParams.pkgFile.pkg,
+      };
+    }
+
+    if (command !== "version") {
+      // add these after that they can use pkgFile
+      extraPublishParams = {
+        ...extraPublishParams,
+        ...(!pkgCommands[pkg].getPublishedVersion
+          ? {}
+          : {
+              getPublishedVersion: template(
+                pkgCommands[pkg].getPublishedVersion
+              )(pipeToTemplate),
+            }),
+        ...(!pkgCommands[pkg].assets
+          ? {}
+          : {
+              assets: templateCommands(
+                pkgCommands[pkg].assets,
+                pipeToTemplate,
+                ["path", "name"]
+              ),
+            }),
       };
     }
 
@@ -40003,11 +42599,19 @@ module.exports.mergeIntoConfig = ({
       type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
       dependencies: pkgCommands[pkg].dependencies,
-      precommand: templateCommands(pkgCommands[pkg].precommand, pipeToTemplate),
-      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate),
+      precommand: templateCommands(
+        pkgCommands[pkg].precommand,
+        pipeToTemplate,
+        ["command", "dryRunCommand"]
+      ),
+      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate, [
+        "command",
+        "dryRunCommand",
+      ]),
       postcommand: templateCommands(
         pkgCommands[pkg].postcommand,
-        pipeToTemplate
+        pipeToTemplate,
+        ["command", "dryRunCommand"]
       ),
     };
     return merged;
@@ -40042,18 +42646,21 @@ const mergeCommand = ({ pkg, pkgManager, command, config }) => {
   return mergedCommand;
 };
 
-const templateCommands = (command, pipe) => {
+const templateCommands = (command, pipe, complexCommands) => {
   if (!command) return null;
   const commands = !Array.isArray(command) ? [command] : command;
   return commands.map((c) => {
     if (typeof c === "object") {
-      const command =
-        typeof c.command === "string" ? template(c.command)(pipe) : c.command;
-      const dryRunCommand =
-        typeof c.dryRunCommand === "string"
-          ? template(c.dryRunCommand)(pipe)
-          : c.dryRunCommand;
-      return { ...c, command, dryRunCommand };
+      return {
+        ...c,
+        ...complexCommands.reduce((templated, complex) => {
+          templated[complex] =
+            typeof c[complex] === "string"
+              ? template(c[complex])(pipe)
+              : c[complex];
+          return templated;
+        }, {}),
+      };
     } else {
       return template(c)(pipe);
     }
@@ -40277,59 +42884,30 @@ function errname(uv, code) {
 
 /***/ }),
 /* 759 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-/* eslint-disable yoda */
+__webpack_require__(469);
+__webpack_require__(819);
+__webpack_require__(815);
+__webpack_require__(546);
+__webpack_require__(551);
+__webpack_require__(431);
+__webpack_require__(948);
+__webpack_require__(888);
+__webpack_require__(47);
+__webpack_require__(713);
+__webpack_require__(226);
+__webpack_require__(943);
+__webpack_require__(817);
+__webpack_require__(57);
+__webpack_require__(460);
+__webpack_require__(643);
+__webpack_require__(883);
+__webpack_require__(198);
+__webpack_require__(894);
+var path = __webpack_require__(628);
 
-
-const isFullwidthCodePoint = codePoint => {
-	if (Number.isNaN(codePoint)) {
-		return false;
-	}
-
-	// Code points are derived from:
-	// http://www.unix.org/Public/UNIDATA/EastAsianWidth.txt
-	if (
-		codePoint >= 0x1100 && (
-			codePoint <= 0x115F || // Hangul Jamo
-			codePoint === 0x2329 || // LEFT-POINTING ANGLE BRACKET
-			codePoint === 0x232A || // RIGHT-POINTING ANGLE BRACKET
-			// CJK Radicals Supplement .. Enclosed CJK Letters and Months
-			(0x2E80 <= codePoint && codePoint <= 0x3247 && codePoint !== 0x303F) ||
-			// Enclosed CJK Letters and Months .. CJK Unified Ideographs Extension A
-			(0x3250 <= codePoint && codePoint <= 0x4DBF) ||
-			// CJK Unified Ideographs .. Yi Radicals
-			(0x4E00 <= codePoint && codePoint <= 0xA4C6) ||
-			// Hangul Jamo Extended-A
-			(0xA960 <= codePoint && codePoint <= 0xA97C) ||
-			// Hangul Syllables
-			(0xAC00 <= codePoint && codePoint <= 0xD7A3) ||
-			// CJK Compatibility Ideographs
-			(0xF900 <= codePoint && codePoint <= 0xFAFF) ||
-			// Vertical Forms
-			(0xFE10 <= codePoint && codePoint <= 0xFE19) ||
-			// CJK Compatibility Forms .. Small Form Variants
-			(0xFE30 <= codePoint && codePoint <= 0xFE6B) ||
-			// Halfwidth and Fullwidth Forms
-			(0xFF01 <= codePoint && codePoint <= 0xFF60) ||
-			(0xFFE0 <= codePoint && codePoint <= 0xFFE6) ||
-			// Kana Supplement
-			(0x1B000 <= codePoint && codePoint <= 0x1B001) ||
-			// Enclosed Ideographic Supplement
-			(0x1F200 <= codePoint && codePoint <= 0x1F251) ||
-			// CJK Unified Ideographs Extension B .. Tertiary Ideographic Plane
-			(0x20000 <= codePoint && codePoint <= 0x3FFFD)
-		)
-	) {
-		return true;
-	}
-
-	return false;
-};
-
-module.exports = isFullwidthCodePoint;
-module.exports.default = isFullwidthCodePoint;
+module.exports = path.Symbol;
 
 
 /***/ }),
@@ -40342,7 +42920,42 @@ module.exports = require("zlib");
 /***/ }),
 /* 762 */,
 /* 763 */,
-/* 764 */,
+/* 764 */
+/***/ (function(module) {
+
+"use strict";
+
+
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
+
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
+
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
+
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
+
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function' &&
+	typeof stream._transformState === 'object';
+
+module.exports = isStream;
+
+
+/***/ }),
 /* 765 */,
 /* 766 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -40861,7 +43474,31 @@ module.exports = Type;
 
 
 /***/ }),
-/* 774 */,
+/* 774 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var $map = __webpack_require__(210).map;
+var arrayMethodHasSpeciesSupport = __webpack_require__(837);
+var arrayMethodUsesToLength = __webpack_require__(877);
+
+var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('map');
+// FF49- issue
+var USES_TO_LENGTH = arrayMethodUsesToLength('map');
+
+// `Array.prototype.map` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.map
+// with adding support of @@species
+$({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH }, {
+  map: function map(callbackfn /* , thisArg */) {
+    return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+  }
+});
+
+
+/***/ }),
 /* 775 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -40947,9 +43584,226 @@ function toResult(value) {
 
 
 /***/ }),
-/* 776 */,
-/* 777 */,
-/* 778 */,
+/* 776 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+/* module decorator */ module = __webpack_require__.nmd(module);
+
+
+const wrapAnsi16 = (fn, offset) => (...args) => {
+	const code = fn(...args);
+	return `\u001B[${code + offset}m`;
+};
+
+const wrapAnsi256 = (fn, offset) => (...args) => {
+	const code = fn(...args);
+	return `\u001B[${38 + offset};5;${code}m`;
+};
+
+const wrapAnsi16m = (fn, offset) => (...args) => {
+	const rgb = fn(...args);
+	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
+};
+
+const ansi2ansi = n => n;
+const rgb2rgb = (r, g, b) => [r, g, b];
+
+const setLazyProperty = (object, property, get) => {
+	Object.defineProperty(object, property, {
+		get: () => {
+			const value = get();
+
+			Object.defineProperty(object, property, {
+				value,
+				enumerable: true,
+				configurable: true
+			});
+
+			return value;
+		},
+		enumerable: true,
+		configurable: true
+	});
+};
+
+/** @type {typeof import('color-convert')} */
+let colorConvert;
+const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
+	if (colorConvert === undefined) {
+		colorConvert = __webpack_require__(371);
+	}
+
+	const offset = isBackground ? 10 : 0;
+	const styles = {};
+
+	for (const [sourceSpace, suite] of Object.entries(colorConvert)) {
+		const name = sourceSpace === 'ansi16' ? 'ansi' : sourceSpace;
+		if (sourceSpace === targetSpace) {
+			styles[name] = wrap(identity, offset);
+		} else if (typeof suite === 'object') {
+			styles[name] = wrap(suite[targetSpace], offset);
+		}
+	}
+
+	return styles;
+};
+
+function assembleStyles() {
+	const codes = new Map();
+	const styles = {
+		modifier: {
+			reset: [0, 0],
+			// 21 isn't widely supported and 22 does the same thing
+			bold: [1, 22],
+			dim: [2, 22],
+			italic: [3, 23],
+			underline: [4, 24],
+			inverse: [7, 27],
+			hidden: [8, 28],
+			strikethrough: [9, 29]
+		},
+		color: {
+			black: [30, 39],
+			red: [31, 39],
+			green: [32, 39],
+			yellow: [33, 39],
+			blue: [34, 39],
+			magenta: [35, 39],
+			cyan: [36, 39],
+			white: [37, 39],
+
+			// Bright color
+			blackBright: [90, 39],
+			redBright: [91, 39],
+			greenBright: [92, 39],
+			yellowBright: [93, 39],
+			blueBright: [94, 39],
+			magentaBright: [95, 39],
+			cyanBright: [96, 39],
+			whiteBright: [97, 39]
+		},
+		bgColor: {
+			bgBlack: [40, 49],
+			bgRed: [41, 49],
+			bgGreen: [42, 49],
+			bgYellow: [43, 49],
+			bgBlue: [44, 49],
+			bgMagenta: [45, 49],
+			bgCyan: [46, 49],
+			bgWhite: [47, 49],
+
+			// Bright color
+			bgBlackBright: [100, 49],
+			bgRedBright: [101, 49],
+			bgGreenBright: [102, 49],
+			bgYellowBright: [103, 49],
+			bgBlueBright: [104, 49],
+			bgMagentaBright: [105, 49],
+			bgCyanBright: [106, 49],
+			bgWhiteBright: [107, 49]
+		}
+	};
+
+	// Alias bright black as gray (and grey)
+	styles.color.gray = styles.color.blackBright;
+	styles.bgColor.bgGray = styles.bgColor.bgBlackBright;
+	styles.color.grey = styles.color.blackBright;
+	styles.bgColor.bgGrey = styles.bgColor.bgBlackBright;
+
+	for (const [groupName, group] of Object.entries(styles)) {
+		for (const [styleName, style] of Object.entries(group)) {
+			styles[styleName] = {
+				open: `\u001B[${style[0]}m`,
+				close: `\u001B[${style[1]}m`
+			};
+
+			group[styleName] = styles[styleName];
+
+			codes.set(style[0], style[1]);
+		}
+
+		Object.defineProperty(styles, groupName, {
+			value: group,
+			enumerable: false
+		});
+	}
+
+	Object.defineProperty(styles, 'codes', {
+		value: codes,
+		enumerable: false
+	});
+
+	styles.color.close = '\u001B[39m';
+	styles.bgColor.close = '\u001B[49m';
+
+	setLazyProperty(styles.color, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, false));
+	setLazyProperty(styles.color, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, false));
+	setLazyProperty(styles.color, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, false));
+	setLazyProperty(styles.bgColor, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, true));
+	setLazyProperty(styles.bgColor, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, true));
+	setLazyProperty(styles.bgColor, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, true));
+
+	return styles;
+}
+
+// Make the export immutable
+Object.defineProperty(module, 'exports', {
+	enumerable: true,
+	get: assembleStyles
+});
+
+
+/***/ }),
+/* 777 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__(624);
+var propertyIsEnumerableModule = __webpack_require__(606);
+var createPropertyDescriptor = __webpack_require__(62);
+var toIndexedObject = __webpack_require__(882);
+var toPrimitive = __webpack_require__(301);
+var has = __webpack_require__(35);
+var IE8_DOM_DEFINE = __webpack_require__(171);
+
+var nativeGetOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+
+// `Object.getOwnPropertyDescriptor` method
+// https://tc39.github.io/ecma262/#sec-object.getownpropertydescriptor
+exports.f = DESCRIPTORS ? nativeGetOwnPropertyDescriptor : function getOwnPropertyDescriptor(O, P) {
+  O = toIndexedObject(O);
+  P = toPrimitive(P, true);
+  if (IE8_DOM_DEFINE) try {
+    return nativeGetOwnPropertyDescriptor(O, P);
+  } catch (error) { /* empty */ }
+  if (has(O, P)) return createPropertyDescriptor(!propertyIsEnumerableModule.f.call(O, P), O[P]);
+};
+
+
+/***/ }),
+/* 778 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var global = __webpack_require__(813);
+var shared = __webpack_require__(262);
+var has = __webpack_require__(35);
+var uid = __webpack_require__(302);
+var NATIVE_SYMBOL = __webpack_require__(603);
+var USE_SYMBOL_AS_UID = __webpack_require__(462);
+
+var WellKnownSymbolsStore = shared('wks');
+var Symbol = global.Symbol;
+var createWellKnownSymbol = USE_SYMBOL_AS_UID ? Symbol : Symbol && Symbol.withoutSetter || uid;
+
+module.exports = function (name) {
+  if (!has(WellKnownSymbolsStore, name)) {
+    if (NATIVE_SYMBOL && has(Symbol, name)) WellKnownSymbolsStore[name] = Symbol[name];
+    else WellKnownSymbolsStore[name] = createWellKnownSymbol('Symbol.' + name);
+  } return WellKnownSymbolsStore[name];
+};
+
+
+/***/ }),
 /* 779 */
 /***/ (function(module) {
 
@@ -41068,10 +43922,10 @@ const signalsByNumber=getSignalsByNumber();exports.signalsByNumber=signalsByNumb
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const SemVer = __webpack_require__(840)
-const Comparator = __webpack_require__(9)
+const Comparator = __webpack_require__(517)
 const {ANY} = Comparator
 const Range = __webpack_require__(318)
-const satisfies = __webpack_require__(845)
+const satisfies = __webpack_require__(60)
 const gt = __webpack_require__(855)
 const lt = __webpack_require__(921)
 const lte = __webpack_require__(508)
@@ -41162,7 +44016,49 @@ var n=__webpack_require__(568),r=__webpack_require__(700);function e(n){return"f
 
 
 /***/ }),
-/* 788 */,
+/* 788 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseCommand = void 0;
+function parseCommand(cmd) {
+    const extraSpacesStrippedCommand = cmd.replace(/\s{2,}/g, ' ');
+    const splitCommand = extraSpacesStrippedCommand.split(/\s+(?![^[]*]|[^<]*>)/);
+    const bregex = /\.*[\][<>]/g;
+    const firstCommand = splitCommand.shift();
+    if (!firstCommand)
+        throw new Error(`No command found in: ${cmd}`);
+    const parsedCommand = {
+        cmd: firstCommand.replace(bregex, ''),
+        demanded: [],
+        optional: []
+    };
+    splitCommand.forEach((cmd, i) => {
+        let variadic = false;
+        cmd = cmd.replace(/\s/g, '');
+        if (/\.+[\]>]/.test(cmd) && i === splitCommand.length - 1)
+            variadic = true;
+        if (/^\[/.test(cmd)) {
+            parsedCommand.optional.push({
+                cmd: cmd.replace(bregex, '').split('|'),
+                variadic
+            });
+        }
+        else {
+            parsedCommand.demanded.push({
+                cmd: cmd.replace(bregex, '').split('|'),
+                variadic
+            });
+        }
+    });
+    return parsedCommand;
+}
+exports.parseCommand = parseCommand;
+
+
+/***/ }),
 /* 789 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -41392,8 +44288,158 @@ exports.default = PartialMatcher;
 
 
 /***/ }),
-/* 791 */,
-/* 792 */,
+/* 791 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(469);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('Array').concat;
+
+
+/***/ }),
+/* 792 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.completion = void 0;
+const command_1 = __webpack_require__(359);
+const templates = __webpack_require__(664);
+const is_promise_1 = __webpack_require__(91);
+const parse_command_1 = __webpack_require__(788);
+const path = __webpack_require__(622);
+const common_types_1 = __webpack_require__(45);
+// add bash completions to your
+//  yargs-powered applications.
+function completion(yargs, usage, command) {
+    const self = {
+        completionKey: 'get-yargs-completions'
+    };
+    let aliases;
+    self.setParsed = function setParsed(parsed) {
+        aliases = parsed.aliases;
+    };
+    const zshShell = (process.env.SHELL && process.env.SHELL.indexOf('zsh') !== -1) ||
+        (process.env.ZSH_NAME && process.env.ZSH_NAME.indexOf('zsh') !== -1);
+    // get a list of completion commands.
+    // 'args' is the array of strings from the line to be completed
+    self.getCompletion = function getCompletion(args, done) {
+        const completions = [];
+        const current = args.length ? args[args.length - 1] : '';
+        const argv = yargs.parse(args, true);
+        const parentCommands = yargs.getContext().commands;
+        // a custom completion function can be provided
+        // to completion().
+        function runCompletionFunction(argv) {
+            common_types_1.assertNotStrictEqual(completionFunction, null);
+            if (isSyncCompletionFunction(completionFunction)) {
+                const result = completionFunction(current, argv);
+                // promise based completion function.
+                if (is_promise_1.isPromise(result)) {
+                    return result.then((list) => {
+                        process.nextTick(() => { done(list); });
+                    }).catch((err) => {
+                        process.nextTick(() => { throw err; });
+                    });
+                }
+                // synchronous completion function.
+                return done(result);
+            }
+            else {
+                // asynchronous completion function
+                return completionFunction(current, argv, (completions) => {
+                    done(completions);
+                });
+            }
+        }
+        if (completionFunction) {
+            return is_promise_1.isPromise(argv) ? argv.then(runCompletionFunction) : runCompletionFunction(argv);
+        }
+        const handlers = command.getCommandHandlers();
+        for (let i = 0, ii = args.length; i < ii; ++i) {
+            if (handlers[args[i]] && handlers[args[i]].builder) {
+                const builder = handlers[args[i]].builder;
+                if (command_1.isCommandBuilderCallback(builder)) {
+                    const y = yargs.reset();
+                    builder(y);
+                    return y.argv;
+                }
+            }
+        }
+        if (!current.match(/^-/) && parentCommands[parentCommands.length - 1] !== current) {
+            usage.getCommands().forEach((usageCommand) => {
+                const commandName = parse_command_1.parseCommand(usageCommand[0]).cmd;
+                if (args.indexOf(commandName) === -1) {
+                    if (!zshShell) {
+                        completions.push(commandName);
+                    }
+                    else {
+                        const desc = usageCommand[1] || '';
+                        completions.push(commandName.replace(/:/g, '\\:') + ':' + desc);
+                    }
+                }
+            });
+        }
+        if (current.match(/^-/) || (current === '' && completions.length === 0)) {
+            const descs = usage.getDescriptions();
+            const options = yargs.getOptions();
+            Object.keys(options.key).forEach((key) => {
+                const negable = !!options.configuration['boolean-negation'] && options.boolean.includes(key);
+                // If the key and its aliases aren't in 'args', add the key to 'completions'
+                let keyAndAliases = [key].concat(aliases[key] || []);
+                if (negable)
+                    keyAndAliases = keyAndAliases.concat(keyAndAliases.map(key => `no-${key}`));
+                function completeOptionKey(key) {
+                    const notInArgs = keyAndAliases.every(val => args.indexOf(`--${val}`) === -1);
+                    if (notInArgs) {
+                        const startsByTwoDashes = (s) => /^--/.test(s);
+                        const isShortOption = (s) => /^[^0-9]$/.test(s);
+                        const dashes = !startsByTwoDashes(current) && isShortOption(key) ? '-' : '--';
+                        if (!zshShell) {
+                            completions.push(dashes + key);
+                        }
+                        else {
+                            const desc = descs[key] || '';
+                            completions.push(dashes + `${key.replace(/:/g, '\\:')}:${desc.replace('__yargsString__:', '')}`);
+                        }
+                    }
+                }
+                completeOptionKey(key);
+                if (negable && !!options.default[key])
+                    completeOptionKey(`no-${key}`);
+            });
+        }
+        done(completions);
+    };
+    // generate the completion script to add to your .bashrc.
+    self.generateCompletionScript = function generateCompletionScript($0, cmd) {
+        let script = zshShell ? templates.completionZshTemplate : templates.completionShTemplate;
+        const name = path.basename($0);
+        // add ./to applications not yet installed as bin.
+        if ($0.match(/\.js$/))
+            $0 = `./${$0}`;
+        script = script.replace(/{{app_name}}/g, name);
+        script = script.replace(/{{completion_command}}/g, cmd);
+        return script.replace(/{{app_path}}/g, $0);
+    };
+    // register a function to perform your own custom
+    // completions., this function can be either
+    // synchrnous or asynchronous.
+    let completionFunction = null;
+    self.registerFunction = (fn) => {
+        completionFunction = fn;
+    };
+    return self;
+}
+exports.completion = completion;
+function isSyncCompletionFunction(completionFunction) {
+    return completionFunction.length < 3;
+}
+
+
+/***/ }),
 /* 793 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -41584,7 +44630,40 @@ function blockquote(node) {
 
 
 /***/ }),
-/* 795 */,
+/* 795 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var requireObjectCoercible = __webpack_require__(611);
+var whitespaces = __webpack_require__(960);
+
+var whitespace = '[' + whitespaces + ']';
+var ltrim = RegExp('^' + whitespace + whitespace + '*');
+var rtrim = RegExp(whitespace + whitespace + '*$');
+
+// `String.prototype.{ trim, trimStart, trimEnd, trimLeft, trimRight }` methods implementation
+var createMethod = function (TYPE) {
+  return function ($this) {
+    var string = String(requireObjectCoercible($this));
+    if (TYPE & 1) string = string.replace(ltrim, '');
+    if (TYPE & 2) string = string.replace(rtrim, '');
+    return string;
+  };
+};
+
+module.exports = {
+  // `String.prototype.{ trimLeft, trimStart }` methods
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trimstart
+  start: createMethod(1),
+  // `String.prototype.{ trimRight, trimEnd }` methods
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trimend
+  end: createMethod(2),
+  // `String.prototype.trim` method
+  // https://tc39.github.io/ecma262/#sec-string.prototype.trim
+  trim: createMethod(3)
+};
+
+
+/***/ }),
 /* 796 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -41687,8 +44766,24 @@ function code(node, parent) {
 /***/ }),
 /* 797 */,
 /* 798 */,
-/* 799 */,
-/* 800 */,
+/* 799 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var getBuiltIn = __webpack_require__(967);
+
+module.exports = getBuiltIn('document', 'documentElement');
+
+
+/***/ }),
+/* 800 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(187);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 801 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -41802,7 +44897,15 @@ module.exports = Schema.DEFAULT = new Schema({
 
 
 /***/ }),
-/* 804 */,
+/* 804 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(695);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 805 */,
 /* 806 */,
 /* 807 */,
@@ -41843,7 +44946,7 @@ function ccount(value, character) {
 
 
 var VMessage = __webpack_require__(280)
-var VFile = __webpack_require__(440)
+var VFile = __webpack_require__(487)
 
 module.exports = VFile
 
@@ -41909,7 +45012,25 @@ module.exports = satisfies
 
 
 /***/ }),
-/* 813 */,
+/* 813 */
+/***/ (function(module) {
+
+var check = function (it) {
+  return it && it.Math == Math && it;
+};
+
+// https://github.com/zloirock/core-js/issues/86#issuecomment-115759028
+module.exports =
+  // eslint-disable-next-line no-undef
+  check(typeof globalThis == 'object' && globalThis) ||
+  check(typeof window == 'object' && window) ||
+  check(typeof self == 'object' && self) ||
+  check(typeof global == 'object' && global) ||
+  // eslint-disable-next-line no-new-func
+  Function('return this')();
+
+
+/***/ }),
 /* 814 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -41941,13 +45062,383 @@ module.exports = maxSatisfying
 
 
 /***/ }),
-/* 815 */,
-/* 816 */,
-/* 817 */,
+/* 815 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+var $ = __webpack_require__(52);
+var global = __webpack_require__(813);
+var getBuiltIn = __webpack_require__(967);
+var IS_PURE = __webpack_require__(746);
+var DESCRIPTORS = __webpack_require__(624);
+var NATIVE_SYMBOL = __webpack_require__(603);
+var USE_SYMBOL_AS_UID = __webpack_require__(462);
+var fails = __webpack_require__(105);
+var has = __webpack_require__(35);
+var isArray = __webpack_require__(516);
+var isObject = __webpack_require__(195);
+var anObject = __webpack_require__(589);
+var toObject = __webpack_require__(375);
+var toIndexedObject = __webpack_require__(882);
+var toPrimitive = __webpack_require__(301);
+var createPropertyDescriptor = __webpack_require__(62);
+var nativeObjectCreate = __webpack_require__(889);
+var objectKeys = __webpack_require__(748);
+var getOwnPropertyNamesModule = __webpack_require__(0);
+var getOwnPropertyNamesExternal = __webpack_require__(942);
+var getOwnPropertySymbolsModule = __webpack_require__(897);
+var getOwnPropertyDescriptorModule = __webpack_require__(777);
+var definePropertyModule = __webpack_require__(690);
+var propertyIsEnumerableModule = __webpack_require__(606);
+var createNonEnumerableProperty = __webpack_require__(315);
+var redefine = __webpack_require__(86);
+var shared = __webpack_require__(262);
+var sharedKey = __webpack_require__(642);
+var hiddenKeys = __webpack_require__(56);
+var uid = __webpack_require__(302);
+var wellKnownSymbol = __webpack_require__(778);
+var wrappedWellKnownSymbolModule = __webpack_require__(844);
+var defineWellKnownSymbol = __webpack_require__(308);
+var setToStringTag = __webpack_require__(263);
+var InternalStateModule = __webpack_require__(304);
+var $forEach = __webpack_require__(210).forEach;
+
+var HIDDEN = sharedKey('hidden');
+var SYMBOL = 'Symbol';
+var PROTOTYPE = 'prototype';
+var TO_PRIMITIVE = wellKnownSymbol('toPrimitive');
+var setInternalState = InternalStateModule.set;
+var getInternalState = InternalStateModule.getterFor(SYMBOL);
+var ObjectPrototype = Object[PROTOTYPE];
+var $Symbol = global.Symbol;
+var $stringify = getBuiltIn('JSON', 'stringify');
+var nativeGetOwnPropertyDescriptor = getOwnPropertyDescriptorModule.f;
+var nativeDefineProperty = definePropertyModule.f;
+var nativeGetOwnPropertyNames = getOwnPropertyNamesExternal.f;
+var nativePropertyIsEnumerable = propertyIsEnumerableModule.f;
+var AllSymbols = shared('symbols');
+var ObjectPrototypeSymbols = shared('op-symbols');
+var StringToSymbolRegistry = shared('string-to-symbol-registry');
+var SymbolToStringRegistry = shared('symbol-to-string-registry');
+var WellKnownSymbolsStore = shared('wks');
+var QObject = global.QObject;
+// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
+var USE_SETTER = !QObject || !QObject[PROTOTYPE] || !QObject[PROTOTYPE].findChild;
+
+// fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
+var setSymbolDescriptor = DESCRIPTORS && fails(function () {
+  return nativeObjectCreate(nativeDefineProperty({}, 'a', {
+    get: function () { return nativeDefineProperty(this, 'a', { value: 7 }).a; }
+  })).a != 7;
+}) ? function (O, P, Attributes) {
+  var ObjectPrototypeDescriptor = nativeGetOwnPropertyDescriptor(ObjectPrototype, P);
+  if (ObjectPrototypeDescriptor) delete ObjectPrototype[P];
+  nativeDefineProperty(O, P, Attributes);
+  if (ObjectPrototypeDescriptor && O !== ObjectPrototype) {
+    nativeDefineProperty(ObjectPrototype, P, ObjectPrototypeDescriptor);
+  }
+} : nativeDefineProperty;
+
+var wrap = function (tag, description) {
+  var symbol = AllSymbols[tag] = nativeObjectCreate($Symbol[PROTOTYPE]);
+  setInternalState(symbol, {
+    type: SYMBOL,
+    tag: tag,
+    description: description
+  });
+  if (!DESCRIPTORS) symbol.description = description;
+  return symbol;
+};
+
+var isSymbol = USE_SYMBOL_AS_UID ? function (it) {
+  return typeof it == 'symbol';
+} : function (it) {
+  return Object(it) instanceof $Symbol;
+};
+
+var $defineProperty = function defineProperty(O, P, Attributes) {
+  if (O === ObjectPrototype) $defineProperty(ObjectPrototypeSymbols, P, Attributes);
+  anObject(O);
+  var key = toPrimitive(P, true);
+  anObject(Attributes);
+  if (has(AllSymbols, key)) {
+    if (!Attributes.enumerable) {
+      if (!has(O, HIDDEN)) nativeDefineProperty(O, HIDDEN, createPropertyDescriptor(1, {}));
+      O[HIDDEN][key] = true;
+    } else {
+      if (has(O, HIDDEN) && O[HIDDEN][key]) O[HIDDEN][key] = false;
+      Attributes = nativeObjectCreate(Attributes, { enumerable: createPropertyDescriptor(0, false) });
+    } return setSymbolDescriptor(O, key, Attributes);
+  } return nativeDefineProperty(O, key, Attributes);
+};
+
+var $defineProperties = function defineProperties(O, Properties) {
+  anObject(O);
+  var properties = toIndexedObject(Properties);
+  var keys = objectKeys(properties).concat($getOwnPropertySymbols(properties));
+  $forEach(keys, function (key) {
+    if (!DESCRIPTORS || $propertyIsEnumerable.call(properties, key)) $defineProperty(O, key, properties[key]);
+  });
+  return O;
+};
+
+var $create = function create(O, Properties) {
+  return Properties === undefined ? nativeObjectCreate(O) : $defineProperties(nativeObjectCreate(O), Properties);
+};
+
+var $propertyIsEnumerable = function propertyIsEnumerable(V) {
+  var P = toPrimitive(V, true);
+  var enumerable = nativePropertyIsEnumerable.call(this, P);
+  if (this === ObjectPrototype && has(AllSymbols, P) && !has(ObjectPrototypeSymbols, P)) return false;
+  return enumerable || !has(this, P) || !has(AllSymbols, P) || has(this, HIDDEN) && this[HIDDEN][P] ? enumerable : true;
+};
+
+var $getOwnPropertyDescriptor = function getOwnPropertyDescriptor(O, P) {
+  var it = toIndexedObject(O);
+  var key = toPrimitive(P, true);
+  if (it === ObjectPrototype && has(AllSymbols, key) && !has(ObjectPrototypeSymbols, key)) return;
+  var descriptor = nativeGetOwnPropertyDescriptor(it, key);
+  if (descriptor && has(AllSymbols, key) && !(has(it, HIDDEN) && it[HIDDEN][key])) {
+    descriptor.enumerable = true;
+  }
+  return descriptor;
+};
+
+var $getOwnPropertyNames = function getOwnPropertyNames(O) {
+  var names = nativeGetOwnPropertyNames(toIndexedObject(O));
+  var result = [];
+  $forEach(names, function (key) {
+    if (!has(AllSymbols, key) && !has(hiddenKeys, key)) result.push(key);
+  });
+  return result;
+};
+
+var $getOwnPropertySymbols = function getOwnPropertySymbols(O) {
+  var IS_OBJECT_PROTOTYPE = O === ObjectPrototype;
+  var names = nativeGetOwnPropertyNames(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols : toIndexedObject(O));
+  var result = [];
+  $forEach(names, function (key) {
+    if (has(AllSymbols, key) && (!IS_OBJECT_PROTOTYPE || has(ObjectPrototype, key))) {
+      result.push(AllSymbols[key]);
+    }
+  });
+  return result;
+};
+
+// `Symbol` constructor
+// https://tc39.github.io/ecma262/#sec-symbol-constructor
+if (!NATIVE_SYMBOL) {
+  $Symbol = function Symbol() {
+    if (this instanceof $Symbol) throw TypeError('Symbol is not a constructor');
+    var description = !arguments.length || arguments[0] === undefined ? undefined : String(arguments[0]);
+    var tag = uid(description);
+    var setter = function (value) {
+      if (this === ObjectPrototype) setter.call(ObjectPrototypeSymbols, value);
+      if (has(this, HIDDEN) && has(this[HIDDEN], tag)) this[HIDDEN][tag] = false;
+      setSymbolDescriptor(this, tag, createPropertyDescriptor(1, value));
+    };
+    if (DESCRIPTORS && USE_SETTER) setSymbolDescriptor(ObjectPrototype, tag, { configurable: true, set: setter });
+    return wrap(tag, description);
+  };
+
+  redefine($Symbol[PROTOTYPE], 'toString', function toString() {
+    return getInternalState(this).tag;
+  });
+
+  redefine($Symbol, 'withoutSetter', function (description) {
+    return wrap(uid(description), description);
+  });
+
+  propertyIsEnumerableModule.f = $propertyIsEnumerable;
+  definePropertyModule.f = $defineProperty;
+  getOwnPropertyDescriptorModule.f = $getOwnPropertyDescriptor;
+  getOwnPropertyNamesModule.f = getOwnPropertyNamesExternal.f = $getOwnPropertyNames;
+  getOwnPropertySymbolsModule.f = $getOwnPropertySymbols;
+
+  wrappedWellKnownSymbolModule.f = function (name) {
+    return wrap(wellKnownSymbol(name), name);
+  };
+
+  if (DESCRIPTORS) {
+    // https://github.com/tc39/proposal-Symbol-description
+    nativeDefineProperty($Symbol[PROTOTYPE], 'description', {
+      configurable: true,
+      get: function description() {
+        return getInternalState(this).description;
+      }
+    });
+    if (!IS_PURE) {
+      redefine(ObjectPrototype, 'propertyIsEnumerable', $propertyIsEnumerable, { unsafe: true });
+    }
+  }
+}
+
+$({ global: true, wrap: true, forced: !NATIVE_SYMBOL, sham: !NATIVE_SYMBOL }, {
+  Symbol: $Symbol
+});
+
+$forEach(objectKeys(WellKnownSymbolsStore), function (name) {
+  defineWellKnownSymbol(name);
+});
+
+$({ target: SYMBOL, stat: true, forced: !NATIVE_SYMBOL }, {
+  // `Symbol.for` method
+  // https://tc39.github.io/ecma262/#sec-symbol.for
+  'for': function (key) {
+    var string = String(key);
+    if (has(StringToSymbolRegistry, string)) return StringToSymbolRegistry[string];
+    var symbol = $Symbol(string);
+    StringToSymbolRegistry[string] = symbol;
+    SymbolToStringRegistry[symbol] = string;
+    return symbol;
+  },
+  // `Symbol.keyFor` method
+  // https://tc39.github.io/ecma262/#sec-symbol.keyfor
+  keyFor: function keyFor(sym) {
+    if (!isSymbol(sym)) throw TypeError(sym + ' is not a symbol');
+    if (has(SymbolToStringRegistry, sym)) return SymbolToStringRegistry[sym];
+  },
+  useSetter: function () { USE_SETTER = true; },
+  useSimple: function () { USE_SETTER = false; }
+});
+
+$({ target: 'Object', stat: true, forced: !NATIVE_SYMBOL, sham: !DESCRIPTORS }, {
+  // `Object.create` method
+  // https://tc39.github.io/ecma262/#sec-object.create
+  create: $create,
+  // `Object.defineProperty` method
+  // https://tc39.github.io/ecma262/#sec-object.defineproperty
+  defineProperty: $defineProperty,
+  // `Object.defineProperties` method
+  // https://tc39.github.io/ecma262/#sec-object.defineproperties
+  defineProperties: $defineProperties,
+  // `Object.getOwnPropertyDescriptor` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertydescriptors
+  getOwnPropertyDescriptor: $getOwnPropertyDescriptor
+});
+
+$({ target: 'Object', stat: true, forced: !NATIVE_SYMBOL }, {
+  // `Object.getOwnPropertyNames` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertynames
+  getOwnPropertyNames: $getOwnPropertyNames,
+  // `Object.getOwnPropertySymbols` method
+  // https://tc39.github.io/ecma262/#sec-object.getownpropertysymbols
+  getOwnPropertySymbols: $getOwnPropertySymbols
+});
+
+// Chrome 38 and 39 `Object.getOwnPropertySymbols` fails on primitives
+// https://bugs.chromium.org/p/v8/issues/detail?id=3443
+$({ target: 'Object', stat: true, forced: fails(function () { getOwnPropertySymbolsModule.f(1); }) }, {
+  getOwnPropertySymbols: function getOwnPropertySymbols(it) {
+    return getOwnPropertySymbolsModule.f(toObject(it));
+  }
+});
+
+// `JSON.stringify` method behavior with symbols
+// https://tc39.github.io/ecma262/#sec-json.stringify
+if ($stringify) {
+  var FORCED_JSON_STRINGIFY = !NATIVE_SYMBOL || fails(function () {
+    var symbol = $Symbol();
+    // MS Edge converts symbol values to JSON as {}
+    return $stringify([symbol]) != '[null]'
+      // WebKit converts symbol values to JSON as null
+      || $stringify({ a: symbol }) != '{}'
+      // V8 throws on boxed symbols
+      || $stringify(Object(symbol)) != '{}';
+  });
+
+  $({ target: 'JSON', stat: true, forced: FORCED_JSON_STRINGIFY }, {
+    // eslint-disable-next-line no-unused-vars
+    stringify: function stringify(it, replacer, space) {
+      var args = [it];
+      var index = 1;
+      var $replacer;
+      while (arguments.length > index) args.push(arguments[index++]);
+      $replacer = replacer;
+      if (!isObject(replacer) && it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
+      if (!isArray(replacer)) replacer = function (key, value) {
+        if (typeof $replacer == 'function') value = $replacer.call(this, key, value);
+        if (!isSymbol(value)) return value;
+      };
+      args[1] = replacer;
+      return $stringify.apply(null, args);
+    }
+  });
+}
+
+// `Symbol.prototype[@@toPrimitive]` method
+// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@toprimitive
+if (!$Symbol[PROTOTYPE][TO_PRIMITIVE]) {
+  createNonEnumerableProperty($Symbol[PROTOTYPE], TO_PRIMITIVE, $Symbol[PROTOTYPE].valueOf);
+}
+// `Symbol.prototype[@@toStringTag]` property
+// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@tostringtag
+setToStringTag($Symbol, SYMBOL);
+
+hiddenKeys[HIDDEN] = true;
+
+
+/***/ }),
+/* 816 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.objFilter = void 0;
+const common_types_1 = __webpack_require__(45);
+function objFilter(original = {}, filter = () => true) {
+    const obj = {};
+    common_types_1.objectKeys(original).forEach((key) => {
+        if (filter(key, original[key])) {
+            obj[key] = original[key];
+        }
+    });
+    return obj;
+}
+exports.objFilter = objFilter;
+
+
+/***/ }),
+/* 817 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.species` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.species
+defineWellKnownSymbol('species');
+
+
+/***/ }),
 /* 818 */,
-/* 819 */,
-/* 820 */,
-/* 821 */,
+/* 819 */
+/***/ (function() {
+
+// empty
+
+
+/***/ }),
+/* 820 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(633);
+
+module.exports = parent;
+
+
+/***/ }),
+/* 821 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(601);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('Array').sort;
+
+
+/***/ }),
 /* 822 */,
 /* 823 */
 /***/ (function(module) {
@@ -41974,7 +45465,12 @@ function locate(value, fromIndex) {
 
 
 /***/ }),
-/* 824 */,
+/* 824 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(441);
+
+/***/ }),
 /* 825 */
 /***/ (function(module) {
 
@@ -42118,7 +45614,2058 @@ function writeSync(description, options) {
 
 
 /***/ }),
-/* 828 */,
+/* 828 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(395);
+
+var _Object$defineProperty = __webpack_require__(617);
+
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = void 0;
+
+var _concat = _interopRequireDefault(__webpack_require__(4));
+
+var _indexOf = _interopRequireDefault(__webpack_require__(472));
+
+var _create = _interopRequireDefault(__webpack_require__(40));
+
+var _slicedToArray2 = _interopRequireDefault(__webpack_require__(519));
+
+var _forEach = _interopRequireDefault(__webpack_require__(904));
+
+var _getIterator2 = _interopRequireDefault(__webpack_require__(95));
+
+var _includes = _interopRequireDefault(__webpack_require__(913));
+
+var _parseInt2 = _interopRequireDefault(__webpack_require__(219));
+
+var _slice = _interopRequireDefault(__webpack_require__(824));
+
+var _sort = _interopRequireDefault(__webpack_require__(920));
+
+var _flags = _interopRequireDefault(__webpack_require__(905));
+
+/*!
+ * XRegExp 4.3.0
+ * <xregexp.com>
+ * Steven Levithan (c) 2007-present MIT License
+ */
+
+/**
+ * XRegExp provides augmented, extensible regular expressions. You get additional regex syntax and
+ * flags, beyond what browsers support natively. XRegExp is also a regex utility belt with tools to
+ * make your client-side grepping simpler and more powerful, while freeing you from related
+ * cross-browser inconsistencies.
+ */
+// ==--------------------------==
+// Private stuff
+// ==--------------------------==
+// Property name used for extended regex instance data
+var REGEX_DATA = 'xregexp'; // Optional features that can be installed and uninstalled
+
+var features = {
+  astral: false,
+  namespacing: false
+}; // Native methods to use and restore ('native' is an ES3 reserved keyword)
+
+var nativ = {
+  exec: RegExp.prototype.exec,
+  test: RegExp.prototype.test,
+  match: String.prototype.match,
+  replace: String.prototype.replace,
+  split: String.prototype.split
+}; // Storage for fixed/extended native methods
+
+var fixed = {}; // Storage for regexes cached by `XRegExp.cache`
+
+var regexCache = {}; // Storage for pattern details cached by the `XRegExp` constructor
+
+var patternCache = {}; // Storage for regex syntax tokens added internally or by `XRegExp.addToken`
+
+var tokens = []; // Token scopes
+
+var defaultScope = 'default';
+var classScope = 'class'; // Regexes that match native regex syntax, including octals
+
+var nativeTokens = {
+  // Any native multicharacter token in default scope, or any single character
+  'default': /\\(?:0(?:[0-3][0-7]{0,2}|[4-7][0-7]?)?|[1-9]\d*|x[\dA-Fa-f]{2}|u(?:[\dA-Fa-f]{4}|{[\dA-Fa-f]+})|c[A-Za-z]|[\s\S])|\(\?(?:[:=!]|<[=!])|[?*+]\?|{\d+(?:,\d*)?}\??|[\s\S]/,
+  // Any native multicharacter token in character class scope, or any single character
+  'class': /\\(?:[0-3][0-7]{0,2}|[4-7][0-7]?|x[\dA-Fa-f]{2}|u(?:[\dA-Fa-f]{4}|{[\dA-Fa-f]+})|c[A-Za-z]|[\s\S])|[\s\S]/
+}; // Any backreference or dollar-prefixed character in replacement strings
+
+var replacementToken = /\$(?:{([\w$]+)}|<([\w$]+)>|(\d\d?|[\s\S]))/g; // Check for correct `exec` handling of nonparticipating capturing groups
+
+var correctExecNpcg = nativ.exec.call(/()??/, '')[1] === undefined; // Check for ES6 `flags` prop support
+
+var hasFlagsProp = (0, _flags.default)(/x/) !== undefined; // Shortcut to `Object.prototype.toString`
+
+var _ref = {},
+    toString = _ref.toString;
+
+function hasNativeFlag(flag) {
+  // Can't check based on the presence of properties/getters since browsers might support such
+  // properties even when they don't support the corresponding flag in regex construction (tested
+  // in Chrome 48, where `'unicode' in /x/` is true but trying to construct a regex with flag `u`
+  // throws an error)
+  var isSupported = true;
+
+  try {
+    // Can't use regex literals for testing even in a `try` because regex literals with
+    // unsupported flags cause a compilation error in IE
+    new RegExp('', flag);
+  } catch (exception) {
+    isSupported = false;
+  }
+
+  return isSupported;
+} // Check for ES6 `u` flag support
+
+
+var hasNativeU = hasNativeFlag('u'); // Check for ES6 `y` flag support
+
+var hasNativeY = hasNativeFlag('y'); // Tracker for known flags, including addon flags
+
+var registeredFlags = {
+  g: true,
+  i: true,
+  m: true,
+  u: hasNativeU,
+  y: hasNativeY
+};
+/**
+ * Attaches extended data and `XRegExp.prototype` properties to a regex object.
+ *
+ * @private
+ * @param {RegExp} regex Regex to augment.
+ * @param {Array} captureNames Array with capture names, or `null`.
+ * @param {String} xSource XRegExp pattern used to generate `regex`, or `null` if N/A.
+ * @param {String} xFlags XRegExp flags used to generate `regex`, or `null` if N/A.
+ * @param {Boolean} [isInternalOnly=false] Whether the regex will be used only for internal
+ *   operations, and never exposed to users. For internal-only regexes, we can improve perf by
+ *   skipping some operations like attaching `XRegExp.prototype` properties.
+ * @returns {RegExp} Augmented regex.
+ */
+
+function augment(regex, captureNames, xSource, xFlags, isInternalOnly) {
+  var _context;
+
+  regex[REGEX_DATA] = {
+    captureNames: captureNames
+  };
+
+  if (isInternalOnly) {
+    return regex;
+  } // Can't auto-inherit these since the XRegExp constructor returns a nonprimitive value
+
+
+  if (regex.__proto__) {
+    regex.__proto__ = XRegExp.prototype;
+  } else {
+    for (var p in XRegExp.prototype) {
+      // An `XRegExp.prototype.hasOwnProperty(p)` check wouldn't be worth it here, since this
+      // is performance sensitive, and enumerable `Object.prototype` or `RegExp.prototype`
+      // extensions exist on `regex.prototype` anyway
+      regex[p] = XRegExp.prototype[p];
+    }
+  }
+
+  regex[REGEX_DATA].source = xSource; // Emulate the ES6 `flags` prop by ensuring flags are in alphabetical order
+
+  regex[REGEX_DATA].flags = xFlags ? (0, _sort.default)(_context = xFlags.split('')).call(_context).join('') : xFlags;
+  return regex;
+}
+/**
+ * Removes any duplicate characters from the provided string.
+ *
+ * @private
+ * @param {String} str String to remove duplicate characters from.
+ * @returns {String} String with any duplicate characters removed.
+ */
+
+
+function clipDuplicates(str) {
+  return nativ.replace.call(str, /([\s\S])(?=[\s\S]*\1)/g, '');
+}
+/**
+ * Copies a regex object while preserving extended data and augmenting with `XRegExp.prototype`
+ * properties. The copy has a fresh `lastIndex` property (set to zero). Allows adding and removing
+ * flags g and y while copying the regex.
+ *
+ * @private
+ * @param {RegExp} regex Regex to copy.
+ * @param {Object} [options] Options object with optional properties:
+ *   - `addG` {Boolean} Add flag g while copying the regex.
+ *   - `addY` {Boolean} Add flag y while copying the regex.
+ *   - `removeG` {Boolean} Remove flag g while copying the regex.
+ *   - `removeY` {Boolean} Remove flag y while copying the regex.
+ *   - `isInternalOnly` {Boolean} Whether the copied regex will be used only for internal
+ *     operations, and never exposed to users. For internal-only regexes, we can improve perf by
+ *     skipping some operations like attaching `XRegExp.prototype` properties.
+ *   - `source` {String} Overrides `<regex>.source`, for special cases.
+ * @returns {RegExp} Copy of the provided regex, possibly with modified flags.
+ */
+
+
+function copyRegex(regex, options) {
+  var _context2;
+
+  if (!XRegExp.isRegExp(regex)) {
+    throw new TypeError('Type RegExp expected');
+  }
+
+  var xData = regex[REGEX_DATA] || {};
+  var flags = getNativeFlags(regex);
+  var flagsToAdd = '';
+  var flagsToRemove = '';
+  var xregexpSource = null;
+  var xregexpFlags = null;
+  options = options || {};
+
+  if (options.removeG) {
+    flagsToRemove += 'g';
+  }
+
+  if (options.removeY) {
+    flagsToRemove += 'y';
+  }
+
+  if (flagsToRemove) {
+    flags = nativ.replace.call(flags, new RegExp("[".concat(flagsToRemove, "]+"), 'g'), '');
+  }
+
+  if (options.addG) {
+    flagsToAdd += 'g';
+  }
+
+  if (options.addY) {
+    flagsToAdd += 'y';
+  }
+
+  if (flagsToAdd) {
+    flags = clipDuplicates(flags + flagsToAdd);
+  }
+
+  if (!options.isInternalOnly) {
+    if (xData.source !== undefined) {
+      xregexpSource = xData.source;
+    } // null or undefined; don't want to add to `flags` if the previous value was null, since
+    // that indicates we're not tracking original precompilation flags
+
+
+    if ((0, _flags.default)(xData) != null) {
+      // Flags are only added for non-internal regexes by `XRegExp.globalize`. Flags are never
+      // removed for non-internal regexes, so don't need to handle it
+      xregexpFlags = flagsToAdd ? clipDuplicates((0, _flags.default)(xData) + flagsToAdd) : (0, _flags.default)(xData);
+    }
+  } // Augment with `XRegExp.prototype` properties, but use the native `RegExp` constructor to avoid
+  // searching for special tokens. That would be wrong for regexes constructed by `RegExp`, and
+  // unnecessary for regexes constructed by `XRegExp` because the regex has already undergone the
+  // translation to native regex syntax
+
+
+  regex = augment(new RegExp(options.source || regex.source, flags), hasNamedCapture(regex) ? (0, _slice.default)(_context2 = xData.captureNames).call(_context2, 0) : null, xregexpSource, xregexpFlags, options.isInternalOnly);
+  return regex;
+}
+/**
+ * Converts hexadecimal to decimal.
+ *
+ * @private
+ * @param {String} hex
+ * @returns {Number}
+ */
+
+
+function dec(hex) {
+  return (0, _parseInt2.default)(hex, 16);
+}
+/**
+ * Returns a pattern that can be used in a native RegExp in place of an ignorable token such as an
+ * inline comment or whitespace with flag x. This is used directly as a token handler function
+ * passed to `XRegExp.addToken`.
+ *
+ * @private
+ * @param {String} match Match arg of `XRegExp.addToken` handler
+ * @param {String} scope Scope arg of `XRegExp.addToken` handler
+ * @param {String} flags Flags arg of `XRegExp.addToken` handler
+ * @returns {String} Either '' or '(?:)', depending on which is needed in the context of the match.
+ */
+
+
+function getContextualTokenSeparator(match, scope, flags) {
+  if ( // No need to separate tokens if at the beginning or end of a group
+  match.input[match.index - 1] === '(' || match.input[match.index + match[0].length] === ')' || // No need to separate tokens if before or after a `|`
+  match.input[match.index - 1] === '|' || match.input[match.index + match[0].length] === '|' || // No need to separate tokens if at the beginning or end of the pattern
+  match.index < 1 || match.index + match[0].length >= match.input.length || // No need to separate tokens if at the beginning of a noncapturing group or lookahead.
+  // The way this is written relies on:
+  // - The search regex matching only 3-char strings.
+  // - Although `substr` gives chars from the end of the string if given a negative index,
+  //   the resulting substring will be too short to match. Ex: `'abcd'.substr(-1, 3) === 'd'`
+  nativ.test.call(/^\(\?[:=!]/, match.input.substr(match.index - 3, 3)) || // Avoid separating tokens when the following token is a quantifier
+  isQuantifierNext(match.input, match.index + match[0].length, flags)) {
+    return '';
+  } // Keep tokens separated. This avoids e.g. inadvertedly changing `\1 1` or `\1(?#)1` to `\11`.
+  // This also ensures all tokens remain as discrete atoms, e.g. it avoids converting the syntax
+  // error `(? :` into `(?:`.
+
+
+  return '(?:)';
+}
+/**
+ * Returns native `RegExp` flags used by a regex object.
+ *
+ * @private
+ * @param {RegExp} regex Regex to check.
+ * @returns {String} Native flags in use.
+ */
+
+
+function getNativeFlags(regex) {
+  return hasFlagsProp ? (0, _flags.default)(regex) : // Explicitly using `RegExp.prototype.toString` (rather than e.g. `String` or concatenation
+  // with an empty string) allows this to continue working predictably when
+  // `XRegExp.proptotype.toString` is overridden
+  nativ.exec.call(/\/([a-z]*)$/i, RegExp.prototype.toString.call(regex))[1];
+}
+/**
+ * Determines whether a regex has extended instance data used to track capture names.
+ *
+ * @private
+ * @param {RegExp} regex Regex to check.
+ * @returns {Boolean} Whether the regex uses named capture.
+ */
+
+
+function hasNamedCapture(regex) {
+  return !!(regex[REGEX_DATA] && regex[REGEX_DATA].captureNames);
+}
+/**
+ * Converts decimal to hexadecimal.
+ *
+ * @private
+ * @param {Number|String} dec
+ * @returns {String}
+ */
+
+
+function hex(dec) {
+  return (0, _parseInt2.default)(dec, 10).toString(16);
+}
+/**
+ * Checks whether the next nonignorable token after the specified position is a quantifier.
+ *
+ * @private
+ * @param {String} pattern Pattern to search within.
+ * @param {Number} pos Index in `pattern` to search at.
+ * @param {String} flags Flags used by the pattern.
+ * @returns {Boolean} Whether the next nonignorable token is a quantifier.
+ */
+
+
+function isQuantifierNext(pattern, pos, flags) {
+  var inlineCommentPattern = '\\(\\?#[^)]*\\)';
+  var lineCommentPattern = '#[^#\\n]*';
+  var quantifierPattern = '[?*+]|{\\d+(?:,\\d*)?}';
+  return nativ.test.call((0, _includes.default)(flags).call(flags, 'x') ? // Ignore any leading whitespace, line comments, and inline comments
+  /^(?:\s|#[^#\n]*|\(\?#[^)]*\))*(?:[?*+]|{\d+(?:,\d*)?})/ : // Ignore any leading inline comments
+  /^(?:\(\?#[^)]*\))*(?:[?*+]|{\d+(?:,\d*)?})/, (0, _slice.default)(pattern).call(pattern, pos));
+}
+/**
+ * Determines whether a value is of the specified type, by resolving its internal [[Class]].
+ *
+ * @private
+ * @param {*} value Object to check.
+ * @param {String} type Type to check for, in TitleCase.
+ * @returns {Boolean} Whether the object matches the type.
+ */
+
+
+function isType(value, type) {
+  return toString.call(value) === "[object ".concat(type, "]");
+}
+/**
+ * Adds leading zeros if shorter than four characters. Used for fixed-length hexadecimal values.
+ *
+ * @private
+ * @param {String} str
+ * @returns {String}
+ */
+
+
+function pad4(str) {
+  while (str.length < 4) {
+    str = "0".concat(str);
+  }
+
+  return str;
+}
+/**
+ * Checks for flag-related errors, and strips/applies flags in a leading mode modifier. Offloads
+ * the flag preparation logic from the `XRegExp` constructor.
+ *
+ * @private
+ * @param {String} pattern Regex pattern, possibly with a leading mode modifier.
+ * @param {String} flags Any combination of flags.
+ * @returns {Object} Object with properties `pattern` and `flags`.
+ */
+
+
+function prepareFlags(pattern, flags) {
+  // Recent browsers throw on duplicate flags, so copy this behavior for nonnative flags
+  if (clipDuplicates(flags) !== flags) {
+    throw new SyntaxError("Invalid duplicate regex flag ".concat(flags));
+  } // Strip and apply a leading mode modifier with any combination of flags except g or y
+
+
+  pattern = nativ.replace.call(pattern, /^\(\?([\w$]+)\)/, function ($0, $1) {
+    if (nativ.test.call(/[gy]/, $1)) {
+      throw new SyntaxError("Cannot use flag g or y in mode modifier ".concat($0));
+    } // Allow duplicate flags within the mode modifier
+
+
+    flags = clipDuplicates(flags + $1);
+    return '';
+  }); // Throw on unknown native or nonnative flags
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = (0, _getIterator2.default)(flags), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var flag = _step.value;
+
+      if (!registeredFlags[flag]) {
+        throw new SyntaxError("Unknown regex flag ".concat(flag));
+      }
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return != null) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return {
+    pattern: pattern,
+    flags: flags
+  };
+}
+/**
+ * Prepares an options object from the given value.
+ *
+ * @private
+ * @param {String|Object} value Value to convert to an options object.
+ * @returns {Object} Options object.
+ */
+
+
+function prepareOptions(value) {
+  var options = {};
+
+  if (isType(value, 'String')) {
+    (0, _forEach.default)(XRegExp).call(XRegExp, value, /[^\s,]+/, function (match) {
+      options[match] = true;
+    });
+    return options;
+  }
+
+  return value;
+}
+/**
+ * Registers a flag so it doesn't throw an 'unknown flag' error.
+ *
+ * @private
+ * @param {String} flag Single-character flag to register.
+ */
+
+
+function registerFlag(flag) {
+  if (!/^[\w$]$/.test(flag)) {
+    throw new Error('Flag must be a single character A-Za-z0-9_$');
+  }
+
+  registeredFlags[flag] = true;
+}
+/**
+ * Runs built-in and custom regex syntax tokens in reverse insertion order at the specified
+ * position, until a match is found.
+ *
+ * @private
+ * @param {String} pattern Original pattern from which an XRegExp object is being built.
+ * @param {String} flags Flags being used to construct the regex.
+ * @param {Number} pos Position to search for tokens within `pattern`.
+ * @param {Number} scope Regex scope to apply: 'default' or 'class'.
+ * @param {Object} context Context object to use for token handler functions.
+ * @returns {Object} Object with properties `matchLength`, `output`, and `reparse`; or `null`.
+ */
+
+
+function runTokens(pattern, flags, pos, scope, context) {
+  var i = tokens.length;
+  var leadChar = pattern[pos];
+  var result = null;
+  var match;
+  var t; // Run in reverse insertion order
+
+  while (i--) {
+    t = tokens[i];
+
+    if (t.leadChar && t.leadChar !== leadChar || t.scope !== scope && t.scope !== 'all' || t.flag && !(0, _includes.default)(flags).call(flags, t.flag)) {
+      continue;
+    }
+
+    match = XRegExp.exec(pattern, t.regex, pos, 'sticky');
+
+    if (match) {
+      result = {
+        matchLength: match[0].length,
+        output: t.handler.call(context, match, scope, flags),
+        reparse: t.reparse
+      }; // Finished with token tests
+
+      break;
+    }
+  }
+
+  return result;
+}
+/**
+ * Enables or disables implicit astral mode opt-in. When enabled, flag A is automatically added to
+ * all new regexes created by XRegExp. This causes an error to be thrown when creating regexes if
+ * the Unicode Base addon is not available, since flag A is registered by that addon.
+ *
+ * @private
+ * @param {Boolean} on `true` to enable; `false` to disable.
+ */
+
+
+function setAstral(on) {
+  features.astral = on;
+}
+/**
+ * Adds named capture groups to the `groups` property of match arrays. See here for details:
+ * https://github.com/tc39/proposal-regexp-named-groups
+ *
+ * @private
+ * @param {Boolean} on `true` to enable; `false` to disable.
+ */
+
+
+function setNamespacing(on) {
+  features.namespacing = on;
+}
+/**
+ * Returns the object, or throws an error if it is `null` or `undefined`. This is used to follow
+ * the ES5 abstract operation `ToObject`.
+ *
+ * @private
+ * @param {*} value Object to check and return.
+ * @returns {*} The provided object.
+ */
+
+
+function toObject(value) {
+  // null or undefined
+  if (value == null) {
+    throw new TypeError('Cannot convert null or undefined to object');
+  }
+
+  return value;
+} // ==--------------------------==
+// Constructor
+// ==--------------------------==
+
+/**
+ * Creates an extended regular expression object for matching text with a pattern. Differs from a
+ * native regular expression in that additional syntax and flags are supported. The returned object
+ * is in fact a native `RegExp` and works with all native methods.
+ *
+ * @class XRegExp
+ * @constructor
+ * @param {String|RegExp} pattern Regex pattern string, or an existing regex object to copy.
+ * @param {String} [flags] Any combination of flags.
+ *   Native flags:
+ *     - `g` - global
+ *     - `i` - ignore case
+ *     - `m` - multiline anchors
+ *     - `u` - unicode (ES6)
+ *     - `y` - sticky (Firefox 3+, ES6)
+ *   Additional XRegExp flags:
+ *     - `n` - explicit capture
+ *     - `s` - dot matches all (aka singleline)
+ *     - `x` - free-spacing and line comments (aka extended)
+ *     - `A` - astral (requires the Unicode Base addon)
+ *   Flags cannot be provided when constructing one `RegExp` from another.
+ * @returns {RegExp} Extended regular expression object.
+ * @example
+ *
+ * // With named capture and flag x
+ * XRegExp(`(?<year>  [0-9]{4} ) -?  # year
+ *          (?<month> [0-9]{2} ) -?  # month
+ *          (?<day>   [0-9]{2} )     # day`, 'x');
+ *
+ * // Providing a regex object copies it. Native regexes are recompiled using native (not XRegExp)
+ * // syntax. Copies maintain extended data, are augmented with `XRegExp.prototype` properties, and
+ * // have fresh `lastIndex` properties (set to zero).
+ * XRegExp(/regex/);
+ */
+
+
+function XRegExp(pattern, flags) {
+  if (XRegExp.isRegExp(pattern)) {
+    if (flags !== undefined) {
+      throw new TypeError('Cannot supply flags when copying a RegExp');
+    }
+
+    return copyRegex(pattern);
+  } // Copy the argument behavior of `RegExp`
+
+
+  pattern = pattern === undefined ? '' : String(pattern);
+  flags = flags === undefined ? '' : String(flags);
+
+  if (XRegExp.isInstalled('astral') && !(0, _includes.default)(flags).call(flags, 'A')) {
+    // This causes an error to be thrown if the Unicode Base addon is not available
+    flags += 'A';
+  }
+
+  if (!patternCache[pattern]) {
+    patternCache[pattern] = {};
+  }
+
+  if (!patternCache[pattern][flags]) {
+    var context = {
+      hasNamedCapture: false,
+      captureNames: []
+    };
+    var scope = defaultScope;
+    var output = '';
+    var pos = 0;
+    var result; // Check for flag-related errors, and strip/apply flags in a leading mode modifier
+
+    var applied = prepareFlags(pattern, flags);
+    var appliedPattern = applied.pattern;
+    var appliedFlags = (0, _flags.default)(applied); // Use XRegExp's tokens to translate the pattern to a native regex pattern.
+    // `appliedPattern.length` may change on each iteration if tokens use `reparse`
+
+    while (pos < appliedPattern.length) {
+      do {
+        // Check for custom tokens at the current position
+        result = runTokens(appliedPattern, appliedFlags, pos, scope, context); // If the matched token used the `reparse` option, splice its output into the
+        // pattern before running tokens again at the same position
+
+        if (result && result.reparse) {
+          appliedPattern = (0, _slice.default)(appliedPattern).call(appliedPattern, 0, pos) + result.output + (0, _slice.default)(appliedPattern).call(appliedPattern, pos + result.matchLength);
+        }
+      } while (result && result.reparse);
+
+      if (result) {
+        output += result.output;
+        pos += result.matchLength || 1;
+      } else {
+        // Get the native token at the current position
+        var _XRegExp$exec = XRegExp.exec(appliedPattern, nativeTokens[scope], pos, 'sticky'),
+            _XRegExp$exec2 = (0, _slicedToArray2.default)(_XRegExp$exec, 1),
+            token = _XRegExp$exec2[0];
+
+        output += token;
+        pos += token.length;
+
+        if (token === '[' && scope === defaultScope) {
+          scope = classScope;
+        } else if (token === ']' && scope === classScope) {
+          scope = defaultScope;
+        }
+      }
+    }
+
+    patternCache[pattern][flags] = {
+      // Use basic cleanup to collapse repeated empty groups like `(?:)(?:)` to `(?:)`. Empty
+      // groups are sometimes inserted during regex transpilation in order to keep tokens
+      // separated. However, more than one empty group in a row is never needed.
+      pattern: nativ.replace.call(output, /(?:\(\?:\))+/g, '(?:)'),
+      // Strip all but native flags
+      flags: nativ.replace.call(appliedFlags, /[^gimuy]+/g, ''),
+      // `context.captureNames` has an item for each capturing group, even if unnamed
+      captures: context.hasNamedCapture ? context.captureNames : null
+    };
+  }
+
+  var generated = patternCache[pattern][flags];
+  return augment(new RegExp(generated.pattern, (0, _flags.default)(generated)), generated.captures, pattern, flags);
+} // Add `RegExp.prototype` to the prototype chain
+
+
+XRegExp.prototype = /(?:)/; // ==--------------------------==
+// Public properties
+// ==--------------------------==
+
+/**
+ * The XRegExp version number as a string containing three dot-separated parts. For example,
+ * '2.0.0-beta-3'.
+ *
+ * @static
+ * @memberOf XRegExp
+ * @type String
+ */
+
+XRegExp.version = '4.3.0'; // ==--------------------------==
+// Public methods
+// ==--------------------------==
+// Intentionally undocumented; used in tests and addons
+
+XRegExp._clipDuplicates = clipDuplicates;
+XRegExp._hasNativeFlag = hasNativeFlag;
+XRegExp._dec = dec;
+XRegExp._hex = hex;
+XRegExp._pad4 = pad4;
+/**
+ * Extends XRegExp syntax and allows custom flags. This is used internally and can be used to
+ * create XRegExp addons. If more than one token can match the same string, the last added wins.
+ *
+ * @memberOf XRegExp
+ * @param {RegExp} regex Regex object that matches the new token.
+ * @param {Function} handler Function that returns a new pattern string (using native regex syntax)
+ *   to replace the matched token within all future XRegExp regexes. Has access to persistent
+ *   properties of the regex being built, through `this`. Invoked with three arguments:
+ *   - The match array, with named backreference properties.
+ *   - The regex scope where the match was found: 'default' or 'class'.
+ *   - The flags used by the regex, including any flags in a leading mode modifier.
+ *   The handler function becomes part of the XRegExp construction process, so be careful not to
+ *   construct XRegExps within the function or you will trigger infinite recursion.
+ * @param {Object} [options] Options object with optional properties:
+ *   - `scope` {String} Scope where the token applies: 'default', 'class', or 'all'.
+ *   - `flag` {String} Single-character flag that triggers the token. This also registers the
+ *     flag, which prevents XRegExp from throwing an 'unknown flag' error when the flag is used.
+ *   - `optionalFlags` {String} Any custom flags checked for within the token `handler` that are
+ *     not required to trigger the token. This registers the flags, to prevent XRegExp from
+ *     throwing an 'unknown flag' error when any of the flags are used.
+ *   - `reparse` {Boolean} Whether the `handler` function's output should not be treated as
+ *     final, and instead be reparseable by other tokens (including the current token). Allows
+ *     token chaining or deferring.
+ *   - `leadChar` {String} Single character that occurs at the beginning of any successful match
+ *     of the token (not always applicable). This doesn't change the behavior of the token unless
+ *     you provide an erroneous value. However, providing it can increase the token's performance
+ *     since the token can be skipped at any positions where this character doesn't appear.
+ * @example
+ *
+ * // Basic usage: Add \a for the ALERT control code
+ * XRegExp.addToken(
+ *   /\\a/,
+ *   () => '\\x07',
+ *   {scope: 'all'}
+ * );
+ * XRegExp('\\a[\\a-\\n]+').test('\x07\n\x07'); // -> true
+ *
+ * // Add the U (ungreedy) flag from PCRE and RE2, which reverses greedy and lazy quantifiers.
+ * // Since `scope` is not specified, it uses 'default' (i.e., transformations apply outside of
+ * // character classes only)
+ * XRegExp.addToken(
+ *   /([?*+]|{\d+(?:,\d*)?})(\??)/,
+ *   (match) => `${match[1]}${match[2] ? '' : '?'}`,
+ *   {flag: 'U'}
+ * );
+ * XRegExp('a+', 'U').exec('aaa')[0]; // -> 'a'
+ * XRegExp('a+?', 'U').exec('aaa')[0]; // -> 'aaa'
+ */
+
+XRegExp.addToken = function (regex, handler, options) {
+  options = options || {};
+  var _options = options,
+      optionalFlags = _options.optionalFlags;
+
+  if (options.flag) {
+    registerFlag(options.flag);
+  }
+
+  if (optionalFlags) {
+    optionalFlags = nativ.split.call(optionalFlags, '');
+    var _iteratorNormalCompletion2 = true;
+    var _didIteratorError2 = false;
+    var _iteratorError2 = undefined;
+
+    try {
+      for (var _iterator2 = (0, _getIterator2.default)(optionalFlags), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+        var flag = _step2.value;
+        registerFlag(flag);
+      }
+    } catch (err) {
+      _didIteratorError2 = true;
+      _iteratorError2 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
+          _iterator2.return();
+        }
+      } finally {
+        if (_didIteratorError2) {
+          throw _iteratorError2;
+        }
+      }
+    }
+  } // Add to the private list of syntax tokens
+
+
+  tokens.push({
+    regex: copyRegex(regex, {
+      addG: true,
+      addY: hasNativeY,
+      isInternalOnly: true
+    }),
+    handler: handler,
+    scope: options.scope || defaultScope,
+    flag: options.flag,
+    reparse: options.reparse,
+    leadChar: options.leadChar
+  }); // Reset the pattern cache used by the `XRegExp` constructor, since the same pattern and flags
+  // might now produce different results
+
+  XRegExp.cache.flush('patterns');
+};
+/**
+ * Caches and returns the result of calling `XRegExp(pattern, flags)`. On any subsequent call with
+ * the same pattern and flag combination, the cached copy of the regex is returned.
+ *
+ * @memberOf XRegExp
+ * @param {String} pattern Regex pattern string.
+ * @param {String} [flags] Any combination of XRegExp flags.
+ * @returns {RegExp} Cached XRegExp object.
+ * @example
+ *
+ * while (match = XRegExp.cache('.', 'gs').exec(str)) {
+ *   // The regex is compiled once only
+ * }
+ */
+
+
+XRegExp.cache = function (pattern, flags) {
+  if (!regexCache[pattern]) {
+    regexCache[pattern] = {};
+  }
+
+  return regexCache[pattern][flags] || (regexCache[pattern][flags] = XRegExp(pattern, flags));
+}; // Intentionally undocumented; used in tests
+
+
+XRegExp.cache.flush = function (cacheName) {
+  if (cacheName === 'patterns') {
+    // Flush the pattern cache used by the `XRegExp` constructor
+    patternCache = {};
+  } else {
+    // Flush the regex cache populated by `XRegExp.cache`
+    regexCache = {};
+  }
+};
+/**
+ * Escapes any regular expression metacharacters, for use when matching literal strings. The result
+ * can safely be used at any point within a regex that uses any flags.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to escape.
+ * @returns {String} String with regex metacharacters escaped.
+ * @example
+ *
+ * XRegExp.escape('Escaped? <.>');
+ * // -> 'Escaped\?\ <\.>'
+ */
+
+
+XRegExp.escape = function (str) {
+  return nativ.replace.call(toObject(str), /[-\[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+};
+/**
+ * Executes a regex search in a specified string. Returns a match array or `null`. If the provided
+ * regex uses named capture, named backreference properties are included on the match array.
+ * Optional `pos` and `sticky` arguments specify the search start position, and whether the match
+ * must start at the specified position only. The `lastIndex` property of the provided regex is not
+ * used, but is updated for compatibility. Also fixes browser bugs compared to the native
+ * `RegExp.prototype.exec` and can be used reliably cross-browser.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to search.
+ * @param {RegExp} regex Regex to search with.
+ * @param {Number} [pos=0] Zero-based index at which to start the search.
+ * @param {Boolean|String} [sticky=false] Whether the match must start at the specified position
+ *   only. The string `'sticky'` is accepted as an alternative to `true`.
+ * @returns {Array} Match array with named backreference properties, or `null`.
+ * @example
+ *
+ * // Basic use, with named backreference
+ * let match = XRegExp.exec('U+2620', XRegExp('U\\+(?<hex>[0-9A-F]{4})'));
+ * match.hex; // -> '2620'
+ *
+ * // With pos and sticky, in a loop
+ * let pos = 2, result = [], match;
+ * while (match = XRegExp.exec('<1><2><3><4>5<6>', /<(\d)>/, pos, 'sticky')) {
+ *   result.push(match[1]);
+ *   pos = match.index + match[0].length;
+ * }
+ * // result -> ['2', '3', '4']
+ */
+
+
+XRegExp.exec = function (str, regex, pos, sticky) {
+  var cacheKey = 'g';
+  var addY = false;
+  var fakeY = false;
+  var match;
+  addY = hasNativeY && !!(sticky || regex.sticky && sticky !== false);
+
+  if (addY) {
+    cacheKey += 'y';
+  } else if (sticky) {
+    // Simulate sticky matching by appending an empty capture to the original regex. The
+    // resulting regex will succeed no matter what at the current index (set with `lastIndex`),
+    // and will not search the rest of the subject string. We'll know that the original regex
+    // has failed if that last capture is `''` rather than `undefined` (i.e., if that last
+    // capture participated in the match).
+    fakeY = true;
+    cacheKey += 'FakeY';
+  }
+
+  regex[REGEX_DATA] = regex[REGEX_DATA] || {}; // Shares cached copies with `XRegExp.match`/`replace`
+
+  var r2 = regex[REGEX_DATA][cacheKey] || (regex[REGEX_DATA][cacheKey] = copyRegex(regex, {
+    addG: true,
+    addY: addY,
+    source: fakeY ? "".concat(regex.source, "|()") : undefined,
+    removeY: sticky === false,
+    isInternalOnly: true
+  }));
+  pos = pos || 0;
+  r2.lastIndex = pos; // Fixed `exec` required for `lastIndex` fix, named backreferences, etc.
+
+  match = fixed.exec.call(r2, str); // Get rid of the capture added by the pseudo-sticky matcher if needed. An empty string means
+  // the original regexp failed (see above).
+
+  if (fakeY && match && match.pop() === '') {
+    match = null;
+  }
+
+  if (regex.global) {
+    regex.lastIndex = match ? r2.lastIndex : 0;
+  }
+
+  return match;
+};
+/**
+ * Executes a provided function once per regex match. Searches always start at the beginning of the
+ * string and continue until the end, regardless of the state of the regex's `global` property and
+ * initial `lastIndex`.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to search.
+ * @param {RegExp} regex Regex to search with.
+ * @param {Function} callback Function to execute for each match. Invoked with four arguments:
+ *   - The match array, with named backreference properties.
+ *   - The zero-based match index.
+ *   - The string being traversed.
+ *   - The regex object being used to traverse the string.
+ * @example
+ *
+ * // Extracts every other digit from a string
+ * const evens = [];
+ * XRegExp.forEach('1a2345', /\d/, (match, i) => {
+ *   if (i % 2) evens.push(+match[0]);
+ * });
+ * // evens -> [2, 4]
+ */
+
+
+XRegExp.forEach = function (str, regex, callback) {
+  var pos = 0;
+  var i = -1;
+  var match;
+
+  while (match = XRegExp.exec(str, regex, pos)) {
+    // Because `regex` is provided to `callback`, the function could use the deprecated/
+    // nonstandard `RegExp.prototype.compile` to mutate the regex. However, since `XRegExp.exec`
+    // doesn't use `lastIndex` to set the search position, this can't lead to an infinite loop,
+    // at least. Actually, because of the way `XRegExp.exec` caches globalized versions of
+    // regexes, mutating the regex will not have any effect on the iteration or matched strings,
+    // which is a nice side effect that brings extra safety.
+    callback(match, ++i, str, regex);
+    pos = match.index + (match[0].length || 1);
+  }
+};
+/**
+ * Copies a regex object and adds flag `g`. The copy maintains extended data, is augmented with
+ * `XRegExp.prototype` properties, and has a fresh `lastIndex` property (set to zero). Native
+ * regexes are not recompiled using XRegExp syntax.
+ *
+ * @memberOf XRegExp
+ * @param {RegExp} regex Regex to globalize.
+ * @returns {RegExp} Copy of the provided regex with flag `g` added.
+ * @example
+ *
+ * const globalCopy = XRegExp.globalize(/regex/);
+ * globalCopy.global; // -> true
+ */
+
+
+XRegExp.globalize = function (regex) {
+  return copyRegex(regex, {
+    addG: true
+  });
+};
+/**
+ * Installs optional features according to the specified options. Can be undone using
+ * `XRegExp.uninstall`.
+ *
+ * @memberOf XRegExp
+ * @param {Object|String} options Options object or string.
+ * @example
+ *
+ * // With an options object
+ * XRegExp.install({
+ *   // Enables support for astral code points in Unicode addons (implicitly sets flag A)
+ *   astral: true,
+ *
+ *   // Adds named capture groups to the `groups` property of matches
+ *   namespacing: true
+ * });
+ *
+ * // With an options string
+ * XRegExp.install('astral namespacing');
+ */
+
+
+XRegExp.install = function (options) {
+  options = prepareOptions(options);
+
+  if (!features.astral && options.astral) {
+    setAstral(true);
+  }
+
+  if (!features.namespacing && options.namespacing) {
+    setNamespacing(true);
+  }
+};
+/**
+ * Checks whether an individual optional feature is installed.
+ *
+ * @memberOf XRegExp
+ * @param {String} feature Name of the feature to check. One of:
+ *   - `astral`
+ *   - `namespacing`
+ * @returns {Boolean} Whether the feature is installed.
+ * @example
+ *
+ * XRegExp.isInstalled('astral');
+ */
+
+
+XRegExp.isInstalled = function (feature) {
+  return !!features[feature];
+};
+/**
+ * Returns `true` if an object is a regex; `false` if it isn't. This works correctly for regexes
+ * created in another frame, when `instanceof` and `constructor` checks would fail.
+ *
+ * @memberOf XRegExp
+ * @param {*} value Object to check.
+ * @returns {Boolean} Whether the object is a `RegExp` object.
+ * @example
+ *
+ * XRegExp.isRegExp('string'); // -> false
+ * XRegExp.isRegExp(/regex/i); // -> true
+ * XRegExp.isRegExp(RegExp('^', 'm')); // -> true
+ * XRegExp.isRegExp(XRegExp('(?s).')); // -> true
+ */
+
+
+XRegExp.isRegExp = function (value) {
+  return toString.call(value) === '[object RegExp]';
+}; // isType(value, 'RegExp');
+
+/**
+ * Returns the first matched string, or in global mode, an array containing all matched strings.
+ * This is essentially a more convenient re-implementation of `String.prototype.match` that gives
+ * the result types you actually want (string instead of `exec`-style array in match-first mode,
+ * and an empty array instead of `null` when no matches are found in match-all mode). It also lets
+ * you override flag g and ignore `lastIndex`, and fixes browser bugs.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to search.
+ * @param {RegExp} regex Regex to search with.
+ * @param {String} [scope='one'] Use 'one' to return the first match as a string. Use 'all' to
+ *   return an array of all matched strings. If not explicitly specified and `regex` uses flag g,
+ *   `scope` is 'all'.
+ * @returns {String|Array} In match-first mode: First match as a string, or `null`. In match-all
+ *   mode: Array of all matched strings, or an empty array.
+ * @example
+ *
+ * // Match first
+ * XRegExp.match('abc', /\w/); // -> 'a'
+ * XRegExp.match('abc', /\w/g, 'one'); // -> 'a'
+ * XRegExp.match('abc', /x/g, 'one'); // -> null
+ *
+ * // Match all
+ * XRegExp.match('abc', /\w/g); // -> ['a', 'b', 'c']
+ * XRegExp.match('abc', /\w/, 'all'); // -> ['a', 'b', 'c']
+ * XRegExp.match('abc', /x/, 'all'); // -> []
+ */
+
+
+XRegExp.match = function (str, regex, scope) {
+  var global = regex.global && scope !== 'one' || scope === 'all';
+  var cacheKey = (global ? 'g' : '') + (regex.sticky ? 'y' : '') || 'noGY';
+  regex[REGEX_DATA] = regex[REGEX_DATA] || {}; // Shares cached copies with `XRegExp.exec`/`replace`
+
+  var r2 = regex[REGEX_DATA][cacheKey] || (regex[REGEX_DATA][cacheKey] = copyRegex(regex, {
+    addG: !!global,
+    removeG: scope === 'one',
+    isInternalOnly: true
+  }));
+  var result = nativ.match.call(toObject(str), r2);
+
+  if (regex.global) {
+    regex.lastIndex = scope === 'one' && result ? // Can't use `r2.lastIndex` since `r2` is nonglobal in this case
+    result.index + result[0].length : 0;
+  }
+
+  return global ? result || [] : result && result[0];
+};
+/**
+ * Retrieves the matches from searching a string using a chain of regexes that successively search
+ * within previous matches. The provided `chain` array can contain regexes and or objects with
+ * `regex` and `backref` properties. When a backreference is specified, the named or numbered
+ * backreference is passed forward to the next regex or returned.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to search.
+ * @param {Array} chain Regexes that each search for matches within preceding results.
+ * @returns {Array} Matches by the last regex in the chain, or an empty array.
+ * @example
+ *
+ * // Basic usage; matches numbers within <b> tags
+ * XRegExp.matchChain('1 <b>2</b> 3 <b>4 a 56</b>', [
+ *   XRegExp('(?is)<b>.*?</b>'),
+ *   /\d+/
+ * ]);
+ * // -> ['2', '4', '56']
+ *
+ * // Passing forward and returning specific backreferences
+ * html = '<a href="http://xregexp.com/api/">XRegExp</a>\
+ *         <a href="http://www.google.com/">Google</a>';
+ * XRegExp.matchChain(html, [
+ *   {regex: /<a href="([^"]+)">/i, backref: 1},
+ *   {regex: XRegExp('(?i)^https?://(?<domain>[^/?#]+)'), backref: 'domain'}
+ * ]);
+ * // -> ['xregexp.com', 'www.google.com']
+ */
+
+
+XRegExp.matchChain = function (str, chain) {
+  return function recurseChain(values, level) {
+    var item = chain[level].regex ? chain[level] : {
+      regex: chain[level]
+    };
+    var matches = [];
+
+    function addMatch(match) {
+      if (item.backref) {
+        var ERR_UNDEFINED_GROUP = "Backreference to undefined group: ".concat(item.backref);
+        var isNamedBackref = isNaN(item.backref);
+
+        if (isNamedBackref && XRegExp.isInstalled('namespacing')) {
+          // `groups` has `null` as prototype, so using `in` instead of `hasOwnProperty`
+          if (!(item.backref in match.groups)) {
+            throw new ReferenceError(ERR_UNDEFINED_GROUP);
+          }
+        } else if (!match.hasOwnProperty(item.backref)) {
+          throw new ReferenceError(ERR_UNDEFINED_GROUP);
+        }
+
+        var backrefValue = isNamedBackref && XRegExp.isInstalled('namespacing') ? match.groups[item.backref] : match[item.backref];
+        matches.push(backrefValue || '');
+      } else {
+        matches.push(match[0]);
+      }
+    }
+
+    var _iteratorNormalCompletion3 = true;
+    var _didIteratorError3 = false;
+    var _iteratorError3 = undefined;
+
+    try {
+      for (var _iterator3 = (0, _getIterator2.default)(values), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+        var value = _step3.value;
+        (0, _forEach.default)(XRegExp).call(XRegExp, value, item.regex, addMatch);
+      }
+    } catch (err) {
+      _didIteratorError3 = true;
+      _iteratorError3 = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion3 && _iterator3.return != null) {
+          _iterator3.return();
+        }
+      } finally {
+        if (_didIteratorError3) {
+          throw _iteratorError3;
+        }
+      }
+    }
+
+    return level === chain.length - 1 || !matches.length ? matches : recurseChain(matches, level + 1);
+  }([str], 0);
+};
+/**
+ * Returns a new string with one or all matches of a pattern replaced. The pattern can be a string
+ * or regex, and the replacement can be a string or a function to be called for each match. To
+ * perform a global search and replace, use the optional `scope` argument or include flag g if using
+ * a regex. Replacement strings can use `${n}` or `$<n>` for named and numbered backreferences.
+ * Replacement functions can use named backreferences via `arguments[0].name`. Also fixes browser
+ * bugs compared to the native `String.prototype.replace` and can be used reliably cross-browser.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to search.
+ * @param {RegExp|String} search Search pattern to be replaced.
+ * @param {String|Function} replacement Replacement string or a function invoked to create it.
+ *   Replacement strings can include special replacement syntax:
+ *     - $$ - Inserts a literal $ character.
+ *     - $&, $0 - Inserts the matched substring.
+ *     - $` - Inserts the string that precedes the matched substring (left context).
+ *     - $' - Inserts the string that follows the matched substring (right context).
+ *     - $n, $nn - Where n/nn are digits referencing an existent capturing group, inserts
+ *       backreference n/nn.
+ *     - ${n}, $<n> - Where n is a name or any number of digits that reference an existent capturing
+ *       group, inserts backreference n.
+ *   Replacement functions are invoked with three or more arguments:
+ *     - The matched substring (corresponds to $& above). Named backreferences are accessible as
+ *       properties of this first argument.
+ *     - 0..n arguments, one for each backreference (corresponding to $1, $2, etc. above).
+ *     - The zero-based index of the match within the total search string.
+ *     - The total string being searched.
+ * @param {String} [scope='one'] Use 'one' to replace the first match only, or 'all'. If not
+ *   explicitly specified and using a regex with flag g, `scope` is 'all'.
+ * @returns {String} New string with one or all matches replaced.
+ * @example
+ *
+ * // Regex search, using named backreferences in replacement string
+ * const name = XRegExp('(?<first>\\w+) (?<last>\\w+)');
+ * XRegExp.replace('John Smith', name, '$<last>, $<first>');
+ * // -> 'Smith, John'
+ *
+ * // Regex search, using named backreferences in replacement function
+ * XRegExp.replace('John Smith', name, (match) => `${match.last}, ${match.first}`);
+ * // -> 'Smith, John'
+ *
+ * // String search, with replace-all
+ * XRegExp.replace('RegExp builds RegExps', 'RegExp', 'XRegExp', 'all');
+ * // -> 'XRegExp builds XRegExps'
+ */
+
+
+XRegExp.replace = function (str, search, replacement, scope) {
+  var isRegex = XRegExp.isRegExp(search);
+  var global = search.global && scope !== 'one' || scope === 'all';
+  var cacheKey = (global ? 'g' : '') + (search.sticky ? 'y' : '') || 'noGY';
+  var s2 = search;
+
+  if (isRegex) {
+    search[REGEX_DATA] = search[REGEX_DATA] || {}; // Shares cached copies with `XRegExp.exec`/`match`. Since a copy is used, `search`'s
+    // `lastIndex` isn't updated *during* replacement iterations
+
+    s2 = search[REGEX_DATA][cacheKey] || (search[REGEX_DATA][cacheKey] = copyRegex(search, {
+      addG: !!global,
+      removeG: scope === 'one',
+      isInternalOnly: true
+    }));
+  } else if (global) {
+    s2 = new RegExp(XRegExp.escape(String(search)), 'g');
+  } // Fixed `replace` required for named backreferences, etc.
+
+
+  var result = fixed.replace.call(toObject(str), s2, replacement);
+
+  if (isRegex && search.global) {
+    // Fixes IE, Safari bug (last tested IE 9, Safari 5.1)
+    search.lastIndex = 0;
+  }
+
+  return result;
+};
+/**
+ * Performs batch processing of string replacements. Used like `XRegExp.replace`, but accepts an
+ * array of replacement details. Later replacements operate on the output of earlier replacements.
+ * Replacement details are accepted as an array with a regex or string to search for, the
+ * replacement string or function, and an optional scope of 'one' or 'all'. Uses the XRegExp
+ * replacement text syntax, which supports named backreference properties via `${name}` or
+ * `$<name>`.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to search.
+ * @param {Array} replacements Array of replacement detail arrays.
+ * @returns {String} New string with all replacements.
+ * @example
+ *
+ * str = XRegExp.replaceEach(str, [
+ *   [XRegExp('(?<name>a)'), 'z${name}'],
+ *   [/b/gi, 'y'],
+ *   [/c/g, 'x', 'one'], // scope 'one' overrides /g
+ *   [/d/, 'w', 'all'],  // scope 'all' overrides lack of /g
+ *   ['e', 'v', 'all'],  // scope 'all' allows replace-all for strings
+ *   [/f/g, ($0) => $0.toUpperCase()]
+ * ]);
+ */
+
+
+XRegExp.replaceEach = function (str, replacements) {
+  var _iteratorNormalCompletion4 = true;
+  var _didIteratorError4 = false;
+  var _iteratorError4 = undefined;
+
+  try {
+    for (var _iterator4 = (0, _getIterator2.default)(replacements), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+      var r = _step4.value;
+      str = XRegExp.replace(str, r[0], r[1], r[2]);
+    }
+  } catch (err) {
+    _didIteratorError4 = true;
+    _iteratorError4 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion4 && _iterator4.return != null) {
+        _iterator4.return();
+      }
+    } finally {
+      if (_didIteratorError4) {
+        throw _iteratorError4;
+      }
+    }
+  }
+
+  return str;
+};
+/**
+ * Splits a string into an array of strings using a regex or string separator. Matches of the
+ * separator are not included in the result array. However, if `separator` is a regex that contains
+ * capturing groups, backreferences are spliced into the result each time `separator` is matched.
+ * Fixes browser bugs compared to the native `String.prototype.split` and can be used reliably
+ * cross-browser.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to split.
+ * @param {RegExp|String} separator Regex or string to use for separating the string.
+ * @param {Number} [limit] Maximum number of items to include in the result array.
+ * @returns {Array} Array of substrings.
+ * @example
+ *
+ * // Basic use
+ * XRegExp.split('a b c', ' ');
+ * // -> ['a', 'b', 'c']
+ *
+ * // With limit
+ * XRegExp.split('a b c', ' ', 2);
+ * // -> ['a', 'b']
+ *
+ * // Backreferences in result array
+ * XRegExp.split('..word1..', /([a-z]+)(\d+)/i);
+ * // -> ['..', 'word', '1', '..']
+ */
+
+
+XRegExp.split = function (str, separator, limit) {
+  return fixed.split.call(toObject(str), separator, limit);
+};
+/**
+ * Executes a regex search in a specified string. Returns `true` or `false`. Optional `pos` and
+ * `sticky` arguments specify the search start position, and whether the match must start at the
+ * specified position only. The `lastIndex` property of the provided regex is not used, but is
+ * updated for compatibility. Also fixes browser bugs compared to the native
+ * `RegExp.prototype.test` and can be used reliably cross-browser.
+ *
+ * @memberOf XRegExp
+ * @param {String} str String to search.
+ * @param {RegExp} regex Regex to search with.
+ * @param {Number} [pos=0] Zero-based index at which to start the search.
+ * @param {Boolean|String} [sticky=false] Whether the match must start at the specified position
+ *   only. The string `'sticky'` is accepted as an alternative to `true`.
+ * @returns {Boolean} Whether the regex matched the provided value.
+ * @example
+ *
+ * // Basic use
+ * XRegExp.test('abc', /c/); // -> true
+ *
+ * // With pos and sticky
+ * XRegExp.test('abc', /c/, 0, 'sticky'); // -> false
+ * XRegExp.test('abc', /c/, 2, 'sticky'); // -> true
+ */
+// Do this the easy way :-)
+
+
+XRegExp.test = function (str, regex, pos, sticky) {
+  return !!XRegExp.exec(str, regex, pos, sticky);
+};
+/**
+ * Uninstalls optional features according to the specified options. All optional features start out
+ * uninstalled, so this is used to undo the actions of `XRegExp.install`.
+ *
+ * @memberOf XRegExp
+ * @param {Object|String} options Options object or string.
+ * @example
+ *
+ * // With an options object
+ * XRegExp.uninstall({
+ *   // Disables support for astral code points in Unicode addons
+ *   astral: true,
+ *
+ *   // Don't add named capture groups to the `groups` property of matches
+ *   namespacing: true
+ * });
+ *
+ * // With an options string
+ * XRegExp.uninstall('astral namespacing');
+ */
+
+
+XRegExp.uninstall = function (options) {
+  options = prepareOptions(options);
+
+  if (features.astral && options.astral) {
+    setAstral(false);
+  }
+
+  if (features.namespacing && options.namespacing) {
+    setNamespacing(false);
+  }
+};
+/**
+ * Returns an XRegExp object that is the union of the given patterns. Patterns can be provided as
+ * regex objects or strings. Metacharacters are escaped in patterns provided as strings.
+ * Backreferences in provided regex objects are automatically renumbered to work correctly within
+ * the larger combined pattern. Native flags used by provided regexes are ignored in favor of the
+ * `flags` argument.
+ *
+ * @memberOf XRegExp
+ * @param {Array} patterns Regexes and strings to combine.
+ * @param {String} [flags] Any combination of XRegExp flags.
+ * @param {Object} [options] Options object with optional properties:
+ *   - `conjunction` {String} Type of conjunction to use: 'or' (default) or 'none'.
+ * @returns {RegExp} Union of the provided regexes and strings.
+ * @example
+ *
+ * XRegExp.union(['a+b*c', /(dogs)\1/, /(cats)\1/], 'i');
+ * // -> /a\+b\*c|(dogs)\1|(cats)\2/i
+ *
+ * XRegExp.union([/man/, /bear/, /pig/], 'i', {conjunction: 'none'});
+ * // -> /manbearpig/i
+ */
+
+
+XRegExp.union = function (patterns, flags, options) {
+  options = options || {};
+  var conjunction = options.conjunction || 'or';
+  var numCaptures = 0;
+  var numPriorCaptures;
+  var captureNames;
+
+  function rewrite(match, paren, backref) {
+    var name = captureNames[numCaptures - numPriorCaptures]; // Capturing group
+
+    if (paren) {
+      ++numCaptures; // If the current capture has a name, preserve the name
+
+      if (name) {
+        return "(?<".concat(name, ">");
+      } // Backreference
+
+    } else if (backref) {
+      // Rewrite the backreference
+      return "\\".concat(+backref + numPriorCaptures);
+    }
+
+    return match;
+  }
+
+  if (!(isType(patterns, 'Array') && patterns.length)) {
+    throw new TypeError('Must provide a nonempty array of patterns to merge');
+  }
+
+  var parts = /(\()(?!\?)|\\([1-9]\d*)|\\[\s\S]|\[(?:[^\\\]]|\\[\s\S])*\]/g;
+  var output = [];
+  var _iteratorNormalCompletion5 = true;
+  var _didIteratorError5 = false;
+  var _iteratorError5 = undefined;
+
+  try {
+    for (var _iterator5 = (0, _getIterator2.default)(patterns), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+      var pattern = _step5.value;
+
+      if (XRegExp.isRegExp(pattern)) {
+        numPriorCaptures = numCaptures;
+        captureNames = pattern[REGEX_DATA] && pattern[REGEX_DATA].captureNames || []; // Rewrite backreferences. Passing to XRegExp dies on octals and ensures patterns are
+        // independently valid; helps keep this simple. Named captures are put back
+
+        output.push(nativ.replace.call(XRegExp(pattern.source).source, parts, rewrite));
+      } else {
+        output.push(XRegExp.escape(pattern));
+      }
+    }
+  } catch (err) {
+    _didIteratorError5 = true;
+    _iteratorError5 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion5 && _iterator5.return != null) {
+        _iterator5.return();
+      }
+    } finally {
+      if (_didIteratorError5) {
+        throw _iteratorError5;
+      }
+    }
+  }
+
+  var separator = conjunction === 'none' ? '' : '|';
+  return XRegExp(output.join(separator), flags);
+}; // ==--------------------------==
+// Fixed/extended native methods
+// ==--------------------------==
+
+/**
+ * Adds named capture support (with backreferences returned as `result.name`), and fixes browser
+ * bugs in the native `RegExp.prototype.exec`. Use via `XRegExp.exec`.
+ *
+ * @memberOf RegExp
+ * @param {String} str String to search.
+ * @returns {Array} Match array with named backreference properties, or `null`.
+ */
+
+
+fixed.exec = function (str) {
+  var origLastIndex = this.lastIndex;
+  var match = nativ.exec.apply(this, arguments);
+
+  if (match) {
+    // Fix browsers whose `exec` methods don't return `undefined` for nonparticipating capturing
+    // groups. This fixes IE 5.5-8, but not IE 9's quirks mode or emulation of older IEs. IE 9
+    // in standards mode follows the spec.
+    if (!correctExecNpcg && match.length > 1 && (0, _includes.default)(match).call(match, '')) {
+      var _context3;
+
+      var r2 = copyRegex(this, {
+        removeG: true,
+        isInternalOnly: true
+      }); // Using `str.slice(match.index)` rather than `match[0]` in case lookahead allowed
+      // matching due to characters outside the match
+
+      nativ.replace.call((0, _slice.default)(_context3 = String(str)).call(_context3, match.index), r2, function () {
+        var len = arguments.length; // Skip index 0 and the last 2
+
+        for (var i = 1; i < len - 2; ++i) {
+          if ((i < 0 || arguments.length <= i ? undefined : arguments[i]) === undefined) {
+            match[i] = undefined;
+          }
+        }
+      });
+    } // Attach named capture properties
+
+
+    var groupsObject = match;
+
+    if (XRegExp.isInstalled('namespacing')) {
+      // https://tc39.github.io/proposal-regexp-named-groups/#sec-regexpbuiltinexec
+      match.groups = (0, _create.default)(null);
+      groupsObject = match.groups;
+    }
+
+    if (this[REGEX_DATA] && this[REGEX_DATA].captureNames) {
+      // Skip index 0
+      for (var i = 1; i < match.length; ++i) {
+        var name = this[REGEX_DATA].captureNames[i - 1];
+
+        if (name) {
+          groupsObject[name] = match[i];
+        }
+      }
+    } // Fix browsers that increment `lastIndex` after zero-length matches
+
+
+    if (this.global && !match[0].length && this.lastIndex > match.index) {
+      this.lastIndex = match.index;
+    }
+  }
+
+  if (!this.global) {
+    // Fixes IE, Opera bug (last tested IE 9, Opera 11.6)
+    this.lastIndex = origLastIndex;
+  }
+
+  return match;
+};
+/**
+ * Fixes browser bugs in the native `RegExp.prototype.test`.
+ *
+ * @memberOf RegExp
+ * @param {String} str String to search.
+ * @returns {Boolean} Whether the regex matched the provided value.
+ */
+
+
+fixed.test = function (str) {
+  // Do this the easy way :-)
+  return !!fixed.exec.call(this, str);
+};
+/**
+ * Adds named capture support (with backreferences returned as `result.name`), and fixes browser
+ * bugs in the native `String.prototype.match`.
+ *
+ * @memberOf String
+ * @param {RegExp|*} regex Regex to search with. If not a regex object, it is passed to `RegExp`.
+ * @returns {Array} If `regex` uses flag g, an array of match strings or `null`. Without flag g,
+ *   the result of calling `regex.exec(this)`.
+ */
+
+
+fixed.match = function (regex) {
+  if (!XRegExp.isRegExp(regex)) {
+    // Use the native `RegExp` rather than `XRegExp`
+    regex = new RegExp(regex);
+  } else if (regex.global) {
+    var result = nativ.match.apply(this, arguments); // Fixes IE bug
+
+    regex.lastIndex = 0;
+    return result;
+  }
+
+  return fixed.exec.call(regex, toObject(this));
+};
+/**
+ * Adds support for `${n}` (or `$<n>`) tokens for named and numbered backreferences in replacement
+ * text, and provides named backreferences to replacement functions as `arguments[0].name`. Also
+ * fixes browser bugs in replacement text syntax when performing a replacement using a nonregex
+ * search value, and the value of a replacement regex's `lastIndex` property during replacement
+ * iterations and upon completion. Note that this doesn't support SpiderMonkey's proprietary third
+ * (`flags`) argument. Use via `XRegExp.replace`.
+ *
+ * @memberOf String
+ * @param {RegExp|String} search Search pattern to be replaced.
+ * @param {String|Function} replacement Replacement string or a function invoked to create it.
+ * @returns {String} New string with one or all matches replaced.
+ */
+
+
+fixed.replace = function (search, replacement) {
+  var isRegex = XRegExp.isRegExp(search);
+  var origLastIndex;
+  var captureNames;
+  var result;
+
+  if (isRegex) {
+    if (search[REGEX_DATA]) {
+      captureNames = search[REGEX_DATA].captureNames;
+    } // Only needed if `search` is nonglobal
+
+
+    origLastIndex = search.lastIndex;
+  } else {
+    search += ''; // Type-convert
+  } // Don't use `typeof`; some older browsers return 'function' for regex objects
+
+
+  if (isType(replacement, 'Function')) {
+    // Stringifying `this` fixes a bug in IE < 9 where the last argument in replacement
+    // functions isn't type-converted to a string
+    result = nativ.replace.call(String(this), search, function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      if (captureNames) {
+        var groupsObject;
+
+        if (XRegExp.isInstalled('namespacing')) {
+          // https://tc39.github.io/proposal-regexp-named-groups/#sec-regexpbuiltinexec
+          groupsObject = (0, _create.default)(null);
+          args.push(groupsObject);
+        } else {
+          // Change the `args[0]` string primitive to a `String` object that can store
+          // properties. This really does need to use `String` as a constructor
+          args[0] = new String(args[0]);
+          groupsObject = args[0];
+        } // Store named backreferences
+
+
+        for (var i = 0; i < captureNames.length; ++i) {
+          if (captureNames[i]) {
+            groupsObject[captureNames[i]] = args[i + 1];
+          }
+        }
+      } // Update `lastIndex` before calling `replacement`. Fixes IE, Chrome, Firefox, Safari
+      // bug (last tested IE 9, Chrome 17, Firefox 11, Safari 5.1)
+
+
+      if (isRegex && search.global) {
+        search.lastIndex = args[args.length - 2] + args[0].length;
+      } // ES6 specs the context for replacement functions as `undefined`
+
+
+      return replacement.apply(void 0, args);
+    });
+  } else {
+    // Ensure that the last value of `args` will be a string when given nonstring `this`,
+    // while still throwing on null or undefined context
+    result = nativ.replace.call(this == null ? this : String(this), search, function () {
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      return nativ.replace.call(String(replacement), replacementToken, replacer);
+
+      function replacer($0, bracketed, angled, dollarToken) {
+        bracketed = bracketed || angled; // Named or numbered backreference with curly or angled braces
+
+        if (bracketed) {
+          // XRegExp behavior for `${n}` or `$<n>`:
+          // 1. Backreference to numbered capture, if `n` is an integer. Use `0` for the
+          //    entire match. Any number of leading zeros may be used.
+          // 2. Backreference to named capture `n`, if it exists and is not an integer
+          //    overridden by numbered capture. In practice, this does not overlap with
+          //    numbered capture since XRegExp does not allow named capture to use a bare
+          //    integer as the name.
+          // 3. If the name or number does not refer to an existing capturing group, it's
+          //    an error.
+          var n = +bracketed; // Type-convert; drop leading zeros
+
+          if (n <= args.length - 3) {
+            return args[n] || '';
+          } // Groups with the same name is an error, else would need `lastIndexOf`
+
+
+          n = captureNames ? (0, _indexOf.default)(captureNames).call(captureNames, bracketed) : -1;
+
+          if (n < 0) {
+            throw new SyntaxError("Backreference to undefined group ".concat($0));
+          }
+
+          return args[n + 1] || '';
+        } // Else, special variable or numbered backreference without curly braces
+
+
+        if (dollarToken === '$') {
+          // $$
+          return '$';
+        }
+
+        if (dollarToken === '&' || +dollarToken === 0) {
+          // $&, $0 (not followed by 1-9), $00
+          return args[0];
+        }
+
+        if (dollarToken === '`') {
+          var _context4;
+
+          // $` (left context)
+          return (0, _slice.default)(_context4 = args[args.length - 1]).call(_context4, 0, args[args.length - 2]);
+        }
+
+        if (dollarToken === "'") {
+          var _context5;
+
+          // $' (right context)
+          return (0, _slice.default)(_context5 = args[args.length - 1]).call(_context5, args[args.length - 2] + args[0].length);
+        } // Else, numbered backreference without braces
+
+
+        dollarToken = +dollarToken; // Type-convert; drop leading zero
+        // XRegExp behavior for `$n` and `$nn`:
+        // - Backrefs end after 1 or 2 digits. Use `${..}` or `$<..>` for more digits.
+        // - `$1` is an error if no capturing groups.
+        // - `$10` is an error if less than 10 capturing groups. Use `${1}0` or `$<1>0`
+        //   instead.
+        // - `$01` is `$1` if at least one capturing group, else it's an error.
+        // - `$0` (not followed by 1-9) and `$00` are the entire match.
+        // Native behavior, for comparison:
+        // - Backrefs end after 1 or 2 digits. Cannot reference capturing group 100+.
+        // - `$1` is a literal `$1` if no capturing groups.
+        // - `$10` is `$1` followed by a literal `0` if less than 10 capturing groups.
+        // - `$01` is `$1` if at least one capturing group, else it's a literal `$01`.
+        // - `$0` is a literal `$0`.
+
+        if (!isNaN(dollarToken)) {
+          if (dollarToken > args.length - 3) {
+            throw new SyntaxError("Backreference to undefined group ".concat($0));
+          }
+
+          return args[dollarToken] || '';
+        } // `$` followed by an unsupported char is an error, unlike native JS
+
+
+        throw new SyntaxError("Invalid token ".concat($0));
+      }
+    });
+  }
+
+  if (isRegex) {
+    if (search.global) {
+      // Fixes IE, Safari bug (last tested IE 9, Safari 5.1)
+      search.lastIndex = 0;
+    } else {
+      // Fixes IE, Opera bug (last tested IE 9, Opera 11.6)
+      search.lastIndex = origLastIndex;
+    }
+  }
+
+  return result;
+};
+/**
+ * Fixes browser bugs in the native `String.prototype.split`. Use via `XRegExp.split`.
+ *
+ * @memberOf String
+ * @param {RegExp|String} separator Regex or string to use for separating the string.
+ * @param {Number} [limit] Maximum number of items to include in the result array.
+ * @returns {Array} Array of substrings.
+ */
+
+
+fixed.split = function (separator, limit) {
+  if (!XRegExp.isRegExp(separator)) {
+    // Browsers handle nonregex split correctly, so use the faster native method
+    return nativ.split.apply(this, arguments);
+  }
+
+  var str = String(this);
+  var output = [];
+  var origLastIndex = separator.lastIndex;
+  var lastLastIndex = 0;
+  var lastLength; // Values for `limit`, per the spec:
+  // If undefined: pow(2,32) - 1
+  // If 0, Infinity, or NaN: 0
+  // If positive number: limit = floor(limit); if (limit >= pow(2,32)) limit -= pow(2,32);
+  // If negative number: pow(2,32) - floor(abs(limit))
+  // If other: Type-convert, then use the above rules
+  // This line fails in very strange ways for some values of `limit` in Opera 10.5-10.63, unless
+  // Opera Dragonfly is open (go figure). It works in at least Opera 9.5-10.1 and 11+
+
+  limit = (limit === undefined ? -1 : limit) >>> 0;
+  (0, _forEach.default)(XRegExp).call(XRegExp, str, separator, function (match) {
+    // This condition is not the same as `if (match[0].length)`
+    if (match.index + match[0].length > lastLastIndex) {
+      output.push((0, _slice.default)(str).call(str, lastLastIndex, match.index));
+
+      if (match.length > 1 && match.index < str.length) {
+        Array.prototype.push.apply(output, (0, _slice.default)(match).call(match, 1));
+      }
+
+      lastLength = match[0].length;
+      lastLastIndex = match.index + lastLength;
+    }
+  });
+
+  if (lastLastIndex === str.length) {
+    if (!nativ.test.call(separator, '') || lastLength) {
+      output.push('');
+    }
+  } else {
+    output.push((0, _slice.default)(str).call(str, lastLastIndex));
+  }
+
+  separator.lastIndex = origLastIndex;
+  return output.length > limit ? (0, _slice.default)(output).call(output, 0, limit) : output;
+}; // ==--------------------------==
+// Built-in syntax/flag tokens
+// ==--------------------------==
+
+/*
+ * Letter escapes that natively match literal characters: `\a`, `\A`, etc. These should be
+ * SyntaxErrors but are allowed in web reality. XRegExp makes them errors for cross-browser
+ * consistency and to reserve their syntax, but lets them be superseded by addons.
+ */
+
+
+XRegExp.addToken(/\\([ABCE-RTUVXYZaeg-mopqyz]|c(?![A-Za-z])|u(?![\dA-Fa-f]{4}|{[\dA-Fa-f]+})|x(?![\dA-Fa-f]{2}))/, function (match, scope) {
+  // \B is allowed in default scope only
+  if (match[1] === 'B' && scope === defaultScope) {
+    return match[0];
+  }
+
+  throw new SyntaxError("Invalid escape ".concat(match[0]));
+}, {
+  scope: 'all',
+  leadChar: '\\'
+});
+/*
+ * Unicode code point escape with curly braces: `\u{N..}`. `N..` is any one or more digit
+ * hexadecimal number from 0-10FFFF, and can include leading zeros. Requires the native ES6 `u` flag
+ * to support code points greater than U+FFFF. Avoids converting code points above U+FFFF to
+ * surrogate pairs (which could be done without flag `u`), since that could lead to broken behavior
+ * if you follow a `\u{N..}` token that references a code point above U+FFFF with a quantifier, or
+ * if you use the same in a character class.
+ */
+
+XRegExp.addToken(/\\u{([\dA-Fa-f]+)}/, function (match, scope, flags) {
+  var code = dec(match[1]);
+
+  if (code > 0x10FFFF) {
+    throw new SyntaxError("Invalid Unicode code point ".concat(match[0]));
+  }
+
+  if (code <= 0xFFFF) {
+    // Converting to \uNNNN avoids needing to escape the literal character and keep it
+    // separate from preceding tokens
+    return "\\u".concat(pad4(hex(code)));
+  } // If `code` is between 0xFFFF and 0x10FFFF, require and defer to native handling
+
+
+  if (hasNativeU && (0, _includes.default)(flags).call(flags, 'u')) {
+    return match[0];
+  }
+
+  throw new SyntaxError('Cannot use Unicode code point above \\u{FFFF} without flag u');
+}, {
+  scope: 'all',
+  leadChar: '\\'
+});
+/*
+ * Empty character class: `[]` or `[^]`. This fixes a critical cross-browser syntax inconsistency.
+ * Unless this is standardized (per the ES spec), regex syntax can't be accurately parsed because
+ * character class endings can't be determined.
+ */
+
+XRegExp.addToken(/\[(\^?)\]/, // For cross-browser compatibility with ES3, convert [] to \b\B and [^] to [\s\S].
+// (?!) should work like \b\B, but is unreliable in some versions of Firefox
+
+/* eslint-disable no-confusing-arrow */
+function (match) {
+  return match[1] ? '[\\s\\S]' : '\\b\\B';
+},
+/* eslint-enable no-confusing-arrow */
+{
+  leadChar: '['
+});
+/*
+ * Comment pattern: `(?# )`. Inline comments are an alternative to the line comments allowed in
+ * free-spacing mode (flag x).
+ */
+
+XRegExp.addToken(/\(\?#[^)]*\)/, getContextualTokenSeparator, {
+  leadChar: '('
+});
+/*
+ * Whitespace and line comments, in free-spacing mode (aka extended mode, flag x) only.
+ */
+
+XRegExp.addToken(/\s+|#[^\n]*\n?/, getContextualTokenSeparator, {
+  flag: 'x'
+});
+/*
+ * Dot, in dotall mode (aka singleline mode, flag s) only.
+ */
+
+XRegExp.addToken(/\./, function () {
+  return '[\\s\\S]';
+}, {
+  flag: 's',
+  leadChar: '.'
+});
+/*
+ * Named backreference: `\k<name>`. Backreference names can use the characters A-Z, a-z, 0-9, _,
+ * and $ only. Also allows numbered backreferences as `\k<n>`.
+ */
+
+XRegExp.addToken(/\\k<([\w$]+)>/, function (match) {
+  var _context6, _context7;
+
+  // Groups with the same name is an error, else would need `lastIndexOf`
+  var index = isNaN(match[1]) ? (0, _indexOf.default)(_context6 = this.captureNames).call(_context6, match[1]) + 1 : +match[1];
+  var endIndex = match.index + match[0].length;
+
+  if (!index || index > this.captureNames.length) {
+    throw new SyntaxError("Backreference to undefined group ".concat(match[0]));
+  } // Keep backreferences separate from subsequent literal numbers. This avoids e.g.
+  // inadvertedly changing `(?<n>)\k<n>1` to `()\11`.
+
+
+  return (0, _concat.default)(_context7 = "\\".concat(index)).call(_context7, endIndex === match.input.length || isNaN(match.input[endIndex]) ? '' : '(?:)');
+}, {
+  leadChar: '\\'
+});
+/*
+ * Numbered backreference or octal, plus any following digits: `\0`, `\11`, etc. Octals except `\0`
+ * not followed by 0-9 and backreferences to unopened capture groups throw an error. Other matches
+ * are returned unaltered. IE < 9 doesn't support backreferences above `\99` in regex syntax.
+ */
+
+XRegExp.addToken(/\\(\d+)/, function (match, scope) {
+  if (!(scope === defaultScope && /^[1-9]/.test(match[1]) && +match[1] <= this.captureNames.length) && match[1] !== '0') {
+    throw new SyntaxError("Cannot use octal escape or backreference to undefined group ".concat(match[0]));
+  }
+
+  return match[0];
+}, {
+  scope: 'all',
+  leadChar: '\\'
+});
+/*
+ * Named capturing group; match the opening delimiter only: `(?<name>`. Capture names can use the
+ * characters A-Z, a-z, 0-9, _, and $ only. Names can't be integers. Supports Python-style
+ * `(?P<name>` as an alternate syntax to avoid issues in some older versions of Opera which natively
+ * supported the Python-style syntax. Otherwise, XRegExp might treat numbered backreferences to
+ * Python-style named capture as octals.
+ */
+
+XRegExp.addToken(/\(\?P?<([\w$]+)>/, function (match) {
+  var _context8;
+
+  // Disallow bare integers as names because named backreferences are added to match arrays
+  // and therefore numeric properties may lead to incorrect lookups
+  if (!isNaN(match[1])) {
+    throw new SyntaxError("Cannot use integer as capture name ".concat(match[0]));
+  }
+
+  if (!XRegExp.isInstalled('namespacing') && (match[1] === 'length' || match[1] === '__proto__')) {
+    throw new SyntaxError("Cannot use reserved word as capture name ".concat(match[0]));
+  }
+
+  if ((0, _includes.default)(_context8 = this.captureNames).call(_context8, match[1])) {
+    throw new SyntaxError("Cannot use same name for multiple groups ".concat(match[0]));
+  }
+
+  this.captureNames.push(match[1]);
+  this.hasNamedCapture = true;
+  return '(';
+}, {
+  leadChar: '('
+});
+/*
+ * Capturing group; match the opening parenthesis only. Required for support of named capturing
+ * groups. Also adds explicit capture mode (flag n).
+ */
+
+XRegExp.addToken(/\((?!\?)/, function (match, scope, flags) {
+  if ((0, _includes.default)(flags).call(flags, 'n')) {
+    return '(?:';
+  }
+
+  this.captureNames.push(null);
+  return '(';
+}, {
+  optionalFlags: 'n',
+  leadChar: '('
+});
+var _default = XRegExp;
+exports.default = _default;
+module.exports = exports["default"];
+
+/***/ }),
 /* 829 */,
 /* 830 */
 /***/ (function(module) {
@@ -42166,32 +47713,7 @@ exports.default = SyncProvider;
 
 
 /***/ }),
-/* 832 */,
-/* 833 */,
-/* 834 */
-/***/ (function(module) {
-
-"use strict";
-
-
-const pTry = (fn, ...arguments_) => new Promise(resolve => {
-	resolve(fn(...arguments_));
-});
-
-module.exports = pTry;
-// TODO: remove this in the next major version
-module.exports.default = pTry;
-
-
-/***/ }),
-/* 835 */
-/***/ (function(module) {
-
-module.exports = require("url");
-
-/***/ }),
-/* 836 */,
-/* 837 */
+/* 832 */
 /***/ (function(module) {
 
 "use strict";
@@ -42346,6 +47868,1249 @@ module.exports = {
 	"whitesmoke": [245, 245, 245],
 	"yellow": [255, 255, 0],
 	"yellowgreen": [154, 205, 50]
+};
+
+
+/***/ }),
+/* 833 */,
+/* 834 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isYargsInstance = exports.rebase = exports.Yargs = void 0;
+const command_1 = __webpack_require__(359);
+const common_types_1 = __webpack_require__(45);
+const yerror_1 = __webpack_require__(946);
+const usage_1 = __webpack_require__(21);
+const argsert_1 = __webpack_require__(997);
+const fs = __webpack_require__(747);
+const completion_1 = __webpack_require__(792);
+const path = __webpack_require__(622);
+const validation_1 = __webpack_require__(655);
+const obj_filter_1 = __webpack_require__(816);
+const apply_extends_1 = __webpack_require__(847);
+const middleware_1 = __webpack_require__(233);
+const processArgv = __webpack_require__(345);
+const is_promise_1 = __webpack_require__(91);
+const Parser = __webpack_require__(453);
+const y18nFactory = __webpack_require__(349);
+const setBlocking = __webpack_require__(411);
+const findUp = __webpack_require__(239);
+const requireMainFilename = __webpack_require__(402);
+function Yargs(processArgs = [], cwd = process.cwd(), parentRequire = require) {
+    const self = {};
+    let command;
+    let completion = null;
+    let groups = {};
+    const globalMiddleware = [];
+    let output = '';
+    const preservedGroups = {};
+    let usage;
+    let validation;
+    let handlerFinishCommand = null;
+    const y18n = y18nFactory({
+        directory: __webpack_require__.ab + "locales",
+        updateFiles: false
+    });
+    self.middleware = middleware_1.globalMiddlewareFactory(globalMiddleware, self);
+    self.scriptName = function (scriptName) {
+        self.customScriptName = true;
+        self.$0 = scriptName;
+        return self;
+    };
+    // ignore the node bin, specify this in your
+    // bin file with #!/usr/bin/env node
+    let default$0;
+    if (/\b(node|iojs|electron)(\.exe)?$/.test(process.argv[0])) {
+        default$0 = process.argv.slice(1, 2);
+    }
+    else {
+        default$0 = process.argv.slice(0, 1);
+    }
+    self.$0 = default$0
+        .map(x => {
+        const b = rebase(cwd, x);
+        return x.match(/^(\/|([a-zA-Z]:)?\\)/) && b.length < x.length ? b : x;
+    })
+        .join(' ').trim();
+    if (process.env._ !== undefined && processArgv.getProcessArgvBin() === process.env._) {
+        self.$0 = process.env._.replace(`${path.dirname(process.execPath)}/`, '');
+    }
+    // use context object to keep track of resets, subcommand execution, etc
+    // submodules should modify and check the state of context as necessary
+    const context = { resets: -1, commands: [], fullCommands: [], files: [] };
+    self.getContext = () => context;
+    // puts yargs back into an initial state. any keys
+    // that have been set to "global" will not be reset
+    // by this action.
+    let options;
+    self.resetOptions = self.reset = function resetOptions(aliases = {}) {
+        context.resets++;
+        options = options || {};
+        // put yargs back into an initial state, this
+        // logic is used to build a nested command
+        // hierarchy.
+        const tmpOptions = {};
+        tmpOptions.local = options.local ? options.local : [];
+        tmpOptions.configObjects = options.configObjects ? options.configObjects : [];
+        // if a key has been explicitly set as local,
+        // we should reset it before passing options to command.
+        const localLookup = {};
+        tmpOptions.local.forEach((l) => {
+            localLookup[l] = true;
+            (aliases[l] || []).forEach((a) => {
+                localLookup[a] = true;
+            });
+        });
+        // add all groups not set to local to preserved groups
+        Object.assign(preservedGroups, Object.keys(groups).reduce((acc, groupName) => {
+            const keys = groups[groupName].filter(key => !(key in localLookup));
+            if (keys.length > 0) {
+                acc[groupName] = keys;
+            }
+            return acc;
+        }, {}));
+        // groups can now be reset
+        groups = {};
+        const arrayOptions = [
+            'array', 'boolean', 'string', 'skipValidation',
+            'count', 'normalize', 'number',
+            'hiddenOptions'
+        ];
+        const objectOptions = [
+            'narg', 'key', 'alias', 'default', 'defaultDescription',
+            'config', 'choices', 'demandedOptions', 'demandedCommands', 'coerce',
+            'deprecatedOptions'
+        ];
+        arrayOptions.forEach(k => {
+            tmpOptions[k] = (options[k] || []).filter(k => !localLookup[k]);
+        });
+        objectOptions.forEach((k) => {
+            tmpOptions[k] = obj_filter_1.objFilter(options[k], k => !localLookup[k]);
+        });
+        tmpOptions.envPrefix = options.envPrefix;
+        options = tmpOptions;
+        // if this is the first time being executed, create
+        // instances of all our helpers -- otherwise just reset.
+        usage = usage ? usage.reset(localLookup) : usage_1.usage(self, y18n);
+        validation = validation ? validation.reset(localLookup) : validation_1.validation(self, usage, y18n);
+        command = command ? command.reset() : command_1.command(self, usage, validation, globalMiddleware);
+        if (!completion)
+            completion = completion_1.completion(self, usage, command);
+        completionCommand = null;
+        output = '';
+        exitError = null;
+        hasOutput = false;
+        self.parsed = false;
+        return self;
+    };
+    self.resetOptions();
+    // temporary hack: allow "freezing" of reset-able state for parse(msg, cb)
+    const frozens = [];
+    function freeze() {
+        frozens.push({
+            options,
+            configObjects: options.configObjects.slice(0),
+            exitProcess,
+            groups,
+            strict,
+            strictCommands,
+            completionCommand,
+            output,
+            exitError,
+            hasOutput,
+            parsed: self.parsed,
+            parseFn,
+            parseContext,
+            handlerFinishCommand
+        });
+        usage.freeze();
+        validation.freeze();
+        command.freeze();
+    }
+    function unfreeze() {
+        const frozen = frozens.pop();
+        common_types_1.assertNotStrictEqual(frozen, undefined);
+        let configObjects;
+        ({
+            options,
+            configObjects,
+            exitProcess,
+            groups,
+            output,
+            exitError,
+            hasOutput,
+            parsed: self.parsed,
+            strict,
+            strictCommands,
+            completionCommand,
+            parseFn,
+            parseContext,
+            handlerFinishCommand
+        } = frozen);
+        options.configObjects = configObjects;
+        usage.unfreeze();
+        validation.unfreeze();
+        command.unfreeze();
+    }
+    self.boolean = function (keys) {
+        argsert_1.argsert('<array|string>', [keys], arguments.length);
+        populateParserHintArray('boolean', keys);
+        return self;
+    };
+    self.array = function (keys) {
+        argsert_1.argsert('<array|string>', [keys], arguments.length);
+        populateParserHintArray('array', keys);
+        return self;
+    };
+    self.number = function (keys) {
+        argsert_1.argsert('<array|string>', [keys], arguments.length);
+        populateParserHintArray('number', keys);
+        return self;
+    };
+    self.normalize = function (keys) {
+        argsert_1.argsert('<array|string>', [keys], arguments.length);
+        populateParserHintArray('normalize', keys);
+        return self;
+    };
+    self.count = function (keys) {
+        argsert_1.argsert('<array|string>', [keys], arguments.length);
+        populateParserHintArray('count', keys);
+        return self;
+    };
+    self.string = function (keys) {
+        argsert_1.argsert('<array|string>', [keys], arguments.length);
+        populateParserHintArray('string', keys);
+        return self;
+    };
+    self.requiresArg = function (keys) {
+        // the 2nd paramter [number] in the argsert the assertion is mandatory
+        // as populateParserHintSingleValueDictionary recursively calls requiresArg
+        // with Nan as a 2nd parameter, although we ignore it
+        argsert_1.argsert('<array|string|object> [number]', [keys], arguments.length);
+        // If someone configures nargs at the same time as requiresArg,
+        // nargs should take precedent,
+        // see: https://github.com/yargs/yargs/pull/1572
+        // TODO: make this work with aliases, using a check similar to
+        // checkAllAliases() in yargs-parser.
+        if (typeof keys === 'string' && options.narg[keys]) {
+            return self;
+        }
+        else {
+            populateParserHintSingleValueDictionary(self.requiresArg, 'narg', keys, NaN);
+        }
+        return self;
+    };
+    self.skipValidation = function (keys) {
+        argsert_1.argsert('<array|string>', [keys], arguments.length);
+        populateParserHintArray('skipValidation', keys);
+        return self;
+    };
+    function populateParserHintArray(type, keys) {
+        keys = [].concat(keys);
+        keys.forEach((key) => {
+            key = sanitizeKey(key);
+            options[type].push(key);
+        });
+    }
+    self.nargs = function (key, value) {
+        argsert_1.argsert('<string|object|array> [number]', [key, value], arguments.length);
+        populateParserHintSingleValueDictionary(self.nargs, 'narg', key, value);
+        return self;
+    };
+    self.choices = function (key, value) {
+        argsert_1.argsert('<object|string|array> [string|array]', [key, value], arguments.length);
+        populateParserHintArrayDictionary(self.choices, 'choices', key, value);
+        return self;
+    };
+    self.alias = function (key, value) {
+        argsert_1.argsert('<object|string|array> [string|array]', [key, value], arguments.length);
+        populateParserHintArrayDictionary(self.alias, 'alias', key, value);
+        return self;
+    };
+    // TODO: actually deprecate self.defaults.
+    self.default = self.defaults = function (key, value, defaultDescription) {
+        argsert_1.argsert('<object|string|array> [*] [string]', [key, value, defaultDescription], arguments.length);
+        if (defaultDescription) {
+            common_types_1.assertSingleKey(key);
+            options.defaultDescription[key] = defaultDescription;
+        }
+        if (typeof value === 'function') {
+            common_types_1.assertSingleKey(key);
+            if (!options.defaultDescription[key])
+                options.defaultDescription[key] = usage.functionDescription(value);
+            value = value.call();
+        }
+        populateParserHintSingleValueDictionary(self.default, 'default', key, value);
+        return self;
+    };
+    self.describe = function (key, desc) {
+        argsert_1.argsert('<object|string|array> [string]', [key, desc], arguments.length);
+        setKey(key, true);
+        usage.describe(key, desc);
+        return self;
+    };
+    function setKey(key, set) {
+        populateParserHintSingleValueDictionary(setKey, 'key', key, set);
+        return self;
+    }
+    function demandOption(keys, msg) {
+        argsert_1.argsert('<object|string|array> [string]', [keys, msg], arguments.length);
+        populateParserHintSingleValueDictionary(self.demandOption, 'demandedOptions', keys, msg);
+        return self;
+    }
+    self.demandOption = demandOption;
+    self.coerce = function (keys, value) {
+        argsert_1.argsert('<object|string|array> [function]', [keys, value], arguments.length);
+        populateParserHintSingleValueDictionary(self.coerce, 'coerce', keys, value);
+        return self;
+    };
+    function populateParserHintSingleValueDictionary(builder, type, key, value) {
+        populateParserHintDictionary(builder, type, key, value, (type, key, value) => {
+            options[type][key] = value;
+        });
+    }
+    function populateParserHintArrayDictionary(builder, type, key, value) {
+        populateParserHintDictionary(builder, type, key, value, (type, key, value) => {
+            options[type][key] = (options[type][key] || []).concat(value);
+        });
+    }
+    function populateParserHintDictionary(builder, type, key, value, singleKeyHandler) {
+        if (Array.isArray(key)) {
+            // an array of keys with one value ['x', 'y', 'z'], function parse () {}
+            key.forEach((k) => {
+                builder(k, value);
+            });
+        }
+        else if (((key) => typeof key === 'object')(key)) {
+            // an object of key value pairs: {'x': parse () {}, 'y': parse() {}}
+            for (const k of common_types_1.objectKeys(key)) {
+                builder(k, key[k]);
+            }
+        }
+        else {
+            singleKeyHandler(type, sanitizeKey(key), value);
+        }
+    }
+    function sanitizeKey(key) {
+        if (key === '__proto__')
+            return '___proto___';
+        return key;
+    }
+    function deleteFromParserHintObject(optionKey) {
+        // delete from all parsing hints:
+        // boolean, array, key, alias, etc.
+        common_types_1.objectKeys(options).forEach((hintKey) => {
+            // configObjects is not a parsing hint array
+            if (((key) => key === 'configObjects')(hintKey))
+                return;
+            const hint = options[hintKey];
+            if (Array.isArray(hint)) {
+                if (~hint.indexOf(optionKey))
+                    hint.splice(hint.indexOf(optionKey), 1);
+            }
+            else if (typeof hint === 'object') {
+                delete hint[optionKey];
+            }
+        });
+        // now delete the description from usage.js.
+        delete usage.getDescriptions()[optionKey];
+    }
+    self.config = function config(key = 'config', msg, parseFn) {
+        argsert_1.argsert('[object|string] [string|function] [function]', [key, msg, parseFn], arguments.length);
+        // allow a config object to be provided directly.
+        if ((typeof key === 'object') && !Array.isArray(key)) {
+            key = apply_extends_1.applyExtends(key, cwd, self.getParserConfiguration()['deep-merge-config']);
+            options.configObjects = (options.configObjects || []).concat(key);
+            return self;
+        }
+        // allow for a custom parsing function.
+        if (typeof msg === 'function') {
+            parseFn = msg;
+            msg = undefined;
+        }
+        self.describe(key, msg || usage.deferY18nLookup('Path to JSON config file'));
+        (Array.isArray(key) ? key : [key]).forEach((k) => {
+            options.config[k] = parseFn || true;
+        });
+        return self;
+    };
+    self.example = function (cmd, description) {
+        argsert_1.argsert('<string|array> [string]', [cmd, description], arguments.length);
+        if (Array.isArray(cmd)) {
+            cmd.forEach((exampleParams) => self.example(...exampleParams));
+        }
+        else {
+            usage.example(cmd, description);
+        }
+        return self;
+    };
+    self.command = function (cmd, description, builder, handler, middlewares, deprecated) {
+        argsert_1.argsert('<string|array|object> [string|boolean] [function|object] [function] [array] [boolean|string]', [cmd, description, builder, handler, middlewares, deprecated], arguments.length);
+        command.addHandler(cmd, description, builder, handler, middlewares, deprecated);
+        return self;
+    };
+    self.commandDir = function (dir, opts) {
+        argsert_1.argsert('<string> [object]', [dir, opts], arguments.length);
+        const req = parentRequire || require;
+        command.addDirectory(dir, self.getContext(), req, __webpack_require__(732)(), opts);
+        return self;
+    };
+    // TODO: deprecate self.demand in favor of
+    // .demandCommand() .demandOption().
+    self.demand = self.required = self.require = function demand(keys, max, msg) {
+        // you can optionally provide a 'max' key,
+        // which will raise an exception if too many '_'
+        // options are provided.
+        if (Array.isArray(max)) {
+            max.forEach((key) => {
+                common_types_1.assertNotStrictEqual(msg, true);
+                demandOption(key, msg);
+            });
+            max = Infinity;
+        }
+        else if (typeof max !== 'number') {
+            msg = max;
+            max = Infinity;
+        }
+        if (typeof keys === 'number') {
+            common_types_1.assertNotStrictEqual(msg, true);
+            self.demandCommand(keys, max, msg, msg);
+        }
+        else if (Array.isArray(keys)) {
+            keys.forEach((key) => {
+                common_types_1.assertNotStrictEqual(msg, true);
+                demandOption(key, msg);
+            });
+        }
+        else {
+            if (typeof msg === 'string') {
+                demandOption(keys, msg);
+            }
+            else if (msg === true || typeof msg === 'undefined') {
+                demandOption(keys);
+            }
+        }
+        return self;
+    };
+    self.demandCommand = function demandCommand(min = 1, max, minMsg, maxMsg) {
+        argsert_1.argsert('[number] [number|string] [string|null|undefined] [string|null|undefined]', [min, max, minMsg, maxMsg], arguments.length);
+        if (typeof max !== 'number') {
+            minMsg = max;
+            max = Infinity;
+        }
+        self.global('_', false);
+        options.demandedCommands._ = {
+            min,
+            max,
+            minMsg,
+            maxMsg
+        };
+        return self;
+    };
+    self.getDemandedOptions = () => {
+        argsert_1.argsert([], 0);
+        return options.demandedOptions;
+    };
+    self.getDemandedCommands = () => {
+        argsert_1.argsert([], 0);
+        return options.demandedCommands;
+    };
+    self.deprecateOption = function deprecateOption(option, message) {
+        argsert_1.argsert('<string> [string|boolean]', [option, message], arguments.length);
+        options.deprecatedOptions[option] = message;
+        return self;
+    };
+    self.getDeprecatedOptions = () => {
+        argsert_1.argsert([], 0);
+        return options.deprecatedOptions;
+    };
+    self.implies = function (key, value) {
+        argsert_1.argsert('<string|object> [number|string|array]', [key, value], arguments.length);
+        validation.implies(key, value);
+        return self;
+    };
+    self.conflicts = function (key1, key2) {
+        argsert_1.argsert('<string|object> [string|array]', [key1, key2], arguments.length);
+        validation.conflicts(key1, key2);
+        return self;
+    };
+    self.usage = function (msg, description, builder, handler) {
+        argsert_1.argsert('<string|null|undefined> [string|boolean] [function|object] [function]', [msg, description, builder, handler], arguments.length);
+        if (description !== undefined) {
+            common_types_1.assertNotStrictEqual(msg, null);
+            // .usage() can be used as an alias for defining
+            // a default command.
+            if ((msg || '').match(/^\$0( |$)/)) {
+                return self.command(msg, description, builder, handler);
+            }
+            else {
+                throw new yerror_1.YError('.usage() description must start with $0 if being used as alias for .command()');
+            }
+        }
+        else {
+            usage.usage(msg);
+            return self;
+        }
+    };
+    self.epilogue = self.epilog = function (msg) {
+        argsert_1.argsert('<string>', [msg], arguments.length);
+        usage.epilog(msg);
+        return self;
+    };
+    self.fail = function (f) {
+        argsert_1.argsert('<function>', [f], arguments.length);
+        usage.failFn(f);
+        return self;
+    };
+    self.onFinishCommand = function (f) {
+        argsert_1.argsert('<function>', [f], arguments.length);
+        handlerFinishCommand = f;
+        return self;
+    };
+    self.getHandlerFinishCommand = () => handlerFinishCommand;
+    self.check = function (f, _global) {
+        argsert_1.argsert('<function> [boolean]', [f, _global], arguments.length);
+        validation.check(f, _global !== false);
+        return self;
+    };
+    self.global = function global(globals, global) {
+        argsert_1.argsert('<string|array> [boolean]', [globals, global], arguments.length);
+        globals = [].concat(globals);
+        if (global !== false) {
+            options.local = options.local.filter(l => globals.indexOf(l) === -1);
+        }
+        else {
+            globals.forEach((g) => {
+                if (options.local.indexOf(g) === -1)
+                    options.local.push(g);
+            });
+        }
+        return self;
+    };
+    self.pkgConf = function pkgConf(key, rootPath) {
+        argsert_1.argsert('<string> [string]', [key, rootPath], arguments.length);
+        let conf = null;
+        // prefer cwd to require-main-filename in this method
+        // since we're looking for e.g. "nyc" config in nyc consumer
+        // rather than "yargs" config in nyc (where nyc is the main filename)
+        const obj = pkgUp(rootPath || cwd);
+        // If an object exists in the key, add it to options.configObjects
+        if (obj[key] && typeof obj[key] === 'object') {
+            conf = apply_extends_1.applyExtends(obj[key], rootPath || cwd, self.getParserConfiguration()['deep-merge-config']);
+            options.configObjects = (options.configObjects || []).concat(conf);
+        }
+        return self;
+    };
+    const pkgs = {};
+    function pkgUp(rootPath) {
+        const npath = rootPath || '*';
+        if (pkgs[npath])
+            return pkgs[npath];
+        let obj = {};
+        try {
+            let startDir = rootPath || requireMainFilename(parentRequire);
+            // When called in an environment that lacks require.main.filename, such as a jest test runner,
+            // startDir is already process.cwd(), and should not be shortened.
+            // Whether or not it is _actually_ a directory (e.g., extensionless bin) is irrelevant, find-up handles it.
+            if (!rootPath && path.extname(startDir)) {
+                startDir = path.dirname(startDir);
+            }
+            const pkgJsonPath = findUp.sync('package.json', {
+                cwd: startDir
+            });
+            common_types_1.assertNotStrictEqual(pkgJsonPath, undefined);
+            obj = JSON.parse(fs.readFileSync(pkgJsonPath).toString());
+        }
+        catch (noop) { }
+        pkgs[npath] = obj || {};
+        return pkgs[npath];
+    }
+    let parseFn = null;
+    let parseContext = null;
+    self.parse = function parse(args, shortCircuit, _parseFn) {
+        argsert_1.argsert('[string|array] [function|boolean|object] [function]', [args, shortCircuit, _parseFn], arguments.length);
+        freeze();
+        if (typeof args === 'undefined') {
+            const argv = self._parseArgs(processArgs);
+            const tmpParsed = self.parsed;
+            unfreeze();
+            // TODO: remove this compatibility hack when we release yargs@15.x:
+            self.parsed = tmpParsed;
+            return argv;
+        }
+        // a context object can optionally be provided, this allows
+        // additional information to be passed to a command handler.
+        if (typeof shortCircuit === 'object') {
+            parseContext = shortCircuit;
+            shortCircuit = _parseFn;
+        }
+        // by providing a function as a second argument to
+        // parse you can capture output that would otherwise
+        // default to printing to stdout/stderr.
+        if (typeof shortCircuit === 'function') {
+            parseFn = shortCircuit;
+            shortCircuit = false;
+        }
+        // completion short-circuits the parsing process,
+        // skipping validation, etc.
+        if (!shortCircuit)
+            processArgs = args;
+        if (parseFn)
+            exitProcess = false;
+        const parsed = self._parseArgs(args, !!shortCircuit);
+        completion.setParsed(self.parsed);
+        if (parseFn)
+            parseFn(exitError, parsed, output);
+        unfreeze();
+        return parsed;
+    };
+    self._getParseContext = () => parseContext || {};
+    self._hasParseCallback = () => !!parseFn;
+    self.option = self.options = function option(key, opt) {
+        argsert_1.argsert('<string|object> [object]', [key, opt], arguments.length);
+        if (typeof key === 'object') {
+            Object.keys(key).forEach((k) => {
+                self.options(k, key[k]);
+            });
+        }
+        else {
+            if (typeof opt !== 'object') {
+                opt = {};
+            }
+            options.key[key] = true; // track manually set keys.
+            if (opt.alias)
+                self.alias(key, opt.alias);
+            const deprecate = opt.deprecate || opt.deprecated;
+            if (deprecate) {
+                self.deprecateOption(key, deprecate);
+            }
+            const demand = opt.demand || opt.required || opt.require;
+            // A required option can be specified via "demand: true".
+            if (demand) {
+                self.demand(key, demand);
+            }
+            if (opt.demandOption) {
+                self.demandOption(key, typeof opt.demandOption === 'string' ? opt.demandOption : undefined);
+            }
+            if (opt.conflicts) {
+                self.conflicts(key, opt.conflicts);
+            }
+            if ('default' in opt) {
+                self.default(key, opt.default);
+            }
+            if (opt.implies !== undefined) {
+                self.implies(key, opt.implies);
+            }
+            if (opt.nargs !== undefined) {
+                self.nargs(key, opt.nargs);
+            }
+            if (opt.config) {
+                self.config(key, opt.configParser);
+            }
+            if (opt.normalize) {
+                self.normalize(key);
+            }
+            if (opt.choices) {
+                self.choices(key, opt.choices);
+            }
+            if (opt.coerce) {
+                self.coerce(key, opt.coerce);
+            }
+            if (opt.group) {
+                self.group(key, opt.group);
+            }
+            if (opt.boolean || opt.type === 'boolean') {
+                self.boolean(key);
+                if (opt.alias)
+                    self.boolean(opt.alias);
+            }
+            if (opt.array || opt.type === 'array') {
+                self.array(key);
+                if (opt.alias)
+                    self.array(opt.alias);
+            }
+            if (opt.number || opt.type === 'number') {
+                self.number(key);
+                if (opt.alias)
+                    self.number(opt.alias);
+            }
+            if (opt.string || opt.type === 'string') {
+                self.string(key);
+                if (opt.alias)
+                    self.string(opt.alias);
+            }
+            if (opt.count || opt.type === 'count') {
+                self.count(key);
+            }
+            if (typeof opt.global === 'boolean') {
+                self.global(key, opt.global);
+            }
+            if (opt.defaultDescription) {
+                options.defaultDescription[key] = opt.defaultDescription;
+            }
+            if (opt.skipValidation) {
+                self.skipValidation(key);
+            }
+            const desc = opt.describe || opt.description || opt.desc;
+            self.describe(key, desc);
+            if (opt.hidden) {
+                self.hide(key);
+            }
+            if (opt.requiresArg) {
+                self.requiresArg(key);
+            }
+        }
+        return self;
+    };
+    self.getOptions = () => options;
+    self.positional = function (key, opts) {
+        argsert_1.argsert('<string> <object>', [key, opts], arguments.length);
+        if (context.resets === 0) {
+            throw new yerror_1.YError(".positional() can only be called in a command's builder function");
+        }
+        // .positional() only supports a subset of the configuration
+        // options available to .option().
+        const supportedOpts = ['default', 'defaultDescription', 'implies', 'normalize',
+            'choices', 'conflicts', 'coerce', 'type', 'describe',
+            'desc', 'description', 'alias'];
+        opts = obj_filter_1.objFilter(opts, (k, v) => {
+            let accept = supportedOpts.indexOf(k) !== -1;
+            // type can be one of string|number|boolean.
+            if (k === 'type' && ['string', 'number', 'boolean'].indexOf(v) === -1)
+                accept = false;
+            return accept;
+        });
+        // copy over any settings that can be inferred from the command string.
+        const fullCommand = context.fullCommands[context.fullCommands.length - 1];
+        const parseOptions = fullCommand ? command.cmdToParseOptions(fullCommand) : {
+            array: [],
+            alias: {},
+            default: {},
+            demand: {}
+        };
+        common_types_1.objectKeys(parseOptions).forEach((pk) => {
+            const parseOption = parseOptions[pk];
+            if (Array.isArray(parseOption)) {
+                if (parseOption.indexOf(key) !== -1)
+                    opts[pk] = true;
+            }
+            else {
+                if (parseOption[key] && !(pk in opts))
+                    opts[pk] = parseOption[key];
+            }
+        });
+        self.group(key, usage.getPositionalGroupName());
+        return self.option(key, opts);
+    };
+    self.group = function group(opts, groupName) {
+        argsert_1.argsert('<string|array> <string>', [opts, groupName], arguments.length);
+        const existing = preservedGroups[groupName] || groups[groupName];
+        if (preservedGroups[groupName]) {
+            // we now only need to track this group name in groups.
+            delete preservedGroups[groupName];
+        }
+        const seen = {};
+        groups[groupName] = (existing || []).concat(opts).filter((key) => {
+            if (seen[key])
+                return false;
+            return (seen[key] = true);
+        });
+        return self;
+    };
+    // combine explicit and preserved groups. explicit groups should be first
+    self.getGroups = () => Object.assign({}, groups, preservedGroups);
+    // as long as options.envPrefix is not undefined,
+    // parser will apply env vars matching prefix to argv
+    self.env = function (prefix) {
+        argsert_1.argsert('[string|boolean]', [prefix], arguments.length);
+        if (prefix === false)
+            delete options.envPrefix;
+        else
+            options.envPrefix = prefix || '';
+        return self;
+    };
+    self.wrap = function (cols) {
+        argsert_1.argsert('<number|null|undefined>', [cols], arguments.length);
+        usage.wrap(cols);
+        return self;
+    };
+    let strict = false;
+    self.strict = function (enabled) {
+        argsert_1.argsert('[boolean]', [enabled], arguments.length);
+        strict = enabled !== false;
+        return self;
+    };
+    self.getStrict = () => strict;
+    let strictCommands = false;
+    self.strictCommands = function (enabled) {
+        argsert_1.argsert('[boolean]', [enabled], arguments.length);
+        strictCommands = enabled !== false;
+        return self;
+    };
+    self.getStrictCommands = () => strictCommands;
+    let parserConfig = {};
+    self.parserConfiguration = function parserConfiguration(config) {
+        argsert_1.argsert('<object>', [config], arguments.length);
+        parserConfig = config;
+        return self;
+    };
+    self.getParserConfiguration = () => parserConfig;
+    self.showHelp = function (level) {
+        argsert_1.argsert('[string|function]', [level], arguments.length);
+        if (!self.parsed)
+            self._parseArgs(processArgs); // run parser, if it has not already been executed.
+        if (command.hasDefaultCommand()) {
+            context.resets++; // override the restriction on top-level positoinals.
+            command.runDefaultBuilderOn(self);
+        }
+        usage.showHelp(level);
+        return self;
+    };
+    let versionOpt = null;
+    self.version = function version(opt, msg, ver) {
+        const defaultVersionOpt = 'version';
+        argsert_1.argsert('[boolean|string] [string] [string]', [opt, msg, ver], arguments.length);
+        // nuke the key previously configured
+        // to return version #.
+        if (versionOpt) {
+            deleteFromParserHintObject(versionOpt);
+            usage.version(undefined);
+            versionOpt = null;
+        }
+        if (arguments.length === 0) {
+            ver = guessVersion();
+            opt = defaultVersionOpt;
+        }
+        else if (arguments.length === 1) {
+            if (opt === false) { // disable default 'version' key.
+                return self;
+            }
+            ver = opt;
+            opt = defaultVersionOpt;
+        }
+        else if (arguments.length === 2) {
+            ver = msg;
+            msg = undefined;
+        }
+        versionOpt = typeof opt === 'string' ? opt : defaultVersionOpt;
+        msg = msg || usage.deferY18nLookup('Show version number');
+        usage.version(ver || undefined);
+        self.boolean(versionOpt);
+        self.describe(versionOpt, msg);
+        return self;
+    };
+    function guessVersion() {
+        const obj = pkgUp();
+        return obj.version || 'unknown';
+    }
+    let helpOpt = null;
+    self.addHelpOpt = self.help = function addHelpOpt(opt, msg) {
+        const defaultHelpOpt = 'help';
+        argsert_1.argsert('[string|boolean] [string]', [opt, msg], arguments.length);
+        // nuke the key previously configured
+        // to return help.
+        if (helpOpt) {
+            deleteFromParserHintObject(helpOpt);
+            helpOpt = null;
+        }
+        if (arguments.length === 1) {
+            if (opt === false)
+                return self;
+        }
+        // use arguments, fallback to defaults for opt and msg
+        helpOpt = typeof opt === 'string' ? opt : defaultHelpOpt;
+        self.boolean(helpOpt);
+        self.describe(helpOpt, msg || usage.deferY18nLookup('Show help'));
+        return self;
+    };
+    const defaultShowHiddenOpt = 'show-hidden';
+    options.showHiddenOpt = defaultShowHiddenOpt;
+    self.addShowHiddenOpt = self.showHidden = function addShowHiddenOpt(opt, msg) {
+        argsert_1.argsert('[string|boolean] [string]', [opt, msg], arguments.length);
+        if (arguments.length === 1) {
+            if (opt === false)
+                return self;
+        }
+        const showHiddenOpt = typeof opt === 'string' ? opt : defaultShowHiddenOpt;
+        self.boolean(showHiddenOpt);
+        self.describe(showHiddenOpt, msg || usage.deferY18nLookup('Show hidden options'));
+        options.showHiddenOpt = showHiddenOpt;
+        return self;
+    };
+    self.hide = function hide(key) {
+        argsert_1.argsert('<string>', [key], arguments.length);
+        options.hiddenOptions.push(key);
+        return self;
+    };
+    self.showHelpOnFail = function showHelpOnFail(enabled, message) {
+        argsert_1.argsert('[boolean|string] [string]', [enabled, message], arguments.length);
+        usage.showHelpOnFail(enabled, message);
+        return self;
+    };
+    var exitProcess = true;
+    self.exitProcess = function (enabled = true) {
+        argsert_1.argsert('[boolean]', [enabled], arguments.length);
+        exitProcess = enabled;
+        return self;
+    };
+    self.getExitProcess = () => exitProcess;
+    var completionCommand = null;
+    self.completion = function (cmd, desc, fn) {
+        argsert_1.argsert('[string] [string|boolean|function] [function]', [cmd, desc, fn], arguments.length);
+        // a function to execute when generating
+        // completions can be provided as the second
+        // or third argument to completion.
+        if (typeof desc === 'function') {
+            fn = desc;
+            desc = undefined;
+        }
+        // register the completion command.
+        completionCommand = cmd || completionCommand || 'completion';
+        if (!desc && desc !== false) {
+            desc = 'generate completion script';
+        }
+        self.command(completionCommand, desc);
+        // a function can be provided
+        if (fn)
+            completion.registerFunction(fn);
+        return self;
+    };
+    self.showCompletionScript = function ($0, cmd) {
+        argsert_1.argsert('[string] [string]', [$0, cmd], arguments.length);
+        $0 = $0 || self.$0;
+        _logger.log(completion.generateCompletionScript($0, cmd || completionCommand || 'completion'));
+        return self;
+    };
+    self.getCompletion = function (args, done) {
+        argsert_1.argsert('<array> <function>', [args, done], arguments.length);
+        completion.getCompletion(args, done);
+    };
+    self.locale = function (locale) {
+        argsert_1.argsert('[string]', [locale], arguments.length);
+        if (!locale) {
+            guessLocale();
+            return y18n.getLocale();
+        }
+        detectLocale = false;
+        y18n.setLocale(locale);
+        return self;
+    };
+    self.updateStrings = self.updateLocale = function (obj) {
+        argsert_1.argsert('<object>', [obj], arguments.length);
+        detectLocale = false;
+        y18n.updateLocale(obj);
+        return self;
+    };
+    let detectLocale = true;
+    self.detectLocale = function (detect) {
+        argsert_1.argsert('<boolean>', [detect], arguments.length);
+        detectLocale = detect;
+        return self;
+    };
+    self.getDetectLocale = () => detectLocale;
+    var hasOutput = false;
+    var exitError = null;
+    // maybe exit, always capture
+    // context about why we wanted to exit.
+    self.exit = (code, err) => {
+        hasOutput = true;
+        exitError = err;
+        if (exitProcess)
+            process.exit(code);
+    };
+    // we use a custom logger that buffers output,
+    // so that we can print to non-CLIs, e.g., chat-bots.
+    const _logger = {
+        log(...args) {
+            if (!self._hasParseCallback())
+                console.log(...args);
+            hasOutput = true;
+            if (output.length)
+                output += '\n';
+            output += args.join(' ');
+        },
+        error(...args) {
+            if (!self._hasParseCallback())
+                console.error(...args);
+            hasOutput = true;
+            if (output.length)
+                output += '\n';
+            output += args.join(' ');
+        }
+    };
+    self._getLoggerInstance = () => _logger;
+    // has yargs output an error our help
+    // message in the current execution context.
+    self._hasOutput = () => hasOutput;
+    self._setHasOutput = () => {
+        hasOutput = true;
+    };
+    let recommendCommands;
+    self.recommendCommands = function (recommend = true) {
+        argsert_1.argsert('[boolean]', [recommend], arguments.length);
+        recommendCommands = recommend;
+        return self;
+    };
+    self.getUsageInstance = () => usage;
+    self.getValidationInstance = () => validation;
+    self.getCommandInstance = () => command;
+    self.terminalWidth = () => {
+        argsert_1.argsert([], 0);
+        return typeof process.stdout.columns !== 'undefined' ? process.stdout.columns : null;
+    };
+    Object.defineProperty(self, 'argv', {
+        get: () => self._parseArgs(processArgs),
+        enumerable: true
+    });
+    self._parseArgs = function parseArgs(args, shortCircuit, _calledFromCommand, commandIndex) {
+        let skipValidation = !!_calledFromCommand;
+        args = args || processArgs;
+        options.__ = y18n.__;
+        options.configuration = self.getParserConfiguration();
+        const populateDoubleDash = !!options.configuration['populate--'];
+        const config = Object.assign({}, options.configuration, {
+            'populate--': true
+        });
+        const parsed = Parser.detailed(args, Object.assign({}, options, {
+            configuration: config
+        }));
+        let argv = parsed.argv;
+        if (parseContext)
+            argv = Object.assign({}, argv, parseContext);
+        const aliases = parsed.aliases;
+        argv.$0 = self.$0;
+        self.parsed = parsed;
+        try {
+            guessLocale(); // guess locale lazily, so that it can be turned off in chain.
+            // while building up the argv object, there
+            // are two passes through the parser. If completion
+            // is being performed short-circuit on the first pass.
+            if (shortCircuit) {
+                return (populateDoubleDash || _calledFromCommand) ? argv : self._copyDoubleDash(argv);
+            }
+            // if there's a handler associated with a
+            // command defer processing to it.
+            if (helpOpt) {
+                // consider any multi-char helpOpt alias as a valid help command
+                // unless all helpOpt aliases are single-char
+                // note that parsed.aliases is a normalized bidirectional map :)
+                const helpCmds = [helpOpt]
+                    .concat(aliases[helpOpt] || [])
+                    .filter(k => k.length > 1);
+                // check if help should trigger and strip it from _.
+                if (~helpCmds.indexOf(argv._[argv._.length - 1])) {
+                    argv._.pop();
+                    argv[helpOpt] = true;
+                }
+            }
+            const handlerKeys = command.getCommands();
+            const requestCompletions = completion.completionKey in argv;
+            const skipRecommendation = argv[helpOpt] || requestCompletions;
+            const skipDefaultCommand = skipRecommendation && (handlerKeys.length > 1 || handlerKeys[0] !== '$0');
+            if (argv._.length) {
+                if (handlerKeys.length) {
+                    let firstUnknownCommand;
+                    for (let i = (commandIndex || 0), cmd; argv._[i] !== undefined; i++) {
+                        cmd = String(argv._[i]);
+                        if (~handlerKeys.indexOf(cmd) && cmd !== completionCommand) {
+                            // commands are executed using a recursive algorithm that executes
+                            // the deepest command first; we keep track of the position in the
+                            // argv._ array that is currently being executed.
+                            const innerArgv = command.runCommand(cmd, self, parsed, i + 1);
+                            return populateDoubleDash ? innerArgv : self._copyDoubleDash(innerArgv);
+                        }
+                        else if (!firstUnknownCommand && cmd !== completionCommand) {
+                            firstUnknownCommand = cmd;
+                            break;
+                        }
+                    }
+                    // run the default command, if defined
+                    if (command.hasDefaultCommand() && !skipDefaultCommand) {
+                        const innerArgv = command.runCommand(null, self, parsed);
+                        return populateDoubleDash ? innerArgv : self._copyDoubleDash(innerArgv);
+                    }
+                    // recommend a command if recommendCommands() has
+                    // been enabled, and no commands were found to execute
+                    if (recommendCommands && firstUnknownCommand && !skipRecommendation) {
+                        validation.recommendCommands(firstUnknownCommand, handlerKeys);
+                    }
+                }
+                // generate a completion script for adding to ~/.bashrc.
+                if (completionCommand && ~argv._.indexOf(completionCommand) && !requestCompletions) {
+                    if (exitProcess)
+                        setBlocking(true);
+                    self.showCompletionScript();
+                    self.exit(0);
+                }
+            }
+            else if (command.hasDefaultCommand() && !skipDefaultCommand) {
+                const innerArgv = command.runCommand(null, self, parsed);
+                return populateDoubleDash ? innerArgv : self._copyDoubleDash(innerArgv);
+            }
+            // we must run completions first, a user might
+            // want to complete the --help or --version option.
+            if (requestCompletions) {
+                if (exitProcess)
+                    setBlocking(true);
+                // we allow for asynchronous completions,
+                // e.g., loading in a list of commands from an API.
+                args = [].concat(args);
+                const completionArgs = args.slice(args.indexOf(`--${completion.completionKey}`) + 1);
+                completion.getCompletion(completionArgs, (completions) => {
+                    ;
+                    (completions || []).forEach((completion) => {
+                        _logger.log(completion);
+                    });
+                    self.exit(0);
+                });
+                return (populateDoubleDash || _calledFromCommand) ? argv : self._copyDoubleDash(argv);
+            }
+            // Handle 'help' and 'version' options
+            // if we haven't already output help!
+            if (!hasOutput) {
+                Object.keys(argv).forEach((key) => {
+                    if (key === helpOpt && argv[key]) {
+                        if (exitProcess)
+                            setBlocking(true);
+                        skipValidation = true;
+                        self.showHelp('log');
+                        self.exit(0);
+                    }
+                    else if (key === versionOpt && argv[key]) {
+                        if (exitProcess)
+                            setBlocking(true);
+                        skipValidation = true;
+                        usage.showVersion();
+                        self.exit(0);
+                    }
+                });
+            }
+            // Check if any of the options to skip validation were provided
+            if (!skipValidation && options.skipValidation.length > 0) {
+                skipValidation = Object.keys(argv).some(key => options.skipValidation.indexOf(key) >= 0 && argv[key] === true);
+            }
+            // If the help or version options where used and exitProcess is false,
+            // or if explicitly skipped, we won't run validations.
+            if (!skipValidation) {
+                if (parsed.error)
+                    throw new yerror_1.YError(parsed.error.message);
+                // if we're executed via bash completion, don't
+                // bother with validation.
+                if (!requestCompletions) {
+                    self._runValidation(argv, aliases, {}, parsed.error);
+                }
+            }
+        }
+        catch (err) {
+            if (err instanceof yerror_1.YError)
+                usage.fail(err.message, err);
+            else
+                throw err;
+        }
+        return (populateDoubleDash || _calledFromCommand) ? argv : self._copyDoubleDash(argv);
+    };
+    // to simplify the parsing of positionals in commands,
+    // we temporarily populate '--' rather than _, with arguments
+    // after the '--' directive. After the parse, we copy these back.
+    self._copyDoubleDash = function (argv) {
+        if (is_promise_1.isPromise(argv) || !argv._ || !argv['--'])
+            return argv;
+        argv._.push.apply(argv._, argv['--']);
+        // TODO(bcoe): refactor command parsing such that this delete is not
+        // necessary: https://github.com/yargs/yargs/issues/1482
+        try {
+            delete argv['--'];
+        }
+        catch (_err) { }
+        return argv;
+    };
+    self._runValidation = function runValidation(argv, aliases, positionalMap, parseErrors, isDefaultCommand = false) {
+        if (parseErrors)
+            throw new yerror_1.YError(parseErrors.message);
+        validation.nonOptionCount(argv);
+        validation.requiredArguments(argv);
+        let failedStrictCommands = false;
+        if (strictCommands) {
+            failedStrictCommands = validation.unknownCommands(argv);
+        }
+        if (strict && !failedStrictCommands) {
+            validation.unknownArguments(argv, aliases, positionalMap, isDefaultCommand);
+        }
+        validation.customChecks(argv, aliases);
+        validation.limitedChoices(argv);
+        validation.implications(argv);
+        validation.conflicting(argv);
+    };
+    function guessLocale() {
+        if (!detectLocale)
+            return;
+        const locale = process.env.LC_ALL || process.env.LC_MESSAGES || process.env.LANG || process.env.LANGUAGE || 'en_US';
+        self.locale(locale.replace(/[.:].*/, ''));
+    }
+    // an app should almost always have --version and --help,
+    // if you *really* want to disable this use .help(false)/.version(false).
+    self.help();
+    self.version();
+    return self;
+}
+exports.Yargs = Yargs;
+// rebase an absolute path to a relative one with respect to a base directory
+// exported for tests
+function rebase(base, dir) {
+    return path.relative(base, dir);
+}
+exports.rebase = rebase;
+function isYargsInstance(y) {
+    return !!y && (typeof y._parseArgs === 'function');
+}
+exports.isYargsInstance = isYargsInstance;
+
+
+/***/ }),
+/* 835 */
+/***/ (function(module) {
+
+module.exports = require("url");
+
+/***/ }),
+/* 836 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var $ = __webpack_require__(52);
+var isArray = __webpack_require__(516);
+
+// `Array.isArray` method
+// https://tc39.github.io/ecma262/#sec-array.isarray
+$({ target: 'Array', stat: true }, {
+  isArray: isArray
+});
+
+
+/***/ }),
+/* 837 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var fails = __webpack_require__(105);
+var wellKnownSymbol = __webpack_require__(778);
+var V8_VERSION = __webpack_require__(317);
+
+var SPECIES = wellKnownSymbol('species');
+
+module.exports = function (METHOD_NAME) {
+  // We can't use this feature detection in V8 since it causes
+  // deoptimization and serious performance degradation
+  // https://github.com/zloirock/core-js/issues/677
+  return V8_VERSION >= 51 || !fails(function () {
+    var array = [];
+    var constructor = array.constructor = {};
+    constructor[SPECIES] = function () {
+      return { foo: 1 };
+    };
+    return array[METHOD_NAME](Boolean).foo !== 1;
+  });
 };
 
 
@@ -42741,20 +49506,22 @@ const SIGRTMAX=64;exports.SIGRTMAX=SIGRTMAX;
 //# sourceMappingURL=realtime.js.map
 
 /***/ }),
-/* 844 */,
+/* 844 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+var wellKnownSymbol = __webpack_require__(778);
+
+exports.f = wellKnownSymbol;
+
+
+/***/ }),
 /* 845 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const Range = __webpack_require__(318)
-const satisfies = (version, range, options) => {
-  try {
-    range = new Range(range, options)
-  } catch (er) {
-    return false
-  }
-  return range.test(version)
-}
-module.exports = satisfies
+__webpack_require__(599);
+var entryVirtual = __webpack_require__(708);
+
+module.exports = entryVirtual('Array').indexOf;
 
 
 /***/ }),
@@ -42858,7 +49625,78 @@ module.exports = eos;
 
 
 /***/ }),
-/* 847 */,
+/* 847 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.applyExtends = void 0;
+const fs = __webpack_require__(747);
+const path = __webpack_require__(622);
+const yerror_1 = __webpack_require__(946);
+let previouslyVisitedConfigs = [];
+function checkForCircularExtends(cfgPath) {
+    if (previouslyVisitedConfigs.indexOf(cfgPath) > -1) {
+        throw new yerror_1.YError(`Circular extended configurations: '${cfgPath}'.`);
+    }
+}
+function getPathToDefaultConfig(cwd, pathToExtend) {
+    return path.resolve(cwd, pathToExtend);
+}
+function mergeDeep(config1, config2) {
+    const target = {};
+    function isObject(obj) {
+        return obj && typeof obj === 'object' && !Array.isArray(obj);
+    }
+    Object.assign(target, config1);
+    for (const key of Object.keys(config2)) {
+        if (isObject(config2[key]) && isObject(target[key])) {
+            target[key] = mergeDeep(config1[key], config2[key]);
+        }
+        else {
+            target[key] = config2[key];
+        }
+    }
+    return target;
+}
+function applyExtends(config, cwd, mergeExtends = false) {
+    let defaultConfig = {};
+    if (Object.prototype.hasOwnProperty.call(config, 'extends')) {
+        if (typeof config.extends !== 'string')
+            return defaultConfig;
+        const isPath = /\.json|\..*rc$/.test(config.extends);
+        let pathToDefault = null;
+        if (!isPath) {
+            try {
+                pathToDefault = require.resolve(config.extends);
+            }
+            catch (err) {
+                // most likely this simply isn't a module.
+            }
+        }
+        else {
+            pathToDefault = getPathToDefaultConfig(cwd, config.extends);
+        }
+        // maybe the module uses key for some other reason,
+        // err on side of caution.
+        if (!pathToDefault && !isPath)
+            return config;
+        if (!pathToDefault)
+            throw new yerror_1.YError(`Unable to find extended config '${config.extends}' in '${cwd}'.`);
+        checkForCircularExtends(pathToDefault);
+        previouslyVisitedConfigs.push(pathToDefault);
+        defaultConfig = isPath ? JSON.parse(fs.readFileSync(pathToDefault, 'utf8')) : require(config.extends);
+        delete config.extends;
+        defaultConfig = applyExtends(defaultConfig, path.dirname(pathToDefault), mergeExtends);
+    }
+    previouslyVisitedConfigs = [];
+    return mergeExtends ? mergeDeep(defaultConfig, config) : Object.assign({}, defaultConfig, config);
+}
+exports.applyExtends = applyExtends;
+
+
+/***/ }),
 /* 848 */
 /***/ (function(module) {
 
@@ -45058,7 +51896,25 @@ exports.getState = getState;
 //# sourceMappingURL=core.js.map
 
 /***/ }),
-/* 853 */,
+/* 853 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var $ = __webpack_require__(52);
+var from = __webpack_require__(686);
+var checkCorrectnessOfIteration = __webpack_require__(660);
+
+var INCORRECT_ITERATION = !checkCorrectnessOfIteration(function (iterable) {
+  Array.from(iterable);
+});
+
+// `Array.from` method
+// https://tc39.github.io/ecma262/#sec-array.from
+$({ target: 'Array', stat: true, forced: INCORRECT_ITERATION }, {
+  from: from
+});
+
+
+/***/ }),
 /* 854 */
 /***/ (function(module) {
 
@@ -45813,606 +52669,124 @@ module.exports = {
 
 /***/ }),
 /* 865 */
-/***/ (function(module) {
-
-/*!
- * is-extglob <https://github.com/jonschlinkert/is-extglob>
- *
- * Copyright (c) 2014-2016, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-module.exports = function isExtglob(str) {
-  if (typeof str !== 'string' || str === '') {
-    return false;
-  }
-
-  var match;
-  while ((match = /(\\).|([@?!+*]\(.*\))/g.exec(str))) {
-    if (match[2]) return true;
-    str = str.slice(match.index + match[0].length);
-  }
-
-  return false;
-};
-
-
-/***/ }),
-/* 866 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-// this file handles outputting usage instructions,
-// failures, etc. keeps logging in one place.
-const decamelize = __webpack_require__(597)
-const stringWidth = __webpack_require__(21)
-const objFilter = __webpack_require__(628)
-const path = __webpack_require__(622)
-const setBlocking = __webpack_require__(411)
-const YError = __webpack_require__(574)
-
-module.exports = function usage (yargs, y18n) {
-  const __ = y18n.__
-  const self = {}
-
-  // methods for ouputting/building failure message.
-  const fails = []
-  self.failFn = function failFn (f) {
-    fails.push(f)
-  }
-
-  let failMessage = null
-  let showHelpOnFail = true
-  self.showHelpOnFail = function showHelpOnFailFn (enabled, message) {
-    if (typeof enabled === 'string') {
-      message = enabled
-      enabled = true
-    } else if (typeof enabled === 'undefined') {
-      enabled = true
-    }
-    failMessage = message
-    showHelpOnFail = enabled
-    return self
-  }
-
-  let failureOutput = false
-  self.fail = function fail (msg, err) {
-    const logger = yargs._getLoggerInstance()
-
-    if (fails.length) {
-      for (let i = fails.length - 1; i >= 0; --i) {
-        fails[i](msg, err, self)
-      }
-    } else {
-      if (yargs.getExitProcess()) setBlocking(true)
-
-      // don't output failure message more than once
-      if (!failureOutput) {
-        failureOutput = true
-        if (showHelpOnFail) {
-          yargs.showHelp('error')
-          logger.error()
-        }
-        if (msg || err) logger.error(msg || err)
-        if (failMessage) {
-          if (msg || err) logger.error('')
-          logger.error(failMessage)
-        }
-      }
-
-      err = err || new YError(msg)
-      if (yargs.getExitProcess()) {
-        return yargs.exit(1)
-      } else if (yargs._hasParseCallback()) {
-        return yargs.exit(1, err)
-      } else {
-        throw err
-      }
-    }
-  }
-
-  // methods for ouputting/building help (usage) message.
-  let usages = []
-  let usageDisabled = false
-  self.usage = (msg, description) => {
-    if (msg === null) {
-      usageDisabled = true
-      usages = []
-      return
-    }
-    usageDisabled = false
-    usages.push([msg, description || ''])
-    return self
-  }
-  self.getUsage = () => {
-    return usages
-  }
-  self.getUsageDisabled = () => {
-    return usageDisabled
-  }
-
-  self.getPositionalGroupName = () => {
-    return __('Positionals:')
-  }
-
-  let examples = []
-  self.example = (cmd, description) => {
-    examples.push([cmd, description || ''])
-  }
-
-  let commands = []
-  self.command = function command (cmd, description, isDefault, aliases) {
-    // the last default wins, so cancel out any previously set default
-    if (isDefault) {
-      commands = commands.map((cmdArray) => {
-        cmdArray[2] = false
-        return cmdArray
-      })
-    }
-    commands.push([cmd, description || '', isDefault, aliases])
-  }
-  self.getCommands = () => commands
-
-  let descriptions = {}
-  self.describe = function describe (key, desc) {
-    if (typeof key === 'object') {
-      Object.keys(key).forEach((k) => {
-        self.describe(k, key[k])
-      })
-    } else {
-      descriptions[key] = desc
-    }
-  }
-  self.getDescriptions = () => descriptions
-
-  let epilogs = []
-  self.epilog = (msg) => {
-    epilogs.push(msg)
-  }
-
-  let wrapSet = false
-  let wrap
-  self.wrap = (cols) => {
-    wrapSet = true
-    wrap = cols
-  }
-
-  function getWrap () {
-    if (!wrapSet) {
-      wrap = windowWidth()
-      wrapSet = true
-    }
-
-    return wrap
-  }
-
-  const deferY18nLookupPrefix = '__yargsString__:'
-  self.deferY18nLookup = str => deferY18nLookupPrefix + str
-
-  const defaultGroup = __('Options:')
-  self.help = function help () {
-    if (cachedHelpMessage) return cachedHelpMessage
-    normalizeAliases()
-
-    // handle old demanded API
-    const base$0 = yargs.customScriptName ? yargs.$0 : path.basename(yargs.$0)
-    const demandedOptions = yargs.getDemandedOptions()
-    const demandedCommands = yargs.getDemandedCommands()
-    const deprecatedOptions = yargs.getDeprecatedOptions()
-    const groups = yargs.getGroups()
-    const options = yargs.getOptions()
-
-    let keys = []
-    keys = keys.concat(Object.keys(descriptions))
-    keys = keys.concat(Object.keys(demandedOptions))
-    keys = keys.concat(Object.keys(demandedCommands))
-    keys = keys.concat(Object.keys(options.default))
-    keys = keys.filter(filterHiddenOptions)
-    keys = Object.keys(keys.reduce((acc, key) => {
-      if (key !== '_') acc[key] = true
-      return acc
-    }, {}))
-
-    const theWrap = getWrap()
-    const ui = __webpack_require__(369)({
-      width: theWrap,
-      wrap: !!theWrap
-    })
-
-    // the usage string.
-    if (!usageDisabled) {
-      if (usages.length) {
-        // user-defined usage.
-        usages.forEach((usage) => {
-          ui.div(`${usage[0].replace(/\$0/g, base$0)}`)
-          if (usage[1]) {
-            ui.div({ text: `${usage[1]}`, padding: [1, 0, 0, 0] })
-          }
-        })
-        ui.div()
-      } else if (commands.length) {
-        let u = null
-        // demonstrate how commands are used.
-        if (demandedCommands._) {
-          u = `${base$0} <${__('command')}>\n`
-        } else {
-          u = `${base$0} [${__('command')}]\n`
-        }
-        ui.div(`${u}`)
-      }
-    }
-
-    // your application's commands, i.e., non-option
-    // arguments populated in '_'.
-    if (commands.length) {
-      ui.div(__('Commands:'))
-
-      const context = yargs.getContext()
-      const parentCommands = context.commands.length ? `${context.commands.join(' ')} ` : ''
-
-      if (yargs.getParserConfiguration()['sort-commands'] === true) {
-        commands = commands.sort((a, b) => a[0].localeCompare(b[0]))
-      }
-
-      commands.forEach((command) => {
-        const commandString = `${base$0} ${parentCommands}${command[0].replace(/^\$0 ?/, '')}` // drop $0 from default commands.
-        ui.span(
-          {
-            text: commandString,
-            padding: [0, 2, 0, 2],
-            width: maxWidth(commands, theWrap, `${base$0}${parentCommands}`) + 4
-          },
-          { text: command[1] }
-        )
-        const hints = []
-        if (command[2]) hints.push(`[${__('default')}]`)
-        if (command[3] && command[3].length) {
-          hints.push(`[${__('aliases:')} ${command[3].join(', ')}]`)
-        }
-        if (hints.length) {
-          ui.div({ text: hints.join(' '), padding: [0, 0, 0, 2], align: 'right' })
-        } else {
-          ui.div()
-        }
-      })
-
-      ui.div()
-    }
-
-    // perform some cleanup on the keys array, making it
-    // only include top-level keys not their aliases.
-    const aliasKeys = (Object.keys(options.alias) || [])
-      .concat(Object.keys(yargs.parsed.newAliases) || [])
-
-    keys = keys.filter(key => !yargs.parsed.newAliases[key] && aliasKeys.every(alias => (options.alias[alias] || []).indexOf(key) === -1))
-
-    // populate 'Options:' group with any keys that have not
-    // explicitly had a group set.
-    if (!groups[defaultGroup]) groups[defaultGroup] = []
-    addUngroupedKeys(keys, options.alias, groups)
-
-    // display 'Options:' table along with any custom tables:
-    Object.keys(groups).forEach((groupName) => {
-      if (!groups[groupName].length) return
-
-      // if we've grouped the key 'f', but 'f' aliases 'foobar',
-      // normalizedKeys should contain only 'foobar'.
-      const normalizedKeys = groups[groupName].filter(filterHiddenOptions).map((key) => {
-        if (~aliasKeys.indexOf(key)) return key
-        for (let i = 0, aliasKey; (aliasKey = aliasKeys[i]) !== undefined; i++) {
-          if (~(options.alias[aliasKey] || []).indexOf(key)) return aliasKey
-        }
-        return key
-      })
-
-      if (normalizedKeys.length < 1) return
-
-      ui.div(groupName)
-
-      // actually generate the switches string --foo, -f, --bar.
-      const switches = normalizedKeys.reduce((acc, key) => {
-        acc[key] = [key].concat(options.alias[key] || [])
-          .map(sw => {
-            // for the special positional group don't
-            // add '--' or '-' prefix.
-            if (groupName === self.getPositionalGroupName()) return sw
-            else {
-              return (
-                // matches yargs-parser logic in which single-digits
-                // aliases declared with a boolean type are now valid
-                /^[0-9]$/.test(sw)
-                  ? ~options.boolean.indexOf(key) ? '-' : '--'
-                  : sw.length > 1 ? '--' : '-'
-              ) + sw
-            }
-          })
-          .join(', ')
-
-        return acc
-      }, {})
-
-      normalizedKeys.forEach((key) => {
-        const kswitch = switches[key]
-        let desc = descriptions[key] || ''
-        let type = null
-
-        if (~desc.lastIndexOf(deferY18nLookupPrefix)) desc = __(desc.substring(deferY18nLookupPrefix.length))
-
-        if (~options.boolean.indexOf(key)) type = `[${__('boolean')}]`
-        if (~options.count.indexOf(key)) type = `[${__('count')}]`
-        if (~options.string.indexOf(key)) type = `[${__('string')}]`
-        if (~options.normalize.indexOf(key)) type = `[${__('string')}]`
-        if (~options.array.indexOf(key)) type = `[${__('array')}]`
-        if (~options.number.indexOf(key)) type = `[${__('number')}]`
-
-        const extra = [
-          (key in deprecatedOptions) ? (
-            typeof deprecatedOptions[key] === 'string'
-              ? `[${__('deprecated: %s', deprecatedOptions[key])}]`
-              : `[${__('deprecated')}]`
-          ) : null,
-          type,
-          (key in demandedOptions) ? `[${__('required')}]` : null,
-          options.choices && options.choices[key] ? `[${__('choices:')} ${
-            self.stringifiedValues(options.choices[key])}]` : null,
-          defaultString(options.default[key], options.defaultDescription[key])
-        ].filter(Boolean).join(' ')
-
-        ui.span(
-          { text: kswitch, padding: [0, 2, 0, 2], width: maxWidth(switches, theWrap) + 4 },
-          desc
-        )
-
-        if (extra) ui.div({ text: extra, padding: [0, 0, 0, 2], align: 'right' })
-        else ui.div()
-      })
-
-      ui.div()
-    })
-
-    // describe some common use-cases for your application.
-    if (examples.length) {
-      ui.div(__('Examples:'))
-
-      examples.forEach((example) => {
-        example[0] = example[0].replace(/\$0/g, base$0)
-      })
-
-      examples.forEach((example) => {
-        if (example[1] === '') {
-          ui.div(
-            {
-              text: example[0],
-              padding: [0, 2, 0, 2]
-            }
-          )
-        } else {
-          ui.div(
-            {
-              text: example[0],
-              padding: [0, 2, 0, 2],
-              width: maxWidth(examples, theWrap) + 4
-            }, {
-              text: example[1]
-            }
-          )
-        }
-      })
-
-      ui.div()
-    }
-
-    // the usage string.
-    if (epilogs.length > 0) {
-      const e = epilogs.map(epilog => epilog.replace(/\$0/g, base$0)).join('\n')
-      ui.div(`${e}\n`)
-    }
-
-    // Remove the trailing white spaces
-    return ui.toString().replace(/\s*$/, '')
-  }
-
-  // return the maximum width of a string
-  // in the left-hand column of a table.
-  function maxWidth (table, theWrap, modifier) {
-    let width = 0
-
-    // table might be of the form [leftColumn],
-    // or {key: leftColumn}
-    if (!Array.isArray(table)) {
-      table = Object.keys(table).map(key => [table[key]])
-    }
-
-    table.forEach((v) => {
-      width = Math.max(
-        stringWidth(modifier ? `${modifier} ${v[0]}` : v[0]),
-        width
-      )
-    })
-
-    // if we've enabled 'wrap' we should limit
-    // the max-width of the left-column.
-    if (theWrap) width = Math.min(width, parseInt(theWrap * 0.5, 10))
-
-    return width
-  }
-
-  // make sure any options set for aliases,
-  // are copied to the keys being aliased.
-  function normalizeAliases () {
-    // handle old demanded API
-    const demandedOptions = yargs.getDemandedOptions()
-    const options = yargs.getOptions()
-
-    ;(Object.keys(options.alias) || []).forEach((key) => {
-      options.alias[key].forEach((alias) => {
-        // copy descriptions.
-        if (descriptions[alias]) self.describe(key, descriptions[alias])
-        // copy demanded.
-        if (alias in demandedOptions) yargs.demandOption(key, demandedOptions[alias])
-        // type messages.
-        if (~options.boolean.indexOf(alias)) yargs.boolean(key)
-        if (~options.count.indexOf(alias)) yargs.count(key)
-        if (~options.string.indexOf(alias)) yargs.string(key)
-        if (~options.normalize.indexOf(alias)) yargs.normalize(key)
-        if (~options.array.indexOf(alias)) yargs.array(key)
-        if (~options.number.indexOf(alias)) yargs.number(key)
-      })
-    })
-  }
-
-  // if yargs is executing an async handler, we take a snapshot of the
-  // help message to display on failure:
-  let cachedHelpMessage
-  self.cacheHelpMessage = function () {
-    cachedHelpMessage = this.help()
-  }
-
-  // however this snapshot must be cleared afterwards
-  // not to be be used by next calls to parse
-  self.clearCachedHelpMessage = function () {
-    cachedHelpMessage = undefined
-  }
-
-  // given a set of keys, place any keys that are
-  // ungrouped under the 'Options:' grouping.
-  function addUngroupedKeys (keys, aliases, groups) {
-    let groupedKeys = []
-    let toCheck = null
-    Object.keys(groups).forEach((group) => {
-      groupedKeys = groupedKeys.concat(groups[group])
-    })
-
-    keys.forEach((key) => {
-      toCheck = [key].concat(aliases[key])
-      if (!toCheck.some(k => groupedKeys.indexOf(k) !== -1)) {
-        groups[defaultGroup].push(key)
-      }
-    })
-    return groupedKeys
-  }
-
-  function filterHiddenOptions (key) {
-    return yargs.getOptions().hiddenOptions.indexOf(key) < 0 || yargs.parsed.argv[yargs.getOptions().showHiddenOpt]
-  }
-
-  self.showHelp = (level) => {
-    const logger = yargs._getLoggerInstance()
-    if (!level) level = 'error'
-    const emit = typeof level === 'function' ? level : logger[level]
-    emit(self.help())
-  }
-
-  self.functionDescription = (fn) => {
-    const description = fn.name ? decamelize(fn.name, '-') : __('generated-value')
-    return ['(', description, ')'].join('')
-  }
-
-  self.stringifiedValues = function stringifiedValues (values, separator) {
-    let string = ''
-    const sep = separator || ', '
-    const array = [].concat(values)
-
-    if (!values || !array.length) return string
-
-    array.forEach((value) => {
-      if (string.length) string += sep
-      string += JSON.stringify(value)
-    })
-
-    return string
-  }
-
-  // format the default-value-string displayed in
-  // the right-hand column.
-  function defaultString (value, defaultDescription) {
-    let string = `[${__('default:')} `
-
-    if (value === undefined && !defaultDescription) return null
-
-    if (defaultDescription) {
-      string += defaultDescription
-    } else {
-      switch (typeof value) {
-        case 'string':
-          string += `"${value}"`
-          break
-        case 'object':
-          string += JSON.stringify(value)
-          break
-        default:
-          string += value
-      }
-    }
-
-    return `${string}]`
-  }
-
-  // guess the width of the console window, max-width 80.
-  function windowWidth () {
-    const maxWidth = 80
-    // CI is not a TTY
-    /* c8 ignore next 2 */
-    if (typeof process === 'object' && process.stdout && process.stdout.columns) {
-      return Math.min(maxWidth, process.stdout.columns)
-    } else {
-      return maxWidth
-    }
-  }
-
-  // logic for displaying application version.
-  let version = null
-  self.version = (ver) => {
-    version = ver
-  }
-
-  self.showVersion = () => {
-    const logger = yargs._getLoggerInstance()
-    logger.log(version)
-  }
-
-  self.reset = function reset (localLookup) {
-    // do not reset wrap here
-    // do not reset fails here
-    failMessage = null
-    failureOutput = false
-    usages = []
-    usageDisabled = false
-    epilogs = []
-    examples = []
-    commands = []
-    descriptions = objFilter(descriptions, (k, v) => !localLookup[k])
-    return self
-  }
-
-  const frozens = []
-  self.freeze = function freeze () {
-    const frozen = {}
-    frozens.push(frozen)
-    frozen.failMessage = failMessage
-    frozen.failureOutput = failureOutput
-    frozen.usages = usages
-    frozen.usageDisabled = usageDisabled
-    frozen.epilogs = epilogs
-    frozen.examples = examples
-    frozen.commands = commands
-    frozen.descriptions = descriptions
-  }
-  self.unfreeze = function unfreeze () {
-    const frozen = frozens.pop()
-    failMessage = frozen.failMessage
-    failureOutput = frozen.failureOutput
-    usages = frozen.usages
-    usageDisabled = frozen.usageDisabled
-    epilogs = frozen.epilogs
-    examples = frozen.examples
-    commands = frozen.commands
-    descriptions = frozen.descriptions
-  }
-
-  return self
+const pump = __webpack_require__(957);
+const bufferStream = __webpack_require__(216);
+
+class MaxBufferError extends Error {
+	constructor() {
+		super('maxBuffer exceeded');
+		this.name = 'MaxBufferError';
+	}
 }
+
+async function getStream(inputStream, options) {
+	if (!inputStream) {
+		return Promise.reject(new Error('Expected a stream'));
+	}
+
+	options = {
+		maxBuffer: Infinity,
+		...options
+	};
+
+	const {maxBuffer} = options;
+
+	let stream;
+	await new Promise((resolve, reject) => {
+		const rejectPromise = error => {
+			if (error) { // A null check
+				error.bufferedData = stream.getBufferedValue();
+			}
+
+			reject(error);
+		};
+
+		stream = pump(inputStream, bufferStream(options), error => {
+			if (error) {
+				rejectPromise(error);
+				return;
+			}
+
+			resolve();
+		});
+
+		stream.on('data', () => {
+			if (stream.getBufferedLength() > maxBuffer) {
+				rejectPromise(new MaxBufferError());
+			}
+		});
+	});
+
+	return stream.getBufferedValue();
+}
+
+module.exports = getStream;
+// TODO: Remove this for the next major release
+module.exports.default = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
+module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.MaxBufferError = MaxBufferError;
+
+
+/***/ }),
+/* 866 */
+/***/ (function(module) {
+
+"use strict";
+/* eslint-disable yoda */
+
+
+const isFullwidthCodePoint = codePoint => {
+	if (Number.isNaN(codePoint)) {
+		return false;
+	}
+
+	// Code points are derived from:
+	// http://www.unix.org/Public/UNIDATA/EastAsianWidth.txt
+	if (
+		codePoint >= 0x1100 && (
+			codePoint <= 0x115F || // Hangul Jamo
+			codePoint === 0x2329 || // LEFT-POINTING ANGLE BRACKET
+			codePoint === 0x232A || // RIGHT-POINTING ANGLE BRACKET
+			// CJK Radicals Supplement .. Enclosed CJK Letters and Months
+			(0x2E80 <= codePoint && codePoint <= 0x3247 && codePoint !== 0x303F) ||
+			// Enclosed CJK Letters and Months .. CJK Unified Ideographs Extension A
+			(0x3250 <= codePoint && codePoint <= 0x4DBF) ||
+			// CJK Unified Ideographs .. Yi Radicals
+			(0x4E00 <= codePoint && codePoint <= 0xA4C6) ||
+			// Hangul Jamo Extended-A
+			(0xA960 <= codePoint && codePoint <= 0xA97C) ||
+			// Hangul Syllables
+			(0xAC00 <= codePoint && codePoint <= 0xD7A3) ||
+			// CJK Compatibility Ideographs
+			(0xF900 <= codePoint && codePoint <= 0xFAFF) ||
+			// Vertical Forms
+			(0xFE10 <= codePoint && codePoint <= 0xFE19) ||
+			// CJK Compatibility Forms .. Small Form Variants
+			(0xFE30 <= codePoint && codePoint <= 0xFE6B) ||
+			// Halfwidth and Fullwidth Forms
+			(0xFF01 <= codePoint && codePoint <= 0xFF60) ||
+			(0xFFE0 <= codePoint && codePoint <= 0xFFE6) ||
+			// Kana Supplement
+			(0x1B000 <= codePoint && codePoint <= 0x1B001) ||
+			// Enclosed Ideographic Supplement
+			(0x1F200 <= codePoint && codePoint <= 0x1F251) ||
+			// CJK Unified Ideographs Extension B .. Tertiary Ideographic Plane
+			(0x20000 <= codePoint && codePoint <= 0x3FFFD)
+		)
+	) {
+		return true;
+	}
+
+	return false;
+};
+
+module.exports = isFullwidthCodePoint;
+module.exports.default = isFullwidthCodePoint;
 
 
 /***/ }),
@@ -46509,49 +52883,43 @@ function toVFile(options) {
 "use strict";
 
 
-var Type = __webpack_require__(773);
+var map = __webpack_require__(906);
+var yaml = __webpack_require__(251);
 
-var _hasOwnProperty = Object.prototype.hasOwnProperty;
-var _toString       = Object.prototype.toString;
+var yamlPlugin = function yamlPlugin(options) {
+    options = options || {};
 
-function resolveYamlOmap(data) {
-  if (data === null) return true;
-
-  var objectKeys = [], index, length, pair, pairKey, pairHasKey,
-      object = data;
-
-  for (index = 0, length = object.length; index < length; index += 1) {
-    pair = object[index];
-    pairHasKey = false;
-
-    if (_toString.call(pair) !== '[object Object]') return false;
-
-    for (pairKey in pair) {
-      if (_hasOwnProperty.call(pair, pairKey)) {
-        if (!pairHasKey) pairHasKey = true;
-        else return false;
-      }
+    function transformer(ast) {
+        return map(ast, function (node) {
+            if (node.type == "yaml") {
+                var parsedValue = yaml.safeLoad(node.value, 'utf8');
+                var newNode = Object.assign({}, node, { data: { parsedValue: parsedValue } });
+                return newNode;
+            } else {
+                return node;
+            }
+        });
     }
 
-    if (!pairHasKey) return false;
+    // Stringify for yaml
+    var Compiler = this.Compiler;
 
-    if (objectKeys.indexOf(pairKey) === -1) objectKeys.push(pairKey);
-    else return false;
-  }
+    if (Compiler != null) {
+        var visitors = Compiler.prototype.visitors;
+        if (visitors) {
+            visitors.yaml = function (node) {
+                if (node.data && node.data.parsedValue) {
+                    var yml = yaml.safeDump(node.data.parsedValue);
+                    return '---\n' + yml + '---';
+                }
+            };
+        }
+    }
 
-  return true;
-}
+    return transformer;
+};
 
-function constructYamlOmap(data) {
-  return data !== null ? data : [];
-}
-
-module.exports = new Type('tag:yaml.org,2002:omap', {
-  kind: 'sequence',
-  resolve: resolveYamlOmap,
-  construct: constructYamlOmap
-});
-
+module.exports = yamlPlugin;
 
 /***/ }),
 /* 873 */
@@ -46818,7 +53186,39 @@ function reference(eat, value, silent) {
 
 
 /***/ }),
-/* 877 */,
+/* 877 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var DESCRIPTORS = __webpack_require__(624);
+var fails = __webpack_require__(105);
+var has = __webpack_require__(35);
+
+var defineProperty = Object.defineProperty;
+var cache = {};
+
+var thrower = function (it) { throw it; };
+
+module.exports = function (METHOD_NAME, options) {
+  if (has(cache, METHOD_NAME)) return cache[METHOD_NAME];
+  if (!options) options = {};
+  var method = [][METHOD_NAME];
+  var ACCESSORS = has(options, 'ACCESSORS') ? options.ACCESSORS : false;
+  var argument0 = has(options, 0) ? options[0] : thrower;
+  var argument1 = has(options, 1) ? options[1] : undefined;
+
+  return cache[METHOD_NAME] = !!method && !fails(function () {
+    if (ACCESSORS && !DESCRIPTORS) return true;
+    var O = { length: -1 };
+
+    if (ACCESSORS) defineProperty(O, 1, { enumerable: true, get: thrower });
+    else O[1] = 1;
+
+    method.call(O, argument0, argument1);
+  });
+};
+
+
+/***/ }),
 /* 878 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -47182,8 +53582,30 @@ module.exports = parse
 
 
 /***/ }),
-/* 882 */,
-/* 883 */,
+/* 882 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+// toObject with fallback for non-array-like ES3 strings
+var IndexedObject = __webpack_require__(322);
+var requireObjectCoercible = __webpack_require__(611);
+
+module.exports = function (it) {
+  return IndexedObject(requireObjectCoercible(it));
+};
+
+
+/***/ }),
+/* 883 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.unscopables` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.unscopables
+defineWellKnownSymbol('unscopables');
+
+
+/***/ }),
 /* 884 */
 /***/ (function(module) {
 
@@ -47260,9 +53682,115 @@ module.exports = compareLoose
 
 
 /***/ }),
-/* 887 */,
-/* 888 */,
-/* 889 */,
+/* 887 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var concat = __webpack_require__(791);
+
+var ArrayPrototype = Array.prototype;
+
+module.exports = function (it) {
+  var own = it.concat;
+  return it === ArrayPrototype || (it instanceof Array && own === ArrayPrototype.concat) ? concat : own;
+};
+
+
+/***/ }),
+/* 888 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.iterator` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.iterator
+defineWellKnownSymbol('iterator');
+
+
+/***/ }),
+/* 889 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var anObject = __webpack_require__(589);
+var defineProperties = __webpack_require__(638);
+var enumBugKeys = __webpack_require__(407);
+var hiddenKeys = __webpack_require__(56);
+var html = __webpack_require__(799);
+var documentCreateElement = __webpack_require__(109);
+var sharedKey = __webpack_require__(642);
+
+var GT = '>';
+var LT = '<';
+var PROTOTYPE = 'prototype';
+var SCRIPT = 'script';
+var IE_PROTO = sharedKey('IE_PROTO');
+
+var EmptyConstructor = function () { /* empty */ };
+
+var scriptTag = function (content) {
+  return LT + SCRIPT + GT + content + LT + '/' + SCRIPT + GT;
+};
+
+// Create object with fake `null` prototype: use ActiveX Object with cleared prototype
+var NullProtoObjectViaActiveX = function (activeXDocument) {
+  activeXDocument.write(scriptTag(''));
+  activeXDocument.close();
+  var temp = activeXDocument.parentWindow.Object;
+  activeXDocument = null; // avoid memory leak
+  return temp;
+};
+
+// Create object with fake `null` prototype: use iframe Object with cleared prototype
+var NullProtoObjectViaIFrame = function () {
+  // Thrash, waste and sodomy: IE GC bug
+  var iframe = documentCreateElement('iframe');
+  var JS = 'java' + SCRIPT + ':';
+  var iframeDocument;
+  iframe.style.display = 'none';
+  html.appendChild(iframe);
+  // https://github.com/zloirock/core-js/issues/475
+  iframe.src = String(JS);
+  iframeDocument = iframe.contentWindow.document;
+  iframeDocument.open();
+  iframeDocument.write(scriptTag('document.F=Object'));
+  iframeDocument.close();
+  return iframeDocument.F;
+};
+
+// Check for document.domain and active x support
+// No need to use active x approach when document.domain is not set
+// see https://github.com/es-shims/es5-shim/issues/150
+// variation of https://github.com/kitcambridge/es5-shim/commit/4f738ac066346
+// avoid IE GC bug
+var activeXDocument;
+var NullProtoObject = function () {
+  try {
+    /* global ActiveXObject */
+    activeXDocument = document.domain && new ActiveXObject('htmlfile');
+  } catch (error) { /* ignore */ }
+  NullProtoObject = activeXDocument ? NullProtoObjectViaActiveX(activeXDocument) : NullProtoObjectViaIFrame();
+  var length = enumBugKeys.length;
+  while (length--) delete NullProtoObject[PROTOTYPE][enumBugKeys[length]];
+  return NullProtoObject();
+};
+
+hiddenKeys[IE_PROTO] = true;
+
+// `Object.create` method
+// https://tc39.github.io/ecma262/#sec-object.create
+module.exports = Object.create || function create(O, Properties) {
+  var result;
+  if (O !== null) {
+    EmptyConstructor[PROTOTYPE] = anObject(O);
+    result = new EmptyConstructor();
+    EmptyConstructor[PROTOTYPE] = null;
+    // add "__proto__" for Object.getPrototypeOf polyfill
+    result[IE_PROTO] = O;
+  } else result = NullProtoObject();
+  return Properties === undefined ? result : defineProperties(result, Properties);
+};
+
+
+/***/ }),
 /* 890 */,
 /* 891 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -47367,7 +53895,18 @@ function getSettings(settingsOrOptions = {}) {
 
 /***/ }),
 /* 893 */,
-/* 894 */,
+/* 894 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var global = __webpack_require__(813);
+var setToStringTag = __webpack_require__(263);
+
+// JSON[@@toStringTag] property
+// https://tc39.github.io/ecma262/#sec-json-@@tostringtag
+setToStringTag(global.JSON, 'JSON', true);
+
+
+/***/ }),
 /* 895 */,
 /* 896 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -47381,7 +53920,13 @@ module.exports = valid
 
 
 /***/ }),
-/* 897 */,
+/* 897 */
+/***/ (function(__unusedmodule, exports) {
+
+exports.f = Object.getOwnPropertySymbols;
+
+
+/***/ }),
 /* 898 */,
 /* 899 */,
 /* 900 */
@@ -47922,23 +54467,17 @@ module.exports = path => {
 
 /***/ }),
 /* 904 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-
-module.exports = ({onlyFirst = false} = {}) => {
-	const pattern = [
-		'[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
-		'(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))'
-	].join('|');
-
-	return new RegExp(pattern, onlyFirst ? undefined : 'g');
-};
-
+module.exports = __webpack_require__(696);
 
 /***/ }),
-/* 905 */,
+/* 905 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(24);
+
+/***/ }),
 /* 906 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -47980,7 +54519,7 @@ function map(tree, iteratee) {
 // without running as a singleton do:
 // require('yargs/yargs')(process.argv.slice(2))
 const yargs = __webpack_require__(704)
-const processArgv = __webpack_require__(665)
+const processArgv = __webpack_require__(345)
 
 Argv(processArgv.getProcessArgvWithoutBin())
 
@@ -48018,14 +54557,28 @@ function singletonify (inst) {
 
 
 /***/ }),
-/* 908 */,
+/* 908 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var $ = __webpack_require__(52);
+var DESCRIPTORS = __webpack_require__(624);
+var objectDefinePropertyModile = __webpack_require__(690);
+
+// `Object.defineProperty` method
+// https://tc39.github.io/ecma262/#sec-object.defineproperty
+$({ target: 'Object', stat: true, forced: !DESCRIPTORS, sham: !DESCRIPTORS }, {
+  defineProperty: objectDefinePropertyModile.f
+});
+
+
+/***/ }),
 /* 909 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
-const satisfies = __webpack_require__(845)
+const satisfies = __webpack_require__(60)
 const compare = __webpack_require__(217)
 module.exports = (versions, range, options) => {
   const set = []
@@ -48091,16 +54644,137 @@ if (process.env.NODE_ENV === 'production') {
 "use strict";
 
 
+var trim = __webpack_require__(235)
+var interrupt = __webpack_require__(658)
 
-if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(960)
-} else {
-  module.exports = __webpack_require__(325)
+module.exports = blockquote
+
+var lineFeed = '\n'
+var tab = '\t'
+var space = ' '
+var greaterThan = '>'
+
+function blockquote(eat, value, silent) {
+  var self = this
+  var offsets = self.offset
+  var tokenizers = self.blockTokenizers
+  var interruptors = self.interruptBlockquote
+  var now = eat.now()
+  var currentLine = now.line
+  var length = value.length
+  var values = []
+  var contents = []
+  var indents = []
+  var add
+  var index = 0
+  var character
+  var rest
+  var nextIndex
+  var content
+  var line
+  var startIndex
+  var prefixed
+  var exit
+
+  while (index < length) {
+    character = value.charAt(index)
+
+    if (character !== space && character !== tab) {
+      break
+    }
+
+    index++
+  }
+
+  if (value.charAt(index) !== greaterThan) {
+    return
+  }
+
+  if (silent) {
+    return true
+  }
+
+  index = 0
+
+  while (index < length) {
+    nextIndex = value.indexOf(lineFeed, index)
+    startIndex = index
+    prefixed = false
+
+    if (nextIndex === -1) {
+      nextIndex = length
+    }
+
+    while (index < length) {
+      character = value.charAt(index)
+
+      if (character !== space && character !== tab) {
+        break
+      }
+
+      index++
+    }
+
+    if (value.charAt(index) === greaterThan) {
+      index++
+      prefixed = true
+
+      if (value.charAt(index) === space) {
+        index++
+      }
+    } else {
+      index = startIndex
+    }
+
+    content = value.slice(index, nextIndex)
+
+    if (!prefixed && !trim(content)) {
+      index = startIndex
+      break
+    }
+
+    if (!prefixed) {
+      rest = value.slice(index)
+
+      // Check if the following code contains a possible block.
+      if (interrupt(interruptors, tokenizers, self, [eat, rest, true])) {
+        break
+      }
+    }
+
+    line = startIndex === index ? content : value.slice(startIndex, nextIndex)
+
+    indents.push(index - startIndex)
+    values.push(line)
+    contents.push(content)
+
+    index = nextIndex + 1
+  }
+
+  index = -1
+  length = indents.length
+  add = eat(values.join(lineFeed))
+
+  while (++index < length) {
+    offsets[currentLine] = (offsets[currentLine] || 0) + indents[index]
+    currentLine++
+  }
+
+  exit = self.enterBlock()
+  contents = self.tokenizeBlock(contents.join(lineFeed), now)
+  exit()
+
+  return add({type: 'blockquote', children: contents})
 }
 
 
 /***/ }),
-/* 913 */,
+/* 913 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(71);
+
+/***/ }),
 /* 914 */
 /***/ (function(module) {
 
@@ -48116,7 +54790,30 @@ module.exports = function (str) {
 
 
 /***/ }),
-/* 915 */,
+/* 915 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+__webpack_require__(424);
+var DOMIterables = __webpack_require__(726);
+var global = __webpack_require__(813);
+var classof = __webpack_require__(241);
+var createNonEnumerableProperty = __webpack_require__(315);
+var Iterators = __webpack_require__(218);
+var wellKnownSymbol = __webpack_require__(778);
+
+var TO_STRING_TAG = wellKnownSymbol('toStringTag');
+
+for (var COLLECTION_NAME in DOMIterables) {
+  var Collection = global[COLLECTION_NAME];
+  var CollectionPrototype = Collection && Collection.prototype;
+  if (CollectionPrototype && classof(CollectionPrototype) !== TO_STRING_TAG) {
+    createNonEnumerableProperty(CollectionPrototype, TO_STRING_TAG, COLLECTION_NAME);
+  }
+  Iterators[COLLECTION_NAME] = Iterators.Array;
+}
+
+
+/***/ }),
 /* 916 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -48192,12 +54889,8 @@ module.exports.configFile = async ({ cwd, changeFolder = ".changes" }) => {
   };
 };
 
-module.exports.changeFiles = async ({
-  cwd,
-  changeFolder = ".changes",
-  remove = true,
-}) => {
-  const paths = await globby(
+module.exports.changeFiles = async ({ cwd, changeFolder = ".changes" }) => {
+  return await globby(
     [
       path.posix.join(changeFolder, "*.md"),
       `!${path.posix.join(changeFolder, "README.md")}`,
@@ -48208,31 +54901,31 @@ module.exports.changeFiles = async ({
       cwd,
     }
   );
+};
 
-  const vfiles = paths.map((file) => {
+module.exports.changeFilesToVfile = ({ cwd, paths }) => {
+  return paths.map((file) => {
     let v = vfile.readSync(path.join(cwd, file), "utf8");
     delete v.history;
     delete v.cwd;
     v.data.filename = file;
     return v;
   });
+};
 
-  if (remove) {
-    await Promise.all(
-      paths.map(async (changeFilePath) => {
-        await fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
-          if (err) throw err;
-        });
-        return changeFilePath;
-      })
-    ).then((deletedPaths) => {
-      deletedPaths.forEach((changeFilePath) =>
-        console.info(`${changeFilePath} was deleted`)
-      );
-    });
-  }
-
-  return vfiles;
+module.exports.changeFilesRemove = ({ cwd, paths }) => {
+  return Promise.all(
+    paths.map(async (changeFilePath) => {
+      await fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
+        if (err) throw err;
+      });
+      return changeFilePath;
+    })
+  ).then((deletedPaths) => {
+    deletedPaths.forEach((changeFilePath) =>
+      console.info(`${changeFilePath} was deleted`)
+    );
+  });
 };
 
 module.exports.readChangelog = async ({ cwd }) => {
@@ -48282,7 +54975,12 @@ function enclose(title) {
 
 
 /***/ }),
-/* 920 */,
+/* 920 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(282);
+
+/***/ }),
 /* 921 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -48328,8 +55026,1188 @@ function locate(value, fromIndex) {
 
 
 /***/ }),
-/* 924 */,
-/* 925 */,
+/* 924 */
+/***/ (function(module) {
+
+module.exports = [
+    {
+        'name': 'InAdlam',
+        'astral': '\uD83A[\uDD00-\uDD5F]'
+    },
+    {
+        'name': 'InAegean_Numbers',
+        'astral': '\uD800[\uDD00-\uDD3F]'
+    },
+    {
+        'name': 'InAhom',
+        'astral': '\uD805[\uDF00-\uDF3F]'
+    },
+    {
+        'name': 'InAlchemical_Symbols',
+        'astral': '\uD83D[\uDF00-\uDF7F]'
+    },
+    {
+        'name': 'InAlphabetic_Presentation_Forms',
+        'bmp': '\uFB00-\uFB4F'
+    },
+    {
+        'name': 'InAnatolian_Hieroglyphs',
+        'astral': '\uD811[\uDC00-\uDE7F]'
+    },
+    {
+        'name': 'InAncient_Greek_Musical_Notation',
+        'astral': '\uD834[\uDE00-\uDE4F]'
+    },
+    {
+        'name': 'InAncient_Greek_Numbers',
+        'astral': '\uD800[\uDD40-\uDD8F]'
+    },
+    {
+        'name': 'InAncient_Symbols',
+        'astral': '\uD800[\uDD90-\uDDCF]'
+    },
+    {
+        'name': 'InArabic',
+        'bmp': '\u0600-\u06FF'
+    },
+    {
+        'name': 'InArabic_Extended_A',
+        'bmp': '\u08A0-\u08FF'
+    },
+    {
+        'name': 'InArabic_Mathematical_Alphabetic_Symbols',
+        'astral': '\uD83B[\uDE00-\uDEFF]'
+    },
+    {
+        'name': 'InArabic_Presentation_Forms_A',
+        'bmp': '\uFB50-\uFDFF'
+    },
+    {
+        'name': 'InArabic_Presentation_Forms_B',
+        'bmp': '\uFE70-\uFEFF'
+    },
+    {
+        'name': 'InArabic_Supplement',
+        'bmp': '\u0750-\u077F'
+    },
+    {
+        'name': 'InArmenian',
+        'bmp': '\u0530-\u058F'
+    },
+    {
+        'name': 'InArrows',
+        'bmp': '\u2190-\u21FF'
+    },
+    {
+        'name': 'InAvestan',
+        'astral': '\uD802[\uDF00-\uDF3F]'
+    },
+    {
+        'name': 'InBalinese',
+        'bmp': '\u1B00-\u1B7F'
+    },
+    {
+        'name': 'InBamum',
+        'bmp': '\uA6A0-\uA6FF'
+    },
+    {
+        'name': 'InBamum_Supplement',
+        'astral': '\uD81A[\uDC00-\uDE3F]'
+    },
+    {
+        'name': 'InBasic_Latin',
+        'bmp': '\0-\x7F'
+    },
+    {
+        'name': 'InBassa_Vah',
+        'astral': '\uD81A[\uDED0-\uDEFF]'
+    },
+    {
+        'name': 'InBatak',
+        'bmp': '\u1BC0-\u1BFF'
+    },
+    {
+        'name': 'InBengali',
+        'bmp': '\u0980-\u09FF'
+    },
+    {
+        'name': 'InBhaiksuki',
+        'astral': '\uD807[\uDC00-\uDC6F]'
+    },
+    {
+        'name': 'InBlock_Elements',
+        'bmp': '\u2580-\u259F'
+    },
+    {
+        'name': 'InBopomofo',
+        'bmp': '\u3100-\u312F'
+    },
+    {
+        'name': 'InBopomofo_Extended',
+        'bmp': '\u31A0-\u31BF'
+    },
+    {
+        'name': 'InBox_Drawing',
+        'bmp': '\u2500-\u257F'
+    },
+    {
+        'name': 'InBrahmi',
+        'astral': '\uD804[\uDC00-\uDC7F]'
+    },
+    {
+        'name': 'InBraille_Patterns',
+        'bmp': '\u2800-\u28FF'
+    },
+    {
+        'name': 'InBuginese',
+        'bmp': '\u1A00-\u1A1F'
+    },
+    {
+        'name': 'InBuhid',
+        'bmp': '\u1740-\u175F'
+    },
+    {
+        'name': 'InByzantine_Musical_Symbols',
+        'astral': '\uD834[\uDC00-\uDCFF]'
+    },
+    {
+        'name': 'InCJK_Compatibility',
+        'bmp': '\u3300-\u33FF'
+    },
+    {
+        'name': 'InCJK_Compatibility_Forms',
+        'bmp': '\uFE30-\uFE4F'
+    },
+    {
+        'name': 'InCJK_Compatibility_Ideographs',
+        'bmp': '\uF900-\uFAFF'
+    },
+    {
+        'name': 'InCJK_Compatibility_Ideographs_Supplement',
+        'astral': '\uD87E[\uDC00-\uDE1F]'
+    },
+    {
+        'name': 'InCJK_Radicals_Supplement',
+        'bmp': '\u2E80-\u2EFF'
+    },
+    {
+        'name': 'InCJK_Strokes',
+        'bmp': '\u31C0-\u31EF'
+    },
+    {
+        'name': 'InCJK_Symbols_And_Punctuation',
+        'bmp': '\u3000-\u303F'
+    },
+    {
+        'name': 'InCJK_Unified_Ideographs',
+        'bmp': '\u4E00-\u9FFF'
+    },
+    {
+        'name': 'InCJK_Unified_Ideographs_Extension_A',
+        'bmp': '\u3400-\u4DBF'
+    },
+    {
+        'name': 'InCJK_Unified_Ideographs_Extension_B',
+        'astral': '[\uD840-\uD868][\uDC00-\uDFFF]|\uD869[\uDC00-\uDEDF]'
+    },
+    {
+        'name': 'InCJK_Unified_Ideographs_Extension_C',
+        'astral': '\uD869[\uDF00-\uDFFF]|[\uD86A-\uD86C][\uDC00-\uDFFF]|\uD86D[\uDC00-\uDF3F]'
+    },
+    {
+        'name': 'InCJK_Unified_Ideographs_Extension_D',
+        'astral': '\uD86D[\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1F]'
+    },
+    {
+        'name': 'InCJK_Unified_Ideographs_Extension_E',
+        'astral': '\uD86E[\uDC20-\uDFFF]|[\uD86F-\uD872][\uDC00-\uDFFF]|\uD873[\uDC00-\uDEAF]'
+    },
+    {
+        'name': 'InCJK_Unified_Ideographs_Extension_F',
+        'astral': '\uD873[\uDEB0-\uDFFF]|[\uD874-\uD879][\uDC00-\uDFFF]|\uD87A[\uDC00-\uDFEF]'
+    },
+    {
+        'name': 'InCarian',
+        'astral': '\uD800[\uDEA0-\uDEDF]'
+    },
+    {
+        'name': 'InCaucasian_Albanian',
+        'astral': '\uD801[\uDD30-\uDD6F]'
+    },
+    {
+        'name': 'InChakma',
+        'astral': '\uD804[\uDD00-\uDD4F]'
+    },
+    {
+        'name': 'InCham',
+        'bmp': '\uAA00-\uAA5F'
+    },
+    {
+        'name': 'InCherokee',
+        'bmp': '\u13A0-\u13FF'
+    },
+    {
+        'name': 'InCherokee_Supplement',
+        'bmp': '\uAB70-\uABBF'
+    },
+    {
+        'name': 'InChess_Symbols',
+        'astral': '\uD83E[\uDE00-\uDE6F]'
+    },
+    {
+        'name': 'InCombining_Diacritical_Marks',
+        'bmp': '\u0300-\u036F'
+    },
+    {
+        'name': 'InCombining_Diacritical_Marks_Extended',
+        'bmp': '\u1AB0-\u1AFF'
+    },
+    {
+        'name': 'InCombining_Diacritical_Marks_For_Symbols',
+        'bmp': '\u20D0-\u20FF'
+    },
+    {
+        'name': 'InCombining_Diacritical_Marks_Supplement',
+        'bmp': '\u1DC0-\u1DFF'
+    },
+    {
+        'name': 'InCombining_Half_Marks',
+        'bmp': '\uFE20-\uFE2F'
+    },
+    {
+        'name': 'InCommon_Indic_Number_Forms',
+        'bmp': '\uA830-\uA83F'
+    },
+    {
+        'name': 'InControl_Pictures',
+        'bmp': '\u2400-\u243F'
+    },
+    {
+        'name': 'InCoptic',
+        'bmp': '\u2C80-\u2CFF'
+    },
+    {
+        'name': 'InCoptic_Epact_Numbers',
+        'astral': '\uD800[\uDEE0-\uDEFF]'
+    },
+    {
+        'name': 'InCounting_Rod_Numerals',
+        'astral': '\uD834[\uDF60-\uDF7F]'
+    },
+    {
+        'name': 'InCuneiform',
+        'astral': '\uD808[\uDC00-\uDFFF]'
+    },
+    {
+        'name': 'InCuneiform_Numbers_And_Punctuation',
+        'astral': '\uD809[\uDC00-\uDC7F]'
+    },
+    {
+        'name': 'InCurrency_Symbols',
+        'bmp': '\u20A0-\u20CF'
+    },
+    {
+        'name': 'InCypriot_Syllabary',
+        'astral': '\uD802[\uDC00-\uDC3F]'
+    },
+    {
+        'name': 'InCyrillic',
+        'bmp': '\u0400-\u04FF'
+    },
+    {
+        'name': 'InCyrillic_Extended_A',
+        'bmp': '\u2DE0-\u2DFF'
+    },
+    {
+        'name': 'InCyrillic_Extended_B',
+        'bmp': '\uA640-\uA69F'
+    },
+    {
+        'name': 'InCyrillic_Extended_C',
+        'bmp': '\u1C80-\u1C8F'
+    },
+    {
+        'name': 'InCyrillic_Supplement',
+        'bmp': '\u0500-\u052F'
+    },
+    {
+        'name': 'InDeseret',
+        'astral': '\uD801[\uDC00-\uDC4F]'
+    },
+    {
+        'name': 'InDevanagari',
+        'bmp': '\u0900-\u097F'
+    },
+    {
+        'name': 'InDevanagari_Extended',
+        'bmp': '\uA8E0-\uA8FF'
+    },
+    {
+        'name': 'InDingbats',
+        'bmp': '\u2700-\u27BF'
+    },
+    {
+        'name': 'InDogra',
+        'astral': '\uD806[\uDC00-\uDC4F]'
+    },
+    {
+        'name': 'InDomino_Tiles',
+        'astral': '\uD83C[\uDC30-\uDC9F]'
+    },
+    {
+        'name': 'InDuployan',
+        'astral': '\uD82F[\uDC00-\uDC9F]'
+    },
+    {
+        'name': 'InEarly_Dynastic_Cuneiform',
+        'astral': '\uD809[\uDC80-\uDD4F]'
+    },
+    {
+        'name': 'InEgyptian_Hieroglyphs',
+        'astral': '\uD80C[\uDC00-\uDFFF]|\uD80D[\uDC00-\uDC2F]'
+    },
+    {
+        'name': 'InElbasan',
+        'astral': '\uD801[\uDD00-\uDD2F]'
+    },
+    {
+        'name': 'InEmoticons',
+        'astral': '\uD83D[\uDE00-\uDE4F]'
+    },
+    {
+        'name': 'InEnclosed_Alphanumeric_Supplement',
+        'astral': '\uD83C[\uDD00-\uDDFF]'
+    },
+    {
+        'name': 'InEnclosed_Alphanumerics',
+        'bmp': '\u2460-\u24FF'
+    },
+    {
+        'name': 'InEnclosed_CJK_Letters_And_Months',
+        'bmp': '\u3200-\u32FF'
+    },
+    {
+        'name': 'InEnclosed_Ideographic_Supplement',
+        'astral': '\uD83C[\uDE00-\uDEFF]'
+    },
+    {
+        'name': 'InEthiopic',
+        'bmp': '\u1200-\u137F'
+    },
+    {
+        'name': 'InEthiopic_Extended',
+        'bmp': '\u2D80-\u2DDF'
+    },
+    {
+        'name': 'InEthiopic_Extended_A',
+        'bmp': '\uAB00-\uAB2F'
+    },
+    {
+        'name': 'InEthiopic_Supplement',
+        'bmp': '\u1380-\u139F'
+    },
+    {
+        'name': 'InGeneral_Punctuation',
+        'bmp': '\u2000-\u206F'
+    },
+    {
+        'name': 'InGeometric_Shapes',
+        'bmp': '\u25A0-\u25FF'
+    },
+    {
+        'name': 'InGeometric_Shapes_Extended',
+        'astral': '\uD83D[\uDF80-\uDFFF]'
+    },
+    {
+        'name': 'InGeorgian',
+        'bmp': '\u10A0-\u10FF'
+    },
+    {
+        'name': 'InGeorgian_Extended',
+        'bmp': '\u1C90-\u1CBF'
+    },
+    {
+        'name': 'InGeorgian_Supplement',
+        'bmp': '\u2D00-\u2D2F'
+    },
+    {
+        'name': 'InGlagolitic',
+        'bmp': '\u2C00-\u2C5F'
+    },
+    {
+        'name': 'InGlagolitic_Supplement',
+        'astral': '\uD838[\uDC00-\uDC2F]'
+    },
+    {
+        'name': 'InGothic',
+        'astral': '\uD800[\uDF30-\uDF4F]'
+    },
+    {
+        'name': 'InGrantha',
+        'astral': '\uD804[\uDF00-\uDF7F]'
+    },
+    {
+        'name': 'InGreek_And_Coptic',
+        'bmp': '\u0370-\u03FF'
+    },
+    {
+        'name': 'InGreek_Extended',
+        'bmp': '\u1F00-\u1FFF'
+    },
+    {
+        'name': 'InGujarati',
+        'bmp': '\u0A80-\u0AFF'
+    },
+    {
+        'name': 'InGunjala_Gondi',
+        'astral': '\uD807[\uDD60-\uDDAF]'
+    },
+    {
+        'name': 'InGurmukhi',
+        'bmp': '\u0A00-\u0A7F'
+    },
+    {
+        'name': 'InHalfwidth_And_Fullwidth_Forms',
+        'bmp': '\uFF00-\uFFEF'
+    },
+    {
+        'name': 'InHangul_Compatibility_Jamo',
+        'bmp': '\u3130-\u318F'
+    },
+    {
+        'name': 'InHangul_Jamo',
+        'bmp': '\u1100-\u11FF'
+    },
+    {
+        'name': 'InHangul_Jamo_Extended_A',
+        'bmp': '\uA960-\uA97F'
+    },
+    {
+        'name': 'InHangul_Jamo_Extended_B',
+        'bmp': '\uD7B0-\uD7FF'
+    },
+    {
+        'name': 'InHangul_Syllables',
+        'bmp': '\uAC00-\uD7AF'
+    },
+    {
+        'name': 'InHanifi_Rohingya',
+        'astral': '\uD803[\uDD00-\uDD3F]'
+    },
+    {
+        'name': 'InHanunoo',
+        'bmp': '\u1720-\u173F'
+    },
+    {
+        'name': 'InHatran',
+        'astral': '\uD802[\uDCE0-\uDCFF]'
+    },
+    {
+        'name': 'InHebrew',
+        'bmp': '\u0590-\u05FF'
+    },
+    {
+        'name': 'InHigh_Private_Use_Surrogates',
+        'bmp': '\uDB80-\uDBFF'
+    },
+    {
+        'name': 'InHigh_Surrogates',
+        'bmp': '\uD800-\uDB7F'
+    },
+    {
+        'name': 'InHiragana',
+        'bmp': '\u3040-\u309F'
+    },
+    {
+        'name': 'InIPA_Extensions',
+        'bmp': '\u0250-\u02AF'
+    },
+    {
+        'name': 'InIdeographic_Description_Characters',
+        'bmp': '\u2FF0-\u2FFF'
+    },
+    {
+        'name': 'InIdeographic_Symbols_And_Punctuation',
+        'astral': '\uD81B[\uDFE0-\uDFFF]'
+    },
+    {
+        'name': 'InImperial_Aramaic',
+        'astral': '\uD802[\uDC40-\uDC5F]'
+    },
+    {
+        'name': 'InIndic_Siyaq_Numbers',
+        'astral': '\uD83B[\uDC70-\uDCBF]'
+    },
+    {
+        'name': 'InInscriptional_Pahlavi',
+        'astral': '\uD802[\uDF60-\uDF7F]'
+    },
+    {
+        'name': 'InInscriptional_Parthian',
+        'astral': '\uD802[\uDF40-\uDF5F]'
+    },
+    {
+        'name': 'InJavanese',
+        'bmp': '\uA980-\uA9DF'
+    },
+    {
+        'name': 'InKaithi',
+        'astral': '\uD804[\uDC80-\uDCCF]'
+    },
+    {
+        'name': 'InKana_Extended_A',
+        'astral': '\uD82C[\uDD00-\uDD2F]'
+    },
+    {
+        'name': 'InKana_Supplement',
+        'astral': '\uD82C[\uDC00-\uDCFF]'
+    },
+    {
+        'name': 'InKanbun',
+        'bmp': '\u3190-\u319F'
+    },
+    {
+        'name': 'InKangxi_Radicals',
+        'bmp': '\u2F00-\u2FDF'
+    },
+    {
+        'name': 'InKannada',
+        'bmp': '\u0C80-\u0CFF'
+    },
+    {
+        'name': 'InKatakana',
+        'bmp': '\u30A0-\u30FF'
+    },
+    {
+        'name': 'InKatakana_Phonetic_Extensions',
+        'bmp': '\u31F0-\u31FF'
+    },
+    {
+        'name': 'InKayah_Li',
+        'bmp': '\uA900-\uA92F'
+    },
+    {
+        'name': 'InKharoshthi',
+        'astral': '\uD802[\uDE00-\uDE5F]'
+    },
+    {
+        'name': 'InKhmer',
+        'bmp': '\u1780-\u17FF'
+    },
+    {
+        'name': 'InKhmer_Symbols',
+        'bmp': '\u19E0-\u19FF'
+    },
+    {
+        'name': 'InKhojki',
+        'astral': '\uD804[\uDE00-\uDE4F]'
+    },
+    {
+        'name': 'InKhudawadi',
+        'astral': '\uD804[\uDEB0-\uDEFF]'
+    },
+    {
+        'name': 'InLao',
+        'bmp': '\u0E80-\u0EFF'
+    },
+    {
+        'name': 'InLatin_1_Supplement',
+        'bmp': '\x80-\xFF'
+    },
+    {
+        'name': 'InLatin_Extended_A',
+        'bmp': '\u0100-\u017F'
+    },
+    {
+        'name': 'InLatin_Extended_Additional',
+        'bmp': '\u1E00-\u1EFF'
+    },
+    {
+        'name': 'InLatin_Extended_B',
+        'bmp': '\u0180-\u024F'
+    },
+    {
+        'name': 'InLatin_Extended_C',
+        'bmp': '\u2C60-\u2C7F'
+    },
+    {
+        'name': 'InLatin_Extended_D',
+        'bmp': '\uA720-\uA7FF'
+    },
+    {
+        'name': 'InLatin_Extended_E',
+        'bmp': '\uAB30-\uAB6F'
+    },
+    {
+        'name': 'InLepcha',
+        'bmp': '\u1C00-\u1C4F'
+    },
+    {
+        'name': 'InLetterlike_Symbols',
+        'bmp': '\u2100-\u214F'
+    },
+    {
+        'name': 'InLimbu',
+        'bmp': '\u1900-\u194F'
+    },
+    {
+        'name': 'InLinear_A',
+        'astral': '\uD801[\uDE00-\uDF7F]'
+    },
+    {
+        'name': 'InLinear_B_Ideograms',
+        'astral': '\uD800[\uDC80-\uDCFF]'
+    },
+    {
+        'name': 'InLinear_B_Syllabary',
+        'astral': '\uD800[\uDC00-\uDC7F]'
+    },
+    {
+        'name': 'InLisu',
+        'bmp': '\uA4D0-\uA4FF'
+    },
+    {
+        'name': 'InLow_Surrogates',
+        'bmp': '\uDC00-\uDFFF'
+    },
+    {
+        'name': 'InLycian',
+        'astral': '\uD800[\uDE80-\uDE9F]'
+    },
+    {
+        'name': 'InLydian',
+        'astral': '\uD802[\uDD20-\uDD3F]'
+    },
+    {
+        'name': 'InMahajani',
+        'astral': '\uD804[\uDD50-\uDD7F]'
+    },
+    {
+        'name': 'InMahjong_Tiles',
+        'astral': '\uD83C[\uDC00-\uDC2F]'
+    },
+    {
+        'name': 'InMakasar',
+        'astral': '\uD807[\uDEE0-\uDEFF]'
+    },
+    {
+        'name': 'InMalayalam',
+        'bmp': '\u0D00-\u0D7F'
+    },
+    {
+        'name': 'InMandaic',
+        'bmp': '\u0840-\u085F'
+    },
+    {
+        'name': 'InManichaean',
+        'astral': '\uD802[\uDEC0-\uDEFF]'
+    },
+    {
+        'name': 'InMarchen',
+        'astral': '\uD807[\uDC70-\uDCBF]'
+    },
+    {
+        'name': 'InMasaram_Gondi',
+        'astral': '\uD807[\uDD00-\uDD5F]'
+    },
+    {
+        'name': 'InMathematical_Alphanumeric_Symbols',
+        'astral': '\uD835[\uDC00-\uDFFF]'
+    },
+    {
+        'name': 'InMathematical_Operators',
+        'bmp': '\u2200-\u22FF'
+    },
+    {
+        'name': 'InMayan_Numerals',
+        'astral': '\uD834[\uDEE0-\uDEFF]'
+    },
+    {
+        'name': 'InMedefaidrin',
+        'astral': '\uD81B[\uDE40-\uDE9F]'
+    },
+    {
+        'name': 'InMeetei_Mayek',
+        'bmp': '\uABC0-\uABFF'
+    },
+    {
+        'name': 'InMeetei_Mayek_Extensions',
+        'bmp': '\uAAE0-\uAAFF'
+    },
+    {
+        'name': 'InMende_Kikakui',
+        'astral': '\uD83A[\uDC00-\uDCDF]'
+    },
+    {
+        'name': 'InMeroitic_Cursive',
+        'astral': '\uD802[\uDDA0-\uDDFF]'
+    },
+    {
+        'name': 'InMeroitic_Hieroglyphs',
+        'astral': '\uD802[\uDD80-\uDD9F]'
+    },
+    {
+        'name': 'InMiao',
+        'astral': '\uD81B[\uDF00-\uDF9F]'
+    },
+    {
+        'name': 'InMiscellaneous_Mathematical_Symbols_A',
+        'bmp': '\u27C0-\u27EF'
+    },
+    {
+        'name': 'InMiscellaneous_Mathematical_Symbols_B',
+        'bmp': '\u2980-\u29FF'
+    },
+    {
+        'name': 'InMiscellaneous_Symbols',
+        'bmp': '\u2600-\u26FF'
+    },
+    {
+        'name': 'InMiscellaneous_Symbols_And_Arrows',
+        'bmp': '\u2B00-\u2BFF'
+    },
+    {
+        'name': 'InMiscellaneous_Symbols_And_Pictographs',
+        'astral': '\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDDFF]'
+    },
+    {
+        'name': 'InMiscellaneous_Technical',
+        'bmp': '\u2300-\u23FF'
+    },
+    {
+        'name': 'InModi',
+        'astral': '\uD805[\uDE00-\uDE5F]'
+    },
+    {
+        'name': 'InModifier_Tone_Letters',
+        'bmp': '\uA700-\uA71F'
+    },
+    {
+        'name': 'InMongolian',
+        'bmp': '\u1800-\u18AF'
+    },
+    {
+        'name': 'InMongolian_Supplement',
+        'astral': '\uD805[\uDE60-\uDE7F]'
+    },
+    {
+        'name': 'InMro',
+        'astral': '\uD81A[\uDE40-\uDE6F]'
+    },
+    {
+        'name': 'InMultani',
+        'astral': '\uD804[\uDE80-\uDEAF]'
+    },
+    {
+        'name': 'InMusical_Symbols',
+        'astral': '\uD834[\uDD00-\uDDFF]'
+    },
+    {
+        'name': 'InMyanmar',
+        'bmp': '\u1000-\u109F'
+    },
+    {
+        'name': 'InMyanmar_Extended_A',
+        'bmp': '\uAA60-\uAA7F'
+    },
+    {
+        'name': 'InMyanmar_Extended_B',
+        'bmp': '\uA9E0-\uA9FF'
+    },
+    {
+        'name': 'InNKo',
+        'bmp': '\u07C0-\u07FF'
+    },
+    {
+        'name': 'InNabataean',
+        'astral': '\uD802[\uDC80-\uDCAF]'
+    },
+    {
+        'name': 'InNew_Tai_Lue',
+        'bmp': '\u1980-\u19DF'
+    },
+    {
+        'name': 'InNewa',
+        'astral': '\uD805[\uDC00-\uDC7F]'
+    },
+    {
+        'name': 'InNumber_Forms',
+        'bmp': '\u2150-\u218F'
+    },
+    {
+        'name': 'InNushu',
+        'astral': '\uD82C[\uDD70-\uDEFF]'
+    },
+    {
+        'name': 'InOgham',
+        'bmp': '\u1680-\u169F'
+    },
+    {
+        'name': 'InOl_Chiki',
+        'bmp': '\u1C50-\u1C7F'
+    },
+    {
+        'name': 'InOld_Hungarian',
+        'astral': '\uD803[\uDC80-\uDCFF]'
+    },
+    {
+        'name': 'InOld_Italic',
+        'astral': '\uD800[\uDF00-\uDF2F]'
+    },
+    {
+        'name': 'InOld_North_Arabian',
+        'astral': '\uD802[\uDE80-\uDE9F]'
+    },
+    {
+        'name': 'InOld_Permic',
+        'astral': '\uD800[\uDF50-\uDF7F]'
+    },
+    {
+        'name': 'InOld_Persian',
+        'astral': '\uD800[\uDFA0-\uDFDF]'
+    },
+    {
+        'name': 'InOld_Sogdian',
+        'astral': '\uD803[\uDF00-\uDF2F]'
+    },
+    {
+        'name': 'InOld_South_Arabian',
+        'astral': '\uD802[\uDE60-\uDE7F]'
+    },
+    {
+        'name': 'InOld_Turkic',
+        'astral': '\uD803[\uDC00-\uDC4F]'
+    },
+    {
+        'name': 'InOptical_Character_Recognition',
+        'bmp': '\u2440-\u245F'
+    },
+    {
+        'name': 'InOriya',
+        'bmp': '\u0B00-\u0B7F'
+    },
+    {
+        'name': 'InOrnamental_Dingbats',
+        'astral': '\uD83D[\uDE50-\uDE7F]'
+    },
+    {
+        'name': 'InOsage',
+        'astral': '\uD801[\uDCB0-\uDCFF]'
+    },
+    {
+        'name': 'InOsmanya',
+        'astral': '\uD801[\uDC80-\uDCAF]'
+    },
+    {
+        'name': 'InPahawh_Hmong',
+        'astral': '\uD81A[\uDF00-\uDF8F]'
+    },
+    {
+        'name': 'InPalmyrene',
+        'astral': '\uD802[\uDC60-\uDC7F]'
+    },
+    {
+        'name': 'InPau_Cin_Hau',
+        'astral': '\uD806[\uDEC0-\uDEFF]'
+    },
+    {
+        'name': 'InPhags_Pa',
+        'bmp': '\uA840-\uA87F'
+    },
+    {
+        'name': 'InPhaistos_Disc',
+        'astral': '\uD800[\uDDD0-\uDDFF]'
+    },
+    {
+        'name': 'InPhoenician',
+        'astral': '\uD802[\uDD00-\uDD1F]'
+    },
+    {
+        'name': 'InPhonetic_Extensions',
+        'bmp': '\u1D00-\u1D7F'
+    },
+    {
+        'name': 'InPhonetic_Extensions_Supplement',
+        'bmp': '\u1D80-\u1DBF'
+    },
+    {
+        'name': 'InPlaying_Cards',
+        'astral': '\uD83C[\uDCA0-\uDCFF]'
+    },
+    {
+        'name': 'InPrivate_Use_Area',
+        'bmp': '\uE000-\uF8FF'
+    },
+    {
+        'name': 'InPsalter_Pahlavi',
+        'astral': '\uD802[\uDF80-\uDFAF]'
+    },
+    {
+        'name': 'InRejang',
+        'bmp': '\uA930-\uA95F'
+    },
+    {
+        'name': 'InRumi_Numeral_Symbols',
+        'astral': '\uD803[\uDE60-\uDE7F]'
+    },
+    {
+        'name': 'InRunic',
+        'bmp': '\u16A0-\u16FF'
+    },
+    {
+        'name': 'InSamaritan',
+        'bmp': '\u0800-\u083F'
+    },
+    {
+        'name': 'InSaurashtra',
+        'bmp': '\uA880-\uA8DF'
+    },
+    {
+        'name': 'InSharada',
+        'astral': '\uD804[\uDD80-\uDDDF]'
+    },
+    {
+        'name': 'InShavian',
+        'astral': '\uD801[\uDC50-\uDC7F]'
+    },
+    {
+        'name': 'InShorthand_Format_Controls',
+        'astral': '\uD82F[\uDCA0-\uDCAF]'
+    },
+    {
+        'name': 'InSiddham',
+        'astral': '\uD805[\uDD80-\uDDFF]'
+    },
+    {
+        'name': 'InSinhala',
+        'bmp': '\u0D80-\u0DFF'
+    },
+    {
+        'name': 'InSinhala_Archaic_Numbers',
+        'astral': '\uD804[\uDDE0-\uDDFF]'
+    },
+    {
+        'name': 'InSmall_Form_Variants',
+        'bmp': '\uFE50-\uFE6F'
+    },
+    {
+        'name': 'InSogdian',
+        'astral': '\uD803[\uDF30-\uDF6F]'
+    },
+    {
+        'name': 'InSora_Sompeng',
+        'astral': '\uD804[\uDCD0-\uDCFF]'
+    },
+    {
+        'name': 'InSoyombo',
+        'astral': '\uD806[\uDE50-\uDEAF]'
+    },
+    {
+        'name': 'InSpacing_Modifier_Letters',
+        'bmp': '\u02B0-\u02FF'
+    },
+    {
+        'name': 'InSpecials',
+        'bmp': '\uFFF0-\uFFFF'
+    },
+    {
+        'name': 'InSundanese',
+        'bmp': '\u1B80-\u1BBF'
+    },
+    {
+        'name': 'InSundanese_Supplement',
+        'bmp': '\u1CC0-\u1CCF'
+    },
+    {
+        'name': 'InSuperscripts_And_Subscripts',
+        'bmp': '\u2070-\u209F'
+    },
+    {
+        'name': 'InSupplemental_Arrows_A',
+        'bmp': '\u27F0-\u27FF'
+    },
+    {
+        'name': 'InSupplemental_Arrows_B',
+        'bmp': '\u2900-\u297F'
+    },
+    {
+        'name': 'InSupplemental_Arrows_C',
+        'astral': '\uD83E[\uDC00-\uDCFF]'
+    },
+    {
+        'name': 'InSupplemental_Mathematical_Operators',
+        'bmp': '\u2A00-\u2AFF'
+    },
+    {
+        'name': 'InSupplemental_Punctuation',
+        'bmp': '\u2E00-\u2E7F'
+    },
+    {
+        'name': 'InSupplemental_Symbols_And_Pictographs',
+        'astral': '\uD83E[\uDD00-\uDDFF]'
+    },
+    {
+        'name': 'InSupplementary_Private_Use_Area_A',
+        'astral': '[\uDB80-\uDBBF][\uDC00-\uDFFF]'
+    },
+    {
+        'name': 'InSupplementary_Private_Use_Area_B',
+        'astral': '[\uDBC0-\uDBFF][\uDC00-\uDFFF]'
+    },
+    {
+        'name': 'InSutton_SignWriting',
+        'astral': '\uD836[\uDC00-\uDEAF]'
+    },
+    {
+        'name': 'InSyloti_Nagri',
+        'bmp': '\uA800-\uA82F'
+    },
+    {
+        'name': 'InSyriac',
+        'bmp': '\u0700-\u074F'
+    },
+    {
+        'name': 'InSyriac_Supplement',
+        'bmp': '\u0860-\u086F'
+    },
+    {
+        'name': 'InTagalog',
+        'bmp': '\u1700-\u171F'
+    },
+    {
+        'name': 'InTagbanwa',
+        'bmp': '\u1760-\u177F'
+    },
+    {
+        'name': 'InTags',
+        'astral': '\uDB40[\uDC00-\uDC7F]'
+    },
+    {
+        'name': 'InTai_Le',
+        'bmp': '\u1950-\u197F'
+    },
+    {
+        'name': 'InTai_Tham',
+        'bmp': '\u1A20-\u1AAF'
+    },
+    {
+        'name': 'InTai_Viet',
+        'bmp': '\uAA80-\uAADF'
+    },
+    {
+        'name': 'InTai_Xuan_Jing_Symbols',
+        'astral': '\uD834[\uDF00-\uDF5F]'
+    },
+    {
+        'name': 'InTakri',
+        'astral': '\uD805[\uDE80-\uDECF]'
+    },
+    {
+        'name': 'InTamil',
+        'bmp': '\u0B80-\u0BFF'
+    },
+    {
+        'name': 'InTangut',
+        'astral': '[\uD81C-\uD821][\uDC00-\uDFFF]'
+    },
+    {
+        'name': 'InTangut_Components',
+        'astral': '\uD822[\uDC00-\uDEFF]'
+    },
+    {
+        'name': 'InTelugu',
+        'bmp': '\u0C00-\u0C7F'
+    },
+    {
+        'name': 'InThaana',
+        'bmp': '\u0780-\u07BF'
+    },
+    {
+        'name': 'InThai',
+        'bmp': '\u0E00-\u0E7F'
+    },
+    {
+        'name': 'InTibetan',
+        'bmp': '\u0F00-\u0FFF'
+    },
+    {
+        'name': 'InTifinagh',
+        'bmp': '\u2D30-\u2D7F'
+    },
+    {
+        'name': 'InTirhuta',
+        'astral': '\uD805[\uDC80-\uDCDF]'
+    },
+    {
+        'name': 'InTransport_And_Map_Symbols',
+        'astral': '\uD83D[\uDE80-\uDEFF]'
+    },
+    {
+        'name': 'InUgaritic',
+        'astral': '\uD800[\uDF80-\uDF9F]'
+    },
+    {
+        'name': 'InUnified_Canadian_Aboriginal_Syllabics',
+        'bmp': '\u1400-\u167F'
+    },
+    {
+        'name': 'InUnified_Canadian_Aboriginal_Syllabics_Extended',
+        'bmp': '\u18B0-\u18FF'
+    },
+    {
+        'name': 'InVai',
+        'bmp': '\uA500-\uA63F'
+    },
+    {
+        'name': 'InVariation_Selectors',
+        'bmp': '\uFE00-\uFE0F'
+    },
+    {
+        'name': 'InVariation_Selectors_Supplement',
+        'astral': '\uDB40[\uDD00-\uDDEF]'
+    },
+    {
+        'name': 'InVedic_Extensions',
+        'bmp': '\u1CD0-\u1CFF'
+    },
+    {
+        'name': 'InVertical_Forms',
+        'bmp': '\uFE10-\uFE1F'
+    },
+    {
+        'name': 'InWarang_Citi',
+        'astral': '\uD806[\uDCA0-\uDCFF]'
+    },
+    {
+        'name': 'InYi_Radicals',
+        'bmp': '\uA490-\uA4CF'
+    },
+    {
+        'name': 'InYi_Syllables',
+        'bmp': '\uA000-\uA48F'
+    },
+    {
+        'name': 'InYijing_Hexagram_Symbols',
+        'bmp': '\u4DC0-\u4DFF'
+    },
+    {
+        'name': 'InZanabazar_Square',
+        'astral': '\uD806[\uDE00-\uDE4F]'
+    },
+    {
+        'name': 'Inundefined',
+        'astral': '\uD803[\uDFE0-\uDFFF]|\uD806[\uDDA0-\uDDFF]|\uD807[\uDFC0-\uDFFF]|\uD80D[\uDC30-\uDC3F]|\uD82C[\uDD30-\uDD6F]|\uD838[\uDD00-\uDD4F\uDEC0-\uDEFF]|\uD83B[\uDD00-\uDD4F]|\uD83E[\uDE70-\uDEFF]'
+    }
+];
+
+
+/***/ }),
+/* 925 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+module.exports = __webpack_require__(108);
+
+/***/ }),
 /* 926 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -48356,10 +56234,134 @@ function matcher(reference) {
   };
 }
 
+/**
+ * Hack Zone!
+ *
+ * tl;dr not only the symbol value, but also the symbol type must be
+ * global.
+ *
+ * In order to satisfy TypeScript that the SymbolSubscribable
+ * represents the same value across different versions of the same
+ * package, we need to declare a "fake" global variable that does not
+ * actually exist, but has a theoretical type. Since it is global,
+ * TypeScript will see it as the same type everywhere, and so we can
+ * use the `typeof` for the value, as the type of of our local symbol
+ * subscribable, and TypeScript will think that all of the types are
+ * the same.
+ *
+ * See https://github.com/microsoft/TypeScript/issues/8099#issuecomment-210134773
+ * for details.
+ */
+var SymbolSubscribable = /*#__PURE__*/Symbol["for"]('Symbol.subscription');
+
+function* _forEach(source, visit) {
+  var subscription = yield subscribe(source);
+
+  while (true) {
+    var result = yield subscription.next();
+
+    if (result.done) {
+      return result.value;
+    } else {
+      yield visit(result.value);
+    }
+  }
+}
+var Subscribable = {
+  from: function from(source) {
+    return new Chain(source);
+  }
+};
+var Chain = /*#__PURE__*/function () {
+  function Chain(source) {
+    this.source = source;
+  }
+
+  var _proto = Chain.prototype;
+
+  _proto[SymbolSubscribable] = function () {
+    return subscribe(this.source);
+  };
+
+  _proto.map = function map(fn) {
+    return this.chain(function (source) {
+      return function (publish) {
+        return _forEach(source, function* (item) {
+          publish(fn(item));
+        });
+      };
+    });
+  };
+
+  _proto.filter = function filter(predicate) {
+    return this.chain(function (source) {
+      return function (publish) {
+        return _forEach(source, function* (item) {
+          if (predicate(item)) {
+            publish(item);
+          }
+        });
+      };
+    });
+  };
+
+  _proto.match = function match(reference) {
+    return this.filter(matcher(reference));
+  };
+
+  _proto.chain = function chain(next) {
+    return new Chain(createSubscription(next(this.source)));
+  };
+
+  _proto.forEach = function forEach(visit) {
+    return _forEach(this.source, visit);
+  };
+
+  _proto.first = function* first() {
+    var subscription = yield subscribe(this.source);
+
+    var _yield$subscription$n = yield subscription.next(),
+        done = _yield$subscription$n.done,
+        value = _yield$subscription$n.value;
+
+    if (done) {
+      return undefined;
+    } else {
+      return value;
+    }
+  };
+
+  return Chain;
+}();
+function subscribe(source) {
+  if (isSubscribable(source)) {
+    return source[SymbolSubscribable]();
+  } else {
+    return source;
+  }
+} // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+function isSubscribable(value) {
+  return !!value[SymbolSubscribable];
+}
+
+var DUMMY = {
+  next: function next() {
+    throw new Error('dummy');
+  }
+};
 var ChainableSubscription = /*#__PURE__*/function () {
   function ChainableSubscription(subscription) {
     this.subscription = subscription;
   }
+
+  ChainableSubscription.of = function* of(source) {
+    var chain = new ChainableSubscription(DUMMY);
+    return yield effection.resource(chain, function* () {
+      chain.subscription = yield subscribe(source);
+      yield;
+    });
+  };
 
   var _proto = ChainableSubscription.prototype;
 
@@ -48520,115 +56522,8 @@ function InvalidPublication(value) {
   return error;
 }
 
-var SymbolSubscribable = /*#__PURE__*/Symbol["for"]('Symbol.subscription');
-
-function* _forEach(source, visit) {
-  var subscription = yield subscribe(source);
-
-  while (true) {
-    var result = yield subscription.next();
-
-    if (result.done) {
-      return result.value;
-    } else {
-      yield visit(result.value);
-    }
-  }
-}
-var Subscribable = {
-  from: function from(source) {
-    return new Chain(source);
-  }
-};
-var Chain = /*#__PURE__*/function () {
-  function Chain(source) {
-    this.source = source;
-  }
-
-  var _proto = Chain.prototype;
-
-  _proto[SymbolSubscribable] = function () {
-    return subscribe(this.source);
-  };
-
-  _proto.map = function map(fn) {
-    return this.chain(function (source) {
-      return function (publish) {
-        return _forEach(source, function* (item) {
-          publish(fn(item));
-        });
-      };
-    });
-  };
-
-  _proto.filter = function filter(predicate) {
-    return this.chain(function (source) {
-      return function (publish) {
-        return _forEach(source, function* (item) {
-          if (predicate(item)) {
-            publish(item);
-          }
-        });
-      };
-    });
-  };
-
-  _proto.match = function match(reference) {
-    return this.filter(matcher(reference));
-  };
-
-  _proto.chain = function chain(next) {
-    return new Chain(createSubscription(next(this.source)));
-  };
-
-  _proto.forEach = function forEach(visit) {
-    return _forEach(this.source, visit);
-  };
-
-  _proto.first = function* first() {
-    var subscription = yield subscribe(this.source);
-
-    var _yield$subscription$n = yield subscription.next(),
-        done = _yield$subscription$n.done,
-        value = _yield$subscription$n.value;
-
-    if (done) {
-      return undefined;
-    } else {
-      return value;
-    }
-  };
-
-  return Chain;
-}();
-function subscribe(source) {
-  if (isSubscribable(source)) {
-    var subscriber = getSubscriber(source);
-
-    if (subscriber) {
-      return subscriber.call(source);
-    } else {
-      var error = new Error("cannot subscribe to " + source + " because it does not contain Symbol.subscription");
-      error.name = 'TypeError';
-      throw error;
-    }
-  } else {
-    return source;
-  }
-}
-
-function isSubscribable(value) {
-  return !!getSubscriber(value);
-} // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
-
-function getSubscriber(source) {
-  return source[SymbolSubscribable];
-}
-
 function* subscribe$1(source) {
-  var inner = yield subscribe(source);
-  return new ChainableSubscription(inner);
+  return yield ChainableSubscription.of(source);
 }
 
 exports.ChainableSubscription = ChainableSubscription;
@@ -48854,8 +56749,8 @@ module.exports = value => {
 
 "use strict";
 
-const isStream = __webpack_require__(124);
-const getStream = __webpack_require__(209);
+const isStream = __webpack_require__(764);
+const getStream = __webpack_require__(865);
 const mergeStream = __webpack_require__(74);
 
 // `input` option
@@ -49367,61 +57262,44 @@ module.exports = debug
 /***/ }),
 /* 941 */,
 /* 942 */
-/***/ (function(__unusedmodule, exports) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-exports.completionShTemplate =
-`###-begin-{{app_name}}-completions-###
-#
-# yargs command completion script
-#
-# Installation: {{app_path}} {{completion_command}} >> ~/.bashrc
-#    or {{app_path}} {{completion_command}} >> ~/.bash_profile on OSX.
-#
-_yargs_completions()
-{
-    local cur_word args type_list
+var toIndexedObject = __webpack_require__(882);
+var nativeGetOwnPropertyNames = __webpack_require__(0).f;
 
-    cur_word="\${COMP_WORDS[COMP_CWORD]}"
-    args=("\${COMP_WORDS[@]}")
+var toString = {}.toString;
 
-    # ask yargs to generate completions.
-    type_list=$({{app_path}} --get-yargs-completions "\${args[@]}")
+var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
+  ? Object.getOwnPropertyNames(window) : [];
 
-    COMPREPLY=( $(compgen -W "\${type_list}" -- \${cur_word}) )
+var getWindowNames = function (it) {
+  try {
+    return nativeGetOwnPropertyNames(it);
+  } catch (error) {
+    return windowNames.slice();
+  }
+};
 
-    # if no match was found, fall back to filename completion
-    if [ \${#COMPREPLY[@]} -eq 0 ]; then
-      COMPREPLY=()
-    fi
-
-    return 0
-}
-complete -o default -F _yargs_completions {{app_name}}
-###-end-{{app_name}}-completions-###
-`
-
-exports.completionZshTemplate = `###-begin-{{app_name}}-completions-###
-#
-# yargs command completion script
-#
-# Installation: {{app_path}} {{completion_command}} >> ~/.zshrc
-#    or {{app_path}} {{completion_command}} >> ~/.zsh_profile on OSX.
-#
-_{{app_name}}_yargs_completions()
-{
-  local reply
-  local si=$IFS
-  IFS=$'\n' reply=($(COMP_CWORD="$((CURRENT-1))" COMP_LINE="$BUFFER" COMP_POINT="$CURSOR" {{app_path}} --get-yargs-completions "\${words[@]}"))
-  IFS=$si
-  _describe 'values' reply
-}
-compdef _{{app_name}}_yargs_completions {{app_name}}
-###-end-{{app_name}}-completions-###
-`
+// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
+module.exports.f = function getOwnPropertyNames(it) {
+  return windowNames && toString.call(it) == '[object Window]'
+    ? getWindowNames(it)
+    : nativeGetOwnPropertyNames(toIndexedObject(it));
+};
 
 
 /***/ }),
-/* 943 */,
+/* 943 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.search` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.search
+defineWellKnownSymbol('search');
+
+
+/***/ }),
 /* 944 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -49555,7 +57433,24 @@ function strikethrough(eat, value, silent) {
 
 
 /***/ }),
-/* 946 */,
+/* 946 */
+/***/ (function(__unusedmodule, exports) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.YError = void 0;
+class YError extends Error {
+    constructor(msg) {
+        super(msg || 'yargs error');
+        this.name = 'YError';
+        Error.captureStackTrace(this, YError);
+    }
+}
+exports.YError = YError;
+
+
+/***/ }),
 /* 947 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -49594,7 +57489,17 @@ function create(EConstructor) {
 
 
 /***/ }),
-/* 948 */,
+/* 948 */
+/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+
+var defineWellKnownSymbol = __webpack_require__(308);
+
+// `Symbol.isConcatSpreadable` well-known symbol
+// https://tc39.github.io/ecma262/#sec-symbol.isconcatspreadable
+defineWellKnownSymbol('isConcatSpreadable');
+
+
+/***/ }),
 /* 949 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -49604,7 +57509,7 @@ const path = __webpack_require__(622);
 const childProcess = __webpack_require__(129);
 const crossSpawn = __webpack_require__(335);
 const stripFinalNewline = __webpack_require__(839);
-const npmRunPath = __webpack_require__(329);
+const npmRunPath = __webpack_require__(553);
 const onetime = __webpack_require__(530);
 const makeError = __webpack_require__(725);
 const normalizeStdio = __webpack_require__(661);
@@ -50081,7 +57986,32 @@ module.exports = pump
 
 
 /***/ }),
-/* 958 */,
+/* 958 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var isObject = __webpack_require__(195);
+var isArray = __webpack_require__(516);
+var wellKnownSymbol = __webpack_require__(778);
+
+var SPECIES = wellKnownSymbol('species');
+
+// `ArraySpeciesCreate` abstract operation
+// https://tc39.github.io/ecma262/#sec-arrayspeciescreate
+module.exports = function (originalArray, length) {
+  var C;
+  if (isArray(originalArray)) {
+    C = originalArray.constructor;
+    // cross-realm fallback
+    if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;
+    else if (isObject(C)) {
+      C = C[SPECIES];
+      if (C === null) C = undefined;
+    }
+  } return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
+};
+
+
+/***/ }),
 /* 959 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -50109,7 +58039,7 @@ module.exports = new Schema({
   ],
   explicit: [
     __webpack_require__(541),
-    __webpack_require__(872),
+    __webpack_require__(9),
     __webpack_require__(559),
     __webpack_require__(326)
   ]
@@ -50118,11 +58048,11 @@ module.exports = new Schema({
 
 /***/ }),
 /* 960 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(module) {
 
-"use strict";
-var n=__webpack_require__(700);function r(n){return function(t){if("object"==typeof t&&"object"==typeof n){var e=t;return Object.entries(n).every((function(n){var t=n[0];return r(n[1])(e[t])}))}return t===n}}var t=Symbol.for("Symbol.subscription");function*e(n,r){for(var t=yield o(n);;){var e=yield t.next();if(e.done)return e.value;yield r(e.value)}}var i={from:function(n){return new u(n)}},u=function(){function n(n){this.source=n}var i=n.prototype;return i[t]=function(){return o(this.source)},i.map=function(n){return this.chain((function(r){return function(t){return e(r,(function*(r){t(n(r))}))}}))},i.filter=function(n){return this.chain((function(r){return function(t){return e(r,(function*(r){n(r)&&t(r)}))}}))},i.match=function(n){return this.filter(r(n))},i.chain=function(r){return new n(a(r(this.source)))},i.forEach=function(n){return e(this.source,n)},i.first=function*(){var n=yield o(this.source),r=yield n.next();return r.done?void 0:r.value},n}();function o(n){return n[t]?n[t]():n}var c={next:function(){throw new Error("dummy")}},s=function(){function t(n){this.subscription=n}t.of=function*(r){var e=new t(c);return yield n.resource(e,(function*(){e.subscription=yield o(r),yield}))};var e=t.prototype;return e.filter=function(n){var r=this.subscription;return new t({next:function*(){for(;;){var t=yield r.next();if(t.done)return t;if(n(t.value))return t}}})},e.match=function(n){return this.filter(r(n))},e.map=function(n){var r=this.subscription;return new t({next:function*(){for(;;){var t=yield r.next();return t.done?t:{done:!1,value:n(t.value)}}}})},e.first=function*(){var n=yield this.subscription.next();return n.done?void 0:n.value},e.expect=function*(){var n=yield this.subscription.next();if(n.done)throw new Error("expected subscription to contain a value");return n.value},e.forEach=function*(n){for(;;){var r=yield this.subscription.next();if(r.done)return r.value;yield n(r.value)}},e.next=function(){return this.subscription.next()},t}(),f=function(){var n=this;this.waiters=[],this.signal=function(r){var t=n.waiters.pop();t&&t(r)},this.wait=function(){return new Promise((function(r){return n.waiters.push(r)}))}};function a(r){return function*(){var t=[],e=new f,i=function(n){t.push({done:!1,value:n}),e.signal()};return yield n.resource(new s({next:function(){try{var n=e.wait();return t.length>0&&e.signal(),Promise.resolve(n.then((function(){return t.shift()})))}catch(n){return Promise.reject(n)}}}),(function*(){try{var n=yield r((function(n){return i(n)}));t.push({done:!0,value:n}),e.signal()}finally{i=function(n){throw function(n){var r=new Error("tried to publish a value: "+n+" on an already finished subscription");return r.name="TypeError",r}(n)}}}))}}exports.ChainableSubscription=s,exports.Subscribable=i,exports.SymbolSubscribable=t,exports.createSubscription=a,exports.forEach=e,exports.subscribe=function*(n){return yield s.of(n)};
-//# sourceMappingURL=subscription.cjs.production.min.js.map
+// a string of all valid unicode whitespaces
+// eslint-disable-next-line max-len
+module.exports = '\u0009\u000A\u000B\u000C\u000D\u0020\u00A0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF';
 
 
 /***/ }),
@@ -50188,9 +58118,9 @@ const path = __webpack_require__(622);
 const childProcess = __webpack_require__(129);
 const crossSpawn = __webpack_require__(328);
 const stripEof = __webpack_require__(922);
-const npmRunPath = __webpack_require__(112);
-const isStream = __webpack_require__(580);
-const _getStream = __webpack_require__(314);
+const npmRunPath = __webpack_require__(329);
+const isStream = __webpack_require__(124);
+const _getStream = __webpack_require__(209);
 const pFinally = __webpack_require__(990);
 const onExit = __webpack_require__(145);
 const errname = __webpack_require__(758);
@@ -50547,7 +58477,241 @@ module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, 
 
 
 /***/ }),
-/* 963 */,
+/* 963 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _interopRequireDefault = __webpack_require__(395);
+
+var _Object$defineProperty = __webpack_require__(617);
+
+_Object$defineProperty(exports, "__esModule", {
+  value: true
+});
+
+exports.default = void 0;
+
+var _slice = _interopRequireDefault(__webpack_require__(824));
+
+var _concat = _interopRequireDefault(__webpack_require__(4));
+
+var _includes = _interopRequireDefault(__webpack_require__(913));
+
+/*!
+ * XRegExp.matchRecursive 4.3.0
+ * <xregexp.com>
+ * Steven Levithan (c) 2009-present MIT License
+ */
+var _default = function _default(XRegExp) {
+  /**
+   * Returns a match detail object composed of the provided values.
+   *
+   * @private
+   */
+  function row(name, value, start, end) {
+    return {
+      name: name,
+      value: value,
+      start: start,
+      end: end
+    };
+  }
+  /**
+   * Returns an array of match strings between outermost left and right delimiters, or an array of
+   * objects with detailed match parts and position data. An error is thrown if delimiters are
+   * unbalanced within the data.
+   *
+   * @memberOf XRegExp
+   * @param {String} str String to search.
+   * @param {String} left Left delimiter as an XRegExp pattern.
+   * @param {String} right Right delimiter as an XRegExp pattern.
+   * @param {String} [flags] Any native or XRegExp flags, used for the left and right delimiters.
+   * @param {Object} [options] Lets you specify `valueNames` and `escapeChar` options.
+   * @returns {Array} Array of matches, or an empty array.
+   * @example
+   *
+   * // Basic usage
+   * let str = '(t((e))s)t()(ing)';
+   * XRegExp.matchRecursive(str, '\\(', '\\)', 'g');
+   * // -> ['t((e))s', '', 'ing']
+   *
+   * // Extended information mode with valueNames
+   * str = 'Here is <div> <div>an</div></div> example';
+   * XRegExp.matchRecursive(str, '<div\\s*>', '</div>', 'gi', {
+   *   valueNames: ['between', 'left', 'match', 'right']
+   * });
+   * // -> [
+   * // {name: 'between', value: 'Here is ',       start: 0,  end: 8},
+   * // {name: 'left',    value: '<div>',          start: 8,  end: 13},
+   * // {name: 'match',   value: ' <div>an</div>', start: 13, end: 27},
+   * // {name: 'right',   value: '</div>',         start: 27, end: 33},
+   * // {name: 'between', value: ' example',       start: 33, end: 41}
+   * // ]
+   *
+   * // Omitting unneeded parts with null valueNames, and using escapeChar
+   * str = '...{1}.\\{{function(x,y){return {y:x}}}';
+   * XRegExp.matchRecursive(str, '{', '}', 'g', {
+   *   valueNames: ['literal', null, 'value', null],
+   *   escapeChar: '\\'
+   * });
+   * // -> [
+   * // {name: 'literal', value: '...',  start: 0, end: 3},
+   * // {name: 'value',   value: '1',    start: 4, end: 5},
+   * // {name: 'literal', value: '.\\{', start: 6, end: 9},
+   * // {name: 'value',   value: 'function(x,y){return {y:x}}', start: 10, end: 37}
+   * // ]
+   *
+   * // Sticky mode via flag y
+   * str = '<1><<<2>>><3>4<5>';
+   * XRegExp.matchRecursive(str, '<', '>', 'gy');
+   * // -> ['1', '<<2>>', '3']
+   */
+
+
+  XRegExp.matchRecursive = function (str, left, right, flags, options) {
+    flags = flags || '';
+    options = options || {};
+    var global = (0, _includes.default)(flags).call(flags, 'g');
+    var sticky = (0, _includes.default)(flags).call(flags, 'y'); // Flag `y` is controlled internally
+
+    var basicFlags = flags.replace(/y/g, '');
+    var _options = options,
+        escapeChar = _options.escapeChar;
+    var vN = options.valueNames;
+    var output = [];
+    var openTokens = 0;
+    var delimStart = 0;
+    var delimEnd = 0;
+    var lastOuterEnd = 0;
+    var outerStart;
+    var innerStart;
+    var leftMatch;
+    var rightMatch;
+    var esc;
+    left = XRegExp(left, basicFlags);
+    right = XRegExp(right, basicFlags);
+
+    if (escapeChar) {
+      var _context, _context2;
+
+      if (escapeChar.length > 1) {
+        throw new Error('Cannot use more than one escape character');
+      }
+
+      escapeChar = XRegExp.escape(escapeChar); // Example of concatenated `esc` regex:
+      // `escapeChar`: '%'
+      // `left`: '<'
+      // `right`: '>'
+      // Regex is: /(?:%[\S\s]|(?:(?!<|>)[^%])+)+/
+
+      esc = new RegExp((0, _concat.default)(_context = (0, _concat.default)(_context2 = "(?:".concat(escapeChar, "[\\S\\s]|(?:(?!")).call(_context2, // Using `XRegExp.union` safely rewrites backreferences in `left` and `right`.
+      // Intentionally not passing `basicFlags` to `XRegExp.union` since any syntax
+      // transformation resulting from those flags was already applied to `left` and
+      // `right` when they were passed through the XRegExp constructor above.
+      XRegExp.union([left, right], '', {
+        conjunction: 'or'
+      }).source, ")[^")).call(_context, escapeChar, "])+)+"), // Flags `gy` not needed here
+      flags.replace(/[^imu]+/g, ''));
+    }
+
+    while (true) {
+      // If using an escape character, advance to the delimiter's next starting position,
+      // skipping any escaped characters in between
+      if (escapeChar) {
+        delimEnd += (XRegExp.exec(str, esc, delimEnd, 'sticky') || [''])[0].length;
+      }
+
+      leftMatch = XRegExp.exec(str, left, delimEnd);
+      rightMatch = XRegExp.exec(str, right, delimEnd); // Keep the leftmost match only
+
+      if (leftMatch && rightMatch) {
+        if (leftMatch.index <= rightMatch.index) {
+          rightMatch = null;
+        } else {
+          leftMatch = null;
+        }
+      } // Paths (LM: leftMatch, RM: rightMatch, OT: openTokens):
+      // LM | RM | OT | Result
+      // 1  | 0  | 1  | loop
+      // 1  | 0  | 0  | loop
+      // 0  | 1  | 1  | loop
+      // 0  | 1  | 0  | throw
+      // 0  | 0  | 1  | throw
+      // 0  | 0  | 0  | break
+      // The paths above don't include the sticky mode special case. The loop ends after the
+      // first completed match if not `global`.
+
+
+      if (leftMatch || rightMatch) {
+        delimStart = (leftMatch || rightMatch).index;
+        delimEnd = delimStart + (leftMatch || rightMatch)[0].length;
+      } else if (!openTokens) {
+        break;
+      }
+
+      if (sticky && !openTokens && delimStart > lastOuterEnd) {
+        break;
+      }
+
+      if (leftMatch) {
+        if (!openTokens) {
+          outerStart = delimStart;
+          innerStart = delimEnd;
+        }
+
+        ++openTokens;
+      } else if (rightMatch && openTokens) {
+        if (! --openTokens) {
+          if (vN) {
+            if (vN[0] && outerStart > lastOuterEnd) {
+              output.push(row(vN[0], (0, _slice.default)(str).call(str, lastOuterEnd, outerStart), lastOuterEnd, outerStart));
+            }
+
+            if (vN[1]) {
+              output.push(row(vN[1], (0, _slice.default)(str).call(str, outerStart, innerStart), outerStart, innerStart));
+            }
+
+            if (vN[2]) {
+              output.push(row(vN[2], (0, _slice.default)(str).call(str, innerStart, delimStart), innerStart, delimStart));
+            }
+
+            if (vN[3]) {
+              output.push(row(vN[3], (0, _slice.default)(str).call(str, delimStart, delimEnd), delimStart, delimEnd));
+            }
+          } else {
+            output.push((0, _slice.default)(str).call(str, innerStart, delimStart));
+          }
+
+          lastOuterEnd = delimEnd;
+
+          if (!global) {
+            break;
+          }
+        }
+      } else {
+        throw new Error('Unbalanced delimiter found in string');
+      } // If the delimiter matched an empty string, avoid an infinite loop
+
+
+      if (delimStart === delimEnd) {
+        ++delimEnd;
+      }
+    }
+
+    if (global && !sticky && vN && vN[0] && str.length > lastOuterEnd) {
+      output.push(row(vN[0], (0, _slice.default)(str).call(str, lastOuterEnd), lastOuterEnd, str.length));
+    }
+
+    return output;
+  };
+};
+
+exports.default = _default;
+module.exports = exports["default"];
+
+/***/ }),
 /* 964 */,
 /* 965 */,
 /* 966 */
@@ -50810,7 +58974,23 @@ function fencedCode(eat, value, silent) {
 
 
 /***/ }),
-/* 967 */,
+/* 967 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var path = __webpack_require__(628);
+var global = __webpack_require__(813);
+
+var aFunction = function (variable) {
+  return typeof variable == 'function' ? variable : undefined;
+};
+
+module.exports = function (namespace, method) {
+  return arguments.length < 2 ? aFunction(path[namespace]) || aFunction(global[namespace])
+    : path[namespace] && path[namespace][method] || global[namespace] && global[namespace][method];
+};
+
+
+/***/ }),
 /* 968 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -50847,7 +59027,29 @@ function hexadecimal(character) {
 
 /***/ }),
 /* 971 */,
-/* 972 */,
+/* 972 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var has = __webpack_require__(35);
+var toObject = __webpack_require__(375);
+var sharedKey = __webpack_require__(642);
+var CORRECT_PROTOTYPE_GETTER = __webpack_require__(521);
+
+var IE_PROTO = sharedKey('IE_PROTO');
+var ObjectPrototype = Object.prototype;
+
+// `Object.getPrototypeOf` method
+// https://tc39.github.io/ecma262/#sec-object.getprototypeof
+module.exports = CORRECT_PROTOTYPE_GETTER ? Object.getPrototypeOf : function (O) {
+  O = toObject(O);
+  if (has(O, IE_PROTO)) return O[IE_PROTO];
+  if (typeof O.constructor == 'function' && O instanceof O.constructor) {
+    return O.constructor.prototype;
+  } return O instanceof Object ? ObjectPrototype : null;
+};
+
+
+/***/ }),
 /* 973 */,
 /* 974 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -51706,7 +59908,65 @@ module.exports.safeDump = safeDump;
 
 
 /***/ }),
-/* 975 */,
+/* 975 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const pLimit = __webpack_require__(495);
+
+class EndError extends Error {
+	constructor(value) {
+		super();
+		this.value = value;
+	}
+}
+
+// The input can also be a promise, so we await it
+const testElement = async (element, tester) => tester(await element);
+
+// The input can also be a promise, so we `Promise.all()` them both
+const finder = async element => {
+	const values = await Promise.all(element);
+	if (values[1] === true) {
+		throw new EndError(values[0]);
+	}
+
+	return false;
+};
+
+const pLocate = async (iterable, tester, options) => {
+	options = {
+		concurrency: Infinity,
+		preserveOrder: true,
+		...options
+	};
+
+	const limit = pLimit(options.concurrency);
+
+	// Start all the promises concurrently with optional limit
+	const items = [...iterable].map(element => [element, limit(testElement, element, tester)]);
+
+	// Check the promises either serially or concurrently
+	const checkLimit = pLimit(options.preserveOrder ? 1 : Infinity);
+
+	try {
+		await Promise.all(items.map(element => checkLimit(finder, element)));
+	} catch (error) {
+		if (error instanceof EndError) {
+			return error.value;
+		}
+
+		throw error;
+	}
+};
+
+module.exports = pLocate;
+// TODO: Remove this for the next major release
+module.exports.default = pLocate;
+
+
+/***/ }),
 /* 976 */,
 /* 977 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
@@ -51800,7 +60060,26 @@ exports.withCustomRequest = withCustomRequest;
 
 
 /***/ }),
-/* 978 */,
+/* 978 */
+/***/ (function(module) {
+
+"use strict";
+
+module.exports = function (str, sep) {
+	if (typeof str !== 'string') {
+		throw new TypeError('Expected a string');
+	}
+
+	sep = typeof sep === 'undefined' ? '_' : sep;
+
+	return str
+		.replace(/([a-z\d])([A-Z])/g, '$1' + sep + '$2')
+		.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + sep + '$2')
+		.toLowerCase();
+};
+
+
+/***/ }),
 /* 979 */,
 /* 980 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -51953,7 +60232,17 @@ function write(description, options, callback) {
 
 
 /***/ }),
-/* 982 */,
+/* 982 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+__webpack_require__(915);
+__webpack_require__(118);
+var getIterator = __webpack_require__(63);
+
+module.exports = getIterator;
+
+
+/***/ }),
 /* 983 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -52006,7 +60295,7 @@ exports.getOctokit = getOctokit;
  * Released under the MIT License.
  */
 
-var isExtglob = __webpack_require__(865);
+var isExtglob = __webpack_require__(122);
 var chars = { '{': '}', '(': ')', '[': ']'};
 var strictRegex = /\\(.)|(^!|\*|[\].+)]\?|\[[^\\\]]+\]|\{[^\\}]+\}|\(\?[:!=][^\\)]+\)|\([^|]+\|[^\\)]+\))/;
 var relaxedRegex = /\\(.)|(^!|[*?{}()[\]]|\(\?)/;
@@ -52152,7 +60441,15 @@ exports.default = ReaderSync;
 
 
 /***/ }),
-/* 988 */,
+/* 988 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var parent = __webpack_require__(240);
+
+module.exports = parent;
+
+
+/***/ }),
 /* 989 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -52344,7 +60641,12 @@ function autoLink(eat, value, silent) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const { attemptCommands, raceTime } = __webpack_require__(378);
-const { configFile, changeFiles } = __webpack_require__(916);
+const {
+  configFile,
+  changeFiles,
+  changeFilesToVfile,
+  changeFilesRemove,
+} = __webpack_require__(916);
 const { assemble, mergeIntoConfig } = __webpack_require__(749);
 const { fillChangelogs } = __webpack_require__(72);
 const { apply, changesConsideringParents } = __webpack_require__(334);
@@ -52355,14 +60657,18 @@ module.exports.covector = function* covector({
   cwd = process.cwd(),
 }) {
   const config = yield configFile({ cwd });
-  const changesArray = yield changeFiles({
+  const changesPaths = yield changeFiles({
     cwd,
-    remove: command === "version" && !dryRun,
+    changeFolder: config.changeFolder,
   });
-  const assembledChanges = yield assemble({ cwd, vfiles: changesArray });
+  const changesVfiles = changeFilesToVfile({
+    cwd,
+    paths: changesPaths,
+  });
+  const assembledChanges = yield assemble({ cwd, vfiles: changesVfiles });
 
   if (command === "status" || !command) {
-    if (changesArray.length === 0) {
+    if (changesVfiles.length === 0) {
       console.info("There are no changes.");
       return "No changes.";
     } else {
@@ -52412,6 +60718,7 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       dryRun,
     });
+
     const applied = yield apply({
       commands,
       config,
@@ -52432,6 +60739,7 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       create: !dryRun,
     });
+
     pkgCommandsRan = yield attemptCommands({
       cwd,
       commands,
@@ -52440,6 +60748,9 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       dryRun,
     });
+
+    if (command === "version" && !dryRun)
+      yield changeFilesRemove({ cwd, paths: changesPaths });
 
     return pkgCommandsRan;
   } else {
@@ -52499,7 +60810,78 @@ module.exports.covector = function* covector({
 /***/ }),
 /* 995 */,
 /* 996 */,
-/* 997 */,
+/* 997 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.argsert = void 0;
+const yerror_1 = __webpack_require__(946);
+const parse_command_1 = __webpack_require__(788);
+const positionName = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
+function argsert(arg1, arg2, arg3) {
+    function parseArgs() {
+        return typeof arg1 === 'object'
+            ? [{ demanded: [], optional: [] }, arg1, arg2]
+            : [parse_command_1.parseCommand(`cmd ${arg1}`), arg2, arg3];
+    }
+    // TODO: should this eventually raise an exception.
+    try {
+        // preface the argument description with "cmd", so
+        // that we can run it through yargs' command parser.
+        let position = 0;
+        let [parsed, callerArguments, length] = parseArgs();
+        const args = [].slice.call(callerArguments);
+        while (args.length && args[args.length - 1] === undefined)
+            args.pop();
+        length = length || args.length;
+        if (length < parsed.demanded.length) {
+            throw new yerror_1.YError(`Not enough arguments provided. Expected ${parsed.demanded.length} but received ${args.length}.`);
+        }
+        const totalCommands = parsed.demanded.length + parsed.optional.length;
+        if (length > totalCommands) {
+            throw new yerror_1.YError(`Too many arguments provided. Expected max ${totalCommands} but received ${length}.`);
+        }
+        parsed.demanded.forEach((demanded) => {
+            const arg = args.shift();
+            const observedType = guessType(arg);
+            const matchingTypes = demanded.cmd.filter(type => type === observedType || type === '*');
+            if (matchingTypes.length === 0)
+                argumentTypeError(observedType, demanded.cmd, position);
+            position += 1;
+        });
+        parsed.optional.forEach((optional) => {
+            if (args.length === 0)
+                return;
+            const arg = args.shift();
+            const observedType = guessType(arg);
+            const matchingTypes = optional.cmd.filter(type => type === observedType || type === '*');
+            if (matchingTypes.length === 0)
+                argumentTypeError(observedType, optional.cmd, position);
+            position += 1;
+        });
+    }
+    catch (err) {
+        console.warn(err.stack);
+    }
+}
+exports.argsert = argsert;
+function guessType(arg) {
+    if (Array.isArray(arg)) {
+        return 'array';
+    }
+    else if (arg === null) {
+        return 'null';
+    }
+    return typeof arg;
+}
+function argumentTypeError(observedType, allowedTypes, position) {
+    throw new yerror_1.YError(`Invalid ${positionName[position] || 'manyith'} argument. Expected ${allowedTypes.join(' or ')} but received ${observedType}.`);
+}
+
+
+/***/ }),
 /* 998 */
 /***/ (function(module) {
 
