@@ -28,7 +28,9 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           command: 'version-or-publish'
+          createRelease: true
       - name: create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v2
