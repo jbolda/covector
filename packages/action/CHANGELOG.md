@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2]
+
+-   In --dry-run mode, output the expected commands with data piped in.
+    -   Bumped due to a bump in covector.
+    -   [1bb67ea](https://www.github.com/jbolda/covector/commit/1bb67ea671b6fbe9b21af9feb72612d166fd7662) fix: missing publish pipe ([#94](https://www.github.com/jbolda/covector/pull/94)) on 2020-07-10
+
 ## [0.2.1]
 
 -   Shift getPublishedVersion check prior to commands running. Without this, postpublished would never run (since packages were just published and are update to date).

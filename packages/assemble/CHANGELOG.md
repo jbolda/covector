@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1]
+
+-   Assemble process was async and the pkgFile needed a proper await. Switch to a generator to yield in the loop.
+    -   [1bb67ea](https://www.github.com/jbolda/covector/commit/1bb67ea671b6fbe9b21af9feb72612d166fd7662) fix: missing publish pipe ([#94](https://www.github.com/jbolda/covector/pull/94)) on 2020-07-10
+
 ## [0.2.0]
 
 -   Note in sub-bullets when a bump was due to a dependency (and that helps note where there summary text is from as well.)
