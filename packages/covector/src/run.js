@@ -62,6 +62,11 @@ module.exports.covector = function* covector({
       dryRun,
     });
 
+    if (dryRun) {
+      console.log("==== commands ready to run ===");
+      console.log(commands);
+    }
+
     let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
       pkgs[pkg] = {
         precommand: false,
@@ -124,6 +129,11 @@ module.exports.covector = function* covector({
       cwd,
       dryRun,
     });
+
+    if (dryRun) {
+      console.log("==== commands ready to run ===");
+      console.log(commands);
+    }
 
     if (commands.length === 0) {
       console.log(`No commands configured to run on [${command}].`);

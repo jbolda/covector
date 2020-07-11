@@ -179,8 +179,8 @@ describe("assemble changes", () => {
 });
 
 describe("merge config test", () => {
-  it("merges version", async () => {
-    const mergedVersionConfig = await mergeIntoConfig({
+  it("merges version", function* () {
+    const mergedVersionConfig = yield mergeIntoConfig({
       config,
       assembledChanges,
       command: "version",
@@ -188,14 +188,14 @@ describe("merge config test", () => {
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges version without command", async () => {
+  it("merges version without command", function* () {
     let modifiedConfig = { ...config };
     delete modifiedConfig.pkgManagers.javascript.version;
     delete modifiedConfig.packages["assemble2"].version;
     delete modifiedConfig.packages["@namespaced/assemble1"].version;
     delete modifiedConfig.packages["@namespaced/assemble2"].version;
 
-    const mergedVersionConfig = await mergeIntoConfig({
+    const mergedVersionConfig = yield mergeIntoConfig({
       config: modifiedConfig,
       assembledChanges,
       command: "version",
@@ -203,7 +203,7 @@ describe("merge config test", () => {
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges nested bumps", async () => {
+  it("merges nested bumps", function* () {
     const nestedAssembledChanges = {
       releases: {
         assemble1: {
@@ -260,7 +260,7 @@ describe("merge config test", () => {
       },
     };
 
-    const mergedVersionConfig = await mergeIntoConfig({
+    const mergedVersionConfig = yield mergeIntoConfig({
       config: nestedConfig,
       assembledChanges: nestedAssembledChanges,
       command: "version",
