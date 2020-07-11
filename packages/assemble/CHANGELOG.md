@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2]
+
+-   Pass split versions through to pipe.
+    -   Bumped due to a bump in @covector/assemble.
+    -   [6370826](https://www.github.com/jbolda/covector/commit/63708261d633d22ada1c7e14667b4107ea7e68c3) fix: pass split versions through to pipe ([#96](https://www.github.com/jbolda/covector/pull/96)) on 2020-07-11
+
 ## [0.2.1]
 
 -   Assemble process was async and the pkgFile needed a proper await. Switch to a generator to yield in the loop.
