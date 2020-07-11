@@ -180,6 +180,77 @@ Object {
       },
     ],
     Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [
+        Object {
+          "command": Array [
+            Object {
+              "command": "yarn build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "yarn info tauri@0.8.0 description",
+                "test": "yarn info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            Object {
+              "command": "yarn build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+      ],
+    ],
+    Array [
       "dryRun >> package-one [build]: yarn build",
     ],
     Array [
@@ -439,6 +510,77 @@ Object {
           "path": "./packages/package-two",
         },
       },
+    ],
+    Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [
+        Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "yarn info tauri@0.8.0 description",
+                "test": "yarn info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+      ],
     ],
     Array [
       "dryRun >> package-one [publish]: echo publish",
@@ -768,6 +910,93 @@ Object {
       },
     ],
     Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [
+        Object {
+          "command": Array [
+            Object {
+              "command": "yarn build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+            Object {
+              "command": "yarn test",
+              "dryRunCommand": false,
+            },
+            Object {
+              "command": "echo boop",
+              "dryRunCommand": "echo deboop",
+            },
+          ],
+          "dependencies": undefined,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "yarn info tauri@0.8.0 description",
+                "test": "yarn info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            Object {
+              "command": "yarn build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+            Object {
+              "command": "yarn test",
+              "dryRunCommand": false,
+            },
+            Object {
+              "command": "echo boop",
+              "dryRunCommand": "echo deboop",
+            },
+          ],
+          "dependencies": undefined,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+      ],
+    ],
+    Array [
       "dryRun >> package-one [test]: yarn build",
     ],
     Array [
@@ -908,6 +1137,12 @@ Object {
   "consoleLog": Array [
     Array [
       "==== data piped into commands ===",
+    ],
+    Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [],
     ],
   ],
   "covectorReturn": Object {
@@ -1454,6 +1689,451 @@ Object {
           "publish": false,
         },
       },
+    ],
+    Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [
+        Object {
+          "command": Array [
+            "echo the files in the tauri-bundler folder are",
+            "ls",
+          ],
+          "dependencies": undefined,
+          "manager": "rust",
+          "path": "./cli/tauri-bundler",
+          "pkg": "tauri-bundler",
+          "pkgFile": Object {
+            "name": "tauri-bundler",
+            "pkg": Object {
+              "bin": Array [
+                Object {
+                  "name": "cargo-tauri-bundler",
+                  "path": "src/main.rs",
+                },
+              ],
+              "dependencies": Object {
+                "anyhow": "1.0",
+                "ar": "0.8.0",
+                "chrono": "0.4",
+                "clap": "^2",
+                "dirs": "2.0.2",
+                "glob": "0.3.0",
+                "handlebars": Object {
+                  "__tomlInline": true,
+                  "version": "3.1",
+                },
+                "icns": "0.3",
+                "image": "0.23.4",
+                "lazy_static": Object {
+                  "__tomlInline": true,
+                  "version": "1.4",
+                },
+                "libflate": "1.0",
+                "md5": "0.7.0",
+                "msi": "0.2",
+                "serde": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "derive",
+                  ],
+                  "version": "1.0",
+                },
+                "serde_json": "1.0",
+                "strsim": "0.10.0",
+                "tar": "0.4",
+                "target_build_utils": "0.3",
+                "term": "0.6.1",
+                "thiserror": "1.0",
+                "toml": "0.5.6",
+                "uuid": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "v5",
+                  ],
+                  "version": "0.8",
+                },
+                "walkdir": "2",
+              },
+              "dev-dependencies": Object {
+                "tempfile": "3",
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Wrap rust executables in OS-specific app bundles for Tauri",
+                "edition": "2018",
+                "keywords": Array [
+                  "bundle",
+                  "cargo",
+                  "tauri",
+                ],
+                "license": "MIT/Apache-2.0",
+                "name": "tauri-bundler",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.6.0",
+              },
+              "target": Object {
+                "cfg(not(target_os = \\"linux\\"))": Object {
+                  "dependencies": Object {
+                    "hex": Object {
+                      "__tomlInline": true,
+                      "version": "0.4",
+                    },
+                    "sha2": Object {
+                      "__tomlInline": true,
+                      "version": "0.8",
+                    },
+                    "zip": Object {
+                      "__tomlInline": true,
+                      "version": "0.5",
+                    },
+                  },
+                },
+                "cfg(target_os = \\"windows\\")": Object {
+                  "dependencies": Object {
+                    "attohttpc": Object {
+                      "__tomlInline": true,
+                      "version": "0.13.0",
+                    },
+                    "regex": Object {
+                      "__tomlInline": true,
+                      "version": "1",
+                    },
+                    "runas": "0.2",
+                  },
+                },
+              },
+              "workspace": Object {
+                "__tomlInline": true,
+              },
+            },
+            "version": "0.6.0",
+            "versionMajor": 0,
+            "versionMinor": 6,
+            "versionPatch": 0,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            "echo the files in the tauri folder are",
+            "ls",
+          ],
+          "dependencies": Array [
+            "tauri-api",
+          ],
+          "manager": "rust",
+          "path": "./tauri",
+          "pkg": "tauri",
+          "pkgFile": Object {
+            "name": "tauri",
+            "pkg": Object {
+              "build-dependencies": Object {
+                "tauri_includedir_codegen": "0.5.2",
+              },
+              "dependencies": Object {
+                "anyhow": "1.0.31",
+                "base64": "0.12.1",
+                "envmnt": "0.8.2",
+                "lazy_static": "1.4.0",
+                "phf": "0.8.0",
+                "serde": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "derive",
+                  ],
+                  "version": "1.0",
+                },
+                "serde_json": "1.0",
+                "tauri-api": Object {
+                  "__tomlInline": true,
+                  "path": "../tauri-api",
+                  "version": "0.5",
+                },
+                "tauri_includedir": "0.5.0",
+                "thiserror": "1.0.19",
+                "threadpool": "1.8",
+                "tiny_http": Object {
+                  "__tomlInline": true,
+                  "optional": true,
+                  "version": "0.7",
+                },
+                "uuid": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "v4",
+                  ],
+                  "version": "0.8.1",
+                },
+                "web-view": "=0.6.2",
+                "webbrowser": "0.5.2",
+                "webview-sys": "=0.5.0",
+              },
+              "dev-dependencies": Object {
+                "proptest": "0.9.6",
+                "serde": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "derive",
+                  ],
+                  "version": "1.0",
+                },
+                "serde_json": "1.0",
+                "tauri": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "all-api",
+                    "edge",
+                  ],
+                  "path": ".",
+                },
+              },
+              "example": Array [
+                Object {
+                  "name": "communication",
+                  "path": "examples/communication/src-tauri/src/main.rs",
+                },
+              ],
+              "features": Object {
+                "all-api": Array [],
+                "copy-file": Array [],
+                "create-dir": Array [],
+                "edge": Array [
+                  "web-view/edge",
+                ],
+                "embedded-server": Array [
+                  "tiny_http",
+                ],
+                "event": Array [],
+                "execute": Array [],
+                "no-server": Array [],
+                "open": Array [],
+                "open-dialog": Array [],
+                "read-binary-file": Array [],
+                "read-dir": Array [],
+                "read-text-file": Array [],
+                "remove-dir": Array [],
+                "remove-file": Array [],
+                "rename-file": Array [],
+                "save-dialog": Array [],
+                "set-title": Array [],
+                "updater": Array [],
+                "write-file": Array [],
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Make tiny, secure apps for all desktop platforms with Tauri",
+                "edition": "2018",
+                "exclude": Array [
+                  "test/fixture/**",
+                ],
+                "homepage": "https://tauri.studio",
+                "license": "MIT",
+                "metadata": Object {
+                  "docs": Object {
+                    "rs": Object {
+                      "features": Array [
+                        "all-api",
+                      ],
+                    },
+                  },
+                },
+                "name": "tauri",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.5.2",
+              },
+            },
+            "version": "0.5.2",
+            "versionMajor": 0,
+            "versionMinor": 5,
+            "versionPatch": 2,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            "echo the files in the tauri-api folder are",
+            "ls",
+          ],
+          "dependencies": Array [
+            "tauri-utils",
+          ],
+          "manager": "rust",
+          "path": "./tauri-api",
+          "pkg": "tauri-api",
+          "pkgFile": Object {
+            "name": "tauri-api",
+            "pkg": Object {
+              "dependencies": Object {
+                "anyhow": "1.0.31",
+                "attohttpc": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "json",
+                    "form",
+                  ],
+                  "version": "0.13.0",
+                },
+                "dirs": "2.0.2",
+                "either": "1.5.3",
+                "flate2": "1",
+                "http": "0.2",
+                "ignore": "0.4.16",
+                "nfd": "0.0.4",
+                "rand": "0.7",
+                "semver": "0.10",
+                "serde": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "derive",
+                  ],
+                  "version": "1.0",
+                },
+                "serde_json": "1.0",
+                "serde_repr": "0.1",
+                "tar": "0.4",
+                "tauri-utils": Object {
+                  "__tomlInline": true,
+                  "path": "../tauri-utils",
+                  "version": "0.5",
+                },
+                "tempdir": "0.3",
+                "tempfile": "3",
+                "thiserror": "1.0.19",
+                "zip": "0.5.5",
+              },
+              "dev-dependencies": Object {
+                "quickcheck": "0.9.2",
+                "quickcheck_macros": "0.9.1",
+                "totems": "0.2.7",
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Make tiny, secure apps for all desktop platforms with Tauri",
+                "edition": "2018",
+                "exclude": Array [
+                  "test/fixture/**",
+                ],
+                "homepage": "https://tauri.studio",
+                "license": "MIT",
+                "name": "tauri-api",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.5.1",
+              },
+            },
+            "version": "0.5.1",
+            "versionMajor": 0,
+            "versionMinor": 5,
+            "versionPatch": 1,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            "echo the files in the tauri-utils folder are",
+            "ls",
+          ],
+          "dependencies": undefined,
+          "manager": "rust",
+          "path": "./tauri-utils",
+          "pkg": "tauri-utils",
+          "pkgFile": Object {
+            "name": "tauri-utils",
+            "pkg": Object {
+              "dependencies": Object {
+                "anyhow": "1.0.31",
+                "sysinfo": "0.10",
+                "thiserror": "1.0.19",
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Utilities for Tauri",
+                "edition": "2018",
+                "homepage": "https://tauri.studio",
+                "license": "MIT",
+                "name": "tauri-utils",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.5.0",
+              },
+            },
+            "version": "0.5.0",
+            "versionMajor": 0,
+            "versionMinor": 5,
+            "versionPatch": 0,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            "echo the files in the tauri-updater folder are",
+            "ls",
+          ],
+          "dependencies": undefined,
+          "manager": "rust",
+          "path": "./tauri-updater",
+          "pkg": "tauri-updater",
+          "pkgFile": Object {
+            "name": "tauri-updater",
+            "pkg": Object {
+              "dependencies": Object {
+                "anyhow": "1.0.31",
+                "attohttpc": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "json",
+                    "compress",
+                  ],
+                  "version": "0.10.1",
+                },
+                "serde": "1.0",
+                "serde_json": "1.0",
+                "tauri-api": Object {
+                  "__tomlInline": true,
+                  "path": "../tauri-api",
+                  "version": "0.5",
+                },
+                "tauri-utils": Object {
+                  "__tomlInline": true,
+                  "path": "../tauri-utils",
+                  "version": "0.5",
+                },
+                "tempdir": "0.3",
+                "thiserror": "1.0.19",
+                "zip": "0.5.3",
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Updater for Tauri",
+                "edition": "2018",
+                "exclude": Array [
+                  "test/fixture/**",
+                ],
+                "homepage": "https://tauri.studio",
+                "license": "MIT",
+                "name": "tauri-updater",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.4.2",
+              },
+            },
+            "version": "0.4.2",
+            "versionMajor": 0,
+            "versionMinor": 4,
+            "versionPatch": 2,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+      ],
     ],
     Array [
       "dryRun >> tauri-bundler [build]: echo the files in the tauri-bundler folder are",
@@ -2514,6 +3194,544 @@ Object {
       },
     ],
     Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [
+        Object {
+          "command": Array [
+            "echo publishing tauri.js would happen here",
+          ],
+          "dependencies": Array [
+            "tauri",
+          ],
+          "manager": "javascript",
+          "path": "./cli/tauri.js",
+          "pkg": "tauri.js",
+          "pkgFile": Object {
+            "name": "tauri.js",
+            "pkg": Object {
+              "bin": Object {
+                "tauri": "./bin/tauri.js",
+              },
+              "bugs": Object {
+                "url": "https://github.com/tauri-apps/tauri/issues",
+              },
+              "contributors": Array [
+                "test",
+              ],
+              "dependencies": Object {
+                "@tauri-apps/tauri-inliner": "1.14.1",
+                "@tauri-apps/toml": "2.2.4",
+                "chalk": "4.0.0",
+                "chokidar": "3.4.0",
+                "cross-spawn": "7.0.3",
+                "fast-glob": "3.2.2",
+                "fs-extra": "9.0.1",
+                "http-proxy": "1.18.1",
+                "imagemin": "7.0.1",
+                "imagemin-optipng": "8.0.0",
+                "imagemin-pngquant": "9.0.0",
+                "imagemin-zopfli": "7.0.0",
+                "is-png": "2.0.0",
+                "isbinaryfile": "4.0.6",
+                "jsdom": "16.2.2",
+                "lodash": "4.17.15",
+                "minimist": "1.2.5",
+                "ms": "2.1.2",
+                "png2icons": "2.0.1",
+                "read-chunk": "3.2.0",
+                "sharp": "0.25.3",
+                "webpack-merge": "4.2.2",
+                "webpack-shell-plugin": "0.5.0",
+              },
+              "description": "Multi-binding collection of libraries and templates for building Tauri apps",
+              "devDependencies": Object {
+                "@babel/core": "7.10.2",
+                "@babel/preset-env": "7.10.2",
+                "@babel/preset-typescript": "7.10.1",
+                "@types/cross-spawn": "6.0.2",
+                "@types/fs-extra": "9.0.1",
+                "@types/http-proxy": "1.17.4",
+                "@types/imagemin": "7.0.0",
+                "@types/imagemin-optipng": "5.2.0",
+                "@types/jsdom": "16.2.3",
+                "@types/lodash": "4.14.155",
+                "@types/ms": "0.7.31",
+                "@types/sharp": "0.25.0",
+                "@types/webpack-merge": "4.1.5",
+                "@typescript-eslint/eslint-plugin": "3.1.0",
+                "@typescript-eslint/parser": "3.1.0",
+                "babel-jest": "26.0.1",
+                "dotenv": "8.2.0",
+                "eslint": "7.1.0",
+                "eslint-config-standard-with-typescript": "18.0.2",
+                "eslint-plugin-import": "2.20.2",
+                "eslint-plugin-lodash-template": "0.18.0",
+                "eslint-plugin-node": "11.1.0",
+                "eslint-plugin-promise": "4.2.1",
+                "eslint-plugin-security": "1.4.0",
+                "eslint-plugin-standard": "4.0.1",
+                "husky": "4.2.5",
+                "is-running": "2.1.0",
+                "jest": "26.0.1",
+                "jest-mock-process": "1.4.0",
+                "lint-staged": "10.2.8",
+                "lockfile-lint": "4.3.6",
+                "promise": "8.1.0",
+                "raw-loader": "4.0.1",
+                "ts-loader": "7.0.5",
+                "typescript": "3.9.3",
+                "webpack": "4.43.0",
+                "webpack-cli": "3.3.11",
+                "webpack-node-externals": "1.7.2",
+              },
+              "funding": Object {
+                "type": "opencollective",
+                "url": "https://opencollective.com/tauri",
+              },
+              "homepage": "https://github.com/tauri-apps/tauri#readme",
+              "husky": Object {
+                "hooks": Object {
+                  "pre-commit": "lint-staged",
+                },
+              },
+              "license": "MIT",
+              "lint-staged": Array [
+                "eslint --fix",
+              ],
+              "name": "tauri",
+              "repository": Object {
+                "type": "git",
+                "url": "git+https://github.com/tauri-apps/tauri.git",
+              },
+              "scripts": Object {
+                "build": "webpack --progress",
+                "build-release": "yarn build --display none --progress false",
+                "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
+                "lint": "eslint --ext ts ./src/**/*.ts",
+                "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
+                "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
+                "prepublishOnly": "yarn build-release",
+                "pretest": "yarn build",
+                "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
+                "test:local": "jest --runInBand",
+              },
+              "version": "0.6.2",
+            },
+            "version": "0.6.2",
+            "versionMajor": 0,
+            "versionMinor": 6,
+            "versionPatch": 2,
+          },
+          "postcommand": null,
+          "precommand": null,
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            "echo publishing tauri-bundler would happen here",
+            "echo running in ./cli/tauri-bundler",
+            "ls",
+          ],
+          "dependencies": undefined,
+          "getPublishedVersion": "echo 0.5.2",
+          "manager": "rust",
+          "path": "./cli/tauri-bundler",
+          "pkg": "tauri-bundler",
+          "pkgFile": Object {
+            "name": "tauri-bundler",
+            "pkg": Object {
+              "bin": Array [
+                Object {
+                  "name": "cargo-tauri-bundler",
+                  "path": "src/main.rs",
+                },
+              ],
+              "dependencies": Object {
+                "anyhow": "1.0",
+                "ar": "0.8.0",
+                "chrono": "0.4",
+                "clap": "^2",
+                "dirs": "2.0.2",
+                "glob": "0.3.0",
+                "handlebars": Object {
+                  "__tomlInline": true,
+                  "version": "3.1",
+                },
+                "icns": "0.3",
+                "image": "0.23.4",
+                "lazy_static": Object {
+                  "__tomlInline": true,
+                  "version": "1.4",
+                },
+                "libflate": "1.0",
+                "md5": "0.7.0",
+                "msi": "0.2",
+                "serde": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "derive",
+                  ],
+                  "version": "1.0",
+                },
+                "serde_json": "1.0",
+                "strsim": "0.10.0",
+                "tar": "0.4",
+                "target_build_utils": "0.3",
+                "term": "0.6.1",
+                "thiserror": "1.0",
+                "toml": "0.5.6",
+                "uuid": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "v5",
+                  ],
+                  "version": "0.8",
+                },
+                "walkdir": "2",
+              },
+              "dev-dependencies": Object {
+                "tempfile": "3",
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Wrap rust executables in OS-specific app bundles for Tauri",
+                "edition": "2018",
+                "keywords": Array [
+                  "bundle",
+                  "cargo",
+                  "tauri",
+                ],
+                "license": "MIT/Apache-2.0",
+                "name": "tauri-bundler",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.6.0",
+              },
+              "target": Object {
+                "cfg(not(target_os = \\"linux\\"))": Object {
+                  "dependencies": Object {
+                    "hex": Object {
+                      "__tomlInline": true,
+                      "version": "0.4",
+                    },
+                    "sha2": Object {
+                      "__tomlInline": true,
+                      "version": "0.8",
+                    },
+                    "zip": Object {
+                      "__tomlInline": true,
+                      "version": "0.5",
+                    },
+                  },
+                },
+                "cfg(target_os = \\"windows\\")": Object {
+                  "dependencies": Object {
+                    "attohttpc": Object {
+                      "__tomlInline": true,
+                      "version": "0.13.0",
+                    },
+                    "regex": Object {
+                      "__tomlInline": true,
+                      "version": "1",
+                    },
+                    "runas": "0.2",
+                  },
+                },
+              },
+              "workspace": Object {
+                "__tomlInline": true,
+              },
+            },
+            "version": "0.6.0",
+            "versionMajor": 0,
+            "versionMinor": 6,
+            "versionPatch": 0,
+          },
+          "postcommand": Array [
+            "echo postmode for tauri-bundler",
+          ],
+          "precommand": Array [
+            "echo premode for tauri-bundler",
+          ],
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            "echo publishing tauri would happen here",
+            "echo running in ./tauri",
+            "ls",
+          ],
+          "dependencies": Array [
+            "tauri-api",
+          ],
+          "getPublishedVersion": "echo 0.5.2",
+          "manager": "rust",
+          "path": "./tauri",
+          "pkg": "tauri",
+          "pkgFile": Object {
+            "name": "tauri",
+            "pkg": Object {
+              "build-dependencies": Object {
+                "tauri_includedir_codegen": "0.5.2",
+              },
+              "dependencies": Object {
+                "anyhow": "1.0.31",
+                "base64": "0.12.1",
+                "envmnt": "0.8.2",
+                "lazy_static": "1.4.0",
+                "phf": "0.8.0",
+                "serde": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "derive",
+                  ],
+                  "version": "1.0",
+                },
+                "serde_json": "1.0",
+                "tauri-api": Object {
+                  "__tomlInline": true,
+                  "path": "../tauri-api",
+                  "version": "0.5",
+                },
+                "tauri_includedir": "0.5.0",
+                "thiserror": "1.0.19",
+                "threadpool": "1.8",
+                "tiny_http": Object {
+                  "__tomlInline": true,
+                  "optional": true,
+                  "version": "0.7",
+                },
+                "uuid": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "v4",
+                  ],
+                  "version": "0.8.1",
+                },
+                "web-view": "=0.6.2",
+                "webbrowser": "0.5.2",
+                "webview-sys": "=0.5.0",
+              },
+              "dev-dependencies": Object {
+                "proptest": "0.9.6",
+                "serde": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "derive",
+                  ],
+                  "version": "1.0",
+                },
+                "serde_json": "1.0",
+                "tauri": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "all-api",
+                    "edge",
+                  ],
+                  "path": ".",
+                },
+              },
+              "example": Array [
+                Object {
+                  "name": "communication",
+                  "path": "examples/communication/src-tauri/src/main.rs",
+                },
+              ],
+              "features": Object {
+                "all-api": Array [],
+                "copy-file": Array [],
+                "create-dir": Array [],
+                "edge": Array [
+                  "web-view/edge",
+                ],
+                "embedded-server": Array [
+                  "tiny_http",
+                ],
+                "event": Array [],
+                "execute": Array [],
+                "no-server": Array [],
+                "open": Array [],
+                "open-dialog": Array [],
+                "read-binary-file": Array [],
+                "read-dir": Array [],
+                "read-text-file": Array [],
+                "remove-dir": Array [],
+                "remove-file": Array [],
+                "rename-file": Array [],
+                "save-dialog": Array [],
+                "set-title": Array [],
+                "updater": Array [],
+                "write-file": Array [],
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Make tiny, secure apps for all desktop platforms with Tauri",
+                "edition": "2018",
+                "exclude": Array [
+                  "test/fixture/**",
+                ],
+                "homepage": "https://tauri.studio",
+                "license": "MIT",
+                "metadata": Object {
+                  "docs": Object {
+                    "rs": Object {
+                      "features": Array [
+                        "all-api",
+                      ],
+                    },
+                  },
+                },
+                "name": "tauri",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.5.2",
+              },
+            },
+            "version": "0.5.2",
+            "versionMajor": 0,
+            "versionMinor": 5,
+            "versionPatch": 2,
+          },
+          "postcommand": Array [
+            "echo postmode for tauri",
+          ],
+          "precommand": Array [
+            "echo premode for tauri",
+          ],
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            "echo publishing tauri-api would happen here",
+            "echo running in ./tauri-api",
+            "ls",
+          ],
+          "dependencies": Array [
+            "tauri-utils",
+          ],
+          "getPublishedVersion": "echo 0.5.2",
+          "manager": "rust",
+          "path": "./tauri-api",
+          "pkg": "tauri-api",
+          "pkgFile": Object {
+            "name": "tauri-api",
+            "pkg": Object {
+              "dependencies": Object {
+                "anyhow": "1.0.31",
+                "attohttpc": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "json",
+                    "form",
+                  ],
+                  "version": "0.13.0",
+                },
+                "dirs": "2.0.2",
+                "either": "1.5.3",
+                "flate2": "1",
+                "http": "0.2",
+                "ignore": "0.4.16",
+                "nfd": "0.0.4",
+                "rand": "0.7",
+                "semver": "0.10",
+                "serde": Object {
+                  "__tomlInline": true,
+                  "features": Array [
+                    "derive",
+                  ],
+                  "version": "1.0",
+                },
+                "serde_json": "1.0",
+                "serde_repr": "0.1",
+                "tar": "0.4",
+                "tauri-utils": Object {
+                  "__tomlInline": true,
+                  "path": "../tauri-utils",
+                  "version": "0.5",
+                },
+                "tempdir": "0.3",
+                "tempfile": "3",
+                "thiserror": "1.0.19",
+                "zip": "0.5.5",
+              },
+              "dev-dependencies": Object {
+                "quickcheck": "0.9.2",
+                "quickcheck_macros": "0.9.1",
+                "totems": "0.2.7",
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Make tiny, secure apps for all desktop platforms with Tauri",
+                "edition": "2018",
+                "exclude": Array [
+                  "test/fixture/**",
+                ],
+                "homepage": "https://tauri.studio",
+                "license": "MIT",
+                "name": "tauri-api",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.5.1",
+              },
+            },
+            "version": "0.5.1",
+            "versionMajor": 0,
+            "versionMinor": 5,
+            "versionPatch": 1,
+          },
+          "postcommand": Array [
+            "echo postmode for tauri-api",
+          ],
+          "precommand": Array [
+            "echo premode for tauri-api",
+          ],
+          "type": null,
+        },
+        Object {
+          "command": Array [
+            "echo publishing tauri-utils would happen here",
+            "echo running in ./tauri-utils",
+            "ls",
+          ],
+          "dependencies": undefined,
+          "getPublishedVersion": "echo 0.5.2",
+          "manager": "rust",
+          "path": "./tauri-utils",
+          "pkg": "tauri-utils",
+          "pkgFile": Object {
+            "name": "tauri-utils",
+            "pkg": Object {
+              "dependencies": Object {
+                "anyhow": "1.0.31",
+                "sysinfo": "0.10",
+                "thiserror": "1.0.19",
+              },
+              "package": Object {
+                "authors": "test",
+                "description": "Utilities for Tauri",
+                "edition": "2018",
+                "homepage": "https://tauri.studio",
+                "license": "MIT",
+                "name": "tauri-utils",
+                "repository": "https://github.com/tauri-apps/tauri",
+                "version": "0.5.0",
+              },
+            },
+            "version": "0.5.0",
+            "versionMajor": 0,
+            "versionMinor": 5,
+            "versionPatch": 0,
+          },
+          "postcommand": Array [
+            "echo postmode for tauri-utils",
+          ],
+          "precommand": Array [
+            "echo premode for tauri-utils",
+          ],
+          "type": null,
+        },
+      ],
+    ],
+    Array [
       "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
     ],
     Array [
@@ -3158,6 +4376,12 @@ Object {
       "==== data piped into commands ===",
     ],
     Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [],
+    ],
+    Array [
       "No commands configured to run on [test].",
     ],
   ],
@@ -3269,6 +4493,58 @@ Object {
           "type": "minor",
         },
       },
+    ],
+    Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [
+        Object {
+          "command": Array [
+            "true",
+          ],
+          "dependencies": Array [
+            "tauri-api",
+          ],
+          "manager": "rust",
+          "parents": Array [
+            "tauri.js",
+          ],
+          "path": "./tauri",
+          "pkg": "tauri",
+          "postcommand": null,
+          "precommand": null,
+          "type": "minor",
+        },
+        Object {
+          "command": Array [
+            "true",
+          ],
+          "dependencies": undefined,
+          "manager": "rust",
+          "parents": Array [],
+          "path": "./tauri-updater",
+          "pkg": "tauri-updater",
+          "postcommand": null,
+          "precommand": null,
+          "type": "patch",
+        },
+        Object {
+          "command": Array [
+            "true",
+          ],
+          "dependencies": Array [
+            "tauri",
+          ],
+          "manager": "javascript",
+          "parents": Array [],
+          "path": "./cli/tauri.js",
+          "pkg": "tauri.js",
+          "postcommand": null,
+          "precommand": null,
+          "type": "minor",
+        },
+      ],
     ],
     Array [
       "bumping tauri with minor",
