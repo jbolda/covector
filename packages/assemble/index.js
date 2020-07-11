@@ -107,13 +107,13 @@ module.exports.assemble = function* ({ cwd, vfiles }) {
   return plan;
 };
 
-module.exports.mergeIntoConfig = ({
+module.exports.mergeIntoConfig = function* ({
   config,
   assembledChanges,
   command,
   cwd,
   dryRun = false,
-}) => {
+}) {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce((pkged, pkg) => {
@@ -152,10 +152,11 @@ module.exports.mergeIntoConfig = ({
   }, {});
 
   const pipeOutput = {};
-  const commands = Object.keys(
+  let commands = [];
+  for (let pkg of Object.keys(
     command !== "version" ? pkgCommands : assembledChanges.releases
-  ).map(async (pkg) => {
-    if (!pkgCommands[pkg]) return null;
+  )) {
+    if (!pkgCommands[pkg]) continue;
 
     const pkgs =
       command !== "version" ? config.packages : assembledChanges.releases;
@@ -168,7 +169,7 @@ module.exports.mergeIntoConfig = ({
       command == "version"
         ? {}
         : {
-            pkgFile: await readPkgFile({
+            pkgFile: yield readPkgFile({
               file: path.join(
                 cwd,
                 config.packages[pkg].path,
@@ -241,20 +242,18 @@ module.exports.mergeIntoConfig = ({
         ["command", "dryRunCommand"]
       ),
     };
-    return merged;
-  });
 
-  if (dryRun)
+    commands = [...commands, merged];
+  }
+
+  if (dryRun) {
+    console.log("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
       console.log(pkg, "pipe", pipeOutput[pkg].pipe)
     );
+  }
 
-  return Promise.all(commands).then((values) =>
-    values.reduce(
-      (acc, current) => (!current ? acc : acc.concat([current])),
-      []
-    )
-  );
+  return commands;
 };
 
 const mergeCommand = ({ pkg, pkgManager, command, config }) => {
