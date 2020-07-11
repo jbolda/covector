@@ -137,6 +137,9 @@ Object {
             "version": "2.3.1",
           },
           "version": "2.3.1",
+          "versionMajor": 2,
+          "versionMinor": 3,
+          "versionPatch": 1,
         },
         "release": Object {
           "manager": "javascript",
@@ -172,6 +175,9 @@ Object {
             "version": "1.9.0",
           },
           "version": "1.9.0",
+          "versionMajor": 1,
+          "versionMinor": 9,
+          "versionPatch": 0,
         },
         "release": Object {
           "manager": "javascript",
@@ -469,6 +475,9 @@ Object {
             "version": "2.3.1",
           },
           "version": "2.3.1",
+          "versionMajor": 2,
+          "versionMinor": 3,
+          "versionPatch": 1,
         },
         "release": Object {
           "manager": "javascript",
@@ -504,6 +513,9 @@ Object {
             "version": "1.9.0",
           },
           "version": "1.9.0",
+          "versionMajor": 1,
+          "versionMinor": 9,
+          "versionPatch": 0,
         },
         "release": Object {
           "manager": "javascript",
@@ -857,6 +869,9 @@ Object {
             "version": "2.3.1",
           },
           "version": "2.3.1",
+          "versionMajor": 2,
+          "versionMinor": 3,
+          "versionPatch": 1,
         },
         "release": Object {
           "manager": "javascript",
@@ -902,6 +917,9 @@ Object {
             "version": "1.9.0",
           },
           "version": "1.9.0",
+          "versionMajor": 1,
+          "versionMinor": 9,
+          "versionPatch": 0,
         },
         "release": Object {
           "manager": "javascript",
@@ -1335,6 +1353,9 @@ Object {
             },
           },
           "version": "0.6.0",
+          "versionMajor": 0,
+          "versionMinor": 6,
+          "versionPatch": 0,
         },
         "release": Object {
           "manager": "rust",
@@ -1479,6 +1500,9 @@ Object {
             },
           },
           "version": "0.5.2",
+          "versionMajor": 0,
+          "versionMinor": 5,
+          "versionPatch": 2,
         },
         "release": Object {
           "dependencies": Array [
@@ -1568,6 +1592,9 @@ Object {
             },
           },
           "version": "0.5.1",
+          "versionMajor": 0,
+          "versionMinor": 5,
+          "versionPatch": 1,
         },
         "release": Object {
           "dependencies": Array [
@@ -1614,6 +1641,9 @@ Object {
             },
           },
           "version": "0.5.0",
+          "versionMajor": 0,
+          "versionMinor": 5,
+          "versionPatch": 0,
         },
         "release": Object {
           "manager": "rust",
@@ -1681,6 +1711,9 @@ Object {
             },
           },
           "version": "0.4.2",
+          "versionMajor": 0,
+          "versionMinor": 4,
+          "versionPatch": 2,
         },
         "release": Object {
           "getPublishedVersion": false,
@@ -2768,6 +2801,9 @@ Object {
             "version": "0.6.2",
           },
           "version": "0.6.2",
+          "versionMajor": 0,
+          "versionMinor": 6,
+          "versionPatch": 2,
         },
         "release": Object {
           "dependencies": Array [
@@ -2901,6 +2937,9 @@ Object {
             },
           },
           "version": "0.6.0",
+          "versionMajor": 0,
+          "versionMinor": 6,
+          "versionPatch": 0,
         },
         "release": Object {
           "manager": "rust",
@@ -3047,6 +3086,9 @@ Object {
             },
           },
           "version": "0.5.2",
+          "versionMajor": 0,
+          "versionMinor": 5,
+          "versionPatch": 2,
         },
         "release": Object {
           "dependencies": Array [
@@ -3138,6 +3180,9 @@ Object {
             },
           },
           "version": "0.5.1",
+          "versionMajor": 0,
+          "versionMinor": 5,
+          "versionPatch": 1,
         },
         "release": Object {
           "dependencies": Array [
@@ -3186,6 +3231,9 @@ Object {
             },
           },
           "version": "0.5.0",
+          "versionMajor": 0,
+          "versionMinor": 5,
+          "versionPatch": 0,
         },
         "release": Object {
           "manager": "rust",
