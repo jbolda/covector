@@ -1,6 +1,6 @@
 {
   "name": "covector",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "license": "Apache-2.0",
   "main": "src",
   "files": [
@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@covector/apply": "0.2.0",
-    "@covector/assemble": "0.2.1",
+    "@covector/assemble": "0.2.2",
     "@covector/changelog": "0.2.1",
     "@covector/files": "0.2.0",
     "@covector/command": "0.0.2",
