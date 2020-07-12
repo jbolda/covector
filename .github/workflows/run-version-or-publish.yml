@@ -36,6 +36,7 @@ jobs:
         uses: peter-evans/create-pull-request@v2
         with:
           title: "Publish New Versions"
+          commit-message: "publish new versions"
           labels: "version updates"
           branch: "release"
           body: ${{ steps.covector.outputs.change }}
