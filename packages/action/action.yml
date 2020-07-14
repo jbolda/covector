@@ -13,9 +13,13 @@ inputs:
     description: Opt-in to create a release on publish
     required: false
     default: false
+  draftRelease:
+    description: When creating a release, set it as a draft.
+    required: false
+    default: false
 outputs:
   change:
-    description: 'The time we greeted you'
+    description: The changes that were applied
 runs:
   using: 'node12'
   main: 'dist/index.js'

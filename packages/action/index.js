@@ -34,38 +34,50 @@ main(function* run() {
       console.log(`The covector output: ${payload}`);
     } else if (
       command === "publish" &&
-      core.getInput("createRelease") === true
+      core.getInput("createRelease") === "true"
     ) {
       core.setOutput("change", covectored);
       const payload = JSON.stringify(covectored, undefined, 2);
       console.log(`The covector output: ${payload}`);
       const octokit = github.getOctokit(token);
       const { owner, repo } = github.context.repo;
+
       let releases = {};
       for (let pkg of Object.keys(covectored)) {
         if (covectored[pkg].command !== false) {
-          // true to test
+          console.log(
+            `creating release for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
+          );
           const createReleaseResponse = yield octokit.repos.createRelease({
             owner,
             repo,
             tag_name: `${pkg}-v${covectored[pkg].pkg.pkgFile.version}`,
             name: `${pkg} v${covectored[pkg].pkg.pkgFile.version}`,
             body: commandText(covectored[pkg]),
+            draft: core.getInput("draftRelease") === "true" ? true : false,
           });
           const { data } = createReleaseResponse;
+          console.log("release created: ", data);
           releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
 
-          const { releaseId } = data;
+          const { id: releaseId } = data;
 
           if (covectored[pkg].pkg.assets) {
-            for (let asset in covectored[pkg].pkg.assetPaths) {
-              const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
-                owner,
-                repo,
-                release_Id: releaseId,
-                name: asset.name,
-                data: fs.readFileSync(asset.path),
-              });
+            try {
+              for (let asset of covectored[pkg].pkg.assets) {
+                console.log(
+                  `uploading asset ${asset.name} for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
+                );
+                const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
+                  owner,
+                  repo,
+                  release_id: releaseId,
+                  name: asset.name,
+                  data: fs.readFileSync(asset.path),
+                });
+              }
+            } catch (error) {
+              console.error(error);
             }
           }
         }

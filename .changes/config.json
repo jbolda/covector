@@ -5,13 +5,7 @@
       "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
       "prepublish": ["npm pack"],
-      "publish": "npm publish --access public",
-      "assets": [
-        {
-          "path": "./${ pkg.pkg }-${ pkgFile.version }.tgz",
-          "name": "${ pkg.pkg }-${ pkgFile.version }.tgz"
-        }
-      ]
+      "publish": "npm publish --access public"
     }
   },
   "packages": {
@@ -30,39 +24,76 @@
         "@covector/changelog",
         "@covector/command",
         "all"
+      ],
+      "assets": [
+        {
+          "path": "./packages/covector/covector-${ pkgFile.version }.tgz",
+          "name": "covector-${ pkgFile.version }.tgz"
+        }
       ]
     },
     "@covector/apply": {
       "path": "./packages/apply",
       "manager": "javascript",
-      "dependencies": ["all"]
+      "dependencies": ["all"],
+      "assets": [
+        {
+          "path": "./packages/apply/covector-apply-${ pkgFile.version }.tgz",
+          "name": "covector-apply-${ pkgFile.version }.tgz"
+        }
+      ]
     },
     "@covector/assemble": {
       "path": "./packages/assemble",
       "manager": "javascript",
-      "dependencies": ["all"]
+      "dependencies": ["all"],
+      "assets": [
+        {
+          "path": "./packages/assemble/covector-assemble-${ pkgFile.version }.tgz",
+          "name": "covector-assemble-${ pkgFile.version }.tgz"
+        }
+      ]
     },
     "@covector/changelog": {
       "path": "./packages/changelog",
       "manager": "javascript",
-      "dependencies": ["@covector/files", "all"]
+      "dependencies": ["@covector/files", "all"],
+      "assets": [
+        {
+          "path": "./packages/changelog/covector-changelog-${ pkgFile.version }.tgz",
+          "name": "covector-changelog-${ pkgFile.version }.tgz"
+        }
+      ]
     },
     "@covector/files": {
       "path": "./packages/files",
       "manager": "javascript",
-      "dependencies": ["all"]
+      "dependencies": ["all"],
+      "assets": [
+        {
+          "path": "./packages/files/covector-files-${ pkgFile.version }.tgz",
+          "name": "covector-files-${ pkgFile.version }.tgz"
+        }
+      ]
     },
     "@covector/command": {
       "path": "./packages/command",
       "manager": "javascript",
-      "dependencies": ["all"]
+      "dependencies": ["all"],
+      "assets": [
+        {
+          "path": "./packages/command/covector-command-${ pkgFile.version }.tgz",
+          "name": "covector-command-${ pkgFile.version }.tgz"
+        }
+      ]
     },
     "action": {
       "path": "./packages/action",
       "manager": "javascript",
       "publish": false,
       "getPublishedVersion": false,
-      "dependencies": ["covector"]
+      "dependencies": ["covector"],
+      "assets": false
     },
     "all": {
       "version": true,
