@@ -27,7 +27,11 @@ module.exports.covector = function* covector({
     cwd,
     paths: changesPaths,
   });
-  const assembledChanges = yield assemble({ cwd, vfiles: changesVfiles });
+  const assembledChanges = yield assemble({
+    cwd,
+    vfiles: changesVfiles,
+    config,
+  });
 
   if (command === "status" || !command) {
     if (changesVfiles.length === 0) {

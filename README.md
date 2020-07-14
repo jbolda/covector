@@ -7,9 +7,10 @@ Sane package change management for single packages, monorepos, and polyglot.
 | package | version |
 | ------- | ------- |
 | [covector](./packages/covector) | [![npm](https://img.shields.io/npm/v/covector?style=for-the-badge)](https://www.npmjs.com/package/covector) |
-| [@covector/assemble](./packages/assemble) | [![npm](https://img.shields.io/npm/v/@covector/assemble?style=for-the-badge)](https://www.npmjs.com/package/@covector/assemble) |
 | [@covector/apply](./packages/apply) | [![npm](https://img.shields.io/npm/v/@covector/apply?style=for-the-badge)](https://www.npmjs.com/package/@covector/apply) |
+| [@covector/assemble](./packages/assemble) | [![npm](https://img.shields.io/npm/v/@covector/assemble?style=for-the-badge)](https://www.npmjs.com/package/@covector/assemble) |
 | [@covector/changelog](./packages/changelog) | [![npm](https://img.shields.io/npm/v/@covector/changelog?style=for-the-badge)](https://www.npmjs.com/package/@covector/changelog) |
+| [@covector/command](./packages/command) | [![npm](https://img.shields.io/npm/v/@covector/command?style=for-the-badge)](https://www.npmjs.com/package/@covector/command) |
 | [@covector/files](./packages/files) | [![npm](https://img.shields.io/npm/v/@covector/files?style=for-the-badge)](https://www.npmjs.com/package/@covector/files) |
 
 

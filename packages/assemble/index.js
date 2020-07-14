@@ -92,7 +92,7 @@ const mergeReleases = (changes) => {
   }, {});
 };
 
-module.exports.assemble = function* ({ cwd, vfiles }) {
+module.exports.assemble = function* ({ cwd, vfiles, config }) {
   let plan = {};
   let changes = yield function* () {
     let allVfiles = vfiles.map((vfile) => parseChange({ cwd, vfile }));
@@ -104,6 +104,24 @@ module.exports.assemble = function* ({ cwd, vfiles }) {
   };
   plan.changes = changes;
   plan.releases = mergeReleases(changes);
+
+  if (config) {
+    for (let pkg of Object.keys(plan.releases)) {
+      if (!config.packages[pkg]) {
+        let changesContainingError = plan.releases[pkg].changes.reduce(
+          (files, file) => {
+            files = `${files}${files === "" ? "" : ", "}${file.meta.filename}`;
+            return files;
+          },
+          ""
+        );
+        throw Error(
+          `${pkg} listed in ${changesContainingError} does not exist in the .changes/config.json`
+        );
+      }
+    }
+  }
+
   return plan;
 };
 
