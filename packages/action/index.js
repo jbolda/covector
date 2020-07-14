@@ -58,14 +58,18 @@ main(function* run() {
           const { releaseId } = data;
 
           if (covectored[pkg].pkg.assets) {
-            for (let asset in covectored[pkg].pkg.assetPaths) {
-              const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
-                owner,
-                repo,
-                release_Id: releaseId,
-                name: asset.name,
-                data: fs.readFileSync(asset.path),
-              });
+            try {
+              for (let asset in covectored[pkg].pkg.assetPaths) {
+                const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
+                  owner,
+                  repo,
+                  release_Id: releaseId,
+                  name: asset.name,
+                  data: fs.readFileSync(asset.path),
+                });
+              }
+            } catch (error) {
+              console.error(error);
             }
           }
         }
