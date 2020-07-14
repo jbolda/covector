@@ -18,6 +18,7 @@ jobs:
       - name: covector publish
         uses: ./packages/action
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           command: 'publish'
           createRelease: true
           draft: true
