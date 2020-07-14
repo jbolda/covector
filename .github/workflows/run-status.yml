@@ -15,3 +15,7 @@ jobs:
         uses: ./packages/action
         with:
           command: 'status'
+      - name: covector publish
+        uses: ./packages/action
+        with:
+          command: 'publish'
