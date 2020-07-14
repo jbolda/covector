@@ -15,10 +15,3 @@ jobs:
         uses: ./packages/action
         with:
           command: 'status'
-      - name: covector publish
-        uses: ./packages/action
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          command: 'publish'
-          createRelease: true
-          draftRelease: true

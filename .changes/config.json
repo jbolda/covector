@@ -3,14 +3,20 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
+      "getPublishedVersion": "npm view ${ pkg.pkg } version",
       "prepublish": ["npm pack"],
-      "publish": "echo npm publish --access public"
+      "publish": "npm publish --access public"
     }
   },
   "packages": {
     "covector": {
       "path": "./packages/covector",
       "manager": "javascript",
+      "postpublish": [
+        "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor } -f",
+        "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor }.${ pkgFile.versionMinor } -f",
+        "git push --tags -f"
+      ],
       "dependencies": [
         "@covector/apply",
         "@covector/assemble",
