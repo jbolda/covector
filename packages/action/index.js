@@ -34,7 +34,7 @@ main(function* run() {
       console.log(`The covector output: ${payload}`);
     } else if (
       command === "publish" &&
-      core.getInput("createRelease") === true
+      core.getInput("createRelease") === "true"
     ) {
       core.setOutput("change", covectored);
       const payload = JSON.stringify(covectored, undefined, 2);
