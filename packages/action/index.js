@@ -51,6 +51,7 @@ main(function* run() {
             tag_name: `${pkg}-v${covectored[pkg].pkg.pkgFile.version}`,
             name: `${pkg} v${covectored[pkg].pkg.pkgFile.version}`,
             body: commandText(covectored[pkg]),
+            draft: core.getInput("draftRelease") === "true" ? true : false,
           });
           const { data } = createReleaseResponse;
           releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
