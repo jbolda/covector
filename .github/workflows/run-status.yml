@@ -21,4 +21,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           command: 'publish'
           createRelease: true
-          draft: true
+          draftRelease: true
