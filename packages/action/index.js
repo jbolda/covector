@@ -66,7 +66,7 @@ main(function* run() {
             try {
               for (let asset in covectored[pkg].pkg.assets) {
                 console.log(
-                  `uploading asset ${asset} for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
+                  `uploading asset ${asset.name} for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
                 );
                 const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
                   owner,
