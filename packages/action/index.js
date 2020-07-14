@@ -57,14 +57,14 @@ main(function* run() {
             draft: core.getInput("draftRelease") === "true" ? true : false,
           });
           const { data } = createReleaseResponse;
+          console.log(data);
           releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
 
-          const { releaseId } = data;
+          const { id: releaseId } = data;
 
-          console.log(`release created with id ${releaseId}`);
           if (covectored[pkg].pkg.assets) {
             try {
-              for (let asset in covectored[pkg].pkg.assets) {
+              for (let asset of covectored[pkg].pkg.assets) {
                 console.log(
                   `uploading asset ${asset.name} for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
                 );
