@@ -57,7 +57,7 @@ main(function* run() {
             draft: core.getInput("draftRelease") === "true" ? true : false,
           });
           const { data } = createReleaseResponse;
-          console.log(data);
+          console.log("release created: ", data);
           releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
 
           const { id: releaseId } = data;
@@ -71,7 +71,7 @@ main(function* run() {
                 const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
                   owner,
                   repo,
-                  release_Id: releaseId,
+                  release_id: releaseId,
                   name: asset.name,
                   data: fs.readFileSync(asset.path),
                 });
