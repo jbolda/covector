@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.4]
+
+-   Throw an error if a change file is added that targets a package that does not exist in the config.
+    -   [48c1c99](https://www.github.com/jbolda/covector/commit/48c1c995fd69b028ec975fc577986b23adfb55b9) feat: throw error on non-existant package, closes [#57](https://www.github.com/jbolda/covector/pull/57) ([#102](https://www.github.com/jbolda/covector/pull/102)) on 2020-07-14
+
 ## [0.2.3]
 
 -   Pass split versions through to pipe.
