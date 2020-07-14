@@ -23,7 +23,7 @@ inputs:
     default: false
 outputs:
   change:
-    description: 'The time we greeted you'
+    description: The changes that were applied
 runs:
   using: 'node12'
   main: 'dist/index.js'
