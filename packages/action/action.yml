@@ -17,10 +17,6 @@ inputs:
     description: When creating a release, set it as a draft.
     required: false
     default: false
-  statusMessage:
-    description: Post a comment on PR when running status
-    required: false
-    default: false
 outputs:
   change:
     description: The changes that were applied
