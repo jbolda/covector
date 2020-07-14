@@ -24,6 +24,24 @@ describe("integration test in production mode", () => {
     restoreConsole();
   });
 
+  it("fails status for non-existant package", async () => {
+    const restoreConsole = mockConsole(["log", "dir"]);
+    const fullIntegration = f.copy("integration.js-with-change-file-error");
+    const covectored = main(
+      covector({
+        command: "status",
+        cwd: fullIntegration,
+      })
+    );
+    await expect(covectored).rejects.toThrow();
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleDir: console.dir.mock.calls,
+      covectorReturn: covectored,
+    }).toMatchSnapshot();
+    restoreConsole();
+  }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
+
   it("runs version for js and rust", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");

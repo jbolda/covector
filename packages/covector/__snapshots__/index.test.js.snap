@@ -4950,6 +4950,31 @@ Object {
 }
 `;
 
+exports[`integration test in production mode fails status for non-existant package 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [],
+  "covectorReturn": t {
+    "_promise": Promise {},
+    "blockOnReturnedContext": true,
+    "children": Set {},
+    "ensure": [Function],
+    "exitHooks": Set {},
+    "fail": [Function],
+    "fork": [Function],
+    "id": 23,
+    "isRequired": false,
+    "operation": Object {},
+    "reject": [Function],
+    "resolve": [Function],
+    "result": [Error: react listed in .changes/change-file-pkg-non-exists.md does not exist in the .changes/config.json],
+    "resume": [Function],
+    "spawn": [Function],
+    "state": "errored",
+  },
+}
+`;
+
 exports[`integration test in production mode fails with error 1`] = `
 Object {
   "consoleInfo": Array [],
