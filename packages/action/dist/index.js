@@ -27258,7 +27258,16 @@ const Range = __webpack_require__(318)
 /***/ }),
 /* 518 */,
 /* 519 */,
-/* 520 */,
+/* 520 */
+/***/ (function(module) {
+
+module.exports = color
+function color(d) {
+  return '\u001B[33m' + d + '\u001B[39m'
+}
+
+
+/***/ }),
 /* 521 */,
 /* 522 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -28139,38 +28148,50 @@ main(function* run() {
       console.log(`The covector output: ${payload}`);
     } else if (
       command === "publish" &&
-      core.getInput("createRelease") === true
+      core.getInput("createRelease") === "true"
     ) {
       core.setOutput("change", covectored);
       const payload = JSON.stringify(covectored, undefined, 2);
       console.log(`The covector output: ${payload}`);
       const octokit = github.getOctokit(token);
       const { owner, repo } = github.context.repo;
+
       let releases = {};
       for (let pkg of Object.keys(covectored)) {
         if (covectored[pkg].command !== false) {
-          // true to test
+          console.log(
+            `creating release for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
+          );
           const createReleaseResponse = yield octokit.repos.createRelease({
             owner,
             repo,
             tag_name: `${pkg}-v${covectored[pkg].pkg.pkgFile.version}`,
             name: `${pkg} v${covectored[pkg].pkg.pkgFile.version}`,
             body: commandText(covectored[pkg]),
+            draft: core.getInput("draftRelease") === "true" ? true : false,
           });
           const { data } = createReleaseResponse;
+          console.log("release created: ", data);
           releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
 
-          const { releaseId } = data;
+          const { id: releaseId } = data;
 
           if (covectored[pkg].pkg.assets) {
-            for (let asset in covectored[pkg].pkg.assetPaths) {
-              const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
-                owner,
-                repo,
-                release_Id: releaseId,
-                name: asset.name,
-                data: fs.readFileSync(asset.path),
-              });
+            try {
+              for (let asset of covectored[pkg].pkg.assets) {
+                console.log(
+                  `uploading asset ${asset.name} for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
+                );
+                const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
+                  owner,
+                  repo,
+                  release_id: releaseId,
+                  name: asset.name,
+                  data: fs.readFileSync(asset.path),
+                });
+              }
+            } catch (error) {
+              console.error(error);
             }
           }
         }
@@ -38237,7 +38258,7 @@ const mergeReleases = (changes) => {
   }, {});
 };
 
-module.exports.assemble = function* ({ cwd, vfiles }) {
+module.exports.assemble = function* ({ cwd, vfiles, config }) {
   let plan = {};
   let changes = yield function* () {
     let allVfiles = vfiles.map((vfile) => parseChange({ cwd, vfile }));
@@ -38249,6 +38270,24 @@ module.exports.assemble = function* ({ cwd, vfiles }) {
   };
   plan.changes = changes;
   plan.releases = mergeReleases(changes);
+
+  if (config) {
+    for (let pkg of Object.keys(plan.releases)) {
+      if (!config.packages[pkg]) {
+        let changesContainingError = plan.releases[pkg].changes.reduce(
+          (files, file) => {
+            files = `${files}${files === "" ? "" : ", "}${file.meta.filename}`;
+            return files;
+          },
+          ""
+        );
+        throw Error(
+          `${pkg} listed in ${changesContainingError} does not exist in the .changes/config.json`
+        );
+      }
+    }
+  }
+
   return plan;
 };
 
@@ -39292,6 +39331,7 @@ module.exports = Type;
 module.exports = visitParents
 
 var convert = __webpack_require__(380)
+var color = __webpack_require__(520)
 
 var CONTINUE = true
 var SKIP = 'skip'
@@ -39304,7 +39344,7 @@ visitParents.EXIT = EXIT
 function visitParents(tree, test, visitor, reverse) {
   var is
 
-  if (typeof test === 'function' && typeof visitor !== 'function') {
+  if (func(test) && !func(visitor)) {
     reverse = visitor
     visitor = test
     test = null
@@ -39312,38 +39352,57 @@ function visitParents(tree, test, visitor, reverse) {
 
   is = convert(test)
 
-  one(tree, null, [])
+  one(tree, null, [])()
 
-  // Visit a single node.
-  function one(node, index, parents) {
-    var result = []
-    var subresult
+  function one(child, index, parents) {
+    var value = object(child) ? child : {}
+    var name
 
-    if (!test || is(node, index, parents[parents.length - 1] || null)) {
-      result = toResult(visitor(node, parents))
+    if (string(value.type)) {
+      name = string(value.tagName)
+        ? value.tagName
+        : string(value.name)
+        ? value.name
+        : undefined
 
-      if (result[0] === EXIT) {
+      node.displayName =
+        'node (' + color(value.type + (name ? '<' + name + '>' : '')) + ')'
+    }
+
+    return node
+
+    function node() {
+      var result = []
+      var subresult
+
+      if (!test || is(child, index, parents[parents.length - 1] || null)) {
+        result = toResult(visitor(child, parents))
+
+        if (result[0] === EXIT) {
+          return result
+        }
+      }
+
+      if (!child.children || result[0] === SKIP) {
         return result
       }
-    }
 
-    if (node.children && result[0] !== SKIP) {
-      subresult = toResult(all(node.children, parents.concat(node)))
+      subresult = toResult(children(child.children, parents.concat(child)))
       return subresult[0] === EXIT ? subresult : result
     }
-
-    return result
   }
 
   // Visit children in `parent`.
-  function all(children, parents) {
+  function children(children, parents) {
     var min = -1
     var step = reverse ? -1 : 1
     var index = (reverse ? children.length : min) + step
+    var child
     var result
 
     while (index > min && index < children.length) {
-      result = one(children[index], index, parents)
+      child = children[index]
+      result = one(child, index, parents)()
 
       if (result[0] === EXIT) {
         return result
@@ -39355,7 +39414,7 @@ function visitParents(tree, test, visitor, reverse) {
 }
 
 function toResult(value) {
-  if (value !== null && typeof value === 'object' && 'length' in value) {
+  if (object(value) && 'length' in value) {
     return value
   }
 
@@ -39364,6 +39423,18 @@ function toResult(value) {
   }
 
   return [value]
+}
+
+function func(d) {
+  return typeof d === 'function'
+}
+
+function string(d) {
+  return typeof d === 'string'
+}
+
+function object(d) {
+  return typeof d === 'object' && d !== null
 }
 
 
@@ -51773,7 +51844,11 @@ module.exports.covector = function* covector({
     cwd,
     paths: changesPaths,
   });
-  const assembledChanges = yield assemble({ cwd, vfiles: changesVfiles });
+  const assembledChanges = yield assemble({
+    cwd,
+    vfiles: changesVfiles,
+    config,
+  });
 
   if (command === "status" || !command) {
     if (changesVfiles.length === 0) {

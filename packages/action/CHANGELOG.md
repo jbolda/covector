@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.3]
+
+-   Fix create release and upload errors on publish.
+    -   [f0443c1](https://www.github.com/jbolda/covector/commit/f0443c17e4584b026eecc6c8a5f34b362c02c498) fix: create release on publish ([#100](https://www.github.com/jbolda/covector/pull/100)) on 2020-07-14
+
 ## [0.2.2]
 
 Bumped due to dependency.
