@@ -49,12 +49,12 @@
       ]
     },
     "@covector/changelog": {
-      "path": "c",
+      "path": "./packages/changelog",
       "manager": "javascript",
       "dependencies": ["@covector/files", "all"],
       "assets": [
         {
-          "path": "./packages/assemble/covector-changelog-${ pkgFile.version }.tgz",
+          "path": "./packages/changelog/covector-changelog-${ pkgFile.version }.tgz",
           "name": "covector-changelog-${ pkgFile.version }.tgz"
         }
       ]
