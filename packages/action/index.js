@@ -61,9 +61,10 @@ main(function* run() {
 
           const { releaseId } = data;
 
+          console.log(`release created with id ${releaseId}`);
           if (covectored[pkg].pkg.assets) {
             try {
-              for (let asset in covectored[pkg].pkg.assetPaths) {
+              for (let asset in covectored[pkg].pkg.assets) {
                 console.log(
                   `uploading asset ${asset} for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
                 );
