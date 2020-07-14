@@ -41,10 +41,13 @@ main(function* run() {
       console.log(`The covector output: ${payload}`);
       const octokit = github.getOctokit(token);
       const { owner, repo } = github.context.repo;
+
       let releases = {};
       for (let pkg of Object.keys(covectored)) {
         if (covectored[pkg].command !== false) {
-          // true to test
+          console.log(
+            `creating release for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
+          );
           const createReleaseResponse = yield octokit.repos.createRelease({
             owner,
             repo,
@@ -61,6 +64,9 @@ main(function* run() {
           if (covectored[pkg].pkg.assets) {
             try {
               for (let asset in covectored[pkg].pkg.assetPaths) {
+                console.log(
+                  `uploading asset ${asset} for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
+                );
                 const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
                   owner,
                   repo,
