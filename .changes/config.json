@@ -3,9 +3,8 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "getPublishedVersion": "npm view ${ pkg.pkg } version",
       "prepublish": ["npm pack"],
-      "publish": "npm publish --access public",
+      "publish": "echo npm publish --access public",
       "assets": [
         {
           "path": "./${ pkg.pkg }-${ pkgFile.version }.tgz",
