@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.5]
+
+-   Stringify remaining portion of change file. Previously we were just looping on `paragraph` which would miss links.
+    -   Bumped due to a bump in @covector/assemble.
+    -   [afc5ceb](https://www.github.com/jbolda/covector/commit/afc5ceb747609979d82e380d7be086a40cdc48ef) fix: stringify remaining change file ([#103](https://www.github.com/jbolda/covector/pull/103)) on 2020-07-15
+
 ## [0.2.4]
 
 -   Throw an error if a change file is added that targets a package that does not exist in the config.

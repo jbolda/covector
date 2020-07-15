@@ -38174,23 +38174,25 @@ const { readPkgFile } = __webpack_require__(916);
 const { runCommand } = __webpack_require__(378);
 const path = __webpack_require__(622);
 
-const processor = unified().use(parse).use(frontmatter).use(parseFrontmatter);
+const processor = unified()
+  .use(parse)
+  .use(frontmatter)
+  .use(parseFrontmatter)
+  .use(stringify);
 
 const parseChange = function* ({ cwd, vfile }) {
   const parsed = processor.parse(vfile.contents);
   const processed = processor.runSync(parsed);
   let changeset = {};
+  const [parsedChanges, ...remaining] = processed.children;
+  changeset.releases = parsedChanges.data.parsedValue;
+  changeset.summary = processor
+    .stringify({
+      type: "root",
+      children: remaining,
+    })
+    .trim();
   changeset.releases = processed.children[0].data.parsedValue;
-  changeset.summary = processed.children.reduce((summary, element) => {
-    if (element.type === "paragraph") {
-      return `${element.children.reduce(
-        (text, item) => `${text}${item.value}`,
-        ""
-      )}`;
-    } else {
-      return summary;
-    }
-  }, "");
   if (cwd) {
     try {
       let gitInfo = yield runCommand({
