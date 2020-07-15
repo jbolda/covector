@@ -4,8 +4,15 @@
     "javascript": {
       "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
-      "prepublish": ["npm pack"],
-      "publish": "npm publish --access public"
+      "prepublish": [{ "command": "npm pack", "dryRunCommand": true }],
+      "publish": [
+        "echo # Package Publish",
+        {
+          "command": "npm publish --access public",
+          "dryRunCommand": "echo publish here",
+          "pipe": true
+        }
+      ]
     }
   },
   "packages": {
