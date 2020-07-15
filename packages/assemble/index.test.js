@@ -151,7 +151,7 @@ const testTextFour = {
 "@namespaced/assemble2": patch
 ---
     
-This is a test.
+This is a test. We might link out to a [website](https://www.jacobbolda.com).
 `,
 };
 const testTextFive = {
