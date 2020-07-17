@@ -253,7 +253,7 @@ module.exports.mergeIntoConfig = function* ({
       precommand: templateCommands(
         pkgCommands[pkg].precommand,
         pipeToTemplate,
-        ["command", "dryRunCommand"]
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
       command: templateCommands(pkgCommands[pkg].command, pipeToTemplate, [
         "command",
@@ -262,7 +262,7 @@ module.exports.mergeIntoConfig = function* ({
       postcommand: templateCommands(
         pkgCommands[pkg].postcommand,
         pipeToTemplate,
-        ["command", "dryRunCommand"]
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
     };
 

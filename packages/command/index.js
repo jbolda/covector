@@ -21,7 +21,7 @@ const attemptCommands = function* ({
         : pkg[`${commandPrefix}command`];
     let stdout = "";
     for (let pubCommand of pubCommands) {
-      const runningCommand = {};
+      const runningCommand = { runFromRoot: pubCommand.runFromRoot };
       if (
         typeof pubCommand === "object" &&
         pubCommand.dryRunCommand === false
@@ -33,10 +33,11 @@ const attemptCommands = function* ({
         if (pubCommand.dryRunCommand === true) {
           runningCommand.command = pubCommand.command;
           runningCommand.shouldRunCommand = true;
+        } else if (typeof pubCommand.dryRunCommand === "string" && dryRun) {
+          runningCommand.command = pubCommand.dryRunCommand;
+          runningCommand.shouldRunCommand = true;
         } else {
-          runningCommand.command = !pubCommand.dryRunCommand
-            ? pubCommand.command
-            : pubCommand.dryRunCommand;
+          runningCommand.command = pubCommand.command;
           runningCommand.shouldRunCommand = !dryRun;
         }
       } else {
@@ -49,8 +50,10 @@ const attemptCommands = function* ({
           command: runningCommand.command,
           cwd,
           pkg: pkg.pkg,
-          pkgPath: pkg.path,
-          log: `${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand.command}`,
+          pkgPath: runningCommand.runFromRoot === true ? "" : pkg.path,
+          log: `${pkg.pkg} [${commandPrefix}${command}${
+            runningCommand.runFromRoot === true ? " run from the cwd" : ""
+          }]: ${runningCommand.command}`,
         });
 
         if (pubCommand.pipe) {
@@ -58,7 +61,9 @@ const attemptCommands = function* ({
         }
       } else {
         console.log(
-          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand.command}`
+          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}${
+            runningCommand.runFromRoot === true ? " run from the cwd" : ""
+          }]: ${runningCommand.command}`
         );
       }
     }
