@@ -861,10 +861,10 @@ Multi-binding collection of libraries and templates for building Tauri apps",
 Apache-2.0",
     ],
     Array [
-      "package-one [test]: echo deboop",
+      "package-one [test]: echo boop",
     ],
     Array [
-      "deboop",
+      "boop",
     ],
     Array [
       "package-two [test]: yarn build",
@@ -881,10 +881,10 @@ this command is not piped, it is run from scripts for pk2",
 this command is not piped, it is run from the test script",
     ],
     Array [
-      "package-two [test]: echo deboop",
+      "package-two [test]: echo boop",
     ],
     Array [
-      "deboop",
+      "boop",
     ],
   ],
   "covectorReturn": Object {
@@ -1183,7 +1183,10 @@ Object {
       "dryRun >> package-one [test]: yarn test",
     ],
     Array [
-      "dryRun >> package-one [test]: echo deboop",
+      "package-one [test]: echo deboop",
+    ],
+    Array [
+      "deboop",
     ],
     Array [
       "dryRun >> package-two [test]: yarn build",
@@ -1192,7 +1195,10 @@ Object {
       "dryRun >> package-two [test]: yarn test",
     ],
     Array [
-      "dryRun >> package-two [test]: echo deboop",
+      "package-two [test]: echo deboop",
+    ],
+    Array [
+      "deboop",
     ],
     Array [
       "==== result ===",
