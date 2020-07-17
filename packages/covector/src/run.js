@@ -54,7 +54,7 @@ module.exports.covector = function* covector({
     delete config.vfile;
     return console.dir(config);
   } else if (command === "version") {
-    yield raceTime();
+    yield raceTime({ t: config.timeout });
     const changes = changesConsideringParents({
       assembledChanges,
       config,
@@ -125,7 +125,7 @@ module.exports.covector = function* covector({
 
     return pkgCommandsRan;
   } else {
-    yield raceTime();
+    yield raceTime({ t: config.timeout });
     const commands = yield mergeIntoConfig({
       assembledChanges,
       config,

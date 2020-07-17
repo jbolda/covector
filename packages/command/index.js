@@ -2,7 +2,6 @@ const { spawn, timeout } = require("effection");
 const { once, on } = require("@effection/events");
 const execa = require("execa");
 const path = require("path");
-const { cpuUsage } = require("process");
 
 const attemptCommands = function* ({
   cwd,
@@ -126,10 +125,10 @@ const runCommand = function* ({
   }
 };
 
-const raceTime = function (
-  t = 120000,
-  msg = `timeout out waiting ${t / 1000}s for command`
-) {
+const raceTime = function ({
+  t = 1200000,
+  msg = `timeout out waiting ${t / 1000}s for command`,
+}) {
   return spawn(function* () {
     yield timeout(t);
     throw new Error(msg);
