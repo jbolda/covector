@@ -7,6 +7,7 @@
       "publish": [
         "echo publishing ${ pkg.pkg } would happen here",
         "echo running in ${ pkg.path }",
+        { "command": "ls", "runFromRoot": true },
         "ls"
       ],
       "postpublish": "echo postmode for ${ pkg.pkg }",

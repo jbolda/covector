@@ -123,6 +123,11 @@ module.exports.covector = function* covector({
     if (command === "version" && !dryRun)
       yield changeFilesRemove({ cwd, paths: changesPaths });
 
+    if (dryRun) {
+      console.log("==== result ===");
+      console.log(pkgCommandsRan);
+    }
+
     return pkgCommandsRan;
   } else {
     yield raceTime({ t: config.timeout });
@@ -179,6 +184,11 @@ module.exports.covector = function* covector({
       pkgCommandsRan,
       dryRun,
     });
+
+    if (dryRun) {
+      console.log("==== result ===");
+      console.log(pkgCommandsRan);
+    }
 
     return pkgCommandsRan;
   }
