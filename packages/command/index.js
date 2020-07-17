@@ -33,10 +33,11 @@ const attemptCommands = function* ({
         if (pubCommand.dryRunCommand === true) {
           runningCommand.command = pubCommand.command;
           runningCommand.shouldRunCommand = true;
+        } else if (typeof pubCommand.dryRunCommand === "string" && dryRun) {
+          runningCommand.command = pubCommand.dryRunCommand;
+          runningCommand.shouldRunCommand = true;
         } else {
-          runningCommand.command = !pubCommand.dryRunCommand
-            ? pubCommand.command
-            : pubCommand.dryRunCommand;
+          runningCommand.command = pubCommand.command;
           runningCommand.shouldRunCommand = !dryRun;
         }
       } else {
