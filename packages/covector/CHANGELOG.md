@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.6]
+
+-   Increase default timeout and allow it to be set from config.
+    -   [a80e2ee](https://www.github.com/jbolda/covector/commit/a80e2eecdc21318b9dd93e9a9fe2a5441703fea5) chore: increase default timeout ([#106](https://www.github.com/jbolda/covector/pull/106)) on 2020-07-17
+
 ## [0.2.5]
 
 -   Stringify remaining portion of change file. Previously we were just looping on `paragraph` which would miss links.

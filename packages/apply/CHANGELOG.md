@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1]
+
+-   Deep clone changes that are getting passed into the changelog. We were editing references and those edits were showing up in erroneous places.
+    -   [38fba3c](https://www.github.com/jbolda/covector/commit/38fba3c6791154f335dde10740cde6ad556b6ef3) fix: deepclone change entries to prevent referencial edits ([#109](https://www.github.com/jbolda/covector/pull/109)) on 2020-07-17
+
 ## [0.2.0]
 
 -   Note in sub-bullets when a bump was due to a dependency (and that helps note where there summary text is from as well.)
