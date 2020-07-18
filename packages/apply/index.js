@@ -1,6 +1,7 @@
 const { readPkgFile, writePkgFile } = require("@covector/files");
 const { compareBumps } = require("@covector/assemble");
 const semver = require("semver");
+const cloneDeep = require("lodash.clonedeep");
 const path = require("path");
 
 module.exports.apply = function* ({
@@ -109,7 +110,7 @@ module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
         } else {
           // if the parent doesn't have a release
           // add one to adopt the next version of it's child
-          changes[pkg] = { ...changes[main] };
+          changes[pkg] = cloneDeep(changes[main]);
           if (changes[pkg].changes) {
             changes[pkg].changes.forEach((parentChange) => {
               parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;

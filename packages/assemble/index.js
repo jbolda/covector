@@ -4,6 +4,7 @@ const stringify = require("remark-stringify");
 const frontmatter = require("remark-frontmatter");
 const parseFrontmatter = require("remark-parse-yaml");
 const template = require("lodash.template");
+const cloneDeep = require("lodash.clonedeep");
 const { readPkgFile } = require("@covector/files");
 const { runCommand } = require("@covector/command");
 const path = require("path");
@@ -81,12 +82,12 @@ const mergeReleases = (changes) => {
       if (!release[pkg]) {
         release[pkg] = {
           type: change.releases[pkg],
-          changes: [change],
+          changes: cloneDeep([change]),
         };
       } else {
         release[pkg] = {
           type: compareBumps(release[pkg].type, change.releases[pkg]),
-          changes: [...release[pkg].changes, change],
+          changes: cloneDeep([...release[pkg].changes, change]),
         };
       }
     });
