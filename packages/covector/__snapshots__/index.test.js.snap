@@ -5865,7 +5865,6 @@ Object {
           "changes": Array [
             Object {
               "meta": Object {
-                "dependencies": "Bumped due to a bump in tauri.",
                 "filename": ".changes/first-change.md",
               },
               "releases": Object {
