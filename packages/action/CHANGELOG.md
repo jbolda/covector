@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.4]
+
+-   Increase default timeout and allow it to be set from config.
+    -   Bumped due to a bump in covector.
+    -   [a80e2ee](https://www.github.com/jbolda/covector/commit/a80e2eecdc21318b9dd93e9a9fe2a5441703fea5) chore: increase default timeout ([#106](https://www.github.com/jbolda/covector/pull/106)) on 2020-07-17
+
 ## [0.2.3]
 
 Bumped due to dependency.

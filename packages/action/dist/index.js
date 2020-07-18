@@ -269,51 +269,145 @@ module.exports = function globParent(str, opts) {
 /* 9 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-
-var Type = __webpack_require__(773);
-
-var _hasOwnProperty = Object.prototype.hasOwnProperty;
-var _toString       = Object.prototype.toString;
-
-function resolveYamlOmap(data) {
-  if (data === null) return true;
-
-  var objectKeys = [], index, length, pair, pairKey, pairHasKey,
-      object = data;
-
-  for (index = 0, length = object.length; index < length; index += 1) {
-    pair = object[index];
-    pairHasKey = false;
-
-    if (_toString.call(pair) !== '[object Object]') return false;
-
-    for (pairKey in pair) {
-      if (_hasOwnProperty.call(pair, pairKey)) {
-        if (!pairHasKey) pairHasKey = true;
-        else return false;
+const ANY = Symbol('SemVer ANY')
+// hoisted class for cyclic dependency
+class Comparator {
+  static get ANY () {
+    return ANY
+  }
+  constructor (comp, options) {
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
       }
     }
 
-    if (!pairHasKey) return false;
+    if (comp instanceof Comparator) {
+      if (comp.loose === !!options.loose) {
+        return comp
+      } else {
+        comp = comp.value
+      }
+    }
 
-    if (objectKeys.indexOf(pairKey) === -1) objectKeys.push(pairKey);
-    else return false;
+    debug('comparator', comp, options)
+    this.options = options
+    this.loose = !!options.loose
+    this.parse(comp)
+
+    if (this.semver === ANY) {
+      this.value = ''
+    } else {
+      this.value = this.operator + this.semver.version
+    }
+
+    debug('comp', this)
   }
 
-  return true;
+  parse (comp) {
+    const r = this.options.loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR]
+    const m = comp.match(r)
+
+    if (!m) {
+      throw new TypeError(`Invalid comparator: ${comp}`)
+    }
+
+    this.operator = m[1] !== undefined ? m[1] : ''
+    if (this.operator === '=') {
+      this.operator = ''
+    }
+
+    // if it literally is just '>' or '' then allow anything.
+    if (!m[2]) {
+      this.semver = ANY
+    } else {
+      this.semver = new SemVer(m[2], this.options.loose)
+    }
+  }
+
+  toString () {
+    return this.value
+  }
+
+  test (version) {
+    debug('Comparator.test', version, this.options.loose)
+
+    if (this.semver === ANY || version === ANY) {
+      return true
+    }
+
+    if (typeof version === 'string') {
+      try {
+        version = new SemVer(version, this.options)
+      } catch (er) {
+        return false
+      }
+    }
+
+    return cmp(version, this.operator, this.semver, this.options)
+  }
+
+  intersects (comp, options) {
+    if (!(comp instanceof Comparator)) {
+      throw new TypeError('a Comparator is required')
+    }
+
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
+      }
+    }
+
+    if (this.operator === '') {
+      if (this.value === '') {
+        return true
+      }
+      return new Range(comp.value, options).test(this.value)
+    } else if (comp.operator === '') {
+      if (comp.value === '') {
+        return true
+      }
+      return new Range(this.value, options).test(comp.semver)
+    }
+
+    const sameDirectionIncreasing =
+      (this.operator === '>=' || this.operator === '>') &&
+      (comp.operator === '>=' || comp.operator === '>')
+    const sameDirectionDecreasing =
+      (this.operator === '<=' || this.operator === '<') &&
+      (comp.operator === '<=' || comp.operator === '<')
+    const sameSemVer = this.semver.version === comp.semver.version
+    const differentDirectionsInclusive =
+      (this.operator === '>=' || this.operator === '<=') &&
+      (comp.operator === '>=' || comp.operator === '<=')
+    const oppositeDirectionsLessThan =
+      cmp(this.semver, '<', comp.semver, options) &&
+      (this.operator === '>=' || this.operator === '>') &&
+        (comp.operator === '<=' || comp.operator === '<')
+    const oppositeDirectionsGreaterThan =
+      cmp(this.semver, '>', comp.semver, options) &&
+      (this.operator === '<=' || this.operator === '<') &&
+        (comp.operator === '>=' || comp.operator === '>')
+
+    return (
+      sameDirectionIncreasing ||
+      sameDirectionDecreasing ||
+      (sameSemVer && differentDirectionsInclusive) ||
+      oppositeDirectionsLessThan ||
+      oppositeDirectionsGreaterThan
+    )
+  }
 }
 
-function constructYamlOmap(data) {
-  return data !== null ? data : [];
-}
+module.exports = Comparator
 
-module.exports = new Type('tag:yaml.org,2002:omap', {
-  kind: 'sequence',
-  resolve: resolveYamlOmap,
-  construct: constructYamlOmap
-});
+const {re, t} = __webpack_require__(629)
+const cmp = __webpack_require__(299)
+const debug = __webpack_require__(940)
+const SemVer = __webpack_require__(840)
+const Range = __webpack_require__(46)
 
 
 /***/ }),
@@ -1215,11 +1309,13 @@ const Endpoints = {
     createRegistrationTokenForRepo: ["POST /repos/{owner}/{repo}/actions/runners/registration-token"],
     createRemoveTokenForOrg: ["POST /orgs/{org}/actions/runners/remove-token"],
     createRemoveTokenForRepo: ["POST /repos/{owner}/{repo}/actions/runners/remove-token"],
+    createWorkflowDispatch: ["POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches"],
     deleteArtifact: ["DELETE /repos/{owner}/{repo}/actions/artifacts/{artifact_id}"],
     deleteOrgSecret: ["DELETE /orgs/{org}/actions/secrets/{secret_name}"],
     deleteRepoSecret: ["DELETE /repos/{owner}/{repo}/actions/secrets/{secret_name}"],
     deleteSelfHostedRunnerFromOrg: ["DELETE /orgs/{org}/actions/runners/{runner_id}"],
     deleteSelfHostedRunnerFromRepo: ["DELETE /repos/{owner}/{repo}/actions/runners/{runner_id}"],
+    deleteWorkflowRun: ["DELETE /repos/{owner}/{repo}/actions/runs/{run_id}"],
     deleteWorkflowRunLogs: ["DELETE /repos/{owner}/{repo}/actions/runs/{run_id}/logs"],
     downloadArtifact: ["GET /repos/{owner}/{repo}/actions/artifacts/{artifact_id}/{archive_format}"],
     downloadJobLogsForWorkflowRun: ["GET /repos/{owner}/{repo}/actions/jobs/{job_id}/logs"],
@@ -1378,6 +1474,14 @@ const Endpoints = {
     revokeInstallationAccessToken: ["DELETE /installation/token"],
     suspendInstallation: ["PUT /app/installations/{installation_id}/suspended"],
     unsuspendInstallation: ["DELETE /app/installations/{installation_id}/suspended"]
+  },
+  billing: {
+    getGithubActionsBillingOrg: ["GET /orgs/{org}/settings/billing/actions"],
+    getGithubActionsBillingUser: ["GET /users/{username}/settings/billing/actions"],
+    getGithubPackagesBillingOrg: ["GET /orgs/{org}/settings/billing/packages"],
+    getGithubPackagesBillingUser: ["GET /users/{username}/settings/billing/packages"],
+    getSharedStorageBillingOrg: ["GET /orgs/{org}/settings/billing/shared-storage"],
+    getSharedStorageBillingUser: ["GET /users/{username}/settings/billing/shared-storage"]
   },
   checks: {
     create: ["POST /repos/{owner}/{repo}/check-runs", {
@@ -1931,6 +2035,13 @@ const Endpoints = {
         previews: ["squirrel-girl"]
       }
     }],
+    deleteLegacy: ["DELETE /reactions/{reaction_id}", {
+      mediaType: {
+        previews: ["squirrel-girl"]
+      }
+    }, {
+      deprecated: "octokit.reactions.deleteLegacy() is deprecated, see https://developer.github.com/v3/reactions/#delete-a-reaction-legacy"
+    }],
     listForCommitComment: ["GET /repos/{owner}/{repo}/comments/{comment_id}/reactions", {
       mediaType: {
         previews: ["squirrel-girl"]
@@ -2080,7 +2191,11 @@ const Endpoints = {
         previews: ["zzzax"]
       }
     }],
-    getCommunityProfileMetrics: ["GET /repos/{owner}/{repo}/community/profile"],
+    getCommunityProfileMetrics: ["GET /repos/{owner}/{repo}/community/profile", {
+      mediaType: {
+        previews: ["black-panther"]
+      }
+    }],
     getContent: ["GET /repos/{owner}/{repo}/contents/{path}"],
     getContributorsStats: ["GET /repos/{owner}/{repo}/stats/contributors"],
     getDeployKey: ["GET /repos/{owner}/{repo}/keys/{key_id}"],
@@ -2199,7 +2314,11 @@ const Endpoints = {
     issuesAndPullRequests: ["GET /search/issues"],
     labels: ["GET /search/labels"],
     repos: ["GET /search/repositories"],
-    topics: ["GET /search/topics"],
+    topics: ["GET /search/topics", {
+      mediaType: {
+        previews: ["mercy"]
+      }
+    }],
     users: ["GET /search/users"]
   },
   teams: {
@@ -2282,7 +2401,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "4.0.0";
+const VERSION = "4.1.0";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -2387,54 +2506,7 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 /* 24 */,
-/* 25 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-var wrappy = __webpack_require__(174)
-module.exports = wrappy(once)
-module.exports.strict = wrappy(onceStrict)
-
-once.proto = once(function () {
-  Object.defineProperty(Function.prototype, 'once', {
-    value: function () {
-      return once(this)
-    },
-    configurable: true
-  })
-
-  Object.defineProperty(Function.prototype, 'onceStrict', {
-    value: function () {
-      return onceStrict(this)
-    },
-    configurable: true
-  })
-})
-
-function once (fn) {
-  var f = function () {
-    if (f.called) return f.value
-    f.called = true
-    return f.value = fn.apply(this, arguments)
-  }
-  f.called = false
-  return f
-}
-
-function onceStrict (fn) {
-  var f = function () {
-    if (f.called)
-      throw new Error(f.onceError)
-    f.called = true
-    return f.value = fn.apply(this, arguments)
-  }
-  var name = fn.name || 'Function wrapped with `once`'
-  f.onceError = name + " shouldn't be called more than once"
-  f.called = false
-  return f
-}
-
-
-/***/ }),
+/* 25 */,
 /* 26 */,
 /* 27 */,
 /* 28 */,
@@ -2580,7 +2652,7 @@ function locate(value, fromIndex) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const SemVer = __webpack_require__(840)
-const Range = __webpack_require__(318)
+const Range = __webpack_require__(46)
 const minSatisfying = (versions, range, options) => {
   let min = null
   let minSV = null
@@ -2609,192 +2681,7 @@ module.exports = minSatisfying
 /* 39 */,
 /* 40 */,
 /* 41 */,
-/* 42 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-const path = __webpack_require__(622);
-const WIN_SLASH = '\\\\/';
-const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
-
-/**
- * Posix glob regex
- */
-
-const DOT_LITERAL = '\\.';
-const PLUS_LITERAL = '\\+';
-const QMARK_LITERAL = '\\?';
-const SLASH_LITERAL = '\\/';
-const ONE_CHAR = '(?=.)';
-const QMARK = '[^/]';
-const END_ANCHOR = `(?:${SLASH_LITERAL}|$)`;
-const START_ANCHOR = `(?:^|${SLASH_LITERAL})`;
-const DOTS_SLASH = `${DOT_LITERAL}{1,2}${END_ANCHOR}`;
-const NO_DOT = `(?!${DOT_LITERAL})`;
-const NO_DOTS = `(?!${START_ANCHOR}${DOTS_SLASH})`;
-const NO_DOT_SLASH = `(?!${DOT_LITERAL}{0,1}${END_ANCHOR})`;
-const NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
-const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
-const STAR = `${QMARK}*?`;
-
-const POSIX_CHARS = {
-  DOT_LITERAL,
-  PLUS_LITERAL,
-  QMARK_LITERAL,
-  SLASH_LITERAL,
-  ONE_CHAR,
-  QMARK,
-  END_ANCHOR,
-  DOTS_SLASH,
-  NO_DOT,
-  NO_DOTS,
-  NO_DOT_SLASH,
-  NO_DOTS_SLASH,
-  QMARK_NO_DOT,
-  STAR,
-  START_ANCHOR
-};
-
-/**
- * Windows glob regex
- */
-
-const WINDOWS_CHARS = {
-  ...POSIX_CHARS,
-
-  SLASH_LITERAL: `[${WIN_SLASH}]`,
-  QMARK: WIN_NO_SLASH,
-  STAR: `${WIN_NO_SLASH}*?`,
-  DOTS_SLASH: `${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$)`,
-  NO_DOT: `(?!${DOT_LITERAL})`,
-  NO_DOTS: `(?!(?:^|[${WIN_SLASH}])${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
-  NO_DOT_SLASH: `(?!${DOT_LITERAL}{0,1}(?:[${WIN_SLASH}]|$))`,
-  NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
-  QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
-  START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
-  END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
-};
-
-/**
- * POSIX Bracket Regex
- */
-
-const POSIX_REGEX_SOURCE = {
-  alnum: 'a-zA-Z0-9',
-  alpha: 'a-zA-Z',
-  ascii: '\\x00-\\x7F',
-  blank: ' \\t',
-  cntrl: '\\x00-\\x1F\\x7F',
-  digit: '0-9',
-  graph: '\\x21-\\x7E',
-  lower: 'a-z',
-  print: '\\x20-\\x7E ',
-  punct: '\\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~',
-  space: ' \\t\\r\\n\\v\\f',
-  upper: 'A-Z',
-  word: 'A-Za-z0-9_',
-  xdigit: 'A-Fa-f0-9'
-};
-
-module.exports = {
-  MAX_LENGTH: 1024 * 64,
-  POSIX_REGEX_SOURCE,
-
-  // regular expressions
-  REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
-  REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
-  REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
-  REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
-  REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
-  REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
-
-  // Replace globs with equivalent patterns to reduce parsing time.
-  REPLACEMENTS: {
-    '***': '*',
-    '**/**': '**',
-    '**/**/**': '**'
-  },
-
-  // Digits
-  CHAR_0: 48, /* 0 */
-  CHAR_9: 57, /* 9 */
-
-  // Alphabet chars.
-  CHAR_UPPERCASE_A: 65, /* A */
-  CHAR_LOWERCASE_A: 97, /* a */
-  CHAR_UPPERCASE_Z: 90, /* Z */
-  CHAR_LOWERCASE_Z: 122, /* z */
-
-  CHAR_LEFT_PARENTHESES: 40, /* ( */
-  CHAR_RIGHT_PARENTHESES: 41, /* ) */
-
-  CHAR_ASTERISK: 42, /* * */
-
-  // Non-alphabetic chars.
-  CHAR_AMPERSAND: 38, /* & */
-  CHAR_AT: 64, /* @ */
-  CHAR_BACKWARD_SLASH: 92, /* \ */
-  CHAR_CARRIAGE_RETURN: 13, /* \r */
-  CHAR_CIRCUMFLEX_ACCENT: 94, /* ^ */
-  CHAR_COLON: 58, /* : */
-  CHAR_COMMA: 44, /* , */
-  CHAR_DOT: 46, /* . */
-  CHAR_DOUBLE_QUOTE: 34, /* " */
-  CHAR_EQUAL: 61, /* = */
-  CHAR_EXCLAMATION_MARK: 33, /* ! */
-  CHAR_FORM_FEED: 12, /* \f */
-  CHAR_FORWARD_SLASH: 47, /* / */
-  CHAR_GRAVE_ACCENT: 96, /* ` */
-  CHAR_HASH: 35, /* # */
-  CHAR_HYPHEN_MINUS: 45, /* - */
-  CHAR_LEFT_ANGLE_BRACKET: 60, /* < */
-  CHAR_LEFT_CURLY_BRACE: 123, /* { */
-  CHAR_LEFT_SQUARE_BRACKET: 91, /* [ */
-  CHAR_LINE_FEED: 10, /* \n */
-  CHAR_NO_BREAK_SPACE: 160, /* \u00A0 */
-  CHAR_PERCENT: 37, /* % */
-  CHAR_PLUS: 43, /* + */
-  CHAR_QUESTION_MARK: 63, /* ? */
-  CHAR_RIGHT_ANGLE_BRACKET: 62, /* > */
-  CHAR_RIGHT_CURLY_BRACE: 125, /* } */
-  CHAR_RIGHT_SQUARE_BRACKET: 93, /* ] */
-  CHAR_SEMICOLON: 59, /* ; */
-  CHAR_SINGLE_QUOTE: 39, /* ' */
-  CHAR_SPACE: 32, /*   */
-  CHAR_TAB: 9, /* \t */
-  CHAR_UNDERSCORE: 95, /* _ */
-  CHAR_VERTICAL_LINE: 124, /* | */
-  CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279, /* \uFEFF */
-
-  SEP: path.sep,
-
-  /**
-   * Create EXTGLOB_CHARS
-   */
-
-  extglobChars(chars) {
-    return {
-      '!': { type: 'negate', open: '(?:(?!(?:', close: `))${chars.STAR})` },
-      '?': { type: 'qmark', open: '(?:', close: ')?' },
-      '+': { type: 'plus', open: '(?:', close: ')+' },
-      '*': { type: 'star', open: '(?:', close: ')*' },
-      '@': { type: 'at', open: '(?:', close: ')' }
-    };
-  },
-
-  /**
-   * Create GLOB_CHARS
-   */
-
-  globChars(win32) {
-    return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
-  }
-};
-
-
-/***/ }),
+/* 42 */,
 /* 43 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -2885,30 +2772,469 @@ exports.objectKeys = objectKeys;
 /* 46 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+// hoisted class for cyclic dependency
+class Range {
+  constructor (range, options) {
+    if (!options || typeof options !== 'object') {
+      options = {
+        loose: !!options,
+        includePrerelease: false
+      }
+    }
 
+    if (range instanceof Range) {
+      if (
+        range.loose === !!options.loose &&
+        range.includePrerelease === !!options.includePrerelease
+      ) {
+        return range
+      } else {
+        return new Range(range.raw, options)
+      }
+    }
 
-const fs = __webpack_require__(747);
-const shebangCommand = __webpack_require__(232);
+    if (range instanceof Comparator) {
+      // just put it in the set and return
+      this.raw = range.value
+      this.set = [[range]]
+      this.format()
+      return this
+    }
 
-function readShebang(command) {
-    // Read the first 150 bytes from the file
-    const size = 150;
-    const buffer = Buffer.alloc(size);
+    this.options = options
+    this.loose = !!options.loose
+    this.includePrerelease = !!options.includePrerelease
 
-    let fd;
+    // First, split based on boolean or ||
+    this.raw = range
+    this.set = range
+      .split(/\s*\|\|\s*/)
+      // map the range to a 2d array of comparators
+      .map(range => this.parseRange(range.trim()))
+      // throw out any comparator lists that are empty
+      // this generally means that it was not a valid range, which is allowed
+      // in loose mode, but will still throw if the WHOLE range is invalid.
+      .filter(c => c.length)
 
-    try {
-        fd = fs.openSync(command, 'r');
-        fs.readSync(fd, buffer, 0, size, 0);
-        fs.closeSync(fd);
-    } catch (e) { /* Empty */ }
+    if (!this.set.length) {
+      throw new TypeError(`Invalid SemVer Range: ${range}`)
+    }
 
-    // Attempt to extract shebang (null is returned if not a shebang)
-    return shebangCommand(buffer.toString());
+    this.format()
+  }
+
+  format () {
+    this.range = this.set
+      .map((comps) => {
+        return comps.join(' ').trim()
+      })
+      .join('||')
+      .trim()
+    return this.range
+  }
+
+  toString () {
+    return this.range
+  }
+
+  parseRange (range) {
+    const loose = this.options.loose
+    range = range.trim()
+    // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
+    const hr = loose ? re[t.HYPHENRANGELOOSE] : re[t.HYPHENRANGE]
+    range = range.replace(hr, hyphenReplace(this.options.includePrerelease))
+    debug('hyphen replace', range)
+    // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
+    range = range.replace(re[t.COMPARATORTRIM], comparatorTrimReplace)
+    debug('comparator trim', range, re[t.COMPARATORTRIM])
+
+    // `~ 1.2.3` => `~1.2.3`
+    range = range.replace(re[t.TILDETRIM], tildeTrimReplace)
+
+    // `^ 1.2.3` => `^1.2.3`
+    range = range.replace(re[t.CARETTRIM], caretTrimReplace)
+
+    // normalize spaces
+    range = range.split(/\s+/).join(' ')
+
+    // At this point, the range is completely trimmed and
+    // ready to be split into comparators.
+
+    const compRe = loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR]
+    return range
+      .split(' ')
+      .map(comp => parseComparator(comp, this.options))
+      .join(' ')
+      .split(/\s+/)
+      .map(comp => replaceGTE0(comp, this.options))
+      // in loose mode, throw out any that are not valid comparators
+      .filter(this.options.loose ? comp => !!comp.match(compRe) : () => true)
+      .map(comp => new Comparator(comp, this.options))
+  }
+
+  intersects (range, options) {
+    if (!(range instanceof Range)) {
+      throw new TypeError('a Range is required')
+    }
+
+    return this.set.some((thisComparators) => {
+      return (
+        isSatisfiable(thisComparators, options) &&
+        range.set.some((rangeComparators) => {
+          return (
+            isSatisfiable(rangeComparators, options) &&
+            thisComparators.every((thisComparator) => {
+              return rangeComparators.every((rangeComparator) => {
+                return thisComparator.intersects(rangeComparator, options)
+              })
+            })
+          )
+        })
+      )
+    })
+  }
+
+  // if ANY of the sets match ALL of its comparators, then pass
+  test (version) {
+    if (!version) {
+      return false
+    }
+
+    if (typeof version === 'string') {
+      try {
+        version = new SemVer(version, this.options)
+      } catch (er) {
+        return false
+      }
+    }
+
+    for (let i = 0; i < this.set.length; i++) {
+      if (testSet(this.set[i], version, this.options)) {
+        return true
+      }
+    }
+    return false
+  }
+}
+module.exports = Range
+
+const Comparator = __webpack_require__(9)
+const debug = __webpack_require__(940)
+const SemVer = __webpack_require__(840)
+const {
+  re,
+  t,
+  comparatorTrimReplace,
+  tildeTrimReplace,
+  caretTrimReplace
+} = __webpack_require__(629)
+
+// take a set of comparators and determine whether there
+// exists a version which can satisfy it
+const isSatisfiable = (comparators, options) => {
+  let result = true
+  const remainingComparators = comparators.slice()
+  let testComparator = remainingComparators.pop()
+
+  while (result && remainingComparators.length) {
+    result = remainingComparators.every((otherComparator) => {
+      return testComparator.intersects(otherComparator, options)
+    })
+
+    testComparator = remainingComparators.pop()
+  }
+
+  return result
 }
 
-module.exports = readShebang;
+// comprised of xranges, tildes, stars, and gtlt's at this point.
+// already replaced the hyphen ranges
+// turn into a set of JUST comparators.
+const parseComparator = (comp, options) => {
+  debug('comp', comp, options)
+  comp = replaceCarets(comp, options)
+  debug('caret', comp)
+  comp = replaceTildes(comp, options)
+  debug('tildes', comp)
+  comp = replaceXRanges(comp, options)
+  debug('xrange', comp)
+  comp = replaceStars(comp, options)
+  debug('stars', comp)
+  return comp
+}
+
+const isX = id => !id || id.toLowerCase() === 'x' || id === '*'
+
+// ~, ~> --> * (any, kinda silly)
+// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0-0
+// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0-0
+// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0-0
+// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0-0
+// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0-0
+const replaceTildes = (comp, options) =>
+  comp.trim().split(/\s+/).map((comp) => {
+    return replaceTilde(comp, options)
+  }).join(' ')
+
+const replaceTilde = (comp, options) => {
+  const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE]
+  return comp.replace(r, (_, M, m, p, pr) => {
+    debug('tilde', comp, _, M, m, p, pr)
+    let ret
+
+    if (isX(M)) {
+      ret = ''
+    } else if (isX(m)) {
+      ret = `>=${M}.0.0 <${+M + 1}.0.0-0`
+    } else if (isX(p)) {
+      // ~1.2 == >=1.2.0 <1.3.0-0
+      ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0-0`
+    } else if (pr) {
+      debug('replaceTilde pr', pr)
+      ret = `>=${M}.${m}.${p}-${pr
+      } <${M}.${+m + 1}.0-0`
+    } else {
+      // ~1.2.3 == >=1.2.3 <1.3.0-0
+      ret = `>=${M}.${m}.${p
+      } <${M}.${+m + 1}.0-0`
+    }
+
+    debug('tilde return', ret)
+    return ret
+  })
+}
+
+// ^ --> * (any, kinda silly)
+// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0-0
+// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0-0
+// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0-0
+// ^1.2.3 --> >=1.2.3 <2.0.0-0
+// ^1.2.0 --> >=1.2.0 <2.0.0-0
+const replaceCarets = (comp, options) =>
+  comp.trim().split(/\s+/).map((comp) => {
+    return replaceCaret(comp, options)
+  }).join(' ')
+
+const replaceCaret = (comp, options) => {
+  debug('caret', comp, options)
+  const r = options.loose ? re[t.CARETLOOSE] : re[t.CARET]
+  const z = options.includePrerelease ? '-0' : ''
+  return comp.replace(r, (_, M, m, p, pr) => {
+    debug('caret', comp, _, M, m, p, pr)
+    let ret
+
+    if (isX(M)) {
+      ret = ''
+    } else if (isX(m)) {
+      ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`
+    } else if (isX(p)) {
+      if (M === '0') {
+        ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`
+      } else {
+        ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`
+      }
+    } else if (pr) {
+      debug('replaceCaret pr', pr)
+      if (M === '0') {
+        if (m === '0') {
+          ret = `>=${M}.${m}.${p}-${pr
+          } <${M}.${m}.${+p + 1}-0`
+        } else {
+          ret = `>=${M}.${m}.${p}-${pr
+          } <${M}.${+m + 1}.0-0`
+        }
+      } else {
+        ret = `>=${M}.${m}.${p}-${pr
+        } <${+M + 1}.0.0-0`
+      }
+    } else {
+      debug('no pr')
+      if (M === '0') {
+        if (m === '0') {
+          ret = `>=${M}.${m}.${p
+          }${z} <${M}.${m}.${+p + 1}-0`
+        } else {
+          ret = `>=${M}.${m}.${p
+          }${z} <${M}.${+m + 1}.0-0`
+        }
+      } else {
+        ret = `>=${M}.${m}.${p
+        } <${+M + 1}.0.0-0`
+      }
+    }
+
+    debug('caret return', ret)
+    return ret
+  })
+}
+
+const replaceXRanges = (comp, options) => {
+  debug('replaceXRanges', comp, options)
+  return comp.split(/\s+/).map((comp) => {
+    return replaceXRange(comp, options)
+  }).join(' ')
+}
+
+const replaceXRange = (comp, options) => {
+  comp = comp.trim()
+  const r = options.loose ? re[t.XRANGELOOSE] : re[t.XRANGE]
+  return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
+    debug('xRange', comp, ret, gtlt, M, m, p, pr)
+    const xM = isX(M)
+    const xm = xM || isX(m)
+    const xp = xm || isX(p)
+    const anyX = xp
+
+    if (gtlt === '=' && anyX) {
+      gtlt = ''
+    }
+
+    // if we're including prereleases in the match, then we need
+    // to fix this to -0, the lowest possible prerelease value
+    pr = options.includePrerelease ? '-0' : ''
+
+    if (xM) {
+      if (gtlt === '>' || gtlt === '<') {
+        // nothing is allowed
+        ret = '<0.0.0-0'
+      } else {
+        // nothing is forbidden
+        ret = '*'
+      }
+    } else if (gtlt && anyX) {
+      // we know patch is an x, because we have any x at all.
+      // replace X with 0
+      if (xm) {
+        m = 0
+      }
+      p = 0
+
+      if (gtlt === '>') {
+        // >1 => >=2.0.0
+        // >1.2 => >=1.3.0
+        gtlt = '>='
+        if (xm) {
+          M = +M + 1
+          m = 0
+          p = 0
+        } else {
+          m = +m + 1
+          p = 0
+        }
+      } else if (gtlt === '<=') {
+        // <=0.7.x is actually <0.8.0, since any 0.7.x should
+        // pass.  Similarly, <=7.x is actually <8.0.0, etc.
+        gtlt = '<'
+        if (xm) {
+          M = +M + 1
+        } else {
+          m = +m + 1
+        }
+      }
+
+      if (gtlt === '<')
+        pr = '-0'
+
+      ret = `${gtlt + M}.${m}.${p}${pr}`
+    } else if (xm) {
+      ret = `>=${M}.0.0${pr} <${+M + 1}.0.0-0`
+    } else if (xp) {
+      ret = `>=${M}.${m}.0${pr
+      } <${M}.${+m + 1}.0-0`
+    }
+
+    debug('xRange return', ret)
+
+    return ret
+  })
+}
+
+// Because * is AND-ed with everything else in the comparator,
+// and '' means "any version", just remove the *s entirely.
+const replaceStars = (comp, options) => {
+  debug('replaceStars', comp, options)
+  // Looseness is ignored here.  star is always as loose as it gets!
+  return comp.trim().replace(re[t.STAR], '')
+}
+
+const replaceGTE0 = (comp, options) => {
+  debug('replaceGTE0', comp, options)
+  return comp.trim()
+    .replace(re[options.includePrerelease ? t.GTE0PRE : t.GTE0], '')
+}
+
+// This function is passed to string.replace(re[t.HYPHENRANGE])
+// M, m, patch, prerelease, build
+// 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
+// 1.2.3 - 3.4 => >=1.2.0 <3.5.0-0 Any 3.4.x will do
+// 1.2 - 3.4 => >=1.2.0 <3.5.0-0
+const hyphenReplace = incPr => ($0,
+  from, fM, fm, fp, fpr, fb,
+  to, tM, tm, tp, tpr, tb) => {
+  if (isX(fM)) {
+    from = ''
+  } else if (isX(fm)) {
+    from = `>=${fM}.0.0${incPr ? '-0' : ''}`
+  } else if (isX(fp)) {
+    from = `>=${fM}.${fm}.0${incPr ? '-0' : ''}`
+  } else if (fpr) {
+    from = `>=${from}`
+  } else {
+    from = `>=${from}${incPr ? '-0' : ''}`
+  }
+
+  if (isX(tM)) {
+    to = ''
+  } else if (isX(tm)) {
+    to = `<${+tM + 1}.0.0-0`
+  } else if (isX(tp)) {
+    to = `<${tM}.${+tm + 1}.0-0`
+  } else if (tpr) {
+    to = `<=${tM}.${tm}.${tp}-${tpr}`
+  } else if (incPr) {
+    to = `<${tM}.${tm}.${+tp + 1}-0`
+  } else {
+    to = `<=${to}`
+  }
+
+  return (`${from} ${to}`).trim()
+}
+
+const testSet = (set, version, options) => {
+  for (let i = 0; i < set.length; i++) {
+    if (!set[i].test(version)) {
+      return false
+    }
+  }
+
+  if (version.prerelease.length && !options.includePrerelease) {
+    // Find the set of versions that are allowed to have prereleases
+    // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
+    // That should allow `1.2.3-pr.2` to pass.
+    // However, `1.2.4-alpha.notready` should NOT be allowed,
+    // even though it's within the range set by the comparators.
+    for (let i = 0; i < set.length; i++) {
+      debug(set[i].semver)
+      if (set[i].semver === Comparator.ANY) {
+        continue
+      }
+
+      if (set[i].semver.prerelease.length > 0) {
+        const allowed = set[i].semver
+        if (allowed.major === version.major &&
+            allowed.minor === version.minor &&
+            allowed.patch === version.patch) {
+          return true
+        }
+      }
+    }
+
+    // Version has a -pre, but it's not one of the ones we like.
+    return false
+  }
+
+  return true
+}
 
 
 /***/ }),
@@ -3075,100 +3401,20 @@ module.exports = gte
 
 
 var repeat = __webpack_require__(360)
-var trim = __webpack_require__(716)
 
-module.exports = indentedCode
+module.exports = strong
 
-var lineFeed = '\n'
-var tab = '\t'
-var space = ' '
-
-var tabSize = 4
-var codeIndent = repeat(space, tabSize)
-
-function indentedCode(eat, value, silent) {
-  var index = -1
-  var length = value.length
-  var subvalue = ''
-  var content = ''
-  var subvalueQueue = ''
-  var contentQueue = ''
-  var character
-  var blankQueue
-  var indent
-
-  while (++index < length) {
-    character = value.charAt(index)
-
-    if (indent) {
-      indent = false
-
-      subvalue += subvalueQueue
-      content += contentQueue
-      subvalueQueue = ''
-      contentQueue = ''
-
-      if (character === lineFeed) {
-        subvalueQueue = character
-        contentQueue = character
-      } else {
-        subvalue += character
-        content += character
-
-        while (++index < length) {
-          character = value.charAt(index)
-
-          if (!character || character === lineFeed) {
-            contentQueue = character
-            subvalueQueue = character
-            break
-          }
-
-          subvalue += character
-          content += character
-        }
-      }
-    } else if (
-      character === space &&
-      value.charAt(index + 1) === character &&
-      value.charAt(index + 2) === character &&
-      value.charAt(index + 3) === character
-    ) {
-      subvalueQueue += codeIndent
-      index += 3
-      indent = true
-    } else if (character === tab) {
-      subvalueQueue += character
-      indent = true
-    } else {
-      blankQueue = ''
-
-      while (character === tab || character === space) {
-        blankQueue += character
-        character = value.charAt(++index)
-      }
-
-      if (character !== lineFeed) {
-        break
-      }
-
-      subvalueQueue += blankQueue + character
-      contentQueue += character
-    }
-  }
-
-  if (content) {
-    if (silent) {
-      return true
-    }
-
-    return eat(subvalue)({
-      type: 'code',
-      lang: null,
-      meta: null,
-      value: trim(content)
-    })
-  }
+// Stringify a `strong`.
+//
+// The marker used is configurable by `strong`, which defaults to an asterisk
+// (`'*'`) but also accepts an underscore (`'_'`):
+//
+// ```markdown
+// __foo__
+// ```
+function strong(node) {
+  var marker = repeat(this.options.strong, 2)
+  return marker + this.all(node).join('') + marker
 }
 
 
@@ -3192,7 +3438,7 @@ var e=__webpack_require__(700),r=__webpack_require__(910),o=__webpack_require__(
 
 const stringWidth = __webpack_require__(624);
 const stripAnsi = __webpack_require__(598);
-const ansiStyles = __webpack_require__(745);
+const ansiStyles = __webpack_require__(285);
 
 const ESCAPES = new Set([
 	'\u001B',
@@ -3394,7 +3640,7 @@ var isPlainObject = _interopDefault(__webpack_require__(188));
 var nodeFetch = _interopDefault(__webpack_require__(850));
 var requestError = __webpack_require__(207);
 
-const VERSION = "5.4.5";
+const VERSION = "5.4.6";
 
 function getBufferResponse(response) {
   return response.arrayBuffer();
@@ -3534,18 +3780,25 @@ exports.request = request;
 
 /***/ }),
 /* 60 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-const Range = __webpack_require__(318)
-const satisfies = (version, range, options) => {
-  try {
-    range = new Range(range, options)
-  } catch (er) {
-    return false
-  }
-  return range.test(version)
-}
-module.exports = satisfies
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
 
 
 /***/ }),
@@ -3742,14 +3995,32 @@ module.exports = rsort
 
 /***/ }),
 /* 67 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
+const f = __webpack_require__(224)
+const DateTime = global.Date
 
-module.exports = (...arguments_) => {
-	return [...new Set([].concat(...arguments_))];
-};
+class Date extends DateTime {
+  constructor (value) {
+    super(value)
+    this.isDate = true
+  }
+  toISOString () {
+    return `${this.getUTCFullYear()}-${f(2, this.getUTCMonth() + 1)}-${f(2, this.getUTCDate())}`
+  }
+}
+
+module.exports = value => {
+  const date = new Date(value)
+  /* istanbul ignore if */
+  if (isNaN(date)) {
+    throw new TypeError('Invalid Datetime')
+  } else {
+    return date
+  }
+}
 
 
 /***/ }),
@@ -4071,66 +4342,11 @@ module.exports = function (/*streams...*/) {
 /***/ }),
 /* 75 */,
 /* 76 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
-
-const fill = __webpack_require__(939);
-const utils = __webpack_require__(49);
-
-const compile = (ast, options = {}) => {
-  let walk = (node, parent = {}) => {
-    let invalidBlock = utils.isInvalidBrace(parent);
-    let invalidNode = node.invalid === true && options.escapeInvalid === true;
-    let invalid = invalidBlock === true || invalidNode === true;
-    let prefix = options.escapeInvalid === true ? '\\' : '';
-    let output = '';
-
-    if (node.isOpen === true) {
-      return prefix + node.value;
-    }
-    if (node.isClose === true) {
-      return prefix + node.value;
-    }
-
-    if (node.type === 'open') {
-      return invalid ? (prefix + node.value) : '(';
-    }
-
-    if (node.type === 'close') {
-      return invalid ? (prefix + node.value) : ')';
-    }
-
-    if (node.type === 'comma') {
-      return node.prev.type === 'comma' ? '' : (invalid ? node.value : '|');
-    }
-
-    if (node.value) {
-      return node.value;
-    }
-
-    if (node.nodes && node.ranges > 0) {
-      let args = utils.reduce(node.nodes);
-      let range = fill(...args, { ...options, wrap: false, toRegex: true });
-
-      if (range.length !== 0) {
-        return args.length > 1 && range.length > 1 ? `(${range})` : range;
-      }
-    }
-
-    if (node.nodes) {
-      for (let child of node.nodes) {
-        output += walk(child, node);
-      }
-    }
-    return output;
-  };
-
-  return walk(ast);
-};
-
-module.exports = compile;
+module.exports = /^#!(.*)/;
 
 
 /***/ }),
@@ -4164,7 +4380,125 @@ module.exports = patch
 
 
 /***/ }),
-/* 79 */,
+/* 79 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const os = __webpack_require__(87);
+const onExit = __webpack_require__(145);
+
+const DEFAULT_FORCE_KILL_TIMEOUT = 1000 * 5;
+
+// Monkey-patches `childProcess.kill()` to add `forceKillAfterTimeout` behavior
+const spawnedKill = (kill, signal = 'SIGTERM', options = {}) => {
+	const killResult = kill(signal);
+	setKillTimeout(kill, signal, options, killResult);
+	return killResult;
+};
+
+const setKillTimeout = (kill, signal, options, killResult) => {
+	if (!shouldForceKill(signal, options, killResult)) {
+		return;
+	}
+
+	const timeout = getForceKillAfterTimeout(options);
+	const t = setTimeout(() => {
+		kill('SIGKILL');
+	}, timeout);
+
+	// Guarded because there's no `.unref()` when `execa` is used in the renderer
+	// process in Electron. This cannot be tested since we don't run tests in
+	// Electron.
+	// istanbul ignore else
+	if (t.unref) {
+		t.unref();
+	}
+};
+
+const shouldForceKill = (signal, {forceKillAfterTimeout}, killResult) => {
+	return isSigterm(signal) && forceKillAfterTimeout !== false && killResult;
+};
+
+const isSigterm = signal => {
+	return signal === os.constants.signals.SIGTERM ||
+		(typeof signal === 'string' && signal.toUpperCase() === 'SIGTERM');
+};
+
+const getForceKillAfterTimeout = ({forceKillAfterTimeout = true}) => {
+	if (forceKillAfterTimeout === true) {
+		return DEFAULT_FORCE_KILL_TIMEOUT;
+	}
+
+	if (!Number.isFinite(forceKillAfterTimeout) || forceKillAfterTimeout < 0) {
+		throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${forceKillAfterTimeout}\` (${typeof forceKillAfterTimeout})`);
+	}
+
+	return forceKillAfterTimeout;
+};
+
+// `childProcess.cancel()`
+const spawnedCancel = (spawned, context) => {
+	const killResult = spawned.kill();
+
+	if (killResult) {
+		context.isCanceled = true;
+	}
+};
+
+const timeoutKill = (spawned, signal, reject) => {
+	spawned.kill(signal);
+	reject(Object.assign(new Error('Timed out'), {timedOut: true, signal}));
+};
+
+// `timeout` option handling
+const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise) => {
+	if (timeout === 0 || timeout === undefined) {
+		return spawnedPromise;
+	}
+
+	if (!Number.isFinite(timeout) || timeout < 0) {
+		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
+	}
+
+	let timeoutId;
+	const timeoutPromise = new Promise((resolve, reject) => {
+		timeoutId = setTimeout(() => {
+			timeoutKill(spawned, killSignal, reject);
+		}, timeout);
+	});
+
+	const safeSpawnedPromise = spawnedPromise.finally(() => {
+		clearTimeout(timeoutId);
+	});
+
+	return Promise.race([timeoutPromise, safeSpawnedPromise]);
+};
+
+// `cleanup` option handling
+const setExitHandler = async (spawned, {cleanup, detached}, timedPromise) => {
+	if (!cleanup || detached) {
+		return timedPromise;
+	}
+
+	const removeExitHandler = onExit(() => {
+		spawned.kill();
+	});
+
+	return timedPromise.finally(() => {
+		removeExitHandler();
+	});
+};
+
+module.exports = {
+	spawnedKill,
+	spawnedCancel,
+	setupTimeout,
+	setExitHandler
+};
+
+
+/***/ }),
 /* 80 */,
 /* 81 */
 /***/ (function(module) {
@@ -4308,57 +4642,165 @@ module.exports = convert;
 
 "use strict";
 
-const os = __webpack_require__(87);
-const execa = __webpack_require__(962);
 
-// Reference: https://www.gaijin.at/en/lstwinver.php
-const names = new Map([
-	['10.0', '10'],
-	['6.3', '8.1'],
-	['6.2', '8'],
-	['6.1', '7'],
-	['6.0', 'Vista'],
-	['5.2', 'Server 2003'],
-	['5.1', 'XP'],
-	['5.0', '2000'],
-	['4.9', 'ME'],
-	['4.1', '98'],
-	['4.0', '95']
-]);
+var xtend = __webpack_require__(81)
+var encode = __webpack_require__(291)
+var defaults = __webpack_require__(730)
+var escapeFactory = __webpack_require__(567)
+var identity = __webpack_require__(491)
 
-const windowsRelease = release => {
-	const version = /\d+\.\d/.exec(release || os.release());
+module.exports = setOptions
 
-	if (release && !version) {
-		throw new Error('`release` argument doesn\'t match `n.n`');
-	}
+// Map of applicable enums.
+var maps = {
+  entities: {true: true, false: true, numbers: true, escape: true},
+  bullet: {'*': true, '-': true, '+': true},
+  rule: {'-': true, _: true, '*': true},
+  listItemIndent: {tab: true, mixed: true, 1: true},
+  emphasis: {_: true, '*': true},
+  strong: {_: true, '*': true},
+  fence: {'`': true, '~': true}
+}
 
-	const ver = (version || [])[0];
+// Expose `validate`.
+var validate = {
+  boolean: validateBoolean,
+  string: validateString,
+  number: validateNumber,
+  function: validateFunction
+}
 
-	// Server 2008, 2012, 2016, and 2019 versions are ambiguous with desktop versions and must be detected at runtime.
-	// If `release` is omitted or we're on a Windows system, and the version number is an ambiguous version
-	// then use `wmic` to get the OS caption: https://msdn.microsoft.com/en-us/library/aa394531(v=vs.85).aspx
-	// If `wmic` is obsoloete (later versions of Windows 10), use PowerShell instead.
-	// If the resulting caption contains the year 2008, 2012, 2016 or 2019, it is a server version, so return a server OS name.
-	if ((!release || release === os.release()) && ['6.1', '6.2', '6.3', '10.0'].includes(ver)) {
-		let stdout;
-		try {
-			stdout = execa.sync('wmic', ['os', 'get', 'Caption']).stdout || '';
-		} catch (_) {
-			stdout = execa.sync('powershell', ['(Get-CimInstance -ClassName Win32_OperatingSystem).caption']).stdout || '';
-		}
+// Set options.  Does not overwrite previously set options.
+function setOptions(options) {
+  var self = this
+  var current = self.options
+  var ruleRepetition
+  var key
 
-		const year = (stdout.match(/2008|2012|2016|2019/) || [])[0];
+  if (options == null) {
+    options = {}
+  } else if (typeof options === 'object') {
+    options = xtend(options)
+  } else {
+    throw new Error('Invalid value `' + options + '` for setting `options`')
+  }
 
-		if (year) {
-			return `Server ${year}`;
-		}
-	}
+  for (key in defaults) {
+    validate[typeof defaults[key]](options, key, current[key], maps[key])
+  }
 
-	return names.get(ver);
-};
+  ruleRepetition = options.ruleRepetition
 
-module.exports = windowsRelease;
+  if (ruleRepetition && ruleRepetition < 3) {
+    raise(ruleRepetition, 'options.ruleRepetition')
+  }
+
+  self.encode = encodeFactory(String(options.entities))
+  self.escape = escapeFactory(options)
+
+  self.options = options
+
+  return self
+}
+
+// Validate a value to be boolean. Defaults to `def`.  Raises an exception with
+// `context[name]` when not a boolean.
+function validateBoolean(context, name, def) {
+  var value = context[name]
+
+  if (value == null) {
+    value = def
+  }
+
+  if (typeof value !== 'boolean') {
+    raise(value, 'options.' + name)
+  }
+
+  context[name] = value
+}
+
+// Validate a value to be boolean. Defaults to `def`.  Raises an exception with
+// `context[name]` when not a boolean.
+function validateNumber(context, name, def) {
+  var value = context[name]
+
+  if (value == null) {
+    value = def
+  }
+
+  if (isNaN(value)) {
+    raise(value, 'options.' + name)
+  }
+
+  context[name] = value
+}
+
+// Validate a value to be in `map`. Defaults to `def`.  Raises an exception
+// with `context[name]` when not in `map`.
+function validateString(context, name, def, map) {
+  var value = context[name]
+
+  if (value == null) {
+    value = def
+  }
+
+  value = String(value)
+
+  if (!(value in map)) {
+    raise(value, 'options.' + name)
+  }
+
+  context[name] = value
+}
+
+// Validate a value to be function. Defaults to `def`.  Raises an exception
+// with `context[name]` when not a function.
+function validateFunction(context, name, def) {
+  var value = context[name]
+
+  if (value == null) {
+    value = def
+  }
+
+  if (typeof value !== 'function') {
+    raise(value, 'options.' + name)
+  }
+
+  context[name] = value
+}
+
+// Factory to encode HTML entities.  Creates a no-operation function when
+// `type` is `'false'`, a function which encodes using named references when
+// `type` is `'true'`, and a function which encodes using numbered references
+// when `type` is `'numbers'`.
+function encodeFactory(type) {
+  var options = {}
+
+  if (type === 'false') {
+    return identity
+  }
+
+  if (type === 'true') {
+    options.useNamedReferences = true
+  }
+
+  if (type === 'escape') {
+    options.escapeOnly = true
+    options.useNamedReferences = true
+  }
+
+  return wrapped
+
+  // Encode HTML entities using the bound options.
+  function wrapped(value) {
+    return encode(value, options)
+  }
+}
+
+// Throw an exception with in its `message` `value` and `name`.
+function raise(value, name) {
+  throw new Error('Invalid value `' + value + '` for setting `' + name + '`')
+}
 
 
 /***/ }),
@@ -4803,7 +5245,22 @@ module.exports = {
 
 
 /***/ }),
-/* 95 */,
+/* 95 */
+/***/ (function(module) {
+
+"use strict";
+
+
+module.exports = tableCell
+
+var lineFeed = /\r?\n/g
+
+function tableCell(node) {
+  return this.all(node).join('').replace(lineFeed, ' ')
+}
+
+
+/***/ }),
 /* 96 */
 /***/ (function(module) {
 
@@ -4872,51 +5329,24 @@ function escapes(options) {
 /***/ (function(module) {
 
 "use strict";
+/*!
+ * is-number <https://github.com/jonschlinkert/is-number>
+ *
+ * Copyright (c) 2014-present, Jon Schlinkert.
+ * Released under the MIT License.
+ */
 
 
-// See http://www.robvanderwoude.com/escapechars.php
-const metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
 
-function escapeCommand(arg) {
-    // Escape meta chars
-    arg = arg.replace(metaCharsRegExp, '^$1');
-
-    return arg;
-}
-
-function escapeArgument(arg, doubleEscapeMetaChars) {
-    // Convert to string
-    arg = `${arg}`;
-
-    // Algorithm below is based on https://qntm.org/cmd
-
-    // Sequence of backslashes followed by a double quote:
-    // double up all the backslashes and escape the double quote
-    arg = arg.replace(/(\\*)"/g, '$1$1\\"');
-
-    // Sequence of backslashes followed by the end of the string
-    // (which will become a double quote later):
-    // double up all the backslashes
-    arg = arg.replace(/(\\*)$/, '$1$1');
-
-    // All other backslashes occur literally
-
-    // Quote the whole thing:
-    arg = `"${arg}"`;
-
-    // Escape meta chars
-    arg = arg.replace(metaCharsRegExp, '^$1');
-
-    // Double escape meta chars if necessary
-    if (doubleEscapeMetaChars) {
-        arg = arg.replace(metaCharsRegExp, '^$1');
-    }
-
-    return arg;
-}
-
-module.exports.command = escapeCommand;
-module.exports.argument = escapeArgument;
+module.exports = function(num) {
+  if (typeof num === 'number') {
+    return num - num === 0;
+  }
+  if (typeof num === 'string' && num.trim() !== '') {
+    return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+  }
+  return false;
+};
 
 
 /***/ }),
@@ -4959,167 +5389,7 @@ function imageReference(node) {
 
 
 /***/ }),
-/* 100 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const Range = __webpack_require__(318)
-const { ANY } = __webpack_require__(517)
-const satisfies = __webpack_require__(60)
-const compare = __webpack_require__(217)
-
-// Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
-// - Every simple range `r1, r2, ...` is a subset of some `R1, R2, ...`
-//
-// Simple range `c1 c2 ...` is a subset of simple range `C1 C2 ...` iff:
-// - If c is only the ANY comparator
-//   - If C is only the ANY comparator, return true
-//   - Else return false
-// - Let EQ be the set of = comparators in c
-// - If EQ is more than one, return true (null set)
-// - Let GT be the highest > or >= comparator in c
-// - Let LT be the lowest < or <= comparator in c
-// - If GT and LT, and GT.semver > LT.semver, return true (null set)
-// - If EQ
-//   - If GT, and EQ does not satisfy GT, return true (null set)
-//   - If LT, and EQ does not satisfy LT, return true (null set)
-//   - If EQ satisfies every C, return true
-//   - Else return false
-// - If GT
-//   - If GT is lower than any > or >= comp in C, return false
-//   - If GT is >=, and GT.semver does not satisfy every C, return false
-// - If LT
-//   - If LT.semver is greater than that of any > comp in C, return false
-//   - If LT is <=, and LT.semver does not satisfy every C, return false
-// - If any C is a = range, and GT or LT are set, return false
-// - Else return true
-
-const subset = (sub, dom, options) => {
-  sub = new Range(sub, options)
-  dom = new Range(dom, options)
-  let sawNonNull = false
-
-  OUTER: for (const simpleSub of sub.set) {
-    for (const simpleDom of dom.set) {
-      const isSub = simpleSubset(simpleSub, simpleDom, options)
-      sawNonNull = sawNonNull || isSub !== null
-      if (isSub)
-        continue OUTER
-    }
-    // the null set is a subset of everything, but null simple ranges in
-    // a complex range should be ignored.  so if we saw a non-null range,
-    // then we know this isn't a subset, but if EVERY simple range was null,
-    // then it is a subset.
-    if (sawNonNull)
-      return false
-  }
-  return true
-}
-
-const simpleSubset = (sub, dom, options) => {
-  if (sub.length === 1 && sub[0].semver === ANY)
-    return dom.length === 1 && dom[0].semver === ANY
-
-  const eqSet = new Set()
-  let gt, lt
-  for (const c of sub) {
-    if (c.operator === '>' || c.operator === '>=')
-      gt = higherGT(gt, c, options)
-    else if (c.operator === '<' || c.operator === '<=')
-      lt = lowerLT(lt, c, options)
-    else
-      eqSet.add(c.semver)
-  }
-
-  if (eqSet.size > 1)
-    return null
-
-  let gtltComp
-  if (gt && lt) {
-    gtltComp = compare(gt.semver, lt.semver, options)
-    if (gtltComp > 0)
-      return null
-    else if (gtltComp === 0 && (gt.operator !== '>=' || lt.operator !== '<='))
-      return null
-  }
-
-  // will iterate one or zero times
-  for (const eq of eqSet) {
-    if (gt && !satisfies(eq, String(gt), options))
-      return null
-
-    if (lt && !satisfies(eq, String(lt), options))
-      return null
-
-    for (const c of dom) {
-      if (!satisfies(eq, String(c), options))
-        return false
-    }
-    return true
-  }
-
-  let higher, lower
-  let hasDomLT, hasDomGT
-  for (const c of dom) {
-    hasDomGT = hasDomGT || c.operator === '>' || c.operator === '>='
-    hasDomLT = hasDomLT || c.operator === '<' || c.operator === '<='
-    if (gt) {
-      if (c.operator === '>' || c.operator === '>=') {
-        higher = higherGT(gt, c, options)
-        if (higher === c)
-          return false
-      } else if (gt.operator === '>=' && !satisfies(gt.semver, String(c), options))
-        return false
-    }
-    if (lt) {
-      if (c.operator === '<' || c.operator === '<=') {
-        lower = lowerLT(lt, c, options)
-        if (lower === c)
-          return false
-      } else if (lt.operator === '<=' && !satisfies(lt.semver, String(c), options))
-        return false
-    }
-    if (!c.operator && (lt || gt) && gtltComp !== 0)
-      return false
-  }
-
-  // if there was a < or >, and nothing in the dom, then must be false
-  // UNLESS it was limited by another range in the other direction.
-  // Eg, >1.0.0 <1.0.1 is still a subset of <2.0.0
-  if (gt && hasDomLT && !lt && gtltComp !== 0)
-    return false
-
-  if (lt && hasDomGT && !gt && gtltComp !== 0)
-    return false
-
-  return true
-}
-
-// >=1.2.3 is lower than >1.2.3
-const higherGT = (a, b, options) => {
-  if (!a)
-    return b
-  const comp = compare(a.semver, b.semver, options)
-  return comp > 0 ? a
-    : comp < 0 ? b
-    : b.operator === '>' && a.operator === '>=' ? b
-    : a
-}
-
-// <=1.2.3 is higher than <1.2.3
-const lowerLT = (a, b, options) => {
-  if (!a)
-    return b
-  const comp = compare(a.semver, b.semver, options)
-  return comp < 0 ? a
-    : comp > 0 ? b
-    : b.operator === '<' && a.operator === '<=' ? b
-    : a
-}
-
-module.exports = subset
-
-
-/***/ }),
+/* 100 */,
 /* 101 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -5211,68 +5481,11 @@ exports.main = main;
 
 /***/ }),
 /* 102 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
-
-
-const isWin = process.platform === 'win32';
-
-function notFoundError(original, syscall) {
-    return Object.assign(new Error(`${syscall} ${original.command} ENOENT`), {
-        code: 'ENOENT',
-        errno: 'ENOENT',
-        syscall: `${syscall} ${original.command}`,
-        path: original.command,
-        spawnargs: original.args,
-    });
-}
-
-function hookChildProcess(cp, parsed) {
-    if (!isWin) {
-        return;
-    }
-
-    const originalEmit = cp.emit;
-
-    cp.emit = function (name, arg1) {
-        // If emitting "exit" event and exit code is 1, we need to check if
-        // the command exists and emit an "error" instead
-        // See https://github.com/IndigoUnited/node-cross-spawn/issues/16
-        if (name === 'exit') {
-            const err = verifyENOENT(arg1, parsed, 'spawn');
-
-            if (err) {
-                return originalEmit.call(cp, 'error', err);
-            }
-        }
-
-        return originalEmit.apply(cp, arguments); // eslint-disable-line prefer-rest-params
-    };
-}
-
-function verifyENOENT(status, parsed) {
-    if (isWin && status === 1 && !parsed.file) {
-        return notFoundError(parsed.original, 'spawn');
-    }
-
-    return null;
-}
-
-function verifyENOENTSync(status, parsed) {
-    if (isWin && status === 1 && !parsed.file) {
-        return notFoundError(parsed.original, 'spawnSync');
-    }
-
-    return null;
-}
-
-module.exports = {
-    hookChildProcess,
-    verifyENOENT,
-    verifyENOENTSync,
-    notFoundError,
-};
+const compare = __webpack_require__(22)
+const compareLoose = (a, b) => compare(a, b, true)
+module.exports = compareLoose
 
 
 /***/ }),
@@ -5303,45 +5516,7 @@ function stringify(options) {
 
 /***/ }),
 /* 105 */,
-/* 106 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-const fs = __webpack_require__(747);
-const shebangCommand = __webpack_require__(147);
-
-function readShebang(command) {
-    // Read the first 150 bytes from the file
-    const size = 150;
-    let buffer;
-
-    if (Buffer.alloc) {
-        // Node.js v4.5+ / v5.10+
-        buffer = Buffer.alloc(size);
-    } else {
-        // Old Node.js API
-        buffer = new Buffer(size);
-        buffer.fill(0); // zero-fill
-    }
-
-    let fd;
-
-    try {
-        fd = fs.openSync(command, 'r');
-        fs.readSync(fd, buffer, 0, size, 0);
-        fs.closeSync(fd);
-    } catch (e) { /* Empty */ }
-
-    // Attempt to extract shebang (null is returned if not a shebang)
-    return shebangCommand(buffer.toString());
-}
-
-module.exports = readShebang;
-
-
-/***/ }),
+/* 106 */,
 /* 107 */,
 /* 108 */,
 /* 109 */,
@@ -5351,7 +5526,7 @@ module.exports = readShebang;
 "use strict";
 
 
-const constants = __webpack_require__(42);
+const constants = __webpack_require__(933);
 const utils = __webpack_require__(167);
 
 /**
@@ -6569,32 +6744,7 @@ function length(value) {
 
 
 /***/ }),
-/* 122 */
-/***/ (function(module) {
-
-/*!
- * is-extglob <https://github.com/jonschlinkert/is-extglob>
- *
- * Copyright (c) 2014-2016, Jon Schlinkert.
- * Licensed under the MIT License.
- */
-
-module.exports = function isExtglob(str) {
-  if (typeof str !== 'string' || str === '') {
-    return false;
-  }
-
-  var match;
-  while ((match = /(\\).|([@?!+*]\(.*\))/g.exec(str))) {
-    if (match[2]) return true;
-    str = str.slice(match.index + match[0].length);
-  }
-
-  return false;
-};
-
-
-/***/ }),
+/* 122 */,
 /* 123 */,
 /* 124 */
 /***/ (function(module) {
@@ -6602,25 +6752,33 @@ module.exports = function isExtglob(str) {
 "use strict";
 
 
-var isStream = module.exports = function (stream) {
-	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
-};
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
 
-isStream.writable = function (stream) {
-	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
-};
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
 
-isStream.readable = function (stream) {
-	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
-};
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
 
-isStream.duplex = function (stream) {
-	return isStream.writable(stream) && isStream.readable(stream);
-};
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
 
-isStream.transform = function (stream) {
-	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
-};
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function' &&
+	typeof stream._transformState === 'object';
+
+module.exports = isStream;
 
 
 /***/ }),
@@ -6689,7 +6847,7 @@ module.exports = neq
 "use strict";
 
 
-var uri = __webpack_require__(452)
+var uri = __webpack_require__(764)
 var title = __webpack_require__(919)
 
 module.exports = definition
@@ -7263,32 +7421,7 @@ function processEmit (ev, arg) {
 
 /***/ }),
 /* 146 */,
-/* 147 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-var shebangRegex = __webpack_require__(621);
-
-module.exports = function (str) {
-	var match = str.match(shebangRegex);
-
-	if (!match) {
-		return null;
-	}
-
-	var arr = match[0].replace(/#! ?/, '').split(' ');
-	var bin = arr[0].split('/').pop();
-	var arg = arr[1];
-
-	return (bin === 'env' ?
-		arg :
-		bin + (arg ? ' ' + arg : '')
-	);
-};
-
-
-/***/ }),
+/* 147 */,
 /* 148 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -7376,7 +7509,7 @@ const {
   CHAR_RIGHT_CURLY_BRACE,    /* } */
   CHAR_RIGHT_PARENTHESES,    /* ) */
   CHAR_RIGHT_SQUARE_BRACKET  /* ] */
-} = __webpack_require__(42);
+} = __webpack_require__(933);
 
 const isPathSeparator = code => {
   return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH;
@@ -7887,15 +8020,15 @@ var proto = Compiler.prototype
 // Enter and exit helpers. */
 proto.enterLink = toggle('inLink', false)
 proto.enterTable = toggle('inTable', false)
-proto.enterLinkReference = __webpack_require__(743)
+proto.enterLinkReference = __webpack_require__(990)
 
 // Configuration.
 proto.options = __webpack_require__(730)
-proto.setOptions = __webpack_require__(325)
+proto.setOptions = __webpack_require__(85)
 
 proto.compile = __webpack_require__(202)
-proto.visit = __webpack_require__(826)
-proto.all = __webpack_require__(691)
+proto.visit = __webpack_require__(382)
+proto.all = __webpack_require__(884)
 proto.block = __webpack_require__(92)
 proto.visitOrderedItems = __webpack_require__(176)
 proto.visitUnorderedItems = __webpack_require__(594)
@@ -7913,7 +8046,7 @@ proto.visitors = {
   code: __webpack_require__(796),
   html: __webpack_require__(11),
   thematicBreak: __webpack_require__(602),
-  strong: __webpack_require__(717),
+  strong: __webpack_require__(53),
   emphasis: __webpack_require__(33),
   break: __webpack_require__(223),
   delete: __webpack_require__(619),
@@ -7923,7 +8056,7 @@ proto.visitors = {
   definition: __webpack_require__(135),
   image: __webpack_require__(980),
   table: __webpack_require__(751),
-  tableCell: __webpack_require__(220)
+  tableCell: __webpack_require__(95)
 }
 
 
@@ -9276,29 +9409,7 @@ module.exports = micromatch;
 
 
 /***/ }),
-/* 164 */
-/***/ (function(module) {
-
-"use strict";
-
-
-const pathKey = (options = {}) => {
-	const environment = options.env || process.env;
-	const platform = options.platform || process.platform;
-
-	if (platform !== 'win32') {
-		return 'PATH';
-	}
-
-	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
-};
-
-module.exports = pathKey;
-// TODO: Remove this for the next major release
-module.exports.default = pathKey;
-
-
-/***/ }),
+/* 164 */,
 /* 165 */,
 /* 166 */,
 /* 167 */
@@ -9314,7 +9425,7 @@ const {
   REGEX_REMOVE_BACKSLASH,
   REGEX_SPECIAL_CHARS,
   REGEX_SPECIAL_CHARS_GLOBAL
-} = __webpack_require__(42);
+} = __webpack_require__(933);
 
 exports.isObject = val => val !== null && typeof val === 'object' && !Array.isArray(val);
 exports.hasRegexChars = str => REGEX_SPECIAL_CHARS.test(str);
@@ -10508,49 +10619,322 @@ function compile() {
 "use strict";
 
 
-// See http://www.robvanderwoude.com/escapechars.php
-const metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
+module.exports = factory
 
-function escapeCommand(arg) {
-    // Escape meta chars
-    arg = arg.replace(metaCharsRegExp, '^$1');
+// Construct a tokenizer.  This creates both `tokenizeInline` and `tokenizeBlock`.
+function factory(type) {
+  return tokenize
 
-    return arg;
-}
+  // Tokenizer for a bound `type`.
+  function tokenize(value, location) {
+    var self = this
+    var offset = self.offset
+    var tokens = []
+    var methods = self[type + 'Methods']
+    var tokenizers = self[type + 'Tokenizers']
+    var line = location.line
+    var column = location.column
+    var index
+    var length
+    var method
+    var name
+    var matched
+    var valueLength
 
-function escapeArgument(arg, doubleEscapeMetaChars) {
-    // Convert to string
-    arg = `${arg}`;
-
-    // Algorithm below is based on https://qntm.org/cmd
-
-    // Sequence of backslashes followed by a double quote:
-    // double up all the backslashes and escape the double quote
-    arg = arg.replace(/(\\*)"/g, '$1$1\\"');
-
-    // Sequence of backslashes followed by the end of the string
-    // (which will become a double quote later):
-    // double up all the backslashes
-    arg = arg.replace(/(\\*)$/, '$1$1');
-
-    // All other backslashes occur literally
-
-    // Quote the whole thing:
-    arg = `"${arg}"`;
-
-    // Escape meta chars
-    arg = arg.replace(metaCharsRegExp, '^$1');
-
-    // Double escape meta chars if necessary
-    if (doubleEscapeMetaChars) {
-        arg = arg.replace(metaCharsRegExp, '^$1');
+    // Trim white space only lines.
+    if (!value) {
+      return tokens
     }
 
-    return arg;
+    // Expose on `eat`.
+    eat.now = now
+    eat.file = self.file
+
+    // Sync initial offset.
+    updatePosition('')
+
+    // Iterate over `value`, and iterate over all tokenizers.  When one eats
+    // something, re-iterate with the remaining value.  If no tokenizer eats,
+    // something failed (should not happen) and an exception is thrown.
+    while (value) {
+      index = -1
+      length = methods.length
+      matched = false
+
+      while (++index < length) {
+        name = methods[index]
+        method = tokenizers[name]
+
+        // Previously, we had constructs such as footnotes and YAML that used
+        // these properties.
+        // Those are now external (plus there are userland extensions), that may
+        // still use them.
+        if (
+          method &&
+          /* istanbul ignore next */ (!method.onlyAtStart || self.atStart) &&
+          /* istanbul ignore next */ (!method.notInList || !self.inList) &&
+          /* istanbul ignore next */ (!method.notInBlock || !self.inBlock) &&
+          (!method.notInLink || !self.inLink)
+        ) {
+          valueLength = value.length
+
+          method.apply(self, [eat, value])
+
+          matched = valueLength !== value.length
+
+          if (matched) {
+            break
+          }
+        }
+      }
+
+      /* istanbul ignore if */
+      if (!matched) {
+        self.file.fail(new Error('Infinite loop'), eat.now())
+      }
+    }
+
+    self.eof = now()
+
+    return tokens
+
+    // Update line, column, and offset based on `value`.
+    function updatePosition(subvalue) {
+      var lastIndex = -1
+      var index = subvalue.indexOf('\n')
+
+      while (index !== -1) {
+        line++
+        lastIndex = index
+        index = subvalue.indexOf('\n', index + 1)
+      }
+
+      if (lastIndex === -1) {
+        column += subvalue.length
+      } else {
+        column = subvalue.length - lastIndex
+      }
+
+      if (line in offset) {
+        if (lastIndex !== -1) {
+          column += offset[line]
+        } else if (column <= offset[line]) {
+          column = offset[line] + 1
+        }
+      }
+    }
+
+    // Get offset.  Called before the first character is eaten to retrieve the
+    // range’s offsets.
+    function getOffset() {
+      var indentation = []
+      var pos = line + 1
+
+      // Done.  Called when the last character is eaten to retrieve the range’s
+      // offsets.
+      return function () {
+        var last = line + 1
+
+        while (pos < last) {
+          indentation.push((offset[pos] || 0) + 1)
+
+          pos++
+        }
+
+        return indentation
+      }
+    }
+
+    // Get the current position.
+    function now() {
+      var pos = {line: line, column: column}
+
+      pos.offset = self.toOffset(pos)
+
+      return pos
+    }
+
+    // Store position information for a node.
+    function Position(start) {
+      this.start = start
+      this.end = now()
+    }
+
+    // Throw when a value is incorrectly eaten.  This shouldn’t happen but will
+    // throw on new, incorrect rules.
+    function validateEat(subvalue) {
+      /* istanbul ignore if */
+      if (value.slice(0, subvalue.length) !== subvalue) {
+        // Capture stack-trace.
+        self.file.fail(
+          new Error(
+            'Incorrectly eaten value: please report this warning on https://git.io/vg5Ft'
+          ),
+          now()
+        )
+      }
+    }
+
+    // Mark position and patch `node.position`.
+    function position() {
+      var before = now()
+
+      return update
+
+      // Add the position to a node.
+      function update(node, indent) {
+        var previous = node.position
+        var start = previous ? previous.start : before
+        var combined = []
+        var n = previous && previous.end.line
+        var l = before.line
+
+        node.position = new Position(start)
+
+        // If there was already a `position`, this node was merged.  Fixing
+        // `start` wasn’t hard, but the indent is different.  Especially
+        // because some information, the indent between `n` and `l` wasn’t
+        // tracked.  Luckily, that space is (should be?) empty, so we can
+        // safely check for it now.
+        if (previous && indent && previous.indent) {
+          combined = previous.indent
+
+          if (n < l) {
+            while (++n < l) {
+              combined.push((offset[n] || 0) + 1)
+            }
+
+            combined.push(before.column)
+          }
+
+          indent = combined.concat(indent)
+        }
+
+        node.position.indent = indent || []
+
+        return node
+      }
+    }
+
+    // Add `node` to `parent`s children or to `tokens`.  Performs merges where
+    // possible.
+    function add(node, parent) {
+      var children = parent ? parent.children : tokens
+      var previous = children[children.length - 1]
+      var fn
+
+      if (
+        previous &&
+        node.type === previous.type &&
+        (node.type === 'text' || node.type === 'blockquote') &&
+        mergeable(previous) &&
+        mergeable(node)
+      ) {
+        fn = node.type === 'text' ? mergeText : mergeBlockquote
+        node = fn.call(self, previous, node)
+      }
+
+      if (node !== previous) {
+        children.push(node)
+      }
+
+      if (self.atStart && tokens.length !== 0) {
+        self.exitStart()
+      }
+
+      return node
+    }
+
+    // Remove `subvalue` from `value`.  `subvalue` must be at the start of
+    // `value`.
+    function eat(subvalue) {
+      var indent = getOffset()
+      var pos = position()
+      var current = now()
+
+      validateEat(subvalue)
+
+      apply.reset = reset
+      reset.test = test
+      apply.test = test
+
+      value = value.slice(subvalue.length)
+
+      updatePosition(subvalue)
+
+      indent = indent()
+
+      return apply
+
+      // Add the given arguments, add `position` to the returned node, and
+      // return the node.
+      function apply(node, parent) {
+        return pos(add(pos(node), parent), indent)
+      }
+
+      // Functions just like apply, but resets the content: the line and
+      // column are reversed, and the eaten value is re-added.   This is
+      // useful for nodes with a single type of content, such as lists and
+      // tables.  See `apply` above for what parameters are expected.
+      function reset() {
+        var node = apply.apply(null, arguments)
+
+        line = current.line
+        column = current.column
+        value = subvalue + value
+
+        return node
+      }
+
+      // Test the position, after eating, and reverse to a not-eaten state.
+      function test() {
+        var result = pos({})
+
+        line = current.line
+        column = current.column
+        value = subvalue + value
+
+        return result.position
+      }
+    }
+  }
 }
 
-module.exports.command = escapeCommand;
-module.exports.argument = escapeArgument;
+// Check whether a node is mergeable with adjacent nodes.
+function mergeable(node) {
+  var start
+  var end
+
+  if (node.type !== 'text' || !node.position) {
+    return true
+  }
+
+  start = node.position.start
+  end = node.position.end
+
+  // Only merge nodes which occupy the same size as their `value`.
+  return (
+    start.line !== end.line || end.column - start.column === node.value.length
+  )
+}
+
+// Merge two text nodes: `node` into `prev`.
+function mergeText(previous, node) {
+  previous.value += node.value
+
+  return previous
+}
+
+// Merge two blockquotes: `node` into `prev`, unless in CommonMark or gfm modes.
+function mergeBlockquote(previous, node) {
+  if (this.options.commonmark || this.options.gfm) {
+    return node
+  }
+
+  previous.children = previous.children.concat(node.children)
+
+  return previous
+}
 
 
 /***/ }),
@@ -10566,7 +10950,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
 var deprecation = __webpack_require__(802);
-var once = _interopDefault(__webpack_require__(25));
+var once = _interopDefault(__webpack_require__(538));
 
 const logOnce = once(deprecation => console.warn(deprecation));
 /**
@@ -10911,21 +11295,25 @@ class MaxBufferError extends Error {
 	}
 }
 
-function getStream(inputStream, options) {
+async function getStream(inputStream, options) {
 	if (!inputStream) {
 		return Promise.reject(new Error('Expected a stream'));
 	}
 
-	options = Object.assign({maxBuffer: Infinity}, options);
+	options = {
+		maxBuffer: Infinity,
+		...options
+	};
 
 	const {maxBuffer} = options;
 
 	let stream;
-	return new Promise((resolve, reject) => {
+	await new Promise((resolve, reject) => {
 		const rejectPromise = error => {
 			if (error) { // A null check
 				error.bufferedData = stream.getBufferedValue();
 			}
+
 			reject(error);
 		};
 
@@ -10943,12 +11331,16 @@ function getStream(inputStream, options) {
 				rejectPromise(new MaxBufferError());
 			}
 		});
-	}).then(() => stream.getBufferedValue());
+	});
+
+	return stream.getBufferedValue();
 }
 
 module.exports = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, Object.assign({}, options, {encoding: 'buffer'}));
-module.exports.array = (stream, options) => getStream(stream, Object.assign({}, options, {array: true}));
+// TODO: Remove this for the next major release
+module.exports.default = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
+module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
 module.exports.MaxBufferError = MaxBufferError;
 
 
@@ -11023,65 +11415,7 @@ module.exports = isPlainObject;
 
 /***/ }),
 /* 215 */,
-/* 216 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const {PassThrough: PassThroughStream} = __webpack_require__(413);
-
-module.exports = options => {
-	options = {...options};
-
-	const {array} = options;
-	let {encoding} = options;
-	const isBuffer = encoding === 'buffer';
-	let objectMode = false;
-
-	if (array) {
-		objectMode = !(encoding || isBuffer);
-	} else {
-		encoding = encoding || 'utf8';
-	}
-
-	if (isBuffer) {
-		encoding = null;
-	}
-
-	const stream = new PassThroughStream({objectMode});
-
-	if (encoding) {
-		stream.setEncoding(encoding);
-	}
-
-	let length = 0;
-	const chunks = [];
-
-	stream.on('data', chunk => {
-		chunks.push(chunk);
-
-		if (objectMode) {
-			length = chunks.length;
-		} else {
-			length += chunk.length;
-		}
-	});
-
-	stream.getBufferedValue = () => {
-		if (array) {
-			return chunks;
-		}
-
-		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
-	};
-
-	stream.getBufferedLength = () => length;
-
-	return stream;
-};
-
-
-/***/ }),
+/* 216 */,
 /* 217 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -11096,18 +11430,61 @@ module.exports = compare
 /* 218 */,
 /* 219 */,
 /* 220 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-module.exports = tableCell
+const path = __webpack_require__(622);
+const which = __webpack_require__(505);
+const getPathKey = __webpack_require__(805);
 
-var lineFeed = /\r?\n/g
+function resolveCommandAttempt(parsed, withoutPathExt) {
+    const env = parsed.options.env || process.env;
+    const cwd = process.cwd();
+    const hasCustomCwd = parsed.options.cwd != null;
+    // Worker threads do not have process.chdir()
+    const shouldSwitchCwd = hasCustomCwd && process.chdir !== undefined && !process.chdir.disabled;
 
-function tableCell(node) {
-  return this.all(node).join('').replace(lineFeed, ' ')
+    // If a custom `cwd` was specified, we need to change the process cwd
+    // because `which` will do stat calls but does not support a custom cwd
+    if (shouldSwitchCwd) {
+        try {
+            process.chdir(parsed.options.cwd);
+        } catch (err) {
+            /* Empty */
+        }
+    }
+
+    let resolved;
+
+    try {
+        resolved = which.sync(parsed.command, {
+            path: env[getPathKey({ env })],
+            pathExt: withoutPathExt ? path.delimiter : undefined,
+        });
+    } catch (e) {
+        /* Empty */
+    } finally {
+        if (shouldSwitchCwd) {
+            process.chdir(cwd);
+        }
+    }
+
+    // If we successfully resolved, ensure that an absolute path is returned
+    // Note that when a custom `cwd` was used, we need to resolve to an absolute path based on it
+    if (resolved) {
+        resolved = path.resolve(hasCustomCwd ? parsed.options.cwd : '', resolved);
+    }
+
+    return resolved;
 }
+
+function resolveCommand(parsed) {
+    return resolveCommandAttempt(parsed) || resolveCommandAttempt(parsed, true);
+}
+
+module.exports = resolveCommand;
 
 
 /***/ }),
@@ -11118,7 +11495,7 @@ function tableCell(node) {
 
 
 var matters = __webpack_require__(579)
-var parse = __webpack_require__(629)
+var parse = __webpack_require__(998)
 var compile = __webpack_require__(468)
 
 module.exports = frontmatter
@@ -11494,7 +11871,28 @@ function getSettings(settingsOrOptions = {}) {
 
 
 /***/ }),
-/* 228 */,
+/* 228 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils = __webpack_require__(17);
+class ErrorFilter {
+    constructor(_settings) {
+        this._settings = _settings;
+    }
+    getFilter() {
+        return (error) => this._isNonFatalError(error);
+    }
+    _isNonFatalError(error) {
+        return utils.errno.isEnoentCodeError(error) || this._settings.suppressErrors;
+    }
+}
+exports.default = ErrorFilter;
+
+
+/***/ }),
 /* 229 */
 /***/ (function(__unusedmodule, exports) {
 
@@ -11667,32 +12065,7 @@ module.exports = new Type('tag:yaml.org,2002:bool', {
 
 
 /***/ }),
-/* 232 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const shebangRegex = __webpack_require__(998);
-
-module.exports = (string = '') => {
-	const match = string.match(shebangRegex);
-
-	if (!match) {
-		return null;
-	}
-
-	const [path, argument] = match[0].replace(/#! ?/, '').split(' ');
-	const binary = path.split('/').pop();
-
-	if (binary === 'env') {
-		return argument;
-	}
-
-	return argument ? `${binary} ${argument}` : binary;
-};
-
-
-/***/ }),
+/* 232 */,
 /* 233 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -11988,27 +12361,68 @@ module.exports.stop = stop;
 /* 240 */,
 /* 241 */,
 /* 242 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
-// Standard YAML's Core schema.
-// http://www.yaml.org/spec/1.2/spec.html#id2804923
-//
-// NOTE: JS-YAML does not support schema-specific tag resolution restrictions.
-// So, Core schema has no distinctions from JSON schema is JS-YAML.
 
 
+const isWin = process.platform === 'win32';
 
+function notFoundError(original, syscall) {
+    return Object.assign(new Error(`${syscall} ${original.command} ENOENT`), {
+        code: 'ENOENT',
+        errno: 'ENOENT',
+        syscall: `${syscall} ${original.command}`,
+        path: original.command,
+        spawnargs: original.args,
+    });
+}
 
+function hookChildProcess(cp, parsed) {
+    if (!isWin) {
+        return;
+    }
 
-var Schema = __webpack_require__(379);
+    const originalEmit = cp.emit;
 
+    cp.emit = function (name, arg1) {
+        // If emitting "exit" event and exit code is 1, we need to check if
+        // the command exists and emit an "error" instead
+        // See https://github.com/IndigoUnited/node-cross-spawn/issues/16
+        if (name === 'exit') {
+            const err = verifyENOENT(arg1, parsed, 'spawn');
 
-module.exports = new Schema({
-  include: [
-    __webpack_require__(937)
-  ]
-});
+            if (err) {
+                return originalEmit.call(cp, 'error', err);
+            }
+        }
+
+        return originalEmit.apply(cp, arguments); // eslint-disable-line prefer-rest-params
+    };
+}
+
+function verifyENOENT(status, parsed) {
+    if (isWin && status === 1 && !parsed.file) {
+        return notFoundError(parsed.original, 'spawn');
+    }
+
+    return null;
+}
+
+function verifyENOENTSync(status, parsed) {
+    if (isWin && status === 1 && !parsed.file) {
+        return notFoundError(parsed.original, 'spawnSync');
+    }
+
+    return null;
+}
+
+module.exports = {
+    hookChildProcess,
+    verifyENOENT,
+    verifyENOENTSync,
+    notFoundError,
+};
 
 
 /***/ }),
@@ -12210,7 +12624,7 @@ function callSuccessCallback(callback, result) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const {MAX_LENGTH} = __webpack_require__(94)
-const { re, t } = __webpack_require__(398)
+const { re, t } = __webpack_require__(629)
 const SemVer = __webpack_require__(840)
 
 const parse = (version, options) => {
@@ -12504,7 +12918,7 @@ function sync (path, options) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const SemVer = __webpack_require__(840)
-const Range = __webpack_require__(318)
+const Range = __webpack_require__(46)
 
 const maxSatisfying = (versions, range, options) => {
   let max = null
@@ -13206,7 +13620,7 @@ module.exports = function extend() {
 /* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
-const { MAX_SAFE_COMPONENT_LENGTH } = __webpack_require__(656)
+const { MAX_SAFE_COMPONENT_LENGTH } = __webpack_require__(511)
 const debug = __webpack_require__(434)
 exports = module.exports = {}
 
@@ -13574,1379 +13988,170 @@ function parseOrigin(origin) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
+/* module decorator */ module = __webpack_require__.nmd(module);
 
-/* eslint-disable no-new-wrappers, no-eval, camelcase, operator-linebreak */
-module.exports = makeParserClass(__webpack_require__(929))
-module.exports.makeParserClass = makeParserClass
 
-class TomlError extends Error {
-  constructor (msg) {
-    super(msg)
-    this.name = 'TomlError'
-    /* istanbul ignore next */
-    if (Error.captureStackTrace) Error.captureStackTrace(this, TomlError)
-    this.fromTOML = true
-    this.wrapped = null
-  }
-}
-TomlError.wrap = err => {
-  const terr = new TomlError(err.message)
-  terr.code = err.code
-  terr.wrapped = err
-  return terr
-}
-module.exports.TomlError = TomlError
+const wrapAnsi16 = (fn, offset) => (...args) => {
+	const code = fn(...args);
+	return `\u001B[${code + offset}m`;
+};
 
-const createDateTime = __webpack_require__(721)
-const createDateTimeFloat = __webpack_require__(499)
-const createDate = __webpack_require__(932)
-const createTime = __webpack_require__(680)
+const wrapAnsi256 = (fn, offset) => (...args) => {
+	const code = fn(...args);
+	return `\u001B[${38 + offset};5;${code}m`;
+};
 
-const CTRL_I = 0x09
-const CTRL_J = 0x0A
-const CTRL_M = 0x0D
-const CTRL_CHAR_BOUNDARY = 0x1F // the last non-character in the latin1 region of unicode, except DEL
-const CHAR_SP = 0x20
-const CHAR_QUOT = 0x22
-const CHAR_NUM = 0x23
-const CHAR_APOS = 0x27
-const CHAR_PLUS = 0x2B
-const CHAR_COMMA = 0x2C
-const CHAR_HYPHEN = 0x2D
-const CHAR_PERIOD = 0x2E
-const CHAR_0 = 0x30
-const CHAR_1 = 0x31
-const CHAR_7 = 0x37
-const CHAR_9 = 0x39
-const CHAR_COLON = 0x3A
-const CHAR_EQUALS = 0x3D
-const CHAR_A = 0x41
-const CHAR_E = 0x45
-const CHAR_F = 0x46
-const CHAR_T = 0x54
-const CHAR_U = 0x55
-const CHAR_Z = 0x5A
-const CHAR_LOWBAR = 0x5F
-const CHAR_a = 0x61
-const CHAR_b = 0x62
-const CHAR_e = 0x65
-const CHAR_f = 0x66
-const CHAR_i = 0x69
-const CHAR_l = 0x6C
-const CHAR_n = 0x6E
-const CHAR_o = 0x6F
-const CHAR_r = 0x72
-const CHAR_s = 0x73
-const CHAR_t = 0x74
-const CHAR_u = 0x75
-const CHAR_x = 0x78
-const CHAR_z = 0x7A
-const CHAR_LCUB = 0x7B
-const CHAR_RCUB = 0x7D
-const CHAR_LSQB = 0x5B
-const CHAR_BSOL = 0x5C
-const CHAR_RSQB = 0x5D
-const CHAR_DEL = 0x7F
-const SURROGATE_FIRST = 0xD800
-const SURROGATE_LAST = 0xDFFF
+const wrapAnsi16m = (fn, offset) => (...args) => {
+	const rgb = fn(...args);
+	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
+};
 
-const escapes = {
-  [CHAR_b]: '\u0008',
-  [CHAR_t]: '\u0009',
-  [CHAR_n]: '\u000A',
-  [CHAR_f]: '\u000C',
-  [CHAR_r]: '\u000D',
-  [CHAR_QUOT]: '\u0022',
-  [CHAR_BSOL]: '\u005C'
-}
+const ansi2ansi = n => n;
+const rgb2rgb = (r, g, b) => [r, g, b];
 
-function isDigit (cp) {
-  return cp >= CHAR_0 && cp <= CHAR_9
-}
-function isHexit (cp) {
-  return (cp >= CHAR_A && cp <= CHAR_F) || (cp >= CHAR_a && cp <= CHAR_f) || (cp >= CHAR_0 && cp <= CHAR_9)
-}
-function isBit (cp) {
-  return cp === CHAR_1 || cp === CHAR_0
-}
-function isOctit (cp) {
-  return (cp >= CHAR_0 && cp <= CHAR_7)
-}
-function isAlphaNumQuoteHyphen (cp) {
-  return (cp >= CHAR_A && cp <= CHAR_Z)
-      || (cp >= CHAR_a && cp <= CHAR_z)
-      || (cp >= CHAR_0 && cp <= CHAR_9)
-      || cp === CHAR_APOS
-      || cp === CHAR_QUOT
-      || cp === CHAR_LOWBAR
-      || cp === CHAR_HYPHEN
-}
-function isAlphaNumHyphen (cp) {
-  return (cp >= CHAR_A && cp <= CHAR_Z)
-      || (cp >= CHAR_a && cp <= CHAR_z)
-      || (cp >= CHAR_0 && cp <= CHAR_9)
-      || cp === CHAR_LOWBAR
-      || cp === CHAR_HYPHEN
-}
-const _type = Symbol('type')
-const _declared = Symbol('declared')
+const setLazyProperty = (object, property, get) => {
+	Object.defineProperty(object, property, {
+		get: () => {
+			const value = get();
 
-const hasOwnProperty = Object.prototype.hasOwnProperty
-const defineProperty = Object.defineProperty
-const descriptor = {configurable: true, enumerable: true, writable: true, value: undefined}
+			Object.defineProperty(object, property, {
+				value,
+				enumerable: true,
+				configurable: true
+			});
 
-function hasKey (obj, key) {
-  if (hasOwnProperty.call(obj, key)) return true
-  if (key === '__proto__') defineProperty(obj, '__proto__', descriptor)
-  return false
-}
+			return value;
+		},
+		enumerable: true,
+		configurable: true
+	});
+};
 
-const INLINE_TABLE = Symbol('inline-table')
-function InlineTable () {
-  return Object.defineProperties({}, {
-    [_type]: {value: INLINE_TABLE}
-  })
-}
-function isInlineTable (obj) {
-  if (obj === null || typeof (obj) !== 'object') return false
-  return obj[_type] === INLINE_TABLE
-}
+/** @type {typeof import('color-convert')} */
+let colorConvert;
+const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
+	if (colorConvert === undefined) {
+		colorConvert = __webpack_require__(83);
+	}
 
-const TABLE = Symbol('table')
-function Table () {
-  return Object.defineProperties({}, {
-    [_type]: {value: TABLE},
-    [_declared]: {value: false, writable: true}
-  })
-}
-function isTable (obj) {
-  if (obj === null || typeof (obj) !== 'object') return false
-  return obj[_type] === TABLE
-}
+	const offset = isBackground ? 10 : 0;
+	const styles = {};
 
-const _contentType = Symbol('content-type')
-const INLINE_LIST = Symbol('inline-list')
-function InlineList (type) {
-  return Object.defineProperties([], {
-    [_type]: {value: INLINE_LIST},
-    [_contentType]: {value: type}
-  })
-}
-function isInlineList (obj) {
-  if (obj === null || typeof (obj) !== 'object') return false
-  return obj[_type] === INLINE_LIST
+	for (const [sourceSpace, suite] of Object.entries(colorConvert)) {
+		const name = sourceSpace === 'ansi16' ? 'ansi' : sourceSpace;
+		if (sourceSpace === targetSpace) {
+			styles[name] = wrap(identity, offset);
+		} else if (typeof suite === 'object') {
+			styles[name] = wrap(suite[targetSpace], offset);
+		}
+	}
+
+	return styles;
+};
+
+function assembleStyles() {
+	const codes = new Map();
+	const styles = {
+		modifier: {
+			reset: [0, 0],
+			// 21 isn't widely supported and 22 does the same thing
+			bold: [1, 22],
+			dim: [2, 22],
+			italic: [3, 23],
+			underline: [4, 24],
+			inverse: [7, 27],
+			hidden: [8, 28],
+			strikethrough: [9, 29]
+		},
+		color: {
+			black: [30, 39],
+			red: [31, 39],
+			green: [32, 39],
+			yellow: [33, 39],
+			blue: [34, 39],
+			magenta: [35, 39],
+			cyan: [36, 39],
+			white: [37, 39],
+
+			// Bright color
+			blackBright: [90, 39],
+			redBright: [91, 39],
+			greenBright: [92, 39],
+			yellowBright: [93, 39],
+			blueBright: [94, 39],
+			magentaBright: [95, 39],
+			cyanBright: [96, 39],
+			whiteBright: [97, 39]
+		},
+		bgColor: {
+			bgBlack: [40, 49],
+			bgRed: [41, 49],
+			bgGreen: [42, 49],
+			bgYellow: [43, 49],
+			bgBlue: [44, 49],
+			bgMagenta: [45, 49],
+			bgCyan: [46, 49],
+			bgWhite: [47, 49],
+
+			// Bright color
+			bgBlackBright: [100, 49],
+			bgRedBright: [101, 49],
+			bgGreenBright: [102, 49],
+			bgYellowBright: [103, 49],
+			bgBlueBright: [104, 49],
+			bgMagentaBright: [105, 49],
+			bgCyanBright: [106, 49],
+			bgWhiteBright: [107, 49]
+		}
+	};
+
+	// Alias bright black as gray (and grey)
+	styles.color.gray = styles.color.blackBright;
+	styles.bgColor.bgGray = styles.bgColor.bgBlackBright;
+	styles.color.grey = styles.color.blackBright;
+	styles.bgColor.bgGrey = styles.bgColor.bgBlackBright;
+
+	for (const [groupName, group] of Object.entries(styles)) {
+		for (const [styleName, style] of Object.entries(group)) {
+			styles[styleName] = {
+				open: `\u001B[${style[0]}m`,
+				close: `\u001B[${style[1]}m`
+			};
+
+			group[styleName] = styles[styleName];
+
+			codes.set(style[0], style[1]);
+		}
+
+		Object.defineProperty(styles, groupName, {
+			value: group,
+			enumerable: false
+		});
+	}
+
+	Object.defineProperty(styles, 'codes', {
+		value: codes,
+		enumerable: false
+	});
+
+	styles.color.close = '\u001B[39m';
+	styles.bgColor.close = '\u001B[49m';
+
+	setLazyProperty(styles.color, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, false));
+	setLazyProperty(styles.color, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, false));
+	setLazyProperty(styles.color, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, false));
+	setLazyProperty(styles.bgColor, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, true));
+	setLazyProperty(styles.bgColor, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, true));
+	setLazyProperty(styles.bgColor, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, true));
+
+	return styles;
 }
 
-const LIST = Symbol('list')
-function List () {
-  return Object.defineProperties([], {
-    [_type]: {value: LIST}
-  })
-}
-function isList (obj) {
-  if (obj === null || typeof (obj) !== 'object') return false
-  return obj[_type] === LIST
-}
-
-// in an eval, to let bundlers not slurp in a util proxy
-let _custom
-try {
-  const utilInspect = eval("require('util').inspect")
-  _custom = utilInspect.custom
-} catch (_) {
-  /* eval require not available in transpiled bundle */
-}
-/* istanbul ignore next */
-const _inspect = _custom || 'inspect'
-
-class BoxedBigInt {
-  constructor (value) {
-    try {
-      this.value = global.BigInt.asIntN(64, value)
-    } catch (_) {
-      /* istanbul ignore next */
-      this.value = null
-    }
-    Object.defineProperty(this, _type, {value: INTEGER})
-  }
-  isNaN () {
-    return this.value === null
-  }
-  /* istanbul ignore next */
-  toString () {
-    return String(this.value)
-  }
-  /* istanbul ignore next */
-  [_inspect] () {
-    return `[BigInt: ${this.toString()}]}`
-  }
-  valueOf () {
-    return this.value
-  }
-}
-
-const INTEGER = Symbol('integer')
-function Integer (value) {
-  let num = Number(value)
-  // -0 is a float thing, not an int thing
-  if (Object.is(num, -0)) num = 0
-  /* istanbul ignore else */
-  if (global.BigInt && !Number.isSafeInteger(num)) {
-    return new BoxedBigInt(value)
-  } else {
-    /* istanbul ignore next */
-    return Object.defineProperties(new Number(num), {
-      isNaN: {value: function () { return isNaN(this) }},
-      [_type]: {value: INTEGER},
-      [_inspect]: {value: () => `[Integer: ${value}]`}
-    })
-  }
-}
-function isInteger (obj) {
-  if (obj === null || typeof (obj) !== 'object') return false
-  return obj[_type] === INTEGER
-}
-
-const FLOAT = Symbol('float')
-function Float (value) {
-  /* istanbul ignore next */
-  return Object.defineProperties(new Number(value), {
-    [_type]: {value: FLOAT},
-    [_inspect]: {value: () => `[Float: ${value}]`}
-  })
-}
-function isFloat (obj) {
-  if (obj === null || typeof (obj) !== 'object') return false
-  return obj[_type] === FLOAT
-}
-
-function tomlType (value) {
-  const type = typeof value
-  if (type === 'object') {
-    /* istanbul ignore if */
-    if (value === null) return 'null'
-    if (value instanceof Date) return 'datetime'
-    /* istanbul ignore else */
-    if (_type in value) {
-      switch (value[_type]) {
-        case INLINE_TABLE: return 'inline-table'
-        case INLINE_LIST: return 'inline-list'
-        /* istanbul ignore next */
-        case TABLE: return 'table'
-        /* istanbul ignore next */
-        case LIST: return 'list'
-        case FLOAT: return 'float'
-        case INTEGER: return 'integer'
-      }
-    }
-  }
-  return type
-}
-
-function makeParserClass (Parser) {
-  class TOMLParser extends Parser {
-    constructor () {
-      super()
-      this.ctx = this.obj = Table()
-    }
-
-    /* MATCH HELPER */
-    atEndOfWord () {
-      return this.char === CHAR_NUM || this.char === CTRL_I || this.char === CHAR_SP || this.atEndOfLine()
-    }
-    atEndOfLine () {
-      return this.char === Parser.END || this.char === CTRL_J || this.char === CTRL_M
-    }
-
-    parseStart () {
-      if (this.char === Parser.END) {
-        return null
-      } else if (this.char === CHAR_LSQB) {
-        return this.call(this.parseTableOrList)
-      } else if (this.char === CHAR_NUM) {
-        return this.call(this.parseComment)
-      } else if (this.char === CTRL_J || this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M) {
-        return null
-      } else if (isAlphaNumQuoteHyphen(this.char)) {
-        return this.callNow(this.parseAssignStatement)
-      } else {
-        throw this.error(new TomlError(`Unknown character "${this.char}"`))
-      }
-    }
-
-    // HELPER, this strips any whitespace and comments to the end of the line
-    // then RETURNS. Last state in a production.
-    parseWhitespaceToEOL () {
-      if (this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M) {
-        return null
-      } else if (this.char === CHAR_NUM) {
-        return this.goto(this.parseComment)
-      } else if (this.char === Parser.END || this.char === CTRL_J) {
-        return this.return()
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected only whitespace or comments till end of line'))
-      }
-    }
-
-    /* ASSIGNMENT: key = value */
-    parseAssignStatement () {
-      return this.callNow(this.parseAssign, this.recordAssignStatement)
-    }
-    recordAssignStatement (kv) {
-      let target = this.ctx
-      let finalKey = kv.key.pop()
-      for (let kw of kv.key) {
-        if (hasKey(target, kw) && (!isTable(target[kw]) || target[kw][_declared])) {
-          throw this.error(new TomlError("Can't redefine existing key"))
-        }
-        target = target[kw] = target[kw] || Table()
-      }
-      if (hasKey(target, finalKey)) {
-        throw this.error(new TomlError("Can't redefine existing key"))
-      }
-      // unbox our numbers
-      if (isInteger(kv.value) || isFloat(kv.value)) {
-        target[finalKey] = kv.value.valueOf()
-      } else {
-        target[finalKey] = kv.value
-      }
-      return this.goto(this.parseWhitespaceToEOL)
-    }
-
-    /* ASSSIGNMENT expression, key = value possibly inside an inline table */
-    parseAssign () {
-      return this.callNow(this.parseKeyword, this.recordAssignKeyword)
-    }
-    recordAssignKeyword (key) {
-      if (this.state.resultTable) {
-        this.state.resultTable.push(key)
-      } else {
-        this.state.resultTable = [key]
-      }
-      return this.goto(this.parseAssignKeywordPreDot)
-    }
-    parseAssignKeywordPreDot () {
-      if (this.char === CHAR_PERIOD) {
-        return this.next(this.parseAssignKeywordPostDot)
-      } else if (this.char !== CHAR_SP && this.char !== CTRL_I) {
-        return this.goto(this.parseAssignEqual)
-      }
-    }
-    parseAssignKeywordPostDot () {
-      if (this.char !== CHAR_SP && this.char !== CTRL_I) {
-        return this.callNow(this.parseKeyword, this.recordAssignKeyword)
-      }
-    }
-
-    parseAssignEqual () {
-      if (this.char === CHAR_EQUALS) {
-        return this.next(this.parseAssignPreValue)
-      } else {
-        throw this.error(new TomlError('Invalid character, expected "="'))
-      }
-    }
-    parseAssignPreValue () {
-      if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return null
-      } else {
-        return this.callNow(this.parseValue, this.recordAssignValue)
-      }
-    }
-    recordAssignValue (value) {
-      return this.returnNow({key: this.state.resultTable, value: value})
-    }
-
-    /* COMMENTS: #...eol */
-    parseComment () {
-      do {
-        if (this.char === Parser.END || this.char === CTRL_J) {
-          return this.return()
-        }
-      } while (this.nextChar())
-    }
-
-    /* TABLES AND LISTS, [foo] and [[foo]] */
-    parseTableOrList () {
-      if (this.char === CHAR_LSQB) {
-        this.next(this.parseList)
-      } else {
-        return this.goto(this.parseTable)
-      }
-    }
-
-    /* TABLE [foo.bar.baz] */
-    parseTable () {
-      this.ctx = this.obj
-      return this.goto(this.parseTableNext)
-    }
-    parseTableNext () {
-      if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return null
-      } else {
-        return this.callNow(this.parseKeyword, this.parseTableMore)
-      }
-    }
-    parseTableMore (keyword) {
-      if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return null
-      } else if (this.char === CHAR_RSQB) {
-        if (hasKey(this.ctx, keyword) && (!isTable(this.ctx[keyword]) || this.ctx[keyword][_declared])) {
-          throw this.error(new TomlError("Can't redefine existing key"))
-        } else {
-          this.ctx = this.ctx[keyword] = this.ctx[keyword] || Table()
-          this.ctx[_declared] = true
-        }
-        return this.next(this.parseWhitespaceToEOL)
-      } else if (this.char === CHAR_PERIOD) {
-        if (!hasKey(this.ctx, keyword)) {
-          this.ctx = this.ctx[keyword] = Table()
-        } else if (isTable(this.ctx[keyword])) {
-          this.ctx = this.ctx[keyword]
-        } else if (isList(this.ctx[keyword])) {
-          this.ctx = this.ctx[keyword][this.ctx[keyword].length - 1]
-        } else {
-          throw this.error(new TomlError("Can't redefine existing key"))
-        }
-        return this.next(this.parseTableNext)
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected whitespace, . or ]'))
-      }
-    }
-
-    /* LIST [[a.b.c]] */
-    parseList () {
-      this.ctx = this.obj
-      return this.goto(this.parseListNext)
-    }
-    parseListNext () {
-      if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return null
-      } else {
-        return this.callNow(this.parseKeyword, this.parseListMore)
-      }
-    }
-    parseListMore (keyword) {
-      if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return null
-      } else if (this.char === CHAR_RSQB) {
-        if (!hasKey(this.ctx, keyword)) {
-          this.ctx[keyword] = List()
-        }
-        if (isInlineList(this.ctx[keyword])) {
-          throw this.error(new TomlError("Can't extend an inline array"))
-        } else if (isList(this.ctx[keyword])) {
-          const next = Table()
-          this.ctx[keyword].push(next)
-          this.ctx = next
-        } else {
-          throw this.error(new TomlError("Can't redefine an existing key"))
-        }
-        return this.next(this.parseListEnd)
-      } else if (this.char === CHAR_PERIOD) {
-        if (!hasKey(this.ctx, keyword)) {
-          this.ctx = this.ctx[keyword] = Table()
-        } else if (isInlineList(this.ctx[keyword])) {
-          throw this.error(new TomlError("Can't extend an inline array"))
-        } else if (isInlineTable(this.ctx[keyword])) {
-          throw this.error(new TomlError("Can't extend an inline table"))
-        } else if (isList(this.ctx[keyword])) {
-          this.ctx = this.ctx[keyword][this.ctx[keyword].length - 1]
-        } else if (isTable(this.ctx[keyword])) {
-          this.ctx = this.ctx[keyword]
-        } else {
-          throw this.error(new TomlError("Can't redefine an existing key"))
-        }
-        return this.next(this.parseListNext)
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected whitespace, . or ]'))
-      }
-    }
-    parseListEnd (keyword) {
-      if (this.char === CHAR_RSQB) {
-        return this.next(this.parseWhitespaceToEOL)
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected whitespace, . or ]'))
-      }
-    }
-
-    /* VALUE string, number, boolean, inline list, inline object */
-    parseValue () {
-      if (this.char === Parser.END) {
-        throw this.error(new TomlError('Key without value'))
-      } else if (this.char === CHAR_QUOT) {
-        return this.next(this.parseDoubleString)
-      } if (this.char === CHAR_APOS) {
-        return this.next(this.parseSingleString)
-      } else if (this.char === CHAR_HYPHEN || this.char === CHAR_PLUS) {
-        return this.goto(this.parseNumberSign)
-      } else if (this.char === CHAR_i) {
-        return this.next(this.parseInf)
-      } else if (this.char === CHAR_n) {
-        return this.next(this.parseNan)
-      } else if (isDigit(this.char)) {
-        return this.goto(this.parseNumberOrDateTime)
-      } else if (this.char === CHAR_t || this.char === CHAR_f) {
-        return this.goto(this.parseBoolean)
-      } else if (this.char === CHAR_LSQB) {
-        return this.call(this.parseInlineList, this.recordValue)
-      } else if (this.char === CHAR_LCUB) {
-        return this.call(this.parseInlineTable, this.recordValue)
-      } else {
-        throw this.error(new TomlError('Unexpected character, expecting string, number, datetime, boolean, inline array or inline table'))
-      }
-    }
-    recordValue (value) {
-      return this.returnNow(value)
-    }
-
-    parseInf () {
-      if (this.char === CHAR_n) {
-        return this.next(this.parseInf2)
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected "inf", "+inf" or "-inf"'))
-      }
-    }
-    parseInf2 () {
-      if (this.char === CHAR_f) {
-        if (this.state.buf === '-') {
-          return this.return(-Infinity)
-        } else {
-          return this.return(Infinity)
-        }
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected "inf", "+inf" or "-inf"'))
-      }
-    }
-
-    parseNan () {
-      if (this.char === CHAR_a) {
-        return this.next(this.parseNan2)
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected "nan"'))
-      }
-    }
-    parseNan2 () {
-      if (this.char === CHAR_n) {
-        return this.return(NaN)
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected "nan"'))
-      }
-    }
-
-    /* KEYS, barewords or basic, literal, or dotted */
-    parseKeyword () {
-      if (this.char === CHAR_QUOT) {
-        return this.next(this.parseBasicString)
-      } else if (this.char === CHAR_APOS) {
-        return this.next(this.parseLiteralString)
-      } else {
-        return this.goto(this.parseBareKey)
-      }
-    }
-
-    /* KEYS: barewords */
-    parseBareKey () {
-      do {
-        if (this.char === Parser.END) {
-          throw this.error(new TomlError('Key ended without value'))
-        } else if (isAlphaNumHyphen(this.char)) {
-          this.consume()
-        } else if (this.state.buf.length === 0) {
-          throw this.error(new TomlError('Empty bare keys are not allowed'))
-        } else {
-          return this.returnNow()
-        }
-      } while (this.nextChar())
-    }
-
-    /* STRINGS, single quoted (literal) */
-    parseSingleString () {
-      if (this.char === CHAR_APOS) {
-        return this.next(this.parseLiteralMultiStringMaybe)
-      } else {
-        return this.goto(this.parseLiteralString)
-      }
-    }
-    parseLiteralString () {
-      do {
-        if (this.char === CHAR_APOS) {
-          return this.return()
-        } else if (this.atEndOfLine()) {
-          throw this.error(new TomlError('Unterminated string'))
-        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
-          throw this.errorControlCharInString()
-        } else {
-          this.consume()
-        }
-      } while (this.nextChar())
-    }
-    parseLiteralMultiStringMaybe () {
-      if (this.char === CHAR_APOS) {
-        return this.next(this.parseLiteralMultiString)
-      } else {
-        return this.returnNow()
-      }
-    }
-    parseLiteralMultiString () {
-      if (this.char === CTRL_M) {
-        return null
-      } else if (this.char === CTRL_J) {
-        return this.next(this.parseLiteralMultiStringContent)
-      } else {
-        return this.goto(this.parseLiteralMultiStringContent)
-      }
-    }
-    parseLiteralMultiStringContent () {
-      do {
-        if (this.char === CHAR_APOS) {
-          return this.next(this.parseLiteralMultiEnd)
-        } else if (this.char === Parser.END) {
-          throw this.error(new TomlError('Unterminated multi-line string'))
-        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I && this.char !== CTRL_J && this.char !== CTRL_M)) {
-          throw this.errorControlCharInString()
-        } else {
-          this.consume()
-        }
-      } while (this.nextChar())
-    }
-    parseLiteralMultiEnd () {
-      if (this.char === CHAR_APOS) {
-        return this.next(this.parseLiteralMultiEnd2)
-      } else {
-        this.state.buf += "'"
-        return this.goto(this.parseLiteralMultiStringContent)
-      }
-    }
-    parseLiteralMultiEnd2 () {
-      if (this.char === CHAR_APOS) {
-        return this.return()
-      } else {
-        this.state.buf += "''"
-        return this.goto(this.parseLiteralMultiStringContent)
-      }
-    }
-
-    /* STRINGS double quoted */
-    parseDoubleString () {
-      if (this.char === CHAR_QUOT) {
-        return this.next(this.parseMultiStringMaybe)
-      } else {
-        return this.goto(this.parseBasicString)
-      }
-    }
-    parseBasicString () {
-      do {
-        if (this.char === CHAR_BSOL) {
-          return this.call(this.parseEscape, this.recordEscapeReplacement)
-        } else if (this.char === CHAR_QUOT) {
-          return this.return()
-        } else if (this.atEndOfLine()) {
-          throw this.error(new TomlError('Unterminated string'))
-        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
-          throw this.errorControlCharInString()
-        } else {
-          this.consume()
-        }
-      } while (this.nextChar())
-    }
-    recordEscapeReplacement (replacement) {
-      this.state.buf += replacement
-      return this.goto(this.parseBasicString)
-    }
-    parseMultiStringMaybe () {
-      if (this.char === CHAR_QUOT) {
-        return this.next(this.parseMultiString)
-      } else {
-        return this.returnNow()
-      }
-    }
-    parseMultiString () {
-      if (this.char === CTRL_M) {
-        return null
-      } else if (this.char === CTRL_J) {
-        return this.next(this.parseMultiStringContent)
-      } else {
-        return this.goto(this.parseMultiStringContent)
-      }
-    }
-    parseMultiStringContent () {
-      do {
-        if (this.char === CHAR_BSOL) {
-          return this.call(this.parseMultiEscape, this.recordMultiEscapeReplacement)
-        } else if (this.char === CHAR_QUOT) {
-          return this.next(this.parseMultiEnd)
-        } else if (this.char === Parser.END) {
-          throw this.error(new TomlError('Unterminated multi-line string'))
-        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I && this.char !== CTRL_J && this.char !== CTRL_M)) {
-          throw this.errorControlCharInString()
-        } else {
-          this.consume()
-        }
-      } while (this.nextChar())
-    }
-    errorControlCharInString () {
-      let displayCode = '\\u00'
-      if (this.char < 16) {
-        displayCode += '0'
-      }
-      displayCode += this.char.toString(16)
-
-      return this.error(new TomlError(`Control characters (codes < 0x1f and 0x7f) are not allowed in strings, use ${displayCode} instead`))
-    }
-    recordMultiEscapeReplacement (replacement) {
-      this.state.buf += replacement
-      return this.goto(this.parseMultiStringContent)
-    }
-    parseMultiEnd () {
-      if (this.char === CHAR_QUOT) {
-        return this.next(this.parseMultiEnd2)
-      } else {
-        this.state.buf += '"'
-        return this.goto(this.parseMultiStringContent)
-      }
-    }
-    parseMultiEnd2 () {
-      if (this.char === CHAR_QUOT) {
-        return this.return()
-      } else {
-        this.state.buf += '""'
-        return this.goto(this.parseMultiStringContent)
-      }
-    }
-    parseMultiEscape () {
-      if (this.char === CTRL_M || this.char === CTRL_J) {
-        return this.next(this.parseMultiTrim)
-      } else if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return this.next(this.parsePreMultiTrim)
-      } else {
-        return this.goto(this.parseEscape)
-      }
-    }
-    parsePreMultiTrim () {
-      if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return null
-      } else if (this.char === CTRL_M || this.char === CTRL_J) {
-        return this.next(this.parseMultiTrim)
-      } else {
-        throw this.error(new TomlError("Can't escape whitespace"))
-      }
-    }
-    parseMultiTrim () {
-      // explicitly whitespace here, END should follow the same path as chars
-      if (this.char === CTRL_J || this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M) {
-        return null
-      } else {
-        return this.returnNow()
-      }
-    }
-    parseEscape () {
-      if (this.char in escapes) {
-        return this.return(escapes[this.char])
-      } else if (this.char === CHAR_u) {
-        return this.call(this.parseSmallUnicode, this.parseUnicodeReturn)
-      } else if (this.char === CHAR_U) {
-        return this.call(this.parseLargeUnicode, this.parseUnicodeReturn)
-      } else {
-        throw this.error(new TomlError('Unknown escape character: ' + this.char))
-      }
-    }
-    parseUnicodeReturn (char) {
-      try {
-        const codePoint = parseInt(char, 16)
-        if (codePoint >= SURROGATE_FIRST && codePoint <= SURROGATE_LAST) {
-          throw this.error(new TomlError('Invalid unicode, character in range 0xD800 - 0xDFFF is reserved'))
-        }
-        return this.returnNow(String.fromCodePoint(codePoint))
-      } catch (err) {
-        throw this.error(TomlError.wrap(err))
-      }
-    }
-    parseSmallUnicode () {
-      if (!isHexit(this.char)) {
-        throw this.error(new TomlError('Invalid character in unicode sequence, expected hex'))
-      } else {
-        this.consume()
-        if (this.state.buf.length >= 4) return this.return()
-      }
-    }
-    parseLargeUnicode () {
-      if (!isHexit(this.char)) {
-        throw this.error(new TomlError('Invalid character in unicode sequence, expected hex'))
-      } else {
-        this.consume()
-        if (this.state.buf.length >= 8) return this.return()
-      }
-    }
-
-    /* NUMBERS */
-    parseNumberSign () {
-      this.consume()
-      return this.next(this.parseMaybeSignedInfOrNan)
-    }
-    parseMaybeSignedInfOrNan () {
-      if (this.char === CHAR_i) {
-        return this.next(this.parseInf)
-      } else if (this.char === CHAR_n) {
-        return this.next(this.parseNan)
-      } else {
-        return this.callNow(this.parseNoUnder, this.parseNumberIntegerStart)
-      }
-    }
-    parseNumberIntegerStart () {
-      if (this.char === CHAR_0) {
-        this.consume()
-        return this.next(this.parseNumberIntegerExponentOrDecimal)
-      } else {
-        return this.goto(this.parseNumberInteger)
-      }
-    }
-    parseNumberIntegerExponentOrDecimal () {
-      if (this.char === CHAR_PERIOD) {
-        this.consume()
-        return this.call(this.parseNoUnder, this.parseNumberFloat)
-      } else if (this.char === CHAR_E || this.char === CHAR_e) {
-        this.consume()
-        return this.next(this.parseNumberExponentSign)
-      } else {
-        return this.returnNow(Integer(this.state.buf))
-      }
-    }
-    parseNumberInteger () {
-      if (isDigit(this.char)) {
-        this.consume()
-      } else if (this.char === CHAR_LOWBAR) {
-        return this.call(this.parseNoUnder)
-      } else if (this.char === CHAR_E || this.char === CHAR_e) {
-        this.consume()
-        return this.next(this.parseNumberExponentSign)
-      } else if (this.char === CHAR_PERIOD) {
-        this.consume()
-        return this.call(this.parseNoUnder, this.parseNumberFloat)
-      } else {
-        const result = Integer(this.state.buf)
-        /* istanbul ignore if */
-        if (result.isNaN()) {
-          throw this.error(new TomlError('Invalid number'))
-        } else {
-          return this.returnNow(result)
-        }
-      }
-    }
-    parseNoUnder () {
-      if (this.char === CHAR_LOWBAR || this.char === CHAR_PERIOD || this.char === CHAR_E || this.char === CHAR_e) {
-        throw this.error(new TomlError('Unexpected character, expected digit'))
-      } else if (this.atEndOfWord()) {
-        throw this.error(new TomlError('Incomplete number'))
-      }
-      return this.returnNow()
-    }
-    parseNumberFloat () {
-      if (this.char === CHAR_LOWBAR) {
-        return this.call(this.parseNoUnder, this.parseNumberFloat)
-      } else if (isDigit(this.char)) {
-        this.consume()
-      } else if (this.char === CHAR_E || this.char === CHAR_e) {
-        this.consume()
-        return this.next(this.parseNumberExponentSign)
-      } else {
-        return this.returnNow(Float(this.state.buf))
-      }
-    }
-    parseNumberExponentSign () {
-      if (isDigit(this.char)) {
-        return this.goto(this.parseNumberExponent)
-      } else if (this.char === CHAR_HYPHEN || this.char === CHAR_PLUS) {
-        this.consume()
-        this.call(this.parseNoUnder, this.parseNumberExponent)
-      } else {
-        throw this.error(new TomlError('Unexpected character, expected -, + or digit'))
-      }
-    }
-    parseNumberExponent () {
-      if (isDigit(this.char)) {
-        this.consume()
-      } else if (this.char === CHAR_LOWBAR) {
-        return this.call(this.parseNoUnder)
-      } else {
-        return this.returnNow(Float(this.state.buf))
-      }
-    }
-
-    /* NUMBERS or DATETIMES  */
-    parseNumberOrDateTime () {
-      if (this.char === CHAR_0) {
-        this.consume()
-        return this.next(this.parseNumberBaseOrDateTime)
-      } else {
-        return this.goto(this.parseNumberOrDateTimeOnly)
-      }
-    }
-    parseNumberOrDateTimeOnly () {
-      // note, if two zeros are in a row then it MUST be a date
-      if (this.char === CHAR_LOWBAR) {
-        return this.call(this.parseNoUnder, this.parseNumberInteger)
-      } else if (isDigit(this.char)) {
-        this.consume()
-        if (this.state.buf.length > 4) this.next(this.parseNumberInteger)
-      } else if (this.char === CHAR_E || this.char === CHAR_e) {
-        this.consume()
-        return this.next(this.parseNumberExponentSign)
-      } else if (this.char === CHAR_PERIOD) {
-        this.consume()
-        return this.call(this.parseNoUnder, this.parseNumberFloat)
-      } else if (this.char === CHAR_HYPHEN) {
-        return this.goto(this.parseDateTime)
-      } else if (this.char === CHAR_COLON) {
-        return this.goto(this.parseOnlyTimeHour)
-      } else {
-        return this.returnNow(Integer(this.state.buf))
-      }
-    }
-    parseDateTimeOnly () {
-      if (this.state.buf.length < 4) {
-        if (isDigit(this.char)) {
-          return this.consume()
-        } else if (this.char === CHAR_COLON) {
-          return this.goto(this.parseOnlyTimeHour)
-        } else {
-          throw this.error(new TomlError('Expected digit while parsing year part of a date'))
-        }
-      } else {
-        if (this.char === CHAR_HYPHEN) {
-          return this.goto(this.parseDateTime)
-        } else {
-          throw this.error(new TomlError('Expected hyphen (-) while parsing year part of date'))
-        }
-      }
-    }
-    parseNumberBaseOrDateTime () {
-      if (this.char === CHAR_b) {
-        this.consume()
-        return this.call(this.parseNoUnder, this.parseIntegerBin)
-      } else if (this.char === CHAR_o) {
-        this.consume()
-        return this.call(this.parseNoUnder, this.parseIntegerOct)
-      } else if (this.char === CHAR_x) {
-        this.consume()
-        return this.call(this.parseNoUnder, this.parseIntegerHex)
-      } else if (this.char === CHAR_PERIOD) {
-        return this.goto(this.parseNumberInteger)
-      } else if (isDigit(this.char)) {
-        return this.goto(this.parseDateTimeOnly)
-      } else {
-        return this.returnNow(Integer(this.state.buf))
-      }
-    }
-    parseIntegerHex () {
-      if (isHexit(this.char)) {
-        this.consume()
-      } else if (this.char === CHAR_LOWBAR) {
-        return this.call(this.parseNoUnder)
-      } else {
-        const result = Integer(this.state.buf)
-        /* istanbul ignore if */
-        if (result.isNaN()) {
-          throw this.error(new TomlError('Invalid number'))
-        } else {
-          return this.returnNow(result)
-        }
-      }
-    }
-    parseIntegerOct () {
-      if (isOctit(this.char)) {
-        this.consume()
-      } else if (this.char === CHAR_LOWBAR) {
-        return this.call(this.parseNoUnder)
-      } else {
-        const result = Integer(this.state.buf)
-        /* istanbul ignore if */
-        if (result.isNaN()) {
-          throw this.error(new TomlError('Invalid number'))
-        } else {
-          return this.returnNow(result)
-        }
-      }
-    }
-    parseIntegerBin () {
-      if (isBit(this.char)) {
-        this.consume()
-      } else if (this.char === CHAR_LOWBAR) {
-        return this.call(this.parseNoUnder)
-      } else {
-        const result = Integer(this.state.buf)
-        /* istanbul ignore if */
-        if (result.isNaN()) {
-          throw this.error(new TomlError('Invalid number'))
-        } else {
-          return this.returnNow(result)
-        }
-      }
-    }
-
-    /* DATETIME */
-    parseDateTime () {
-      // we enter here having just consumed the year and about to consume the hyphen
-      if (this.state.buf.length < 4) {
-        throw this.error(new TomlError('Years less than 1000 must be zero padded to four characters'))
-      }
-      this.state.result = this.state.buf
-      this.state.buf = ''
-      return this.next(this.parseDateMonth)
-    }
-    parseDateMonth () {
-      if (this.char === CHAR_HYPHEN) {
-        if (this.state.buf.length < 2) {
-          throw this.error(new TomlError('Months less than 10 must be zero padded to two characters'))
-        }
-        this.state.result += '-' + this.state.buf
-        this.state.buf = ''
-        return this.next(this.parseDateDay)
-      } else if (isDigit(this.char)) {
-        this.consume()
-      } else {
-        throw this.error(new TomlError('Incomplete datetime'))
-      }
-    }
-    parseDateDay () {
-      if (this.char === CHAR_T || this.char === CHAR_SP) {
-        if (this.state.buf.length < 2) {
-          throw this.error(new TomlError('Days less than 10 must be zero padded to two characters'))
-        }
-        this.state.result += '-' + this.state.buf
-        this.state.buf = ''
-        return this.next(this.parseStartTimeHour)
-      } else if (this.atEndOfWord()) {
-        return this.return(createDate(this.state.result + '-' + this.state.buf))
-      } else if (isDigit(this.char)) {
-        this.consume()
-      } else {
-        throw this.error(new TomlError('Incomplete datetime'))
-      }
-    }
-    parseStartTimeHour () {
-      if (this.atEndOfWord()) {
-        return this.returnNow(createDate(this.state.result))
-      } else {
-        return this.goto(this.parseTimeHour)
-      }
-    }
-    parseTimeHour () {
-      if (this.char === CHAR_COLON) {
-        if (this.state.buf.length < 2) {
-          throw this.error(new TomlError('Hours less than 10 must be zero padded to two characters'))
-        }
-        this.state.result += 'T' + this.state.buf
-        this.state.buf = ''
-        return this.next(this.parseTimeMin)
-      } else if (isDigit(this.char)) {
-        this.consume()
-      } else {
-        throw this.error(new TomlError('Incomplete datetime'))
-      }
-    }
-    parseTimeMin () {
-      if (this.state.buf.length < 2 && isDigit(this.char)) {
-        this.consume()
-      } else if (this.state.buf.length === 2 && this.char === CHAR_COLON) {
-        this.state.result += ':' + this.state.buf
-        this.state.buf = ''
-        return this.next(this.parseTimeSec)
-      } else {
-        throw this.error(new TomlError('Incomplete datetime'))
-      }
-    }
-    parseTimeSec () {
-      if (isDigit(this.char)) {
-        this.consume()
-        if (this.state.buf.length === 2) {
-          this.state.result += ':' + this.state.buf
-          this.state.buf = ''
-          return this.next(this.parseTimeZoneOrFraction)
-        }
-      } else {
-        throw this.error(new TomlError('Incomplete datetime'))
-      }
-    }
-
-    parseOnlyTimeHour () {
-      /* istanbul ignore else */
-      if (this.char === CHAR_COLON) {
-        if (this.state.buf.length < 2) {
-          throw this.error(new TomlError('Hours less than 10 must be zero padded to two characters'))
-        }
-        this.state.result = this.state.buf
-        this.state.buf = ''
-        return this.next(this.parseOnlyTimeMin)
-      } else {
-        throw this.error(new TomlError('Incomplete time'))
-      }
-    }
-    parseOnlyTimeMin () {
-      if (this.state.buf.length < 2 && isDigit(this.char)) {
-        this.consume()
-      } else if (this.state.buf.length === 2 && this.char === CHAR_COLON) {
-        this.state.result += ':' + this.state.buf
-        this.state.buf = ''
-        return this.next(this.parseOnlyTimeSec)
-      } else {
-        throw this.error(new TomlError('Incomplete time'))
-      }
-    }
-    parseOnlyTimeSec () {
-      if (isDigit(this.char)) {
-        this.consume()
-        if (this.state.buf.length === 2) {
-          return this.next(this.parseOnlyTimeFractionMaybe)
-        }
-      } else {
-        throw this.error(new TomlError('Incomplete time'))
-      }
-    }
-    parseOnlyTimeFractionMaybe () {
-      this.state.result += ':' + this.state.buf
-      if (this.char === CHAR_PERIOD) {
-        this.state.buf = ''
-        this.next(this.parseOnlyTimeFraction)
-      } else {
-        return this.return(createTime(this.state.result))
-      }
-    }
-    parseOnlyTimeFraction () {
-      if (isDigit(this.char)) {
-        this.consume()
-      } else if (this.atEndOfWord()) {
-        if (this.state.buf.length === 0) throw this.error(new TomlError('Expected digit in milliseconds'))
-        return this.returnNow(createTime(this.state.result + '.' + this.state.buf))
-      } else {
-        throw this.error(new TomlError('Unexpected character in datetime, expected period (.), minus (-), plus (+) or Z'))
-      }
-    }
-
-    parseTimeZoneOrFraction () {
-      if (this.char === CHAR_PERIOD) {
-        this.consume()
-        this.next(this.parseDateTimeFraction)
-      } else if (this.char === CHAR_HYPHEN || this.char === CHAR_PLUS) {
-        this.consume()
-        this.next(this.parseTimeZoneHour)
-      } else if (this.char === CHAR_Z) {
-        this.consume()
-        return this.return(createDateTime(this.state.result + this.state.buf))
-      } else if (this.atEndOfWord()) {
-        return this.returnNow(createDateTimeFloat(this.state.result + this.state.buf))
-      } else {
-        throw this.error(new TomlError('Unexpected character in datetime, expected period (.), minus (-), plus (+) or Z'))
-      }
-    }
-    parseDateTimeFraction () {
-      if (isDigit(this.char)) {
-        this.consume()
-      } else if (this.state.buf.length === 1) {
-        throw this.error(new TomlError('Expected digit in milliseconds'))
-      } else if (this.char === CHAR_HYPHEN || this.char === CHAR_PLUS) {
-        this.consume()
-        this.next(this.parseTimeZoneHour)
-      } else if (this.char === CHAR_Z) {
-        this.consume()
-        return this.return(createDateTime(this.state.result + this.state.buf))
-      } else if (this.atEndOfWord()) {
-        return this.returnNow(createDateTimeFloat(this.state.result + this.state.buf))
-      } else {
-        throw this.error(new TomlError('Unexpected character in datetime, expected period (.), minus (-), plus (+) or Z'))
-      }
-    }
-    parseTimeZoneHour () {
-      if (isDigit(this.char)) {
-        this.consume()
-        // FIXME: No more regexps
-        if (/\d\d$/.test(this.state.buf)) return this.next(this.parseTimeZoneSep)
-      } else {
-        throw this.error(new TomlError('Unexpected character in datetime, expected digit'))
-      }
-    }
-    parseTimeZoneSep () {
-      if (this.char === CHAR_COLON) {
-        this.consume()
-        this.next(this.parseTimeZoneMin)
-      } else {
-        throw this.error(new TomlError('Unexpected character in datetime, expected colon'))
-      }
-    }
-    parseTimeZoneMin () {
-      if (isDigit(this.char)) {
-        this.consume()
-        if (/\d\d$/.test(this.state.buf)) return this.return(createDateTime(this.state.result + this.state.buf))
-      } else {
-        throw this.error(new TomlError('Unexpected character in datetime, expected digit'))
-      }
-    }
-
-    /* BOOLEAN */
-    parseBoolean () {
-      /* istanbul ignore else */
-      if (this.char === CHAR_t) {
-        this.consume()
-        return this.next(this.parseTrue_r)
-      } else if (this.char === CHAR_f) {
-        this.consume()
-        return this.next(this.parseFalse_a)
-      }
-    }
-    parseTrue_r () {
-      if (this.char === CHAR_r) {
-        this.consume()
-        return this.next(this.parseTrue_u)
-      } else {
-        throw this.error(new TomlError('Invalid boolean, expected true or false'))
-      }
-    }
-    parseTrue_u () {
-      if (this.char === CHAR_u) {
-        this.consume()
-        return this.next(this.parseTrue_e)
-      } else {
-        throw this.error(new TomlError('Invalid boolean, expected true or false'))
-      }
-    }
-    parseTrue_e () {
-      if (this.char === CHAR_e) {
-        return this.return(true)
-      } else {
-        throw this.error(new TomlError('Invalid boolean, expected true or false'))
-      }
-    }
-
-    parseFalse_a () {
-      if (this.char === CHAR_a) {
-        this.consume()
-        return this.next(this.parseFalse_l)
-      } else {
-        throw this.error(new TomlError('Invalid boolean, expected true or false'))
-      }
-    }
-
-    parseFalse_l () {
-      if (this.char === CHAR_l) {
-        this.consume()
-        return this.next(this.parseFalse_s)
-      } else {
-        throw this.error(new TomlError('Invalid boolean, expected true or false'))
-      }
-    }
-
-    parseFalse_s () {
-      if (this.char === CHAR_s) {
-        this.consume()
-        return this.next(this.parseFalse_e)
-      } else {
-        throw this.error(new TomlError('Invalid boolean, expected true or false'))
-      }
-    }
-
-    parseFalse_e () {
-      if (this.char === CHAR_e) {
-        return this.return(false)
-      } else {
-        throw this.error(new TomlError('Invalid boolean, expected true or false'))
-      }
-    }
-
-    /* INLINE LISTS */
-    parseInlineList () {
-      if (this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M || this.char === CTRL_J) {
-        return null
-      } else if (this.char === Parser.END) {
-        throw this.error(new TomlError('Unterminated inline array'))
-      } else if (this.char === CHAR_NUM) {
-        return this.call(this.parseComment)
-      } else if (this.char === CHAR_RSQB) {
-        return this.return(this.state.resultArr || InlineList())
-      } else {
-        return this.callNow(this.parseValue, this.recordInlineListValue)
-      }
-    }
-    recordInlineListValue (value) {
-      if (this.state.resultArr) {
-        const listType = this.state.resultArr[_contentType]
-        const valueType = tomlType(value)
-        if (listType !== valueType) {
-          throw this.error(new TomlError(`Inline lists must be a single type, not a mix of ${listType} and ${valueType}`))
-        }
-      } else {
-        this.state.resultArr = InlineList(tomlType(value))
-      }
-      if (isFloat(value) || isInteger(value)) {
-        // unbox now that we've verified they're ok
-        this.state.resultArr.push(value.valueOf())
-      } else {
-        this.state.resultArr.push(value)
-      }
-      return this.goto(this.parseInlineListNext)
-    }
-    parseInlineListNext () {
-      if (this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M || this.char === CTRL_J) {
-        return null
-      } else if (this.char === CHAR_NUM) {
-        return this.call(this.parseComment)
-      } else if (this.char === CHAR_COMMA) {
-        return this.next(this.parseInlineList)
-      } else if (this.char === CHAR_RSQB) {
-        return this.goto(this.parseInlineList)
-      } else {
-        throw this.error(new TomlError('Invalid character, expected whitespace, comma (,) or close bracket (])'))
-      }
-    }
-
-    /* INLINE TABLE */
-    parseInlineTable () {
-      if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return null
-      } else if (this.char === Parser.END || this.char === CHAR_NUM || this.char === CTRL_J || this.char === CTRL_M) {
-        throw this.error(new TomlError('Unterminated inline array'))
-      } else if (this.char === CHAR_RCUB) {
-        const returnValue = this.state.resultTable || InlineTable()
-        returnValue.__tomlInline = true
-        return this.return(returnValue)
-      } else {
-        if (!this.state.resultTable) this.state.resultTable = InlineTable()
-        return this.callNow(this.parseAssign, this.recordInlineTableValue)
-      }
-    }
-    recordInlineTableValue (kv) {
-      let target = this.state.resultTable
-      let finalKey = kv.key.pop()
-      for (let kw of kv.key) {
-        if (hasKey(target, kw) && (!isTable(target[kw]) || target[kw][_declared])) {
-          throw this.error(new TomlError("Can't redefine existing key"))
-        }
-        target = target[kw] = target[kw] || Table()
-      }
-      if (hasKey(target, finalKey)) {
-        throw this.error(new TomlError("Can't redefine existing key"))
-      }
-      if (isInteger(kv.value) || isFloat(kv.value)) {
-        target[finalKey] = kv.value.valueOf()
-      } else {
-        target[finalKey] = kv.value
-      }
-      return this.goto(this.parseInlineTableNext)
-    }
-    parseInlineTableNext () {
-      if (this.char === CHAR_SP || this.char === CTRL_I) {
-        return null
-      } else if (this.char === Parser.END || this.char === CHAR_NUM || this.char === CTRL_J || this.char === CTRL_M) {
-        throw this.error(new TomlError('Unterminated inline array'))
-      } else if (this.char === CHAR_COMMA) {
-        return this.next(this.parseInlineTable)
-      } else if (this.char === CHAR_RCUB) {
-        return this.goto(this.parseInlineTable)
-      } else {
-        throw this.error(new TomlError('Invalid character, expected whitespace, comma (,) or close bracket (])'))
-      }
-    }
-  }
-  return TOMLParser
-}
+// Make the export immutable
+Object.defineProperty(module, 'exports', {
+	enumerable: true,
+	get: assembleStyles
+});
 
 
 /***/ }),
@@ -14960,7 +14165,7 @@ function makeParserClass (Parser) {
 
 module.exports = parseString
 
-const TOMLParser = __webpack_require__(285)
+const TOMLParser = __webpack_require__(725)
 const prettyError = __webpack_require__(985)
 
 function parseString (str) {
@@ -15279,119 +14484,161 @@ function construct() {
 /* 293 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+const Range = __webpack_require__(46)
+const { ANY } = __webpack_require__(9)
+const satisfies = __webpack_require__(845)
+const compare = __webpack_require__(217)
 
-const os = __webpack_require__(87);
-const onExit = __webpack_require__(145);
+// Complex range `r1 || r2 || ...` is a subset of `R1 || R2 || ...` iff:
+// - Every simple range `r1, r2, ...` is a subset of some `R1, R2, ...`
+//
+// Simple range `c1 c2 ...` is a subset of simple range `C1 C2 ...` iff:
+// - If c is only the ANY comparator
+//   - If C is only the ANY comparator, return true
+//   - Else return false
+// - Let EQ be the set of = comparators in c
+// - If EQ is more than one, return true (null set)
+// - Let GT be the highest > or >= comparator in c
+// - Let LT be the lowest < or <= comparator in c
+// - If GT and LT, and GT.semver > LT.semver, return true (null set)
+// - If EQ
+//   - If GT, and EQ does not satisfy GT, return true (null set)
+//   - If LT, and EQ does not satisfy LT, return true (null set)
+//   - If EQ satisfies every C, return true
+//   - Else return false
+// - If GT
+//   - If GT is lower than any > or >= comp in C, return false
+//   - If GT is >=, and GT.semver does not satisfy every C, return false
+// - If LT
+//   - If LT.semver is greater than that of any > comp in C, return false
+//   - If LT is <=, and LT.semver does not satisfy every C, return false
+// - If any C is a = range, and GT or LT are set, return false
+// - Else return true
 
-const DEFAULT_FORCE_KILL_TIMEOUT = 1000 * 5;
+const subset = (sub, dom, options) => {
+  sub = new Range(sub, options)
+  dom = new Range(dom, options)
+  let sawNonNull = false
 
-// Monkey-patches `childProcess.kill()` to add `forceKillAfterTimeout` behavior
-const spawnedKill = (kill, signal = 'SIGTERM', options = {}) => {
-	const killResult = kill(signal);
-	setKillTimeout(kill, signal, options, killResult);
-	return killResult;
-};
+  OUTER: for (const simpleSub of sub.set) {
+    for (const simpleDom of dom.set) {
+      const isSub = simpleSubset(simpleSub, simpleDom, options)
+      sawNonNull = sawNonNull || isSub !== null
+      if (isSub)
+        continue OUTER
+    }
+    // the null set is a subset of everything, but null simple ranges in
+    // a complex range should be ignored.  so if we saw a non-null range,
+    // then we know this isn't a subset, but if EVERY simple range was null,
+    // then it is a subset.
+    if (sawNonNull)
+      return false
+  }
+  return true
+}
 
-const setKillTimeout = (kill, signal, options, killResult) => {
-	if (!shouldForceKill(signal, options, killResult)) {
-		return;
-	}
+const simpleSubset = (sub, dom, options) => {
+  if (sub.length === 1 && sub[0].semver === ANY)
+    return dom.length === 1 && dom[0].semver === ANY
 
-	const timeout = getForceKillAfterTimeout(options);
-	const t = setTimeout(() => {
-		kill('SIGKILL');
-	}, timeout);
+  const eqSet = new Set()
+  let gt, lt
+  for (const c of sub) {
+    if (c.operator === '>' || c.operator === '>=')
+      gt = higherGT(gt, c, options)
+    else if (c.operator === '<' || c.operator === '<=')
+      lt = lowerLT(lt, c, options)
+    else
+      eqSet.add(c.semver)
+  }
 
-	// Guarded because there's no `.unref()` when `execa` is used in the renderer
-	// process in Electron. This cannot be tested since we don't run tests in
-	// Electron.
-	// istanbul ignore else
-	if (t.unref) {
-		t.unref();
-	}
-};
+  if (eqSet.size > 1)
+    return null
 
-const shouldForceKill = (signal, {forceKillAfterTimeout}, killResult) => {
-	return isSigterm(signal) && forceKillAfterTimeout !== false && killResult;
-};
+  let gtltComp
+  if (gt && lt) {
+    gtltComp = compare(gt.semver, lt.semver, options)
+    if (gtltComp > 0)
+      return null
+    else if (gtltComp === 0 && (gt.operator !== '>=' || lt.operator !== '<='))
+      return null
+  }
 
-const isSigterm = signal => {
-	return signal === os.constants.signals.SIGTERM ||
-		(typeof signal === 'string' && signal.toUpperCase() === 'SIGTERM');
-};
+  // will iterate one or zero times
+  for (const eq of eqSet) {
+    if (gt && !satisfies(eq, String(gt), options))
+      return null
 
-const getForceKillAfterTimeout = ({forceKillAfterTimeout = true}) => {
-	if (forceKillAfterTimeout === true) {
-		return DEFAULT_FORCE_KILL_TIMEOUT;
-	}
+    if (lt && !satisfies(eq, String(lt), options))
+      return null
 
-	if (!Number.isFinite(forceKillAfterTimeout) || forceKillAfterTimeout < 0) {
-		throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${forceKillAfterTimeout}\` (${typeof forceKillAfterTimeout})`);
-	}
+    for (const c of dom) {
+      if (!satisfies(eq, String(c), options))
+        return false
+    }
+    return true
+  }
 
-	return forceKillAfterTimeout;
-};
+  let higher, lower
+  let hasDomLT, hasDomGT
+  for (const c of dom) {
+    hasDomGT = hasDomGT || c.operator === '>' || c.operator === '>='
+    hasDomLT = hasDomLT || c.operator === '<' || c.operator === '<='
+    if (gt) {
+      if (c.operator === '>' || c.operator === '>=') {
+        higher = higherGT(gt, c, options)
+        if (higher === c)
+          return false
+      } else if (gt.operator === '>=' && !satisfies(gt.semver, String(c), options))
+        return false
+    }
+    if (lt) {
+      if (c.operator === '<' || c.operator === '<=') {
+        lower = lowerLT(lt, c, options)
+        if (lower === c)
+          return false
+      } else if (lt.operator === '<=' && !satisfies(lt.semver, String(c), options))
+        return false
+    }
+    if (!c.operator && (lt || gt) && gtltComp !== 0)
+      return false
+  }
 
-// `childProcess.cancel()`
-const spawnedCancel = (spawned, context) => {
-	const killResult = spawned.kill();
+  // if there was a < or >, and nothing in the dom, then must be false
+  // UNLESS it was limited by another range in the other direction.
+  // Eg, >1.0.0 <1.0.1 is still a subset of <2.0.0
+  if (gt && hasDomLT && !lt && gtltComp !== 0)
+    return false
 
-	if (killResult) {
-		context.isCanceled = true;
-	}
-};
+  if (lt && hasDomGT && !gt && gtltComp !== 0)
+    return false
 
-const timeoutKill = (spawned, signal, reject) => {
-	spawned.kill(signal);
-	reject(Object.assign(new Error('Timed out'), {timedOut: true, signal}));
-};
+  return true
+}
 
-// `timeout` option handling
-const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise) => {
-	if (timeout === 0 || timeout === undefined) {
-		return spawnedPromise;
-	}
+// >=1.2.3 is lower than >1.2.3
+const higherGT = (a, b, options) => {
+  if (!a)
+    return b
+  const comp = compare(a.semver, b.semver, options)
+  return comp > 0 ? a
+    : comp < 0 ? b
+    : b.operator === '>' && a.operator === '>=' ? b
+    : a
+}
 
-	if (!Number.isFinite(timeout) || timeout < 0) {
-		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
-	}
+// <=1.2.3 is higher than <1.2.3
+const lowerLT = (a, b, options) => {
+  if (!a)
+    return b
+  const comp = compare(a.semver, b.semver, options)
+  return comp < 0 ? a
+    : comp > 0 ? b
+    : b.operator === '<' && a.operator === '<=' ? b
+    : a
+}
 
-	let timeoutId;
-	const timeoutPromise = new Promise((resolve, reject) => {
-		timeoutId = setTimeout(() => {
-			timeoutKill(spawned, killSignal, reject);
-		}, timeout);
-	});
-
-	const safeSpawnedPromise = spawnedPromise.finally(() => {
-		clearTimeout(timeoutId);
-	});
-
-	return Promise.race([timeoutPromise, safeSpawnedPromise]);
-};
-
-// `cleanup` option handling
-const setExitHandler = async (spawned, {cleanup, detached}, timedPromise) => {
-	if (!cleanup || detached) {
-		return timedPromise;
-	}
-
-	const removeExitHandler = onExit(() => {
-		spawned.kill();
-	});
-
-	return timedPromise.finally(() => {
-		removeExitHandler();
-	});
-};
-
-module.exports = {
-	spawnedKill,
-	spawnedCancel,
-	setupTimeout,
-	setExitHandler
-};
+module.exports = subset
 
 
 /***/ }),
@@ -15544,1491 +14791,14 @@ exports.createFileSystemAdapter = createFileSystemAdapter;
 
 /***/ }),
 /* 311 */
-/***/ (function(module, exports) {
+/***/ (function(module) {
 
-exports = module.exports = SemVer
+"use strict";
 
-var debug
-/* istanbul ignore next */
-if (typeof process === 'object' &&
-    process.env &&
-    process.env.NODE_DEBUG &&
-    /\bsemver\b/i.test(process.env.NODE_DEBUG)) {
-  debug = function () {
-    var args = Array.prototype.slice.call(arguments, 0)
-    args.unshift('SEMVER')
-    console.log.apply(console, args)
-  }
-} else {
-  debug = function () {}
-}
 
-// Note: this is the semver.org version of the spec that it implements
-// Not necessarily the package version of this code.
-exports.SEMVER_SPEC_VERSION = '2.0.0'
-
-var MAX_LENGTH = 256
-var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
-  /* istanbul ignore next */ 9007199254740991
-
-// Max safe segment length for coercion.
-var MAX_SAFE_COMPONENT_LENGTH = 16
-
-// The actual regexps go on exports.re
-var re = exports.re = []
-var src = exports.src = []
-var R = 0
-
-// The following Regular Expressions can be used for tokenizing,
-// validating, and parsing SemVer version strings.
-
-// ## Numeric Identifier
-// A single `0`, or a non-zero digit followed by zero or more digits.
-
-var NUMERICIDENTIFIER = R++
-src[NUMERICIDENTIFIER] = '0|[1-9]\\d*'
-var NUMERICIDENTIFIERLOOSE = R++
-src[NUMERICIDENTIFIERLOOSE] = '[0-9]+'
-
-// ## Non-numeric Identifier
-// Zero or more digits, followed by a letter or hyphen, and then zero or
-// more letters, digits, or hyphens.
-
-var NONNUMERICIDENTIFIER = R++
-src[NONNUMERICIDENTIFIER] = '\\d*[a-zA-Z-][a-zA-Z0-9-]*'
-
-// ## Main Version
-// Three dot-separated numeric identifiers.
-
-var MAINVERSION = R++
-src[MAINVERSION] = '(' + src[NUMERICIDENTIFIER] + ')\\.' +
-                   '(' + src[NUMERICIDENTIFIER] + ')\\.' +
-                   '(' + src[NUMERICIDENTIFIER] + ')'
-
-var MAINVERSIONLOOSE = R++
-src[MAINVERSIONLOOSE] = '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
-                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')\\.' +
-                        '(' + src[NUMERICIDENTIFIERLOOSE] + ')'
-
-// ## Pre-release Version Identifier
-// A numeric identifier, or a non-numeric identifier.
-
-var PRERELEASEIDENTIFIER = R++
-src[PRERELEASEIDENTIFIER] = '(?:' + src[NUMERICIDENTIFIER] +
-                            '|' + src[NONNUMERICIDENTIFIER] + ')'
-
-var PRERELEASEIDENTIFIERLOOSE = R++
-src[PRERELEASEIDENTIFIERLOOSE] = '(?:' + src[NUMERICIDENTIFIERLOOSE] +
-                                 '|' + src[NONNUMERICIDENTIFIER] + ')'
-
-// ## Pre-release Version
-// Hyphen, followed by one or more dot-separated pre-release version
-// identifiers.
-
-var PRERELEASE = R++
-src[PRERELEASE] = '(?:-(' + src[PRERELEASEIDENTIFIER] +
-                  '(?:\\.' + src[PRERELEASEIDENTIFIER] + ')*))'
-
-var PRERELEASELOOSE = R++
-src[PRERELEASELOOSE] = '(?:-?(' + src[PRERELEASEIDENTIFIERLOOSE] +
-                       '(?:\\.' + src[PRERELEASEIDENTIFIERLOOSE] + ')*))'
-
-// ## Build Metadata Identifier
-// Any combination of digits, letters, or hyphens.
-
-var BUILDIDENTIFIER = R++
-src[BUILDIDENTIFIER] = '[0-9A-Za-z-]+'
-
-// ## Build Metadata
-// Plus sign, followed by one or more period-separated build metadata
-// identifiers.
-
-var BUILD = R++
-src[BUILD] = '(?:\\+(' + src[BUILDIDENTIFIER] +
-             '(?:\\.' + src[BUILDIDENTIFIER] + ')*))'
-
-// ## Full Version String
-// A main version, followed optionally by a pre-release version and
-// build metadata.
-
-// Note that the only major, minor, patch, and pre-release sections of
-// the version string are capturing groups.  The build metadata is not a
-// capturing group, because it should not ever be used in version
-// comparison.
-
-var FULL = R++
-var FULLPLAIN = 'v?' + src[MAINVERSION] +
-                src[PRERELEASE] + '?' +
-                src[BUILD] + '?'
-
-src[FULL] = '^' + FULLPLAIN + '$'
-
-// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
-// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
-// common in the npm registry.
-var LOOSEPLAIN = '[v=\\s]*' + src[MAINVERSIONLOOSE] +
-                 src[PRERELEASELOOSE] + '?' +
-                 src[BUILD] + '?'
-
-var LOOSE = R++
-src[LOOSE] = '^' + LOOSEPLAIN + '$'
-
-var GTLT = R++
-src[GTLT] = '((?:<|>)?=?)'
-
-// Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
-// Only the first item is strictly required.
-var XRANGEIDENTIFIERLOOSE = R++
-src[XRANGEIDENTIFIERLOOSE] = src[NUMERICIDENTIFIERLOOSE] + '|x|X|\\*'
-var XRANGEIDENTIFIER = R++
-src[XRANGEIDENTIFIER] = src[NUMERICIDENTIFIER] + '|x|X|\\*'
-
-var XRANGEPLAIN = R++
-src[XRANGEPLAIN] = '[v=\\s]*(' + src[XRANGEIDENTIFIER] + ')' +
-                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
-                   '(?:\\.(' + src[XRANGEIDENTIFIER] + ')' +
-                   '(?:' + src[PRERELEASE] + ')?' +
-                   src[BUILD] + '?' +
-                   ')?)?'
-
-var XRANGEPLAINLOOSE = R++
-src[XRANGEPLAINLOOSE] = '[v=\\s]*(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
-                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
-                        '(?:\\.(' + src[XRANGEIDENTIFIERLOOSE] + ')' +
-                        '(?:' + src[PRERELEASELOOSE] + ')?' +
-                        src[BUILD] + '?' +
-                        ')?)?'
-
-var XRANGE = R++
-src[XRANGE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAIN] + '$'
-var XRANGELOOSE = R++
-src[XRANGELOOSE] = '^' + src[GTLT] + '\\s*' + src[XRANGEPLAINLOOSE] + '$'
-
-// Coercion.
-// Extract anything that could conceivably be a part of a valid semver
-var COERCE = R++
-src[COERCE] = '(?:^|[^\\d])' +
-              '(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '})' +
-              '(?:\\.(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '}))?' +
-              '(?:\\.(\\d{1,' + MAX_SAFE_COMPONENT_LENGTH + '}))?' +
-              '(?:$|[^\\d])'
-
-// Tilde ranges.
-// Meaning is "reasonably at or greater than"
-var LONETILDE = R++
-src[LONETILDE] = '(?:~>?)'
-
-var TILDETRIM = R++
-src[TILDETRIM] = '(\\s*)' + src[LONETILDE] + '\\s+'
-re[TILDETRIM] = new RegExp(src[TILDETRIM], 'g')
-var tildeTrimReplace = '$1~'
-
-var TILDE = R++
-src[TILDE] = '^' + src[LONETILDE] + src[XRANGEPLAIN] + '$'
-var TILDELOOSE = R++
-src[TILDELOOSE] = '^' + src[LONETILDE] + src[XRANGEPLAINLOOSE] + '$'
-
-// Caret ranges.
-// Meaning is "at least and backwards compatible with"
-var LONECARET = R++
-src[LONECARET] = '(?:\\^)'
-
-var CARETTRIM = R++
-src[CARETTRIM] = '(\\s*)' + src[LONECARET] + '\\s+'
-re[CARETTRIM] = new RegExp(src[CARETTRIM], 'g')
-var caretTrimReplace = '$1^'
-
-var CARET = R++
-src[CARET] = '^' + src[LONECARET] + src[XRANGEPLAIN] + '$'
-var CARETLOOSE = R++
-src[CARETLOOSE] = '^' + src[LONECARET] + src[XRANGEPLAINLOOSE] + '$'
-
-// A simple gt/lt/eq thing, or just "" to indicate "any version"
-var COMPARATORLOOSE = R++
-src[COMPARATORLOOSE] = '^' + src[GTLT] + '\\s*(' + LOOSEPLAIN + ')$|^$'
-var COMPARATOR = R++
-src[COMPARATOR] = '^' + src[GTLT] + '\\s*(' + FULLPLAIN + ')$|^$'
-
-// An expression to strip any whitespace between the gtlt and the thing
-// it modifies, so that `> 1.2.3` ==> `>1.2.3`
-var COMPARATORTRIM = R++
-src[COMPARATORTRIM] = '(\\s*)' + src[GTLT] +
-                      '\\s*(' + LOOSEPLAIN + '|' + src[XRANGEPLAIN] + ')'
-
-// this one has to use the /g flag
-re[COMPARATORTRIM] = new RegExp(src[COMPARATORTRIM], 'g')
-var comparatorTrimReplace = '$1$2$3'
-
-// Something like `1.2.3 - 1.2.4`
-// Note that these all use the loose form, because they'll be
-// checked against either the strict or loose comparator form
-// later.
-var HYPHENRANGE = R++
-src[HYPHENRANGE] = '^\\s*(' + src[XRANGEPLAIN] + ')' +
-                   '\\s+-\\s+' +
-                   '(' + src[XRANGEPLAIN] + ')' +
-                   '\\s*$'
-
-var HYPHENRANGELOOSE = R++
-src[HYPHENRANGELOOSE] = '^\\s*(' + src[XRANGEPLAINLOOSE] + ')' +
-                        '\\s+-\\s+' +
-                        '(' + src[XRANGEPLAINLOOSE] + ')' +
-                        '\\s*$'
-
-// Star ranges basically just allow anything at all.
-var STAR = R++
-src[STAR] = '(<|>)?=?\\s*\\*'
-
-// Compile to actual regexp objects.
-// All are flag-free, unless they were created above with a flag.
-for (var i = 0; i < R; i++) {
-  debug(i, src[i])
-  if (!re[i]) {
-    re[i] = new RegExp(src[i])
-  }
-}
-
-exports.parse = parse
-function parse (version, options) {
-  if (!options || typeof options !== 'object') {
-    options = {
-      loose: !!options,
-      includePrerelease: false
-    }
-  }
-
-  if (version instanceof SemVer) {
-    return version
-  }
-
-  if (typeof version !== 'string') {
-    return null
-  }
-
-  if (version.length > MAX_LENGTH) {
-    return null
-  }
-
-  var r = options.loose ? re[LOOSE] : re[FULL]
-  if (!r.test(version)) {
-    return null
-  }
-
-  try {
-    return new SemVer(version, options)
-  } catch (er) {
-    return null
-  }
-}
-
-exports.valid = valid
-function valid (version, options) {
-  var v = parse(version, options)
-  return v ? v.version : null
-}
-
-exports.clean = clean
-function clean (version, options) {
-  var s = parse(version.trim().replace(/^[=v]+/, ''), options)
-  return s ? s.version : null
-}
-
-exports.SemVer = SemVer
-
-function SemVer (version, options) {
-  if (!options || typeof options !== 'object') {
-    options = {
-      loose: !!options,
-      includePrerelease: false
-    }
-  }
-  if (version instanceof SemVer) {
-    if (version.loose === options.loose) {
-      return version
-    } else {
-      version = version.version
-    }
-  } else if (typeof version !== 'string') {
-    throw new TypeError('Invalid Version: ' + version)
-  }
-
-  if (version.length > MAX_LENGTH) {
-    throw new TypeError('version is longer than ' + MAX_LENGTH + ' characters')
-  }
-
-  if (!(this instanceof SemVer)) {
-    return new SemVer(version, options)
-  }
-
-  debug('SemVer', version, options)
-  this.options = options
-  this.loose = !!options.loose
-
-  var m = version.trim().match(options.loose ? re[LOOSE] : re[FULL])
-
-  if (!m) {
-    throw new TypeError('Invalid Version: ' + version)
-  }
-
-  this.raw = version
-
-  // these are actually numbers
-  this.major = +m[1]
-  this.minor = +m[2]
-  this.patch = +m[3]
-
-  if (this.major > MAX_SAFE_INTEGER || this.major < 0) {
-    throw new TypeError('Invalid major version')
-  }
-
-  if (this.minor > MAX_SAFE_INTEGER || this.minor < 0) {
-    throw new TypeError('Invalid minor version')
-  }
-
-  if (this.patch > MAX_SAFE_INTEGER || this.patch < 0) {
-    throw new TypeError('Invalid patch version')
-  }
-
-  // numberify any prerelease numeric ids
-  if (!m[4]) {
-    this.prerelease = []
-  } else {
-    this.prerelease = m[4].split('.').map(function (id) {
-      if (/^[0-9]+$/.test(id)) {
-        var num = +id
-        if (num >= 0 && num < MAX_SAFE_INTEGER) {
-          return num
-        }
-      }
-      return id
-    })
-  }
-
-  this.build = m[5] ? m[5].split('.') : []
-  this.format()
-}
-
-SemVer.prototype.format = function () {
-  this.version = this.major + '.' + this.minor + '.' + this.patch
-  if (this.prerelease.length) {
-    this.version += '-' + this.prerelease.join('.')
-  }
-  return this.version
-}
-
-SemVer.prototype.toString = function () {
-  return this.version
-}
-
-SemVer.prototype.compare = function (other) {
-  debug('SemVer.compare', this.version, this.options, other)
-  if (!(other instanceof SemVer)) {
-    other = new SemVer(other, this.options)
-  }
-
-  return this.compareMain(other) || this.comparePre(other)
-}
-
-SemVer.prototype.compareMain = function (other) {
-  if (!(other instanceof SemVer)) {
-    other = new SemVer(other, this.options)
-  }
-
-  return compareIdentifiers(this.major, other.major) ||
-         compareIdentifiers(this.minor, other.minor) ||
-         compareIdentifiers(this.patch, other.patch)
-}
-
-SemVer.prototype.comparePre = function (other) {
-  if (!(other instanceof SemVer)) {
-    other = new SemVer(other, this.options)
-  }
-
-  // NOT having a prerelease is > having one
-  if (this.prerelease.length && !other.prerelease.length) {
-    return -1
-  } else if (!this.prerelease.length && other.prerelease.length) {
-    return 1
-  } else if (!this.prerelease.length && !other.prerelease.length) {
-    return 0
-  }
-
-  var i = 0
-  do {
-    var a = this.prerelease[i]
-    var b = other.prerelease[i]
-    debug('prerelease compare', i, a, b)
-    if (a === undefined && b === undefined) {
-      return 0
-    } else if (b === undefined) {
-      return 1
-    } else if (a === undefined) {
-      return -1
-    } else if (a === b) {
-      continue
-    } else {
-      return compareIdentifiers(a, b)
-    }
-  } while (++i)
-}
-
-// preminor will bump the version up to the next minor release, and immediately
-// down to pre-release. premajor and prepatch work the same way.
-SemVer.prototype.inc = function (release, identifier) {
-  switch (release) {
-    case 'premajor':
-      this.prerelease.length = 0
-      this.patch = 0
-      this.minor = 0
-      this.major++
-      this.inc('pre', identifier)
-      break
-    case 'preminor':
-      this.prerelease.length = 0
-      this.patch = 0
-      this.minor++
-      this.inc('pre', identifier)
-      break
-    case 'prepatch':
-      // If this is already a prerelease, it will bump to the next version
-      // drop any prereleases that might already exist, since they are not
-      // relevant at this point.
-      this.prerelease.length = 0
-      this.inc('patch', identifier)
-      this.inc('pre', identifier)
-      break
-    // If the input is a non-prerelease version, this acts the same as
-    // prepatch.
-    case 'prerelease':
-      if (this.prerelease.length === 0) {
-        this.inc('patch', identifier)
-      }
-      this.inc('pre', identifier)
-      break
-
-    case 'major':
-      // If this is a pre-major version, bump up to the same major version.
-      // Otherwise increment major.
-      // 1.0.0-5 bumps to 1.0.0
-      // 1.1.0 bumps to 2.0.0
-      if (this.minor !== 0 ||
-          this.patch !== 0 ||
-          this.prerelease.length === 0) {
-        this.major++
-      }
-      this.minor = 0
-      this.patch = 0
-      this.prerelease = []
-      break
-    case 'minor':
-      // If this is a pre-minor version, bump up to the same minor version.
-      // Otherwise increment minor.
-      // 1.2.0-5 bumps to 1.2.0
-      // 1.2.1 bumps to 1.3.0
-      if (this.patch !== 0 || this.prerelease.length === 0) {
-        this.minor++
-      }
-      this.patch = 0
-      this.prerelease = []
-      break
-    case 'patch':
-      // If this is not a pre-release version, it will increment the patch.
-      // If it is a pre-release it will bump up to the same patch version.
-      // 1.2.0-5 patches to 1.2.0
-      // 1.2.0 patches to 1.2.1
-      if (this.prerelease.length === 0) {
-        this.patch++
-      }
-      this.prerelease = []
-      break
-    // This probably shouldn't be used publicly.
-    // 1.0.0 "pre" would become 1.0.0-0 which is the wrong direction.
-    case 'pre':
-      if (this.prerelease.length === 0) {
-        this.prerelease = [0]
-      } else {
-        var i = this.prerelease.length
-        while (--i >= 0) {
-          if (typeof this.prerelease[i] === 'number') {
-            this.prerelease[i]++
-            i = -2
-          }
-        }
-        if (i === -1) {
-          // didn't increment anything
-          this.prerelease.push(0)
-        }
-      }
-      if (identifier) {
-        // 1.2.0-beta.1 bumps to 1.2.0-beta.2,
-        // 1.2.0-beta.fooblz or 1.2.0-beta bumps to 1.2.0-beta.0
-        if (this.prerelease[0] === identifier) {
-          if (isNaN(this.prerelease[1])) {
-            this.prerelease = [identifier, 0]
-          }
-        } else {
-          this.prerelease = [identifier, 0]
-        }
-      }
-      break
-
-    default:
-      throw new Error('invalid increment argument: ' + release)
-  }
-  this.format()
-  this.raw = this.version
-  return this
-}
-
-exports.inc = inc
-function inc (version, release, loose, identifier) {
-  if (typeof (loose) === 'string') {
-    identifier = loose
-    loose = undefined
-  }
-
-  try {
-    return new SemVer(version, loose).inc(release, identifier).version
-  } catch (er) {
-    return null
-  }
-}
-
-exports.diff = diff
-function diff (version1, version2) {
-  if (eq(version1, version2)) {
-    return null
-  } else {
-    var v1 = parse(version1)
-    var v2 = parse(version2)
-    var prefix = ''
-    if (v1.prerelease.length || v2.prerelease.length) {
-      prefix = 'pre'
-      var defaultResult = 'prerelease'
-    }
-    for (var key in v1) {
-      if (key === 'major' || key === 'minor' || key === 'patch') {
-        if (v1[key] !== v2[key]) {
-          return prefix + key
-        }
-      }
-    }
-    return defaultResult // may be undefined
-  }
-}
-
-exports.compareIdentifiers = compareIdentifiers
-
-var numeric = /^[0-9]+$/
-function compareIdentifiers (a, b) {
-  var anum = numeric.test(a)
-  var bnum = numeric.test(b)
-
-  if (anum && bnum) {
-    a = +a
-    b = +b
-  }
-
-  return a === b ? 0
-    : (anum && !bnum) ? -1
-    : (bnum && !anum) ? 1
-    : a < b ? -1
-    : 1
-}
-
-exports.rcompareIdentifiers = rcompareIdentifiers
-function rcompareIdentifiers (a, b) {
-  return compareIdentifiers(b, a)
-}
-
-exports.major = major
-function major (a, loose) {
-  return new SemVer(a, loose).major
-}
-
-exports.minor = minor
-function minor (a, loose) {
-  return new SemVer(a, loose).minor
-}
-
-exports.patch = patch
-function patch (a, loose) {
-  return new SemVer(a, loose).patch
-}
-
-exports.compare = compare
-function compare (a, b, loose) {
-  return new SemVer(a, loose).compare(new SemVer(b, loose))
-}
-
-exports.compareLoose = compareLoose
-function compareLoose (a, b) {
-  return compare(a, b, true)
-}
-
-exports.rcompare = rcompare
-function rcompare (a, b, loose) {
-  return compare(b, a, loose)
-}
-
-exports.sort = sort
-function sort (list, loose) {
-  return list.sort(function (a, b) {
-    return exports.compare(a, b, loose)
-  })
-}
-
-exports.rsort = rsort
-function rsort (list, loose) {
-  return list.sort(function (a, b) {
-    return exports.rcompare(a, b, loose)
-  })
-}
-
-exports.gt = gt
-function gt (a, b, loose) {
-  return compare(a, b, loose) > 0
-}
-
-exports.lt = lt
-function lt (a, b, loose) {
-  return compare(a, b, loose) < 0
-}
-
-exports.eq = eq
-function eq (a, b, loose) {
-  return compare(a, b, loose) === 0
-}
-
-exports.neq = neq
-function neq (a, b, loose) {
-  return compare(a, b, loose) !== 0
-}
-
-exports.gte = gte
-function gte (a, b, loose) {
-  return compare(a, b, loose) >= 0
-}
-
-exports.lte = lte
-function lte (a, b, loose) {
-  return compare(a, b, loose) <= 0
-}
-
-exports.cmp = cmp
-function cmp (a, op, b, loose) {
-  switch (op) {
-    case '===':
-      if (typeof a === 'object')
-        a = a.version
-      if (typeof b === 'object')
-        b = b.version
-      return a === b
-
-    case '!==':
-      if (typeof a === 'object')
-        a = a.version
-      if (typeof b === 'object')
-        b = b.version
-      return a !== b
-
-    case '':
-    case '=':
-    case '==':
-      return eq(a, b, loose)
-
-    case '!=':
-      return neq(a, b, loose)
-
-    case '>':
-      return gt(a, b, loose)
-
-    case '>=':
-      return gte(a, b, loose)
-
-    case '<':
-      return lt(a, b, loose)
-
-    case '<=':
-      return lte(a, b, loose)
-
-    default:
-      throw new TypeError('Invalid operator: ' + op)
-  }
-}
-
-exports.Comparator = Comparator
-function Comparator (comp, options) {
-  if (!options || typeof options !== 'object') {
-    options = {
-      loose: !!options,
-      includePrerelease: false
-    }
-  }
-
-  if (comp instanceof Comparator) {
-    if (comp.loose === !!options.loose) {
-      return comp
-    } else {
-      comp = comp.value
-    }
-  }
-
-  if (!(this instanceof Comparator)) {
-    return new Comparator(comp, options)
-  }
-
-  debug('comparator', comp, options)
-  this.options = options
-  this.loose = !!options.loose
-  this.parse(comp)
-
-  if (this.semver === ANY) {
-    this.value = ''
-  } else {
-    this.value = this.operator + this.semver.version
-  }
-
-  debug('comp', this)
-}
-
-var ANY = {}
-Comparator.prototype.parse = function (comp) {
-  var r = this.options.loose ? re[COMPARATORLOOSE] : re[COMPARATOR]
-  var m = comp.match(r)
-
-  if (!m) {
-    throw new TypeError('Invalid comparator: ' + comp)
-  }
-
-  this.operator = m[1]
-  if (this.operator === '=') {
-    this.operator = ''
-  }
-
-  // if it literally is just '>' or '' then allow anything.
-  if (!m[2]) {
-    this.semver = ANY
-  } else {
-    this.semver = new SemVer(m[2], this.options.loose)
-  }
-}
-
-Comparator.prototype.toString = function () {
-  return this.value
-}
-
-Comparator.prototype.test = function (version) {
-  debug('Comparator.test', version, this.options.loose)
-
-  if (this.semver === ANY) {
-    return true
-  }
-
-  if (typeof version === 'string') {
-    version = new SemVer(version, this.options)
-  }
-
-  return cmp(version, this.operator, this.semver, this.options)
-}
-
-Comparator.prototype.intersects = function (comp, options) {
-  if (!(comp instanceof Comparator)) {
-    throw new TypeError('a Comparator is required')
-  }
-
-  if (!options || typeof options !== 'object') {
-    options = {
-      loose: !!options,
-      includePrerelease: false
-    }
-  }
-
-  var rangeTmp
-
-  if (this.operator === '') {
-    rangeTmp = new Range(comp.value, options)
-    return satisfies(this.value, rangeTmp, options)
-  } else if (comp.operator === '') {
-    rangeTmp = new Range(this.value, options)
-    return satisfies(comp.semver, rangeTmp, options)
-  }
-
-  var sameDirectionIncreasing =
-    (this.operator === '>=' || this.operator === '>') &&
-    (comp.operator === '>=' || comp.operator === '>')
-  var sameDirectionDecreasing =
-    (this.operator === '<=' || this.operator === '<') &&
-    (comp.operator === '<=' || comp.operator === '<')
-  var sameSemVer = this.semver.version === comp.semver.version
-  var differentDirectionsInclusive =
-    (this.operator === '>=' || this.operator === '<=') &&
-    (comp.operator === '>=' || comp.operator === '<=')
-  var oppositeDirectionsLessThan =
-    cmp(this.semver, '<', comp.semver, options) &&
-    ((this.operator === '>=' || this.operator === '>') &&
-    (comp.operator === '<=' || comp.operator === '<'))
-  var oppositeDirectionsGreaterThan =
-    cmp(this.semver, '>', comp.semver, options) &&
-    ((this.operator === '<=' || this.operator === '<') &&
-    (comp.operator === '>=' || comp.operator === '>'))
-
-  return sameDirectionIncreasing || sameDirectionDecreasing ||
-    (sameSemVer && differentDirectionsInclusive) ||
-    oppositeDirectionsLessThan || oppositeDirectionsGreaterThan
-}
-
-exports.Range = Range
-function Range (range, options) {
-  if (!options || typeof options !== 'object') {
-    options = {
-      loose: !!options,
-      includePrerelease: false
-    }
-  }
-
-  if (range instanceof Range) {
-    if (range.loose === !!options.loose &&
-        range.includePrerelease === !!options.includePrerelease) {
-      return range
-    } else {
-      return new Range(range.raw, options)
-    }
-  }
-
-  if (range instanceof Comparator) {
-    return new Range(range.value, options)
-  }
-
-  if (!(this instanceof Range)) {
-    return new Range(range, options)
-  }
-
-  this.options = options
-  this.loose = !!options.loose
-  this.includePrerelease = !!options.includePrerelease
-
-  // First, split based on boolean or ||
-  this.raw = range
-  this.set = range.split(/\s*\|\|\s*/).map(function (range) {
-    return this.parseRange(range.trim())
-  }, this).filter(function (c) {
-    // throw out any that are not relevant for whatever reason
-    return c.length
-  })
-
-  if (!this.set.length) {
-    throw new TypeError('Invalid SemVer Range: ' + range)
-  }
-
-  this.format()
-}
-
-Range.prototype.format = function () {
-  this.range = this.set.map(function (comps) {
-    return comps.join(' ').trim()
-  }).join('||').trim()
-  return this.range
-}
-
-Range.prototype.toString = function () {
-  return this.range
-}
-
-Range.prototype.parseRange = function (range) {
-  var loose = this.options.loose
-  range = range.trim()
-  // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-  var hr = loose ? re[HYPHENRANGELOOSE] : re[HYPHENRANGE]
-  range = range.replace(hr, hyphenReplace)
-  debug('hyphen replace', range)
-  // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
-  range = range.replace(re[COMPARATORTRIM], comparatorTrimReplace)
-  debug('comparator trim', range, re[COMPARATORTRIM])
-
-  // `~ 1.2.3` => `~1.2.3`
-  range = range.replace(re[TILDETRIM], tildeTrimReplace)
-
-  // `^ 1.2.3` => `^1.2.3`
-  range = range.replace(re[CARETTRIM], caretTrimReplace)
-
-  // normalize spaces
-  range = range.split(/\s+/).join(' ')
-
-  // At this point, the range is completely trimmed and
-  // ready to be split into comparators.
-
-  var compRe = loose ? re[COMPARATORLOOSE] : re[COMPARATOR]
-  var set = range.split(' ').map(function (comp) {
-    return parseComparator(comp, this.options)
-  }, this).join(' ').split(/\s+/)
-  if (this.options.loose) {
-    // in loose mode, throw out any that are not valid comparators
-    set = set.filter(function (comp) {
-      return !!comp.match(compRe)
-    })
-  }
-  set = set.map(function (comp) {
-    return new Comparator(comp, this.options)
-  }, this)
-
-  return set
-}
-
-Range.prototype.intersects = function (range, options) {
-  if (!(range instanceof Range)) {
-    throw new TypeError('a Range is required')
-  }
-
-  return this.set.some(function (thisComparators) {
-    return thisComparators.every(function (thisComparator) {
-      return range.set.some(function (rangeComparators) {
-        return rangeComparators.every(function (rangeComparator) {
-          return thisComparator.intersects(rangeComparator, options)
-        })
-      })
-    })
-  })
-}
-
-// Mostly just for testing and legacy API reasons
-exports.toComparators = toComparators
-function toComparators (range, options) {
-  return new Range(range, options).set.map(function (comp) {
-    return comp.map(function (c) {
-      return c.value
-    }).join(' ').trim().split(' ')
-  })
-}
-
-// comprised of xranges, tildes, stars, and gtlt's at this point.
-// already replaced the hyphen ranges
-// turn into a set of JUST comparators.
-function parseComparator (comp, options) {
-  debug('comp', comp, options)
-  comp = replaceCarets(comp, options)
-  debug('caret', comp)
-  comp = replaceTildes(comp, options)
-  debug('tildes', comp)
-  comp = replaceXRanges(comp, options)
-  debug('xrange', comp)
-  comp = replaceStars(comp, options)
-  debug('stars', comp)
-  return comp
-}
-
-function isX (id) {
-  return !id || id.toLowerCase() === 'x' || id === '*'
-}
-
-// ~, ~> --> * (any, kinda silly)
-// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0
-// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0
-// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0
-// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0
-// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0
-function replaceTildes (comp, options) {
-  return comp.trim().split(/\s+/).map(function (comp) {
-    return replaceTilde(comp, options)
-  }).join(' ')
-}
-
-function replaceTilde (comp, options) {
-  var r = options.loose ? re[TILDELOOSE] : re[TILDE]
-  return comp.replace(r, function (_, M, m, p, pr) {
-    debug('tilde', comp, _, M, m, p, pr)
-    var ret
-
-    if (isX(M)) {
-      ret = ''
-    } else if (isX(m)) {
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0'
-    } else if (isX(p)) {
-      // ~1.2 == >=1.2.0 <1.3.0
-      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0'
-    } else if (pr) {
-      debug('replaceTilde pr', pr)
-      ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
-            ' <' + M + '.' + (+m + 1) + '.0'
-    } else {
-      // ~1.2.3 == >=1.2.3 <1.3.0
-      ret = '>=' + M + '.' + m + '.' + p +
-            ' <' + M + '.' + (+m + 1) + '.0'
-    }
-
-    debug('tilde return', ret)
-    return ret
-  })
-}
-
-// ^ --> * (any, kinda silly)
-// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0
-// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0
-// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0
-// ^1.2.3 --> >=1.2.3 <2.0.0
-// ^1.2.0 --> >=1.2.0 <2.0.0
-function replaceCarets (comp, options) {
-  return comp.trim().split(/\s+/).map(function (comp) {
-    return replaceCaret(comp, options)
-  }).join(' ')
-}
-
-function replaceCaret (comp, options) {
-  debug('caret', comp, options)
-  var r = options.loose ? re[CARETLOOSE] : re[CARET]
-  return comp.replace(r, function (_, M, m, p, pr) {
-    debug('caret', comp, _, M, m, p, pr)
-    var ret
-
-    if (isX(M)) {
-      ret = ''
-    } else if (isX(m)) {
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0'
-    } else if (isX(p)) {
-      if (M === '0') {
-        ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0'
-      } else {
-        ret = '>=' + M + '.' + m + '.0 <' + (+M + 1) + '.0.0'
-      }
-    } else if (pr) {
-      debug('replaceCaret pr', pr)
-      if (M === '0') {
-        if (m === '0') {
-          ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
-                ' <' + M + '.' + m + '.' + (+p + 1)
-        } else {
-          ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
-                ' <' + M + '.' + (+m + 1) + '.0'
-        }
-      } else {
-        ret = '>=' + M + '.' + m + '.' + p + '-' + pr +
-              ' <' + (+M + 1) + '.0.0'
-      }
-    } else {
-      debug('no pr')
-      if (M === '0') {
-        if (m === '0') {
-          ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + m + '.' + (+p + 1)
-        } else {
-          ret = '>=' + M + '.' + m + '.' + p +
-                ' <' + M + '.' + (+m + 1) + '.0'
-        }
-      } else {
-        ret = '>=' + M + '.' + m + '.' + p +
-              ' <' + (+M + 1) + '.0.0'
-      }
-    }
-
-    debug('caret return', ret)
-    return ret
-  })
-}
-
-function replaceXRanges (comp, options) {
-  debug('replaceXRanges', comp, options)
-  return comp.split(/\s+/).map(function (comp) {
-    return replaceXRange(comp, options)
-  }).join(' ')
-}
-
-function replaceXRange (comp, options) {
-  comp = comp.trim()
-  var r = options.loose ? re[XRANGELOOSE] : re[XRANGE]
-  return comp.replace(r, function (ret, gtlt, M, m, p, pr) {
-    debug('xRange', comp, ret, gtlt, M, m, p, pr)
-    var xM = isX(M)
-    var xm = xM || isX(m)
-    var xp = xm || isX(p)
-    var anyX = xp
-
-    if (gtlt === '=' && anyX) {
-      gtlt = ''
-    }
-
-    if (xM) {
-      if (gtlt === '>' || gtlt === '<') {
-        // nothing is allowed
-        ret = '<0.0.0'
-      } else {
-        // nothing is forbidden
-        ret = '*'
-      }
-    } else if (gtlt && anyX) {
-      // we know patch is an x, because we have any x at all.
-      // replace X with 0
-      if (xm) {
-        m = 0
-      }
-      p = 0
-
-      if (gtlt === '>') {
-        // >1 => >=2.0.0
-        // >1.2 => >=1.3.0
-        // >1.2.3 => >= 1.2.4
-        gtlt = '>='
-        if (xm) {
-          M = +M + 1
-          m = 0
-          p = 0
-        } else {
-          m = +m + 1
-          p = 0
-        }
-      } else if (gtlt === '<=') {
-        // <=0.7.x is actually <0.8.0, since any 0.7.x should
-        // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<'
-        if (xm) {
-          M = +M + 1
-        } else {
-          m = +m + 1
-        }
-      }
-
-      ret = gtlt + M + '.' + m + '.' + p
-    } else if (xm) {
-      ret = '>=' + M + '.0.0 <' + (+M + 1) + '.0.0'
-    } else if (xp) {
-      ret = '>=' + M + '.' + m + '.0 <' + M + '.' + (+m + 1) + '.0'
-    }
-
-    debug('xRange return', ret)
-
-    return ret
-  })
-}
-
-// Because * is AND-ed with everything else in the comparator,
-// and '' means "any version", just remove the *s entirely.
-function replaceStars (comp, options) {
-  debug('replaceStars', comp, options)
-  // Looseness is ignored here.  star is always as loose as it gets!
-  return comp.trim().replace(re[STAR], '')
-}
-
-// This function is passed to string.replace(re[HYPHENRANGE])
-// M, m, patch, prerelease, build
-// 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
-// 1.2.3 - 3.4 => >=1.2.0 <3.5.0 Any 3.4.x will do
-// 1.2 - 3.4 => >=1.2.0 <3.5.0
-function hyphenReplace ($0,
-  from, fM, fm, fp, fpr, fb,
-  to, tM, tm, tp, tpr, tb) {
-  if (isX(fM)) {
-    from = ''
-  } else if (isX(fm)) {
-    from = '>=' + fM + '.0.0'
-  } else if (isX(fp)) {
-    from = '>=' + fM + '.' + fm + '.0'
-  } else {
-    from = '>=' + from
-  }
-
-  if (isX(tM)) {
-    to = ''
-  } else if (isX(tm)) {
-    to = '<' + (+tM + 1) + '.0.0'
-  } else if (isX(tp)) {
-    to = '<' + tM + '.' + (+tm + 1) + '.0'
-  } else if (tpr) {
-    to = '<=' + tM + '.' + tm + '.' + tp + '-' + tpr
-  } else {
-    to = '<=' + to
-  }
-
-  return (from + ' ' + to).trim()
-}
-
-// if ANY of the sets match ALL of its comparators, then pass
-Range.prototype.test = function (version) {
-  if (!version) {
-    return false
-  }
-
-  if (typeof version === 'string') {
-    version = new SemVer(version, this.options)
-  }
-
-  for (var i = 0; i < this.set.length; i++) {
-    if (testSet(this.set[i], version, this.options)) {
-      return true
-    }
-  }
-  return false
-}
-
-function testSet (set, version, options) {
-  for (var i = 0; i < set.length; i++) {
-    if (!set[i].test(version)) {
-      return false
-    }
-  }
-
-  if (version.prerelease.length && !options.includePrerelease) {
-    // Find the set of versions that are allowed to have prereleases
-    // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
-    // That should allow `1.2.3-pr.2` to pass.
-    // However, `1.2.4-alpha.notready` should NOT be allowed,
-    // even though it's within the range set by the comparators.
-    for (i = 0; i < set.length; i++) {
-      debug(set[i].semver)
-      if (set[i].semver === ANY) {
-        continue
-      }
-
-      if (set[i].semver.prerelease.length > 0) {
-        var allowed = set[i].semver
-        if (allowed.major === version.major &&
-            allowed.minor === version.minor &&
-            allowed.patch === version.patch) {
-          return true
-        }
-      }
-    }
-
-    // Version has a -pre, but it's not one of the ones we like.
-    return false
-  }
-
-  return true
-}
-
-exports.satisfies = satisfies
-function satisfies (version, range, options) {
-  try {
-    range = new Range(range, options)
-  } catch (er) {
-    return false
-  }
-  return range.test(version)
-}
-
-exports.maxSatisfying = maxSatisfying
-function maxSatisfying (versions, range, options) {
-  var max = null
-  var maxSV = null
-  try {
-    var rangeObj = new Range(range, options)
-  } catch (er) {
-    return null
-  }
-  versions.forEach(function (v) {
-    if (rangeObj.test(v)) {
-      // satisfies(v, range, options)
-      if (!max || maxSV.compare(v) === -1) {
-        // compare(max, v, true)
-        max = v
-        maxSV = new SemVer(max, options)
-      }
-    }
-  })
-  return max
-}
-
-exports.minSatisfying = minSatisfying
-function minSatisfying (versions, range, options) {
-  var min = null
-  var minSV = null
-  try {
-    var rangeObj = new Range(range, options)
-  } catch (er) {
-    return null
-  }
-  versions.forEach(function (v) {
-    if (rangeObj.test(v)) {
-      // satisfies(v, range, options)
-      if (!min || minSV.compare(v) === 1) {
-        // compare(min, v, true)
-        min = v
-        minSV = new SemVer(min, options)
-      }
-    }
-  })
-  return min
-}
-
-exports.minVersion = minVersion
-function minVersion (range, loose) {
-  range = new Range(range, loose)
-
-  var minver = new SemVer('0.0.0')
-  if (range.test(minver)) {
-    return minver
-  }
-
-  minver = new SemVer('0.0.0-0')
-  if (range.test(minver)) {
-    return minver
-  }
-
-  minver = null
-  for (var i = 0; i < range.set.length; ++i) {
-    var comparators = range.set[i]
-
-    comparators.forEach(function (comparator) {
-      // Clone to avoid manipulating the comparator's semver object.
-      var compver = new SemVer(comparator.semver.version)
-      switch (comparator.operator) {
-        case '>':
-          if (compver.prerelease.length === 0) {
-            compver.patch++
-          } else {
-            compver.prerelease.push(0)
-          }
-          compver.raw = compver.format()
-          /* fallthrough */
-        case '':
-        case '>=':
-          if (!minver || gt(minver, compver)) {
-            minver = compver
-          }
-          break
-        case '<':
-        case '<=':
-          /* Ignore maximum versions */
-          break
-        /* istanbul ignore next */
-        default:
-          throw new Error('Unexpected operation: ' + comparator.operator)
-      }
-    })
-  }
-
-  if (minver && range.test(minver)) {
-    return minver
-  }
-
-  return null
-}
-
-exports.validRange = validRange
-function validRange (range, options) {
-  try {
-    // Return '*' instead of '' so that truthiness works.
-    // This will throw if it's invalid anyway
-    return new Range(range, options).range || '*'
-  } catch (er) {
-    return null
-  }
-}
-
-// Determine if version is less than all the versions possible in the range
-exports.ltr = ltr
-function ltr (version, range, options) {
-  return outside(version, range, '<', options)
-}
-
-// Determine if version is greater than all the versions possible in the range.
-exports.gtr = gtr
-function gtr (version, range, options) {
-  return outside(version, range, '>', options)
-}
-
-exports.outside = outside
-function outside (version, range, hilo, options) {
-  version = new SemVer(version, options)
-  range = new Range(range, options)
-
-  var gtfn, ltefn, ltfn, comp, ecomp
-  switch (hilo) {
-    case '>':
-      gtfn = gt
-      ltefn = lte
-      ltfn = lt
-      comp = '>'
-      ecomp = '>='
-      break
-    case '<':
-      gtfn = lt
-      ltefn = gte
-      ltfn = gt
-      comp = '<'
-      ecomp = '<='
-      break
-    default:
-      throw new TypeError('Must provide a hilo val of "<" or ">"')
-  }
-
-  // If it satisifes the range it is not outside
-  if (satisfies(version, range, options)) {
-    return false
-  }
-
-  // From now on, variable terms are as if we're in "gtr" mode.
-  // but note that everything is flipped for the "ltr" function.
-
-  for (var i = 0; i < range.set.length; ++i) {
-    var comparators = range.set[i]
-
-    var high = null
-    var low = null
-
-    comparators.forEach(function (comparator) {
-      if (comparator.semver === ANY) {
-        comparator = new Comparator('>=0.0.0')
-      }
-      high = high || comparator
-      low = low || comparator
-      if (gtfn(comparator.semver, high.semver, options)) {
-        high = comparator
-      } else if (ltfn(comparator.semver, low.semver, options)) {
-        low = comparator
-      }
-    })
-
-    // If the edge version comparator has a operator then our version
-    // isn't outside it
-    if (high.operator === comp || high.operator === ecomp) {
-      return false
-    }
-
-    // If the lowest version comparator has an operator and our version
-    // is less than it then it isn't higher than the range
-    if ((!low.operator || low.operator === comp) &&
-        ltefn(version, low.semver)) {
-      return false
-    } else if (low.operator === ecomp && ltfn(version, low.semver)) {
-      return false
-    }
-  }
-  return true
-}
-
-exports.prerelease = prerelease
-function prerelease (version, options) {
-  var parsed = parse(version, options)
-  return (parsed && parsed.prerelease.length) ? parsed.prerelease : null
-}
-
-exports.intersects = intersects
-function intersects (r1, r2, options) {
-  r1 = new Range(r1, options)
-  r2 = new Range(r2, options)
-  return r1.intersects(r2)
-}
-
-exports.coerce = coerce
-function coerce (version) {
-  if (version instanceof SemVer) {
-    return version
-  }
-
-  if (typeof version !== 'string') {
-    return null
-  }
-
-  var match = version.match(re[COERCE])
-
-  if (match == null) {
-    return null
-  }
-
-  return parse(match[1] +
-    '.' + (match[2] || '0') +
-    '.' + (match[3] || '0'))
-}
+module.exports = (...arguments_) => {
+	return [...new Set([].concat(...arguments_))];
+};
 
 
 /***/ }),
@@ -17109,479 +14879,11 @@ module.exports = diff
 
 /***/ }),
 /* 317 */,
-/* 318 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-// hoisted class for cyclic dependency
-class Range {
-  constructor (range, options) {
-    if (!options || typeof options !== 'object') {
-      options = {
-        loose: !!options,
-        includePrerelease: false
-      }
-    }
-
-    if (range instanceof Range) {
-      if (
-        range.loose === !!options.loose &&
-        range.includePrerelease === !!options.includePrerelease
-      ) {
-        return range
-      } else {
-        return new Range(range.raw, options)
-      }
-    }
-
-    if (range instanceof Comparator) {
-      // just put it in the set and return
-      this.raw = range.value
-      this.set = [[range]]
-      this.format()
-      return this
-    }
-
-    this.options = options
-    this.loose = !!options.loose
-    this.includePrerelease = !!options.includePrerelease
-
-    // First, split based on boolean or ||
-    this.raw = range
-    this.set = range
-      .split(/\s*\|\|\s*/)
-      // map the range to a 2d array of comparators
-      .map(range => this.parseRange(range.trim()))
-      // throw out any comparator lists that are empty
-      // this generally means that it was not a valid range, which is allowed
-      // in loose mode, but will still throw if the WHOLE range is invalid.
-      .filter(c => c.length)
-
-    if (!this.set.length) {
-      throw new TypeError(`Invalid SemVer Range: ${range}`)
-    }
-
-    this.format()
-  }
-
-  format () {
-    this.range = this.set
-      .map((comps) => {
-        return comps.join(' ').trim()
-      })
-      .join('||')
-      .trim()
-    return this.range
-  }
-
-  toString () {
-    return this.range
-  }
-
-  parseRange (range) {
-    const loose = this.options.loose
-    range = range.trim()
-    // `1.2.3 - 1.2.4` => `>=1.2.3 <=1.2.4`
-    const hr = loose ? re[t.HYPHENRANGELOOSE] : re[t.HYPHENRANGE]
-    range = range.replace(hr, hyphenReplace(this.options.includePrerelease))
-    debug('hyphen replace', range)
-    // `> 1.2.3 < 1.2.5` => `>1.2.3 <1.2.5`
-    range = range.replace(re[t.COMPARATORTRIM], comparatorTrimReplace)
-    debug('comparator trim', range, re[t.COMPARATORTRIM])
-
-    // `~ 1.2.3` => `~1.2.3`
-    range = range.replace(re[t.TILDETRIM], tildeTrimReplace)
-
-    // `^ 1.2.3` => `^1.2.3`
-    range = range.replace(re[t.CARETTRIM], caretTrimReplace)
-
-    // normalize spaces
-    range = range.split(/\s+/).join(' ')
-
-    // At this point, the range is completely trimmed and
-    // ready to be split into comparators.
-
-    const compRe = loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR]
-    return range
-      .split(' ')
-      .map(comp => parseComparator(comp, this.options))
-      .join(' ')
-      .split(/\s+/)
-      .map(comp => replaceGTE0(comp, this.options))
-      // in loose mode, throw out any that are not valid comparators
-      .filter(this.options.loose ? comp => !!comp.match(compRe) : () => true)
-      .map(comp => new Comparator(comp, this.options))
-  }
-
-  intersects (range, options) {
-    if (!(range instanceof Range)) {
-      throw new TypeError('a Range is required')
-    }
-
-    return this.set.some((thisComparators) => {
-      return (
-        isSatisfiable(thisComparators, options) &&
-        range.set.some((rangeComparators) => {
-          return (
-            isSatisfiable(rangeComparators, options) &&
-            thisComparators.every((thisComparator) => {
-              return rangeComparators.every((rangeComparator) => {
-                return thisComparator.intersects(rangeComparator, options)
-              })
-            })
-          )
-        })
-      )
-    })
-  }
-
-  // if ANY of the sets match ALL of its comparators, then pass
-  test (version) {
-    if (!version) {
-      return false
-    }
-
-    if (typeof version === 'string') {
-      try {
-        version = new SemVer(version, this.options)
-      } catch (er) {
-        return false
-      }
-    }
-
-    for (let i = 0; i < this.set.length; i++) {
-      if (testSet(this.set[i], version, this.options)) {
-        return true
-      }
-    }
-    return false
-  }
-}
-module.exports = Range
-
-const Comparator = __webpack_require__(517)
-const debug = __webpack_require__(940)
-const SemVer = __webpack_require__(840)
-const {
-  re,
-  t,
-  comparatorTrimReplace,
-  tildeTrimReplace,
-  caretTrimReplace
-} = __webpack_require__(398)
-
-// take a set of comparators and determine whether there
-// exists a version which can satisfy it
-const isSatisfiable = (comparators, options) => {
-  let result = true
-  const remainingComparators = comparators.slice()
-  let testComparator = remainingComparators.pop()
-
-  while (result && remainingComparators.length) {
-    result = remainingComparators.every((otherComparator) => {
-      return testComparator.intersects(otherComparator, options)
-    })
-
-    testComparator = remainingComparators.pop()
-  }
-
-  return result
-}
-
-// comprised of xranges, tildes, stars, and gtlt's at this point.
-// already replaced the hyphen ranges
-// turn into a set of JUST comparators.
-const parseComparator = (comp, options) => {
-  debug('comp', comp, options)
-  comp = replaceCarets(comp, options)
-  debug('caret', comp)
-  comp = replaceTildes(comp, options)
-  debug('tildes', comp)
-  comp = replaceXRanges(comp, options)
-  debug('xrange', comp)
-  comp = replaceStars(comp, options)
-  debug('stars', comp)
-  return comp
-}
-
-const isX = id => !id || id.toLowerCase() === 'x' || id === '*'
-
-// ~, ~> --> * (any, kinda silly)
-// ~2, ~2.x, ~2.x.x, ~>2, ~>2.x ~>2.x.x --> >=2.0.0 <3.0.0-0
-// ~2.0, ~2.0.x, ~>2.0, ~>2.0.x --> >=2.0.0 <2.1.0-0
-// ~1.2, ~1.2.x, ~>1.2, ~>1.2.x --> >=1.2.0 <1.3.0-0
-// ~1.2.3, ~>1.2.3 --> >=1.2.3 <1.3.0-0
-// ~1.2.0, ~>1.2.0 --> >=1.2.0 <1.3.0-0
-const replaceTildes = (comp, options) =>
-  comp.trim().split(/\s+/).map((comp) => {
-    return replaceTilde(comp, options)
-  }).join(' ')
-
-const replaceTilde = (comp, options) => {
-  const r = options.loose ? re[t.TILDELOOSE] : re[t.TILDE]
-  return comp.replace(r, (_, M, m, p, pr) => {
-    debug('tilde', comp, _, M, m, p, pr)
-    let ret
-
-    if (isX(M)) {
-      ret = ''
-    } else if (isX(m)) {
-      ret = `>=${M}.0.0 <${+M + 1}.0.0-0`
-    } else if (isX(p)) {
-      // ~1.2 == >=1.2.0 <1.3.0-0
-      ret = `>=${M}.${m}.0 <${M}.${+m + 1}.0-0`
-    } else if (pr) {
-      debug('replaceTilde pr', pr)
-      ret = `>=${M}.${m}.${p}-${pr
-      } <${M}.${+m + 1}.0-0`
-    } else {
-      // ~1.2.3 == >=1.2.3 <1.3.0-0
-      ret = `>=${M}.${m}.${p
-      } <${M}.${+m + 1}.0-0`
-    }
-
-    debug('tilde return', ret)
-    return ret
-  })
-}
-
-// ^ --> * (any, kinda silly)
-// ^2, ^2.x, ^2.x.x --> >=2.0.0 <3.0.0-0
-// ^2.0, ^2.0.x --> >=2.0.0 <3.0.0-0
-// ^1.2, ^1.2.x --> >=1.2.0 <2.0.0-0
-// ^1.2.3 --> >=1.2.3 <2.0.0-0
-// ^1.2.0 --> >=1.2.0 <2.0.0-0
-const replaceCarets = (comp, options) =>
-  comp.trim().split(/\s+/).map((comp) => {
-    return replaceCaret(comp, options)
-  }).join(' ')
-
-const replaceCaret = (comp, options) => {
-  debug('caret', comp, options)
-  const r = options.loose ? re[t.CARETLOOSE] : re[t.CARET]
-  const z = options.includePrerelease ? '-0' : ''
-  return comp.replace(r, (_, M, m, p, pr) => {
-    debug('caret', comp, _, M, m, p, pr)
-    let ret
-
-    if (isX(M)) {
-      ret = ''
-    } else if (isX(m)) {
-      ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`
-    } else if (isX(p)) {
-      if (M === '0') {
-        ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`
-      } else {
-        ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`
-      }
-    } else if (pr) {
-      debug('replaceCaret pr', pr)
-      if (M === '0') {
-        if (m === '0') {
-          ret = `>=${M}.${m}.${p}-${pr
-          } <${M}.${m}.${+p + 1}-0`
-        } else {
-          ret = `>=${M}.${m}.${p}-${pr
-          } <${M}.${+m + 1}.0-0`
-        }
-      } else {
-        ret = `>=${M}.${m}.${p}-${pr
-        } <${+M + 1}.0.0-0`
-      }
-    } else {
-      debug('no pr')
-      if (M === '0') {
-        if (m === '0') {
-          ret = `>=${M}.${m}.${p
-          }${z} <${M}.${m}.${+p + 1}-0`
-        } else {
-          ret = `>=${M}.${m}.${p
-          }${z} <${M}.${+m + 1}.0-0`
-        }
-      } else {
-        ret = `>=${M}.${m}.${p
-        } <${+M + 1}.0.0-0`
-      }
-    }
-
-    debug('caret return', ret)
-    return ret
-  })
-}
-
-const replaceXRanges = (comp, options) => {
-  debug('replaceXRanges', comp, options)
-  return comp.split(/\s+/).map((comp) => {
-    return replaceXRange(comp, options)
-  }).join(' ')
-}
-
-const replaceXRange = (comp, options) => {
-  comp = comp.trim()
-  const r = options.loose ? re[t.XRANGELOOSE] : re[t.XRANGE]
-  return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
-    debug('xRange', comp, ret, gtlt, M, m, p, pr)
-    const xM = isX(M)
-    const xm = xM || isX(m)
-    const xp = xm || isX(p)
-    const anyX = xp
-
-    if (gtlt === '=' && anyX) {
-      gtlt = ''
-    }
-
-    // if we're including prereleases in the match, then we need
-    // to fix this to -0, the lowest possible prerelease value
-    pr = options.includePrerelease ? '-0' : ''
-
-    if (xM) {
-      if (gtlt === '>' || gtlt === '<') {
-        // nothing is allowed
-        ret = '<0.0.0-0'
-      } else {
-        // nothing is forbidden
-        ret = '*'
-      }
-    } else if (gtlt && anyX) {
-      // we know patch is an x, because we have any x at all.
-      // replace X with 0
-      if (xm) {
-        m = 0
-      }
-      p = 0
-
-      if (gtlt === '>') {
-        // >1 => >=2.0.0
-        // >1.2 => >=1.3.0
-        gtlt = '>='
-        if (xm) {
-          M = +M + 1
-          m = 0
-          p = 0
-        } else {
-          m = +m + 1
-          p = 0
-        }
-      } else if (gtlt === '<=') {
-        // <=0.7.x is actually <0.8.0, since any 0.7.x should
-        // pass.  Similarly, <=7.x is actually <8.0.0, etc.
-        gtlt = '<'
-        if (xm) {
-          M = +M + 1
-        } else {
-          m = +m + 1
-        }
-      }
-
-      if (gtlt === '<')
-        pr = '-0'
-
-      ret = `${gtlt + M}.${m}.${p}${pr}`
-    } else if (xm) {
-      ret = `>=${M}.0.0${pr} <${+M + 1}.0.0-0`
-    } else if (xp) {
-      ret = `>=${M}.${m}.0${pr
-      } <${M}.${+m + 1}.0-0`
-    }
-
-    debug('xRange return', ret)
-
-    return ret
-  })
-}
-
-// Because * is AND-ed with everything else in the comparator,
-// and '' means "any version", just remove the *s entirely.
-const replaceStars = (comp, options) => {
-  debug('replaceStars', comp, options)
-  // Looseness is ignored here.  star is always as loose as it gets!
-  return comp.trim().replace(re[t.STAR], '')
-}
-
-const replaceGTE0 = (comp, options) => {
-  debug('replaceGTE0', comp, options)
-  return comp.trim()
-    .replace(re[options.includePrerelease ? t.GTE0PRE : t.GTE0], '')
-}
-
-// This function is passed to string.replace(re[t.HYPHENRANGE])
-// M, m, patch, prerelease, build
-// 1.2 - 3.4.5 => >=1.2.0 <=3.4.5
-// 1.2.3 - 3.4 => >=1.2.0 <3.5.0-0 Any 3.4.x will do
-// 1.2 - 3.4 => >=1.2.0 <3.5.0-0
-const hyphenReplace = incPr => ($0,
-  from, fM, fm, fp, fpr, fb,
-  to, tM, tm, tp, tpr, tb) => {
-  if (isX(fM)) {
-    from = ''
-  } else if (isX(fm)) {
-    from = `>=${fM}.0.0${incPr ? '-0' : ''}`
-  } else if (isX(fp)) {
-    from = `>=${fM}.${fm}.0${incPr ? '-0' : ''}`
-  } else if (fpr) {
-    from = `>=${from}`
-  } else {
-    from = `>=${from}${incPr ? '-0' : ''}`
-  }
-
-  if (isX(tM)) {
-    to = ''
-  } else if (isX(tm)) {
-    to = `<${+tM + 1}.0.0-0`
-  } else if (isX(tp)) {
-    to = `<${tM}.${+tm + 1}.0-0`
-  } else if (tpr) {
-    to = `<=${tM}.${tm}.${tp}-${tpr}`
-  } else if (incPr) {
-    to = `<${tM}.${tm}.${+tp + 1}-0`
-  } else {
-    to = `<=${to}`
-  }
-
-  return (`${from} ${to}`).trim()
-}
-
-const testSet = (set, version, options) => {
-  for (let i = 0; i < set.length; i++) {
-    if (!set[i].test(version)) {
-      return false
-    }
-  }
-
-  if (version.prerelease.length && !options.includePrerelease) {
-    // Find the set of versions that are allowed to have prereleases
-    // For example, ^1.2.3-pr.1 desugars to >=1.2.3-pr.1 <2.0.0
-    // That should allow `1.2.3-pr.2` to pass.
-    // However, `1.2.4-alpha.notready` should NOT be allowed,
-    // even though it's within the range set by the comparators.
-    for (let i = 0; i < set.length; i++) {
-      debug(set[i].semver)
-      if (set[i].semver === Comparator.ANY) {
-        continue
-      }
-
-      if (set[i].semver.prerelease.length > 0) {
-        const allowed = set[i].semver
-        if (allowed.major === version.major &&
-            allowed.minor === version.minor &&
-            allowed.patch === version.patch) {
-          return true
-        }
-      }
-    }
-
-    // Version has a -pre, but it's not one of the ones we like.
-    return false
-  }
-
-  return true
-}
-
-
-/***/ }),
+/* 318 */,
 /* 319 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const Range = __webpack_require__(318)
+const Range = __webpack_require__(46)
 const validRange = (range, options) => {
   try {
     // Return '*' instead of '' so that truthiness works.
@@ -17620,173 +14922,7 @@ function wordCharacter(character) {
 
 
 /***/ }),
-/* 325 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var xtend = __webpack_require__(81)
-var encode = __webpack_require__(291)
-var defaults = __webpack_require__(730)
-var escapeFactory = __webpack_require__(567)
-var identity = __webpack_require__(491)
-
-module.exports = setOptions
-
-// Map of applicable enums.
-var maps = {
-  entities: {true: true, false: true, numbers: true, escape: true},
-  bullet: {'*': true, '-': true, '+': true},
-  rule: {'-': true, _: true, '*': true},
-  listItemIndent: {tab: true, mixed: true, 1: true},
-  emphasis: {_: true, '*': true},
-  strong: {_: true, '*': true},
-  fence: {'`': true, '~': true}
-}
-
-// Expose `validate`.
-var validate = {
-  boolean: validateBoolean,
-  string: validateString,
-  number: validateNumber,
-  function: validateFunction
-}
-
-// Set options.  Does not overwrite previously set options.
-function setOptions(options) {
-  var self = this
-  var current = self.options
-  var ruleRepetition
-  var key
-
-  if (options == null) {
-    options = {}
-  } else if (typeof options === 'object') {
-    options = xtend(options)
-  } else {
-    throw new Error('Invalid value `' + options + '` for setting `options`')
-  }
-
-  for (key in defaults) {
-    validate[typeof defaults[key]](options, key, current[key], maps[key])
-  }
-
-  ruleRepetition = options.ruleRepetition
-
-  if (ruleRepetition && ruleRepetition < 3) {
-    raise(ruleRepetition, 'options.ruleRepetition')
-  }
-
-  self.encode = encodeFactory(String(options.entities))
-  self.escape = escapeFactory(options)
-
-  self.options = options
-
-  return self
-}
-
-// Validate a value to be boolean. Defaults to `def`.  Raises an exception with
-// `context[name]` when not a boolean.
-function validateBoolean(context, name, def) {
-  var value = context[name]
-
-  if (value == null) {
-    value = def
-  }
-
-  if (typeof value !== 'boolean') {
-    raise(value, 'options.' + name)
-  }
-
-  context[name] = value
-}
-
-// Validate a value to be boolean. Defaults to `def`.  Raises an exception with
-// `context[name]` when not a boolean.
-function validateNumber(context, name, def) {
-  var value = context[name]
-
-  if (value == null) {
-    value = def
-  }
-
-  if (isNaN(value)) {
-    raise(value, 'options.' + name)
-  }
-
-  context[name] = value
-}
-
-// Validate a value to be in `map`. Defaults to `def`.  Raises an exception
-// with `context[name]` when not in `map`.
-function validateString(context, name, def, map) {
-  var value = context[name]
-
-  if (value == null) {
-    value = def
-  }
-
-  value = String(value)
-
-  if (!(value in map)) {
-    raise(value, 'options.' + name)
-  }
-
-  context[name] = value
-}
-
-// Validate a value to be function. Defaults to `def`.  Raises an exception
-// with `context[name]` when not a function.
-function validateFunction(context, name, def) {
-  var value = context[name]
-
-  if (value == null) {
-    value = def
-  }
-
-  if (typeof value !== 'function') {
-    raise(value, 'options.' + name)
-  }
-
-  context[name] = value
-}
-
-// Factory to encode HTML entities.  Creates a no-operation function when
-// `type` is `'false'`, a function which encodes using named references when
-// `type` is `'true'`, and a function which encodes using numbered references
-// when `type` is `'numbers'`.
-function encodeFactory(type) {
-  var options = {}
-
-  if (type === 'false') {
-    return identity
-  }
-
-  if (type === 'true') {
-    options.useNamedReferences = true
-  }
-
-  if (type === 'escape') {
-    options.escapeOnly = true
-    options.useNamedReferences = true
-  }
-
-  return wrapped
-
-  // Encode HTML entities using the bound options.
-  function wrapped(value) {
-    return encode(value, options)
-  }
-}
-
-// Throw an exception with in its `message` `value` and `name`.
-function raise(value, name) {
-  throw new Error('Invalid value `' + value + '` for setting `' + name + '`')
-}
-
-
-/***/ }),
+/* 325 */,
 /* 326 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -17915,92 +15051,55 @@ function strong(eat, value, silent) {
 
 
 /***/ }),
-/* 328 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-const cp = __webpack_require__(129);
-const parse = __webpack_require__(604);
-const enoent = __webpack_require__(884);
-
-function spawn(command, args, options) {
-    // Parse the arguments
-    const parsed = parse(command, args, options);
-
-    // Spawn the child process
-    const spawned = cp.spawn(parsed.command, parsed.args, parsed.options);
-
-    // Hook into child process "exit" event to emit an error if the command
-    // does not exists, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
-    enoent.hookChildProcess(spawned, parsed);
-
-    return spawned;
-}
-
-function spawnSync(command, args, options) {
-    // Parse the arguments
-    const parsed = parse(command, args, options);
-
-    // Spawn the child process
-    const result = cp.spawnSync(parsed.command, parsed.args, parsed.options);
-
-    // Analyze if the command does not exist, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
-    result.error = result.error || enoent.verifyENOENTSync(result.status, parsed);
-
-    return result;
-}
-
-module.exports = spawn;
-module.exports.spawn = spawn;
-module.exports.sync = spawnSync;
-
-module.exports._parse = parse;
-module.exports._enoent = enoent;
-
-
-/***/ }),
+/* 328 */,
 /* 329 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 const path = __webpack_require__(622);
-const pathKey = __webpack_require__(697);
+const pathKey = __webpack_require__(60);
 
-module.exports = opts => {
-	opts = Object.assign({
+const npmRunPath = options => {
+	options = {
 		cwd: process.cwd(),
-		path: process.env[pathKey()]
-	}, opts);
+		path: process.env[pathKey()],
+		execPath: process.execPath,
+		...options
+	};
 
-	let prev;
-	let pth = path.resolve(opts.cwd);
-	const ret = [];
+	let previous;
+	let cwdPath = path.resolve(options.cwd);
+	const result = [];
 
-	while (prev !== pth) {
-		ret.push(path.join(pth, 'node_modules/.bin'));
-		prev = pth;
-		pth = path.resolve(pth, '..');
+	while (previous !== cwdPath) {
+		result.push(path.join(cwdPath, 'node_modules/.bin'));
+		previous = cwdPath;
+		cwdPath = path.resolve(cwdPath, '..');
 	}
 
-	// ensure the running `node` binary is used
-	ret.push(path.dirname(process.execPath));
+	// Ensure the running `node` binary is used
+	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
+	result.push(execPathDir);
 
-	return ret.concat(opts.path).join(path.delimiter);
+	return result.concat(options.path).join(path.delimiter);
 };
 
-module.exports.env = opts => {
-	opts = Object.assign({
-		env: process.env
-	}, opts);
+module.exports = npmRunPath;
+// TODO: Remove this for the next major release
+module.exports.default = npmRunPath;
 
-	const env = Object.assign({}, opts.env);
+module.exports.env = options => {
+	options = {
+		env: process.env,
+		...options
+	};
+
+	const env = {...options.env};
 	const path = pathKey({env});
 
-	opts.path = env[path];
-	env[path] = module.exports(opts);
+	options.path = env[path];
+	env[path] = module.exports(options);
 
 	return env;
 };
@@ -18017,6 +15116,7 @@ module.exports.env = opts => {
 const { readPkgFile, writePkgFile } = __webpack_require__(916);
 const { compareBumps } = __webpack_require__(749);
 const semver = __webpack_require__(534);
+const cloneDeep = __webpack_require__(607);
 const path = __webpack_require__(622);
 
 module.exports.apply = function* ({
@@ -18125,7 +15225,7 @@ module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
         } else {
           // if the parent doesn't have a release
           // add one to adopt the next version of it's child
-          changes[pkg] = { ...changes[main] };
+          changes[pkg] = cloneDeep(changes[main]);
           if (changes[pkg].changes) {
             changes[pkg].changes.forEach((parentChange) => {
               parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
@@ -18252,52 +15352,7 @@ const incWithPartials = (version, bumpType) => {
 
 
 /***/ }),
-/* 335 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-const cp = __webpack_require__(129);
-const parse = __webpack_require__(547);
-const enoent = __webpack_require__(102);
-
-function spawn(command, args, options) {
-    // Parse the arguments
-    const parsed = parse(command, args, options);
-
-    // Spawn the child process
-    const spawned = cp.spawn(parsed.command, parsed.args, parsed.options);
-
-    // Hook into child process "exit" event to emit an error if the command
-    // does not exists, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
-    enoent.hookChildProcess(spawned, parsed);
-
-    return spawned;
-}
-
-function spawnSync(command, args, options) {
-    // Parse the arguments
-    const parsed = parse(command, args, options);
-
-    // Spawn the child process
-    const result = cp.spawnSync(parsed.command, parsed.args, parsed.options);
-
-    // Analyze if the command does not exist, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
-    result.error = result.error || enoent.verifyENOENTSync(result.status, parsed);
-
-    return result;
-}
-
-module.exports = spawn;
-module.exports.spawn = spawn;
-module.exports.sync = spawnSync;
-
-module.exports._parse = parse;
-module.exports._enoent = enoent;
-
-
-/***/ }),
+/* 335 */,
 /* 336 */,
 /* 337 */
 /***/ (function(module) {
@@ -18321,10 +15376,10 @@ function list(node) {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const debug = __webpack_require__(434)
-const { MAX_LENGTH, MAX_SAFE_INTEGER } = __webpack_require__(656)
+const { MAX_LENGTH, MAX_SAFE_INTEGER } = __webpack_require__(511)
 const { re, t } = __webpack_require__(275)
 
-const { compareIdentifiers } = __webpack_require__(838)
+const { compareIdentifiers } = __webpack_require__(758)
 class SemVer {
   constructor (version, options) {
     if (!options || typeof options !== 'object') {
@@ -18810,53 +15865,54 @@ module.exports.defaults = defaultOptions;
 
 "use strict";
 
-const {PassThrough} = __webpack_require__(413);
+const {PassThrough: PassThroughStream} = __webpack_require__(413);
 
 module.exports = options => {
-	options = Object.assign({}, options);
+	options = {...options};
 
 	const {array} = options;
 	let {encoding} = options;
-	const buffer = encoding === 'buffer';
+	const isBuffer = encoding === 'buffer';
 	let objectMode = false;
 
 	if (array) {
-		objectMode = !(encoding || buffer);
+		objectMode = !(encoding || isBuffer);
 	} else {
 		encoding = encoding || 'utf8';
 	}
 
-	if (buffer) {
+	if (isBuffer) {
 		encoding = null;
 	}
 
-	let len = 0;
-	const ret = [];
-	const stream = new PassThrough({objectMode});
+	const stream = new PassThroughStream({objectMode});
 
 	if (encoding) {
 		stream.setEncoding(encoding);
 	}
 
+	let length = 0;
+	const chunks = [];
+
 	stream.on('data', chunk => {
-		ret.push(chunk);
+		chunks.push(chunk);
 
 		if (objectMode) {
-			len = ret.length;
+			length = chunks.length;
 		} else {
-			len += chunk.length;
+			length += chunk.length;
 		}
 	});
 
 	stream.getBufferedValue = () => {
 		if (array) {
-			return ret;
+			return chunks;
 		}
 
-		return buffer ? Buffer.concat(ret, len) : ret.join('');
+		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
 	};
 
-	stream.getBufferedLength = () => len;
+	stream.getBufferedLength = () => length;
 
 	return stream;
 };
@@ -18943,7 +15999,7 @@ module.exports = require("assert");
 
 
 const stringify = __webpack_require__(450);
-const compile = __webpack_require__(76);
+const compile = __webpack_require__(656);
 const expand = __webpack_require__(61);
 const parse = __webpack_require__(627);
 
@@ -19123,7 +16179,7 @@ exports.isCommandBuilderCallback = exports.isCommandBuilderDefinition = exports.
 const common_types_1 = __webpack_require__(45);
 const is_promise_1 = __webpack_require__(91);
 const middleware_1 = __webpack_require__(233);
-const parse_command_1 = __webpack_require__(788);
+const parse_command_1 = __webpack_require__(398);
 const path = __webpack_require__(622);
 const util_1 = __webpack_require__(669);
 const yargs_1 = __webpack_require__(834);
@@ -20243,9 +17299,8 @@ function paragraph(eat, value, silent) {
 
 const { spawn, timeout } = __webpack_require__(700);
 const { once, on } = __webpack_require__(910);
-const execa = __webpack_require__(949);
+const execa = __webpack_require__(962);
 const path = __webpack_require__(622);
-const { cpuUsage } = __webpack_require__(765);
 
 const attemptCommands = function* ({
   cwd,
@@ -20265,7 +17320,7 @@ const attemptCommands = function* ({
         : pkg[`${commandPrefix}command`];
     let stdout = "";
     for (let pubCommand of pubCommands) {
-      const runningCommand = {};
+      const runningCommand = { runFromRoot: pubCommand.runFromRoot };
       if (
         typeof pubCommand === "object" &&
         pubCommand.dryRunCommand === false
@@ -20277,10 +17332,11 @@ const attemptCommands = function* ({
         if (pubCommand.dryRunCommand === true) {
           runningCommand.command = pubCommand.command;
           runningCommand.shouldRunCommand = true;
+        } else if (typeof pubCommand.dryRunCommand === "string" && dryRun) {
+          runningCommand.command = pubCommand.dryRunCommand;
+          runningCommand.shouldRunCommand = true;
         } else {
-          runningCommand.command = !pubCommand.dryRunCommand
-            ? pubCommand.command
-            : pubCommand.dryRunCommand;
+          runningCommand.command = pubCommand.command;
           runningCommand.shouldRunCommand = !dryRun;
         }
       } else {
@@ -20293,8 +17349,10 @@ const attemptCommands = function* ({
           command: runningCommand.command,
           cwd,
           pkg: pkg.pkg,
-          pkgPath: pkg.path,
-          log: `${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand.command}`,
+          pkgPath: runningCommand.runFromRoot === true ? "" : pkg.path,
+          log: `${pkg.pkg} [${commandPrefix}${command}${
+            runningCommand.runFromRoot === true ? " run from the cwd" : ""
+          }]: ${runningCommand.command}`,
         });
 
         if (pubCommand.pipe) {
@@ -20302,7 +17360,9 @@ const attemptCommands = function* ({
         }
       } else {
         console.log(
-          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}]: ${runningCommand.command}`
+          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}${
+            runningCommand.runFromRoot === true ? " run from the cwd" : ""
+          }]: ${runningCommand.command}`
         );
       }
     }
@@ -20369,10 +17429,10 @@ const runCommand = function* ({
   }
 };
 
-const raceTime = function (
-  t = 120000,
-  msg = `timeout out waiting ${t / 1000}s for command`
-) {
+const raceTime = function ({
+  t = 1200000,
+  msg = `timeout out waiting ${t / 1000}s for command`,
+}) {
   return spawn(function* () {
     yield timeout(t);
     throw new Error(msg);
@@ -20388,121 +17448,7 @@ module.exports = {
 
 
 /***/ }),
-/* 379 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-/*eslint-disable max-len*/
-
-var common        = __webpack_require__(422);
-var YAMLException = __webpack_require__(848);
-var Type          = __webpack_require__(773);
-
-
-function compileList(schema, name, result) {
-  var exclude = [];
-
-  schema.include.forEach(function (includedSchema) {
-    result = compileList(includedSchema, name, result);
-  });
-
-  schema[name].forEach(function (currentType) {
-    result.forEach(function (previousType, previousIndex) {
-      if (previousType.tag === currentType.tag && previousType.kind === currentType.kind) {
-        exclude.push(previousIndex);
-      }
-    });
-
-    result.push(currentType);
-  });
-
-  return result.filter(function (type, index) {
-    return exclude.indexOf(index) === -1;
-  });
-}
-
-
-function compileMap(/* lists... */) {
-  var result = {
-        scalar: {},
-        sequence: {},
-        mapping: {},
-        fallback: {}
-      }, index, length;
-
-  function collectType(type) {
-    result[type.kind][type.tag] = result['fallback'][type.tag] = type;
-  }
-
-  for (index = 0, length = arguments.length; index < length; index += 1) {
-    arguments[index].forEach(collectType);
-  }
-  return result;
-}
-
-
-function Schema(definition) {
-  this.include  = definition.include  || [];
-  this.implicit = definition.implicit || [];
-  this.explicit = definition.explicit || [];
-
-  this.implicit.forEach(function (type) {
-    if (type.loadKind && type.loadKind !== 'scalar') {
-      throw new YAMLException('There is a non-scalar type in the implicit list of a schema. Implicit resolving of such types is not supported.');
-    }
-  });
-
-  this.compiledImplicit = compileList(this, 'implicit', []);
-  this.compiledExplicit = compileList(this, 'explicit', []);
-  this.compiledTypeMap  = compileMap(this.compiledImplicit, this.compiledExplicit);
-}
-
-
-Schema.DEFAULT = null;
-
-
-Schema.create = function createSchema() {
-  var schemas, types;
-
-  switch (arguments.length) {
-    case 1:
-      schemas = Schema.DEFAULT;
-      types = arguments[0];
-      break;
-
-    case 2:
-      schemas = arguments[0];
-      types = arguments[1];
-      break;
-
-    default:
-      throw new YAMLException('Wrong number of arguments for Schema.create function');
-  }
-
-  schemas = common.toArray(schemas);
-  types = common.toArray(types);
-
-  if (!schemas.every(function (schema) { return schema instanceof Schema; })) {
-    throw new YAMLException('Specified list of super schemas (or a single Schema object) contains a non-Schema object.');
-  }
-
-  if (!types.every(function (type) { return type instanceof Type; })) {
-    throw new YAMLException('Specified list of YAML types (or a single Type object) contains a non-Type object.');
-  }
-
-  return new Schema({
-    include: schemas,
-    explicit: types
-  });
-};
-
-
-module.exports = Schema;
-
-
-/***/ }),
+/* 379 */,
 /* 380 */
 /***/ (function(module) {
 
@@ -20636,67 +17582,86 @@ exports.getProcessArgvBin = getProcessArgvBin;
 
 /***/ }),
 /* 382 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
 "use strict";
 
 
-const path = __webpack_require__(622);
-const which = __webpack_require__(505);
-const getPathKey = __webpack_require__(164);
+module.exports = one
 
-function resolveCommandAttempt(parsed, withoutPathExt) {
-    const env = parsed.options.env || process.env;
-    const cwd = process.cwd();
-    const hasCustomCwd = parsed.options.cwd != null;
-    // Worker threads do not have process.chdir()
-    const shouldSwitchCwd = hasCustomCwd && process.chdir !== undefined && !process.chdir.disabled;
+function one(node, parent) {
+  var self = this
+  var visitors = self.visitors
 
-    // If a custom `cwd` was specified, we need to change the process cwd
-    // because `which` will do stat calls but does not support a custom cwd
-    if (shouldSwitchCwd) {
-        try {
-            process.chdir(parsed.options.cwd);
-        } catch (err) {
-            /* Empty */
-        }
-    }
+  // Fail on unknown nodes.
+  if (typeof visitors[node.type] !== 'function') {
+    self.file.fail(
+      new Error(
+        'Missing compiler for node of type `' + node.type + '`: `' + node + '`'
+      ),
+      node
+    )
+  }
 
-    let resolved;
-
-    try {
-        resolved = which.sync(parsed.command, {
-            path: env[getPathKey({ env })],
-            pathExt: withoutPathExt ? path.delimiter : undefined,
-        });
-    } catch (e) {
-        /* Empty */
-    } finally {
-        if (shouldSwitchCwd) {
-            process.chdir(cwd);
-        }
-    }
-
-    // If we successfully resolved, ensure that an absolute path is returned
-    // Note that when a custom `cwd` was used, we need to resolve to an absolute path based on it
-    if (resolved) {
-        resolved = path.resolve(hasCustomCwd ? parsed.options.cwd : '', resolved);
-    }
-
-    return resolved;
+  return visitors[node.type].call(self, node, parent)
 }
-
-function resolveCommand(parsed) {
-    return resolveCommandAttempt(parsed) || resolveCommandAttempt(parsed, true);
-}
-
-module.exports = resolveCommand;
 
 
 /***/ }),
 /* 383 */,
 /* 384 */,
-/* 385 */,
+/* 385 */
+/***/ (function(module) {
+
+"use strict";
+
+
+// See http://www.robvanderwoude.com/escapechars.php
+const metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
+
+function escapeCommand(arg) {
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    return arg;
+}
+
+function escapeArgument(arg, doubleEscapeMetaChars) {
+    // Convert to string
+    arg = `${arg}`;
+
+    // Algorithm below is based on https://qntm.org/cmd
+
+    // Sequence of backslashes followed by a double quote:
+    // double up all the backslashes and escape the double quote
+    arg = arg.replace(/(\\*)"/g, '$1$1\\"');
+
+    // Sequence of backslashes followed by the end of the string
+    // (which will become a double quote later):
+    // double up all the backslashes
+    arg = arg.replace(/(\\*)$/, '$1$1');
+
+    // All other backslashes occur literally
+
+    // Quote the whole thing:
+    arg = `"${arg}"`;
+
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    // Double escape meta chars if necessary
+    if (doubleEscapeMetaChars) {
+        arg = arg.replace(metaCharsRegExp, '^$1');
+    }
+
+    return arg;
+}
+
+module.exports.command = escapeCommand;
+module.exports.argument = escapeArgument;
+
+
+/***/ }),
 /* 386 */,
 /* 387 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -21664,190 +18629,45 @@ function wrap(fn, callback) {
 
 /***/ }),
 /* 398 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
-const { MAX_SAFE_COMPONENT_LENGTH } = __webpack_require__(94)
-const debug = __webpack_require__(940)
-exports = module.exports = {}
+"use strict";
 
-// The actual regexps go on exports.re
-const re = exports.re = []
-const src = exports.src = []
-const t = exports.t = {}
-let R = 0
-
-const createToken = (name, value, isGlobal) => {
-  const index = R++
-  debug(index, value)
-  t[name] = index
-  src[index] = value
-  re[index] = new RegExp(value, isGlobal ? 'g' : undefined)
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.parseCommand = void 0;
+function parseCommand(cmd) {
+    const extraSpacesStrippedCommand = cmd.replace(/\s{2,}/g, ' ');
+    const splitCommand = extraSpacesStrippedCommand.split(/\s+(?![^[]*]|[^<]*>)/);
+    const bregex = /\.*[\][<>]/g;
+    const firstCommand = splitCommand.shift();
+    if (!firstCommand)
+        throw new Error(`No command found in: ${cmd}`);
+    const parsedCommand = {
+        cmd: firstCommand.replace(bregex, ''),
+        demanded: [],
+        optional: []
+    };
+    splitCommand.forEach((cmd, i) => {
+        let variadic = false;
+        cmd = cmd.replace(/\s/g, '');
+        if (/\.+[\]>]/.test(cmd) && i === splitCommand.length - 1)
+            variadic = true;
+        if (/^\[/.test(cmd)) {
+            parsedCommand.optional.push({
+                cmd: cmd.replace(bregex, '').split('|'),
+                variadic
+            });
+        }
+        else {
+            parsedCommand.demanded.push({
+                cmd: cmd.replace(bregex, '').split('|'),
+                variadic
+            });
+        }
+    });
+    return parsedCommand;
 }
-
-// The following Regular Expressions can be used for tokenizing,
-// validating, and parsing SemVer version strings.
-
-// ## Numeric Identifier
-// A single `0`, or a non-zero digit followed by zero or more digits.
-
-createToken('NUMERICIDENTIFIER', '0|[1-9]\\d*')
-createToken('NUMERICIDENTIFIERLOOSE', '[0-9]+')
-
-// ## Non-numeric Identifier
-// Zero or more digits, followed by a letter or hyphen, and then zero or
-// more letters, digits, or hyphens.
-
-createToken('NONNUMERICIDENTIFIER', '\\d*[a-zA-Z-][a-zA-Z0-9-]*')
-
-// ## Main Version
-// Three dot-separated numeric identifiers.
-
-createToken('MAINVERSION', `(${src[t.NUMERICIDENTIFIER]})\\.` +
-                   `(${src[t.NUMERICIDENTIFIER]})\\.` +
-                   `(${src[t.NUMERICIDENTIFIER]})`)
-
-createToken('MAINVERSIONLOOSE', `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
-                        `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
-                        `(${src[t.NUMERICIDENTIFIERLOOSE]})`)
-
-// ## Pre-release Version Identifier
-// A numeric identifier, or a non-numeric identifier.
-
-createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NUMERICIDENTIFIER]
-}|${src[t.NONNUMERICIDENTIFIER]})`)
-
-createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NUMERICIDENTIFIERLOOSE]
-}|${src[t.NONNUMERICIDENTIFIER]})`)
-
-// ## Pre-release Version
-// Hyphen, followed by one or more dot-separated pre-release version
-// identifiers.
-
-createToken('PRERELEASE', `(?:-(${src[t.PRERELEASEIDENTIFIER]
-}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`)
-
-createToken('PRERELEASELOOSE', `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]
-}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*))`)
-
-// ## Build Metadata Identifier
-// Any combination of digits, letters, or hyphens.
-
-createToken('BUILDIDENTIFIER', '[0-9A-Za-z-]+')
-
-// ## Build Metadata
-// Plus sign, followed by one or more period-separated build metadata
-// identifiers.
-
-createToken('BUILD', `(?:\\+(${src[t.BUILDIDENTIFIER]
-}(?:\\.${src[t.BUILDIDENTIFIER]})*))`)
-
-// ## Full Version String
-// A main version, followed optionally by a pre-release version and
-// build metadata.
-
-// Note that the only major, minor, patch, and pre-release sections of
-// the version string are capturing groups.  The build metadata is not a
-// capturing group, because it should not ever be used in version
-// comparison.
-
-createToken('FULLPLAIN', `v?${src[t.MAINVERSION]
-}${src[t.PRERELEASE]}?${
-  src[t.BUILD]}?`)
-
-createToken('FULL', `^${src[t.FULLPLAIN]}$`)
-
-// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
-// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
-// common in the npm registry.
-createToken('LOOSEPLAIN', `[v=\\s]*${src[t.MAINVERSIONLOOSE]
-}${src[t.PRERELEASELOOSE]}?${
-  src[t.BUILD]}?`)
-
-createToken('LOOSE', `^${src[t.LOOSEPLAIN]}$`)
-
-createToken('GTLT', '((?:<|>)?=?)')
-
-// Something like "2.*" or "1.2.x".
-// Note that "x.x" is a valid xRange identifer, meaning "any version"
-// Only the first item is strictly required.
-createToken('XRANGEIDENTIFIERLOOSE', `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`)
-createToken('XRANGEIDENTIFIER', `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`)
-
-createToken('XRANGEPLAIN', `[v=\\s]*(${src[t.XRANGEIDENTIFIER]})` +
-                   `(?:\\.(${src[t.XRANGEIDENTIFIER]})` +
-                   `(?:\\.(${src[t.XRANGEIDENTIFIER]})` +
-                   `(?:${src[t.PRERELEASE]})?${
-                     src[t.BUILD]}?` +
-                   `)?)?`)
-
-createToken('XRANGEPLAINLOOSE', `[v=\\s]*(${src[t.XRANGEIDENTIFIERLOOSE]})` +
-                        `(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})` +
-                        `(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})` +
-                        `(?:${src[t.PRERELEASELOOSE]})?${
-                          src[t.BUILD]}?` +
-                        `)?)?`)
-
-createToken('XRANGE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAIN]}$`)
-createToken('XRANGELOOSE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`)
-
-// Coercion.
-// Extract anything that could conceivably be a part of a valid semver
-createToken('COERCE', `${'(^|[^\\d])' +
-              '(\\d{1,'}${MAX_SAFE_COMPONENT_LENGTH}})` +
-              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
-              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
-              `(?:$|[^\\d])`)
-createToken('COERCERTL', src[t.COERCE], true)
-
-// Tilde ranges.
-// Meaning is "reasonably at or greater than"
-createToken('LONETILDE', '(?:~>?)')
-
-createToken('TILDETRIM', `(\\s*)${src[t.LONETILDE]}\\s+`, true)
-exports.tildeTrimReplace = '$1~'
-
-createToken('TILDE', `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`)
-createToken('TILDELOOSE', `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`)
-
-// Caret ranges.
-// Meaning is "at least and backwards compatible with"
-createToken('LONECARET', '(?:\\^)')
-
-createToken('CARETTRIM', `(\\s*)${src[t.LONECARET]}\\s+`, true)
-exports.caretTrimReplace = '$1^'
-
-createToken('CARET', `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`)
-createToken('CARETLOOSE', `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`)
-
-// A simple gt/lt/eq thing, or just "" to indicate "any version"
-createToken('COMPARATORLOOSE', `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`)
-createToken('COMPARATOR', `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`)
-
-// An expression to strip any whitespace between the gtlt and the thing
-// it modifies, so that `> 1.2.3` ==> `>1.2.3`
-createToken('COMPARATORTRIM', `(\\s*)${src[t.GTLT]
-}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true)
-exports.comparatorTrimReplace = '$1$2$3'
-
-// Something like `1.2.3 - 1.2.4`
-// Note that these all use the loose form, because they'll be
-// checked against either the strict or loose comparator form
-// later.
-createToken('HYPHENRANGE', `^\\s*(${src[t.XRANGEPLAIN]})` +
-                   `\\s+-\\s+` +
-                   `(${src[t.XRANGEPLAIN]})` +
-                   `\\s*$`)
-
-createToken('HYPHENRANGELOOSE', `^\\s*(${src[t.XRANGEPLAINLOOSE]})` +
-                        `\\s+-\\s+` +
-                        `(${src[t.XRANGEPLAINLOOSE]})` +
-                        `\\s*$`)
-
-// Star ranges basically just allow anything at all.
-createToken('STAR', '(<|>)?=?\\s*\\*')
-// >=0.0.0 is like a star
-createToken('GTE0', '^\\s*>=\\s*0\.0\.0\\s*$')
-createToken('GTE0PRE', '^\\s*>=\\s*0\.0\.0-0\\s*$')
+exports.parseCommand = parseCommand;
 
 
 /***/ }),
@@ -21917,53 +18737,388 @@ exports.default = ReaderStream;
 /* 401 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+/**
+ * Lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+var reInterpolate = __webpack_require__(125);
 
-const os = __webpack_require__(87);
-const macosRelease = __webpack_require__(409);
-const winRelease = __webpack_require__(85);
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0;
 
-const osName = (platform, release) => {
-	if (!platform && release) {
-		throw new Error('You can\'t specify a `release` without specifying `platform`');
-	}
+/** `Object#toString` result references. */
+var nullTag = '[object Null]',
+    symbolTag = '[object Symbol]',
+    undefinedTag = '[object Undefined]';
 
-	platform = platform || os.platform();
+/** Used to match HTML entities and HTML characters. */
+var reUnescapedHtml = /[&<>"']/g,
+    reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
 
-	let id;
+/** Used to match template delimiters. */
+var reEscape = /<%-([\s\S]+?)%>/g,
+    reEvaluate = /<%([\s\S]+?)%>/g;
 
-	if (platform === 'darwin') {
-		if (!release && os.platform() === 'darwin') {
-			release = os.release();
-		}
-
-		const prefix = release ? (Number(release.split('.')[0]) > 15 ? 'macOS' : 'OS X') : 'macOS';
-		id = release ? macosRelease(release).name : '';
-		return prefix + (id ? ' ' + id : '');
-	}
-
-	if (platform === 'linux') {
-		if (!release && os.platform() === 'linux') {
-			release = os.release();
-		}
-
-		id = release ? release.replace(/^(\d+\.\d+).*/, '$1') : '';
-		return 'Linux' + (id ? ' ' + id : '');
-	}
-
-	if (platform === 'win32') {
-		if (!release && os.platform() === 'win32') {
-			release = os.release();
-		}
-
-		id = release ? winRelease(release) : '';
-		return 'Windows' + (id ? ' ' + id : '');
-	}
-
-	return platform;
+/** Used to map characters to HTML entities. */
+var htmlEscapes = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
 };
 
-module.exports = osName;
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+/**
+ * A specialized version of `_.map` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
+ */
+function arrayMap(array, iteratee) {
+  var index = -1,
+      length = array == null ? 0 : array.length,
+      result = Array(length);
+
+  while (++index < length) {
+    result[index] = iteratee(array[index], index, array);
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.propertyOf` without support for deep paths.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Function} Returns the new accessor function.
+ */
+function basePropertyOf(object) {
+  return function(key) {
+    return object == null ? undefined : object[key];
+  };
+}
+
+/**
+ * Used by `_.escape` to convert characters to HTML entities.
+ *
+ * @private
+ * @param {string} chr The matched character to escape.
+ * @returns {string} Returns the escaped character.
+ */
+var escapeHtmlChar = basePropertyOf(htmlEscapes);
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var nativeObjectToString = objectProto.toString;
+
+/** Built-in value references. */
+var Symbol = root.Symbol,
+    symToStringTag = Symbol ? Symbol.toStringTag : undefined;
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolToString = symbolProto ? symbolProto.toString : undefined;
+
+/**
+ * By default, the template delimiters used by lodash are like those in
+ * embedded Ruby (ERB) as well as ES2015 template strings. Change the
+ * following template settings to use alternative delimiters.
+ *
+ * @static
+ * @memberOf _
+ * @type {Object}
+ */
+var templateSettings = {
+
+  /**
+   * Used to detect `data` property values to be HTML-escaped.
+   *
+   * @memberOf _.templateSettings
+   * @type {RegExp}
+   */
+  'escape': reEscape,
+
+  /**
+   * Used to detect code to be evaluated.
+   *
+   * @memberOf _.templateSettings
+   * @type {RegExp}
+   */
+  'evaluate': reEvaluate,
+
+  /**
+   * Used to detect `data` property values to inject.
+   *
+   * @memberOf _.templateSettings
+   * @type {RegExp}
+   */
+  'interpolate': reInterpolate,
+
+  /**
+   * Used to reference the data object in the template text.
+   *
+   * @memberOf _.templateSettings
+   * @type {string}
+   */
+  'variable': '',
+
+  /**
+   * Used to import variables into the compiled template.
+   *
+   * @memberOf _.templateSettings
+   * @type {Object}
+   */
+  'imports': {
+
+    /**
+     * A reference to the `lodash` function.
+     *
+     * @memberOf _.templateSettings.imports
+     * @type {Function}
+     */
+    '_': { 'escape': escape }
+  }
+};
+
+/**
+ * The base implementation of `getTag` without fallbacks for buggy environments.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the `toStringTag`.
+ */
+function baseGetTag(value) {
+  if (value == null) {
+    return value === undefined ? undefinedTag : nullTag;
+  }
+  return (symToStringTag && symToStringTag in Object(value))
+    ? getRawTag(value)
+    : objectToString(value);
+}
+
+/**
+ * The base implementation of `_.toString` which doesn't convert nullish
+ * values to empty strings.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+function baseToString(value) {
+  // Exit early for strings to avoid a performance hit in some environments.
+  if (typeof value == 'string') {
+    return value;
+  }
+  if (isArray(value)) {
+    // Recursively convert values (susceptible to call stack limits).
+    return arrayMap(value, baseToString) + '';
+  }
+  if (isSymbol(value)) {
+    return symbolToString ? symbolToString.call(value) : '';
+  }
+  var result = (value + '');
+  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
+}
+
+/**
+ * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the raw `toStringTag`.
+ */
+function getRawTag(value) {
+  var isOwn = hasOwnProperty.call(value, symToStringTag),
+      tag = value[symToStringTag];
+
+  try {
+    value[symToStringTag] = undefined;
+    var unmasked = true;
+  } catch (e) {}
+
+  var result = nativeObjectToString.call(value);
+  if (unmasked) {
+    if (isOwn) {
+      value[symToStringTag] = tag;
+    } else {
+      delete value[symToStringTag];
+    }
+  }
+  return result;
+}
+
+/**
+ * Converts `value` to a string using `Object.prototype.toString`.
+ *
+ * @private
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ */
+function objectToString(value) {
+  return nativeObjectToString.call(value);
+}
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return value != null && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && baseGetTag(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a string. An empty string is returned for `null`
+ * and `undefined` values. The sign of `-0` is preserved.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {string} Returns the converted string.
+ * @example
+ *
+ * _.toString(null);
+ * // => ''
+ *
+ * _.toString(-0);
+ * // => '-0'
+ *
+ * _.toString([1, 2, 3]);
+ * // => '1,2,3'
+ */
+function toString(value) {
+  return value == null ? '' : baseToString(value);
+}
+
+/**
+ * Converts the characters "&", "<", ">", '"', and "'" in `string` to their
+ * corresponding HTML entities.
+ *
+ * **Note:** No other characters are escaped. To escape additional
+ * characters use a third-party library like [_he_](https://mths.be/he).
+ *
+ * Though the ">" character is escaped for symmetry, characters like
+ * ">" and "/" don't need escaping in HTML and have no special meaning
+ * unless they're part of a tag or unquoted attribute value. See
+ * [Mathias Bynens's article](https://mathiasbynens.be/notes/ambiguous-ampersands)
+ * (under "semi-related fun fact") for more details.
+ *
+ * When working with HTML you should always
+ * [quote attribute values](http://wonko.com/post/html-escaping) to reduce
+ * XSS vectors.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category String
+ * @param {string} [string=''] The string to escape.
+ * @returns {string} Returns the escaped string.
+ * @example
+ *
+ * _.escape('fred, barney, & pebbles');
+ * // => 'fred, barney, &amp; pebbles'
+ */
+function escape(string) {
+  string = toString(string);
+  return (string && reHasUnescapedHtml.test(string))
+    ? string.replace(reUnescapedHtml, escapeHtmlChar)
+    : string;
+}
+
+module.exports = templateSettings;
 
 
 /***/ }),
@@ -22255,7 +19410,7 @@ module.exports = function (opts) {
 
 const SemVer = __webpack_require__(840)
 const parse = __webpack_require__(249)
-const {re, t} = __webpack_require__(398)
+const {re, t} = __webpack_require__(629)
 
 const coerce = (version, options) => {
   if (version instanceof SemVer) {
@@ -22307,65 +19462,58 @@ module.exports = coerce
 
 
 /***/ }),
-/* 409 */
+/* 409 */,
+/* 410 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-const os = __webpack_require__(87);
 
-const nameMap = new Map([
-	[20, ['Big Sur', '11']],
-	[19, ['Catalina', '10.15']],
-	[18, ['Mojave', '10.14']],
-	[17, ['High Sierra', '10.13']],
-	[16, ['Sierra', '10.12']],
-	[15, ['El Capitan', '10.11']],
-	[14, ['Yosemite', '10.10']],
-	[13, ['Mavericks', '10.9']],
-	[12, ['Mountain Lion', '10.8']],
-	[11, ['Lion', '10.7']],
-	[10, ['Snow Leopard', '10.6']],
-	[9, ['Leopard', '10.5']],
-	[8, ['Tiger', '10.4']],
-	[7, ['Panther', '10.3']],
-	[6, ['Jaguar', '10.2']],
-	[5, ['Puma', '10.1']]
-]);
+var xtend = __webpack_require__(81)
+var escapes = __webpack_require__(96)
+var defaults = __webpack_require__(488)
 
-const macosRelease = release => {
-	release = Number((release || os.release()).split('.')[0]);
+module.exports = setOptions
 
-	const [name, version] = nameMap.get(release);
+function setOptions(options) {
+  var self = this
+  var current = self.options
+  var key
+  var value
 
-	return {
-		name,
-		version
-	};
-};
+  if (options == null) {
+    options = {}
+  } else if (typeof options === 'object') {
+    options = xtend(options)
+  } else {
+    throw new Error('Invalid value `' + options + '` for setting `options`')
+  }
 
-module.exports = macosRelease;
-// TODO: remove this in the next major version
-module.exports.default = macosRelease;
+  for (key in defaults) {
+    value = options[key]
 
+    if (value == null) {
+      value = current[key]
+    }
 
-/***/ }),
-/* 410 */
-/***/ (function(module) {
+    if (
+      (key !== 'blocks' && typeof value !== 'boolean') ||
+      (key === 'blocks' && typeof value !== 'object')
+    ) {
+      throw new Error(
+        'Invalid value `' + value + '` for setting `options.' + key + '`'
+      )
+    }
 
-"use strict";
+    options[key] = value
+  }
 
+  self.options = options
+  self.escape = escapes(options)
 
-/**
- * Tries to execute a function and discards any error that occurs.
- * @param {Function} fn - Function that might or might not throw an error.
- * @returns {?*} Return-value of the function when no error occurred.
- */
-module.exports = function(fn) {
-
-	try { return fn() } catch (e) {}
-
+  return self
 }
+
 
 /***/ }),
 /* 411 */
@@ -22458,7 +19606,31 @@ module.exports = minor
 /***/ }),
 /* 418 */,
 /* 419 */,
-/* 420 */,
+/* 420 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+// Standard YAML's Core schema.
+// http://www.yaml.org/spec/1.2/spec.html#id2804923
+//
+// NOTE: JS-YAML does not support schema-specific tag resolution restrictions.
+// So, Core schema has no distinctions from JSON schema is JS-YAML.
+
+
+
+
+
+var Schema = __webpack_require__(717);
+
+
+module.exports = new Schema({
+  include: [
+    __webpack_require__(937)
+  ]
+});
+
+
+/***/ }),
 /* 421 */,
 /* 422 */
 /***/ (function(module) {
@@ -22547,450 +19719,43 @@ module.exports = ltr
 "use strict";
 
 
-var trim = __webpack_require__(235)
-var repeat = __webpack_require__(360)
-var decimal = __webpack_require__(858)
-var getIndent = __webpack_require__(313)
-var removeIndent = __webpack_require__(891)
-var interrupt = __webpack_require__(658)
+const cp = __webpack_require__(129);
+const parse = __webpack_require__(952);
+const enoent = __webpack_require__(242);
 
-module.exports = list
+function spawn(command, args, options) {
+    // Parse the arguments
+    const parsed = parse(command, args, options);
 
-var asterisk = '*'
-var underscore = '_'
-var plusSign = '+'
-var dash = '-'
-var dot = '.'
-var space = ' '
-var lineFeed = '\n'
-var tab = '\t'
-var rightParenthesis = ')'
-var lowercaseX = 'x'
+    // Spawn the child process
+    const spawned = cp.spawn(parsed.command, parsed.args, parsed.options);
 
-var tabSize = 4
-var looseListItemExpression = /\n\n(?!\s*$)/
-var taskItemExpression = /^\[([ X\tx])][ \t]/
-var bulletExpression = /^([ \t]*)([*+-]|\d+[.)])( {1,4}(?! )| |\t|$|(?=\n))([^\n]*)/
-var pedanticBulletExpression = /^([ \t]*)([*+-]|\d+[.)])([ \t]+)/
-var initialIndentExpression = /^( {1,4}|\t)?/gm
+    // Hook into child process "exit" event to emit an error if the command
+    // does not exists, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
+    enoent.hookChildProcess(spawned, parsed);
 
-function list(eat, value, silent) {
-  var self = this
-  var commonmark = self.options.commonmark
-  var pedantic = self.options.pedantic
-  var tokenizers = self.blockTokenizers
-  var interuptors = self.interruptList
-  var index = 0
-  var length = value.length
-  var start = null
-  var size
-  var queue
-  var ordered
-  var character
-  var marker
-  var nextIndex
-  var startIndex
-  var prefixed
-  var currentMarker
-  var content
-  var line
-  var previousEmpty
-  var empty
-  var items
-  var allLines
-  var emptyLines
-  var item
-  var enterTop
-  var exitBlockquote
-  var spread = false
-  var node
-  var now
-  var end
-  var indented
-
-  while (index < length) {
-    character = value.charAt(index)
-
-    if (character !== tab && character !== space) {
-      break
-    }
-
-    index++
-  }
-
-  character = value.charAt(index)
-
-  if (character === asterisk || character === plusSign || character === dash) {
-    marker = character
-    ordered = false
-  } else {
-    ordered = true
-    queue = ''
-
-    while (index < length) {
-      character = value.charAt(index)
-
-      if (!decimal(character)) {
-        break
-      }
-
-      queue += character
-      index++
-    }
-
-    character = value.charAt(index)
-
-    if (
-      !queue ||
-      !(character === dot || (commonmark && character === rightParenthesis))
-    ) {
-      return
-    }
-
-    /* Slightly abusing `silent` mode, whose goal is to make interrupting
-     * paragraphs work.
-     * Well, that’s exactly what we want to do here: don’t interrupt:
-     * 2. here, because the “list” doesn’t start with `1`. */
-    if (silent && queue !== '1') {
-      return
-    }
-
-    start = parseInt(queue, 10)
-    marker = character
-  }
-
-  character = value.charAt(++index)
-
-  if (
-    character !== space &&
-    character !== tab &&
-    (pedantic || (character !== lineFeed && character !== ''))
-  ) {
-    return
-  }
-
-  if (silent) {
-    return true
-  }
-
-  index = 0
-  items = []
-  allLines = []
-  emptyLines = []
-
-  while (index < length) {
-    nextIndex = value.indexOf(lineFeed, index)
-    startIndex = index
-    prefixed = false
-    indented = false
-
-    if (nextIndex === -1) {
-      nextIndex = length
-    }
-
-    size = 0
-
-    while (index < length) {
-      character = value.charAt(index)
-
-      if (character === tab) {
-        size += tabSize - (size % tabSize)
-      } else if (character === space) {
-        size++
-      } else {
-        break
-      }
-
-      index++
-    }
-
-    if (item && size >= item.indent) {
-      indented = true
-    }
-
-    character = value.charAt(index)
-    currentMarker = null
-
-    if (!indented) {
-      if (
-        character === asterisk ||
-        character === plusSign ||
-        character === dash
-      ) {
-        currentMarker = character
-        index++
-        size++
-      } else {
-        queue = ''
-
-        while (index < length) {
-          character = value.charAt(index)
-
-          if (!decimal(character)) {
-            break
-          }
-
-          queue += character
-          index++
-        }
-
-        character = value.charAt(index)
-        index++
-
-        if (
-          queue &&
-          (character === dot || (commonmark && character === rightParenthesis))
-        ) {
-          currentMarker = character
-          size += queue.length + 1
-        }
-      }
-
-      if (currentMarker) {
-        character = value.charAt(index)
-
-        if (character === tab) {
-          size += tabSize - (size % tabSize)
-          index++
-        } else if (character === space) {
-          end = index + tabSize
-
-          while (index < end) {
-            if (value.charAt(index) !== space) {
-              break
-            }
-
-            index++
-            size++
-          }
-
-          if (index === end && value.charAt(index) === space) {
-            index -= tabSize - 1
-            size -= tabSize - 1
-          }
-        } else if (character !== lineFeed && character !== '') {
-          currentMarker = null
-        }
-      }
-    }
-
-    if (currentMarker) {
-      if (!pedantic && marker !== currentMarker) {
-        break
-      }
-
-      prefixed = true
-    } else {
-      if (!commonmark && !indented && value.charAt(startIndex) === space) {
-        indented = true
-      } else if (commonmark && item) {
-        indented = size >= item.indent || size > tabSize
-      }
-
-      prefixed = false
-      index = startIndex
-    }
-
-    line = value.slice(startIndex, nextIndex)
-    content = startIndex === index ? line : value.slice(index, nextIndex)
-
-    if (
-      currentMarker === asterisk ||
-      currentMarker === underscore ||
-      currentMarker === dash
-    ) {
-      if (tokenizers.thematicBreak.call(self, eat, line, true)) {
-        break
-      }
-    }
-
-    previousEmpty = empty
-    empty = !prefixed && !trim(content).length
-
-    if (indented && item) {
-      item.value = item.value.concat(emptyLines, line)
-      allLines = allLines.concat(emptyLines, line)
-      emptyLines = []
-    } else if (prefixed) {
-      if (emptyLines.length !== 0) {
-        spread = true
-        item.value.push('')
-        item.trail = emptyLines.concat()
-      }
-
-      item = {
-        value: [line],
-        indent: size,
-        trail: []
-      }
-
-      items.push(item)
-      allLines = allLines.concat(emptyLines, line)
-      emptyLines = []
-    } else if (empty) {
-      if (previousEmpty && !commonmark) {
-        break
-      }
-
-      emptyLines.push(line)
-    } else {
-      if (previousEmpty) {
-        break
-      }
-
-      if (interrupt(interuptors, tokenizers, self, [eat, line, true])) {
-        break
-      }
-
-      item.value = item.value.concat(emptyLines, line)
-      allLines = allLines.concat(emptyLines, line)
-      emptyLines = []
-    }
-
-    index = nextIndex + 1
-  }
-
-  node = eat(allLines.join(lineFeed)).reset({
-    type: 'list',
-    ordered: ordered,
-    start: start,
-    spread: spread,
-    children: []
-  })
-
-  enterTop = self.enterList()
-  exitBlockquote = self.enterBlock()
-  index = -1
-  length = items.length
-
-  while (++index < length) {
-    item = items[index].value.join(lineFeed)
-    now = eat.now()
-
-    eat(item)(listItem(self, item, now), node)
-
-    item = items[index].trail.join(lineFeed)
-
-    if (index !== length - 1) {
-      item += lineFeed
-    }
-
-    eat(item)
-  }
-
-  enterTop()
-  exitBlockquote()
-
-  return node
+    return spawned;
 }
 
-function listItem(ctx, value, position) {
-  var offsets = ctx.offset
-  var fn = ctx.options.pedantic ? pedanticListItem : normalListItem
-  var checked = null
-  var task
-  var indent
+function spawnSync(command, args, options) {
+    // Parse the arguments
+    const parsed = parse(command, args, options);
 
-  value = fn.apply(null, arguments)
+    // Spawn the child process
+    const result = cp.spawnSync(parsed.command, parsed.args, parsed.options);
 
-  if (ctx.options.gfm) {
-    task = value.match(taskItemExpression)
+    // Analyze if the command does not exist, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
+    result.error = result.error || enoent.verifyENOENTSync(result.status, parsed);
 
-    if (task) {
-      indent = task[0].length
-      checked = task[1].toLowerCase() === lowercaseX
-      offsets[position.line] += indent
-      value = value.slice(indent)
-    }
-  }
-
-  return {
-    type: 'listItem',
-    spread: looseListItemExpression.test(value),
-    checked: checked,
-    children: ctx.tokenizeBlock(value, position)
-  }
+    return result;
 }
 
-// Create a list-item using overly simple mechanics.
-function pedanticListItem(ctx, value, position) {
-  var offsets = ctx.offset
-  var line = position.line
+module.exports = spawn;
+module.exports.spawn = spawn;
+module.exports.sync = spawnSync;
 
-  // Remove the list-item’s bullet.
-  value = value.replace(pedanticBulletExpression, replacer)
-
-  // The initial line was also matched by the below, so we reset the `line`.
-  line = position.line
-
-  return value.replace(initialIndentExpression, replacer)
-
-  // A simple replacer which removed all matches, and adds their length to
-  // `offset`.
-  function replacer($0) {
-    offsets[line] = (offsets[line] || 0) + $0.length
-    line++
-
-    return ''
-  }
-}
-
-// Create a list-item using sane mechanics.
-function normalListItem(ctx, value, position) {
-  var offsets = ctx.offset
-  var line = position.line
-  var max
-  var bullet
-  var rest
-  var lines
-  var trimmedLines
-  var index
-  var length
-
-  // Remove the list-item’s bullet.
-  value = value.replace(bulletExpression, replacer)
-
-  lines = value.split(lineFeed)
-
-  trimmedLines = removeIndent(value, getIndent(max).indent).split(lineFeed)
-
-  // We replaced the initial bullet with something else above, which was used
-  // to trick `removeIndentation` into removing some more characters when
-  // possible.  However, that could result in the initial line to be stripped
-  // more than it should be.
-  trimmedLines[0] = rest
-
-  offsets[line] = (offsets[line] || 0) + bullet.length
-  line++
-
-  index = 0
-  length = lines.length
-
-  while (++index < length) {
-    offsets[line] =
-      (offsets[line] || 0) + lines[index].length - trimmedLines[index].length
-    line++
-  }
-
-  return trimmedLines.join(lineFeed)
-
-  /* eslint-disable-next-line max-params */
-  function replacer($0, $1, $2, $3, $4) {
-    bullet = $1 + $2 + $3
-    rest = $4
-
-    // Make sure that the first nine numbered list items can indent with an
-    // extra space.  That is, when the bullet did not receive an extra final
-    // space.
-    if (Number($2) < 10 && bullet.length % 2 === 1) {
-      $2 = space + $2
-    }
-
-    max = $1 + repeat(space, $2.length) + $3
-
-    return max + rest
-  }
-}
+module.exports._parse = parse;
+module.exports._enoent = enoent;
 
 
 /***/ }),
@@ -23605,38 +20370,102 @@ module.exports = (ast, options = {}) => {
 
 "use strict";
 
+const isStream = __webpack_require__(124);
+const getStream = __webpack_require__(209);
+const mergeStream = __webpack_require__(74);
 
-var count = __webpack_require__(808)
+// `input` option
+const handleInput = (spawned, input) => {
+	// Checking for stdin is workaround for https://github.com/nodejs/node/issues/26852
+	// TODO: Remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
+	if (input === undefined || spawned.stdin === undefined) {
+		return;
+	}
 
-module.exports = enclose
+	if (isStream(input)) {
+		input.pipe(spawned.stdin);
+	} else {
+		spawned.stdin.end(input);
+	}
+};
 
-var leftParenthesis = '('
-var rightParenthesis = ')'
-var lessThan = '<'
-var greaterThan = '>'
+// `all` interleaves `stdout` and `stderr`
+const makeAllStream = (spawned, {all}) => {
+	if (!all || (!spawned.stdout && !spawned.stderr)) {
+		return;
+	}
 
-var expression = /\s/
+	const mixed = mergeStream();
 
-// Wrap `url` in angle brackets when needed, or when
-// forced.
-// In links, images, and definitions, the URL part needs
-// to be enclosed when it:
-//
-// - has a length of `0`
-// - contains white-space
-// - has more or less opening than closing parentheses
-function enclose(uri, always) {
-  if (
-    always ||
-    uri.length === 0 ||
-    expression.test(uri) ||
-    count(uri, leftParenthesis) !== count(uri, rightParenthesis)
-  ) {
-    return lessThan + uri + greaterThan
-  }
+	if (spawned.stdout) {
+		mixed.add(spawned.stdout);
+	}
 
-  return uri
-}
+	if (spawned.stderr) {
+		mixed.add(spawned.stderr);
+	}
+
+	return mixed;
+};
+
+// On failure, `result.stdout|stderr|all` should contain the currently buffered stream
+const getBufferedData = async (stream, streamPromise) => {
+	if (!stream) {
+		return;
+	}
+
+	stream.destroy();
+
+	try {
+		return await streamPromise;
+	} catch (error) {
+		return error.bufferedData;
+	}
+};
+
+const getStreamPromise = (stream, {encoding, buffer, maxBuffer}) => {
+	if (!stream || !buffer) {
+		return;
+	}
+
+	if (encoding) {
+		return getStream(stream, {encoding, maxBuffer});
+	}
+
+	return getStream.buffer(stream, {maxBuffer});
+};
+
+// Retrieve result of child process: exit code, signal, error, streams (stdout/stderr/all)
+const getSpawnedResult = async ({stdout, stderr, all}, {encoding, buffer, maxBuffer}, processDone) => {
+	const stdoutPromise = getStreamPromise(stdout, {encoding, buffer, maxBuffer});
+	const stderrPromise = getStreamPromise(stderr, {encoding, buffer, maxBuffer});
+	const allPromise = getStreamPromise(all, {encoding, buffer, maxBuffer: maxBuffer * 2});
+
+	try {
+		return await Promise.all([processDone, stdoutPromise, stderrPromise, allPromise]);
+	} catch (error) {
+		return Promise.all([
+			{error, signal: error.signal, timedOut: error.timedOut},
+			getBufferedData(stdout, stdoutPromise),
+			getBufferedData(stderr, stderrPromise),
+			getBufferedData(all, allPromise)
+		]);
+	}
+};
+
+const validateInputSync = ({input}) => {
+	if (isStream(input)) {
+		throw new TypeError('The `input` option cannot be a stream in sync mode');
+	}
+};
+
+module.exports = {
+	handleInput,
+	makeAllStream,
+	getSpawnedResult,
+	validateInputSync
+};
+
 
 
 /***/ }),
@@ -24854,43 +21683,7 @@ function inlineHTML(eat, value, silent) {
 
 /***/ }),
 /* 462 */,
-/* 463 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-module.exports = parseAsync
-
-const TOMLParser = __webpack_require__(285)
-const prettyError = __webpack_require__(985)
-
-function parseAsync (str, opts) {
-  if (!opts) opts = {}
-  const index = 0
-  const blocksize = opts.blocksize || 40960
-  const parser = new TOMLParser()
-  return new Promise((resolve, reject) => {
-    setImmediate(parseAsyncNext, index, blocksize, resolve, reject)
-  })
-  function parseAsyncNext (index, blocksize, resolve, reject) {
-    if (index >= str.length) {
-      try {
-        return resolve(parser.finish())
-      } catch (err) {
-        return reject(prettyError(err, str))
-      }
-    }
-    try {
-      parser.parse(str.slice(index, index + blocksize))
-      setImmediate(parseAsyncNext, index + blocksize, blocksize, resolve, reject)
-    } catch (err) {
-      reject(prettyError(err, str))
-    }
-  }
-}
-
-
-/***/ }),
+/* 463 */,
 /* 464 */,
 /* 465 */,
 /* 466 */
@@ -25002,7 +21795,7 @@ module.exports = toComparators
 
 
 
-const isNumber = __webpack_require__(830);
+const isNumber = __webpack_require__(97);
 
 const toRegexRange = (min, max, options) => {
   if (isNumber(min) === false) {
@@ -25642,7 +22435,7 @@ const path = __webpack_require__(622);
 const scan = __webpack_require__(150);
 const parse = __webpack_require__(110);
 const utils = __webpack_require__(167);
-const constants = __webpack_require__(42);
+const constants = __webpack_require__(933);
 const isObject = val => val && typeof val === 'object' && !Array.isArray(val);
 
 /**
@@ -26268,7 +23061,7 @@ module.exports = outside
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const SemVer = __webpack_require__(840)
-const Range = __webpack_require__(318)
+const Range = __webpack_require__(46)
 const gt = __webpack_require__(855)
 
 const minVersion = (range, loose) => {
@@ -26507,402 +23300,476 @@ module.exports = lte
 /* 510 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const Range = __webpack_require__(318)
+"use strict";
 
-// Mostly just for testing and legacy API reasons
-const toComparators = (range, options) =>
-  new Range(range, options).set
-    .map(comp => comp.map(c => c.value).join(' ').trim().split(' '))
 
-module.exports = toComparators
+var trim = __webpack_require__(235)
+var repeat = __webpack_require__(360)
+var decimal = __webpack_require__(858)
+var getIndent = __webpack_require__(313)
+var removeIndent = __webpack_require__(891)
+var interrupt = __webpack_require__(658)
+
+module.exports = list
+
+var asterisk = '*'
+var underscore = '_'
+var plusSign = '+'
+var dash = '-'
+var dot = '.'
+var space = ' '
+var lineFeed = '\n'
+var tab = '\t'
+var rightParenthesis = ')'
+var lowercaseX = 'x'
+
+var tabSize = 4
+var looseListItemExpression = /\n\n(?!\s*$)/
+var taskItemExpression = /^\[([ X\tx])][ \t]/
+var bulletExpression = /^([ \t]*)([*+-]|\d+[.)])( {1,4}(?! )| |\t|$|(?=\n))([^\n]*)/
+var pedanticBulletExpression = /^([ \t]*)([*+-]|\d+[.)])([ \t]+)/
+var initialIndentExpression = /^( {1,4}|\t)?/gm
+
+function list(eat, value, silent) {
+  var self = this
+  var commonmark = self.options.commonmark
+  var pedantic = self.options.pedantic
+  var tokenizers = self.blockTokenizers
+  var interuptors = self.interruptList
+  var index = 0
+  var length = value.length
+  var start = null
+  var size
+  var queue
+  var ordered
+  var character
+  var marker
+  var nextIndex
+  var startIndex
+  var prefixed
+  var currentMarker
+  var content
+  var line
+  var previousEmpty
+  var empty
+  var items
+  var allLines
+  var emptyLines
+  var item
+  var enterTop
+  var exitBlockquote
+  var spread = false
+  var node
+  var now
+  var end
+  var indented
+
+  while (index < length) {
+    character = value.charAt(index)
+
+    if (character !== tab && character !== space) {
+      break
+    }
+
+    index++
+  }
+
+  character = value.charAt(index)
+
+  if (character === asterisk || character === plusSign || character === dash) {
+    marker = character
+    ordered = false
+  } else {
+    ordered = true
+    queue = ''
+
+    while (index < length) {
+      character = value.charAt(index)
+
+      if (!decimal(character)) {
+        break
+      }
+
+      queue += character
+      index++
+    }
+
+    character = value.charAt(index)
+
+    if (
+      !queue ||
+      !(character === dot || (commonmark && character === rightParenthesis))
+    ) {
+      return
+    }
+
+    /* Slightly abusing `silent` mode, whose goal is to make interrupting
+     * paragraphs work.
+     * Well, that’s exactly what we want to do here: don’t interrupt:
+     * 2. here, because the “list” doesn’t start with `1`. */
+    if (silent && queue !== '1') {
+      return
+    }
+
+    start = parseInt(queue, 10)
+    marker = character
+  }
+
+  character = value.charAt(++index)
+
+  if (
+    character !== space &&
+    character !== tab &&
+    (pedantic || (character !== lineFeed && character !== ''))
+  ) {
+    return
+  }
+
+  if (silent) {
+    return true
+  }
+
+  index = 0
+  items = []
+  allLines = []
+  emptyLines = []
+
+  while (index < length) {
+    nextIndex = value.indexOf(lineFeed, index)
+    startIndex = index
+    prefixed = false
+    indented = false
+
+    if (nextIndex === -1) {
+      nextIndex = length
+    }
+
+    size = 0
+
+    while (index < length) {
+      character = value.charAt(index)
+
+      if (character === tab) {
+        size += tabSize - (size % tabSize)
+      } else if (character === space) {
+        size++
+      } else {
+        break
+      }
+
+      index++
+    }
+
+    if (item && size >= item.indent) {
+      indented = true
+    }
+
+    character = value.charAt(index)
+    currentMarker = null
+
+    if (!indented) {
+      if (
+        character === asterisk ||
+        character === plusSign ||
+        character === dash
+      ) {
+        currentMarker = character
+        index++
+        size++
+      } else {
+        queue = ''
+
+        while (index < length) {
+          character = value.charAt(index)
+
+          if (!decimal(character)) {
+            break
+          }
+
+          queue += character
+          index++
+        }
+
+        character = value.charAt(index)
+        index++
+
+        if (
+          queue &&
+          (character === dot || (commonmark && character === rightParenthesis))
+        ) {
+          currentMarker = character
+          size += queue.length + 1
+        }
+      }
+
+      if (currentMarker) {
+        character = value.charAt(index)
+
+        if (character === tab) {
+          size += tabSize - (size % tabSize)
+          index++
+        } else if (character === space) {
+          end = index + tabSize
+
+          while (index < end) {
+            if (value.charAt(index) !== space) {
+              break
+            }
+
+            index++
+            size++
+          }
+
+          if (index === end && value.charAt(index) === space) {
+            index -= tabSize - 1
+            size -= tabSize - 1
+          }
+        } else if (character !== lineFeed && character !== '') {
+          currentMarker = null
+        }
+      }
+    }
+
+    if (currentMarker) {
+      if (!pedantic && marker !== currentMarker) {
+        break
+      }
+
+      prefixed = true
+    } else {
+      if (!commonmark && !indented && value.charAt(startIndex) === space) {
+        indented = true
+      } else if (commonmark && item) {
+        indented = size >= item.indent || size > tabSize
+      }
+
+      prefixed = false
+      index = startIndex
+    }
+
+    line = value.slice(startIndex, nextIndex)
+    content = startIndex === index ? line : value.slice(index, nextIndex)
+
+    if (
+      currentMarker === asterisk ||
+      currentMarker === underscore ||
+      currentMarker === dash
+    ) {
+      if (tokenizers.thematicBreak.call(self, eat, line, true)) {
+        break
+      }
+    }
+
+    previousEmpty = empty
+    empty = !prefixed && !trim(content).length
+
+    if (indented && item) {
+      item.value = item.value.concat(emptyLines, line)
+      allLines = allLines.concat(emptyLines, line)
+      emptyLines = []
+    } else if (prefixed) {
+      if (emptyLines.length !== 0) {
+        spread = true
+        item.value.push('')
+        item.trail = emptyLines.concat()
+      }
+
+      item = {
+        value: [line],
+        indent: size,
+        trail: []
+      }
+
+      items.push(item)
+      allLines = allLines.concat(emptyLines, line)
+      emptyLines = []
+    } else if (empty) {
+      if (previousEmpty && !commonmark) {
+        break
+      }
+
+      emptyLines.push(line)
+    } else {
+      if (previousEmpty) {
+        break
+      }
+
+      if (interrupt(interuptors, tokenizers, self, [eat, line, true])) {
+        break
+      }
+
+      item.value = item.value.concat(emptyLines, line)
+      allLines = allLines.concat(emptyLines, line)
+      emptyLines = []
+    }
+
+    index = nextIndex + 1
+  }
+
+  node = eat(allLines.join(lineFeed)).reset({
+    type: 'list',
+    ordered: ordered,
+    start: start,
+    spread: spread,
+    children: []
+  })
+
+  enterTop = self.enterList()
+  exitBlockquote = self.enterBlock()
+  index = -1
+  length = items.length
+
+  while (++index < length) {
+    item = items[index].value.join(lineFeed)
+    now = eat.now()
+
+    eat(item)(listItem(self, item, now), node)
+
+    item = items[index].trail.join(lineFeed)
+
+    if (index !== length - 1) {
+      item += lineFeed
+    }
+
+    eat(item)
+  }
+
+  enterTop()
+  exitBlockquote()
+
+  return node
+}
+
+function listItem(ctx, value, position) {
+  var offsets = ctx.offset
+  var fn = ctx.options.pedantic ? pedanticListItem : normalListItem
+  var checked = null
+  var task
+  var indent
+
+  value = fn.apply(null, arguments)
+
+  if (ctx.options.gfm) {
+    task = value.match(taskItemExpression)
+
+    if (task) {
+      indent = task[0].length
+      checked = task[1].toLowerCase() === lowercaseX
+      offsets[position.line] += indent
+      value = value.slice(indent)
+    }
+  }
+
+  return {
+    type: 'listItem',
+    spread: looseListItemExpression.test(value),
+    checked: checked,
+    children: ctx.tokenizeBlock(value, position)
+  }
+}
+
+// Create a list-item using overly simple mechanics.
+function pedanticListItem(ctx, value, position) {
+  var offsets = ctx.offset
+  var line = position.line
+
+  // Remove the list-item’s bullet.
+  value = value.replace(pedanticBulletExpression, replacer)
+
+  // The initial line was also matched by the below, so we reset the `line`.
+  line = position.line
+
+  return value.replace(initialIndentExpression, replacer)
+
+  // A simple replacer which removed all matches, and adds their length to
+  // `offset`.
+  function replacer($0) {
+    offsets[line] = (offsets[line] || 0) + $0.length
+    line++
+
+    return ''
+  }
+}
+
+// Create a list-item using sane mechanics.
+function normalListItem(ctx, value, position) {
+  var offsets = ctx.offset
+  var line = position.line
+  var max
+  var bullet
+  var rest
+  var lines
+  var trimmedLines
+  var index
+  var length
+
+  // Remove the list-item’s bullet.
+  value = value.replace(bulletExpression, replacer)
+
+  lines = value.split(lineFeed)
+
+  trimmedLines = removeIndent(value, getIndent(max).indent).split(lineFeed)
+
+  // We replaced the initial bullet with something else above, which was used
+  // to trick `removeIndentation` into removing some more characters when
+  // possible.  However, that could result in the initial line to be stripped
+  // more than it should be.
+  trimmedLines[0] = rest
+
+  offsets[line] = (offsets[line] || 0) + bullet.length
+  line++
+
+  index = 0
+  length = lines.length
+
+  while (++index < length) {
+    offsets[line] =
+      (offsets[line] || 0) + lines[index].length - trimmedLines[index].length
+    line++
+  }
+
+  return trimmedLines.join(lineFeed)
+
+  /* eslint-disable-next-line max-params */
+  function replacer($0, $1, $2, $3, $4) {
+    bullet = $1 + $2 + $3
+    rest = $4
+
+    // Make sure that the first nine numbered list items can indent with an
+    // extra space.  That is, when the bullet did not receive an extra final
+    // space.
+    if (Number($2) < 10 && bullet.length % 2 === 1) {
+      $2 = space + $2
+    }
+
+    max = $1 + repeat(space, $2.length) + $3
+
+    return max + rest
+  }
+}
 
 
 /***/ }),
 /* 511 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-/**
- * Lodash (Custom Build) <https://lodash.com/>
- * Build: `lodash modularize exports="npm" -o ./`
- * Copyright OpenJS Foundation and other contributors <https://openjsf.org/>
- * Released under MIT license <https://lodash.com/license>
- * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
- * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
- */
-var reInterpolate = __webpack_require__(125);
+// Note: this is the semver.org version of the spec that it implements
+// Not necessarily the package version of this code.
+const SEMVER_SPEC_VERSION = '2.0.0'
 
-/** Used as references for various `Number` constants. */
-var INFINITY = 1 / 0;
+const MAX_LENGTH = 256
+const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
+  /* istanbul ignore next */ 9007199254740991
 
-/** `Object#toString` result references. */
-var nullTag = '[object Null]',
-    symbolTag = '[object Symbol]',
-    undefinedTag = '[object Undefined]';
+// Max safe segment length for coercion.
+const MAX_SAFE_COMPONENT_LENGTH = 16
 
-/** Used to match HTML entities and HTML characters. */
-var reUnescapedHtml = /[&<>"']/g,
-    reHasUnescapedHtml = RegExp(reUnescapedHtml.source);
-
-/** Used to match template delimiters. */
-var reEscape = /<%-([\s\S]+?)%>/g,
-    reEvaluate = /<%([\s\S]+?)%>/g;
-
-/** Used to map characters to HTML entities. */
-var htmlEscapes = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;'
-};
-
-/** Detect free variable `global` from Node.js. */
-var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
-
-/** Detect free variable `self`. */
-var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
-
-/** Used as a reference to the global object. */
-var root = freeGlobal || freeSelf || Function('return this')();
-
-/**
- * A specialized version of `_.map` for arrays without support for iteratee
- * shorthands.
- *
- * @private
- * @param {Array} [array] The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new mapped array.
- */
-function arrayMap(array, iteratee) {
-  var index = -1,
-      length = array == null ? 0 : array.length,
-      result = Array(length);
-
-  while (++index < length) {
-    result[index] = iteratee(array[index], index, array);
-  }
-  return result;
+module.exports = {
+  SEMVER_SPEC_VERSION,
+  MAX_LENGTH,
+  MAX_SAFE_INTEGER,
+  MAX_SAFE_COMPONENT_LENGTH
 }
-
-/**
- * The base implementation of `_.propertyOf` without support for deep paths.
- *
- * @private
- * @param {Object} object The object to query.
- * @returns {Function} Returns the new accessor function.
- */
-function basePropertyOf(object) {
-  return function(key) {
-    return object == null ? undefined : object[key];
-  };
-}
-
-/**
- * Used by `_.escape` to convert characters to HTML entities.
- *
- * @private
- * @param {string} chr The matched character to escape.
- * @returns {string} Returns the escaped character.
- */
-var escapeHtmlChar = basePropertyOf(htmlEscapes);
-
-/** Used for built-in method references. */
-var objectProto = Object.prototype;
-
-/** Used to check objects for own properties. */
-var hasOwnProperty = objectProto.hasOwnProperty;
-
-/**
- * Used to resolve the
- * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
- * of values.
- */
-var nativeObjectToString = objectProto.toString;
-
-/** Built-in value references. */
-var Symbol = root.Symbol,
-    symToStringTag = Symbol ? Symbol.toStringTag : undefined;
-
-/** Used to convert symbols to primitives and strings. */
-var symbolProto = Symbol ? Symbol.prototype : undefined,
-    symbolToString = symbolProto ? symbolProto.toString : undefined;
-
-/**
- * By default, the template delimiters used by lodash are like those in
- * embedded Ruby (ERB) as well as ES2015 template strings. Change the
- * following template settings to use alternative delimiters.
- *
- * @static
- * @memberOf _
- * @type {Object}
- */
-var templateSettings = {
-
-  /**
-   * Used to detect `data` property values to be HTML-escaped.
-   *
-   * @memberOf _.templateSettings
-   * @type {RegExp}
-   */
-  'escape': reEscape,
-
-  /**
-   * Used to detect code to be evaluated.
-   *
-   * @memberOf _.templateSettings
-   * @type {RegExp}
-   */
-  'evaluate': reEvaluate,
-
-  /**
-   * Used to detect `data` property values to inject.
-   *
-   * @memberOf _.templateSettings
-   * @type {RegExp}
-   */
-  'interpolate': reInterpolate,
-
-  /**
-   * Used to reference the data object in the template text.
-   *
-   * @memberOf _.templateSettings
-   * @type {string}
-   */
-  'variable': '',
-
-  /**
-   * Used to import variables into the compiled template.
-   *
-   * @memberOf _.templateSettings
-   * @type {Object}
-   */
-  'imports': {
-
-    /**
-     * A reference to the `lodash` function.
-     *
-     * @memberOf _.templateSettings.imports
-     * @type {Function}
-     */
-    '_': { 'escape': escape }
-  }
-};
-
-/**
- * The base implementation of `getTag` without fallbacks for buggy environments.
- *
- * @private
- * @param {*} value The value to query.
- * @returns {string} Returns the `toStringTag`.
- */
-function baseGetTag(value) {
-  if (value == null) {
-    return value === undefined ? undefinedTag : nullTag;
-  }
-  return (symToStringTag && symToStringTag in Object(value))
-    ? getRawTag(value)
-    : objectToString(value);
-}
-
-/**
- * The base implementation of `_.toString` which doesn't convert nullish
- * values to empty strings.
- *
- * @private
- * @param {*} value The value to process.
- * @returns {string} Returns the string.
- */
-function baseToString(value) {
-  // Exit early for strings to avoid a performance hit in some environments.
-  if (typeof value == 'string') {
-    return value;
-  }
-  if (isArray(value)) {
-    // Recursively convert values (susceptible to call stack limits).
-    return arrayMap(value, baseToString) + '';
-  }
-  if (isSymbol(value)) {
-    return symbolToString ? symbolToString.call(value) : '';
-  }
-  var result = (value + '');
-  return (result == '0' && (1 / value) == -INFINITY) ? '-0' : result;
-}
-
-/**
- * A specialized version of `baseGetTag` which ignores `Symbol.toStringTag` values.
- *
- * @private
- * @param {*} value The value to query.
- * @returns {string} Returns the raw `toStringTag`.
- */
-function getRawTag(value) {
-  var isOwn = hasOwnProperty.call(value, symToStringTag),
-      tag = value[symToStringTag];
-
-  try {
-    value[symToStringTag] = undefined;
-    var unmasked = true;
-  } catch (e) {}
-
-  var result = nativeObjectToString.call(value);
-  if (unmasked) {
-    if (isOwn) {
-      value[symToStringTag] = tag;
-    } else {
-      delete value[symToStringTag];
-    }
-  }
-  return result;
-}
-
-/**
- * Converts `value` to a string using `Object.prototype.toString`.
- *
- * @private
- * @param {*} value The value to convert.
- * @returns {string} Returns the converted string.
- */
-function objectToString(value) {
-  return nativeObjectToString.call(value);
-}
-
-/**
- * Checks if `value` is classified as an `Array` object.
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is an array, else `false`.
- * @example
- *
- * _.isArray([1, 2, 3]);
- * // => true
- *
- * _.isArray(document.body.children);
- * // => false
- *
- * _.isArray('abc');
- * // => false
- *
- * _.isArray(_.noop);
- * // => false
- */
-var isArray = Array.isArray;
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return value != null && typeof value == 'object';
-}
-
-/**
- * Checks if `value` is classified as a `Symbol` primitive or object.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
- * @example
- *
- * _.isSymbol(Symbol.iterator);
- * // => true
- *
- * _.isSymbol('abc');
- * // => false
- */
-function isSymbol(value) {
-  return typeof value == 'symbol' ||
-    (isObjectLike(value) && baseGetTag(value) == symbolTag);
-}
-
-/**
- * Converts `value` to a string. An empty string is returned for `null`
- * and `undefined` values. The sign of `-0` is preserved.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {string} Returns the converted string.
- * @example
- *
- * _.toString(null);
- * // => ''
- *
- * _.toString(-0);
- * // => '-0'
- *
- * _.toString([1, 2, 3]);
- * // => '1,2,3'
- */
-function toString(value) {
-  return value == null ? '' : baseToString(value);
-}
-
-/**
- * Converts the characters "&", "<", ">", '"', and "'" in `string` to their
- * corresponding HTML entities.
- *
- * **Note:** No other characters are escaped. To escape additional
- * characters use a third-party library like [_he_](https://mths.be/he).
- *
- * Though the ">" character is escaped for symmetry, characters like
- * ">" and "/" don't need escaping in HTML and have no special meaning
- * unless they're part of a tag or unquoted attribute value. See
- * [Mathias Bynens's article](https://mathiasbynens.be/notes/ambiguous-ampersands)
- * (under "semi-related fun fact") for more details.
- *
- * When working with HTML you should always
- * [quote attribute values](http://wonko.com/post/html-escaping) to reduce
- * XSS vectors.
- *
- * @static
- * @since 0.1.0
- * @memberOf _
- * @category String
- * @param {string} [string=''] The string to escape.
- * @returns {string} Returns the escaped string.
- * @example
- *
- * _.escape('fred, barney, & pebbles');
- * // => 'fred, barney, &amp; pebbles'
- */
-function escape(string) {
-  string = toString(string);
-  return (string && reHasUnescapedHtml.test(string))
-    ? string.replace(reUnescapedHtml, escapeHtmlChar)
-    : string;
-}
-
-module.exports = templateSettings;
 
 
 /***/ }),
@@ -26916,7 +23783,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const path = __webpack_require__(622);
 const deep_1 = __webpack_require__(565);
 const entry_1 = __webpack_require__(148);
-const error_1 = __webpack_require__(952);
+const error_1 = __webpack_require__(228);
 const entry_2 = __webpack_require__(272);
 class Provider {
     constructor(_settings) {
@@ -27057,205 +23924,9 @@ module.exports = new Type('tag:yaml.org,2002:timestamp', {
 
 
 /***/ }),
-/* 515 */
-/***/ (function(module) {
-
-"use strict";
-
-
-const nativePromisePrototype = (async () => {})().constructor.prototype;
-const descriptors = ['then', 'catch', 'finally'].map(property => [
-	property,
-	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
-]);
-
-// The return value is a mixin of `childProcess` and `Promise`
-const mergePromise = (spawned, promise) => {
-	for (const [property, descriptor] of descriptors) {
-		// Starting the main `promise` is deferred to avoid consuming streams
-		const value = typeof promise === 'function' ?
-			(...args) => Reflect.apply(descriptor.value, promise(), args) :
-			descriptor.value.bind(promise);
-
-		Reflect.defineProperty(spawned, property, {...descriptor, value});
-	}
-
-	return spawned;
-};
-
-// Use promises instead of `child_process` events
-const getSpawnedPromise = spawned => {
-	return new Promise((resolve, reject) => {
-		spawned.on('exit', (exitCode, signal) => {
-			resolve({exitCode, signal});
-		});
-
-		spawned.on('error', error => {
-			reject(error);
-		});
-
-		if (spawned.stdin) {
-			spawned.stdin.on('error', error => {
-				reject(error);
-			});
-		}
-	});
-};
-
-module.exports = {
-	mergePromise,
-	getSpawnedPromise
-};
-
-
-
-/***/ }),
+/* 515 */,
 /* 516 */,
-/* 517 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const ANY = Symbol('SemVer ANY')
-// hoisted class for cyclic dependency
-class Comparator {
-  static get ANY () {
-    return ANY
-  }
-  constructor (comp, options) {
-    if (!options || typeof options !== 'object') {
-      options = {
-        loose: !!options,
-        includePrerelease: false
-      }
-    }
-
-    if (comp instanceof Comparator) {
-      if (comp.loose === !!options.loose) {
-        return comp
-      } else {
-        comp = comp.value
-      }
-    }
-
-    debug('comparator', comp, options)
-    this.options = options
-    this.loose = !!options.loose
-    this.parse(comp)
-
-    if (this.semver === ANY) {
-      this.value = ''
-    } else {
-      this.value = this.operator + this.semver.version
-    }
-
-    debug('comp', this)
-  }
-
-  parse (comp) {
-    const r = this.options.loose ? re[t.COMPARATORLOOSE] : re[t.COMPARATOR]
-    const m = comp.match(r)
-
-    if (!m) {
-      throw new TypeError(`Invalid comparator: ${comp}`)
-    }
-
-    this.operator = m[1] !== undefined ? m[1] : ''
-    if (this.operator === '=') {
-      this.operator = ''
-    }
-
-    // if it literally is just '>' or '' then allow anything.
-    if (!m[2]) {
-      this.semver = ANY
-    } else {
-      this.semver = new SemVer(m[2], this.options.loose)
-    }
-  }
-
-  toString () {
-    return this.value
-  }
-
-  test (version) {
-    debug('Comparator.test', version, this.options.loose)
-
-    if (this.semver === ANY || version === ANY) {
-      return true
-    }
-
-    if (typeof version === 'string') {
-      try {
-        version = new SemVer(version, this.options)
-      } catch (er) {
-        return false
-      }
-    }
-
-    return cmp(version, this.operator, this.semver, this.options)
-  }
-
-  intersects (comp, options) {
-    if (!(comp instanceof Comparator)) {
-      throw new TypeError('a Comparator is required')
-    }
-
-    if (!options || typeof options !== 'object') {
-      options = {
-        loose: !!options,
-        includePrerelease: false
-      }
-    }
-
-    if (this.operator === '') {
-      if (this.value === '') {
-        return true
-      }
-      return new Range(comp.value, options).test(this.value)
-    } else if (comp.operator === '') {
-      if (comp.value === '') {
-        return true
-      }
-      return new Range(this.value, options).test(comp.semver)
-    }
-
-    const sameDirectionIncreasing =
-      (this.operator === '>=' || this.operator === '>') &&
-      (comp.operator === '>=' || comp.operator === '>')
-    const sameDirectionDecreasing =
-      (this.operator === '<=' || this.operator === '<') &&
-      (comp.operator === '<=' || comp.operator === '<')
-    const sameSemVer = this.semver.version === comp.semver.version
-    const differentDirectionsInclusive =
-      (this.operator === '>=' || this.operator === '<=') &&
-      (comp.operator === '>=' || comp.operator === '<=')
-    const oppositeDirectionsLessThan =
-      cmp(this.semver, '<', comp.semver, options) &&
-      (this.operator === '>=' || this.operator === '>') &&
-        (comp.operator === '<=' || comp.operator === '<')
-    const oppositeDirectionsGreaterThan =
-      cmp(this.semver, '>', comp.semver, options) &&
-      (this.operator === '<=' || this.operator === '<') &&
-        (comp.operator === '>=' || comp.operator === '>')
-
-    return (
-      sameDirectionIncreasing ||
-      sameDirectionDecreasing ||
-      (sameSemVer && differentDirectionsInclusive) ||
-      oppositeDirectionsLessThan ||
-      oppositeDirectionsGreaterThan
-    )
-  }
-}
-
-module.exports = Comparator
-
-const {re, t} = __webpack_require__(398)
-const cmp = __webpack_require__(299)
-const debug = __webpack_require__(940)
-const SemVer = __webpack_require__(840)
-const Range = __webpack_require__(318)
-
-
-/***/ }),
+/* 517 */,
 /* 518 */,
 /* 519 */,
 /* 520 */
@@ -27280,27 +23951,23 @@ module.exports = ltr
 
 /***/ }),
 /* 523 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports) {
 
 "use strict";
 
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
-
-var osName = _interopDefault(__webpack_require__(401));
-
 function getUserAgent() {
-  try {
-    return `Node.js/${process.version.substr(1)} (${osName()}; ${process.arch})`;
-  } catch (error) {
-    if (/wmic os get Caption/.test(error.message)) {
-      return "Windows <version undetectable>";
-    }
-
-    return "<environment undetectable>";
+  if (typeof navigator === "object" && "userAgent" in navigator) {
+    return navigator.userAgent;
   }
+
+  if (typeof process === "object" && "version" in process) {
+    return `Node.js/${process.version.substr(1)} (${process.platform}; ${process.arch})`;
+  }
+
+  return "<environment undetectable>";
 }
 
 exports.getUserAgent = getUserAgent;
@@ -27622,7 +24289,7 @@ module.exports.sync = (input, options) => {
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 // just pre-load all the stuff that index.js lazily exports
-const internalRe = __webpack_require__(398)
+const internalRe = __webpack_require__(629)
 module.exports = {
   re: internalRe.re,
   src: internalRe.src,
@@ -27654,10 +24321,10 @@ module.exports = {
   lte: __webpack_require__(508),
   cmp: __webpack_require__(299),
   coerce: __webpack_require__(408),
-  Comparator: __webpack_require__(517),
-  Range: __webpack_require__(318),
-  satisfies: __webpack_require__(60),
-  toComparators: __webpack_require__(510),
+  Comparator: __webpack_require__(9),
+  Range: __webpack_require__(46),
+  satisfies: __webpack_require__(845),
+  toComparators: __webpack_require__(714),
   maxSatisfying: __webpack_require__(266),
   minSatisfying: __webpack_require__(38),
   minVersion: __webpack_require__(502),
@@ -27667,7 +24334,7 @@ module.exports = {
   ltr: __webpack_require__(522),
   intersects: __webpack_require__(620),
   simplifyRange: __webpack_require__(909),
-  subset: __webpack_require__(100),
+  subset: __webpack_require__(293),
 }
 
 
@@ -27744,54 +24411,48 @@ module.exports = {
 /* 538 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-"use strict";
+var wrappy = __webpack_require__(174)
+module.exports = wrappy(once)
+module.exports.strict = wrappy(onceStrict)
 
+once.proto = once(function () {
+  Object.defineProperty(Function.prototype, 'once', {
+    value: function () {
+      return once(this)
+    },
+    configurable: true
+  })
 
-const path = __webpack_require__(622);
-const which = __webpack_require__(744);
-const pathKey = __webpack_require__(697)();
+  Object.defineProperty(Function.prototype, 'onceStrict', {
+    value: function () {
+      return onceStrict(this)
+    },
+    configurable: true
+  })
+})
 
-function resolveCommandAttempt(parsed, withoutPathExt) {
-    const cwd = process.cwd();
-    const hasCustomCwd = parsed.options.cwd != null;
-
-    // If a custom `cwd` was specified, we need to change the process cwd
-    // because `which` will do stat calls but does not support a custom cwd
-    if (hasCustomCwd) {
-        try {
-            process.chdir(parsed.options.cwd);
-        } catch (err) {
-            /* Empty */
-        }
-    }
-
-    let resolved;
-
-    try {
-        resolved = which.sync(parsed.command, {
-            path: (parsed.options.env || process.env)[pathKey],
-            pathExt: withoutPathExt ? path.delimiter : undefined,
-        });
-    } catch (e) {
-        /* Empty */
-    } finally {
-        process.chdir(cwd);
-    }
-
-    // If we successfully resolved, ensure that an absolute path is returned
-    // Note that when a custom `cwd` was used, we need to resolve to an absolute path based on it
-    if (resolved) {
-        resolved = path.resolve(hasCustomCwd ? parsed.options.cwd : '', resolved);
-    }
-
-    return resolved;
+function once (fn) {
+  var f = function () {
+    if (f.called) return f.value
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  f.called = false
+  return f
 }
 
-function resolveCommand(parsed) {
-    return resolveCommandAttempt(parsed) || resolveCommandAttempt(parsed, true);
+function onceStrict (fn) {
+  var f = function () {
+    if (f.called)
+      throw new Error(f.onceError)
+    f.called = true
+    return f.value = fn.apply(this, arguments)
+  }
+  var name = fn.name || 'Function wrapped with `once`'
+  f.onceError = name + " shouldn't be called more than once"
+  f.called = false
+  return f
 }
-
-module.exports = resolveCommand;
 
 
 /***/ }),
@@ -28217,105 +24878,37 @@ const commandText = (pkg) => {
 
 
 /***/ }),
-/* 546 */,
-/* 547 */
+/* 546 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-const path = __webpack_require__(622);
-const resolveCommand = __webpack_require__(382);
-const escape = __webpack_require__(205);
-const readShebang = __webpack_require__(46);
+const fs = __webpack_require__(747);
+const shebangCommand = __webpack_require__(786);
 
-const isWin = process.platform === 'win32';
-const isExecutableRegExp = /\.(?:com|exe)$/i;
-const isCmdShimRegExp = /node_modules[\\/].bin[\\/][^\\/]+\.cmd$/i;
+function readShebang(command) {
+    // Read the first 150 bytes from the file
+    const size = 150;
+    const buffer = Buffer.alloc(size);
 
-function detectShebang(parsed) {
-    parsed.file = resolveCommand(parsed);
+    let fd;
 
-    const shebang = parsed.file && readShebang(parsed.file);
+    try {
+        fd = fs.openSync(command, 'r');
+        fs.readSync(fd, buffer, 0, size, 0);
+        fs.closeSync(fd);
+    } catch (e) { /* Empty */ }
 
-    if (shebang) {
-        parsed.args.unshift(parsed.file);
-        parsed.command = shebang;
-
-        return resolveCommand(parsed);
-    }
-
-    return parsed.file;
+    // Attempt to extract shebang (null is returned if not a shebang)
+    return shebangCommand(buffer.toString());
 }
 
-function parseNonShell(parsed) {
-    if (!isWin) {
-        return parsed;
-    }
-
-    // Detect & add support for shebangs
-    const commandFile = detectShebang(parsed);
-
-    // We don't need a shell if the command filename is an executable
-    const needsShell = !isExecutableRegExp.test(commandFile);
-
-    // If a shell is required, use cmd.exe and take care of escaping everything correctly
-    // Note that `forceShell` is an hidden option used only in tests
-    if (parsed.options.forceShell || needsShell) {
-        // Need to double escape meta chars if the command is a cmd-shim located in `node_modules/.bin/`
-        // The cmd-shim simply calls execute the package bin file with NodeJS, proxying any argument
-        // Because the escape of metachars with ^ gets interpreted when the cmd.exe is first called,
-        // we need to double escape them
-        const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
-
-        // Normalize posix paths into OS compatible paths (e.g.: foo/bar -> foo\bar)
-        // This is necessary otherwise it will always fail with ENOENT in those cases
-        parsed.command = path.normalize(parsed.command);
-
-        // Escape command & arguments
-        parsed.command = escape.command(parsed.command);
-        parsed.args = parsed.args.map((arg) => escape.argument(arg, needsDoubleEscapeMetaChars));
-
-        const shellCommand = [parsed.command].concat(parsed.args).join(' ');
-
-        parsed.args = ['/d', '/s', '/c', `"${shellCommand}"`];
-        parsed.command = process.env.comspec || 'cmd.exe';
-        parsed.options.windowsVerbatimArguments = true; // Tell node's spawn that the arguments are already escaped
-    }
-
-    return parsed;
-}
-
-function parse(command, args, options) {
-    // Normalize arguments, similar to nodejs
-    if (args && !Array.isArray(args)) {
-        options = args;
-        args = null;
-    }
-
-    args = args ? args.slice(0) : []; // Clone array to avoid changing the original
-    options = Object.assign({}, options); // Clone object to avoid changing the original
-
-    // Build our parsed object
-    const parsed = {
-        command,
-        args,
-        options,
-        file: undefined,
-        original: {
-            command,
-            args,
-        },
-    };
-
-    // Delegate further parsing to shell or non-shell
-    return options.shell ? parsed : parseNonShell(parsed);
-}
-
-module.exports = parse;
+module.exports = readShebang;
 
 
 /***/ }),
+/* 547 */,
 /* 548 */,
 /* 549 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -28372,45 +24965,56 @@ module.exports = (versions, range, options) => {
 
 "use strict";
 
-const alias = ['stdin', 'stdout', 'stderr'];
+const aliases = ['stdin', 'stdout', 'stderr'];
 
-const hasAlias = opts => alias.some(x => Boolean(opts[x]));
+const hasAlias = opts => aliases.some(alias => opts[alias] !== undefined);
 
-module.exports = opts => {
+const normalizeStdio = opts => {
 	if (!opts) {
-		return null;
+		return;
 	}
 
-	if (opts.stdio && hasAlias(opts)) {
-		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${alias.map(x => `\`${x}\``).join(', ')}`);
+	const {stdio} = opts;
+
+	if (stdio === undefined) {
+		return aliases.map(alias => opts[alias]);
 	}
 
-	if (typeof opts.stdio === 'string') {
-		return opts.stdio;
+	if (hasAlias(opts)) {
+		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map(alias => `\`${alias}\``).join(', ')}`);
 	}
 
-	const stdio = opts.stdio || [];
+	if (typeof stdio === 'string') {
+		return stdio;
+	}
 
 	if (!Array.isArray(stdio)) {
 		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
 	}
 
-	const result = [];
-	const len = Math.max(stdio.length, alias.length);
+	const length = Math.max(stdio.length, aliases.length);
+	return Array.from({length}, (value, index) => stdio[index]);
+};
 
-	for (let i = 0; i < len; i++) {
-		let value = null;
+module.exports = normalizeStdio;
 
-		if (stdio[i] !== undefined) {
-			value = stdio[i];
-		} else if (opts[alias[i]] !== undefined) {
-			value = opts[alias[i]];
-		}
+// `ipc` is pushed unless it is already present
+module.exports.node = opts => {
+	const stdio = normalizeStdio(opts);
 
-		result[i] = value;
+	if (stdio === 'ipc') {
+		return 'ipc';
 	}
 
-	return result;
+	if (stdio === undefined || typeof stdio === 'string') {
+		return [stdio, stdio, stdio, 'ipc'];
+	}
+
+	if (stdio.includes('ipc')) {
+		return stdio;
+	}
+
+	return [...stdio, 'ipc'];
 };
 
 
@@ -28422,53 +25026,44 @@ module.exports = opts => {
 
 "use strict";
 
-const path = __webpack_require__(622);
-const pathKey = __webpack_require__(164);
 
-const npmRunPath = options => {
-	options = {
-		cwd: process.cwd(),
-		path: process.env[pathKey()],
-		execPath: process.execPath,
-		...options
-	};
+var map = __webpack_require__(906);
+var yaml = __webpack_require__(251);
 
-	let previous;
-	let cwdPath = path.resolve(options.cwd);
-	const result = [];
+var yamlPlugin = function yamlPlugin(options) {
+    options = options || {};
 
-	while (previous !== cwdPath) {
-		result.push(path.join(cwdPath, 'node_modules/.bin'));
-		previous = cwdPath;
-		cwdPath = path.resolve(cwdPath, '..');
-	}
+    function transformer(ast) {
+        return map(ast, function (node) {
+            if (node.type == "yaml") {
+                var parsedValue = yaml.safeLoad(node.value, 'utf8');
+                var newNode = Object.assign({}, node, { data: { parsedValue: parsedValue } });
+                return newNode;
+            } else {
+                return node;
+            }
+        });
+    }
 
-	// Ensure the running `node` binary is used
-	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
-	result.push(execPathDir);
+    // Stringify for yaml
+    var Compiler = this.Compiler;
 
-	return result.concat(options.path).join(path.delimiter);
+    if (Compiler != null) {
+        var visitors = Compiler.prototype.visitors;
+        if (visitors) {
+            visitors.yaml = function (node) {
+                if (node.data && node.data.parsedValue) {
+                    var yml = yaml.safeDump(node.data.parsedValue);
+                    return '---\n' + yml + '---';
+                }
+            };
+        }
+    }
+
+    return transformer;
 };
 
-module.exports = npmRunPath;
-// TODO: Remove this for the next major release
-module.exports.default = npmRunPath;
-
-module.exports.env = options => {
-	options = {
-		env: process.env,
-		...options
-	};
-
-	const env = {...options.env};
-	const path = pathKey({env});
-
-	options.path = env[path];
-	env[path] = module.exports(options);
-
-	return env;
-};
-
+module.exports = yamlPlugin;
 
 /***/ }),
 /* 554 */,
@@ -29427,7 +26022,7 @@ exports.convertPatternGroupToTask = convertPatternGroupToTask;
  * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  */
 var reInterpolate = __webpack_require__(125),
-    templateSettings = __webpack_require__(511);
+    templateSettings = __webpack_require__(401);
 
 /** Used to detect hot functions by number of calls within a span of milliseconds. */
 var HOT_COUNT = 800,
@@ -31150,7 +27745,7 @@ module.exports = __webpack_require__(849);
 "use strict";
 
 
-var uri = __webpack_require__(452)
+var uri = __webpack_require__(764)
 var title = __webpack_require__(919)
 
 module.exports = link
@@ -31282,15 +27877,7 @@ function unorderedItems(node) {
 
 
 /***/ }),
-/* 595 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const compare = __webpack_require__(22)
-const compareLoose = (a, b) => compare(a, b, true)
-module.exports = compareLoose
-
-
-/***/ }),
+/* 595 */,
 /* 596 */,
 /* 597 */
 /***/ (function(module) {
@@ -31398,138 +27985,7 @@ function thematic() {
 
 /***/ }),
 /* 603 */,
-/* 604 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-const path = __webpack_require__(622);
-const niceTry = __webpack_require__(410);
-const resolveCommand = __webpack_require__(538);
-const escape = __webpack_require__(97);
-const readShebang = __webpack_require__(106);
-const semver = __webpack_require__(311);
-
-const isWin = process.platform === 'win32';
-const isExecutableRegExp = /\.(?:com|exe)$/i;
-const isCmdShimRegExp = /node_modules[\\/].bin[\\/][^\\/]+\.cmd$/i;
-
-// `options.shell` is supported in Node ^4.8.0, ^5.7.0 and >= 6.0.0
-const supportsShellOption = niceTry(() => semver.satisfies(process.version, '^4.8.0 || ^5.7.0 || >= 6.0.0', true)) || false;
-
-function detectShebang(parsed) {
-    parsed.file = resolveCommand(parsed);
-
-    const shebang = parsed.file && readShebang(parsed.file);
-
-    if (shebang) {
-        parsed.args.unshift(parsed.file);
-        parsed.command = shebang;
-
-        return resolveCommand(parsed);
-    }
-
-    return parsed.file;
-}
-
-function parseNonShell(parsed) {
-    if (!isWin) {
-        return parsed;
-    }
-
-    // Detect & add support for shebangs
-    const commandFile = detectShebang(parsed);
-
-    // We don't need a shell if the command filename is an executable
-    const needsShell = !isExecutableRegExp.test(commandFile);
-
-    // If a shell is required, use cmd.exe and take care of escaping everything correctly
-    // Note that `forceShell` is an hidden option used only in tests
-    if (parsed.options.forceShell || needsShell) {
-        // Need to double escape meta chars if the command is a cmd-shim located in `node_modules/.bin/`
-        // The cmd-shim simply calls execute the package bin file with NodeJS, proxying any argument
-        // Because the escape of metachars with ^ gets interpreted when the cmd.exe is first called,
-        // we need to double escape them
-        const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
-
-        // Normalize posix paths into OS compatible paths (e.g.: foo/bar -> foo\bar)
-        // This is necessary otherwise it will always fail with ENOENT in those cases
-        parsed.command = path.normalize(parsed.command);
-
-        // Escape command & arguments
-        parsed.command = escape.command(parsed.command);
-        parsed.args = parsed.args.map((arg) => escape.argument(arg, needsDoubleEscapeMetaChars));
-
-        const shellCommand = [parsed.command].concat(parsed.args).join(' ');
-
-        parsed.args = ['/d', '/s', '/c', `"${shellCommand}"`];
-        parsed.command = process.env.comspec || 'cmd.exe';
-        parsed.options.windowsVerbatimArguments = true; // Tell node's spawn that the arguments are already escaped
-    }
-
-    return parsed;
-}
-
-function parseShell(parsed) {
-    // If node supports the shell option, there's no need to mimic its behavior
-    if (supportsShellOption) {
-        return parsed;
-    }
-
-    // Mimic node shell option
-    // See https://github.com/nodejs/node/blob/b9f6a2dc059a1062776133f3d4fd848c4da7d150/lib/child_process.js#L335
-    const shellCommand = [parsed.command].concat(parsed.args).join(' ');
-
-    if (isWin) {
-        parsed.command = typeof parsed.options.shell === 'string' ? parsed.options.shell : process.env.comspec || 'cmd.exe';
-        parsed.args = ['/d', '/s', '/c', `"${shellCommand}"`];
-        parsed.options.windowsVerbatimArguments = true; // Tell node's spawn that the arguments are already escaped
-    } else {
-        if (typeof parsed.options.shell === 'string') {
-            parsed.command = parsed.options.shell;
-        } else if (process.platform === 'android') {
-            parsed.command = '/system/bin/sh';
-        } else {
-            parsed.command = '/bin/sh';
-        }
-
-        parsed.args = ['-c', shellCommand];
-    }
-
-    return parsed;
-}
-
-function parse(command, args, options) {
-    // Normalize arguments, similar to nodejs
-    if (args && !Array.isArray(args)) {
-        options = args;
-        args = null;
-    }
-
-    args = args ? args.slice(0) : []; // Clone array to avoid changing the original
-    options = Object.assign({}, options); // Clone object to avoid changing the original
-
-    // Build our parsed object
-    const parsed = {
-        command,
-        args,
-        options,
-        file: undefined,
-        original: {
-            command,
-            args,
-        },
-    };
-
-    // Delegate further parsing to shell or non-shell
-    return options.shell ? parseShell(parsed) : parseNonShell(parsed);
-}
-
-module.exports = parse;
-
-
-/***/ }),
+/* 604 */,
 /* 605 */
 /***/ (function(module) {
 
@@ -31537,7 +27993,1761 @@ module.exports = require("http");
 
 /***/ }),
 /* 606 */,
-/* 607 */,
+/* 607 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* module decorator */ module = __webpack_require__.nmd(module);
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as the size to enable large array optimizations. */
+var LARGE_ARRAY_SIZE = 200;
+
+/** Used to stand-in for `undefined` hash values. */
+var HASH_UNDEFINED = '__lodash_hash_undefined__';
+
+/** Used as references for various `Number` constants. */
+var MAX_SAFE_INTEGER = 9007199254740991;
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]',
+    arrayTag = '[object Array]',
+    boolTag = '[object Boolean]',
+    dateTag = '[object Date]',
+    errorTag = '[object Error]',
+    funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]',
+    mapTag = '[object Map]',
+    numberTag = '[object Number]',
+    objectTag = '[object Object]',
+    promiseTag = '[object Promise]',
+    regexpTag = '[object RegExp]',
+    setTag = '[object Set]',
+    stringTag = '[object String]',
+    symbolTag = '[object Symbol]',
+    weakMapTag = '[object WeakMap]';
+
+var arrayBufferTag = '[object ArrayBuffer]',
+    dataViewTag = '[object DataView]',
+    float32Tag = '[object Float32Array]',
+    float64Tag = '[object Float64Array]',
+    int8Tag = '[object Int8Array]',
+    int16Tag = '[object Int16Array]',
+    int32Tag = '[object Int32Array]',
+    uint8Tag = '[object Uint8Array]',
+    uint8ClampedTag = '[object Uint8ClampedArray]',
+    uint16Tag = '[object Uint16Array]',
+    uint32Tag = '[object Uint32Array]';
+
+/**
+ * Used to match `RegExp`
+ * [syntax characters](http://ecma-international.org/ecma-262/7.0/#sec-patterns).
+ */
+var reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+
+/** Used to match `RegExp` flags from their coerced string values. */
+var reFlags = /\w*$/;
+
+/** Used to detect host constructors (Safari). */
+var reIsHostCtor = /^\[object .+?Constructor\]$/;
+
+/** Used to detect unsigned integer values. */
+var reIsUint = /^(?:0|[1-9]\d*)$/;
+
+/** Used to identify `toStringTag` values supported by `_.clone`. */
+var cloneableTags = {};
+cloneableTags[argsTag] = cloneableTags[arrayTag] =
+cloneableTags[arrayBufferTag] = cloneableTags[dataViewTag] =
+cloneableTags[boolTag] = cloneableTags[dateTag] =
+cloneableTags[float32Tag] = cloneableTags[float64Tag] =
+cloneableTags[int8Tag] = cloneableTags[int16Tag] =
+cloneableTags[int32Tag] = cloneableTags[mapTag] =
+cloneableTags[numberTag] = cloneableTags[objectTag] =
+cloneableTags[regexpTag] = cloneableTags[setTag] =
+cloneableTags[stringTag] = cloneableTags[symbolTag] =
+cloneableTags[uint8Tag] = cloneableTags[uint8ClampedTag] =
+cloneableTags[uint16Tag] = cloneableTags[uint32Tag] = true;
+cloneableTags[errorTag] = cloneableTags[funcTag] =
+cloneableTags[weakMapTag] = false;
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+/** Detect free variable `exports`. */
+var freeExports =  true && exports && !exports.nodeType && exports;
+
+/** Detect free variable `module`. */
+var freeModule = freeExports && "object" == 'object' && module && !module.nodeType && module;
+
+/** Detect the popular CommonJS extension `module.exports`. */
+var moduleExports = freeModule && freeModule.exports === freeExports;
+
+/**
+ * Adds the key-value `pair` to `map`.
+ *
+ * @private
+ * @param {Object} map The map to modify.
+ * @param {Array} pair The key-value pair to add.
+ * @returns {Object} Returns `map`.
+ */
+function addMapEntry(map, pair) {
+  // Don't return `map.set` because it's not chainable in IE 11.
+  map.set(pair[0], pair[1]);
+  return map;
+}
+
+/**
+ * Adds `value` to `set`.
+ *
+ * @private
+ * @param {Object} set The set to modify.
+ * @param {*} value The value to add.
+ * @returns {Object} Returns `set`.
+ */
+function addSetEntry(set, value) {
+  // Don't return `set.add` because it's not chainable in IE 11.
+  set.add(value);
+  return set;
+}
+
+/**
+ * A specialized version of `_.forEach` for arrays without support for
+ * iteratee shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns `array`.
+ */
+function arrayEach(array, iteratee) {
+  var index = -1,
+      length = array ? array.length : 0;
+
+  while (++index < length) {
+    if (iteratee(array[index], index, array) === false) {
+      break;
+    }
+  }
+  return array;
+}
+
+/**
+ * Appends the elements of `values` to `array`.
+ *
+ * @private
+ * @param {Array} array The array to modify.
+ * @param {Array} values The values to append.
+ * @returns {Array} Returns `array`.
+ */
+function arrayPush(array, values) {
+  var index = -1,
+      length = values.length,
+      offset = array.length;
+
+  while (++index < length) {
+    array[offset + index] = values[index];
+  }
+  return array;
+}
+
+/**
+ * A specialized version of `_.reduce` for arrays without support for
+ * iteratee shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @param {*} [accumulator] The initial value.
+ * @param {boolean} [initAccum] Specify using the first element of `array` as
+ *  the initial value.
+ * @returns {*} Returns the accumulated value.
+ */
+function arrayReduce(array, iteratee, accumulator, initAccum) {
+  var index = -1,
+      length = array ? array.length : 0;
+
+  if (initAccum && length) {
+    accumulator = array[++index];
+  }
+  while (++index < length) {
+    accumulator = iteratee(accumulator, array[index], index, array);
+  }
+  return accumulator;
+}
+
+/**
+ * The base implementation of `_.times` without support for iteratee shorthands
+ * or max array length checks.
+ *
+ * @private
+ * @param {number} n The number of times to invoke `iteratee`.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the array of results.
+ */
+function baseTimes(n, iteratee) {
+  var index = -1,
+      result = Array(n);
+
+  while (++index < n) {
+    result[index] = iteratee(index);
+  }
+  return result;
+}
+
+/**
+ * Gets the value at `key` of `object`.
+ *
+ * @private
+ * @param {Object} [object] The object to query.
+ * @param {string} key The key of the property to get.
+ * @returns {*} Returns the property value.
+ */
+function getValue(object, key) {
+  return object == null ? undefined : object[key];
+}
+
+/**
+ * Checks if `value` is a host object in IE < 9.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
+ */
+function isHostObject(value) {
+  // Many host objects are `Object` objects that can coerce to strings
+  // despite having improperly defined `toString` methods.
+  var result = false;
+  if (value != null && typeof value.toString != 'function') {
+    try {
+      result = !!(value + '');
+    } catch (e) {}
+  }
+  return result;
+}
+
+/**
+ * Converts `map` to its key-value pairs.
+ *
+ * @private
+ * @param {Object} map The map to convert.
+ * @returns {Array} Returns the key-value pairs.
+ */
+function mapToArray(map) {
+  var index = -1,
+      result = Array(map.size);
+
+  map.forEach(function(value, key) {
+    result[++index] = [key, value];
+  });
+  return result;
+}
+
+/**
+ * Creates a unary function that invokes `func` with its argument transformed.
+ *
+ * @private
+ * @param {Function} func The function to wrap.
+ * @param {Function} transform The argument transform.
+ * @returns {Function} Returns the new function.
+ */
+function overArg(func, transform) {
+  return function(arg) {
+    return func(transform(arg));
+  };
+}
+
+/**
+ * Converts `set` to an array of its values.
+ *
+ * @private
+ * @param {Object} set The set to convert.
+ * @returns {Array} Returns the values.
+ */
+function setToArray(set) {
+  var index = -1,
+      result = Array(set.size);
+
+  set.forEach(function(value) {
+    result[++index] = value;
+  });
+  return result;
+}
+
+/** Used for built-in method references. */
+var arrayProto = Array.prototype,
+    funcProto = Function.prototype,
+    objectProto = Object.prototype;
+
+/** Used to detect overreaching core-js shims. */
+var coreJsData = root['__core-js_shared__'];
+
+/** Used to detect methods masquerading as native. */
+var maskSrcKey = (function() {
+  var uid = /[^.]+$/.exec(coreJsData && coreJsData.keys && coreJsData.keys.IE_PROTO || '');
+  return uid ? ('Symbol(src)_1.' + uid) : '';
+}());
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/** Used to detect if a method is native. */
+var reIsNative = RegExp('^' +
+  funcToString.call(hasOwnProperty).replace(reRegExpChar, '\\$&')
+  .replace(/hasOwnProperty|(function).*?(?=\\\()| for .+?(?=\\\])/g, '$1.*?') + '$'
+);
+
+/** Built-in value references. */
+var Buffer = moduleExports ? root.Buffer : undefined,
+    Symbol = root.Symbol,
+    Uint8Array = root.Uint8Array,
+    getPrototype = overArg(Object.getPrototypeOf, Object),
+    objectCreate = Object.create,
+    propertyIsEnumerable = objectProto.propertyIsEnumerable,
+    splice = arrayProto.splice;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeGetSymbols = Object.getOwnPropertySymbols,
+    nativeIsBuffer = Buffer ? Buffer.isBuffer : undefined,
+    nativeKeys = overArg(Object.keys, Object);
+
+/* Built-in method references that are verified to be native. */
+var DataView = getNative(root, 'DataView'),
+    Map = getNative(root, 'Map'),
+    Promise = getNative(root, 'Promise'),
+    Set = getNative(root, 'Set'),
+    WeakMap = getNative(root, 'WeakMap'),
+    nativeCreate = getNative(Object, 'create');
+
+/** Used to detect maps, sets, and weakmaps. */
+var dataViewCtorString = toSource(DataView),
+    mapCtorString = toSource(Map),
+    promiseCtorString = toSource(Promise),
+    setCtorString = toSource(Set),
+    weakMapCtorString = toSource(WeakMap);
+
+/** Used to convert symbols to primitives and strings. */
+var symbolProto = Symbol ? Symbol.prototype : undefined,
+    symbolValueOf = symbolProto ? symbolProto.valueOf : undefined;
+
+/**
+ * Creates a hash object.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function Hash(entries) {
+  var index = -1,
+      length = entries ? entries.length : 0;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+/**
+ * Removes all key-value entries from the hash.
+ *
+ * @private
+ * @name clear
+ * @memberOf Hash
+ */
+function hashClear() {
+  this.__data__ = nativeCreate ? nativeCreate(null) : {};
+}
+
+/**
+ * Removes `key` and its value from the hash.
+ *
+ * @private
+ * @name delete
+ * @memberOf Hash
+ * @param {Object} hash The hash to modify.
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function hashDelete(key) {
+  return this.has(key) && delete this.__data__[key];
+}
+
+/**
+ * Gets the hash value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf Hash
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function hashGet(key) {
+  var data = this.__data__;
+  if (nativeCreate) {
+    var result = data[key];
+    return result === HASH_UNDEFINED ? undefined : result;
+  }
+  return hasOwnProperty.call(data, key) ? data[key] : undefined;
+}
+
+/**
+ * Checks if a hash value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf Hash
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function hashHas(key) {
+  var data = this.__data__;
+  return nativeCreate ? data[key] !== undefined : hasOwnProperty.call(data, key);
+}
+
+/**
+ * Sets the hash `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf Hash
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the hash instance.
+ */
+function hashSet(key, value) {
+  var data = this.__data__;
+  data[key] = (nativeCreate && value === undefined) ? HASH_UNDEFINED : value;
+  return this;
+}
+
+// Add methods to `Hash`.
+Hash.prototype.clear = hashClear;
+Hash.prototype['delete'] = hashDelete;
+Hash.prototype.get = hashGet;
+Hash.prototype.has = hashHas;
+Hash.prototype.set = hashSet;
+
+/**
+ * Creates an list cache object.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function ListCache(entries) {
+  var index = -1,
+      length = entries ? entries.length : 0;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+/**
+ * Removes all key-value entries from the list cache.
+ *
+ * @private
+ * @name clear
+ * @memberOf ListCache
+ */
+function listCacheClear() {
+  this.__data__ = [];
+}
+
+/**
+ * Removes `key` and its value from the list cache.
+ *
+ * @private
+ * @name delete
+ * @memberOf ListCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function listCacheDelete(key) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  if (index < 0) {
+    return false;
+  }
+  var lastIndex = data.length - 1;
+  if (index == lastIndex) {
+    data.pop();
+  } else {
+    splice.call(data, index, 1);
+  }
+  return true;
+}
+
+/**
+ * Gets the list cache value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf ListCache
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function listCacheGet(key) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  return index < 0 ? undefined : data[index][1];
+}
+
+/**
+ * Checks if a list cache value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf ListCache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function listCacheHas(key) {
+  return assocIndexOf(this.__data__, key) > -1;
+}
+
+/**
+ * Sets the list cache `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf ListCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the list cache instance.
+ */
+function listCacheSet(key, value) {
+  var data = this.__data__,
+      index = assocIndexOf(data, key);
+
+  if (index < 0) {
+    data.push([key, value]);
+  } else {
+    data[index][1] = value;
+  }
+  return this;
+}
+
+// Add methods to `ListCache`.
+ListCache.prototype.clear = listCacheClear;
+ListCache.prototype['delete'] = listCacheDelete;
+ListCache.prototype.get = listCacheGet;
+ListCache.prototype.has = listCacheHas;
+ListCache.prototype.set = listCacheSet;
+
+/**
+ * Creates a map cache object to store key-value pairs.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function MapCache(entries) {
+  var index = -1,
+      length = entries ? entries.length : 0;
+
+  this.clear();
+  while (++index < length) {
+    var entry = entries[index];
+    this.set(entry[0], entry[1]);
+  }
+}
+
+/**
+ * Removes all key-value entries from the map.
+ *
+ * @private
+ * @name clear
+ * @memberOf MapCache
+ */
+function mapCacheClear() {
+  this.__data__ = {
+    'hash': new Hash,
+    'map': new (Map || ListCache),
+    'string': new Hash
+  };
+}
+
+/**
+ * Removes `key` and its value from the map.
+ *
+ * @private
+ * @name delete
+ * @memberOf MapCache
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function mapCacheDelete(key) {
+  return getMapData(this, key)['delete'](key);
+}
+
+/**
+ * Gets the map value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf MapCache
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function mapCacheGet(key) {
+  return getMapData(this, key).get(key);
+}
+
+/**
+ * Checks if a map value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf MapCache
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function mapCacheHas(key) {
+  return getMapData(this, key).has(key);
+}
+
+/**
+ * Sets the map `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf MapCache
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the map cache instance.
+ */
+function mapCacheSet(key, value) {
+  getMapData(this, key).set(key, value);
+  return this;
+}
+
+// Add methods to `MapCache`.
+MapCache.prototype.clear = mapCacheClear;
+MapCache.prototype['delete'] = mapCacheDelete;
+MapCache.prototype.get = mapCacheGet;
+MapCache.prototype.has = mapCacheHas;
+MapCache.prototype.set = mapCacheSet;
+
+/**
+ * Creates a stack cache object to store key-value pairs.
+ *
+ * @private
+ * @constructor
+ * @param {Array} [entries] The key-value pairs to cache.
+ */
+function Stack(entries) {
+  this.__data__ = new ListCache(entries);
+}
+
+/**
+ * Removes all key-value entries from the stack.
+ *
+ * @private
+ * @name clear
+ * @memberOf Stack
+ */
+function stackClear() {
+  this.__data__ = new ListCache;
+}
+
+/**
+ * Removes `key` and its value from the stack.
+ *
+ * @private
+ * @name delete
+ * @memberOf Stack
+ * @param {string} key The key of the value to remove.
+ * @returns {boolean} Returns `true` if the entry was removed, else `false`.
+ */
+function stackDelete(key) {
+  return this.__data__['delete'](key);
+}
+
+/**
+ * Gets the stack value for `key`.
+ *
+ * @private
+ * @name get
+ * @memberOf Stack
+ * @param {string} key The key of the value to get.
+ * @returns {*} Returns the entry value.
+ */
+function stackGet(key) {
+  return this.__data__.get(key);
+}
+
+/**
+ * Checks if a stack value for `key` exists.
+ *
+ * @private
+ * @name has
+ * @memberOf Stack
+ * @param {string} key The key of the entry to check.
+ * @returns {boolean} Returns `true` if an entry for `key` exists, else `false`.
+ */
+function stackHas(key) {
+  return this.__data__.has(key);
+}
+
+/**
+ * Sets the stack `key` to `value`.
+ *
+ * @private
+ * @name set
+ * @memberOf Stack
+ * @param {string} key The key of the value to set.
+ * @param {*} value The value to set.
+ * @returns {Object} Returns the stack cache instance.
+ */
+function stackSet(key, value) {
+  var cache = this.__data__;
+  if (cache instanceof ListCache) {
+    var pairs = cache.__data__;
+    if (!Map || (pairs.length < LARGE_ARRAY_SIZE - 1)) {
+      pairs.push([key, value]);
+      return this;
+    }
+    cache = this.__data__ = new MapCache(pairs);
+  }
+  cache.set(key, value);
+  return this;
+}
+
+// Add methods to `Stack`.
+Stack.prototype.clear = stackClear;
+Stack.prototype['delete'] = stackDelete;
+Stack.prototype.get = stackGet;
+Stack.prototype.has = stackHas;
+Stack.prototype.set = stackSet;
+
+/**
+ * Creates an array of the enumerable property names of the array-like `value`.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @param {boolean} inherited Specify returning inherited property names.
+ * @returns {Array} Returns the array of property names.
+ */
+function arrayLikeKeys(value, inherited) {
+  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+  // Safari 9 makes `arguments.length` enumerable in strict mode.
+  var result = (isArray(value) || isArguments(value))
+    ? baseTimes(value.length, String)
+    : [];
+
+  var length = result.length,
+      skipIndexes = !!length;
+
+  for (var key in value) {
+    if ((inherited || hasOwnProperty.call(value, key)) &&
+        !(skipIndexes && (key == 'length' || isIndex(key, length)))) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+/**
+ * Assigns `value` to `key` of `object` if the existing value is not equivalent
+ * using [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * for equality comparisons.
+ *
+ * @private
+ * @param {Object} object The object to modify.
+ * @param {string} key The key of the property to assign.
+ * @param {*} value The value to assign.
+ */
+function assignValue(object, key, value) {
+  var objValue = object[key];
+  if (!(hasOwnProperty.call(object, key) && eq(objValue, value)) ||
+      (value === undefined && !(key in object))) {
+    object[key] = value;
+  }
+}
+
+/**
+ * Gets the index at which the `key` is found in `array` of key-value pairs.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {*} key The key to search for.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function assocIndexOf(array, key) {
+  var length = array.length;
+  while (length--) {
+    if (eq(array[length][0], key)) {
+      return length;
+    }
+  }
+  return -1;
+}
+
+/**
+ * The base implementation of `_.assign` without support for multiple sources
+ * or `customizer` functions.
+ *
+ * @private
+ * @param {Object} object The destination object.
+ * @param {Object} source The source object.
+ * @returns {Object} Returns `object`.
+ */
+function baseAssign(object, source) {
+  return object && copyObject(source, keys(source), object);
+}
+
+/**
+ * The base implementation of `_.clone` and `_.cloneDeep` which tracks
+ * traversed objects.
+ *
+ * @private
+ * @param {*} value The value to clone.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @param {boolean} [isFull] Specify a clone including symbols.
+ * @param {Function} [customizer] The function to customize cloning.
+ * @param {string} [key] The key of `value`.
+ * @param {Object} [object] The parent object of `value`.
+ * @param {Object} [stack] Tracks traversed objects and their clone counterparts.
+ * @returns {*} Returns the cloned value.
+ */
+function baseClone(value, isDeep, isFull, customizer, key, object, stack) {
+  var result;
+  if (customizer) {
+    result = object ? customizer(value, key, object, stack) : customizer(value);
+  }
+  if (result !== undefined) {
+    return result;
+  }
+  if (!isObject(value)) {
+    return value;
+  }
+  var isArr = isArray(value);
+  if (isArr) {
+    result = initCloneArray(value);
+    if (!isDeep) {
+      return copyArray(value, result);
+    }
+  } else {
+    var tag = getTag(value),
+        isFunc = tag == funcTag || tag == genTag;
+
+    if (isBuffer(value)) {
+      return cloneBuffer(value, isDeep);
+    }
+    if (tag == objectTag || tag == argsTag || (isFunc && !object)) {
+      if (isHostObject(value)) {
+        return object ? value : {};
+      }
+      result = initCloneObject(isFunc ? {} : value);
+      if (!isDeep) {
+        return copySymbols(value, baseAssign(result, value));
+      }
+    } else {
+      if (!cloneableTags[tag]) {
+        return object ? value : {};
+      }
+      result = initCloneByTag(value, tag, baseClone, isDeep);
+    }
+  }
+  // Check for circular references and return its corresponding clone.
+  stack || (stack = new Stack);
+  var stacked = stack.get(value);
+  if (stacked) {
+    return stacked;
+  }
+  stack.set(value, result);
+
+  if (!isArr) {
+    var props = isFull ? getAllKeys(value) : keys(value);
+  }
+  arrayEach(props || value, function(subValue, key) {
+    if (props) {
+      key = subValue;
+      subValue = value[key];
+    }
+    // Recursively populate clone (susceptible to call stack limits).
+    assignValue(result, key, baseClone(subValue, isDeep, isFull, customizer, key, value, stack));
+  });
+  return result;
+}
+
+/**
+ * The base implementation of `_.create` without support for assigning
+ * properties to the created object.
+ *
+ * @private
+ * @param {Object} prototype The object to inherit from.
+ * @returns {Object} Returns the new object.
+ */
+function baseCreate(proto) {
+  return isObject(proto) ? objectCreate(proto) : {};
+}
+
+/**
+ * The base implementation of `getAllKeys` and `getAllKeysIn` which uses
+ * `keysFunc` and `symbolsFunc` to get the enumerable property names and
+ * symbols of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Function} keysFunc The function to get the keys of `object`.
+ * @param {Function} symbolsFunc The function to get the symbols of `object`.
+ * @returns {Array} Returns the array of property names and symbols.
+ */
+function baseGetAllKeys(object, keysFunc, symbolsFunc) {
+  var result = keysFunc(object);
+  return isArray(object) ? result : arrayPush(result, symbolsFunc(object));
+}
+
+/**
+ * The base implementation of `getTag`.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the `toStringTag`.
+ */
+function baseGetTag(value) {
+  return objectToString.call(value);
+}
+
+/**
+ * The base implementation of `_.isNative` without bad shim checks.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a native function,
+ *  else `false`.
+ */
+function baseIsNative(value) {
+  if (!isObject(value) || isMasked(value)) {
+    return false;
+  }
+  var pattern = (isFunction(value) || isHostObject(value)) ? reIsNative : reIsHostCtor;
+  return pattern.test(toSource(value));
+}
+
+/**
+ * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ */
+function baseKeys(object) {
+  if (!isPrototype(object)) {
+    return nativeKeys(object);
+  }
+  var result = [];
+  for (var key in Object(object)) {
+    if (hasOwnProperty.call(object, key) && key != 'constructor') {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+/**
+ * Creates a clone of  `buffer`.
+ *
+ * @private
+ * @param {Buffer} buffer The buffer to clone.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @returns {Buffer} Returns the cloned buffer.
+ */
+function cloneBuffer(buffer, isDeep) {
+  if (isDeep) {
+    return buffer.slice();
+  }
+  var result = new buffer.constructor(buffer.length);
+  buffer.copy(result);
+  return result;
+}
+
+/**
+ * Creates a clone of `arrayBuffer`.
+ *
+ * @private
+ * @param {ArrayBuffer} arrayBuffer The array buffer to clone.
+ * @returns {ArrayBuffer} Returns the cloned array buffer.
+ */
+function cloneArrayBuffer(arrayBuffer) {
+  var result = new arrayBuffer.constructor(arrayBuffer.byteLength);
+  new Uint8Array(result).set(new Uint8Array(arrayBuffer));
+  return result;
+}
+
+/**
+ * Creates a clone of `dataView`.
+ *
+ * @private
+ * @param {Object} dataView The data view to clone.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @returns {Object} Returns the cloned data view.
+ */
+function cloneDataView(dataView, isDeep) {
+  var buffer = isDeep ? cloneArrayBuffer(dataView.buffer) : dataView.buffer;
+  return new dataView.constructor(buffer, dataView.byteOffset, dataView.byteLength);
+}
+
+/**
+ * Creates a clone of `map`.
+ *
+ * @private
+ * @param {Object} map The map to clone.
+ * @param {Function} cloneFunc The function to clone values.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @returns {Object} Returns the cloned map.
+ */
+function cloneMap(map, isDeep, cloneFunc) {
+  var array = isDeep ? cloneFunc(mapToArray(map), true) : mapToArray(map);
+  return arrayReduce(array, addMapEntry, new map.constructor);
+}
+
+/**
+ * Creates a clone of `regexp`.
+ *
+ * @private
+ * @param {Object} regexp The regexp to clone.
+ * @returns {Object} Returns the cloned regexp.
+ */
+function cloneRegExp(regexp) {
+  var result = new regexp.constructor(regexp.source, reFlags.exec(regexp));
+  result.lastIndex = regexp.lastIndex;
+  return result;
+}
+
+/**
+ * Creates a clone of `set`.
+ *
+ * @private
+ * @param {Object} set The set to clone.
+ * @param {Function} cloneFunc The function to clone values.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @returns {Object} Returns the cloned set.
+ */
+function cloneSet(set, isDeep, cloneFunc) {
+  var array = isDeep ? cloneFunc(setToArray(set), true) : setToArray(set);
+  return arrayReduce(array, addSetEntry, new set.constructor);
+}
+
+/**
+ * Creates a clone of the `symbol` object.
+ *
+ * @private
+ * @param {Object} symbol The symbol object to clone.
+ * @returns {Object} Returns the cloned symbol object.
+ */
+function cloneSymbol(symbol) {
+  return symbolValueOf ? Object(symbolValueOf.call(symbol)) : {};
+}
+
+/**
+ * Creates a clone of `typedArray`.
+ *
+ * @private
+ * @param {Object} typedArray The typed array to clone.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @returns {Object} Returns the cloned typed array.
+ */
+function cloneTypedArray(typedArray, isDeep) {
+  var buffer = isDeep ? cloneArrayBuffer(typedArray.buffer) : typedArray.buffer;
+  return new typedArray.constructor(buffer, typedArray.byteOffset, typedArray.length);
+}
+
+/**
+ * Copies the values of `source` to `array`.
+ *
+ * @private
+ * @param {Array} source The array to copy values from.
+ * @param {Array} [array=[]] The array to copy values to.
+ * @returns {Array} Returns `array`.
+ */
+function copyArray(source, array) {
+  var index = -1,
+      length = source.length;
+
+  array || (array = Array(length));
+  while (++index < length) {
+    array[index] = source[index];
+  }
+  return array;
+}
+
+/**
+ * Copies properties of `source` to `object`.
+ *
+ * @private
+ * @param {Object} source The object to copy properties from.
+ * @param {Array} props The property identifiers to copy.
+ * @param {Object} [object={}] The object to copy properties to.
+ * @param {Function} [customizer] The function to customize copied values.
+ * @returns {Object} Returns `object`.
+ */
+function copyObject(source, props, object, customizer) {
+  object || (object = {});
+
+  var index = -1,
+      length = props.length;
+
+  while (++index < length) {
+    var key = props[index];
+
+    var newValue = customizer
+      ? customizer(object[key], source[key], key, object, source)
+      : undefined;
+
+    assignValue(object, key, newValue === undefined ? source[key] : newValue);
+  }
+  return object;
+}
+
+/**
+ * Copies own symbol properties of `source` to `object`.
+ *
+ * @private
+ * @param {Object} source The object to copy symbols from.
+ * @param {Object} [object={}] The object to copy symbols to.
+ * @returns {Object} Returns `object`.
+ */
+function copySymbols(source, object) {
+  return copyObject(source, getSymbols(source), object);
+}
+
+/**
+ * Creates an array of own enumerable property names and symbols of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names and symbols.
+ */
+function getAllKeys(object) {
+  return baseGetAllKeys(object, keys, getSymbols);
+}
+
+/**
+ * Gets the data for `map`.
+ *
+ * @private
+ * @param {Object} map The map to query.
+ * @param {string} key The reference key.
+ * @returns {*} Returns the map data.
+ */
+function getMapData(map, key) {
+  var data = map.__data__;
+  return isKeyable(key)
+    ? data[typeof key == 'string' ? 'string' : 'hash']
+    : data.map;
+}
+
+/**
+ * Gets the native function at `key` of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {string} key The key of the method to get.
+ * @returns {*} Returns the function if it's native, else `undefined`.
+ */
+function getNative(object, key) {
+  var value = getValue(object, key);
+  return baseIsNative(value) ? value : undefined;
+}
+
+/**
+ * Creates an array of the own enumerable symbol properties of `object`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of symbols.
+ */
+var getSymbols = nativeGetSymbols ? overArg(nativeGetSymbols, Object) : stubArray;
+
+/**
+ * Gets the `toStringTag` of `value`.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @returns {string} Returns the `toStringTag`.
+ */
+var getTag = baseGetTag;
+
+// Fallback for data views, maps, sets, and weak maps in IE 11,
+// for data views in Edge < 14, and promises in Node.js.
+if ((DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag) ||
+    (Map && getTag(new Map) != mapTag) ||
+    (Promise && getTag(Promise.resolve()) != promiseTag) ||
+    (Set && getTag(new Set) != setTag) ||
+    (WeakMap && getTag(new WeakMap) != weakMapTag)) {
+  getTag = function(value) {
+    var result = objectToString.call(value),
+        Ctor = result == objectTag ? value.constructor : undefined,
+        ctorString = Ctor ? toSource(Ctor) : undefined;
+
+    if (ctorString) {
+      switch (ctorString) {
+        case dataViewCtorString: return dataViewTag;
+        case mapCtorString: return mapTag;
+        case promiseCtorString: return promiseTag;
+        case setCtorString: return setTag;
+        case weakMapCtorString: return weakMapTag;
+      }
+    }
+    return result;
+  };
+}
+
+/**
+ * Initializes an array clone.
+ *
+ * @private
+ * @param {Array} array The array to clone.
+ * @returns {Array} Returns the initialized clone.
+ */
+function initCloneArray(array) {
+  var length = array.length,
+      result = array.constructor(length);
+
+  // Add properties assigned by `RegExp#exec`.
+  if (length && typeof array[0] == 'string' && hasOwnProperty.call(array, 'index')) {
+    result.index = array.index;
+    result.input = array.input;
+  }
+  return result;
+}
+
+/**
+ * Initializes an object clone.
+ *
+ * @private
+ * @param {Object} object The object to clone.
+ * @returns {Object} Returns the initialized clone.
+ */
+function initCloneObject(object) {
+  return (typeof object.constructor == 'function' && !isPrototype(object))
+    ? baseCreate(getPrototype(object))
+    : {};
+}
+
+/**
+ * Initializes an object clone based on its `toStringTag`.
+ *
+ * **Note:** This function only supports cloning values with tags of
+ * `Boolean`, `Date`, `Error`, `Number`, `RegExp`, or `String`.
+ *
+ * @private
+ * @param {Object} object The object to clone.
+ * @param {string} tag The `toStringTag` of the object to clone.
+ * @param {Function} cloneFunc The function to clone values.
+ * @param {boolean} [isDeep] Specify a deep clone.
+ * @returns {Object} Returns the initialized clone.
+ */
+function initCloneByTag(object, tag, cloneFunc, isDeep) {
+  var Ctor = object.constructor;
+  switch (tag) {
+    case arrayBufferTag:
+      return cloneArrayBuffer(object);
+
+    case boolTag:
+    case dateTag:
+      return new Ctor(+object);
+
+    case dataViewTag:
+      return cloneDataView(object, isDeep);
+
+    case float32Tag: case float64Tag:
+    case int8Tag: case int16Tag: case int32Tag:
+    case uint8Tag: case uint8ClampedTag: case uint16Tag: case uint32Tag:
+      return cloneTypedArray(object, isDeep);
+
+    case mapTag:
+      return cloneMap(object, isDeep, cloneFunc);
+
+    case numberTag:
+    case stringTag:
+      return new Ctor(object);
+
+    case regexpTag:
+      return cloneRegExp(object);
+
+    case setTag:
+      return cloneSet(object, isDeep, cloneFunc);
+
+    case symbolTag:
+      return cloneSymbol(object);
+  }
+}
+
+/**
+ * Checks if `value` is a valid array-like index.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+ * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ */
+function isIndex(value, length) {
+  length = length == null ? MAX_SAFE_INTEGER : length;
+  return !!length &&
+    (typeof value == 'number' || reIsUint.test(value)) &&
+    (value > -1 && value % 1 == 0 && value < length);
+}
+
+/**
+ * Checks if `value` is suitable for use as unique object key.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is suitable, else `false`.
+ */
+function isKeyable(value) {
+  var type = typeof value;
+  return (type == 'string' || type == 'number' || type == 'symbol' || type == 'boolean')
+    ? (value !== '__proto__')
+    : (value === null);
+}
+
+/**
+ * Checks if `func` has its source masked.
+ *
+ * @private
+ * @param {Function} func The function to check.
+ * @returns {boolean} Returns `true` if `func` is masked, else `false`.
+ */
+function isMasked(func) {
+  return !!maskSrcKey && (maskSrcKey in func);
+}
+
+/**
+ * Checks if `value` is likely a prototype object.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
+ */
+function isPrototype(value) {
+  var Ctor = value && value.constructor,
+      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+
+  return value === proto;
+}
+
+/**
+ * Converts `func` to its source code.
+ *
+ * @private
+ * @param {Function} func The function to process.
+ * @returns {string} Returns the source code.
+ */
+function toSource(func) {
+  if (func != null) {
+    try {
+      return funcToString.call(func);
+    } catch (e) {}
+    try {
+      return (func + '');
+    } catch (e) {}
+  }
+  return '';
+}
+
+/**
+ * This method is like `_.clone` except that it recursively clones `value`.
+ *
+ * @static
+ * @memberOf _
+ * @since 1.0.0
+ * @category Lang
+ * @param {*} value The value to recursively clone.
+ * @returns {*} Returns the deep cloned value.
+ * @see _.clone
+ * @example
+ *
+ * var objects = [{ 'a': 1 }, { 'b': 2 }];
+ *
+ * var deep = _.cloneDeep(objects);
+ * console.log(deep[0] === objects[0]);
+ * // => false
+ */
+function cloneDeep(value) {
+  return baseClone(value, true, true);
+}
+
+/**
+ * Performs a
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * comparison between two values to determine if they are equivalent.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to compare.
+ * @param {*} other The other value to compare.
+ * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+ * @example
+ *
+ * var object = { 'a': 1 };
+ * var other = { 'a': 1 };
+ *
+ * _.eq(object, object);
+ * // => true
+ *
+ * _.eq(object, other);
+ * // => false
+ *
+ * _.eq('a', 'a');
+ * // => true
+ *
+ * _.eq('a', Object('a'));
+ * // => false
+ *
+ * _.eq(NaN, NaN);
+ * // => true
+ */
+function eq(value, other) {
+  return value === other || (value !== value && other !== other);
+}
+
+/**
+ * Checks if `value` is likely an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+function isArguments(value) {
+  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+  return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
+    (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
+}
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+/**
+ * Checks if `value` is array-like. A value is considered array-like if it's
+ * not a function and has a `value.length` that's an integer greater than or
+ * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ * @example
+ *
+ * _.isArrayLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLike(document.body.children);
+ * // => true
+ *
+ * _.isArrayLike('abc');
+ * // => true
+ *
+ * _.isArrayLike(_.noop);
+ * // => false
+ */
+function isArrayLike(value) {
+  return value != null && isLength(value.length) && !isFunction(value);
+}
+
+/**
+ * This method is like `_.isArrayLike` except that it also checks if `value`
+ * is an object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array-like object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArrayLikeObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLikeObject(document.body.children);
+ * // => true
+ *
+ * _.isArrayLikeObject('abc');
+ * // => false
+ *
+ * _.isArrayLikeObject(_.noop);
+ * // => false
+ */
+function isArrayLikeObject(value) {
+  return isObjectLike(value) && isArrayLike(value);
+}
+
+/**
+ * Checks if `value` is a buffer.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.3.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a buffer, else `false`.
+ * @example
+ *
+ * _.isBuffer(new Buffer(2));
+ * // => true
+ *
+ * _.isBuffer(new Uint8Array(2));
+ * // => false
+ */
+var isBuffer = nativeIsBuffer || stubFalse;
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in Safari 8-9 which returns 'object' for typed array and other constructors.
+  var tag = isObject(value) ? objectToString.call(value) : '';
+  return tag == funcTag || tag == genTag;
+}
+
+/**
+ * Checks if `value` is a valid array-like length.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+ * @example
+ *
+ * _.isLength(3);
+ * // => true
+ *
+ * _.isLength(Number.MIN_VALUE);
+ * // => false
+ *
+ * _.isLength(Infinity);
+ * // => false
+ *
+ * _.isLength('3');
+ * // => false
+ */
+function isLength(value) {
+  return typeof value == 'number' &&
+    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Creates an array of the own enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects. See the
+ * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+ * for more details.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keys(new Foo);
+ * // => ['a', 'b'] (iteration order is not guaranteed)
+ *
+ * _.keys('hi');
+ * // => ['0', '1']
+ */
+function keys(object) {
+  return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
+}
+
+/**
+ * This method returns a new empty array.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.13.0
+ * @category Util
+ * @returns {Array} Returns the new empty array.
+ * @example
+ *
+ * var arrays = _.times(2, _.stubArray);
+ *
+ * console.log(arrays);
+ * // => [[], []]
+ *
+ * console.log(arrays[0] === arrays[1]);
+ * // => false
+ */
+function stubArray() {
+  return [];
+}
+
+/**
+ * This method returns `false`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.13.0
+ * @category Util
+ * @returns {boolean} Returns `false`.
+ * @example
+ *
+ * _.times(2, _.stubFalse);
+ * // => [false, false]
+ */
+function stubFalse() {
+  return false;
+}
+
+module.exports = cloneDeep;
+
+
+/***/ }),
 /* 608 */,
 /* 609 */,
 /* 610 */,
@@ -31670,7 +29880,7 @@ function strikethrough(node) {
 /* 620 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const Range = __webpack_require__(318)
+const Range = __webpack_require__(46)
 const intersects = (r1, r2, options) => {
   r1 = new Range(r1, options)
   r2 = new Range(r2, options)
@@ -31680,15 +29890,7 @@ module.exports = intersects
 
 
 /***/ }),
-/* 621 */
-/***/ (function(module) {
-
-"use strict";
-
-module.exports = /^#!.*/;
-
-
-/***/ }),
+/* 621 */,
 /* 622 */
 /***/ (function(module) {
 
@@ -32194,55 +30396,190 @@ module.exports = parse;
 /***/ }),
 /* 628 */,
 /* 629 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
-"use strict";
+const { MAX_SAFE_COMPONENT_LENGTH } = __webpack_require__(94)
+const debug = __webpack_require__(940)
+exports = module.exports = {}
 
+// The actual regexps go on exports.re
+const re = exports.re = []
+const src = exports.src = []
+const t = exports.t = {}
+let R = 0
 
-var fence = __webpack_require__(753)
-
-module.exports = create
-
-function create(matter) {
-  var name = matter.type + 'FrontMatter'
-  var open = fence(matter, 'open')
-  var close = fence(matter, 'close')
-  var newline = '\n'
-  var anywhere = matter.anywhere
-
-  frontmatter.displayName = name
-  frontmatter.onlyAtStart = typeof anywhere === 'boolean' ? !anywhere : true
-
-  return [name, frontmatter]
-
-  function frontmatter(eat, value, silent) {
-    var index = open.length
-    var offset
-
-    if (value.slice(0, index) !== open || value.charAt(index) !== newline) {
-      return
-    }
-
-    offset = value.indexOf(close, index)
-
-    while (offset !== -1 && value.charAt(offset - 1) !== newline) {
-      index = offset + close.length
-      offset = value.indexOf(close, index)
-    }
-
-    if (offset !== -1) {
-      /* istanbul ignore if - never used (yet) */
-      if (silent) {
-        return true
-      }
-
-      return eat(value.slice(0, offset + close.length))({
-        type: matter.type,
-        value: value.slice(open.length + 1, offset - 1)
-      })
-    }
-  }
+const createToken = (name, value, isGlobal) => {
+  const index = R++
+  debug(index, value)
+  t[name] = index
+  src[index] = value
+  re[index] = new RegExp(value, isGlobal ? 'g' : undefined)
 }
+
+// The following Regular Expressions can be used for tokenizing,
+// validating, and parsing SemVer version strings.
+
+// ## Numeric Identifier
+// A single `0`, or a non-zero digit followed by zero or more digits.
+
+createToken('NUMERICIDENTIFIER', '0|[1-9]\\d*')
+createToken('NUMERICIDENTIFIERLOOSE', '[0-9]+')
+
+// ## Non-numeric Identifier
+// Zero or more digits, followed by a letter or hyphen, and then zero or
+// more letters, digits, or hyphens.
+
+createToken('NONNUMERICIDENTIFIER', '\\d*[a-zA-Z-][a-zA-Z0-9-]*')
+
+// ## Main Version
+// Three dot-separated numeric identifiers.
+
+createToken('MAINVERSION', `(${src[t.NUMERICIDENTIFIER]})\\.` +
+                   `(${src[t.NUMERICIDENTIFIER]})\\.` +
+                   `(${src[t.NUMERICIDENTIFIER]})`)
+
+createToken('MAINVERSIONLOOSE', `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
+                        `(${src[t.NUMERICIDENTIFIERLOOSE]})\\.` +
+                        `(${src[t.NUMERICIDENTIFIERLOOSE]})`)
+
+// ## Pre-release Version Identifier
+// A numeric identifier, or a non-numeric identifier.
+
+createToken('PRERELEASEIDENTIFIER', `(?:${src[t.NUMERICIDENTIFIER]
+}|${src[t.NONNUMERICIDENTIFIER]})`)
+
+createToken('PRERELEASEIDENTIFIERLOOSE', `(?:${src[t.NUMERICIDENTIFIERLOOSE]
+}|${src[t.NONNUMERICIDENTIFIER]})`)
+
+// ## Pre-release Version
+// Hyphen, followed by one or more dot-separated pre-release version
+// identifiers.
+
+createToken('PRERELEASE', `(?:-(${src[t.PRERELEASEIDENTIFIER]
+}(?:\\.${src[t.PRERELEASEIDENTIFIER]})*))`)
+
+createToken('PRERELEASELOOSE', `(?:-?(${src[t.PRERELEASEIDENTIFIERLOOSE]
+}(?:\\.${src[t.PRERELEASEIDENTIFIERLOOSE]})*))`)
+
+// ## Build Metadata Identifier
+// Any combination of digits, letters, or hyphens.
+
+createToken('BUILDIDENTIFIER', '[0-9A-Za-z-]+')
+
+// ## Build Metadata
+// Plus sign, followed by one or more period-separated build metadata
+// identifiers.
+
+createToken('BUILD', `(?:\\+(${src[t.BUILDIDENTIFIER]
+}(?:\\.${src[t.BUILDIDENTIFIER]})*))`)
+
+// ## Full Version String
+// A main version, followed optionally by a pre-release version and
+// build metadata.
+
+// Note that the only major, minor, patch, and pre-release sections of
+// the version string are capturing groups.  The build metadata is not a
+// capturing group, because it should not ever be used in version
+// comparison.
+
+createToken('FULLPLAIN', `v?${src[t.MAINVERSION]
+}${src[t.PRERELEASE]}?${
+  src[t.BUILD]}?`)
+
+createToken('FULL', `^${src[t.FULLPLAIN]}$`)
+
+// like full, but allows v1.2.3 and =1.2.3, which people do sometimes.
+// also, 1.0.0alpha1 (prerelease without the hyphen) which is pretty
+// common in the npm registry.
+createToken('LOOSEPLAIN', `[v=\\s]*${src[t.MAINVERSIONLOOSE]
+}${src[t.PRERELEASELOOSE]}?${
+  src[t.BUILD]}?`)
+
+createToken('LOOSE', `^${src[t.LOOSEPLAIN]}$`)
+
+createToken('GTLT', '((?:<|>)?=?)')
+
+// Something like "2.*" or "1.2.x".
+// Note that "x.x" is a valid xRange identifer, meaning "any version"
+// Only the first item is strictly required.
+createToken('XRANGEIDENTIFIERLOOSE', `${src[t.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`)
+createToken('XRANGEIDENTIFIER', `${src[t.NUMERICIDENTIFIER]}|x|X|\\*`)
+
+createToken('XRANGEPLAIN', `[v=\\s]*(${src[t.XRANGEIDENTIFIER]})` +
+                   `(?:\\.(${src[t.XRANGEIDENTIFIER]})` +
+                   `(?:\\.(${src[t.XRANGEIDENTIFIER]})` +
+                   `(?:${src[t.PRERELEASE]})?${
+                     src[t.BUILD]}?` +
+                   `)?)?`)
+
+createToken('XRANGEPLAINLOOSE', `[v=\\s]*(${src[t.XRANGEIDENTIFIERLOOSE]})` +
+                        `(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})` +
+                        `(?:\\.(${src[t.XRANGEIDENTIFIERLOOSE]})` +
+                        `(?:${src[t.PRERELEASELOOSE]})?${
+                          src[t.BUILD]}?` +
+                        `)?)?`)
+
+createToken('XRANGE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAIN]}$`)
+createToken('XRANGELOOSE', `^${src[t.GTLT]}\\s*${src[t.XRANGEPLAINLOOSE]}$`)
+
+// Coercion.
+// Extract anything that could conceivably be a part of a valid semver
+createToken('COERCE', `${'(^|[^\\d])' +
+              '(\\d{1,'}${MAX_SAFE_COMPONENT_LENGTH}})` +
+              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
+              `(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?` +
+              `(?:$|[^\\d])`)
+createToken('COERCERTL', src[t.COERCE], true)
+
+// Tilde ranges.
+// Meaning is "reasonably at or greater than"
+createToken('LONETILDE', '(?:~>?)')
+
+createToken('TILDETRIM', `(\\s*)${src[t.LONETILDE]}\\s+`, true)
+exports.tildeTrimReplace = '$1~'
+
+createToken('TILDE', `^${src[t.LONETILDE]}${src[t.XRANGEPLAIN]}$`)
+createToken('TILDELOOSE', `^${src[t.LONETILDE]}${src[t.XRANGEPLAINLOOSE]}$`)
+
+// Caret ranges.
+// Meaning is "at least and backwards compatible with"
+createToken('LONECARET', '(?:\\^)')
+
+createToken('CARETTRIM', `(\\s*)${src[t.LONECARET]}\\s+`, true)
+exports.caretTrimReplace = '$1^'
+
+createToken('CARET', `^${src[t.LONECARET]}${src[t.XRANGEPLAIN]}$`)
+createToken('CARETLOOSE', `^${src[t.LONECARET]}${src[t.XRANGEPLAINLOOSE]}$`)
+
+// A simple gt/lt/eq thing, or just "" to indicate "any version"
+createToken('COMPARATORLOOSE', `^${src[t.GTLT]}\\s*(${src[t.LOOSEPLAIN]})$|^$`)
+createToken('COMPARATOR', `^${src[t.GTLT]}\\s*(${src[t.FULLPLAIN]})$|^$`)
+
+// An expression to strip any whitespace between the gtlt and the thing
+// it modifies, so that `> 1.2.3` ==> `>1.2.3`
+createToken('COMPARATORTRIM', `(\\s*)${src[t.GTLT]
+}\\s*(${src[t.LOOSEPLAIN]}|${src[t.XRANGEPLAIN]})`, true)
+exports.comparatorTrimReplace = '$1$2$3'
+
+// Something like `1.2.3 - 1.2.4`
+// Note that these all use the loose form, because they'll be
+// checked against either the strict or loose comparator form
+// later.
+createToken('HYPHENRANGE', `^\\s*(${src[t.XRANGEPLAIN]})` +
+                   `\\s+-\\s+` +
+                   `(${src[t.XRANGEPLAIN]})` +
+                   `\\s*$`)
+
+createToken('HYPHENRANGELOOSE', `^\\s*(${src[t.XRANGEPLAINLOOSE]})` +
+                        `\\s+-\\s+` +
+                        `(${src[t.XRANGEPLAINLOOSE]})` +
+                        `\\s*$`)
+
+// Star ranges basically just allow anything at all.
+createToken('STAR', '(<|>)?=?\\s*\\*')
+// >=0.0.0 is like a star
+createToken('GTE0', '^\\s*>=\\s*0\.0\.0\\s*$')
+createToken('GTE0PRE', '^\\s*>=\\s*0\.0\.0-0\\s*$')
 
 
 /***/ }),
@@ -32989,25 +31326,66 @@ exports.validation = validation;
 
 /***/ }),
 /* 656 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
-// Note: this is the semver.org version of the spec that it implements
-// Not necessarily the package version of this code.
-const SEMVER_SPEC_VERSION = '2.0.0'
+"use strict";
 
-const MAX_LENGTH = 256
-const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER ||
-  /* istanbul ignore next */ 9007199254740991
 
-// Max safe segment length for coercion.
-const MAX_SAFE_COMPONENT_LENGTH = 16
+const fill = __webpack_require__(939);
+const utils = __webpack_require__(49);
 
-module.exports = {
-  SEMVER_SPEC_VERSION,
-  MAX_LENGTH,
-  MAX_SAFE_INTEGER,
-  MAX_SAFE_COMPONENT_LENGTH
-}
+const compile = (ast, options = {}) => {
+  let walk = (node, parent = {}) => {
+    let invalidBlock = utils.isInvalidBrace(parent);
+    let invalidNode = node.invalid === true && options.escapeInvalid === true;
+    let invalid = invalidBlock === true || invalidNode === true;
+    let prefix = options.escapeInvalid === true ? '\\' : '';
+    let output = '';
+
+    if (node.isOpen === true) {
+      return prefix + node.value;
+    }
+    if (node.isClose === true) {
+      return prefix + node.value;
+    }
+
+    if (node.type === 'open') {
+      return invalid ? (prefix + node.value) : '(';
+    }
+
+    if (node.type === 'close') {
+      return invalid ? (prefix + node.value) : ')';
+    }
+
+    if (node.type === 'comma') {
+      return node.prev.type === 'comma' ? '' : (invalid ? node.value : '|');
+    }
+
+    if (node.value) {
+      return node.value;
+    }
+
+    if (node.nodes && node.ranges > 0) {
+      let args = utils.reduce(node.nodes);
+      let range = fill(...args, { ...options, wrap: false, toRegex: true });
+
+      if (range.length !== 0) {
+        return args.length > 1 && range.length > 1 ? `(${range})` : range;
+      }
+    }
+
+    if (node.nodes) {
+      for (let child of node.nodes) {
+        output += walk(child, node);
+      }
+    }
+    return output;
+  };
+
+  return walk(ast);
+};
+
+module.exports = compile;
 
 
 /***/ }),
@@ -33122,65 +31500,7 @@ function interrupt(interruptors, tokenizers, ctx, parameters) {
 /***/ }),
 /* 659 */,
 /* 660 */,
-/* 661 */
-/***/ (function(module) {
-
-"use strict";
-
-const aliases = ['stdin', 'stdout', 'stderr'];
-
-const hasAlias = opts => aliases.some(alias => opts[alias] !== undefined);
-
-const normalizeStdio = opts => {
-	if (!opts) {
-		return;
-	}
-
-	const {stdio} = opts;
-
-	if (stdio === undefined) {
-		return aliases.map(alias => opts[alias]);
-	}
-
-	if (hasAlias(opts)) {
-		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map(alias => `\`${alias}\``).join(', ')}`);
-	}
-
-	if (typeof stdio === 'string') {
-		return stdio;
-	}
-
-	if (!Array.isArray(stdio)) {
-		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
-	}
-
-	const length = Math.max(stdio.length, aliases.length);
-	return Array.from({length}, (value, index) => stdio[index]);
-};
-
-module.exports = normalizeStdio;
-
-// `ipc` is pushed unless it is already present
-module.exports.node = opts => {
-	const stdio = normalizeStdio(opts);
-
-	if (stdio === 'ipc') {
-		return 'ipc';
-	}
-
-	if (stdio === undefined || typeof stdio === 'string') {
-		return [stdio, stdio, stdio, 'ipc'];
-	}
-
-	if (stdio.includes('ipc')) {
-		return stdio;
-	}
-
-	return [...stdio, 'ipc'];
-};
-
-
-/***/ }),
+/* 661 */,
 /* 662 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -33542,7 +31862,7 @@ function withDefaults(oldDefaults, newDefaults) {
   });
 }
 
-const VERSION = "6.0.3";
+const VERSION = "6.0.4";
 
 const userAgent = `octokit-endpoint.js/${VERSION} ${universalUserAgent.getUserAgent()}`; // DEFAULTS has all properties set that EndpointOptions has, except url.
 // So we use RequestParameters and add method as additional required property.
@@ -33776,7 +32096,7 @@ module.exports = require("util");
 module.exports = parseStream
 
 const stream = __webpack_require__(413)
-const TOMLParser = __webpack_require__(285)
+const TOMLParser = __webpack_require__(725)
 
 function parseStream (stm) {
   if (stm) {
@@ -35923,31 +34243,7 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 /* 688 */,
 /* 689 */,
 /* 690 */,
-/* 691 */
-/***/ (function(module) {
-
-"use strict";
-
-
-module.exports = all
-
-// Visit all children of `parent`.
-function all(parent) {
-  var self = this
-  var children = parent.children
-  var length = children.length
-  var results = []
-  var index = -1
-
-  while (++index < length) {
-    results[index] = self.visit(children[index], parent)
-  }
-
-  return results
-}
-
-
-/***/ }),
+/* 691 */,
 /* 692 */,
 /* 693 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
@@ -36045,26 +34341,7 @@ function emphasis(eat, value, silent) {
 /* 694 */,
 /* 695 */,
 /* 696 */,
-/* 697 */
-/***/ (function(module) {
-
-"use strict";
-
-module.exports = opts => {
-	opts = opts || {};
-
-	const env = opts.env || process.env;
-	const platform = opts.platform || process.platform;
-
-	if (platform !== 'win32') {
-		return 'PATH';
-	}
-
-	return Object.keys(env).find(x => x.toUpperCase() === 'PATH') || 'Path';
-};
-
-
-/***/ }),
+/* 697 */,
 /* 698 */,
 /* 699 */,
 /* 700 */
@@ -36210,7 +34487,7 @@ function _objectSpread2(target) {
   return target;
 }
 
-const VERSION = "3.1.0";
+const VERSION = "3.1.1";
 
 class Octokit {
   constructor(options = {}) {
@@ -36870,7 +35147,20 @@ exports.Context = Context;
 /* 711 */,
 /* 712 */,
 /* 713 */,
-/* 714 */,
+/* 714 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const Range = __webpack_require__(46)
+
+// Mostly just for testing and legacy API reasons
+const toComparators = (range, options) =>
+  new Range(range, options).set
+    .map(comp => comp.map(c => c.value).join(' ').trim().split(' '))
+
+module.exports = toComparators
+
+
+/***/ }),
 /* 715 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -36882,7 +35172,7 @@ var toggle = __webpack_require__(616)
 var vfileLocation = __webpack_require__(862)
 var unescape = __webpack_require__(31)
 var decode = __webpack_require__(572)
-var tokenizer = __webpack_require__(718)
+var tokenizer = __webpack_require__(205)
 
 module.exports = Parser
 
@@ -36905,7 +35195,7 @@ function Parser(doc, file) {
 var proto = Parser.prototype
 
 // Expose core.
-proto.setOptions = __webpack_require__(961)
+proto.setOptions = __webpack_require__(410)
 proto.parse = __webpack_require__(756)
 
 // Expose `defaults`.
@@ -36973,12 +35263,12 @@ proto.interruptBlockquote = [
 // Handlers.
 proto.blockTokenizers = {
   blankLine: __webpack_require__(144),
-  indentedCode: __webpack_require__(53),
+  indentedCode: __webpack_require__(949),
   fencedCode: __webpack_require__(966),
   blockquote: __webpack_require__(912),
   atxHeading: __webpack_require__(648),
   thematicBreak: __webpack_require__(389),
-  list: __webpack_require__(429),
+  list: __webpack_require__(510),
   setextHeading: __webpack_require__(238),
   html: __webpack_require__(10),
   definition: __webpack_require__(93),
@@ -37055,350 +35345,116 @@ function trimTrailingLines(value) {
 "use strict";
 
 
-var repeat = __webpack_require__(360)
+/*eslint-disable max-len*/
 
-module.exports = strong
+var common        = __webpack_require__(422);
+var YAMLException = __webpack_require__(848);
+var Type          = __webpack_require__(773);
 
-// Stringify a `strong`.
-//
-// The marker used is configurable by `strong`, which defaults to an asterisk
-// (`'*'`) but also accepts an underscore (`'_'`):
-//
-// ```markdown
-// __foo__
-// ```
-function strong(node) {
-  var marker = repeat(this.options.strong, 2)
-  return marker + this.all(node).join('') + marker
+
+function compileList(schema, name, result) {
+  var exclude = [];
+
+  schema.include.forEach(function (includedSchema) {
+    result = compileList(includedSchema, name, result);
+  });
+
+  schema[name].forEach(function (currentType) {
+    result.forEach(function (previousType, previousIndex) {
+      if (previousType.tag === currentType.tag && previousType.kind === currentType.kind) {
+        exclude.push(previousIndex);
+      }
+    });
+
+    result.push(currentType);
+  });
+
+  return result.filter(function (type, index) {
+    return exclude.indexOf(index) === -1;
+  });
 }
+
+
+function compileMap(/* lists... */) {
+  var result = {
+        scalar: {},
+        sequence: {},
+        mapping: {},
+        fallback: {}
+      }, index, length;
+
+  function collectType(type) {
+    result[type.kind][type.tag] = result['fallback'][type.tag] = type;
+  }
+
+  for (index = 0, length = arguments.length; index < length; index += 1) {
+    arguments[index].forEach(collectType);
+  }
+  return result;
+}
+
+
+function Schema(definition) {
+  this.include  = definition.include  || [];
+  this.implicit = definition.implicit || [];
+  this.explicit = definition.explicit || [];
+
+  this.implicit.forEach(function (type) {
+    if (type.loadKind && type.loadKind !== 'scalar') {
+      throw new YAMLException('There is a non-scalar type in the implicit list of a schema. Implicit resolving of such types is not supported.');
+    }
+  });
+
+  this.compiledImplicit = compileList(this, 'implicit', []);
+  this.compiledExplicit = compileList(this, 'explicit', []);
+  this.compiledTypeMap  = compileMap(this.compiledImplicit, this.compiledExplicit);
+}
+
+
+Schema.DEFAULT = null;
+
+
+Schema.create = function createSchema() {
+  var schemas, types;
+
+  switch (arguments.length) {
+    case 1:
+      schemas = Schema.DEFAULT;
+      types = arguments[0];
+      break;
+
+    case 2:
+      schemas = arguments[0];
+      types = arguments[1];
+      break;
+
+    default:
+      throw new YAMLException('Wrong number of arguments for Schema.create function');
+  }
+
+  schemas = common.toArray(schemas);
+  types = common.toArray(types);
+
+  if (!schemas.every(function (schema) { return schema instanceof Schema; })) {
+    throw new YAMLException('Specified list of super schemas (or a single Schema object) contains a non-Schema object.');
+  }
+
+  if (!types.every(function (type) { return type instanceof Type; })) {
+    throw new YAMLException('Specified list of YAML types (or a single Type object) contains a non-Type object.');
+  }
+
+  return new Schema({
+    include: schemas,
+    explicit: types
+  });
+};
+
+
+module.exports = Schema;
 
 
 /***/ }),
-/* 718 */
-/***/ (function(module) {
-
-"use strict";
-
-
-module.exports = factory
-
-// Construct a tokenizer.  This creates both `tokenizeInline` and `tokenizeBlock`.
-function factory(type) {
-  return tokenize
-
-  // Tokenizer for a bound `type`.
-  function tokenize(value, location) {
-    var self = this
-    var offset = self.offset
-    var tokens = []
-    var methods = self[type + 'Methods']
-    var tokenizers = self[type + 'Tokenizers']
-    var line = location.line
-    var column = location.column
-    var index
-    var length
-    var method
-    var name
-    var matched
-    var valueLength
-
-    // Trim white space only lines.
-    if (!value) {
-      return tokens
-    }
-
-    // Expose on `eat`.
-    eat.now = now
-    eat.file = self.file
-
-    // Sync initial offset.
-    updatePosition('')
-
-    // Iterate over `value`, and iterate over all tokenizers.  When one eats
-    // something, re-iterate with the remaining value.  If no tokenizer eats,
-    // something failed (should not happen) and an exception is thrown.
-    while (value) {
-      index = -1
-      length = methods.length
-      matched = false
-
-      while (++index < length) {
-        name = methods[index]
-        method = tokenizers[name]
-
-        // Previously, we had constructs such as footnotes and YAML that used
-        // these properties.
-        // Those are now external (plus there are userland extensions), that may
-        // still use them.
-        if (
-          method &&
-          /* istanbul ignore next */ (!method.onlyAtStart || self.atStart) &&
-          /* istanbul ignore next */ (!method.notInList || !self.inList) &&
-          /* istanbul ignore next */ (!method.notInBlock || !self.inBlock) &&
-          (!method.notInLink || !self.inLink)
-        ) {
-          valueLength = value.length
-
-          method.apply(self, [eat, value])
-
-          matched = valueLength !== value.length
-
-          if (matched) {
-            break
-          }
-        }
-      }
-
-      /* istanbul ignore if */
-      if (!matched) {
-        self.file.fail(new Error('Infinite loop'), eat.now())
-      }
-    }
-
-    self.eof = now()
-
-    return tokens
-
-    // Update line, column, and offset based on `value`.
-    function updatePosition(subvalue) {
-      var lastIndex = -1
-      var index = subvalue.indexOf('\n')
-
-      while (index !== -1) {
-        line++
-        lastIndex = index
-        index = subvalue.indexOf('\n', index + 1)
-      }
-
-      if (lastIndex === -1) {
-        column += subvalue.length
-      } else {
-        column = subvalue.length - lastIndex
-      }
-
-      if (line in offset) {
-        if (lastIndex !== -1) {
-          column += offset[line]
-        } else if (column <= offset[line]) {
-          column = offset[line] + 1
-        }
-      }
-    }
-
-    // Get offset.  Called before the first character is eaten to retrieve the
-    // range’s offsets.
-    function getOffset() {
-      var indentation = []
-      var pos = line + 1
-
-      // Done.  Called when the last character is eaten to retrieve the range’s
-      // offsets.
-      return function () {
-        var last = line + 1
-
-        while (pos < last) {
-          indentation.push((offset[pos] || 0) + 1)
-
-          pos++
-        }
-
-        return indentation
-      }
-    }
-
-    // Get the current position.
-    function now() {
-      var pos = {line: line, column: column}
-
-      pos.offset = self.toOffset(pos)
-
-      return pos
-    }
-
-    // Store position information for a node.
-    function Position(start) {
-      this.start = start
-      this.end = now()
-    }
-
-    // Throw when a value is incorrectly eaten.  This shouldn’t happen but will
-    // throw on new, incorrect rules.
-    function validateEat(subvalue) {
-      /* istanbul ignore if */
-      if (value.slice(0, subvalue.length) !== subvalue) {
-        // Capture stack-trace.
-        self.file.fail(
-          new Error(
-            'Incorrectly eaten value: please report this warning on https://git.io/vg5Ft'
-          ),
-          now()
-        )
-      }
-    }
-
-    // Mark position and patch `node.position`.
-    function position() {
-      var before = now()
-
-      return update
-
-      // Add the position to a node.
-      function update(node, indent) {
-        var previous = node.position
-        var start = previous ? previous.start : before
-        var combined = []
-        var n = previous && previous.end.line
-        var l = before.line
-
-        node.position = new Position(start)
-
-        // If there was already a `position`, this node was merged.  Fixing
-        // `start` wasn’t hard, but the indent is different.  Especially
-        // because some information, the indent between `n` and `l` wasn’t
-        // tracked.  Luckily, that space is (should be?) empty, so we can
-        // safely check for it now.
-        if (previous && indent && previous.indent) {
-          combined = previous.indent
-
-          if (n < l) {
-            while (++n < l) {
-              combined.push((offset[n] || 0) + 1)
-            }
-
-            combined.push(before.column)
-          }
-
-          indent = combined.concat(indent)
-        }
-
-        node.position.indent = indent || []
-
-        return node
-      }
-    }
-
-    // Add `node` to `parent`s children or to `tokens`.  Performs merges where
-    // possible.
-    function add(node, parent) {
-      var children = parent ? parent.children : tokens
-      var previous = children[children.length - 1]
-      var fn
-
-      if (
-        previous &&
-        node.type === previous.type &&
-        (node.type === 'text' || node.type === 'blockquote') &&
-        mergeable(previous) &&
-        mergeable(node)
-      ) {
-        fn = node.type === 'text' ? mergeText : mergeBlockquote
-        node = fn.call(self, previous, node)
-      }
-
-      if (node !== previous) {
-        children.push(node)
-      }
-
-      if (self.atStart && tokens.length !== 0) {
-        self.exitStart()
-      }
-
-      return node
-    }
-
-    // Remove `subvalue` from `value`.  `subvalue` must be at the start of
-    // `value`.
-    function eat(subvalue) {
-      var indent = getOffset()
-      var pos = position()
-      var current = now()
-
-      validateEat(subvalue)
-
-      apply.reset = reset
-      reset.test = test
-      apply.test = test
-
-      value = value.slice(subvalue.length)
-
-      updatePosition(subvalue)
-
-      indent = indent()
-
-      return apply
-
-      // Add the given arguments, add `position` to the returned node, and
-      // return the node.
-      function apply(node, parent) {
-        return pos(add(pos(node), parent), indent)
-      }
-
-      // Functions just like apply, but resets the content: the line and
-      // column are reversed, and the eaten value is re-added.   This is
-      // useful for nodes with a single type of content, such as lists and
-      // tables.  See `apply` above for what parameters are expected.
-      function reset() {
-        var node = apply.apply(null, arguments)
-
-        line = current.line
-        column = current.column
-        value = subvalue + value
-
-        return node
-      }
-
-      // Test the position, after eating, and reverse to a not-eaten state.
-      function test() {
-        var result = pos({})
-
-        line = current.line
-        column = current.column
-        value = subvalue + value
-
-        return result.position
-      }
-    }
-  }
-}
-
-// Check whether a node is mergeable with adjacent nodes.
-function mergeable(node) {
-  var start
-  var end
-
-  if (node.type !== 'text' || !node.position) {
-    return true
-  }
-
-  start = node.position.start
-  end = node.position.end
-
-  // Only merge nodes which occupy the same size as their `value`.
-  return (
-    start.line !== end.line || end.column - start.column === node.value.length
-  )
-}
-
-// Merge two text nodes: `node` into `prev`.
-function mergeText(previous, node) {
-  previous.value += node.value
-
-  return previous
-}
-
-// Merge two blockquotes: `node` into `prev`, unless in CommonMark or gfm modes.
-function mergeBlockquote(previous, node) {
-  if (this.options.commonmark || this.options.gfm) {
-    return node
-  }
-
-  previous.children = previous.children.concat(node.children)
-
-  return previous
-}
-
-
-/***/ }),
+/* 718 */,
 /* 719 */
 /***/ (function(__unusedmodule, exports) {
 
@@ -37484,91 +35540,1378 @@ module.exports = value => {
 
 "use strict";
 
-const {signalsByName} = __webpack_require__(781);
+/* eslint-disable no-new-wrappers, no-eval, camelcase, operator-linebreak */
+module.exports = makeParserClass(__webpack_require__(929))
+module.exports.makeParserClass = makeParserClass
 
-const getErrorPrefix = ({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled}) => {
-	if (timedOut) {
-		return `timed out after ${timeout} milliseconds`;
-	}
+class TomlError extends Error {
+  constructor (msg) {
+    super(msg)
+    this.name = 'TomlError'
+    /* istanbul ignore next */
+    if (Error.captureStackTrace) Error.captureStackTrace(this, TomlError)
+    this.fromTOML = true
+    this.wrapped = null
+  }
+}
+TomlError.wrap = err => {
+  const terr = new TomlError(err.message)
+  terr.code = err.code
+  terr.wrapped = err
+  return terr
+}
+module.exports.TomlError = TomlError
 
-	if (isCanceled) {
-		return 'was canceled';
-	}
+const createDateTime = __webpack_require__(721)
+const createDateTimeFloat = __webpack_require__(499)
+const createDate = __webpack_require__(67)
+const createTime = __webpack_require__(680)
 
-	if (errorCode !== undefined) {
-		return `failed with ${errorCode}`;
-	}
+const CTRL_I = 0x09
+const CTRL_J = 0x0A
+const CTRL_M = 0x0D
+const CTRL_CHAR_BOUNDARY = 0x1F // the last non-character in the latin1 region of unicode, except DEL
+const CHAR_SP = 0x20
+const CHAR_QUOT = 0x22
+const CHAR_NUM = 0x23
+const CHAR_APOS = 0x27
+const CHAR_PLUS = 0x2B
+const CHAR_COMMA = 0x2C
+const CHAR_HYPHEN = 0x2D
+const CHAR_PERIOD = 0x2E
+const CHAR_0 = 0x30
+const CHAR_1 = 0x31
+const CHAR_7 = 0x37
+const CHAR_9 = 0x39
+const CHAR_COLON = 0x3A
+const CHAR_EQUALS = 0x3D
+const CHAR_A = 0x41
+const CHAR_E = 0x45
+const CHAR_F = 0x46
+const CHAR_T = 0x54
+const CHAR_U = 0x55
+const CHAR_Z = 0x5A
+const CHAR_LOWBAR = 0x5F
+const CHAR_a = 0x61
+const CHAR_b = 0x62
+const CHAR_e = 0x65
+const CHAR_f = 0x66
+const CHAR_i = 0x69
+const CHAR_l = 0x6C
+const CHAR_n = 0x6E
+const CHAR_o = 0x6F
+const CHAR_r = 0x72
+const CHAR_s = 0x73
+const CHAR_t = 0x74
+const CHAR_u = 0x75
+const CHAR_x = 0x78
+const CHAR_z = 0x7A
+const CHAR_LCUB = 0x7B
+const CHAR_RCUB = 0x7D
+const CHAR_LSQB = 0x5B
+const CHAR_BSOL = 0x5C
+const CHAR_RSQB = 0x5D
+const CHAR_DEL = 0x7F
+const SURROGATE_FIRST = 0xD800
+const SURROGATE_LAST = 0xDFFF
 
-	if (signal !== undefined) {
-		return `was killed with ${signal} (${signalDescription})`;
-	}
+const escapes = {
+  [CHAR_b]: '\u0008',
+  [CHAR_t]: '\u0009',
+  [CHAR_n]: '\u000A',
+  [CHAR_f]: '\u000C',
+  [CHAR_r]: '\u000D',
+  [CHAR_QUOT]: '\u0022',
+  [CHAR_BSOL]: '\u005C'
+}
 
-	if (exitCode !== undefined) {
-		return `failed with exit code ${exitCode}`;
-	}
+function isDigit (cp) {
+  return cp >= CHAR_0 && cp <= CHAR_9
+}
+function isHexit (cp) {
+  return (cp >= CHAR_A && cp <= CHAR_F) || (cp >= CHAR_a && cp <= CHAR_f) || (cp >= CHAR_0 && cp <= CHAR_9)
+}
+function isBit (cp) {
+  return cp === CHAR_1 || cp === CHAR_0
+}
+function isOctit (cp) {
+  return (cp >= CHAR_0 && cp <= CHAR_7)
+}
+function isAlphaNumQuoteHyphen (cp) {
+  return (cp >= CHAR_A && cp <= CHAR_Z)
+      || (cp >= CHAR_a && cp <= CHAR_z)
+      || (cp >= CHAR_0 && cp <= CHAR_9)
+      || cp === CHAR_APOS
+      || cp === CHAR_QUOT
+      || cp === CHAR_LOWBAR
+      || cp === CHAR_HYPHEN
+}
+function isAlphaNumHyphen (cp) {
+  return (cp >= CHAR_A && cp <= CHAR_Z)
+      || (cp >= CHAR_a && cp <= CHAR_z)
+      || (cp >= CHAR_0 && cp <= CHAR_9)
+      || cp === CHAR_LOWBAR
+      || cp === CHAR_HYPHEN
+}
+const _type = Symbol('type')
+const _declared = Symbol('declared')
 
-	return 'failed';
-};
+const hasOwnProperty = Object.prototype.hasOwnProperty
+const defineProperty = Object.defineProperty
+const descriptor = {configurable: true, enumerable: true, writable: true, value: undefined}
 
-const makeError = ({
-	stdout,
-	stderr,
-	all,
-	error,
-	signal,
-	exitCode,
-	command,
-	timedOut,
-	isCanceled,
-	killed,
-	parsed: {options: {timeout}}
-}) => {
-	// `signal` and `exitCode` emitted on `spawned.on('exit')` event can be `null`.
-	// We normalize them to `undefined`
-	exitCode = exitCode === null ? undefined : exitCode;
-	signal = signal === null ? undefined : signal;
-	const signalDescription = signal === undefined ? undefined : signalsByName[signal].description;
+function hasKey (obj, key) {
+  if (hasOwnProperty.call(obj, key)) return true
+  if (key === '__proto__') defineProperty(obj, '__proto__', descriptor)
+  return false
+}
 
-	const errorCode = error && error.code;
+const INLINE_TABLE = Symbol('inline-table')
+function InlineTable () {
+  return Object.defineProperties({}, {
+    [_type]: {value: INLINE_TABLE}
+  })
+}
+function isInlineTable (obj) {
+  if (obj === null || typeof (obj) !== 'object') return false
+  return obj[_type] === INLINE_TABLE
+}
 
-	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
-	const execaMessage = `Command ${prefix}: ${command}`;
-	const isError = Object.prototype.toString.call(error) === '[object Error]';
-	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
-	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
+const TABLE = Symbol('table')
+function Table () {
+  return Object.defineProperties({}, {
+    [_type]: {value: TABLE},
+    [_declared]: {value: false, writable: true}
+  })
+}
+function isTable (obj) {
+  if (obj === null || typeof (obj) !== 'object') return false
+  return obj[_type] === TABLE
+}
 
-	if (isError) {
-		error.originalMessage = error.message;
-		error.message = message;
-	} else {
-		error = new Error(message);
-	}
+const _contentType = Symbol('content-type')
+const INLINE_LIST = Symbol('inline-list')
+function InlineList (type) {
+  return Object.defineProperties([], {
+    [_type]: {value: INLINE_LIST},
+    [_contentType]: {value: type}
+  })
+}
+function isInlineList (obj) {
+  if (obj === null || typeof (obj) !== 'object') return false
+  return obj[_type] === INLINE_LIST
+}
 
-	error.shortMessage = shortMessage;
-	error.command = command;
-	error.exitCode = exitCode;
-	error.signal = signal;
-	error.signalDescription = signalDescription;
-	error.stdout = stdout;
-	error.stderr = stderr;
+const LIST = Symbol('list')
+function List () {
+  return Object.defineProperties([], {
+    [_type]: {value: LIST}
+  })
+}
+function isList (obj) {
+  if (obj === null || typeof (obj) !== 'object') return false
+  return obj[_type] === LIST
+}
 
-	if (all !== undefined) {
-		error.all = all;
-	}
+// in an eval, to let bundlers not slurp in a util proxy
+let _custom
+try {
+  const utilInspect = eval("require('util').inspect")
+  _custom = utilInspect.custom
+} catch (_) {
+  /* eval require not available in transpiled bundle */
+}
+/* istanbul ignore next */
+const _inspect = _custom || 'inspect'
 
-	if ('bufferedData' in error) {
-		delete error.bufferedData;
-	}
+class BoxedBigInt {
+  constructor (value) {
+    try {
+      this.value = global.BigInt.asIntN(64, value)
+    } catch (_) {
+      /* istanbul ignore next */
+      this.value = null
+    }
+    Object.defineProperty(this, _type, {value: INTEGER})
+  }
+  isNaN () {
+    return this.value === null
+  }
+  /* istanbul ignore next */
+  toString () {
+    return String(this.value)
+  }
+  /* istanbul ignore next */
+  [_inspect] () {
+    return `[BigInt: ${this.toString()}]}`
+  }
+  valueOf () {
+    return this.value
+  }
+}
 
-	error.failed = true;
-	error.timedOut = Boolean(timedOut);
-	error.isCanceled = isCanceled;
-	error.killed = killed && !timedOut;
+const INTEGER = Symbol('integer')
+function Integer (value) {
+  let num = Number(value)
+  // -0 is a float thing, not an int thing
+  if (Object.is(num, -0)) num = 0
+  /* istanbul ignore else */
+  if (global.BigInt && !Number.isSafeInteger(num)) {
+    return new BoxedBigInt(value)
+  } else {
+    /* istanbul ignore next */
+    return Object.defineProperties(new Number(num), {
+      isNaN: {value: function () { return isNaN(this) }},
+      [_type]: {value: INTEGER},
+      [_inspect]: {value: () => `[Integer: ${value}]`}
+    })
+  }
+}
+function isInteger (obj) {
+  if (obj === null || typeof (obj) !== 'object') return false
+  return obj[_type] === INTEGER
+}
 
-	return error;
-};
+const FLOAT = Symbol('float')
+function Float (value) {
+  /* istanbul ignore next */
+  return Object.defineProperties(new Number(value), {
+    [_type]: {value: FLOAT},
+    [_inspect]: {value: () => `[Float: ${value}]`}
+  })
+}
+function isFloat (obj) {
+  if (obj === null || typeof (obj) !== 'object') return false
+  return obj[_type] === FLOAT
+}
 
-module.exports = makeError;
+function tomlType (value) {
+  const type = typeof value
+  if (type === 'object') {
+    /* istanbul ignore if */
+    if (value === null) return 'null'
+    if (value instanceof Date) return 'datetime'
+    /* istanbul ignore else */
+    if (_type in value) {
+      switch (value[_type]) {
+        case INLINE_TABLE: return 'inline-table'
+        case INLINE_LIST: return 'inline-list'
+        /* istanbul ignore next */
+        case TABLE: return 'table'
+        /* istanbul ignore next */
+        case LIST: return 'list'
+        case FLOAT: return 'float'
+        case INTEGER: return 'integer'
+      }
+    }
+  }
+  return type
+}
+
+function makeParserClass (Parser) {
+  class TOMLParser extends Parser {
+    constructor () {
+      super()
+      this.ctx = this.obj = Table()
+    }
+
+    /* MATCH HELPER */
+    atEndOfWord () {
+      return this.char === CHAR_NUM || this.char === CTRL_I || this.char === CHAR_SP || this.atEndOfLine()
+    }
+    atEndOfLine () {
+      return this.char === Parser.END || this.char === CTRL_J || this.char === CTRL_M
+    }
+
+    parseStart () {
+      if (this.char === Parser.END) {
+        return null
+      } else if (this.char === CHAR_LSQB) {
+        return this.call(this.parseTableOrList)
+      } else if (this.char === CHAR_NUM) {
+        return this.call(this.parseComment)
+      } else if (this.char === CTRL_J || this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M) {
+        return null
+      } else if (isAlphaNumQuoteHyphen(this.char)) {
+        return this.callNow(this.parseAssignStatement)
+      } else {
+        throw this.error(new TomlError(`Unknown character "${this.char}"`))
+      }
+    }
+
+    // HELPER, this strips any whitespace and comments to the end of the line
+    // then RETURNS. Last state in a production.
+    parseWhitespaceToEOL () {
+      if (this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M) {
+        return null
+      } else if (this.char === CHAR_NUM) {
+        return this.goto(this.parseComment)
+      } else if (this.char === Parser.END || this.char === CTRL_J) {
+        return this.return()
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected only whitespace or comments till end of line'))
+      }
+    }
+
+    /* ASSIGNMENT: key = value */
+    parseAssignStatement () {
+      return this.callNow(this.parseAssign, this.recordAssignStatement)
+    }
+    recordAssignStatement (kv) {
+      let target = this.ctx
+      let finalKey = kv.key.pop()
+      for (let kw of kv.key) {
+        if (hasKey(target, kw) && (!isTable(target[kw]) || target[kw][_declared])) {
+          throw this.error(new TomlError("Can't redefine existing key"))
+        }
+        target = target[kw] = target[kw] || Table()
+      }
+      if (hasKey(target, finalKey)) {
+        throw this.error(new TomlError("Can't redefine existing key"))
+      }
+      // unbox our numbers
+      if (isInteger(kv.value) || isFloat(kv.value)) {
+        target[finalKey] = kv.value.valueOf()
+      } else {
+        target[finalKey] = kv.value
+      }
+      return this.goto(this.parseWhitespaceToEOL)
+    }
+
+    /* ASSSIGNMENT expression, key = value possibly inside an inline table */
+    parseAssign () {
+      return this.callNow(this.parseKeyword, this.recordAssignKeyword)
+    }
+    recordAssignKeyword (key) {
+      if (this.state.resultTable) {
+        this.state.resultTable.push(key)
+      } else {
+        this.state.resultTable = [key]
+      }
+      return this.goto(this.parseAssignKeywordPreDot)
+    }
+    parseAssignKeywordPreDot () {
+      if (this.char === CHAR_PERIOD) {
+        return this.next(this.parseAssignKeywordPostDot)
+      } else if (this.char !== CHAR_SP && this.char !== CTRL_I) {
+        return this.goto(this.parseAssignEqual)
+      }
+    }
+    parseAssignKeywordPostDot () {
+      if (this.char !== CHAR_SP && this.char !== CTRL_I) {
+        return this.callNow(this.parseKeyword, this.recordAssignKeyword)
+      }
+    }
+
+    parseAssignEqual () {
+      if (this.char === CHAR_EQUALS) {
+        return this.next(this.parseAssignPreValue)
+      } else {
+        throw this.error(new TomlError('Invalid character, expected "="'))
+      }
+    }
+    parseAssignPreValue () {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else {
+        return this.callNow(this.parseValue, this.recordAssignValue)
+      }
+    }
+    recordAssignValue (value) {
+      return this.returnNow({key: this.state.resultTable, value: value})
+    }
+
+    /* COMMENTS: #...eol */
+    parseComment () {
+      do {
+        if (this.char === Parser.END || this.char === CTRL_J) {
+          return this.return()
+        }
+      } while (this.nextChar())
+    }
+
+    /* TABLES AND LISTS, [foo] and [[foo]] */
+    parseTableOrList () {
+      if (this.char === CHAR_LSQB) {
+        this.next(this.parseList)
+      } else {
+        return this.goto(this.parseTable)
+      }
+    }
+
+    /* TABLE [foo.bar.baz] */
+    parseTable () {
+      this.ctx = this.obj
+      return this.goto(this.parseTableNext)
+    }
+    parseTableNext () {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else {
+        return this.callNow(this.parseKeyword, this.parseTableMore)
+      }
+    }
+    parseTableMore (keyword) {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else if (this.char === CHAR_RSQB) {
+        if (hasKey(this.ctx, keyword) && (!isTable(this.ctx[keyword]) || this.ctx[keyword][_declared])) {
+          throw this.error(new TomlError("Can't redefine existing key"))
+        } else {
+          this.ctx = this.ctx[keyword] = this.ctx[keyword] || Table()
+          this.ctx[_declared] = true
+        }
+        return this.next(this.parseWhitespaceToEOL)
+      } else if (this.char === CHAR_PERIOD) {
+        if (!hasKey(this.ctx, keyword)) {
+          this.ctx = this.ctx[keyword] = Table()
+        } else if (isTable(this.ctx[keyword])) {
+          this.ctx = this.ctx[keyword]
+        } else if (isList(this.ctx[keyword])) {
+          this.ctx = this.ctx[keyword][this.ctx[keyword].length - 1]
+        } else {
+          throw this.error(new TomlError("Can't redefine existing key"))
+        }
+        return this.next(this.parseTableNext)
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected whitespace, . or ]'))
+      }
+    }
+
+    /* LIST [[a.b.c]] */
+    parseList () {
+      this.ctx = this.obj
+      return this.goto(this.parseListNext)
+    }
+    parseListNext () {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else {
+        return this.callNow(this.parseKeyword, this.parseListMore)
+      }
+    }
+    parseListMore (keyword) {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else if (this.char === CHAR_RSQB) {
+        if (!hasKey(this.ctx, keyword)) {
+          this.ctx[keyword] = List()
+        }
+        if (isInlineList(this.ctx[keyword])) {
+          throw this.error(new TomlError("Can't extend an inline array"))
+        } else if (isList(this.ctx[keyword])) {
+          const next = Table()
+          this.ctx[keyword].push(next)
+          this.ctx = next
+        } else {
+          throw this.error(new TomlError("Can't redefine an existing key"))
+        }
+        return this.next(this.parseListEnd)
+      } else if (this.char === CHAR_PERIOD) {
+        if (!hasKey(this.ctx, keyword)) {
+          this.ctx = this.ctx[keyword] = Table()
+        } else if (isInlineList(this.ctx[keyword])) {
+          throw this.error(new TomlError("Can't extend an inline array"))
+        } else if (isInlineTable(this.ctx[keyword])) {
+          throw this.error(new TomlError("Can't extend an inline table"))
+        } else if (isList(this.ctx[keyword])) {
+          this.ctx = this.ctx[keyword][this.ctx[keyword].length - 1]
+        } else if (isTable(this.ctx[keyword])) {
+          this.ctx = this.ctx[keyword]
+        } else {
+          throw this.error(new TomlError("Can't redefine an existing key"))
+        }
+        return this.next(this.parseListNext)
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected whitespace, . or ]'))
+      }
+    }
+    parseListEnd (keyword) {
+      if (this.char === CHAR_RSQB) {
+        return this.next(this.parseWhitespaceToEOL)
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected whitespace, . or ]'))
+      }
+    }
+
+    /* VALUE string, number, boolean, inline list, inline object */
+    parseValue () {
+      if (this.char === Parser.END) {
+        throw this.error(new TomlError('Key without value'))
+      } else if (this.char === CHAR_QUOT) {
+        return this.next(this.parseDoubleString)
+      } if (this.char === CHAR_APOS) {
+        return this.next(this.parseSingleString)
+      } else if (this.char === CHAR_HYPHEN || this.char === CHAR_PLUS) {
+        return this.goto(this.parseNumberSign)
+      } else if (this.char === CHAR_i) {
+        return this.next(this.parseInf)
+      } else if (this.char === CHAR_n) {
+        return this.next(this.parseNan)
+      } else if (isDigit(this.char)) {
+        return this.goto(this.parseNumberOrDateTime)
+      } else if (this.char === CHAR_t || this.char === CHAR_f) {
+        return this.goto(this.parseBoolean)
+      } else if (this.char === CHAR_LSQB) {
+        return this.call(this.parseInlineList, this.recordValue)
+      } else if (this.char === CHAR_LCUB) {
+        return this.call(this.parseInlineTable, this.recordValue)
+      } else {
+        throw this.error(new TomlError('Unexpected character, expecting string, number, datetime, boolean, inline array or inline table'))
+      }
+    }
+    recordValue (value) {
+      return this.returnNow(value)
+    }
+
+    parseInf () {
+      if (this.char === CHAR_n) {
+        return this.next(this.parseInf2)
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected "inf", "+inf" or "-inf"'))
+      }
+    }
+    parseInf2 () {
+      if (this.char === CHAR_f) {
+        if (this.state.buf === '-') {
+          return this.return(-Infinity)
+        } else {
+          return this.return(Infinity)
+        }
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected "inf", "+inf" or "-inf"'))
+      }
+    }
+
+    parseNan () {
+      if (this.char === CHAR_a) {
+        return this.next(this.parseNan2)
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected "nan"'))
+      }
+    }
+    parseNan2 () {
+      if (this.char === CHAR_n) {
+        return this.return(NaN)
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected "nan"'))
+      }
+    }
+
+    /* KEYS, barewords or basic, literal, or dotted */
+    parseKeyword () {
+      if (this.char === CHAR_QUOT) {
+        return this.next(this.parseBasicString)
+      } else if (this.char === CHAR_APOS) {
+        return this.next(this.parseLiteralString)
+      } else {
+        return this.goto(this.parseBareKey)
+      }
+    }
+
+    /* KEYS: barewords */
+    parseBareKey () {
+      do {
+        if (this.char === Parser.END) {
+          throw this.error(new TomlError('Key ended without value'))
+        } else if (isAlphaNumHyphen(this.char)) {
+          this.consume()
+        } else if (this.state.buf.length === 0) {
+          throw this.error(new TomlError('Empty bare keys are not allowed'))
+        } else {
+          return this.returnNow()
+        }
+      } while (this.nextChar())
+    }
+
+    /* STRINGS, single quoted (literal) */
+    parseSingleString () {
+      if (this.char === CHAR_APOS) {
+        return this.next(this.parseLiteralMultiStringMaybe)
+      } else {
+        return this.goto(this.parseLiteralString)
+      }
+    }
+    parseLiteralString () {
+      do {
+        if (this.char === CHAR_APOS) {
+          return this.return()
+        } else if (this.atEndOfLine()) {
+          throw this.error(new TomlError('Unterminated string'))
+        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
+          throw this.errorControlCharInString()
+        } else {
+          this.consume()
+        }
+      } while (this.nextChar())
+    }
+    parseLiteralMultiStringMaybe () {
+      if (this.char === CHAR_APOS) {
+        return this.next(this.parseLiteralMultiString)
+      } else {
+        return this.returnNow()
+      }
+    }
+    parseLiteralMultiString () {
+      if (this.char === CTRL_M) {
+        return null
+      } else if (this.char === CTRL_J) {
+        return this.next(this.parseLiteralMultiStringContent)
+      } else {
+        return this.goto(this.parseLiteralMultiStringContent)
+      }
+    }
+    parseLiteralMultiStringContent () {
+      do {
+        if (this.char === CHAR_APOS) {
+          return this.next(this.parseLiteralMultiEnd)
+        } else if (this.char === Parser.END) {
+          throw this.error(new TomlError('Unterminated multi-line string'))
+        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I && this.char !== CTRL_J && this.char !== CTRL_M)) {
+          throw this.errorControlCharInString()
+        } else {
+          this.consume()
+        }
+      } while (this.nextChar())
+    }
+    parseLiteralMultiEnd () {
+      if (this.char === CHAR_APOS) {
+        return this.next(this.parseLiteralMultiEnd2)
+      } else {
+        this.state.buf += "'"
+        return this.goto(this.parseLiteralMultiStringContent)
+      }
+    }
+    parseLiteralMultiEnd2 () {
+      if (this.char === CHAR_APOS) {
+        return this.return()
+      } else {
+        this.state.buf += "''"
+        return this.goto(this.parseLiteralMultiStringContent)
+      }
+    }
+
+    /* STRINGS double quoted */
+    parseDoubleString () {
+      if (this.char === CHAR_QUOT) {
+        return this.next(this.parseMultiStringMaybe)
+      } else {
+        return this.goto(this.parseBasicString)
+      }
+    }
+    parseBasicString () {
+      do {
+        if (this.char === CHAR_BSOL) {
+          return this.call(this.parseEscape, this.recordEscapeReplacement)
+        } else if (this.char === CHAR_QUOT) {
+          return this.return()
+        } else if (this.atEndOfLine()) {
+          throw this.error(new TomlError('Unterminated string'))
+        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I)) {
+          throw this.errorControlCharInString()
+        } else {
+          this.consume()
+        }
+      } while (this.nextChar())
+    }
+    recordEscapeReplacement (replacement) {
+      this.state.buf += replacement
+      return this.goto(this.parseBasicString)
+    }
+    parseMultiStringMaybe () {
+      if (this.char === CHAR_QUOT) {
+        return this.next(this.parseMultiString)
+      } else {
+        return this.returnNow()
+      }
+    }
+    parseMultiString () {
+      if (this.char === CTRL_M) {
+        return null
+      } else if (this.char === CTRL_J) {
+        return this.next(this.parseMultiStringContent)
+      } else {
+        return this.goto(this.parseMultiStringContent)
+      }
+    }
+    parseMultiStringContent () {
+      do {
+        if (this.char === CHAR_BSOL) {
+          return this.call(this.parseMultiEscape, this.recordMultiEscapeReplacement)
+        } else if (this.char === CHAR_QUOT) {
+          return this.next(this.parseMultiEnd)
+        } else if (this.char === Parser.END) {
+          throw this.error(new TomlError('Unterminated multi-line string'))
+        } else if (this.char === CHAR_DEL || (this.char <= CTRL_CHAR_BOUNDARY && this.char !== CTRL_I && this.char !== CTRL_J && this.char !== CTRL_M)) {
+          throw this.errorControlCharInString()
+        } else {
+          this.consume()
+        }
+      } while (this.nextChar())
+    }
+    errorControlCharInString () {
+      let displayCode = '\\u00'
+      if (this.char < 16) {
+        displayCode += '0'
+      }
+      displayCode += this.char.toString(16)
+
+      return this.error(new TomlError(`Control characters (codes < 0x1f and 0x7f) are not allowed in strings, use ${displayCode} instead`))
+    }
+    recordMultiEscapeReplacement (replacement) {
+      this.state.buf += replacement
+      return this.goto(this.parseMultiStringContent)
+    }
+    parseMultiEnd () {
+      if (this.char === CHAR_QUOT) {
+        return this.next(this.parseMultiEnd2)
+      } else {
+        this.state.buf += '"'
+        return this.goto(this.parseMultiStringContent)
+      }
+    }
+    parseMultiEnd2 () {
+      if (this.char === CHAR_QUOT) {
+        return this.return()
+      } else {
+        this.state.buf += '""'
+        return this.goto(this.parseMultiStringContent)
+      }
+    }
+    parseMultiEscape () {
+      if (this.char === CTRL_M || this.char === CTRL_J) {
+        return this.next(this.parseMultiTrim)
+      } else if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return this.next(this.parsePreMultiTrim)
+      } else {
+        return this.goto(this.parseEscape)
+      }
+    }
+    parsePreMultiTrim () {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else if (this.char === CTRL_M || this.char === CTRL_J) {
+        return this.next(this.parseMultiTrim)
+      } else {
+        throw this.error(new TomlError("Can't escape whitespace"))
+      }
+    }
+    parseMultiTrim () {
+      // explicitly whitespace here, END should follow the same path as chars
+      if (this.char === CTRL_J || this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M) {
+        return null
+      } else {
+        return this.returnNow()
+      }
+    }
+    parseEscape () {
+      if (this.char in escapes) {
+        return this.return(escapes[this.char])
+      } else if (this.char === CHAR_u) {
+        return this.call(this.parseSmallUnicode, this.parseUnicodeReturn)
+      } else if (this.char === CHAR_U) {
+        return this.call(this.parseLargeUnicode, this.parseUnicodeReturn)
+      } else {
+        throw this.error(new TomlError('Unknown escape character: ' + this.char))
+      }
+    }
+    parseUnicodeReturn (char) {
+      try {
+        const codePoint = parseInt(char, 16)
+        if (codePoint >= SURROGATE_FIRST && codePoint <= SURROGATE_LAST) {
+          throw this.error(new TomlError('Invalid unicode, character in range 0xD800 - 0xDFFF is reserved'))
+        }
+        return this.returnNow(String.fromCodePoint(codePoint))
+      } catch (err) {
+        throw this.error(TomlError.wrap(err))
+      }
+    }
+    parseSmallUnicode () {
+      if (!isHexit(this.char)) {
+        throw this.error(new TomlError('Invalid character in unicode sequence, expected hex'))
+      } else {
+        this.consume()
+        if (this.state.buf.length >= 4) return this.return()
+      }
+    }
+    parseLargeUnicode () {
+      if (!isHexit(this.char)) {
+        throw this.error(new TomlError('Invalid character in unicode sequence, expected hex'))
+      } else {
+        this.consume()
+        if (this.state.buf.length >= 8) return this.return()
+      }
+    }
+
+    /* NUMBERS */
+    parseNumberSign () {
+      this.consume()
+      return this.next(this.parseMaybeSignedInfOrNan)
+    }
+    parseMaybeSignedInfOrNan () {
+      if (this.char === CHAR_i) {
+        return this.next(this.parseInf)
+      } else if (this.char === CHAR_n) {
+        return this.next(this.parseNan)
+      } else {
+        return this.callNow(this.parseNoUnder, this.parseNumberIntegerStart)
+      }
+    }
+    parseNumberIntegerStart () {
+      if (this.char === CHAR_0) {
+        this.consume()
+        return this.next(this.parseNumberIntegerExponentOrDecimal)
+      } else {
+        return this.goto(this.parseNumberInteger)
+      }
+    }
+    parseNumberIntegerExponentOrDecimal () {
+      if (this.char === CHAR_PERIOD) {
+        this.consume()
+        return this.call(this.parseNoUnder, this.parseNumberFloat)
+      } else if (this.char === CHAR_E || this.char === CHAR_e) {
+        this.consume()
+        return this.next(this.parseNumberExponentSign)
+      } else {
+        return this.returnNow(Integer(this.state.buf))
+      }
+    }
+    parseNumberInteger () {
+      if (isDigit(this.char)) {
+        this.consume()
+      } else if (this.char === CHAR_LOWBAR) {
+        return this.call(this.parseNoUnder)
+      } else if (this.char === CHAR_E || this.char === CHAR_e) {
+        this.consume()
+        return this.next(this.parseNumberExponentSign)
+      } else if (this.char === CHAR_PERIOD) {
+        this.consume()
+        return this.call(this.parseNoUnder, this.parseNumberFloat)
+      } else {
+        const result = Integer(this.state.buf)
+        /* istanbul ignore if */
+        if (result.isNaN()) {
+          throw this.error(new TomlError('Invalid number'))
+        } else {
+          return this.returnNow(result)
+        }
+      }
+    }
+    parseNoUnder () {
+      if (this.char === CHAR_LOWBAR || this.char === CHAR_PERIOD || this.char === CHAR_E || this.char === CHAR_e) {
+        throw this.error(new TomlError('Unexpected character, expected digit'))
+      } else if (this.atEndOfWord()) {
+        throw this.error(new TomlError('Incomplete number'))
+      }
+      return this.returnNow()
+    }
+    parseNumberFloat () {
+      if (this.char === CHAR_LOWBAR) {
+        return this.call(this.parseNoUnder, this.parseNumberFloat)
+      } else if (isDigit(this.char)) {
+        this.consume()
+      } else if (this.char === CHAR_E || this.char === CHAR_e) {
+        this.consume()
+        return this.next(this.parseNumberExponentSign)
+      } else {
+        return this.returnNow(Float(this.state.buf))
+      }
+    }
+    parseNumberExponentSign () {
+      if (isDigit(this.char)) {
+        return this.goto(this.parseNumberExponent)
+      } else if (this.char === CHAR_HYPHEN || this.char === CHAR_PLUS) {
+        this.consume()
+        this.call(this.parseNoUnder, this.parseNumberExponent)
+      } else {
+        throw this.error(new TomlError('Unexpected character, expected -, + or digit'))
+      }
+    }
+    parseNumberExponent () {
+      if (isDigit(this.char)) {
+        this.consume()
+      } else if (this.char === CHAR_LOWBAR) {
+        return this.call(this.parseNoUnder)
+      } else {
+        return this.returnNow(Float(this.state.buf))
+      }
+    }
+
+    /* NUMBERS or DATETIMES  */
+    parseNumberOrDateTime () {
+      if (this.char === CHAR_0) {
+        this.consume()
+        return this.next(this.parseNumberBaseOrDateTime)
+      } else {
+        return this.goto(this.parseNumberOrDateTimeOnly)
+      }
+    }
+    parseNumberOrDateTimeOnly () {
+      // note, if two zeros are in a row then it MUST be a date
+      if (this.char === CHAR_LOWBAR) {
+        return this.call(this.parseNoUnder, this.parseNumberInteger)
+      } else if (isDigit(this.char)) {
+        this.consume()
+        if (this.state.buf.length > 4) this.next(this.parseNumberInteger)
+      } else if (this.char === CHAR_E || this.char === CHAR_e) {
+        this.consume()
+        return this.next(this.parseNumberExponentSign)
+      } else if (this.char === CHAR_PERIOD) {
+        this.consume()
+        return this.call(this.parseNoUnder, this.parseNumberFloat)
+      } else if (this.char === CHAR_HYPHEN) {
+        return this.goto(this.parseDateTime)
+      } else if (this.char === CHAR_COLON) {
+        return this.goto(this.parseOnlyTimeHour)
+      } else {
+        return this.returnNow(Integer(this.state.buf))
+      }
+    }
+    parseDateTimeOnly () {
+      if (this.state.buf.length < 4) {
+        if (isDigit(this.char)) {
+          return this.consume()
+        } else if (this.char === CHAR_COLON) {
+          return this.goto(this.parseOnlyTimeHour)
+        } else {
+          throw this.error(new TomlError('Expected digit while parsing year part of a date'))
+        }
+      } else {
+        if (this.char === CHAR_HYPHEN) {
+          return this.goto(this.parseDateTime)
+        } else {
+          throw this.error(new TomlError('Expected hyphen (-) while parsing year part of date'))
+        }
+      }
+    }
+    parseNumberBaseOrDateTime () {
+      if (this.char === CHAR_b) {
+        this.consume()
+        return this.call(this.parseNoUnder, this.parseIntegerBin)
+      } else if (this.char === CHAR_o) {
+        this.consume()
+        return this.call(this.parseNoUnder, this.parseIntegerOct)
+      } else if (this.char === CHAR_x) {
+        this.consume()
+        return this.call(this.parseNoUnder, this.parseIntegerHex)
+      } else if (this.char === CHAR_PERIOD) {
+        return this.goto(this.parseNumberInteger)
+      } else if (isDigit(this.char)) {
+        return this.goto(this.parseDateTimeOnly)
+      } else {
+        return this.returnNow(Integer(this.state.buf))
+      }
+    }
+    parseIntegerHex () {
+      if (isHexit(this.char)) {
+        this.consume()
+      } else if (this.char === CHAR_LOWBAR) {
+        return this.call(this.parseNoUnder)
+      } else {
+        const result = Integer(this.state.buf)
+        /* istanbul ignore if */
+        if (result.isNaN()) {
+          throw this.error(new TomlError('Invalid number'))
+        } else {
+          return this.returnNow(result)
+        }
+      }
+    }
+    parseIntegerOct () {
+      if (isOctit(this.char)) {
+        this.consume()
+      } else if (this.char === CHAR_LOWBAR) {
+        return this.call(this.parseNoUnder)
+      } else {
+        const result = Integer(this.state.buf)
+        /* istanbul ignore if */
+        if (result.isNaN()) {
+          throw this.error(new TomlError('Invalid number'))
+        } else {
+          return this.returnNow(result)
+        }
+      }
+    }
+    parseIntegerBin () {
+      if (isBit(this.char)) {
+        this.consume()
+      } else if (this.char === CHAR_LOWBAR) {
+        return this.call(this.parseNoUnder)
+      } else {
+        const result = Integer(this.state.buf)
+        /* istanbul ignore if */
+        if (result.isNaN()) {
+          throw this.error(new TomlError('Invalid number'))
+        } else {
+          return this.returnNow(result)
+        }
+      }
+    }
+
+    /* DATETIME */
+    parseDateTime () {
+      // we enter here having just consumed the year and about to consume the hyphen
+      if (this.state.buf.length < 4) {
+        throw this.error(new TomlError('Years less than 1000 must be zero padded to four characters'))
+      }
+      this.state.result = this.state.buf
+      this.state.buf = ''
+      return this.next(this.parseDateMonth)
+    }
+    parseDateMonth () {
+      if (this.char === CHAR_HYPHEN) {
+        if (this.state.buf.length < 2) {
+          throw this.error(new TomlError('Months less than 10 must be zero padded to two characters'))
+        }
+        this.state.result += '-' + this.state.buf
+        this.state.buf = ''
+        return this.next(this.parseDateDay)
+      } else if (isDigit(this.char)) {
+        this.consume()
+      } else {
+        throw this.error(new TomlError('Incomplete datetime'))
+      }
+    }
+    parseDateDay () {
+      if (this.char === CHAR_T || this.char === CHAR_SP) {
+        if (this.state.buf.length < 2) {
+          throw this.error(new TomlError('Days less than 10 must be zero padded to two characters'))
+        }
+        this.state.result += '-' + this.state.buf
+        this.state.buf = ''
+        return this.next(this.parseStartTimeHour)
+      } else if (this.atEndOfWord()) {
+        return this.return(createDate(this.state.result + '-' + this.state.buf))
+      } else if (isDigit(this.char)) {
+        this.consume()
+      } else {
+        throw this.error(new TomlError('Incomplete datetime'))
+      }
+    }
+    parseStartTimeHour () {
+      if (this.atEndOfWord()) {
+        return this.returnNow(createDate(this.state.result))
+      } else {
+        return this.goto(this.parseTimeHour)
+      }
+    }
+    parseTimeHour () {
+      if (this.char === CHAR_COLON) {
+        if (this.state.buf.length < 2) {
+          throw this.error(new TomlError('Hours less than 10 must be zero padded to two characters'))
+        }
+        this.state.result += 'T' + this.state.buf
+        this.state.buf = ''
+        return this.next(this.parseTimeMin)
+      } else if (isDigit(this.char)) {
+        this.consume()
+      } else {
+        throw this.error(new TomlError('Incomplete datetime'))
+      }
+    }
+    parseTimeMin () {
+      if (this.state.buf.length < 2 && isDigit(this.char)) {
+        this.consume()
+      } else if (this.state.buf.length === 2 && this.char === CHAR_COLON) {
+        this.state.result += ':' + this.state.buf
+        this.state.buf = ''
+        return this.next(this.parseTimeSec)
+      } else {
+        throw this.error(new TomlError('Incomplete datetime'))
+      }
+    }
+    parseTimeSec () {
+      if (isDigit(this.char)) {
+        this.consume()
+        if (this.state.buf.length === 2) {
+          this.state.result += ':' + this.state.buf
+          this.state.buf = ''
+          return this.next(this.parseTimeZoneOrFraction)
+        }
+      } else {
+        throw this.error(new TomlError('Incomplete datetime'))
+      }
+    }
+
+    parseOnlyTimeHour () {
+      /* istanbul ignore else */
+      if (this.char === CHAR_COLON) {
+        if (this.state.buf.length < 2) {
+          throw this.error(new TomlError('Hours less than 10 must be zero padded to two characters'))
+        }
+        this.state.result = this.state.buf
+        this.state.buf = ''
+        return this.next(this.parseOnlyTimeMin)
+      } else {
+        throw this.error(new TomlError('Incomplete time'))
+      }
+    }
+    parseOnlyTimeMin () {
+      if (this.state.buf.length < 2 && isDigit(this.char)) {
+        this.consume()
+      } else if (this.state.buf.length === 2 && this.char === CHAR_COLON) {
+        this.state.result += ':' + this.state.buf
+        this.state.buf = ''
+        return this.next(this.parseOnlyTimeSec)
+      } else {
+        throw this.error(new TomlError('Incomplete time'))
+      }
+    }
+    parseOnlyTimeSec () {
+      if (isDigit(this.char)) {
+        this.consume()
+        if (this.state.buf.length === 2) {
+          return this.next(this.parseOnlyTimeFractionMaybe)
+        }
+      } else {
+        throw this.error(new TomlError('Incomplete time'))
+      }
+    }
+    parseOnlyTimeFractionMaybe () {
+      this.state.result += ':' + this.state.buf
+      if (this.char === CHAR_PERIOD) {
+        this.state.buf = ''
+        this.next(this.parseOnlyTimeFraction)
+      } else {
+        return this.return(createTime(this.state.result))
+      }
+    }
+    parseOnlyTimeFraction () {
+      if (isDigit(this.char)) {
+        this.consume()
+      } else if (this.atEndOfWord()) {
+        if (this.state.buf.length === 0) throw this.error(new TomlError('Expected digit in milliseconds'))
+        return this.returnNow(createTime(this.state.result + '.' + this.state.buf))
+      } else {
+        throw this.error(new TomlError('Unexpected character in datetime, expected period (.), minus (-), plus (+) or Z'))
+      }
+    }
+
+    parseTimeZoneOrFraction () {
+      if (this.char === CHAR_PERIOD) {
+        this.consume()
+        this.next(this.parseDateTimeFraction)
+      } else if (this.char === CHAR_HYPHEN || this.char === CHAR_PLUS) {
+        this.consume()
+        this.next(this.parseTimeZoneHour)
+      } else if (this.char === CHAR_Z) {
+        this.consume()
+        return this.return(createDateTime(this.state.result + this.state.buf))
+      } else if (this.atEndOfWord()) {
+        return this.returnNow(createDateTimeFloat(this.state.result + this.state.buf))
+      } else {
+        throw this.error(new TomlError('Unexpected character in datetime, expected period (.), minus (-), plus (+) or Z'))
+      }
+    }
+    parseDateTimeFraction () {
+      if (isDigit(this.char)) {
+        this.consume()
+      } else if (this.state.buf.length === 1) {
+        throw this.error(new TomlError('Expected digit in milliseconds'))
+      } else if (this.char === CHAR_HYPHEN || this.char === CHAR_PLUS) {
+        this.consume()
+        this.next(this.parseTimeZoneHour)
+      } else if (this.char === CHAR_Z) {
+        this.consume()
+        return this.return(createDateTime(this.state.result + this.state.buf))
+      } else if (this.atEndOfWord()) {
+        return this.returnNow(createDateTimeFloat(this.state.result + this.state.buf))
+      } else {
+        throw this.error(new TomlError('Unexpected character in datetime, expected period (.), minus (-), plus (+) or Z'))
+      }
+    }
+    parseTimeZoneHour () {
+      if (isDigit(this.char)) {
+        this.consume()
+        // FIXME: No more regexps
+        if (/\d\d$/.test(this.state.buf)) return this.next(this.parseTimeZoneSep)
+      } else {
+        throw this.error(new TomlError('Unexpected character in datetime, expected digit'))
+      }
+    }
+    parseTimeZoneSep () {
+      if (this.char === CHAR_COLON) {
+        this.consume()
+        this.next(this.parseTimeZoneMin)
+      } else {
+        throw this.error(new TomlError('Unexpected character in datetime, expected colon'))
+      }
+    }
+    parseTimeZoneMin () {
+      if (isDigit(this.char)) {
+        this.consume()
+        if (/\d\d$/.test(this.state.buf)) return this.return(createDateTime(this.state.result + this.state.buf))
+      } else {
+        throw this.error(new TomlError('Unexpected character in datetime, expected digit'))
+      }
+    }
+
+    /* BOOLEAN */
+    parseBoolean () {
+      /* istanbul ignore else */
+      if (this.char === CHAR_t) {
+        this.consume()
+        return this.next(this.parseTrue_r)
+      } else if (this.char === CHAR_f) {
+        this.consume()
+        return this.next(this.parseFalse_a)
+      }
+    }
+    parseTrue_r () {
+      if (this.char === CHAR_r) {
+        this.consume()
+        return this.next(this.parseTrue_u)
+      } else {
+        throw this.error(new TomlError('Invalid boolean, expected true or false'))
+      }
+    }
+    parseTrue_u () {
+      if (this.char === CHAR_u) {
+        this.consume()
+        return this.next(this.parseTrue_e)
+      } else {
+        throw this.error(new TomlError('Invalid boolean, expected true or false'))
+      }
+    }
+    parseTrue_e () {
+      if (this.char === CHAR_e) {
+        return this.return(true)
+      } else {
+        throw this.error(new TomlError('Invalid boolean, expected true or false'))
+      }
+    }
+
+    parseFalse_a () {
+      if (this.char === CHAR_a) {
+        this.consume()
+        return this.next(this.parseFalse_l)
+      } else {
+        throw this.error(new TomlError('Invalid boolean, expected true or false'))
+      }
+    }
+
+    parseFalse_l () {
+      if (this.char === CHAR_l) {
+        this.consume()
+        return this.next(this.parseFalse_s)
+      } else {
+        throw this.error(new TomlError('Invalid boolean, expected true or false'))
+      }
+    }
+
+    parseFalse_s () {
+      if (this.char === CHAR_s) {
+        this.consume()
+        return this.next(this.parseFalse_e)
+      } else {
+        throw this.error(new TomlError('Invalid boolean, expected true or false'))
+      }
+    }
+
+    parseFalse_e () {
+      if (this.char === CHAR_e) {
+        return this.return(false)
+      } else {
+        throw this.error(new TomlError('Invalid boolean, expected true or false'))
+      }
+    }
+
+    /* INLINE LISTS */
+    parseInlineList () {
+      if (this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M || this.char === CTRL_J) {
+        return null
+      } else if (this.char === Parser.END) {
+        throw this.error(new TomlError('Unterminated inline array'))
+      } else if (this.char === CHAR_NUM) {
+        return this.call(this.parseComment)
+      } else if (this.char === CHAR_RSQB) {
+        return this.return(this.state.resultArr || InlineList())
+      } else {
+        return this.callNow(this.parseValue, this.recordInlineListValue)
+      }
+    }
+    recordInlineListValue (value) {
+      if (this.state.resultArr) {
+        const listType = this.state.resultArr[_contentType]
+        const valueType = tomlType(value)
+        if (listType !== valueType) {
+          throw this.error(new TomlError(`Inline lists must be a single type, not a mix of ${listType} and ${valueType}`))
+        }
+      } else {
+        this.state.resultArr = InlineList(tomlType(value))
+      }
+      if (isFloat(value) || isInteger(value)) {
+        // unbox now that we've verified they're ok
+        this.state.resultArr.push(value.valueOf())
+      } else {
+        this.state.resultArr.push(value)
+      }
+      return this.goto(this.parseInlineListNext)
+    }
+    parseInlineListNext () {
+      if (this.char === CHAR_SP || this.char === CTRL_I || this.char === CTRL_M || this.char === CTRL_J) {
+        return null
+      } else if (this.char === CHAR_NUM) {
+        return this.call(this.parseComment)
+      } else if (this.char === CHAR_COMMA) {
+        return this.next(this.parseInlineList)
+      } else if (this.char === CHAR_RSQB) {
+        return this.goto(this.parseInlineList)
+      } else {
+        throw this.error(new TomlError('Invalid character, expected whitespace, comma (,) or close bracket (])'))
+      }
+    }
+
+    /* INLINE TABLE */
+    parseInlineTable () {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else if (this.char === Parser.END || this.char === CHAR_NUM || this.char === CTRL_J || this.char === CTRL_M) {
+        throw this.error(new TomlError('Unterminated inline array'))
+      } else if (this.char === CHAR_RCUB) {
+        const returnValue = this.state.resultTable || InlineTable()
+        returnValue.__tomlInline = true
+        return this.return(returnValue)
+      } else {
+        if (!this.state.resultTable) this.state.resultTable = InlineTable()
+        return this.callNow(this.parseAssign, this.recordInlineTableValue)
+      }
+    }
+    recordInlineTableValue (kv) {
+      let target = this.state.resultTable
+      let finalKey = kv.key.pop()
+      for (let kw of kv.key) {
+        if (hasKey(target, kw) && (!isTable(target[kw]) || target[kw][_declared])) {
+          throw this.error(new TomlError("Can't redefine existing key"))
+        }
+        target = target[kw] = target[kw] || Table()
+      }
+      if (hasKey(target, finalKey)) {
+        throw this.error(new TomlError("Can't redefine existing key"))
+      }
+      if (isInteger(kv.value) || isFloat(kv.value)) {
+        target[finalKey] = kv.value.valueOf()
+      } else {
+        target[finalKey] = kv.value
+      }
+      return this.goto(this.parseInlineTableNext)
+    }
+    parseInlineTableNext () {
+      if (this.char === CHAR_SP || this.char === CTRL_I) {
+        return null
+      } else if (this.char === Parser.END || this.char === CHAR_NUM || this.char === CTRL_J || this.char === CTRL_M) {
+        throw this.error(new TomlError('Unterminated inline array'))
+      } else if (this.char === CHAR_COMMA) {
+        return this.next(this.parseInlineTable)
+      } else if (this.char === CHAR_RCUB) {
+        return this.goto(this.parseInlineTable)
+      } else {
+        throw this.error(new TomlError('Invalid character, expected whitespace, comma (,) or close bracket (])'))
+      }
+    }
+  }
+  return TOMLParser
+}
 
 
 /***/ }),
@@ -37752,7 +37095,7 @@ function heading(node) {
 
 
 
-var Schema = __webpack_require__(379);
+var Schema = __webpack_require__(717);
 
 
 module.exports = new Schema({
@@ -37801,358 +37144,9 @@ exports.default = Settings;
 /***/ }),
 /* 741 */,
 /* 742 */,
-/* 743 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var identity = __webpack_require__(491)
-
-module.exports = enter
-
-// Shortcut and collapsed link references need no escaping and encoding during
-// the processing of child nodes (it must be implied from identifier).
-//
-// This toggler turns encoding and escaping off for shortcut and collapsed
-// references.
-//
-// Implies `enterLink`.
-function enter(compiler, node) {
-  var encode = compiler.encode
-  var escape = compiler.escape
-  var exitLink = compiler.enterLink()
-
-  if (node.referenceType !== 'shortcut' && node.referenceType !== 'collapsed') {
-    return exitLink
-  }
-
-  compiler.escape = identity
-  compiler.encode = identity
-
-  return exit
-
-  function exit() {
-    compiler.encode = encode
-    compiler.escape = escape
-    exitLink()
-  }
-}
-
-
-/***/ }),
-/* 744 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-module.exports = which
-which.sync = whichSync
-
-var isWindows = process.platform === 'win32' ||
-    process.env.OSTYPE === 'cygwin' ||
-    process.env.OSTYPE === 'msys'
-
-var path = __webpack_require__(622)
-var COLON = isWindows ? ';' : ':'
-var isexe = __webpack_require__(443)
-
-function getNotFoundError (cmd) {
-  var er = new Error('not found: ' + cmd)
-  er.code = 'ENOENT'
-
-  return er
-}
-
-function getPathInfo (cmd, opt) {
-  var colon = opt.colon || COLON
-  var pathEnv = opt.path || process.env.PATH || ''
-  var pathExt = ['']
-
-  pathEnv = pathEnv.split(colon)
-
-  var pathExtExe = ''
-  if (isWindows) {
-    pathEnv.unshift(process.cwd())
-    pathExtExe = (opt.pathExt || process.env.PATHEXT || '.EXE;.CMD;.BAT;.COM')
-    pathExt = pathExtExe.split(colon)
-
-
-    // Always test the cmd itself first.  isexe will check to make sure
-    // it's found in the pathExt set.
-    if (cmd.indexOf('.') !== -1 && pathExt[0] !== '')
-      pathExt.unshift('')
-  }
-
-  // If it has a slash, then we don't bother searching the pathenv.
-  // just check the file itself, and that's it.
-  if (cmd.match(/\//) || isWindows && cmd.match(/\\/))
-    pathEnv = ['']
-
-  return {
-    env: pathEnv,
-    ext: pathExt,
-    extExe: pathExtExe
-  }
-}
-
-function which (cmd, opt, cb) {
-  if (typeof opt === 'function') {
-    cb = opt
-    opt = {}
-  }
-
-  var info = getPathInfo(cmd, opt)
-  var pathEnv = info.env
-  var pathExt = info.ext
-  var pathExtExe = info.extExe
-  var found = []
-
-  ;(function F (i, l) {
-    if (i === l) {
-      if (opt.all && found.length)
-        return cb(null, found)
-      else
-        return cb(getNotFoundError(cmd))
-    }
-
-    var pathPart = pathEnv[i]
-    if (pathPart.charAt(0) === '"' && pathPart.slice(-1) === '"')
-      pathPart = pathPart.slice(1, -1)
-
-    var p = path.join(pathPart, cmd)
-    if (!pathPart && (/^\.[\\\/]/).test(cmd)) {
-      p = cmd.slice(0, 2) + p
-    }
-    ;(function E (ii, ll) {
-      if (ii === ll) return F(i + 1, l)
-      var ext = pathExt[ii]
-      isexe(p + ext, { pathExt: pathExtExe }, function (er, is) {
-        if (!er && is) {
-          if (opt.all)
-            found.push(p + ext)
-          else
-            return cb(null, p + ext)
-        }
-        return E(ii + 1, ll)
-      })
-    })(0, pathExt.length)
-  })(0, pathEnv.length)
-}
-
-function whichSync (cmd, opt) {
-  opt = opt || {}
-
-  var info = getPathInfo(cmd, opt)
-  var pathEnv = info.env
-  var pathExt = info.ext
-  var pathExtExe = info.extExe
-  var found = []
-
-  for (var i = 0, l = pathEnv.length; i < l; i ++) {
-    var pathPart = pathEnv[i]
-    if (pathPart.charAt(0) === '"' && pathPart.slice(-1) === '"')
-      pathPart = pathPart.slice(1, -1)
-
-    var p = path.join(pathPart, cmd)
-    if (!pathPart && /^\.[\\\/]/.test(cmd)) {
-      p = cmd.slice(0, 2) + p
-    }
-    for (var j = 0, ll = pathExt.length; j < ll; j ++) {
-      var cur = p + pathExt[j]
-      var is
-      try {
-        is = isexe.sync(cur, { pathExt: pathExtExe })
-        if (is) {
-          if (opt.all)
-            found.push(cur)
-          else
-            return cur
-        }
-      } catch (ex) {}
-    }
-  }
-
-  if (opt.all && found.length)
-    return found
-
-  if (opt.nothrow)
-    return null
-
-  throw getNotFoundError(cmd)
-}
-
-
-/***/ }),
-/* 745 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-/* module decorator */ module = __webpack_require__.nmd(module);
-
-
-const wrapAnsi16 = (fn, offset) => (...args) => {
-	const code = fn(...args);
-	return `\u001B[${code + offset}m`;
-};
-
-const wrapAnsi256 = (fn, offset) => (...args) => {
-	const code = fn(...args);
-	return `\u001B[${38 + offset};5;${code}m`;
-};
-
-const wrapAnsi16m = (fn, offset) => (...args) => {
-	const rgb = fn(...args);
-	return `\u001B[${38 + offset};2;${rgb[0]};${rgb[1]};${rgb[2]}m`;
-};
-
-const ansi2ansi = n => n;
-const rgb2rgb = (r, g, b) => [r, g, b];
-
-const setLazyProperty = (object, property, get) => {
-	Object.defineProperty(object, property, {
-		get: () => {
-			const value = get();
-
-			Object.defineProperty(object, property, {
-				value,
-				enumerable: true,
-				configurable: true
-			});
-
-			return value;
-		},
-		enumerable: true,
-		configurable: true
-	});
-};
-
-/** @type {typeof import('color-convert')} */
-let colorConvert;
-const makeDynamicStyles = (wrap, targetSpace, identity, isBackground) => {
-	if (colorConvert === undefined) {
-		colorConvert = __webpack_require__(83);
-	}
-
-	const offset = isBackground ? 10 : 0;
-	const styles = {};
-
-	for (const [sourceSpace, suite] of Object.entries(colorConvert)) {
-		const name = sourceSpace === 'ansi16' ? 'ansi' : sourceSpace;
-		if (sourceSpace === targetSpace) {
-			styles[name] = wrap(identity, offset);
-		} else if (typeof suite === 'object') {
-			styles[name] = wrap(suite[targetSpace], offset);
-		}
-	}
-
-	return styles;
-};
-
-function assembleStyles() {
-	const codes = new Map();
-	const styles = {
-		modifier: {
-			reset: [0, 0],
-			// 21 isn't widely supported and 22 does the same thing
-			bold: [1, 22],
-			dim: [2, 22],
-			italic: [3, 23],
-			underline: [4, 24],
-			inverse: [7, 27],
-			hidden: [8, 28],
-			strikethrough: [9, 29]
-		},
-		color: {
-			black: [30, 39],
-			red: [31, 39],
-			green: [32, 39],
-			yellow: [33, 39],
-			blue: [34, 39],
-			magenta: [35, 39],
-			cyan: [36, 39],
-			white: [37, 39],
-
-			// Bright color
-			blackBright: [90, 39],
-			redBright: [91, 39],
-			greenBright: [92, 39],
-			yellowBright: [93, 39],
-			blueBright: [94, 39],
-			magentaBright: [95, 39],
-			cyanBright: [96, 39],
-			whiteBright: [97, 39]
-		},
-		bgColor: {
-			bgBlack: [40, 49],
-			bgRed: [41, 49],
-			bgGreen: [42, 49],
-			bgYellow: [43, 49],
-			bgBlue: [44, 49],
-			bgMagenta: [45, 49],
-			bgCyan: [46, 49],
-			bgWhite: [47, 49],
-
-			// Bright color
-			bgBlackBright: [100, 49],
-			bgRedBright: [101, 49],
-			bgGreenBright: [102, 49],
-			bgYellowBright: [103, 49],
-			bgBlueBright: [104, 49],
-			bgMagentaBright: [105, 49],
-			bgCyanBright: [106, 49],
-			bgWhiteBright: [107, 49]
-		}
-	};
-
-	// Alias bright black as gray (and grey)
-	styles.color.gray = styles.color.blackBright;
-	styles.bgColor.bgGray = styles.bgColor.bgBlackBright;
-	styles.color.grey = styles.color.blackBright;
-	styles.bgColor.bgGrey = styles.bgColor.bgBlackBright;
-
-	for (const [groupName, group] of Object.entries(styles)) {
-		for (const [styleName, style] of Object.entries(group)) {
-			styles[styleName] = {
-				open: `\u001B[${style[0]}m`,
-				close: `\u001B[${style[1]}m`
-			};
-
-			group[styleName] = styles[styleName];
-
-			codes.set(style[0], style[1]);
-		}
-
-		Object.defineProperty(styles, groupName, {
-			value: group,
-			enumerable: false
-		});
-	}
-
-	Object.defineProperty(styles, 'codes', {
-		value: codes,
-		enumerable: false
-	});
-
-	styles.color.close = '\u001B[39m';
-	styles.bgColor.close = '\u001B[49m';
-
-	setLazyProperty(styles.color, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, false));
-	setLazyProperty(styles.color, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, false));
-	setLazyProperty(styles.color, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, false));
-	setLazyProperty(styles.bgColor, 'ansi', () => makeDynamicStyles(wrapAnsi16, 'ansi16', ansi2ansi, true));
-	setLazyProperty(styles.bgColor, 'ansi256', () => makeDynamicStyles(wrapAnsi256, 'ansi256', ansi2ansi, true));
-	setLazyProperty(styles.bgColor, 'ansi16m', () => makeDynamicStyles(wrapAnsi16m, 'rgb', rgb2rgb, true));
-
-	return styles;
-}
-
-// Make the export immutable
-Object.defineProperty(module, 'exports', {
-	enumerable: true,
-	get: assembleStyles
-});
-
-
-/***/ }),
+/* 743 */,
+/* 744 */,
+/* 745 */,
 /* 746 */,
 /* 747 */
 /***/ (function(module) {
@@ -38168,8 +37162,9 @@ const unified = __webpack_require__(709);
 const parse = __webpack_require__(64);
 const stringify = __webpack_require__(104);
 const frontmatter = __webpack_require__(221);
-const parseFrontmatter = __webpack_require__(872);
+const parseFrontmatter = __webpack_require__(553);
 const template = __webpack_require__(583);
+const cloneDeep = __webpack_require__(607);
 const { readPkgFile } = __webpack_require__(916);
 const { runCommand } = __webpack_require__(378);
 const path = __webpack_require__(622);
@@ -38247,12 +37242,12 @@ const mergeReleases = (changes) => {
       if (!release[pkg]) {
         release[pkg] = {
           type: change.releases[pkg],
-          changes: [change],
+          changes: cloneDeep([change]),
         };
       } else {
         release[pkg] = {
           type: compareBumps(release[pkg].type, change.releases[pkg]),
-          changes: [...release[pkg].changes, change],
+          changes: cloneDeep([...release[pkg].changes, change]),
         };
       }
     });
@@ -38419,7 +37414,7 @@ module.exports.mergeIntoConfig = function* ({
       precommand: templateCommands(
         pkgCommands[pkg].precommand,
         pipeToTemplate,
-        ["command", "dryRunCommand"]
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
       command: templateCommands(pkgCommands[pkg].command, pipeToTemplate, [
         "command",
@@ -38428,7 +37423,7 @@ module.exports.mergeIntoConfig = function* ({
       postcommand: templateCommands(
         pkgCommands[pkg].postcommand,
         pipeToTemplate,
-        ["command", "dryRunCommand"]
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
     };
 
@@ -38653,48 +37648,31 @@ function parse() {
 /***/ }),
 /* 757 */,
 /* 758 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ (function(module) {
 
-"use strict";
+const numeric = /^[0-9]+$/
+const compareIdentifiers = (a, b) => {
+  const anum = numeric.test(a)
+  const bnum = numeric.test(b)
 
-// Older verions of Node.js might not have `util.getSystemErrorName()`.
-// In that case, fall back to a deprecated internal.
-const util = __webpack_require__(669);
+  if (anum && bnum) {
+    a = +a
+    b = +b
+  }
 
-let uv;
-
-if (typeof util.getSystemErrorName === 'function') {
-	module.exports = util.getSystemErrorName;
-} else {
-	try {
-		uv = process.binding('uv');
-
-		if (typeof uv.errname !== 'function') {
-			throw new TypeError('uv.errname is not a function');
-		}
-	} catch (err) {
-		console.error('execa/lib/errname: unable to establish process.binding(\'uv\')', err);
-		uv = null;
-	}
-
-	module.exports = code => errname(uv, code);
+  return a === b ? 0
+    : (anum && !bnum) ? -1
+    : (bnum && !anum) ? 1
+    : a < b ? -1
+    : 1
 }
 
-// Used for testing the fallback behavior
-module.exports.__test__ = errname;
+const rcompareIdentifiers = (a, b) => compareIdentifiers(b, a)
 
-function errname(uv, code) {
-	if (uv) {
-		return uv.errname(code);
-	}
-
-	if (!(code < 0)) {
-		throw new Error('err >= 0');
-	}
-
-	return `Unknown system error ${code}`;
+module.exports = {
+  compareIdentifiers,
+  rcompareIdentifiers
 }
-
 
 
 /***/ }),
@@ -38765,47 +37743,46 @@ module.exports = require("zlib");
 /* 762 */,
 /* 763 */,
 /* 764 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 
-const isStream = stream =>
-	stream !== null &&
-	typeof stream === 'object' &&
-	typeof stream.pipe === 'function';
+var count = __webpack_require__(808)
 
-isStream.writable = stream =>
-	isStream(stream) &&
-	stream.writable !== false &&
-	typeof stream._write === 'function' &&
-	typeof stream._writableState === 'object';
+module.exports = enclose
 
-isStream.readable = stream =>
-	isStream(stream) &&
-	stream.readable !== false &&
-	typeof stream._read === 'function' &&
-	typeof stream._readableState === 'object';
+var leftParenthesis = '('
+var rightParenthesis = ')'
+var lessThan = '<'
+var greaterThan = '>'
 
-isStream.duplex = stream =>
-	isStream.writable(stream) &&
-	isStream.readable(stream);
+var expression = /\s/
 
-isStream.transform = stream =>
-	isStream.duplex(stream) &&
-	typeof stream._transform === 'function' &&
-	typeof stream._transformState === 'object';
+// Wrap `url` in angle brackets when needed, or when
+// forced.
+// In links, images, and definitions, the URL part needs
+// to be enclosed when it:
+//
+// - has a length of `0`
+// - contains white-space
+// - has more or less opening than closing parentheses
+function enclose(uri, always) {
+  if (
+    always ||
+    uri.length === 0 ||
+    expression.test(uri) ||
+    count(uri, leftParenthesis) !== count(uri, rightParenthesis)
+  ) {
+    return lessThan + uri + greaterThan
+  }
 
-module.exports = isStream;
+  return uri
+}
 
-
-/***/ }),
-/* 765 */
-/***/ (function(module) {
-
-module.exports = require("process");
 
 /***/ }),
+/* 765 */,
 /* 766 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -39562,10 +38539,10 @@ const signalsByNumber=getSignalsByNumber();exports.signalsByNumber=signalsByNumb
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 const SemVer = __webpack_require__(840)
-const Comparator = __webpack_require__(517)
+const Comparator = __webpack_require__(9)
 const {ANY} = Comparator
-const Range = __webpack_require__(318)
-const satisfies = __webpack_require__(60)
+const Range = __webpack_require__(46)
+const satisfies = __webpack_require__(845)
 const gt = __webpack_require__(855)
 const lt = __webpack_require__(921)
 const lte = __webpack_require__(508)
@@ -39646,7 +38623,32 @@ module.exports = outside
 /***/ }),
 /* 784 */,
 /* 785 */,
-/* 786 */,
+/* 786 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const shebangRegex = __webpack_require__(76);
+
+module.exports = (string = '') => {
+	const match = string.match(shebangRegex);
+
+	if (!match) {
+		return null;
+	}
+
+	const [path, argument] = match[0].replace(/#! ?/, '').split(' ');
+	const binary = path.split('/').pop();
+
+	if (binary === 'env') {
+		return argument;
+	}
+
+	return argument ? `${binary} ${argument}` : binary;
+};
+
+
+/***/ }),
 /* 787 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -39656,56 +38658,14 @@ var n=__webpack_require__(568),r=__webpack_require__(700);function e(n){return"f
 
 
 /***/ }),
-/* 788 */
-/***/ (function(__unusedmodule, exports) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseCommand = void 0;
-function parseCommand(cmd) {
-    const extraSpacesStrippedCommand = cmd.replace(/\s{2,}/g, ' ');
-    const splitCommand = extraSpacesStrippedCommand.split(/\s+(?![^[]*]|[^<]*>)/);
-    const bregex = /\.*[\][<>]/g;
-    const firstCommand = splitCommand.shift();
-    if (!firstCommand)
-        throw new Error(`No command found in: ${cmd}`);
-    const parsedCommand = {
-        cmd: firstCommand.replace(bregex, ''),
-        demanded: [],
-        optional: []
-    };
-    splitCommand.forEach((cmd, i) => {
-        let variadic = false;
-        cmd = cmd.replace(/\s/g, '');
-        if (/\.+[\]>]/.test(cmd) && i === splitCommand.length - 1)
-            variadic = true;
-        if (/^\[/.test(cmd)) {
-            parsedCommand.optional.push({
-                cmd: cmd.replace(bregex, '').split('|'),
-                variadic
-            });
-        }
-        else {
-            parsedCommand.demanded.push({
-                cmd: cmd.replace(bregex, '').split('|'),
-                variadic
-            });
-        }
-    });
-    return parsedCommand;
-}
-exports.parseCommand = parseCommand;
-
-
-/***/ }),
+/* 788 */,
 /* 789 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
 const fs = __webpack_require__(747);
-const arrayUnion = __webpack_require__(67);
+const arrayUnion = __webpack_require__(311);
 const merge2 = __webpack_require__(6);
 const fastGlob = __webpack_require__(344);
 const dirGlob = __webpack_require__(533);
@@ -39939,7 +38899,7 @@ exports.completion = void 0;
 const command_1 = __webpack_require__(359);
 const templates = __webpack_require__(664);
 const is_promise_1 = __webpack_require__(91);
-const parse_command_1 = __webpack_require__(788);
+const parse_command_1 = __webpack_require__(398);
 const path = __webpack_require__(622);
 const common_types_1 = __webpack_require__(45);
 // add bash completions to your
@@ -40375,10 +39335,10 @@ module.exports = {
   re: internalRe.re,
   src: internalRe.src,
   tokens: internalRe.t,
-  SEMVER_SPEC_VERSION: __webpack_require__(656).SEMVER_SPEC_VERSION,
+  SEMVER_SPEC_VERSION: __webpack_require__(511).SEMVER_SPEC_VERSION,
   SemVer: __webpack_require__(341),
-  compareIdentifiers: __webpack_require__(838).compareIdentifiers,
-  rcompareIdentifiers: __webpack_require__(838).rcompareIdentifiers,
+  compareIdentifiers: __webpack_require__(758).compareIdentifiers,
+  rcompareIdentifiers: __webpack_require__(758).rcompareIdentifiers,
   parse: __webpack_require__(881),
   valid: __webpack_require__(896),
   clean: __webpack_require__(927),
@@ -40390,7 +39350,7 @@ module.exports = {
   prerelease: __webpack_require__(702),
   compare: __webpack_require__(22),
   rcompare: __webpack_require__(449),
-  compareLoose: __webpack_require__(595),
+  compareLoose: __webpack_require__(102),
   compareBuild: __webpack_require__(767),
   sort: __webpack_require__(640),
   rsort: __webpack_require__(66),
@@ -40463,7 +39423,7 @@ exports.Deprecation = Deprecation;
 
 
 
-var Schema = __webpack_require__(379);
+var Schema = __webpack_require__(717);
 
 
 module.exports = Schema.DEFAULT = new Schema({
@@ -40479,8 +39439,122 @@ module.exports = Schema.DEFAULT = new Schema({
 
 
 /***/ }),
-/* 804 */,
-/* 805 */,
+/* 804 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+const {signalsByName} = __webpack_require__(781);
+
+const getErrorPrefix = ({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled}) => {
+	if (timedOut) {
+		return `timed out after ${timeout} milliseconds`;
+	}
+
+	if (isCanceled) {
+		return 'was canceled';
+	}
+
+	if (errorCode !== undefined) {
+		return `failed with ${errorCode}`;
+	}
+
+	if (signal !== undefined) {
+		return `was killed with ${signal} (${signalDescription})`;
+	}
+
+	if (exitCode !== undefined) {
+		return `failed with exit code ${exitCode}`;
+	}
+
+	return 'failed';
+};
+
+const makeError = ({
+	stdout,
+	stderr,
+	all,
+	error,
+	signal,
+	exitCode,
+	command,
+	timedOut,
+	isCanceled,
+	killed,
+	parsed: {options: {timeout}}
+}) => {
+	// `signal` and `exitCode` emitted on `spawned.on('exit')` event can be `null`.
+	// We normalize them to `undefined`
+	exitCode = exitCode === null ? undefined : exitCode;
+	signal = signal === null ? undefined : signal;
+	const signalDescription = signal === undefined ? undefined : signalsByName[signal].description;
+
+	const errorCode = error && error.code;
+
+	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
+	const execaMessage = `Command ${prefix}: ${command}`;
+	const isError = Object.prototype.toString.call(error) === '[object Error]';
+	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
+	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
+
+	if (isError) {
+		error.originalMessage = error.message;
+		error.message = message;
+	} else {
+		error = new Error(message);
+	}
+
+	error.shortMessage = shortMessage;
+	error.command = command;
+	error.exitCode = exitCode;
+	error.signal = signal;
+	error.signalDescription = signalDescription;
+	error.stdout = stdout;
+	error.stderr = stderr;
+
+	if (all !== undefined) {
+		error.all = all;
+	}
+
+	if ('bufferedData' in error) {
+		delete error.bufferedData;
+	}
+
+	error.failed = true;
+	error.timedOut = Boolean(timedOut);
+	error.isCanceled = isCanceled;
+	error.killed = killed && !timedOut;
+
+	return error;
+};
+
+module.exports = makeError;
+
+
+/***/ }),
+/* 805 */
+/***/ (function(module) {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports.default = pathKey;
+
+
+/***/ }),
 /* 806 */,
 /* 807 */,
 /* 808 */
@@ -40716,7 +39790,51 @@ exports.applyExtends = applyExtends;
 
 /***/ }),
 /* 821 */,
-/* 822 */,
+/* 822 */
+/***/ (function(module) {
+
+"use strict";
+
+const SPACES_REGEXP = / +/g;
+
+const joinCommand = (file, args = []) => {
+	if (!Array.isArray(args)) {
+		return file;
+	}
+
+	return [file, ...args].join(' ');
+};
+
+// Allow spaces to be escaped by a backslash if not meant as a delimiter
+const handleEscaping = (tokens, token, index) => {
+	if (index === 0) {
+		return [token];
+	}
+
+	const previousToken = tokens[tokens.length - 1];
+
+	if (previousToken.endsWith('\\')) {
+		return [...tokens.slice(0, -1), `${previousToken.slice(0, -1)} ${token}`];
+	}
+
+	return [...tokens, token];
+};
+
+// Handle `execa.command()`
+const parseCommand = command => {
+	return command
+		.trim()
+		.split(SPACES_REGEXP)
+		.reduce(handleEscaping, []);
+};
+
+module.exports = {
+	joinCommand,
+	parseCommand
+};
+
+
+/***/ }),
 /* 823 */
 /***/ (function(module) {
 
@@ -40826,33 +39944,7 @@ module.exports.default = camelCase;
 
 
 /***/ }),
-/* 826 */
-/***/ (function(module) {
-
-"use strict";
-
-
-module.exports = one
-
-function one(node, parent) {
-  var self = this
-  var visitors = self.visitors
-
-  // Fail on unknown nodes.
-  if (typeof visitors[node.type] !== 'function') {
-    self.file.fail(
-      new Error(
-        'Missing compiler for node of type `' + node.type + '`: `' + node + '`'
-      ),
-      node
-    )
-  }
-
-  return visitors[node.type].call(self, node, parent)
-}
-
-
-/***/ }),
+/* 826 */,
 /* 827 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -40888,31 +39980,7 @@ function writeSync(description, options) {
 /***/ }),
 /* 828 */,
 /* 829 */,
-/* 830 */
-/***/ (function(module) {
-
-"use strict";
-/*!
- * is-number <https://github.com/jonschlinkert/is-number>
- *
- * Copyright (c) 2014-present, Jon Schlinkert.
- * Released under the MIT License.
- */
-
-
-
-module.exports = function(num) {
-  if (typeof num === 'number') {
-    return num - num === 0;
-  }
-  if (typeof num === 'string' && num.trim() !== '') {
-    return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
-  }
-  return false;
-};
-
-
-/***/ }),
+/* 830 */,
 /* 831 */
 /***/ (function(__unusedmodule, exports, __webpack_require__) {
 
@@ -42299,35 +41367,7 @@ module.exports = {
 
 
 /***/ }),
-/* 838 */
-/***/ (function(module) {
-
-const numeric = /^[0-9]+$/
-const compareIdentifiers = (a, b) => {
-  const anum = numeric.test(a)
-  const bnum = numeric.test(b)
-
-  if (anum && bnum) {
-    a = +a
-    b = +b
-  }
-
-  return a === b ? 0
-    : (anum && !bnum) ? -1
-    : (bnum && !anum) ? 1
-    : a < b ? -1
-    : 1
-}
-
-const rcompareIdentifiers = (a, b) => compareIdentifiers(b, a)
-
-module.exports = {
-  compareIdentifiers,
-  rcompareIdentifiers
-}
-
-
-/***/ }),
+/* 838 */,
 /* 839 */
 /***/ (function(module) {
 
@@ -42356,7 +41396,7 @@ module.exports = input => {
 
 const debug = __webpack_require__(940)
 const { MAX_LENGTH, MAX_SAFE_INTEGER } = __webpack_require__(94)
-const { re, t } = __webpack_require__(398)
+const { re, t } = __webpack_require__(629)
 
 const { compareIdentifiers } = __webpack_require__(542)
 class SemVer {
@@ -42691,11 +41731,26 @@ const SIGRTMAX=64;exports.SIGRTMAX=SIGRTMAX;
 
 /***/ }),
 /* 844 */,
-/* 845 */,
+/* 845 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+const Range = __webpack_require__(46)
+const satisfies = (version, range, options) => {
+  try {
+    range = new Range(range, options)
+  } catch (er) {
+    return false
+  }
+  return range.test(version)
+}
+module.exports = satisfies
+
+
+/***/ }),
 /* 846 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var once = __webpack_require__(25);
+var once = __webpack_require__(538);
 
 var noop = function() {};
 
@@ -45701,113 +44756,30 @@ function indices(value) {
 
 /***/ }),
 /* 863 */,
-/* 864 */
+/* 864 */,
+/* 865 */
 /***/ (function(module) {
 
-"use strict";
+/*!
+ * is-extglob <https://github.com/jonschlinkert/is-extglob>
+ *
+ * Copyright (c) 2014-2016, Jon Schlinkert.
+ * Licensed under the MIT License.
+ */
 
-const SPACES_REGEXP = / +/g;
+module.exports = function isExtglob(str) {
+  if (typeof str !== 'string' || str === '') {
+    return false;
+  }
 
-const joinCommand = (file, args = []) => {
-	if (!Array.isArray(args)) {
-		return file;
-	}
+  var match;
+  while ((match = /(\\).|([@?!+*]\(.*\))/g.exec(str))) {
+    if (match[2]) return true;
+    str = str.slice(match.index + match[0].length);
+  }
 
-	return [file, ...args].join(' ');
+  return false;
 };
-
-// Allow spaces to be escaped by a backslash if not meant as a delimiter
-const handleEscaping = (tokens, token, index) => {
-	if (index === 0) {
-		return [token];
-	}
-
-	const previousToken = tokens[tokens.length - 1];
-
-	if (previousToken.endsWith('\\')) {
-		return [...tokens.slice(0, -1), `${previousToken.slice(0, -1)} ${token}`];
-	}
-
-	return [...tokens, token];
-};
-
-// Handle `execa.command()`
-const parseCommand = command => {
-	return command
-		.trim()
-		.split(SPACES_REGEXP)
-		.reduce(handleEscaping, []);
-};
-
-module.exports = {
-	joinCommand,
-	parseCommand
-};
-
-
-/***/ }),
-/* 865 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const pump = __webpack_require__(957);
-const bufferStream = __webpack_require__(216);
-
-class MaxBufferError extends Error {
-	constructor() {
-		super('maxBuffer exceeded');
-		this.name = 'MaxBufferError';
-	}
-}
-
-async function getStream(inputStream, options) {
-	if (!inputStream) {
-		return Promise.reject(new Error('Expected a stream'));
-	}
-
-	options = {
-		maxBuffer: Infinity,
-		...options
-	};
-
-	const {maxBuffer} = options;
-
-	let stream;
-	await new Promise((resolve, reject) => {
-		const rejectPromise = error => {
-			if (error) { // A null check
-				error.bufferedData = stream.getBufferedValue();
-			}
-
-			reject(error);
-		};
-
-		stream = pump(inputStream, bufferStream(options), error => {
-			if (error) {
-				rejectPromise(error);
-				return;
-			}
-
-			resolve();
-		});
-
-		stream.on('data', () => {
-			if (stream.getBufferedLength() > maxBuffer) {
-				rejectPromise(new MaxBufferError());
-			}
-		});
-	});
-
-	return stream.getBufferedValue();
-}
-
-module.exports = getStream;
-// TODO: Remove this for the next major release
-module.exports.default = getStream;
-module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
-module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
-module.exports.MaxBufferError = MaxBufferError;
 
 
 /***/ }),
@@ -45905,43 +44877,49 @@ function toVFile(options) {
 "use strict";
 
 
-var map = __webpack_require__(906);
-var yaml = __webpack_require__(251);
+var Type = __webpack_require__(773);
 
-var yamlPlugin = function yamlPlugin(options) {
-    options = options || {};
+var _hasOwnProperty = Object.prototype.hasOwnProperty;
+var _toString       = Object.prototype.toString;
 
-    function transformer(ast) {
-        return map(ast, function (node) {
-            if (node.type == "yaml") {
-                var parsedValue = yaml.safeLoad(node.value, 'utf8');
-                var newNode = Object.assign({}, node, { data: { parsedValue: parsedValue } });
-                return newNode;
-            } else {
-                return node;
-            }
-        });
+function resolveYamlOmap(data) {
+  if (data === null) return true;
+
+  var objectKeys = [], index, length, pair, pairKey, pairHasKey,
+      object = data;
+
+  for (index = 0, length = object.length; index < length; index += 1) {
+    pair = object[index];
+    pairHasKey = false;
+
+    if (_toString.call(pair) !== '[object Object]') return false;
+
+    for (pairKey in pair) {
+      if (_hasOwnProperty.call(pair, pairKey)) {
+        if (!pairHasKey) pairHasKey = true;
+        else return false;
+      }
     }
 
-    // Stringify for yaml
-    var Compiler = this.Compiler;
+    if (!pairHasKey) return false;
 
-    if (Compiler != null) {
-        var visitors = Compiler.prototype.visitors;
-        if (visitors) {
-            visitors.yaml = function (node) {
-                if (node.data && node.data.parsedValue) {
-                    var yml = yaml.safeDump(node.data.parsedValue);
-                    return '---\n' + yml + '---';
-                }
-            };
-        }
-    }
+    if (objectKeys.indexOf(pairKey) === -1) objectKeys.push(pairKey);
+    else return false;
+  }
 
-    return transformer;
-};
+  return true;
+}
 
-module.exports = yamlPlugin;
+function constructYamlOmap(data) {
+  return data !== null ? data : [];
+}
+
+module.exports = new Type('tag:yaml.org,2002:omap', {
+  kind: 'sequence',
+  resolve: resolveYamlOmap,
+  construct: constructYamlOmap
+});
+
 
 /***/ }),
 /* 873 */
@@ -46532,7 +45510,7 @@ module.exports = new Type('tag:yaml.org,2002:int', {
 /* 881 */
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-const {MAX_LENGTH} = __webpack_require__(656)
+const {MAX_LENGTH} = __webpack_require__(511)
 const { re, t } = __webpack_require__(275)
 const SemVer = __webpack_require__(341)
 
@@ -46580,63 +45558,22 @@ module.exports = parse
 "use strict";
 
 
-const isWin = process.platform === 'win32';
+module.exports = all
 
-function notFoundError(original, syscall) {
-    return Object.assign(new Error(`${syscall} ${original.command} ENOENT`), {
-        code: 'ENOENT',
-        errno: 'ENOENT',
-        syscall: `${syscall} ${original.command}`,
-        path: original.command,
-        spawnargs: original.args,
-    });
+// Visit all children of `parent`.
+function all(parent) {
+  var self = this
+  var children = parent.children
+  var length = children.length
+  var results = []
+  var index = -1
+
+  while (++index < length) {
+    results[index] = self.visit(children[index], parent)
+  }
+
+  return results
 }
-
-function hookChildProcess(cp, parsed) {
-    if (!isWin) {
-        return;
-    }
-
-    const originalEmit = cp.emit;
-
-    cp.emit = function (name, arg1) {
-        // If emitting "exit" event and exit code is 1, we need to check if
-        // the command exists and emit an "error" instead
-        // See https://github.com/IndigoUnited/node-cross-spawn/issues/16
-        if (name === 'exit') {
-            const err = verifyENOENT(arg1, parsed, 'spawn');
-
-            if (err) {
-                return originalEmit.call(cp, 'error', err);
-            }
-        }
-
-        return originalEmit.apply(cp, arguments); // eslint-disable-line prefer-rest-params
-    };
-}
-
-function verifyENOENT(status, parsed) {
-    if (isWin && status === 1 && !parsed.file) {
-        return notFoundError(parsed.original, 'spawn');
-    }
-
-    return null;
-}
-
-function verifyENOENTSync(status, parsed) {
-    if (isWin && status === 1 && !parsed.file) {
-        return notFoundError(parsed.original, 'spawnSync');
-    }
-
-    return null;
-}
-
-module.exports = {
-    hookChildProcess,
-    verifyENOENT,
-    verifyENOENTSync,
-    notFoundError,
-};
 
 
 /***/ }),
@@ -47415,7 +46352,7 @@ function singletonify (inst) {
 // given a set of versions and a range, create a "simplified" range
 // that includes the same versions that the original range does
 // If the original range is shorter than the simplified one, return that.
-const satisfies = __webpack_require__(60)
+const satisfies = __webpack_require__(845)
 const compare = __webpack_require__(217)
 module.exports = (versions, range, options) => {
   const set = []
@@ -47794,28 +46731,7 @@ module.exports = lt
 
 
 /***/ }),
-/* 922 */
-/***/ (function(module) {
-
-"use strict";
-
-module.exports = function (x) {
-	var lf = typeof x === 'string' ? '\n' : '\n'.charCodeAt();
-	var cr = typeof x === 'string' ? '\r' : '\r'.charCodeAt();
-
-	if (x[x.length - 1] === lf) {
-		x = x.slice(0, x.length - 1);
-	}
-
-	if (x[x.length - 1] === cr) {
-		x = x.slice(0, x.length - 1);
-	}
-
-	return x;
-};
-
-
-/***/ }),
+/* 922 */,
 /* 923 */
 /***/ (function(module) {
 
@@ -48343,26 +47259,33 @@ module.exports = inc
 
 "use strict";
 
-const f = __webpack_require__(224)
-const DateTime = global.Date
+module.exports = parseAsync
 
-class Date extends DateTime {
-  constructor (value) {
-    super(value)
-    this.isDate = true
-  }
-  toISOString () {
-    return `${this.getUTCFullYear()}-${f(2, this.getUTCMonth() + 1)}-${f(2, this.getUTCDate())}`
-  }
-}
+const TOMLParser = __webpack_require__(725)
+const prettyError = __webpack_require__(985)
 
-module.exports = value => {
-  const date = new Date(value)
-  /* istanbul ignore if */
-  if (isNaN(date)) {
-    throw new TypeError('Invalid Datetime')
-  } else {
-    return date
+function parseAsync (str, opts) {
+  if (!opts) opts = {}
+  const index = 0
+  const blocksize = opts.blocksize || 40960
+  const parser = new TOMLParser()
+  return new Promise((resolve, reject) => {
+    setImmediate(parseAsyncNext, index, blocksize, resolve, reject)
+  })
+  function parseAsyncNext (index, blocksize, resolve, reject) {
+    if (index >= str.length) {
+      try {
+        return resolve(parser.finish())
+      } catch (err) {
+        return reject(prettyError(err, str))
+      }
+    }
+    try {
+      parser.parse(str.slice(index, index + blocksize))
+      setImmediate(parseAsyncNext, index + blocksize, blocksize, resolve, reject)
+    } catch (err) {
+      reject(prettyError(err, str))
+    }
   }
 }
 
@@ -48373,102 +47296,184 @@ module.exports = value => {
 
 "use strict";
 
-const isStream = __webpack_require__(764);
-const getStream = __webpack_require__(865);
-const mergeStream = __webpack_require__(74);
 
-// `input` option
-const handleInput = (spawned, input) => {
-	// Checking for stdin is workaround for https://github.com/nodejs/node/issues/26852
-	// TODO: Remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
-	if (input === undefined || spawned.stdin === undefined) {
-		return;
-	}
+const path = __webpack_require__(622);
+const WIN_SLASH = '\\\\/';
+const WIN_NO_SLASH = `[^${WIN_SLASH}]`;
 
-	if (isStream(input)) {
-		input.pipe(spawned.stdin);
-	} else {
-		spawned.stdin.end(input);
-	}
+/**
+ * Posix glob regex
+ */
+
+const DOT_LITERAL = '\\.';
+const PLUS_LITERAL = '\\+';
+const QMARK_LITERAL = '\\?';
+const SLASH_LITERAL = '\\/';
+const ONE_CHAR = '(?=.)';
+const QMARK = '[^/]';
+const END_ANCHOR = `(?:${SLASH_LITERAL}|$)`;
+const START_ANCHOR = `(?:^|${SLASH_LITERAL})`;
+const DOTS_SLASH = `${DOT_LITERAL}{1,2}${END_ANCHOR}`;
+const NO_DOT = `(?!${DOT_LITERAL})`;
+const NO_DOTS = `(?!${START_ANCHOR}${DOTS_SLASH})`;
+const NO_DOT_SLASH = `(?!${DOT_LITERAL}{0,1}${END_ANCHOR})`;
+const NO_DOTS_SLASH = `(?!${DOTS_SLASH})`;
+const QMARK_NO_DOT = `[^.${SLASH_LITERAL}]`;
+const STAR = `${QMARK}*?`;
+
+const POSIX_CHARS = {
+  DOT_LITERAL,
+  PLUS_LITERAL,
+  QMARK_LITERAL,
+  SLASH_LITERAL,
+  ONE_CHAR,
+  QMARK,
+  END_ANCHOR,
+  DOTS_SLASH,
+  NO_DOT,
+  NO_DOTS,
+  NO_DOT_SLASH,
+  NO_DOTS_SLASH,
+  QMARK_NO_DOT,
+  STAR,
+  START_ANCHOR
 };
 
-// `all` interleaves `stdout` and `stderr`
-const makeAllStream = (spawned, {all}) => {
-	if (!all || (!spawned.stdout && !spawned.stderr)) {
-		return;
-	}
+/**
+ * Windows glob regex
+ */
 
-	const mixed = mergeStream();
+const WINDOWS_CHARS = {
+  ...POSIX_CHARS,
 
-	if (spawned.stdout) {
-		mixed.add(spawned.stdout);
-	}
-
-	if (spawned.stderr) {
-		mixed.add(spawned.stderr);
-	}
-
-	return mixed;
+  SLASH_LITERAL: `[${WIN_SLASH}]`,
+  QMARK: WIN_NO_SLASH,
+  STAR: `${WIN_NO_SLASH}*?`,
+  DOTS_SLASH: `${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$)`,
+  NO_DOT: `(?!${DOT_LITERAL})`,
+  NO_DOTS: `(?!(?:^|[${WIN_SLASH}])${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+  NO_DOT_SLASH: `(?!${DOT_LITERAL}{0,1}(?:[${WIN_SLASH}]|$))`,
+  NO_DOTS_SLASH: `(?!${DOT_LITERAL}{1,2}(?:[${WIN_SLASH}]|$))`,
+  QMARK_NO_DOT: `[^.${WIN_SLASH}]`,
+  START_ANCHOR: `(?:^|[${WIN_SLASH}])`,
+  END_ANCHOR: `(?:[${WIN_SLASH}]|$)`
 };
 
-// On failure, `result.stdout|stderr|all` should contain the currently buffered stream
-const getBufferedData = async (stream, streamPromise) => {
-	if (!stream) {
-		return;
-	}
+/**
+ * POSIX Bracket Regex
+ */
 
-	stream.destroy();
-
-	try {
-		return await streamPromise;
-	} catch (error) {
-		return error.bufferedData;
-	}
-};
-
-const getStreamPromise = (stream, {encoding, buffer, maxBuffer}) => {
-	if (!stream || !buffer) {
-		return;
-	}
-
-	if (encoding) {
-		return getStream(stream, {encoding, maxBuffer});
-	}
-
-	return getStream.buffer(stream, {maxBuffer});
-};
-
-// Retrieve result of child process: exit code, signal, error, streams (stdout/stderr/all)
-const getSpawnedResult = async ({stdout, stderr, all}, {encoding, buffer, maxBuffer}, processDone) => {
-	const stdoutPromise = getStreamPromise(stdout, {encoding, buffer, maxBuffer});
-	const stderrPromise = getStreamPromise(stderr, {encoding, buffer, maxBuffer});
-	const allPromise = getStreamPromise(all, {encoding, buffer, maxBuffer: maxBuffer * 2});
-
-	try {
-		return await Promise.all([processDone, stdoutPromise, stderrPromise, allPromise]);
-	} catch (error) {
-		return Promise.all([
-			{error, signal: error.signal, timedOut: error.timedOut},
-			getBufferedData(stdout, stdoutPromise),
-			getBufferedData(stderr, stderrPromise),
-			getBufferedData(all, allPromise)
-		]);
-	}
-};
-
-const validateInputSync = ({input}) => {
-	if (isStream(input)) {
-		throw new TypeError('The `input` option cannot be a stream in sync mode');
-	}
+const POSIX_REGEX_SOURCE = {
+  alnum: 'a-zA-Z0-9',
+  alpha: 'a-zA-Z',
+  ascii: '\\x00-\\x7F',
+  blank: ' \\t',
+  cntrl: '\\x00-\\x1F\\x7F',
+  digit: '0-9',
+  graph: '\\x21-\\x7E',
+  lower: 'a-z',
+  print: '\\x20-\\x7E ',
+  punct: '\\-!"#$%&\'()\\*+,./:;<=>?@[\\]^_`{|}~',
+  space: ' \\t\\r\\n\\v\\f',
+  upper: 'A-Z',
+  word: 'A-Za-z0-9_',
+  xdigit: 'A-Fa-f0-9'
 };
 
 module.exports = {
-	handleInput,
-	makeAllStream,
-	getSpawnedResult,
-	validateInputSync
-};
+  MAX_LENGTH: 1024 * 64,
+  POSIX_REGEX_SOURCE,
 
+  // regular expressions
+  REGEX_BACKSLASH: /\\(?![*+?^${}(|)[\]])/g,
+  REGEX_NON_SPECIAL_CHARS: /^[^@![\].,$*+?^{}()|\\/]+/,
+  REGEX_SPECIAL_CHARS: /[-*+?.^${}(|)[\]]/,
+  REGEX_SPECIAL_CHARS_BACKREF: /(\\?)((\W)(\3*))/g,
+  REGEX_SPECIAL_CHARS_GLOBAL: /([-*+?.^${}(|)[\]])/g,
+  REGEX_REMOVE_BACKSLASH: /(?:\[.*?[^\\]\]|\\(?=.))/g,
+
+  // Replace globs with equivalent patterns to reduce parsing time.
+  REPLACEMENTS: {
+    '***': '*',
+    '**/**': '**',
+    '**/**/**': '**'
+  },
+
+  // Digits
+  CHAR_0: 48, /* 0 */
+  CHAR_9: 57, /* 9 */
+
+  // Alphabet chars.
+  CHAR_UPPERCASE_A: 65, /* A */
+  CHAR_LOWERCASE_A: 97, /* a */
+  CHAR_UPPERCASE_Z: 90, /* Z */
+  CHAR_LOWERCASE_Z: 122, /* z */
+
+  CHAR_LEFT_PARENTHESES: 40, /* ( */
+  CHAR_RIGHT_PARENTHESES: 41, /* ) */
+
+  CHAR_ASTERISK: 42, /* * */
+
+  // Non-alphabetic chars.
+  CHAR_AMPERSAND: 38, /* & */
+  CHAR_AT: 64, /* @ */
+  CHAR_BACKWARD_SLASH: 92, /* \ */
+  CHAR_CARRIAGE_RETURN: 13, /* \r */
+  CHAR_CIRCUMFLEX_ACCENT: 94, /* ^ */
+  CHAR_COLON: 58, /* : */
+  CHAR_COMMA: 44, /* , */
+  CHAR_DOT: 46, /* . */
+  CHAR_DOUBLE_QUOTE: 34, /* " */
+  CHAR_EQUAL: 61, /* = */
+  CHAR_EXCLAMATION_MARK: 33, /* ! */
+  CHAR_FORM_FEED: 12, /* \f */
+  CHAR_FORWARD_SLASH: 47, /* / */
+  CHAR_GRAVE_ACCENT: 96, /* ` */
+  CHAR_HASH: 35, /* # */
+  CHAR_HYPHEN_MINUS: 45, /* - */
+  CHAR_LEFT_ANGLE_BRACKET: 60, /* < */
+  CHAR_LEFT_CURLY_BRACE: 123, /* { */
+  CHAR_LEFT_SQUARE_BRACKET: 91, /* [ */
+  CHAR_LINE_FEED: 10, /* \n */
+  CHAR_NO_BREAK_SPACE: 160, /* \u00A0 */
+  CHAR_PERCENT: 37, /* % */
+  CHAR_PLUS: 43, /* + */
+  CHAR_QUESTION_MARK: 63, /* ? */
+  CHAR_RIGHT_ANGLE_BRACKET: 62, /* > */
+  CHAR_RIGHT_CURLY_BRACE: 125, /* } */
+  CHAR_RIGHT_SQUARE_BRACKET: 93, /* ] */
+  CHAR_SEMICOLON: 59, /* ; */
+  CHAR_SINGLE_QUOTE: 39, /* ' */
+  CHAR_SPACE: 32, /*   */
+  CHAR_TAB: 9, /* \t */
+  CHAR_UNDERSCORE: 95, /* _ */
+  CHAR_VERTICAL_LINE: 124, /* | */
+  CHAR_ZERO_WIDTH_NOBREAK_SPACE: 65279, /* \uFEFF */
+
+  SEP: path.sep,
+
+  /**
+   * Create EXTGLOB_CHARS
+   */
+
+  extglobChars(chars) {
+    return {
+      '!': { type: 'negate', open: '(?:(?!(?:', close: `))${chars.STAR})` },
+      '?': { type: 'qmark', open: '(?:', close: ')?' },
+      '+': { type: 'plus', open: '(?:', close: ')+' },
+      '*': { type: 'star', open: '(?:', close: ')*' },
+      '@': { type: 'at', open: '(?:', close: ')' }
+    };
+  },
+
+  /**
+   * Create GLOB_CHARS
+   */
+
+  globChars(win32) {
+    return win32 === true ? WINDOWS_CHARS : POSIX_CHARS;
+  }
+};
 
 
 /***/ }),
@@ -48595,7 +47600,7 @@ module.exports = {
 
 
 
-var Schema = __webpack_require__(379);
+var Schema = __webpack_require__(717);
 
 
 module.exports = new Schema({
@@ -49082,18 +48087,512 @@ function create(EConstructor) {
 
 "use strict";
 
+
+var repeat = __webpack_require__(360)
+var trim = __webpack_require__(716)
+
+module.exports = indentedCode
+
+var lineFeed = '\n'
+var tab = '\t'
+var space = ' '
+
+var tabSize = 4
+var codeIndent = repeat(space, tabSize)
+
+function indentedCode(eat, value, silent) {
+  var index = -1
+  var length = value.length
+  var subvalue = ''
+  var content = ''
+  var subvalueQueue = ''
+  var contentQueue = ''
+  var character
+  var blankQueue
+  var indent
+
+  while (++index < length) {
+    character = value.charAt(index)
+
+    if (indent) {
+      indent = false
+
+      subvalue += subvalueQueue
+      content += contentQueue
+      subvalueQueue = ''
+      contentQueue = ''
+
+      if (character === lineFeed) {
+        subvalueQueue = character
+        contentQueue = character
+      } else {
+        subvalue += character
+        content += character
+
+        while (++index < length) {
+          character = value.charAt(index)
+
+          if (!character || character === lineFeed) {
+            contentQueue = character
+            subvalueQueue = character
+            break
+          }
+
+          subvalue += character
+          content += character
+        }
+      }
+    } else if (
+      character === space &&
+      value.charAt(index + 1) === character &&
+      value.charAt(index + 2) === character &&
+      value.charAt(index + 3) === character
+    ) {
+      subvalueQueue += codeIndent
+      index += 3
+      indent = true
+    } else if (character === tab) {
+      subvalueQueue += character
+      indent = true
+    } else {
+      blankQueue = ''
+
+      while (character === tab || character === space) {
+        blankQueue += character
+        character = value.charAt(++index)
+      }
+
+      if (character !== lineFeed) {
+        break
+      }
+
+      subvalueQueue += blankQueue + character
+      contentQueue += character
+    }
+  }
+
+  if (content) {
+    if (silent) {
+      return true
+    }
+
+    return eat(subvalue)({
+      type: 'code',
+      lang: null,
+      meta: null,
+      value: trim(content)
+    })
+  }
+}
+
+
+/***/ }),
+/* 950 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+
+var subscription = __webpack_require__(568);
+var effection = __webpack_require__(700);
+
+function isEventTarget(target) {
+  return typeof target.addEventListener === 'function';
+}
+
+function addListener(source, name, listener) {
+  if (isEventTarget(source)) {
+    source.addEventListener(name, listener);
+  } else {
+    source.on(name, listener);
+  }
+}
+function removeListener(source, name, listener) {
+  if (isEventTarget(source)) {
+    source.removeEventListener(name, listener);
+  } else {
+    source.off(name, listener);
+  }
+}
+
+/**
+ * Takes an event source and event name and returns a yieldable
+ * operation which resumes when the event occurs.
+ */
+
+function* once(source, eventName) {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  var onceListener = function onceListener() {};
+
+  try {
+    return yield new Promise(function (resolve) {
+      onceListener = function onceListener() {
+        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+          args[_key] = arguments[_key];
+        }
+
+        return resolve(args);
+      };
+
+      addListener(source, eventName, onceListener);
+    });
+  } finally {
+    removeListener(source, eventName, onceListener);
+  }
+}
+
+function on(source, name) {
+  return subscription.createSubscription(function* (publish) {
+    var listener = function listener() {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return publish(args);
+    };
+
+    try {
+      addListener(source, name, listener);
+      yield;
+    } finally {
+      removeListener(source, name, listener);
+    }
+  });
+}
+
+function throwOnErrorEvent(source) {
+  return effection.spawn(function* () {
+    var _yield$once = yield once(source, 'error'),
+        error = _yield$once[0];
+
+    throw error;
+  });
+}
+
+exports.on = on;
+exports.once = once;
+exports.throwOnErrorEvent = throwOnErrorEvent;
+//# sourceMappingURL=events.cjs.development.js.map
+
+
+/***/ }),
+/* 951 */,
+/* 952 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+const path = __webpack_require__(622);
+const resolveCommand = __webpack_require__(220);
+const escape = __webpack_require__(385);
+const readShebang = __webpack_require__(546);
+
+const isWin = process.platform === 'win32';
+const isExecutableRegExp = /\.(?:com|exe)$/i;
+const isCmdShimRegExp = /node_modules[\\/].bin[\\/][^\\/]+\.cmd$/i;
+
+function detectShebang(parsed) {
+    parsed.file = resolveCommand(parsed);
+
+    const shebang = parsed.file && readShebang(parsed.file);
+
+    if (shebang) {
+        parsed.args.unshift(parsed.file);
+        parsed.command = shebang;
+
+        return resolveCommand(parsed);
+    }
+
+    return parsed.file;
+}
+
+function parseNonShell(parsed) {
+    if (!isWin) {
+        return parsed;
+    }
+
+    // Detect & add support for shebangs
+    const commandFile = detectShebang(parsed);
+
+    // We don't need a shell if the command filename is an executable
+    const needsShell = !isExecutableRegExp.test(commandFile);
+
+    // If a shell is required, use cmd.exe and take care of escaping everything correctly
+    // Note that `forceShell` is an hidden option used only in tests
+    if (parsed.options.forceShell || needsShell) {
+        // Need to double escape meta chars if the command is a cmd-shim located in `node_modules/.bin/`
+        // The cmd-shim simply calls execute the package bin file with NodeJS, proxying any argument
+        // Because the escape of metachars with ^ gets interpreted when the cmd.exe is first called,
+        // we need to double escape them
+        const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
+
+        // Normalize posix paths into OS compatible paths (e.g.: foo/bar -> foo\bar)
+        // This is necessary otherwise it will always fail with ENOENT in those cases
+        parsed.command = path.normalize(parsed.command);
+
+        // Escape command & arguments
+        parsed.command = escape.command(parsed.command);
+        parsed.args = parsed.args.map((arg) => escape.argument(arg, needsDoubleEscapeMetaChars));
+
+        const shellCommand = [parsed.command].concat(parsed.args).join(' ');
+
+        parsed.args = ['/d', '/s', '/c', `"${shellCommand}"`];
+        parsed.command = process.env.comspec || 'cmd.exe';
+        parsed.options.windowsVerbatimArguments = true; // Tell node's spawn that the arguments are already escaped
+    }
+
+    return parsed;
+}
+
+function parse(command, args, options) {
+    // Normalize arguments, similar to nodejs
+    if (args && !Array.isArray(args)) {
+        options = args;
+        args = null;
+    }
+
+    args = args ? args.slice(0) : []; // Clone array to avoid changing the original
+    options = Object.assign({}, options); // Clone object to avoid changing the original
+
+    // Build our parsed object
+    const parsed = {
+        command,
+        args,
+        options,
+        file: undefined,
+        original: {
+            command,
+            args,
+        },
+    };
+
+    // Delegate further parsing to shell or non-shell
+    return options.shell ? parsed : parseNonShell(parsed);
+}
+
+module.exports = parse;
+
+
+/***/ }),
+/* 953 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
+
+var characterEntities = __webpack_require__(671)
+
+module.exports = decodeEntity
+
+var own = {}.hasOwnProperty
+
+function decodeEntity(characters) {
+  return own.call(characterEntities, characters)
+    ? characterEntities[characters]
+    : false
+}
+
+
+/***/ }),
+/* 954 */,
+/* 955 */,
+/* 956 */,
+/* 957 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var once = __webpack_require__(538)
+var eos = __webpack_require__(846)
+var fs = __webpack_require__(747) // we only need fs to get the ReadStream and WriteStream prototypes
+
+var noop = function () {}
+var ancient = /^v?\.0/.test(process.version)
+
+var isFn = function (fn) {
+  return typeof fn === 'function'
+}
+
+var isFS = function (stream) {
+  if (!ancient) return false // newer node version do not need to care about fs is a special way
+  if (!fs) return false // browser
+  return (stream instanceof (fs.ReadStream || noop) || stream instanceof (fs.WriteStream || noop)) && isFn(stream.close)
+}
+
+var isRequest = function (stream) {
+  return stream.setHeader && isFn(stream.abort)
+}
+
+var destroyer = function (stream, reading, writing, callback) {
+  callback = once(callback)
+
+  var closed = false
+  stream.on('close', function () {
+    closed = true
+  })
+
+  eos(stream, {readable: reading, writable: writing}, function (err) {
+    if (err) return callback(err)
+    closed = true
+    callback()
+  })
+
+  var destroyed = false
+  return function (err) {
+    if (closed) return
+    if (destroyed) return
+    destroyed = true
+
+    if (isFS(stream)) return stream.close(noop) // use close for fs streams to avoid fd leaks
+    if (isRequest(stream)) return stream.abort() // request.destroy just do .end - .abort is what we want
+
+    if (isFn(stream.destroy)) return stream.destroy()
+
+    callback(err || new Error('stream was destroyed'))
+  }
+}
+
+var call = function (fn) {
+  fn()
+}
+
+var pipe = function (from, to) {
+  return from.pipe(to)
+}
+
+var pump = function () {
+  var streams = Array.prototype.slice.call(arguments)
+  var callback = isFn(streams[streams.length - 1] || noop) && streams.pop() || noop
+
+  if (Array.isArray(streams[0])) streams = streams[0]
+  if (streams.length < 2) throw new Error('pump requires two streams per minimum')
+
+  var error
+  var destroys = streams.map(function (stream, i) {
+    var reading = i < streams.length - 1
+    var writing = i > 0
+    return destroyer(stream, reading, writing, function (err) {
+      if (!error) error = err
+      if (err) destroys.forEach(call)
+      if (reading) return
+      destroys.forEach(call)
+      callback(error)
+    })
+  })
+
+  return streams.reduce(pipe)
+}
+
+module.exports = pump
+
+
+/***/ }),
+/* 958 */,
+/* 959 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+// JS-YAML's default schema for `safeLoad` function.
+// It is not described in the YAML specification.
+//
+// This schema is based on standard YAML's Core schema and includes most of
+// extra types described at YAML tag repository. (http://yaml.org/type/)
+
+
+
+
+
+var Schema = __webpack_require__(717);
+
+
+module.exports = new Schema({
+  include: [
+    __webpack_require__(420)
+  ],
+  implicit: [
+    __webpack_require__(514),
+    __webpack_require__(130)
+  ],
+  explicit: [
+    __webpack_require__(541),
+    __webpack_require__(872),
+    __webpack_require__(559),
+    __webpack_require__(326)
+  ]
+});
+
+
+/***/ }),
+/* 960 */
+/***/ (function(module) {
+
+"use strict";
+
+
+const nativePromisePrototype = (async () => {})().constructor.prototype;
+const descriptors = ['then', 'catch', 'finally'].map(property => [
+	property,
+	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
+]);
+
+// The return value is a mixin of `childProcess` and `Promise`
+const mergePromise = (spawned, promise) => {
+	for (const [property, descriptor] of descriptors) {
+		// Starting the main `promise` is deferred to avoid consuming streams
+		const value = typeof promise === 'function' ?
+			(...args) => Reflect.apply(descriptor.value, promise(), args) :
+			descriptor.value.bind(promise);
+
+		Reflect.defineProperty(spawned, property, {...descriptor, value});
+	}
+
+	return spawned;
+};
+
+// Use promises instead of `child_process` events
+const getSpawnedPromise = spawned => {
+	return new Promise((resolve, reject) => {
+		spawned.on('exit', (exitCode, signal) => {
+			resolve({exitCode, signal});
+		});
+
+		spawned.on('error', error => {
+			reject(error);
+		});
+
+		if (spawned.stdin) {
+			spawned.stdin.on('error', error => {
+				reject(error);
+			});
+		}
+	});
+};
+
+module.exports = {
+	mergePromise,
+	getSpawnedPromise
+};
+
+
+
+/***/ }),
+/* 961 */,
+/* 962 */
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+"use strict";
+
 const path = __webpack_require__(622);
 const childProcess = __webpack_require__(129);
-const crossSpawn = __webpack_require__(335);
+const crossSpawn = __webpack_require__(429);
 const stripFinalNewline = __webpack_require__(839);
-const npmRunPath = __webpack_require__(553);
+const npmRunPath = __webpack_require__(329);
 const onetime = __webpack_require__(530);
-const makeError = __webpack_require__(725);
-const normalizeStdio = __webpack_require__(661);
-const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __webpack_require__(293);
-const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __webpack_require__(933);
-const {mergePromise, getSpawnedPromise} = __webpack_require__(515);
-const {joinCommand, parseCommand} = __webpack_require__(864);
+const makeError = __webpack_require__(804);
+const normalizeStdio = __webpack_require__(550);
+const {spawnedKill, spawnedCancel, setupTimeout, setExitHandler} = __webpack_require__(79);
+const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __webpack_require__(452);
+const {mergePromise, getSpawnedPromise} = __webpack_require__(960);
+const {joinCommand, parseCommand} = __webpack_require__(822);
 
 const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
 
@@ -49337,687 +48836,6 @@ module.exports.node = (scriptPath, args, options = {}) => {
 		}
 	);
 };
-
-
-/***/ }),
-/* 950 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-
-var subscription = __webpack_require__(568);
-var effection = __webpack_require__(700);
-
-function isEventTarget(target) {
-  return typeof target.addEventListener === 'function';
-}
-
-function addListener(source, name, listener) {
-  if (isEventTarget(source)) {
-    source.addEventListener(name, listener);
-  } else {
-    source.on(name, listener);
-  }
-}
-function removeListener(source, name, listener) {
-  if (isEventTarget(source)) {
-    source.removeEventListener(name, listener);
-  } else {
-    source.off(name, listener);
-  }
-}
-
-/**
- * Takes an event source and event name and returns a yieldable
- * operation which resumes when the event occurs.
- */
-
-function* once(source, eventName) {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  var onceListener = function onceListener() {};
-
-  try {
-    return yield new Promise(function (resolve) {
-      onceListener = function onceListener() {
-        for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-
-        return resolve(args);
-      };
-
-      addListener(source, eventName, onceListener);
-    });
-  } finally {
-    removeListener(source, eventName, onceListener);
-  }
-}
-
-function on(source, name) {
-  return subscription.createSubscription(function* (publish) {
-    var listener = function listener() {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      return publish(args);
-    };
-
-    try {
-      addListener(source, name, listener);
-      yield;
-    } finally {
-      removeListener(source, name, listener);
-    }
-  });
-}
-
-function throwOnErrorEvent(source) {
-  return effection.spawn(function* () {
-    var _yield$once = yield once(source, 'error'),
-        error = _yield$once[0];
-
-    throw error;
-  });
-}
-
-exports.on = on;
-exports.once = once;
-exports.throwOnErrorEvent = throwOnErrorEvent;
-//# sourceMappingURL=events.cjs.development.js.map
-
-
-/***/ }),
-/* 951 */,
-/* 952 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-const utils = __webpack_require__(17);
-class ErrorFilter {
-    constructor(_settings) {
-        this._settings = _settings;
-    }
-    getFilter() {
-        return (error) => this._isNonFatalError(error);
-    }
-    _isNonFatalError(error) {
-        return utils.errno.isEnoentCodeError(error) || this._settings.suppressErrors;
-    }
-}
-exports.default = ErrorFilter;
-
-
-/***/ }),
-/* 953 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var characterEntities = __webpack_require__(671)
-
-module.exports = decodeEntity
-
-var own = {}.hasOwnProperty
-
-function decodeEntity(characters) {
-  return own.call(characterEntities, characters)
-    ? characterEntities[characters]
-    : false
-}
-
-
-/***/ }),
-/* 954 */,
-/* 955 */,
-/* 956 */,
-/* 957 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-var once = __webpack_require__(25)
-var eos = __webpack_require__(846)
-var fs = __webpack_require__(747) // we only need fs to get the ReadStream and WriteStream prototypes
-
-var noop = function () {}
-var ancient = /^v?\.0/.test(process.version)
-
-var isFn = function (fn) {
-  return typeof fn === 'function'
-}
-
-var isFS = function (stream) {
-  if (!ancient) return false // newer node version do not need to care about fs is a special way
-  if (!fs) return false // browser
-  return (stream instanceof (fs.ReadStream || noop) || stream instanceof (fs.WriteStream || noop)) && isFn(stream.close)
-}
-
-var isRequest = function (stream) {
-  return stream.setHeader && isFn(stream.abort)
-}
-
-var destroyer = function (stream, reading, writing, callback) {
-  callback = once(callback)
-
-  var closed = false
-  stream.on('close', function () {
-    closed = true
-  })
-
-  eos(stream, {readable: reading, writable: writing}, function (err) {
-    if (err) return callback(err)
-    closed = true
-    callback()
-  })
-
-  var destroyed = false
-  return function (err) {
-    if (closed) return
-    if (destroyed) return
-    destroyed = true
-
-    if (isFS(stream)) return stream.close(noop) // use close for fs streams to avoid fd leaks
-    if (isRequest(stream)) return stream.abort() // request.destroy just do .end - .abort is what we want
-
-    if (isFn(stream.destroy)) return stream.destroy()
-
-    callback(err || new Error('stream was destroyed'))
-  }
-}
-
-var call = function (fn) {
-  fn()
-}
-
-var pipe = function (from, to) {
-  return from.pipe(to)
-}
-
-var pump = function () {
-  var streams = Array.prototype.slice.call(arguments)
-  var callback = isFn(streams[streams.length - 1] || noop) && streams.pop() || noop
-
-  if (Array.isArray(streams[0])) streams = streams[0]
-  if (streams.length < 2) throw new Error('pump requires two streams per minimum')
-
-  var error
-  var destroys = streams.map(function (stream, i) {
-    var reading = i < streams.length - 1
-    var writing = i > 0
-    return destroyer(stream, reading, writing, function (err) {
-      if (!error) error = err
-      if (err) destroys.forEach(call)
-      if (reading) return
-      destroys.forEach(call)
-      callback(error)
-    })
-  })
-
-  return streams.reduce(pipe)
-}
-
-module.exports = pump
-
-
-/***/ }),
-/* 958 */,
-/* 959 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-// JS-YAML's default schema for `safeLoad` function.
-// It is not described in the YAML specification.
-//
-// This schema is based on standard YAML's Core schema and includes most of
-// extra types described at YAML tag repository. (http://yaml.org/type/)
-
-
-
-
-
-var Schema = __webpack_require__(379);
-
-
-module.exports = new Schema({
-  include: [
-    __webpack_require__(242)
-  ],
-  implicit: [
-    __webpack_require__(514),
-    __webpack_require__(130)
-  ],
-  explicit: [
-    __webpack_require__(541),
-    __webpack_require__(9),
-    __webpack_require__(559),
-    __webpack_require__(326)
-  ]
-});
-
-
-/***/ }),
-/* 960 */,
-/* 961 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-
-var xtend = __webpack_require__(81)
-var escapes = __webpack_require__(96)
-var defaults = __webpack_require__(488)
-
-module.exports = setOptions
-
-function setOptions(options) {
-  var self = this
-  var current = self.options
-  var key
-  var value
-
-  if (options == null) {
-    options = {}
-  } else if (typeof options === 'object') {
-    options = xtend(options)
-  } else {
-    throw new Error('Invalid value `' + options + '` for setting `options`')
-  }
-
-  for (key in defaults) {
-    value = options[key]
-
-    if (value == null) {
-      value = current[key]
-    }
-
-    if (
-      (key !== 'blocks' && typeof value !== 'boolean') ||
-      (key === 'blocks' && typeof value !== 'object')
-    ) {
-      throw new Error(
-        'Invalid value `' + value + '` for setting `options.' + key + '`'
-      )
-    }
-
-    options[key] = value
-  }
-
-  self.options = options
-  self.escape = escapes(options)
-
-  return self
-}
-
-
-/***/ }),
-/* 962 */
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-"use strict";
-
-const path = __webpack_require__(622);
-const childProcess = __webpack_require__(129);
-const crossSpawn = __webpack_require__(328);
-const stripEof = __webpack_require__(922);
-const npmRunPath = __webpack_require__(329);
-const isStream = __webpack_require__(124);
-const _getStream = __webpack_require__(209);
-const pFinally = __webpack_require__(990);
-const onExit = __webpack_require__(145);
-const errname = __webpack_require__(758);
-const stdio = __webpack_require__(550);
-
-const TEN_MEGABYTES = 1000 * 1000 * 10;
-
-function handleArgs(cmd, args, opts) {
-	let parsed;
-
-	opts = Object.assign({
-		extendEnv: true,
-		env: {}
-	}, opts);
-
-	if (opts.extendEnv) {
-		opts.env = Object.assign({}, process.env, opts.env);
-	}
-
-	if (opts.__winShell === true) {
-		delete opts.__winShell;
-		parsed = {
-			command: cmd,
-			args,
-			options: opts,
-			file: cmd,
-			original: {
-				cmd,
-				args
-			}
-		};
-	} else {
-		parsed = crossSpawn._parse(cmd, args, opts);
-	}
-
-	opts = Object.assign({
-		maxBuffer: TEN_MEGABYTES,
-		buffer: true,
-		stripEof: true,
-		preferLocal: true,
-		localDir: parsed.options.cwd || process.cwd(),
-		encoding: 'utf8',
-		reject: true,
-		cleanup: true
-	}, parsed.options);
-
-	opts.stdio = stdio(opts);
-
-	if (opts.preferLocal) {
-		opts.env = npmRunPath.env(Object.assign({}, opts, {cwd: opts.localDir}));
-	}
-
-	if (opts.detached) {
-		// #115
-		opts.cleanup = false;
-	}
-
-	if (process.platform === 'win32' && path.basename(parsed.command) === 'cmd.exe') {
-		// #116
-		parsed.args.unshift('/q');
-	}
-
-	return {
-		cmd: parsed.command,
-		args: parsed.args,
-		opts,
-		parsed
-	};
-}
-
-function handleInput(spawned, input) {
-	if (input === null || input === undefined) {
-		return;
-	}
-
-	if (isStream(input)) {
-		input.pipe(spawned.stdin);
-	} else {
-		spawned.stdin.end(input);
-	}
-}
-
-function handleOutput(opts, val) {
-	if (val && opts.stripEof) {
-		val = stripEof(val);
-	}
-
-	return val;
-}
-
-function handleShell(fn, cmd, opts) {
-	let file = '/bin/sh';
-	let args = ['-c', cmd];
-
-	opts = Object.assign({}, opts);
-
-	if (process.platform === 'win32') {
-		opts.__winShell = true;
-		file = process.env.comspec || 'cmd.exe';
-		args = ['/s', '/c', `"${cmd}"`];
-		opts.windowsVerbatimArguments = true;
-	}
-
-	if (opts.shell) {
-		file = opts.shell;
-		delete opts.shell;
-	}
-
-	return fn(file, args, opts);
-}
-
-function getStream(process, stream, {encoding, buffer, maxBuffer}) {
-	if (!process[stream]) {
-		return null;
-	}
-
-	let ret;
-
-	if (!buffer) {
-		// TODO: Use `ret = util.promisify(stream.finished)(process[stream]);` when targeting Node.js 10
-		ret = new Promise((resolve, reject) => {
-			process[stream]
-				.once('end', resolve)
-				.once('error', reject);
-		});
-	} else if (encoding) {
-		ret = _getStream(process[stream], {
-			encoding,
-			maxBuffer
-		});
-	} else {
-		ret = _getStream.buffer(process[stream], {maxBuffer});
-	}
-
-	return ret.catch(err => {
-		err.stream = stream;
-		err.message = `${stream} ${err.message}`;
-		throw err;
-	});
-}
-
-function makeError(result, options) {
-	const {stdout, stderr} = result;
-
-	let err = result.error;
-	const {code, signal} = result;
-
-	const {parsed, joinedCmd} = options;
-	const timedOut = options.timedOut || false;
-
-	if (!err) {
-		let output = '';
-
-		if (Array.isArray(parsed.opts.stdio)) {
-			if (parsed.opts.stdio[2] !== 'inherit') {
-				output += output.length > 0 ? stderr : `\n${stderr}`;
-			}
-
-			if (parsed.opts.stdio[1] !== 'inherit') {
-				output += `\n${stdout}`;
-			}
-		} else if (parsed.opts.stdio !== 'inherit') {
-			output = `\n${stderr}${stdout}`;
-		}
-
-		err = new Error(`Command failed: ${joinedCmd}${output}`);
-		err.code = code < 0 ? errname(code) : code;
-	}
-
-	err.stdout = stdout;
-	err.stderr = stderr;
-	err.failed = true;
-	err.signal = signal || null;
-	err.cmd = joinedCmd;
-	err.timedOut = timedOut;
-
-	return err;
-}
-
-function joinCmd(cmd, args) {
-	let joinedCmd = cmd;
-
-	if (Array.isArray(args) && args.length > 0) {
-		joinedCmd += ' ' + args.join(' ');
-	}
-
-	return joinedCmd;
-}
-
-module.exports = (cmd, args, opts) => {
-	const parsed = handleArgs(cmd, args, opts);
-	const {encoding, buffer, maxBuffer} = parsed.opts;
-	const joinedCmd = joinCmd(cmd, args);
-
-	let spawned;
-	try {
-		spawned = childProcess.spawn(parsed.cmd, parsed.args, parsed.opts);
-	} catch (err) {
-		return Promise.reject(err);
-	}
-
-	let removeExitHandler;
-	if (parsed.opts.cleanup) {
-		removeExitHandler = onExit(() => {
-			spawned.kill();
-		});
-	}
-
-	let timeoutId = null;
-	let timedOut = false;
-
-	const cleanup = () => {
-		if (timeoutId) {
-			clearTimeout(timeoutId);
-			timeoutId = null;
-		}
-
-		if (removeExitHandler) {
-			removeExitHandler();
-		}
-	};
-
-	if (parsed.opts.timeout > 0) {
-		timeoutId = setTimeout(() => {
-			timeoutId = null;
-			timedOut = true;
-			spawned.kill(parsed.opts.killSignal);
-		}, parsed.opts.timeout);
-	}
-
-	const processDone = new Promise(resolve => {
-		spawned.on('exit', (code, signal) => {
-			cleanup();
-			resolve({code, signal});
-		});
-
-		spawned.on('error', err => {
-			cleanup();
-			resolve({error: err});
-		});
-
-		if (spawned.stdin) {
-			spawned.stdin.on('error', err => {
-				cleanup();
-				resolve({error: err});
-			});
-		}
-	});
-
-	function destroy() {
-		if (spawned.stdout) {
-			spawned.stdout.destroy();
-		}
-
-		if (spawned.stderr) {
-			spawned.stderr.destroy();
-		}
-	}
-
-	const handlePromise = () => pFinally(Promise.all([
-		processDone,
-		getStream(spawned, 'stdout', {encoding, buffer, maxBuffer}),
-		getStream(spawned, 'stderr', {encoding, buffer, maxBuffer})
-	]).then(arr => {
-		const result = arr[0];
-		result.stdout = arr[1];
-		result.stderr = arr[2];
-
-		if (result.error || result.code !== 0 || result.signal !== null) {
-			const err = makeError(result, {
-				joinedCmd,
-				parsed,
-				timedOut
-			});
-
-			// TODO: missing some timeout logic for killed
-			// https://github.com/nodejs/node/blob/master/lib/child_process.js#L203
-			// err.killed = spawned.killed || killed;
-			err.killed = err.killed || spawned.killed;
-
-			if (!parsed.opts.reject) {
-				return err;
-			}
-
-			throw err;
-		}
-
-		return {
-			stdout: handleOutput(parsed.opts, result.stdout),
-			stderr: handleOutput(parsed.opts, result.stderr),
-			code: 0,
-			failed: false,
-			killed: false,
-			signal: null,
-			cmd: joinedCmd,
-			timedOut: false
-		};
-	}), destroy);
-
-	crossSpawn._enoent.hookChildProcess(spawned, parsed.parsed);
-
-	handleInput(spawned, parsed.opts.input);
-
-	spawned.then = (onfulfilled, onrejected) => handlePromise().then(onfulfilled, onrejected);
-	spawned.catch = onrejected => handlePromise().catch(onrejected);
-
-	return spawned;
-};
-
-// TODO: set `stderr: 'ignore'` when that option is implemented
-module.exports.stdout = (...args) => module.exports(...args).then(x => x.stdout);
-
-// TODO: set `stdout: 'ignore'` when that option is implemented
-module.exports.stderr = (...args) => module.exports(...args).then(x => x.stderr);
-
-module.exports.shell = (cmd, opts) => handleShell(module.exports, cmd, opts);
-
-module.exports.sync = (cmd, args, opts) => {
-	const parsed = handleArgs(cmd, args, opts);
-	const joinedCmd = joinCmd(cmd, args);
-
-	if (isStream(parsed.opts.input)) {
-		throw new TypeError('The `input` option cannot be a stream in sync mode');
-	}
-
-	const result = childProcess.spawnSync(parsed.cmd, parsed.args, parsed.opts);
-	result.code = result.status;
-
-	if (result.error || result.status !== 0 || result.signal !== null) {
-		const err = makeError(result, {
-			joinedCmd,
-			parsed
-		});
-
-		if (!parsed.opts.reject) {
-			return err;
-		}
-
-		throw err;
-	}
-
-	return {
-		stdout: handleOutput(parsed.opts, result.stdout),
-		stderr: handleOutput(parsed.opts, result.stderr),
-		code: 0,
-		failed: false,
-		signal: null,
-		cmd: joinedCmd,
-		timedOut: false
-	};
-};
-
-module.exports.shellSync = (cmd, opts) => handleShell(module.exports.sync, cmd, opts);
 
 
 /***/ }),
@@ -51193,7 +50011,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var request = __webpack_require__(59);
 var universalUserAgent = __webpack_require__(523);
 
-const VERSION = "4.5.1";
+const VERSION = "4.5.2";
 
 class GraphqlError extends Error {
   constructor(request, response) {
@@ -51282,7 +50100,7 @@ exports.withCustomRequest = withCustomRequest;
 "use strict";
 
 
-var uri = __webpack_require__(452)
+var uri = __webpack_require__(764)
 var title = __webpack_require__(919)
 
 module.exports = image
@@ -51480,7 +50298,7 @@ exports.getOctokit = getOctokit;
  * Released under the MIT License.
  */
 
-var isExtglob = __webpack_require__(122);
+var isExtglob = __webpack_require__(865);
 var chars = { '{': '}', '(': ')', '[': ']'};
 var strictRegex = /\\(.)|(^!|\*|[\].+)]\?|\[[^\\\]]+\]|\{[^\\}]+\}|\(\?[:!=][^\\)]+\)|\([^|]+\|[^\\)]+\))/;
 var relaxedRegex = /\\(.)|(^!|[*?{}()[\]]|\(\?)/;
@@ -51570,7 +50388,7 @@ function prettyError (err, buf) {
 "use strict";
 
 module.exports = __webpack_require__(289)
-module.exports.async = __webpack_require__(463)
+module.exports.async = __webpack_require__(932)
 module.exports.stream = __webpack_require__(670)
 module.exports.prettyError = __webpack_require__(985)
 
@@ -51637,24 +50455,42 @@ module.exports = gte
 
 /***/ }),
 /* 990 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-module.exports = (promise, onFinally) => {
-	onFinally = onFinally || (() => {});
 
-	return promise.then(
-		val => new Promise(resolve => {
-			resolve(onFinally());
-		}).then(() => val),
-		err => new Promise(resolve => {
-			resolve(onFinally());
-		}).then(() => {
-			throw err;
-		})
-	);
-};
+var identity = __webpack_require__(491)
+
+module.exports = enter
+
+// Shortcut and collapsed link references need no escaping and encoding during
+// the processing of child nodes (it must be implied from identifier).
+//
+// This toggler turns encoding and escaping off for shortcut and collapsed
+// references.
+//
+// Implies `enterLink`.
+function enter(compiler, node) {
+  var encode = compiler.encode
+  var escape = compiler.escape
+  var exitLink = compiler.enterLink()
+
+  if (node.referenceType !== 'shortcut' && node.referenceType !== 'collapsed') {
+    return exitLink
+  }
+
+  compiler.escape = identity
+  compiler.encode = identity
+
+  return exit
+
+  function exit() {
+    compiler.encode = encode
+    compiler.escape = escape
+    exitLink()
+  }
+}
 
 
 /***/ }),
@@ -51873,7 +50709,7 @@ module.exports.covector = function* covector({
     delete config.vfile;
     return console.dir(config);
   } else if (command === "version") {
-    yield raceTime();
+    yield raceTime({ t: config.timeout });
     const changes = changesConsideringParents({
       assembledChanges,
       config,
@@ -51942,9 +50778,14 @@ module.exports.covector = function* covector({
     if (command === "version" && !dryRun)
       yield changeFilesRemove({ cwd, paths: changesPaths });
 
+    if (dryRun) {
+      console.log("==== result ===");
+      console.log(pkgCommandsRan);
+    }
+
     return pkgCommandsRan;
   } else {
-    yield raceTime();
+    yield raceTime({ t: config.timeout });
     const commands = yield mergeIntoConfig({
       assembledChanges,
       config,
@@ -51999,6 +50840,11 @@ module.exports.covector = function* covector({
       dryRun,
     });
 
+    if (dryRun) {
+      console.log("==== result ===");
+      console.log(pkgCommandsRan);
+    }
+
     return pkgCommandsRan;
   }
 };
@@ -52015,7 +50861,7 @@ module.exports.covector = function* covector({
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.argsert = void 0;
 const yerror_1 = __webpack_require__(946);
-const parse_command_1 = __webpack_require__(788);
+const parse_command_1 = __webpack_require__(398);
 const positionName = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth'];
 function argsert(arg1, arg2, arg3) {
     function parseArgs() {
@@ -52080,11 +50926,55 @@ function argumentTypeError(observedType, allowedTypes, position) {
 
 /***/ }),
 /* 998 */
-/***/ (function(module) {
+/***/ (function(module, __unusedexports, __webpack_require__) {
 
 "use strict";
 
-module.exports = /^#!(.*)/;
+
+var fence = __webpack_require__(753)
+
+module.exports = create
+
+function create(matter) {
+  var name = matter.type + 'FrontMatter'
+  var open = fence(matter, 'open')
+  var close = fence(matter, 'close')
+  var newline = '\n'
+  var anywhere = matter.anywhere
+
+  frontmatter.displayName = name
+  frontmatter.onlyAtStart = typeof anywhere === 'boolean' ? !anywhere : true
+
+  return [name, frontmatter]
+
+  function frontmatter(eat, value, silent) {
+    var index = open.length
+    var offset
+
+    if (value.slice(0, index) !== open || value.charAt(index) !== newline) {
+      return
+    }
+
+    offset = value.indexOf(close, index)
+
+    while (offset !== -1 && value.charAt(offset - 1) !== newline) {
+      index = offset + close.length
+      offset = value.indexOf(close, index)
+    }
+
+    if (offset !== -1) {
+      /* istanbul ignore if - never used (yet) */
+      if (silent) {
+        return true
+      }
+
+      return eat(value.slice(0, offset + close.length))({
+        type: matter.type,
+        value: value.slice(open.length + 1, offset - 1)
+      })
+    }
+  }
+}
 
 
 /***/ }),
@@ -52107,10 +50997,10 @@ function deprecated(name) {
 
 
 module.exports.Type                = __webpack_require__(773);
-module.exports.Schema              = __webpack_require__(379);
+module.exports.Schema              = __webpack_require__(717);
 module.exports.FAILSAFE_SCHEMA     = __webpack_require__(738);
 module.exports.JSON_SCHEMA         = __webpack_require__(937);
-module.exports.CORE_SCHEMA         = __webpack_require__(242);
+module.exports.CORE_SCHEMA         = __webpack_require__(420);
 module.exports.DEFAULT_SAFE_SCHEMA = __webpack_require__(959);
 module.exports.DEFAULT_FULL_SCHEMA = __webpack_require__(803);
 module.exports.load                = loader.load;

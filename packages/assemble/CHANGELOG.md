@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.5]
+
+-   Deep clone changes that are getting passed into the changelog. We were editing references and those edits were showing up in erroneous places.
+    -   [38fba3c](https://www.github.com/jbolda/covector/commit/38fba3c6791154f335dde10740cde6ad556b6ef3) fix: deepclone change entries to prevent referencial edits ([#109](https://www.github.com/jbolda/covector/pull/109)) on 2020-07-17
+-   Allow running commands from the cwd within the config.
+    -   [b95249e](https://www.github.com/jbolda/covector/commit/b95249e88fb9fba1b1cc85c4a8fefa633ca9fd1c) feat: allow command to run from cwd ([#108](https://www.github.com/jbolda/covector/pull/108)) on 2020-07-17
+
 ## [0.2.4]
 
 -   Stringify remaining portion of change file. Previously we were just looping on `paragraph` which would miss links.
