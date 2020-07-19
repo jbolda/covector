@@ -149,7 +149,11 @@ module.exports.covector = function* covector({
       return `No commands configured to run on [${command}].`;
     }
 
-    const commandsToRun = yield confirmCommandsToRun({ cwd, commands });
+    const commandsToRun = yield confirmCommandsToRun({
+      cwd,
+      commands,
+      command,
+    });
 
     let pkgCommandsRan = commands.reduce((pkgs, pkg) => {
       pkgs[pkg.pkg] = {

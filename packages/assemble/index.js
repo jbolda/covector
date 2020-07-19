@@ -142,14 +142,19 @@ module.exports.mergeIntoConfig = function* ({
     const commandItems = { pkg, pkgManager, config };
     const mergedCommand = mergeCommand({ ...commandItems, command });
 
-    let getPublishedVersion;
-    let assets;
+    let publishElements = {};
+    publishElements.subPublishCommand = command.slice(7, 999);
     if (command === "publish") {
-      getPublishedVersion = mergeCommand({
+      publishElements[
+        `getPublishedVersion${publishElements.subPublishCommand}`
+      ] = mergeCommand({
         ...commandItems,
-        command: "getPublishedVersion",
+        command: `getPublishedVersion${publishElements.subPublishCommand}`,
       });
-      assets = mergeCommand({ ...commandItems, command: "assets" });
+      publishElements["assets"] = mergeCommand({
+        ...commandItems,
+        command: "assets",
+      });
     }
 
     if (!!mergedCommand) {
@@ -162,8 +167,18 @@ module.exports.mergeIntoConfig = function* ({
           ...commandItems,
           command: `post${command}`,
         }),
-        ...(!getPublishedVersion ? {} : { getPublishedVersion }),
-        ...(!assets ? {} : { assets }),
+        ...(!publishElements[
+          `getPublishedVersion${publishElements.subPublishCommand}`
+        ]
+          ? {}
+          : {
+              [`getPublishedVersion${publishElements.subPublishCommand}`]: publishElements[
+                `getPublishedVersion${publishElements.subPublishCommand}`
+              ],
+            }),
+        ...(!publishElements[publishElements.assets]
+          ? {}
+          : { assets: publishElements[publishElements.assets] }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
       };
@@ -215,14 +230,15 @@ module.exports.mergeIntoConfig = function* ({
     }
 
     if (command !== "version") {
+      let subPublishCommand = command.slice(7, 999);
       // add these after that they can use pkgFile
       extraPublishParams = {
         ...extraPublishParams,
-        ...(!pkgCommands[pkg].getPublishedVersion
+        ...(!pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
           ? {}
           : {
-              getPublishedVersion: template(
-                pkgCommands[pkg].getPublishedVersion
+              [`getPublishedVersion${subPublishCommand}`]: template(
+                pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
               )(pipeToTemplate),
             }),
         ...(!pkgCommands[pkg].assets

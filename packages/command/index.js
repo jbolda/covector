@@ -75,17 +75,22 @@ const attemptCommands = function* ({
   return _pkgCommandsRan;
 };
 
-const confirmCommandsToRun = function* ({ cwd, commands }) {
+const confirmCommandsToRun = function* ({ cwd, commands, command }) {
+  let subPublishCommand = command.slice(7, 999);
   let commandsToRun = [];
   for (let pkg of commands) {
-    if (!!pkg.getPublishedVersion) {
+    if (!!pkg[`getPublishedVersion${subPublishCommand}`]) {
       const version = yield runCommand({
-        command: pkg.getPublishedVersion,
+        command: pkg[`getPublishedVersion${subPublishCommand}`],
         cwd,
         pkg: pkg.pkg,
         pkgPath: pkg.path,
         stdio: "pipe",
-        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
+        log: `Checking if ${pkg.pkg}@${
+          pkg.pkgFile.version
+        } is already published with: ${
+          pkg[`getPublishedVersion${subPublishCommand}`]
+        }`,
       });
 
       if (pkg.pkgFile.version === version) {
