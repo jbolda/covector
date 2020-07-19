@@ -450,3 +450,39 @@ const scrubVfile = (covectored) => {
     return c;
   }, covectored);
 };
+
+describe("integration test to invoke sub commands", () => {
+  it("runs publish-primary in prod mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-subcommands");
+    const covectored = await main(
+      covector({
+        command: "publish-primary",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: scrubVfile(covectored),
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+
+  it("runs publishSecondary in prod mode", async () => {
+    const restoreConsole = mockConsole(["log", "info"]);
+    const fullIntegration = f.copy("integration.js-with-subcommands");
+    const covectored = await main(
+      covector({
+        command: "publishSecondary",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: console.log.mock.calls,
+      consoleInfo: console.info.mock.calls,
+      covectorReturn: scrubVfile(covectored),
+    }).toMatchSnapshot();
+    restoreConsole();
+  });
+});
