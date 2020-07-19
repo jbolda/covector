@@ -22,6 +22,15 @@ main(function* run() {
     }
     const covectored = yield covector({ command });
 
+    core.setOutput("commandRan", command);
+    let successfulPublish = false;
+    if (command === "publish") {
+      for (let pkg of Object.keys(covectored)) {
+        if (covectored[pkg].command !== false) successfulPublish = true;
+      }
+    }
+    core.setOutput("successfulPublish", successfulPublish);
+
     if (command === "version") {
       const covectoredSmushed = Object.keys(covectored).reduce((text, pkg) => {
         if (typeof covectored[pkg].command === "string") {

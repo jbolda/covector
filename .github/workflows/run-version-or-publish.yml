@@ -31,9 +31,14 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           command: 'version-or-publish'
           createRelease: true
+      - name: dump covector output
+        env:
+          COVECTOR_CONTEXT: ${{ toJson(steps.covector) }}
+        run: echo "$COVECTOR_CONTEXT"
       - name: create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v2
+        if: ${{ steps.covector.outputs.command }} == 'version'
         with:
           title: "Publish New Versions"
           commit-message: "publish new versions"

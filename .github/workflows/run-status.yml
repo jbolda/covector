@@ -15,3 +15,7 @@ jobs:
         uses: ./packages/action
         with:
           command: 'status'
+      - name: dump covector output
+        env:
+          COVECTOR_CONTEXT: ${{ toJson(steps.covector) }}
+        run: echo "$COVECTOR_CONTEXT"
