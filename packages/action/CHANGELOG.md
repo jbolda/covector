@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.5]
+
+-   Add extra outputs that says which command was run (for `version-or-publish`) and if something was published.
+    -   [65aad0f](https://www.github.com/jbolda/covector/commit/65aad0f34ccc3d3b17ce31dda5eb9aaa8efd563f) feat: adjust action output for better follow on step responses ([#111](https://www.github.com/jbolda/covector/pull/111)) on 2020-07-19
+
 ## [0.2.4]
 
 -   Increase default timeout and allow it to be set from config.

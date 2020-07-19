@@ -17374,17 +17374,22 @@ const attemptCommands = function* ({
   return _pkgCommandsRan;
 };
 
-const confirmCommandsToRun = function* ({ cwd, commands }) {
+const confirmCommandsToRun = function* ({ cwd, commands, command }) {
+  let subPublishCommand = command.slice(7, 999);
   let commandsToRun = [];
   for (let pkg of commands) {
-    if (!!pkg.getPublishedVersion) {
+    if (!!pkg[`getPublishedVersion${subPublishCommand}`]) {
       const version = yield runCommand({
-        command: pkg.getPublishedVersion,
+        command: pkg[`getPublishedVersion${subPublishCommand}`],
         cwd,
         pkg: pkg.pkg,
         pkgPath: pkg.path,
         stdio: "pipe",
-        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${pkg.getPublishedVersion}`,
+        log: `Checking if ${pkg.pkg}@${
+          pkg.pkgFile.version
+        } is already published with: ${
+          pkg[`getPublishedVersion${subPublishCommand}`]
+        }`,
       });
 
       if (pkg.pkgFile.version === version) {
@@ -24796,6 +24801,15 @@ main(function* run() {
       }
     }
     const covectored = yield covector({ command });
+
+    core.setOutput("commandRan", command);
+    let successfulPublish = false;
+    if (command === "publish") {
+      for (let pkg of Object.keys(covectored)) {
+        if (covectored[pkg].command !== false) successfulPublish = true;
+      }
+    }
+    core.setOutput("successfulPublish", successfulPublish);
 
     if (command === "version") {
       const covectoredSmushed = Object.keys(covectored).reduce((text, pkg) => {
@@ -37302,14 +37316,19 @@ module.exports.mergeIntoConfig = function* ({
     const commandItems = { pkg, pkgManager, config };
     const mergedCommand = mergeCommand({ ...commandItems, command });
 
-    let getPublishedVersion;
-    let assets;
+    let publishElements = {};
+    publishElements.subPublishCommand = command.slice(7, 999);
     if (command === "publish") {
-      getPublishedVersion = mergeCommand({
+      publishElements[
+        `getPublishedVersion${publishElements.subPublishCommand}`
+      ] = mergeCommand({
         ...commandItems,
-        command: "getPublishedVersion",
+        command: `getPublishedVersion${publishElements.subPublishCommand}`,
       });
-      assets = mergeCommand({ ...commandItems, command: "assets" });
+      publishElements["assets"] = mergeCommand({
+        ...commandItems,
+        command: "assets",
+      });
     }
 
     if (!!mergedCommand) {
@@ -37322,8 +37341,18 @@ module.exports.mergeIntoConfig = function* ({
           ...commandItems,
           command: `post${command}`,
         }),
-        ...(!getPublishedVersion ? {} : { getPublishedVersion }),
-        ...(!assets ? {} : { assets }),
+        ...(!publishElements[
+          `getPublishedVersion${publishElements.subPublishCommand}`
+        ]
+          ? {}
+          : {
+              [`getPublishedVersion${publishElements.subPublishCommand}`]: publishElements[
+                `getPublishedVersion${publishElements.subPublishCommand}`
+              ],
+            }),
+        ...(!publishElements[publishElements.assets]
+          ? {}
+          : { assets: publishElements[publishElements.assets] }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
       };
@@ -37375,14 +37404,15 @@ module.exports.mergeIntoConfig = function* ({
     }
 
     if (command !== "version") {
+      let subPublishCommand = command.slice(7, 999);
       // add these after that they can use pkgFile
       extraPublishParams = {
         ...extraPublishParams,
-        ...(!pkgCommands[pkg].getPublishedVersion
+        ...(!pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
           ? {}
           : {
-              getPublishedVersion: template(
-                pkgCommands[pkg].getPublishedVersion
+              [`getPublishedVersion${subPublishCommand}`]: template(
+                pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
               )(pipeToTemplate),
             }),
         ...(!pkgCommands[pkg].assets
@@ -50804,7 +50834,11 @@ module.exports.covector = function* covector({
       return `No commands configured to run on [${command}].`;
     }
 
-    const commandsToRun = yield confirmCommandsToRun({ cwd, commands });
+    const commandsToRun = yield confirmCommandsToRun({
+      cwd,
+      commands,
+      command,
+    });
 
     let pkgCommandsRan = commands.reduce((pkgs, pkg) => {
       pkgs[pkg.pkg] = {

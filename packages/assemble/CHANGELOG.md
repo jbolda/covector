@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.0]
+
+-   Allow multiple publish sequences. Any command beginning with `publish` will invoke the related `getPublishedVersion`, e.g. `publishNPM` would look for and check `getPublishedVersionNPM`. This allows separation of concerns and re-run-ability for multiple deploy targets.
+    -   [ed3698d](https://www.github.com/jbolda/covector/commit/ed3698df85140dd13e98569c4266df03f8bbfc16) feat: allow multiple publishes ([#113](https://www.github.com/jbolda/covector/pull/113)) on 2020-07-19
+
 ## [0.2.5]
 
 -   Deep clone changes that are getting passed into the changelog. We were editing references and those edits were showing up in erroneous places.
