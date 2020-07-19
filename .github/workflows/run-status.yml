@@ -13,5 +13,10 @@ jobs:
       - run: yarn workspace action build
       - name: covector status
         uses: ./packages/action
+        id: covector
         with:
           command: 'status'
+      - name: dump covector output
+        env:
+          COVECTOR_CONTEXT: ${{ toJson(steps.covector) }}
+        run: echo "$COVECTOR_CONTEXT"

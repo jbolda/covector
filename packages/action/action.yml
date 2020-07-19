@@ -20,6 +20,10 @@ inputs:
 outputs:
   change:
     description: The changes that were applied
+  commandRan:
+    description: The command ran (particularly useful for 'version-or-publish' input option).
+  successfulPublish:
+    description: Boolean as a string if we published anything. Useful to skip follow-on steps with nothing published.
 runs:
   using: 'node12'
   main: 'dist/index.js'
