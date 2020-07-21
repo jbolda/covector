@@ -100,12 +100,18 @@ main(function* run() {
 const commandText = (pkg) => {
   const { precommand, command, postcommand } = pkg;
   let text = "";
+
   if (typeof precommand !== "boolean") {
-    text = `${precommand}\n`;
-  } else if (typeof command !== "boolean") {
-    text = `${command}\n`;
-  } else if (typeof postcommand !== "boolean") {
-    text = `${postcommand}\n`;
+    text = `${text}${precommand}\n`;
   }
+
+  if (typeof command !== "boolean") {
+    text = `${text}${command}\n`;
+  }
+
+  if (typeof postcommand !== "boolean") {
+    text = `${text}${postcommand}\n`;
+  }
+
   return text === "" ? "Publish complete." : text;
 };
