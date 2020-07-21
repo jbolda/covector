@@ -102,15 +102,15 @@ const commandText = (pkg) => {
   let text = "";
 
   if (typeof precommand !== "boolean") {
-    text = `${precommand}\n`;
+    text = `${text}${precommand}\n`;
   }
 
   if (typeof command !== "boolean") {
-    text = `${command}\n`;
+    text = `${text}${command}\n`;
   }
 
   if (typeof postcommand !== "boolean") {
-    text = `${postcommand}\n`;
+    text = `${text}${postcommand}\n`;
   }
 
   return text === "" ? "Publish complete." : text;
