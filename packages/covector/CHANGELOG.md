@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1]
+
+-   The command sequence was piping to the return correctly, but in publish, we didn't properly concat the text. Fix that.
+    -   [095fe43](https://www.github.com/jbolda/covector/commit/095fe43d856ff5cf22995d2729afa449ebc3d4e3) fix: proper pipe publish output in action ([#114](https://www.github.com/jbolda/covector/pull/114)) on 2020-07-21
+
 ## [0.3.0]
 
 -   Allow multiple publish sequences. Any command beginning with `publish` will invoke the related `getPublishedVersion`, e.g. `publishNPM` would look for and check `getPublishedVersionNPM`. This allows separation of concerns and re-run-ability for multiple deploy targets.
