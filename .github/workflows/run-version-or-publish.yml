@@ -38,7 +38,7 @@ jobs:
       - name: create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v2
-        if: ${{ steps.covector.outputs.command }} == 'version'
+        if: steps.covector.outputs.commandRan == 'version'
         with:
           title: "Publish New Versions"
           commit-message: "publish new versions"
