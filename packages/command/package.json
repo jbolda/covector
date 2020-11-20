@@ -6,6 +6,7 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "effection": "^0.7.0"
+    "effection": "^0.7.0",
+    "strip-ansi": "^6.0.0"
   }
 }

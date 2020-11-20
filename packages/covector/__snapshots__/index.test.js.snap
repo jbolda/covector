@@ -8,31 +8,16 @@ Object {
       "package-one [build]: yarn build",
     ],
     Array [
-      "[2K",
+      "$ yarn info tauri@0.8.0 description",
     ],
     Array [
-      "[1G",
-    ],
-    Array [
-      "[2m$ yarn info tauri@0.8.0 description[22m",
-    ],
-    Array [
-      "[2K",
-    ],
-    Array [
-      "[1GMulti-binding collection of libraries and templates for building Tauri apps",
+      "Multi-binding collection of libraries and templates for building Tauri apps",
     ],
     Array [
       "package-two [build]: yarn build",
     ],
     Array [
-      "[2K",
-    ],
-    Array [
-      "[1G",
-    ],
-    Array [
-      "[2m$ echo this command is not piped, it is run from scripts for pk2[22m",
+      "$ echo this command is not piped, it is run from scripts for pk2",
     ],
     Array [
       "this command is not piped, it is run from scripts for pk2",
@@ -869,31 +854,19 @@ Object {
       "package-one [test]: yarn build",
     ],
     Array [
-      "[2K",
+      "$ yarn info tauri@0.8.0 description",
     ],
     Array [
-      "[1G[2m$ yarn info tauri@0.8.0 description[22m",
-    ],
-    Array [
-      "[2K",
-    ],
-    Array [
-      "[1GMulti-binding collection of libraries and templates for building Tauri apps",
+      "Multi-binding collection of libraries and templates for building Tauri apps",
     ],
     Array [
       "package-one [test]: yarn test",
     ],
     Array [
-      "[2K",
+      "$ yarn info covector@0.1.0 license",
     ],
     Array [
-      "[1G[2m$ yarn info covector@0.1.0 license[22m",
-    ],
-    Array [
-      "[2K",
-    ],
-    Array [
-      "[1GApache-2.0",
+      "Apache-2.0",
     ],
     Array [
       "package-one [test]: echo boop",
@@ -905,10 +878,7 @@ Object {
       "package-two [test]: yarn build",
     ],
     Array [
-      "[2K",
-    ],
-    Array [
-      "[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m",
+      "$ echo this command is not piped, it is run from scripts for pk2",
     ],
     Array [
       "this command is not piped, it is run from scripts for pk2",
@@ -917,10 +887,7 @@ Object {
       "package-two [test]: yarn test",
     ],
     Array [
-      "[2K",
-    ],
-    Array [
-      "[1G[2m$ echo this command is not piped, it is run from the test script[22m",
+      "$ echo this command is not piped, it is run from the test script",
     ],
     Array [
       "this command is not piped, it is run from the test script",
@@ -6756,6 +6723,56 @@ Object {
   "consoleLog": Array [
     Array [
       "tauri.js [publish]: npm publish",
+    ],
+    Array [
+      "npm",
+    ],
+    Array [
+      "notice 
+npm notice package: react@16.13.0
+npm notice === Tarball Contents ===",
+    ],
+    Array [
+      "npm notice 216B .changes/config.json
+npm notice",
+    ],
+    Array [
+      "93B  package.json        
+npm notice === Tarball Details ===",
+    ],
+    Array [
+      "npm notice name:          react                                   
+npm",
+    ],
+    Array [
+      "notice version:       16.13.0                                 
+npm notice package size:  300 B                                   
+npm notice unpacked size: 309 B                                   
+npm notice shasum:        8fa44d58b9961cff92023f6a343be06cdd6b5d6e
+npm notice integrity:     sha512-m2FPYzFegVo0A[...]dvZrRSsW7nefQ==
+npm notice total files:   2                                       
+npm notice",
+    ],
+    Array [
+      "npm ERR! code E404",
+    ],
+    Array [
+      "npm ERR! 404 Not Found - PUT https://registry.yarnpkg.com/react - Not found
+npm ERR! 404 
+npm ERR! 404  'react@16.13.0' is not in the npm registry.",
+    ],
+    Array [
+      "npm ERR! 404 You should bug the author to publish it (or use the name yourself!)
+npm ERR! 404 
+npm ERR! 404 Note that you can also install from a
+npm ERR! 404 tarball, folder, http url, or git url.",
+    ],
+    Array [
+      "npm",
+    ],
+    Array [
+      "ERR! A complete log of this run can be found in:
+npm ERR!     C:\\\\Users\\\\Jacob\\\\AppData\\\\Roaming\\\\npm-cache\\\\_logs\\\\2020-11-20T23_21_46_601Z-debug.log",
     ],
   ],
 }

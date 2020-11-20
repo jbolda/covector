@@ -1,5 +1,6 @@
 const { spawn, timeout } = require("effection");
 const { exec } = require("@effection/node");
+const stripAnsi = require("strip-ansi");
 const path = require("path");
 
 const attemptCommands = function* ({
@@ -134,13 +135,15 @@ const sh = function* (command, options, log) {
   if (log !== false) {
     yield spawn(
       child.stdout.subscribe().forEach(function* (datum) {
-        console.log(datum.toString().trim());
+        const out = stripAnsi(datum.toString().trim());
+        if (out !== "") console.log(out);
       })
     );
 
     yield spawn(
       child.stderr.subscribe().forEach(function* (datum) {
-        console.error(datum.toString().trim());
+        const out = stripAnsi(datum.toString().trim());
+        if (out !== "") console.log(out);
       })
     );
   }
