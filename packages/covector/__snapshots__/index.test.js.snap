@@ -8,21 +8,40 @@ Object {
       "package-one [build]: yarn build",
     ],
     Array [
-      "$ yarn info tauri@0.8.0 description
-Multi-binding collection of libraries and templates for building Tauri apps",
+      "[2K",
+    ],
+    Array [
+      "[1G",
+    ],
+    Array [
+      "[2m$ yarn info tauri@0.8.0 description[22m",
+    ],
+    Array [
+      "[2K",
+    ],
+    Array [
+      "[1GMulti-binding collection of libraries and templates for building Tauri apps",
     ],
     Array [
       "package-two [build]: yarn build",
     ],
     Array [
-      "$ echo this command is not piped, it is run from scripts for pk2
-this command is not piped, it is run from scripts for pk2",
+      "[2K",
+    ],
+    Array [
+      "[1G",
+    ],
+    Array [
+      "[2m$ echo this command is not piped, it is run from scripts for pk2[22m",
+    ],
+    Array [
+      "this command is not piped, it is run from scripts for pk2",
     ],
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": "$ yarn info tauri@0.8.0 description
-Multi-binding collection of libraries and templates for building Tauri apps
+      "command": "[2K[1G[2m$ yarn info tauri@0.8.0 description[22m
+[2K[1GMulti-binding collection of libraries and templates for building Tauri apps
 ",
       "pkg": Object {
         "command": Array [
@@ -60,7 +79,7 @@ Multi-binding collection of libraries and templates for building Tauri apps
       "precommand": false,
     },
     "package-two": Object {
-      "command": "$ echo this command is not piped, it is run from scripts for pk2
+      "command": "[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
 this command is not piped, it is run from scripts for pk2
 ",
       "pkg": Object {
@@ -850,15 +869,31 @@ Object {
       "package-one [test]: yarn build",
     ],
     Array [
-      "$ yarn info tauri@0.8.0 description
-Multi-binding collection of libraries and templates for building Tauri apps",
+      "[2K",
+    ],
+    Array [
+      "[1G[2m$ yarn info tauri@0.8.0 description[22m",
+    ],
+    Array [
+      "[2K",
+    ],
+    Array [
+      "[1GMulti-binding collection of libraries and templates for building Tauri apps",
     ],
     Array [
       "package-one [test]: yarn test",
     ],
     Array [
-      "$ yarn info covector@0.1.0 license
-Apache-2.0",
+      "[2K",
+    ],
+    Array [
+      "[1G[2m$ yarn info covector@0.1.0 license[22m",
+    ],
+    Array [
+      "[2K",
+    ],
+    Array [
+      "[1GApache-2.0",
     ],
     Array [
       "package-one [test]: echo boop",
@@ -870,15 +905,25 @@ Apache-2.0",
       "package-two [test]: yarn build",
     ],
     Array [
-      "$ echo this command is not piped, it is run from scripts for pk2
-this command is not piped, it is run from scripts for pk2",
+      "[2K",
+    ],
+    Array [
+      "[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m",
+    ],
+    Array [
+      "this command is not piped, it is run from scripts for pk2",
     ],
     Array [
       "package-two [test]: yarn test",
     ],
     Array [
-      "$ echo this command is not piped, it is run from the test script
-this command is not piped, it is run from the test script",
+      "[2K",
+    ],
+    Array [
+      "[1G[2m$ echo this command is not piped, it is run from the test script[22m",
+    ],
+    Array [
+      "this command is not piped, it is run from the test script",
     ],
     Array [
       "package-two [test]: echo boop",
@@ -889,8 +934,8 @@ this command is not piped, it is run from the test script",
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": "$ yarn info tauri@0.8.0 description
-Multi-binding collection of libraries and templates for building Tauri apps
+      "command": "[2K[1G[2m$ yarn info tauri@0.8.0 description[22m
+[2K[1GMulti-binding collection of libraries and templates for building Tauri apps
 ",
       "pkg": Object {
         "command": Array [
@@ -936,7 +981,7 @@ Multi-binding collection of libraries and templates for building Tauri apps
       "precommand": false,
     },
     "package-two": Object {
-      "command": "$ echo this command is not piped, it is run from scripts for pk2
+      "command": "[2K[1G[2m$ echo this command is not piped, it is run from scripts for pk2[22m
 this command is not piped, it is run from scripts for pk2
 ",
       "pkg": Object {
@@ -6693,7 +6738,6 @@ Object {
     "exitHooks": Set {},
     "fail": [Function],
     "fork": [Function],
-    "id": 23,
     "isRequired": false,
     "operation": Object {},
     "reject": [Function],

@@ -6,8 +6,6 @@
   ],
   "license": "Apache-2.0",
   "dependencies": {
-    "@effection/events": "^0.7.6",
-    "effection": "^0.7.0",
-    "execa": "^4.0.3"
+    "effection": "^0.7.0"
   }
 }

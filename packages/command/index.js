@@ -1,6 +1,5 @@
 const { spawn, timeout } = require("effection");
-const { once, on } = require("@effection/events");
-const execa = require("execa");
+const { exec } = require("@effection/node");
 const path = require("path");
 
 const attemptCommands = function* ({
@@ -112,33 +111,48 @@ const runCommand = function* ({
   command,
   cwd,
   pkgPath,
-  stdio = "pipe",
   log = `running command for ${pkg}`,
 }) {
-  let child;
-  try {
-    return yield function* () {
-      if (log !== false) console.log(log);
-      child = yield execa.command(command, {
-        cwd: path.join(cwd, pkgPath),
-        shell: process.env.shell || true,
-        windowsHide: true,
-        all: true,
-        env: { FORCE_COLOR: 0 },
-      });
+  if (log !== false) console.log(log);
+  raceTime();
 
-      if (log !== false) console.log(child.all);
-      return child.all;
-    };
-  } catch (error) {
-    throw error;
+  let child = yield sh(
+    command,
+    {
+      cwd: path.join(cwd, pkgPath),
+      encoding: "utf8",
+    },
+    log
+  );
+
+  return child;
+};
+
+const sh = function* (command, options, log) {
+  let child = yield exec(command, options);
+
+  if (log !== false) {
+    yield spawn(
+      child.stdout.subscribe().forEach(function* (datum) {
+        console.log(datum.toString().trim());
+      })
+    );
+
+    yield spawn(
+      child.stderr.subscribe().forEach(function* (datum) {
+        console.error(datum.toString().trim());
+      })
+    );
   }
+
+  const out = yield child.expect();
+  return Buffer.concat(out.tail).toString().trim();
 };
 
 const raceTime = function ({
   t = 1200000,
   msg = `timeout out waiting ${t / 1000}s for command`,
-}) {
+} = {}) {
   return spawn(function* () {
     yield timeout(t);
     throw new Error(msg);

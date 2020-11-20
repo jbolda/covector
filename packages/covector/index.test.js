@@ -34,6 +34,7 @@ describe("integration test in production mode", () => {
       })
     );
     await expect(covectored).rejects.toThrow();
+    delete covectored.id;
     expect({
       consoleLog: console.log.mock.calls,
       consoleDir: console.dir.mock.calls,
