@@ -14,10 +14,9 @@
     "@covector/apply": "0.2.1",
     "@covector/assemble": "0.3.0",
     "@covector/changelog": "0.2.1",
-    "@covector/files": "0.2.0",
     "@covector/command": "0.1.0",
-    "@effection/events": "0.7.5",
-    "@effection/node": "0.7.0",
+    "@covector/files": "0.2.0",
+    "@effection/node": "0.9.1",
     "yargs": "^15.3.1"
   }
 }

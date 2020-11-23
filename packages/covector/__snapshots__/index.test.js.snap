@@ -8,15 +8,19 @@ Object {
       "package-one [build]: yarn build",
     ],
     Array [
-      "$ yarn info tauri@0.8.0 description
-Multi-binding collection of libraries and templates for building Tauri apps",
+      "$ yarn info tauri@0.8.0 description",
+    ],
+    Array [
+      "Multi-binding collection of libraries and templates for building Tauri apps",
     ],
     Array [
       "package-two [build]: yarn build",
     ],
     Array [
-      "$ echo this command is not piped, it is run from scripts for pk2
-this command is not piped, it is run from scripts for pk2",
+      "$ echo this command is not piped, it is run from scripts for pk2",
+    ],
+    Array [
+      "this command is not piped, it is run from scripts for pk2",
     ],
   ],
   "covectorReturn": Object {
@@ -850,15 +854,19 @@ Object {
       "package-one [test]: yarn build",
     ],
     Array [
-      "$ yarn info tauri@0.8.0 description
-Multi-binding collection of libraries and templates for building Tauri apps",
+      "$ yarn info tauri@0.8.0 description",
+    ],
+    Array [
+      "Multi-binding collection of libraries and templates for building Tauri apps",
     ],
     Array [
       "package-one [test]: yarn test",
     ],
     Array [
-      "$ yarn info covector@0.1.0 license
-Apache-2.0",
+      "$ yarn info covector@0.1.0 license",
+    ],
+    Array [
+      "Apache-2.0",
     ],
     Array [
       "package-one [test]: echo boop",
@@ -870,15 +878,19 @@ Apache-2.0",
       "package-two [test]: yarn build",
     ],
     Array [
-      "$ echo this command is not piped, it is run from scripts for pk2
-this command is not piped, it is run from scripts for pk2",
+      "$ echo this command is not piped, it is run from scripts for pk2",
+    ],
+    Array [
+      "this command is not piped, it is run from scripts for pk2",
     ],
     Array [
       "package-two [test]: yarn test",
     ],
     Array [
-      "$ echo this command is not piped, it is run from the test script
-this command is not piped, it is run from the test script",
+      "$ echo this command is not piped, it is run from the test script",
+    ],
+    Array [
+      "this command is not piped, it is run from the test script",
     ],
     Array [
       "package-two [test]: echo boop",
@@ -6693,7 +6705,6 @@ Object {
     "exitHooks": Set {},
     "fail": [Function],
     "fork": [Function],
-    "id": 23,
     "isRequired": false,
     "operation": Object {},
     "reject": [Function],
