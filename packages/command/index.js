@@ -143,13 +143,13 @@ const sh = function* (command, options, log) {
     yield spawn(
       child.stderr.subscribe().forEach(function* (datum) {
         const out = stripAnsi(datum.toString().trim());
-        if (out !== "") console.log(out);
+        if (out !== "") console.error(out);
       })
     );
   }
 
   const out = yield child.expect();
-  return Buffer.concat(out.tail).toString().trim();
+  return stripAnsi(Buffer.concat(out.tail).toString().trim());
 };
 
 const raceTime = function ({
