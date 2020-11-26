@@ -134,6 +134,7 @@ module.exports.mergeIntoConfig = function* ({
   command,
   cwd,
   dryRun = false,
+  filterPackages = [],
 }) {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
@@ -190,7 +191,10 @@ module.exports.mergeIntoConfig = function* ({
   const pipeOutput = {};
   let commands = [];
   for (let pkg of Object.keys(
-    command !== "version" ? pkgCommands : assembledChanges.releases
+    uesPackageSubset(
+      command !== "version" ? pkgCommands : assembledChanges.releases,
+      filterPackages
+    )
   )) {
     if (!pkgCommands[pkg]) continue;
 
@@ -311,6 +315,18 @@ const mergeCommand = ({ pkg, pkgManager, command, config }) => {
 
   return mergedCommand;
 };
+
+const uesPackageSubset = (commands, subset = []) =>
+  !!subset && subset.length === 0
+    ? commands
+    : subset.reduce((pkgCommands, pkg) => {
+        if (!commands[pkg]) {
+          return pkgCommands;
+        } else {
+          pkgCommands[pkg] = commands[pkg];
+          return pkgCommands;
+        }
+      }, {});
 
 const templateCommands = (command, pipe, complexCommands) => {
   if (!command) return null;

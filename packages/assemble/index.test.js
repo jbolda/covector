@@ -1,4 +1,6 @@
 const { assemble, mergeIntoConfig } = require("./index");
+const fixtures = require("fixturez");
+const f = fixtures(__dirname);
 
 const assembledChanges = {
   releases: {
@@ -268,12 +270,48 @@ describe("merge config test", () => {
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges publish", async () => {
-    // const mergedPublishConfig = await mergeIntoConfig({
-    //   config,
-    //   assembledChanges,
-    //   command: "publish",
-    // });
-    // expect(mergedPublishConfig).toMatchSnapshot();
+  it("merges publish", function* () {
+    const configFolder = f.copy("assemble");
+
+    const mergedPublishConfig = yield mergeIntoConfig({
+      cwd: configFolder,
+      config,
+      assembledChanges: [],
+      command: "publish",
+    });
+    expect(scrubVfile(mergedPublishConfig)).toMatchSnapshot();
   });
 });
+
+describe("merge filtered config test", () => {
+  it("merges version", function* () {
+    const mergedVersionConfig = yield mergeIntoConfig({
+      config,
+      assembledChanges,
+      command: "version",
+      filterPackages: ["assemble1", "@namespaced/assemble1"],
+    });
+    expect(mergedVersionConfig).toMatchSnapshot();
+  });
+
+  it("merges publish", function* () {
+    const configFolder = f.copy("assemble");
+
+    const mergedPublishConfig = yield mergeIntoConfig({
+      cwd: configFolder,
+      config,
+      assembledChanges,
+      command: "publish",
+      filterPackages: ["assemble1", "@namespaced/assemble1"],
+    });
+    expect(scrubVfile(mergedPublishConfig)).toMatchSnapshot();
+  });
+});
+
+// vfile returns fs information that is flaky between machines, scrub it
+const scrubVfile = (mergedPublishConfig) => {
+  return mergedPublishConfig.map((pkg) => {
+    delete pkg.pkgFile.vfile;
+    return pkg;
+  }, mergedPublishConfig);
+};

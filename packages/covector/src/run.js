@@ -17,6 +17,7 @@ module.exports.covector = function* covector({
   command,
   dryRun = false,
   cwd = process.cwd(),
+  filterPackages = [],
 }) {
   const config = yield configFile({ cwd });
   const changesPaths = yield changeFiles({
@@ -26,6 +27,7 @@ module.exports.covector = function* covector({
   const changesVfiles = changeFilesToVfile({
     cwd,
     paths: changesPaths,
+    filterPackages,
   });
   const assembledChanges = yield assemble({
     cwd,
@@ -64,6 +66,7 @@ module.exports.covector = function* covector({
       config,
       command,
       dryRun,
+      filterPackages,
     });
 
     if (dryRun) {
@@ -137,6 +140,7 @@ module.exports.covector = function* covector({
       command,
       cwd,
       dryRun,
+      filterPackages,
     });
 
     if (dryRun) {
