@@ -28,6 +28,8 @@ outputs:
     description: The command ran (particularly useful for 'version-or-publish' input option).
   successfulPublish:
     description: Boolean as a string if we published anything. Useful to skip follow-on steps with nothing published.
+  packagesPublished:
+    description: Comma separated list of all of the packages that published. Most useful for chaining runs together to act on the filtered list.
 runs:
   using: 'node12'
   main: 'dist/index.js'
