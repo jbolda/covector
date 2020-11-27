@@ -17,6 +17,10 @@ inputs:
     description: When creating a release, set it as a draft.
     required: false
     default: false
+  filterPackages:
+    description: A comma separated list (no spaces) of packages to run commands on rather than everything listed in the config.
+    required: false
+    default: ''
 outputs:
   change:
     description: The changes that were applied

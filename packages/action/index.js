@@ -2,6 +2,7 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const { main } = require("@effection/node");
 const { covector } = require("../covector");
+const { commandText, packageListToArray } = require("./utils");
 const fs = require("fs");
 
 main(function* run() {
@@ -11,6 +12,7 @@ main(function* run() {
         ? process.env.GITHUB_TOKEN
         : core.getInput("token");
     const inputCommand = core.getInput("command");
+    const filterPackages = packageListToArray(core.getInput("filterPackages"));
     let command = inputCommand;
     if (inputCommand === "version-or-publish") {
       if ((yield covector({ command: "status" })) === "No changes.") {
@@ -20,7 +22,7 @@ main(function* run() {
         command = "version";
       }
     }
-    const covectored = yield covector({ command });
+    const covectored = yield covector({ command, filterPackages });
 
     core.setOutput("commandRan", command);
     let successfulPublish = false;
@@ -96,22 +98,3 @@ main(function* run() {
     core.setFailed(error.message);
   }
 });
-
-const commandText = (pkg) => {
-  const { precommand, command, postcommand } = pkg;
-  let text = "";
-
-  if (typeof precommand !== "boolean") {
-    text = `${text}${precommand}\n`;
-  }
-
-  if (typeof command !== "boolean") {
-    text = `${text}${command}\n`;
-  }
-
-  if (typeof postcommand !== "boolean") {
-    text = `${text}${postcommand}\n`;
-  }
-
-  return text === "" ? "Publish complete." : text;
-};
