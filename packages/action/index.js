@@ -54,6 +54,7 @@ main(function* run() {
       const { owner, repo } = github.context.repo;
 
       let releases = {};
+      let packagesPublished = "";
       for (let pkg of Object.keys(covectored)) {
         if (covectored[pkg].command !== false) {
           console.log(
@@ -68,6 +69,12 @@ main(function* run() {
             draft: core.getInput("draftRelease") === "true" ? true : false,
           });
           const { data } = createReleaseResponse;
+          core.setOutput(`${pkg}-published`, "true");
+          if (packagesPublished === "") {
+            packagesPublished = pkg;
+          } else {
+            packagesPublished = `${packagesPublished},${pkg}`;
+          }
           console.log("release created: ", data);
           releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
 
@@ -93,6 +100,8 @@ main(function* run() {
           }
         }
       }
+
+      core.setOutput("packagesPublished", packagesPublished);
     }
   } catch (error) {
     core.setFailed(error.message);
