@@ -1,6 +1,6 @@
 # covector
 
-Sane package change management for single packages, monorepos, and polyglot.
+Transparent and flexible change management for publishing packages and assets. Publish and deploy from a single asset repository, monorepos, and even multi-language repositories.
 
 ## Packages
 
