@@ -344,7 +344,7 @@ const templateCommands = (command, pipe, complexCommands) => {
         }, {}),
       };
     } else {
-      return template(c)(pipe);
+      return typeof c === "function" ? c : template(c)(pipe);
     }
   });
 };
