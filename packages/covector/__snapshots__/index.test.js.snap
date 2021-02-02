@@ -6693,6 +6693,158 @@ Object {
 }
 `;
 
+exports[`integration test in production mode allows modifying the config 1`] = `
+Array [
+  Array [
+    "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+  ],
+  Array [
+    "0.5.2",
+  ],
+  Array [
+    "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
+  ],
+  Array [
+    "0.5.2",
+  ],
+  Array [
+    "tauri@0.5.2 is already published. Skipping.",
+  ],
+  Array [
+    "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+  ],
+  Array [
+    "0.5.2",
+  ],
+  Array [
+    "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+  ],
+  Array [
+    "0.5.2",
+  ],
+  Array [
+    "begin with only boops",
+  ],
+  Array [
+    "begin with only boops",
+  ],
+  Array [
+    "begin with only boops",
+  ],
+  Array [
+    "tauri.js [publish]: echo publishing tauri.js would happen here",
+  ],
+  Array [
+    "publishing tauri.js would happen here",
+  ],
+  Array [
+    "deboop",
+  ],
+  Array [
+    "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
+  ],
+  Array [
+    "publishing tauri-bundler would happen here",
+  ],
+  Array [
+    "tauri-bundler [publish]: echo running in ./cli/tauri-bundler",
+  ],
+  Array [
+    "running in ./cli/tauri-bundler",
+  ],
+  Array [
+    "tauri-bundler [publish run from the cwd]: ls",
+  ],
+  Array [
+    "cli
+tauri
+tauri-api
+tauri-updater
+tauri-utils",
+  ],
+  Array [
+    "tauri-bundler [publish]: ls",
+  ],
+  Array [
+    "Cargo.toml",
+  ],
+  Array [
+    "deboop",
+  ],
+  Array [
+    "tauri-api [publish]: echo publishing tauri-api would happen here",
+  ],
+  Array [
+    "publishing tauri-api would happen here",
+  ],
+  Array [
+    "tauri-api [publish]: echo running in ./tauri-api",
+  ],
+  Array [
+    "running in ./tauri-api",
+  ],
+  Array [
+    "tauri-api [publish run from the cwd]: ls",
+  ],
+  Array [
+    "cli
+tauri
+tauri-api
+tauri-updater
+tauri-utils",
+  ],
+  Array [
+    "tauri-api [publish]: ls",
+  ],
+  Array [
+    "Cargo.toml",
+  ],
+  Array [
+    "deboop",
+  ],
+  Array [
+    "tauri-utils [publish]: echo publishing tauri-utils would happen here",
+  ],
+  Array [
+    "publishing tauri-utils would happen here",
+  ],
+  Array [
+    "tauri-utils [publish]: echo running in ./tauri-utils",
+  ],
+  Array [
+    "running in ./tauri-utils",
+  ],
+  Array [
+    "tauri-utils [publish run from the cwd]: ls",
+  ],
+  Array [
+    "cli
+tauri
+tauri-api
+tauri-updater
+tauri-utils",
+  ],
+  Array [
+    "tauri-utils [publish]: ls",
+  ],
+  Array [
+    "Cargo.toml",
+  ],
+  Array [
+    "deboop",
+  ],
+  Array [
+    "ends with overwrites using boops",
+  ],
+  Array [
+    "ends with overwrites using boops",
+  ],
+  Array [
+    "ends with overwrites using boops",
+  ],
+]
+`;
+
 exports[`integration test in production mode fails status for non-existant package 1`] = `
 Object {
   "consoleDir": Array [],
@@ -8413,6 +8565,188 @@ Object {
     },
   },
 }
+`;
+
+exports[`integration test in production mode uses the action config modification 1`] = `
+Array [
+  Array [
+    "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+  ],
+  Array [
+    "0.5.2",
+  ],
+  Array [
+    "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
+  ],
+  Array [
+    "0.5.2",
+  ],
+  Array [
+    "tauri@0.5.2 is already published. Skipping.",
+  ],
+  Array [
+    "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+  ],
+  Array [
+    "0.5.2",
+  ],
+  Array [
+    "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+  ],
+  Array [
+    "0.5.2",
+  ],
+  Array [
+    "tauri-bundler [prepublish]: echo premode for tauri-bundler",
+  ],
+  Array [
+    "premode for tauri-bundler",
+  ],
+  Array [
+    "tauri-api [prepublish]: echo premode for tauri-api",
+  ],
+  Array [
+    "premode for tauri-api",
+  ],
+  Array [
+    "tauri-utils [prepublish]: echo premode for tauri-utils",
+  ],
+  Array [
+    "premode for tauri-utils",
+  ],
+  Array [
+    "tauri.js [publish]: echo publishing tauri.js would happen here",
+  ],
+  Array [
+    "publishing tauri.js would happen here",
+  ],
+  Array [
+    "push log into publish for tauri.js-v0.6.2",
+  ],
+  Array [
+    "push another log",
+  ],
+  Array [
+    "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
+  ],
+  Array [
+    "publishing tauri-bundler would happen here",
+  ],
+  Array [
+    "tauri-bundler [publish]: echo running in ./cli/tauri-bundler",
+  ],
+  Array [
+    "running in ./cli/tauri-bundler",
+  ],
+  Array [
+    "tauri-bundler [publish run from the cwd]: ls",
+  ],
+  Array [
+    "cli
+tauri
+tauri-api
+tauri-updater
+tauri-utils",
+  ],
+  Array [
+    "tauri-bundler [publish]: ls",
+  ],
+  Array [
+    "Cargo.toml",
+  ],
+  Array [
+    "push log into publish for tauri-bundler-v0.6.0",
+  ],
+  Array [
+    "push another log",
+  ],
+  Array [
+    "tauri-api [publish]: echo publishing tauri-api would happen here",
+  ],
+  Array [
+    "publishing tauri-api would happen here",
+  ],
+  Array [
+    "tauri-api [publish]: echo running in ./tauri-api",
+  ],
+  Array [
+    "running in ./tauri-api",
+  ],
+  Array [
+    "tauri-api [publish run from the cwd]: ls",
+  ],
+  Array [
+    "cli
+tauri
+tauri-api
+tauri-updater
+tauri-utils",
+  ],
+  Array [
+    "tauri-api [publish]: ls",
+  ],
+  Array [
+    "Cargo.toml",
+  ],
+  Array [
+    "push log into publish for tauri-api-v0.5.1",
+  ],
+  Array [
+    "push another log",
+  ],
+  Array [
+    "tauri-utils [publish]: echo publishing tauri-utils would happen here",
+  ],
+  Array [
+    "publishing tauri-utils would happen here",
+  ],
+  Array [
+    "tauri-utils [publish]: echo running in ./tauri-utils",
+  ],
+  Array [
+    "running in ./tauri-utils",
+  ],
+  Array [
+    "tauri-utils [publish run from the cwd]: ls",
+  ],
+  Array [
+    "cli
+tauri
+tauri-api
+tauri-updater
+tauri-utils",
+  ],
+  Array [
+    "tauri-utils [publish]: ls",
+  ],
+  Array [
+    "Cargo.toml",
+  ],
+  Array [
+    "push log into publish for tauri-utils-v0.5.0",
+  ],
+  Array [
+    "push another log",
+  ],
+  Array [
+    "tauri-bundler [postpublish]: echo postmode for tauri-bundler",
+  ],
+  Array [
+    "postmode for tauri-bundler",
+  ],
+  Array [
+    "tauri-api [postpublish]: echo postmode for tauri-api",
+  ],
+  Array [
+    "postmode for tauri-api",
+  ],
+  Array [
+    "tauri-utils [postpublish]: echo postmode for tauri-utils",
+  ],
+  Array [
+    "postmode for tauri-utils",
+  ],
+]
 `;
 
 exports[`integration test to invoke sub commands runs publish-primary in prod mode 1`] = `

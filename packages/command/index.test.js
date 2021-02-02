@@ -51,5 +51,44 @@ describe("command", () => {
         ["booooop"],
       ]);
     });
+
+    it("invokes a function using package values", function* () {
+      yield attemptCommands({
+        commands: [
+          {
+            name: "pkg-nickname",
+            version: "0.5.6",
+            command: async (pkg) =>
+              console.log(`boop ${pkg.name}@${pkg.version}`),
+          },
+        ],
+      });
+
+      expect(console.log.mock.calls).toEqual([["boop pkg-nickname@0.5.6"]]);
+    });
+
+    it("invokes an array of functions using package values", function* () {
+      yield attemptCommands({
+        commands: [
+          {
+            name: "pkg-nickname",
+            version: "0.5.6",
+            command: [
+              async (pkg) => console.log(`boop ${pkg.name}@${pkg.version}`),
+              async (pkg) => console.log(`booop ${pkg.name}@${pkg.version}`),
+              async (pkg) => console.log(`boooop ${pkg.name}@${pkg.version}`),
+              async (pkg) => console.log(`booooop ${pkg.name}@${pkg.version}`),
+            ],
+          },
+        ],
+      });
+
+      expect(console.log.mock.calls).toEqual([
+        ["boop pkg-nickname@0.5.6"],
+        ["booop pkg-nickname@0.5.6"],
+        ["boooop pkg-nickname@0.5.6"],
+        ["booooop pkg-nickname@0.5.6"],
+      ]);
+    });
   });
 });

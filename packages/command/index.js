@@ -49,12 +49,10 @@ const attemptCommands = function* ({
       if (runningCommand.shouldRunCommand) {
         if (typeof runningCommand.command === "function") {
           try {
-            yield runningCommand.command();
+            yield runningCommand.command(pkg);
 
             if (pubCommand.pipe) {
-              console.warn(
-                `We cannot pipe the function command in ${pkg.name}`
-              );
+              console.warn(`We cannot pipe the function command in ${pkg.pkg}`);
             }
           } catch (e) {
             console.error(e);
