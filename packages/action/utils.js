@@ -1,3 +1,5 @@
+const fs = require("fs");
+
 const commandText = (pkg) => {
   const { precommand, command, postcommand } = pkg;
   let text = "";

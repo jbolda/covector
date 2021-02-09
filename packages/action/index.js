@@ -8,10 +8,9 @@ const {
   injectPublishFunctions,
   createReleases,
 } = require("./utils");
-const fs = require("fs");
 
-main(function* run() {
-  try {
+try {
+  main(function* run() {
     const token =
       core.getInput("token") === ""
         ? process.env.GITHUB_TOKEN
@@ -82,7 +81,7 @@ main(function* run() {
       const payload = JSON.stringify(covectored, undefined, 2);
       console.log(`The covector output: ${payload}`);
     }
-  } catch (error) {
-    core.setFailed(error.message);
-  }
-});
+  });
+} catch (error) {
+  core.setFailed(error.message);
+}
