@@ -9,8 +9,8 @@ const {
   createReleases,
 } = require("./utils");
 
-try {
-  main(function* run() {
+main(function* run() {
+  try {
     const token =
       core.getInput("token") === ""
         ? process.env.GITHUB_TOKEN
@@ -30,7 +30,9 @@ try {
     core.setOutput("commandRan", command);
     let successfulPublish = false;
 
-    if (command === "version") {
+    if (command === "status") {
+      const covectored = yield covector({ command, filterPackages });
+    } else if (command === "version") {
       const covectored = yield covector({ command, filterPackages });
       core.setOutput("successfulPublish", successfulPublish);
 
@@ -81,7 +83,7 @@ try {
       const payload = JSON.stringify(covectored, undefined, 2);
       console.log(`The covector output: ${payload}`);
     }
-  });
-} catch (error) {
-  core.setFailed(error.message);
-}
+  } catch (error) {
+    core.setFailed(error.message);
+  }
+});
