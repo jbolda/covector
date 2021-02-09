@@ -6,7 +6,7 @@ const path = require("path");
 const attemptCommands = function* ({
   cwd,
   commands,
-  command,
+  command, // is this used?
   commandPrefix = "",
   pkgCommandsRan,
   dryRun,
@@ -16,6 +16,7 @@ const attemptCommands = function* ({
     if (!pkg[`${commandPrefix}command`]) continue;
     const pubCommands =
       typeof pkg[`${commandPrefix}command`] === "string" ||
+      typeof pkg[`${commandPrefix}command`] === "function" ||
       !Array.isArray(pkg[`${commandPrefix}command`])
         ? [pkg[`${commandPrefix}command`]]
         : pkg[`${commandPrefix}command`];
@@ -46,18 +47,30 @@ const attemptCommands = function* ({
       }
 
       if (runningCommand.shouldRunCommand) {
-        const ranCommand = yield runCommand({
-          command: runningCommand.command,
-          cwd,
-          pkg: pkg.pkg,
-          pkgPath: runningCommand.runFromRoot === true ? "" : pkg.path,
-          log: `${pkg.pkg} [${commandPrefix}${command}${
-            runningCommand.runFromRoot === true ? " run from the cwd" : ""
-          }]: ${runningCommand.command}`,
-        });
+        if (typeof runningCommand.command === "function") {
+          try {
+            yield runningCommand.command(pkg);
 
-        if (pubCommand.pipe) {
-          stdout = `${stdout}${ranCommand}\n`;
+            if (pubCommand.pipe) {
+              console.warn(`We cannot pipe the function command in ${pkg.pkg}`);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        } else {
+          const ranCommand = yield runCommand({
+            command: runningCommand.command,
+            cwd,
+            pkg: pkg.pkg,
+            pkgPath: runningCommand.runFromRoot === true ? "" : pkg.path,
+            log: `${pkg.pkg} [${commandPrefix}${command}${
+              runningCommand.runFromRoot === true ? " run from the cwd" : ""
+            }]: ${runningCommand.command}`,
+          });
+
+          if (pubCommand.pipe) {
+            stdout = `${stdout}${ranCommand}\n`;
+          }
         }
       } else {
         console.log(

@@ -1,14 +1,14 @@
-name: 'covector'
-description: 'Sane change management in polyglot, monorepos, single'
+name: "covector"
+description: "Sane change management in polyglot, monorepos, single"
 inputs:
   command:
-    description: 'covector cli command to run'
+    description: "covector cli command to run"
     required: false
-    default: 'status'
+    default: "status"
   token:
     description: Github Token or PAT for creating releases / posting messages
     required: false
-    default: ''
+    default: ""
   createRelease:
     description: Opt-in to create a release on publish
     required: false
@@ -20,7 +20,7 @@ inputs:
   filterPackages:
     description: A comma separated list (no spaces) of packages to run commands on rather than everything listed in the config.
     required: false
-    default: ''
+    default: ""
 outputs:
   change:
     description: The changes that were applied
@@ -31,8 +31,8 @@ outputs:
   packagesPublished:
     description: Comma separated list of all of the packages that published. Most useful for chaining runs together to act on the filtered list.
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: "node12"
+  main: "dist/index.js"
 branding:
-  icon: 'sliders'  
-  color: 'green'
+  icon: "sliders"
+  color: "green"

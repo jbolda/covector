@@ -6,7 +6,11 @@
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
       "prepublish": [{ "command": "npm pack", "dryRunCommand": true }],
       "publish": [
-        "echo # Package Publish",
+        {
+          "command": "echo # Package Publish",
+          "dryRunCommand": "echo # Package Publish",
+          "pipe": true
+        },
         {
           "command": "npm publish --access public",
           "dryRunCommand": "echo publish here",

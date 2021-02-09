@@ -18,8 +18,9 @@ module.exports.covector = function* covector({
   dryRun = false,
   cwd = process.cwd(),
   filterPackages = [],
+  modifyConfig = async (c) => c,
 }) {
-  const config = yield configFile({ cwd });
+  const config = yield modifyConfig(yield configFile({ cwd }));
   const changesPaths = yield changeFiles({
     cwd,
     changeFolder: config.changeFolder,

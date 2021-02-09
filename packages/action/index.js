@@ -2,8 +2,12 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 const { main } = require("@effection/node");
 const { covector } = require("../covector");
-const { commandText, packageListToArray } = require("./utils");
-const fs = require("fs");
+const {
+  commandText,
+  packageListToArray,
+  injectPublishFunctions,
+  createReleases,
+} = require("./utils");
 
 main(function* run() {
   try {
@@ -22,18 +26,16 @@ main(function* run() {
         command = "version";
       }
     }
-    const covectored = yield covector({ command, filterPackages });
 
     core.setOutput("commandRan", command);
     let successfulPublish = false;
-    if (command === "publish") {
-      for (let pkg of Object.keys(covectored)) {
-        if (covectored[pkg].command !== false) successfulPublish = true;
-      }
-    }
-    core.setOutput("successfulPublish", successfulPublish);
 
-    if (command === "version") {
+    if (command === "status") {
+      const covectored = yield covector({ command, filterPackages });
+    } else if (command === "version") {
+      const covectored = yield covector({ command, filterPackages });
+      core.setOutput("successfulPublish", successfulPublish);
+
       const covectoredSmushed = Object.keys(covectored).reduce((text, pkg) => {
         if (typeof covectored[pkg].command === "string") {
           text = `${text}\n\n\n# ${pkg}\n\n${commandText(covectored[pkg])}`;
@@ -43,65 +45,43 @@ main(function* run() {
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       console.log(`The covector output: ${payload}`);
-    } else if (
-      command === "publish" &&
-      core.getInput("createRelease") === "true"
-    ) {
+    } else if (command === "publish") {
+      if (core.getInput("createRelease") === "true") {
+        const octokit = github.getOctokit(token);
+        const { owner, repo } = github.context.repo;
+        let releases = {};
+
+        const covectored = yield covector({
+          command,
+          filterPackages,
+          modifyConfig: injectPublishFunctions([
+            createReleases.bind({ octokit, owner, repo }),
+          ]),
+        });
+
+        let packagesPublished = Object.keys(covectored).reduce((pub, pkg) => {
+          if (!covectored[pkg].published) {
+            return pub;
+          } else {
+            return `${pub}${pkg}`;
+          }
+        }, "");
+        core.setOutput("packagesPublished", packagesPublished);
+      } else {
+        const covectored = yield covector({
+          command,
+          filterPackages,
+        });
+      }
+
+      for (let pkg of Object.keys(covectored)) {
+        if (covectored[pkg].command !== false) successfulPublish = true;
+      }
+      core.setOutput("successfulPublish", successfulPublish);
+
       core.setOutput("change", covectored);
       const payload = JSON.stringify(covectored, undefined, 2);
       console.log(`The covector output: ${payload}`);
-      const octokit = github.getOctokit(token);
-      const { owner, repo } = github.context.repo;
-
-      let releases = {};
-      let packagesPublished = "";
-      for (let pkg of Object.keys(covectored)) {
-        if (covectored[pkg].command !== false) {
-          console.log(
-            `creating release for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
-          );
-          const createReleaseResponse = yield octokit.repos.createRelease({
-            owner,
-            repo,
-            tag_name: `${pkg}-v${covectored[pkg].pkg.pkgFile.version}`,
-            name: `${pkg} v${covectored[pkg].pkg.pkgFile.version}`,
-            body: commandText(covectored[pkg]),
-            draft: core.getInput("draftRelease") === "true" ? true : false,
-          });
-          const { data } = createReleaseResponse;
-          core.setOutput(`${pkg}-published`, "true");
-          if (packagesPublished === "") {
-            packagesPublished = pkg;
-          } else {
-            packagesPublished = `${packagesPublished},${pkg}`;
-          }
-          console.log("release created: ", data);
-          releases[pkg] = data; // { id: releaseId, html_url: htmlUrl, upload_url: uploadUrl }
-
-          const { id: releaseId } = data;
-
-          if (covectored[pkg].pkg.assets) {
-            try {
-              for (let asset of covectored[pkg].pkg.assets) {
-                console.log(
-                  `uploading asset ${asset.name} for ${pkg}@${covectored[pkg].pkg.pkgFile.version}`
-                );
-                const uploadedAsset = yield octokit.repos.uploadReleaseAsset({
-                  owner,
-                  repo,
-                  release_id: releaseId,
-                  name: asset.name,
-                  data: fs.readFileSync(asset.path),
-                });
-              }
-            } catch (error) {
-              console.error(error);
-            }
-          }
-        }
-      }
-
-      core.setOutput("packagesPublished", packagesPublished);
     }
   } catch (error) {
     core.setFailed(error.message);
