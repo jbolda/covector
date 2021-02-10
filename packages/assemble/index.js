@@ -60,42 +60,51 @@ const parseChange = function* ({ cwd, vfile }) {
 };
 
 const compareBumps = (bumpOne, bumpTwo) => {
-  // major, premajor, minor, preminor, patch, prepatch, or prerelease
+  // major, minor, or patch
   // enum and use Int to compare
   let bumps = new Map([
     ["major", 1],
-    ["premajor", 2],
-    ["minor", 3],
-    ["preminor", 4],
-    ["patch", 5],
-    ["prepatch", 6],
-    ["prerelease", 7],
+    ["minor", 2],
+    ["patch", 3],
   ]);
   return bumps.get(bumpOne) < bumps.get(bumpTwo) ? bumpOne : bumpTwo;
 };
 
 module.exports.compareBumps = compareBumps;
 
-const mergeReleases = (changes) => {
+const mergeReleases = (changes, { additionalBumpTypes = [] }) => {
   return changes.reduce((release, change) => {
     Object.keys(change.releases).forEach((pkg) => {
-      if (!release[pkg]) {
-        release[pkg] = {
-          type: change.releases[pkg],
-          changes: cloneDeep([change]),
-        };
+      const bumpOptions = ["major", "minor", "patch"].concat(
+        additionalBumpTypes
+      );
+      if (bumpOptions.includes(change.releases[pkg])) {
+        if (!release[pkg]) {
+          release[pkg] = {
+            type: change.releases[pkg],
+            changes: cloneDeep([change]),
+          };
+        } else {
+          release[pkg] = {
+            type: compareBumps(release[pkg].type, change.releases[pkg]),
+            changes: cloneDeep([...release[pkg].changes, change]),
+          };
+        }
       } else {
-        release[pkg] = {
-          type: compareBumps(release[pkg].type, change.releases[pkg]),
-          changes: cloneDeep([...release[pkg].changes, change]),
-        };
+        throw new Error(
+          `${change.releases[pkg]} specified for ${pkg} is invalid.\n` +
+            `Try one of the following${
+              !change.meta ? `` : ` in ${change.meta.filename}`
+            }: ` +
+            `${bumpOptions.join(", ")}.\n`
+        );
       }
     });
     return release;
   }, {});
 };
 
-module.exports.assemble = function* ({ cwd, vfiles, config }) {
+module.exports.assemble = function* ({ cwd, vfiles, config = {} }) {
   let plan = {};
   let changes = yield function* () {
     let allVfiles = vfiles.map((vfile) => parseChange({ cwd, vfile }));
@@ -106,9 +115,9 @@ module.exports.assemble = function* ({ cwd, vfiles, config }) {
     return yieldedV;
   };
   plan.changes = changes;
-  plan.releases = mergeReleases(changes);
+  plan.releases = mergeReleases(changes, config);
 
-  if (config) {
+  if (Object.keys(config).length > 0) {
     for (let pkg of Object.keys(plan.releases)) {
       if (!config.packages[pkg]) {
         let changesContainingError = plan.releases[pkg].changes.reduce(

@@ -369,3 +369,132 @@ Array [
 `;
 
 exports[`merge filtered config test merges version 1`] = `Array []`;
+
+exports[`special bump types valid additional bump types 1`] = `
+Object {
+  "changes": Array [
+    Object {
+      "releases": Object {
+        "assemble1": "patch",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "assemble1": "minor",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "assemble1": "patch",
+        "assemble2": "major",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "@namespaced/assemble2": "patch",
+        "assemble1": "patch",
+      },
+      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+    },
+    Object {
+      "releases": Object {
+        "assemble1": "housekeeping",
+        "assemble2": "workflows",
+      },
+      "summary": "This is a test.",
+    },
+  ],
+  "releases": Object {
+    "@namespaced/assemble2": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+        },
+      ],
+      "type": "patch",
+    },
+    "assemble1": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "major",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "housekeeping",
+            "assemble2": "workflows",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "housekeeping",
+    },
+    "assemble2": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "major",
+          },
+          "summary": "This is a test.",
+        },
+        Object {
+          "releases": Object {
+            "assemble1": "housekeeping",
+            "assemble2": "workflows",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "workflows",
+    },
+  },
+}
+`;
