@@ -58,6 +58,23 @@ module.exports.writePkgFile = async ({ packageFile }) => {
   return inputVfile;
 };
 
+module.exports.testSerializePkgFile = ({ packageFile }) => {
+  try {
+    stringifyPkg({
+      newContents: packageFile.pkg,
+      extname: packageFile.vfile.extname,
+    });
+    return true;
+  } catch (e) {
+    if (e.message === "Can only stringify objects, not null") {
+      console.error(
+        "It appears that a dependency within this repo does not have a version specified."
+      );
+    }
+    throw new Error(`within ${packageFile.name} => ${e.message}`);
+  }
+};
+
 module.exports.configFile = async ({ cwd, changeFolder = ".changes" }) => {
   const inputVfile = await vfile.read(
     path.join(cwd, changeFolder, "config.json"),

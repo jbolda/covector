@@ -11,7 +11,11 @@ const {
 } = require("@covector/files");
 const { assemble, mergeIntoConfig } = require("@covector/assemble");
 const { fillChangelogs } = require("@covector/changelog");
-const { apply, changesConsideringParents } = require("@covector/apply");
+const {
+  apply,
+  changesConsideringParents,
+  validateApply,
+} = require("@covector/apply");
 
 module.exports.covector = function* covector({
   command,
@@ -41,11 +45,31 @@ module.exports.covector = function* covector({
       console.info("There are no changes.");
       return "No changes.";
     } else {
+      // write out all of the changes
+      // TODO make it pretty
       console.log("changes:");
       Object.keys(assembledChanges.releases).forEach((release) => {
         console.log(`${release} => ${assembledChanges.releases[release].type}`);
         console.dir(assembledChanges.releases[release].changes);
       });
+
+      const changes = changesConsideringParents({
+        assembledChanges,
+        config,
+      });
+      const commands = yield mergeIntoConfig({
+        assembledChanges: changes,
+        config,
+        command,
+        dryRun,
+        filterPackages,
+      });
+      const applied = yield validateApply({
+        commands,
+        config,
+        cwd,
+      });
+
       return `There are ${
         Object.keys(assembledChanges.releases).length
       } changes which include${Object.keys(assembledChanges.releases).map(
