@@ -116,6 +116,11 @@ const config = {
   },
 };
 
+const configSpecial = {
+  ...config,
+  additionalBumpTypes: ["housekeeping", "workflows"],
+};
+
 const testTextOne = {
   contents: `
 ---
@@ -165,6 +170,27 @@ const testTextFive = {
 This is a test.
 `,
 };
+const testTextSpecialOne = {
+  contents: `
+---
+"assemble1": housekeeping
+"assemble2": workflows
+---
+  
+This is a test.
+`,
+};
+const testTextSpecialTwo = {
+  contents: `
+---
+"assemble1": patch
+"assemble2": workflows
+"@namespaced/assemble2": explosions
+---
+  
+This is a test.
+`,
+};
 
 describe("assemble changes", () => {
   it("runs", function* () {
@@ -177,6 +203,58 @@ describe("assemble changes", () => {
   it("assembles deps", function* () {
     const assembled = yield assemble({ vfiles: [testTextFive] });
     expect(assembled).toMatchSnapshot();
+  });
+});
+
+describe("special bump types", () => {
+  it("valid additional bump types", function* () {
+    const assembled = yield assemble({
+      vfiles: [
+        testTextOne,
+        testTextTwo,
+        testTextThree,
+        testTextFour,
+        testTextSpecialOne,
+      ],
+      config: configSpecial,
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("invalid bump types", function* () {
+    expect.assertions(1);
+    try {
+      yield assemble({
+        vfiles: [
+          testTextOne,
+          testTextTwo,
+          testTextThree,
+          testTextFour,
+          testTextSpecialOne,
+        ],
+        config,
+      });
+    } catch (e) {
+      expect(e.message).toMatch(
+        "housekeeping specified for assemble1 is invalid.\n" +
+          "Try one of the following: major, minor, patch.\n"
+      );
+    }
+  });
+
+  it("one each valid and invalid", function* () {
+    expect.assertions(1);
+    try {
+      yield assemble({
+        vfiles: [testTextSpecialTwo],
+        config: configSpecial,
+      });
+    } catch (e) {
+      expect(e.message).toMatch(
+        "explosions specified for @namespaced/assemble2 is invalid.\n" +
+          "Try one of the following: major, minor, patch, housekeeping, workflows.\n"
+      );
+    }
   });
 });
 
