@@ -1516,6 +1516,9 @@ Object {
     Array [
       "tauri-updater => patch",
     ],
+    Array [
+      "==== data piped into commands ===",
+    ],
   ],
   "covectorReturn": "There are 2 changes which include tauri with minor, tauri-updater with patch",
 }

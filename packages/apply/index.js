@@ -1,4 +1,8 @@
-const { readPkgFile, writePkgFile } = require("@covector/files");
+const {
+  readPkgFile,
+  writePkgFile,
+  testSerializePkgFile,
+} = require("@covector/files");
 const { compareBumps } = require("@covector/assemble");
 const semver = require("semver");
 const cloneDeep = require("lodash.clonedeep");
@@ -30,6 +34,33 @@ module.exports.apply = function* ({
     });
   }
   return bumps;
+};
+
+module.exports.validateApply = async ({
+  commands,
+  config,
+  cwd = process.cwd(),
+}) => {
+  const changes = commands.reduce((finalChanges, command) => {
+    finalChanges[command.pkg] = command;
+    return finalChanges;
+  }, {});
+  let allPackages = await readAll({ changes, config, cwd });
+
+  const bumps = bumpAll({ changes, allPackages, logs: false }).reduce(
+    (final, current) => (!current.vfile ? final : final.concat([current])),
+    []
+  );
+
+  try {
+    for (let bump of bumps) {
+      testSerializePkgFile({ packageFile: bump });
+    }
+    // will throw on validation error and not return true
+    return true;
+  } catch (e) {
+    throw e;
+  }
 };
 
 const readAll = async ({ changes, config, cwd = process.cwd() }) => {
@@ -125,11 +156,11 @@ module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
   return { releases: changes, changes: assembledChanges.changes };
 };
 
-const bumpAll = ({ changes, allPackages }) => {
+const bumpAll = ({ changes, allPackages, logs = true }) => {
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
     if (!packageFiles[pkg].vfile) continue;
-    console.log(`bumping ${pkg} with ${changes[pkg].type}`);
+    if (logs) console.log(`bumping ${pkg} with ${changes[pkg].type}`);
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
       bumpType: changes[pkg].type,

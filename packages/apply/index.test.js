@@ -1,4 +1,4 @@
-const { apply, changesConsideringParents } = require("./index");
+const { apply, changesConsideringParents, validateApply } = require("./index");
 const toVFile = require("to-vfile");
 const mockConsole = require("jest-mock-console");
 const fixtures = require("fixturez");
@@ -583,5 +583,337 @@ describe("list changes considering parents", () => {
       consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
+  });
+});
+
+describe("package file apply bump", () => {
+  it("bumps single js json", async () => {
+    const jsonFolder = f.copy("pkg.js-single-json");
+
+    const commands = [
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: "./",
+        pkg: "js-single-json-fixture",
+        type: "minor",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        "js-single-json-fixture": {
+          path: "./",
+          manager: "javascript",
+        },
+      },
+    };
+
+    expect.assertions(1);
+    await expect(async () =>
+      validateApply({ commands, config, cwd: jsonFolder })
+    ).not.toThrow();
+  });
+
+  it("bumps single rust toml", async () => {
+    const rustFolder = f.copy("pkg.rust-single");
+
+    const commands = [
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./",
+        pkg: "rust-single-fixture",
+        type: "minor",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        "rust-single-fixture": {
+          path: "./",
+          manager: "rust",
+        },
+      },
+    };
+
+    expect.assertions(1);
+    await expect(async () =>
+      validateApply({ commands, config, cwd: rustFolder })
+    ).not.toThrow();
+  });
+
+  it("bumps multi js json", async () => {
+    const jsonFolder = f.copy("pkg.js-yarn-workspace");
+
+    const commands = [
+      {
+        dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        manager: "javascript",
+        path: "./",
+        pkg: "yarn-workspace-base-pkg-a",
+        type: "minor",
+        parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: undefined,
+        pkg: "yarn-workspace-base-pkg-b",
+        type: "minor",
+        parents: ["yarn-workspace-base-pkg-a"],
+      },
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: undefined,
+        pkg: "all",
+        type: "minor",
+        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
+      },
+    ];
+
+    const config = {
+      packages: {
+        "yarn-workspace-base-pkg-a": {
+          path: "./packages/pkg-a/",
+          manager: "javascript",
+          dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        },
+        "yarn-workspace-base-pkg-b": {
+          path: "./packages/pkg-b/",
+          manager: "javascript",
+          dependencies: ["all"],
+        },
+        all: { version: true },
+      },
+    };
+
+    expect.assertions(1);
+    await expect(async () =>
+      validateApply({ commands, config, cwd: jsonFolder })
+    ).not.toThrow();
+  });
+
+  it("bumps multi rust toml", async () => {
+    const rustFolder = f.copy("pkg.rust-multi");
+
+    const commands = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "minor",
+        parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "minor",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    expect.assertions(1);
+    await expect(async () =>
+      validateApply({ commands, config, cwd: rustFolder })
+    ).not.toThrow();
+  });
+
+  it("bumps multi rust toml with object dep", async () => {
+    const rustFolder = f.copy("pkg.rust-multi-object-dep");
+
+    const commands = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "minor",
+        parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "minor",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    expect.assertions(1);
+    await expect(async () =>
+      validateApply({ commands, config, cwd: rustFolder })
+    ).not.toThrow();
+  });
+
+  it("bumps multi rust toml with dep missing patch", async () => {
+    const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
+
+    const commands = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "minor",
+        parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "minor",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    expect.assertions(1);
+    await expect(async () =>
+      validateApply({ commands, config, cwd: rustFolder })
+    ).not.toThrow();
+  });
+
+  it("bumps multi rust toml as patch with object dep missing patch", async () => {
+    const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
+
+    const commands = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "patch",
+        parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "patch",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    expect.assertions(1);
+    const validated = await validateApply({
+      commands,
+      config,
+      cwd: rustFolder,
+    });
+    expect(validated).toBe(true);
+  });
+
+  it("bumps multi rust toml as minor with object dep without version number", async () => {
+    let restoreConsole = mockConsole(["error"]);
+
+    const rustFolder = f.copy("pkg.rust-multi-object-path-dep-only");
+
+    const commands = [
+      {
+        dependencies: ["rust_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_pkg_a_fixture",
+        type: "minor",
+        parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_pkg_b_fixture",
+        type: "minor",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+
+    expect.assertions(2);
+    try {
+      await validateApply({ commands, config, cwd: rustFolder });
+    } catch (e) {
+      expect(e.message).toMatch(
+        "within rust_pkg_a_fixture => Can only stringify objects, not null"
+      );
+    }
+
+    expect({
+      consoleError: console.error.mock.calls,
+    }).toMatchSnapshot();
+
+    restoreConsole();
   });
 });

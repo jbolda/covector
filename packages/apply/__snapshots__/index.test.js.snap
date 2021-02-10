@@ -124,6 +124,16 @@ Object {
 }
 `;
 
+exports[`package file apply bump bumps multi rust toml as minor with object dep without version number 1`] = `
+Object {
+  "consoleError": Array [
+    Array [
+      "It appears that a dependency within this repo does not have a version specified.",
+    ],
+  ],
+}
+`;
+
 exports[`package file apply bump bumps multi rust toml as patch with object dep missing patch 1`] = `
 Object {
   "consoleDir": Array [],
