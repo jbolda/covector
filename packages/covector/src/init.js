@@ -1,6 +1,13 @@
 const inquirer = require("inquirer");
 const globby = require("globby");
-const fs = require("fs/promises");
+let fs;
+try {
+  // works in v10 and v14
+  fs = require("fs/promises");
+} catch (e) {
+  // for dealing with v12
+  fs = require("fs").promises;
+}
 const path = require("path");
 const { readPkgFile } = require("@covector/files");
 
