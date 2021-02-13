@@ -4,27 +4,27 @@ Transparent and flexible change management for publishing packages and assets. P
 
 ## Packages
 
-| package | version |
-| ------- | ------- |
-| [covector](./packages/covector) | [![npm](https://img.shields.io/npm/v/covector?style=for-the-badge)](https://www.npmjs.com/package/covector) |
-| [@covector/apply](./packages/apply) | [![npm](https://img.shields.io/npm/v/@covector/apply?style=for-the-badge)](https://www.npmjs.com/package/@covector/apply) |
-| [@covector/assemble](./packages/assemble) | [![npm](https://img.shields.io/npm/v/@covector/assemble?style=for-the-badge)](https://www.npmjs.com/package/@covector/assemble) |
+| package                                     | version                                                                                                                           |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| [covector](./packages/covector)             | [![npm](https://img.shields.io/npm/v/covector?style=for-the-badge)](https://www.npmjs.com/package/covector)                       |
+| [@covector/apply](./packages/apply)         | [![npm](https://img.shields.io/npm/v/@covector/apply?style=for-the-badge)](https://www.npmjs.com/package/@covector/apply)         |
+| [@covector/assemble](./packages/assemble)   | [![npm](https://img.shields.io/npm/v/@covector/assemble?style=for-the-badge)](https://www.npmjs.com/package/@covector/assemble)   |
 | [@covector/changelog](./packages/changelog) | [![npm](https://img.shields.io/npm/v/@covector/changelog?style=for-the-badge)](https://www.npmjs.com/package/@covector/changelog) |
-| [@covector/command](./packages/command) | [![npm](https://img.shields.io/npm/v/@covector/command?style=for-the-badge)](https://www.npmjs.com/package/@covector/command) |
-| [@covector/files](./packages/files) | [![npm](https://img.shields.io/npm/v/@covector/files?style=for-the-badge)](https://www.npmjs.com/package/@covector/files) |
-
+| [@covector/command](./packages/command)     | [![npm](https://img.shields.io/npm/v/@covector/command?style=for-the-badge)](https://www.npmjs.com/package/@covector/command)     |
+| [@covector/files](./packages/files)         | [![npm](https://img.shields.io/npm/v/@covector/files?style=for-the-badge)](https://www.npmjs.com/package/@covector/files)         |
 
 ## Usage
 
-This library is primarily a CLI, but we do also have a GitHub Action that can be used. To use this in a production setting, we expect a `.changes` folder where one would put the `config.json`. (Eventually an `init` command can bootstrap this for you. Would love to see a PR adding this.) We typically will recommend adding covector as a dev dependency at the root. Then one can run `yarn covector` to access the commands. We include a dry run mode that you can test the version and publish commands with.
+This library is primarily designed as a CLI, but we do also have a GitHub Action that can be used. The CLI commands can be used within any CI/CD environment. To use this in a production setting, we expect a `.changes` folder where one would put the `config.json`. (Eventually an `init` command can bootstrap this for you. Would love to see a PR adding this.) We typically will recommend adding covector as a dev dependency at the root. Then one can run `yarn covector` to access the commands. We include a dry run mode that you can test the version and publish commands with.
 
 ### Primary Commands
 
-| Command | Description |
-| --- | --- |
-| status | Outputs the status letting you know if there are changes and what they are. |
-| config | Pretty prints the config. |
-| version | Will see which packages have changes, run the version bumps on any package changed, and update the changelog. |
+| Command | Description                                                                                                                                             |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| init    | Initializes the configuration required for covector.                                                                                                    |
+| status  | Outputs the status letting you know if there are changes and what they are.                                                                             |
+| config  | Pretty prints the config.                                                                                                                               |
+| version | Will see which packages have changes, run the version bumps on any package changed, and update the changelog.                                           |
 | publish | Will run the `getPublishedVersion` specified in the config, and any package whose version does not match that return will attempt the publish commands. |
 
 ## GitHub Action
@@ -53,19 +53,19 @@ It also outputs if a `successfulPublish` which is a boolean (as a string) if it 
 
 ## Applying Changes
 
-As you create PRs and make changes that require a version bump, please add a new markdown file in this folder. You do not note the version *number*, but rather the type of bump that you expect: major, minor, or patch. The filename is not important, as long as it is a `.md`, but we recommend it represents the overall change for our sanity.
+As you create PRs and make changes that require a version bump, please add a new markdown file in this folder. You do not note the version _number_, but rather the type of bump that you expect: major, minor, or patch. The filename is not important, as long as it is a `.md`, but we recommend it represents the overall change for our sanity.
 
-When you select the version bump required, you do *not* need to consider depedencies. Only note the package with the actual change, and any packages that depend on that package will be bumped automatically in the process.
+When you select the version bump required, you do _not_ need to consider depedencies. Only note the package with the actual change, and any packages that depend on that package will be bumped automatically in the process.
 
 Use the following format:
+
 ```md
 ---
-"tauri.js": patch
-"tauri": minor
+"covector": minor
+"@covector/apply": patch
 ---
 
 Change summary goes here
-
 ```
 
 Summaries do not have a specific character limit, but are text only. These summaries are used within the (future implementation of) changelogs. They will give context to the change and also point back to the original PR if more details and context are needed.
@@ -92,6 +92,8 @@ Your configuration may look something like this.
 
 ```json
 {
+  "gitSiteUrl": "https://www.github.com/jbolda/covector/",
+  "additionalBumpTypes": ["housekeeping"],
   "pkgManagers": {
     "javascript": {
       "version": true,

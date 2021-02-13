@@ -17,6 +17,8 @@
     "@covector/command": "0.1.0",
     "@covector/files": "0.2.0",
     "@effection/node": "0.9.1",
+    "globby": "^11.0.1",
+    "inquirer": "^7.3.3",
     "yargs": "^15.3.1"
   }
 }
