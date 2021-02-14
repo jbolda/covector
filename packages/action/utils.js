@@ -56,8 +56,7 @@ function curry(func) {
   };
 }
 
-const createReleases = async (pkg) => {
-  const { octokit, owner, repo } = this;
+const createReleases = curry(async ({ octokit, owner, repo }, pkg) => {
   console.log(`creating release for ${pkg.pkg}@${pkg.pkgFile.version}`);
   const createReleaseResponse = await octokit.repos.createRelease({
     owner,
@@ -92,7 +91,7 @@ const createReleases = async (pkg) => {
       console.error(error);
     }
   }
-};
+});
 
 module.exports = {
   commandText,

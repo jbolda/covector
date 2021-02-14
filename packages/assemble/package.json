@@ -6,8 +6,8 @@
     "index.js"
   ],
   "dependencies": {
-    "@covector/command": "0.1.0",
-    "@covector/files": "0.2.0",
+    "@covector/command": "0.2.0",
+    "@covector/files": "0.2.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.template": "^4.5.0",
     "remark-frontmatter": "^2.0.0",

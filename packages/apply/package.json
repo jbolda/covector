@@ -6,7 +6,7 @@
     "index.js"
   ],
   "dependencies": {
-    "@covector/files": "0.2.0",
+    "@covector/files": "0.2.1",
     "lodash.clonedeep": "^4.5.0",
     "semver": "^7.3.2"
   }
