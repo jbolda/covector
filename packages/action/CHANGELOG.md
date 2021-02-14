@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.3]
+
+-   The result of the action had the covector output scoped, and further on logs failed. Hoist it so it is in the correct scope.
+    -   [e0ceae9](https://www.github.com/jbolda/covector/commit/e0ceae980cafc3dcfdb6d4db4b2deb6c8e4c3a9b) fix: action output result undefined ([#145](https://www.github.com/jbolda/covector/pull/145)) on 2021-02-14
+
 ## [0.3.2]
 
 -   The `core` method was not passed to the release util in the Github Action. This failed the Github Release creation.
