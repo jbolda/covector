@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1]
+
+-   Switch to currying github context as binding returned undefined.
+    -   [5b60ba1](https://www.github.com/jbolda/covector/commit/5b60ba11b4c1169953da5c2a709ad15a9c700605) fix: curry github release info ([#141](https://www.github.com/jbolda/covector/pull/141)) on 2021-02-14
+
 ## [0.3.0]
 
 -   Add extra outputs for which packages published and a list of packages. This is useful for chaining runs of the action together.

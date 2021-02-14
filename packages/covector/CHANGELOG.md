@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.2]
+
+-   Switch to currying github context as binding returned undefined.
+    -   [5b60ba1](https://www.github.com/jbolda/covector/commit/5b60ba11b4c1169953da5c2a709ad15a9c700605) fix: curry github release info ([#141](https://www.github.com/jbolda/covector/pull/141)) on 2021-02-14
+
 ## [0.4.0]
 
 -   Some workflows require different actions for different packages. Most of this can be codified into config. However there are cases where you may need to run a command for a dynamic set of packages.
