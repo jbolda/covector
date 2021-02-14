@@ -1,6 +1,6 @@
 {
   "name": "covector",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "license": "Apache-2.0",
   "main": "src",
   "files": [
@@ -11,11 +11,11 @@
     "covector": "./bin/covector.js"
   },
   "dependencies": {
-    "@covector/apply": "0.2.1",
-    "@covector/assemble": "0.3.0",
-    "@covector/changelog": "0.2.1",
-    "@covector/command": "0.1.0",
-    "@covector/files": "0.2.0",
+    "@covector/apply": "0.2.2",
+    "@covector/assemble": "0.4.0",
+    "@covector/changelog": "0.2.2",
+    "@covector/command": "0.2.0",
+    "@covector/files": "0.2.1",
     "@effection/node": "0.9.1",
     "globby": "^11.0.1",
     "inquirer": "^7.3.3",

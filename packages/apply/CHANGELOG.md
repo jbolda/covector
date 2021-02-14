@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2]
+
+-   Add missing workspace dependencies. These were likely only functioning due to hoisting.
+    -   [948ca7c](https://www.github.com/jbolda/covector/commit/948ca7ca7f6332abb6ffd13ff68d21560f275b57) feat: init command ([#139](https://www.github.com/jbolda/covector/pull/139)) on 2021-02-12
+-   Add a validation guardrail within the `status` command. This will run a nearly identical version application function. It can catch an error during the PR process rather than during the versioning process.
+    -   [4437766](https://www.github.com/jbolda/covector/commit/44377667fe7c64207bc84140fb4954b23dc4424f) feat: version bump guardrail ([#137](https://www.github.com/jbolda/covector/pull/137)) on 2021-02-10
+
 ## [0.2.1]
 
 -   Deep clone changes that are getting passed into the changelog. We were editing references and those edits were showing up in erroneous places.

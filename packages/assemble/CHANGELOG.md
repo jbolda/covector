@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0]
+
+-   Allow running functions as a command instead of assuming everything runs in a shell. This is mostly for internal use to be used within the Github Action.
+    -   [6dc90bf](https://www.github.com/jbolda/covector/commit/6dc90bfe849c4c9441afce7a26a01aabf4a2196c) feat: reorder GitHub release step ([#136](https://www.github.com/jbolda/covector/pull/136)) on 2021-02-09
+-   Throw a hard error on an invalid bump types. If you specify something other than `major`, `minor`, or `patch`. You will receive an error in the `status` and `version` commands. Also adds a new config option, `additionalBumpTypes`, which allows specifying other bump types (that are ignored in versioning) but do not throw an error. This allows one to always require a change file even if the code does not require a version bump. This is generally easier to enforce then conditionally requiring a change file.
+    -   [a446b43](https://www.github.com/jbolda/covector/commit/a446b43443603ae86b9667b4d04e0f69b068293d) feat: extra bump types ([#138](https://www.github.com/jbolda/covector/pull/138)) on 2021-02-10
+-   Some workflows require different actions for different packages. Most of this can be codified into config. However there are cases where you may need to run a command for a dynamic set of packages.
+    -   [2748d90](https://www.github.com/jbolda/covector/commit/2748d90cfe2dbe94050ccc85e932aff4260627d4) feat: filter pkgs ([#128](https://www.github.com/jbolda/covector/pull/128)) on 2020-11-26
+-   Add missing workspace dependencies. These were likely only functioning due to hoisting.
+    -   [948ca7c](https://www.github.com/jbolda/covector/commit/948ca7ca7f6332abb6ffd13ff68d21560f275b57) feat: init command ([#139](https://www.github.com/jbolda/covector/pull/139)) on 2021-02-12
+
 ## [0.3.0]
 
 -   Allow multiple publish sequences. Any command beginning with `publish` will invoke the related `getPublishedVersion`, e.g. `publishNPM` would look for and check `getPublishedVersionNPM`. This allows separation of concerns and re-run-ability for multiple deploy targets.

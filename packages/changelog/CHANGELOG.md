@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.2]
+
+-   Add a validation guardrail within the `status` command. This will run a nearly identical version application function. It can catch an error during the PR process rather than during the versioning process.
+    -   Bumped due to a bump in @covector/files.
+    -   [4437766](https://www.github.com/jbolda/covector/commit/44377667fe7c64207bc84140fb4954b23dc4424f) feat: version bump guardrail ([#137](https://www.github.com/jbolda/covector/pull/137)) on 2021-02-10
+
 ## [0.2.1]
 
 -   Find all numbers in a PR no matter the quantity.
