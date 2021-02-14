@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0]
+
+-   Allow running functions as a command instead of assuming everything runs in a shell. This is mostly for internal use to be used within the Github Action.
+    -   [6dc90bf](https://www.github.com/jbolda/covector/commit/6dc90bfe849c4c9441afce7a26a01aabf4a2196c) feat: reorder GitHub release step ([#136](https://www.github.com/jbolda/covector/pull/136)) on 2021-02-09
+-   Stream command output instead of waiting for completion. This is particularly helpful when a command hangs unexpectedly (such as when it asks for input in CI).
+    -   [d8cfcda](https://www.github.com/jbolda/covector/commit/d8cfcdac6ef972d466acb5da3d2329426b4bd2d9) stream command output through new @effection/node version ([#124](https://www.github.com/jbolda/covector/pull/124)) on 2020-11-23
+
 ## [0.1.0]
 
 -   Allow multiple publish sequences. Any command beginning with `publish` will invoke the related `getPublishedVersion`, e.g. `publishNPM` would look for and check `getPublishedVersionNPM`. This allows separation of concerns and re-run-ability for multiple deploy targets.
