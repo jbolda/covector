@@ -49,13 +49,12 @@ main(function* run() {
       if (core.getInput("createRelease") === "true") {
         const octokit = github.getOctokit(token);
         const { owner, repo } = github.context.repo;
-        let releases = {};
 
         const covectored = yield covector({
           command,
           filterPackages,
           modifyConfig: injectPublishFunctions([
-            createReleases.bind({ octokit, owner, repo }),
+            createReleases({ octokit, owner, repo }),
           ]),
         });
 
@@ -72,6 +71,15 @@ main(function* run() {
           command,
           filterPackages,
         });
+
+        let packagesPublished = Object.keys(covectored).reduce((pub, pkg) => {
+          if (!covectored[pkg].published) {
+            return pub;
+          } else {
+            return `${pub}${pkg}`;
+          }
+        }, "");
+        core.setOutput("packagesPublished", packagesPublished);
       }
 
       for (let pkg of Object.keys(covectored)) {
