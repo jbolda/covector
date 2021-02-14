@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4.3]
+
+-   The `core` method was not passed to the release util in the Github Action. This failed the Github Release creation.
+    -   [c9026bd](https://www.github.com/jbolda/covector/commit/c9026bdc47d828b7f5c17b6e4680d22fe7c623a6) fix: core not passed in action ([#143](https://www.github.com/jbolda/covector/pull/143)) on 2021-02-14
+
 ## [0.4.2]
 
 -   Switch to currying github context as binding returned undefined.
