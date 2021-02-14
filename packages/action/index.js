@@ -54,7 +54,7 @@ main(function* run() {
           command,
           filterPackages,
           modifyConfig: injectPublishFunctions([
-            createReleases({ octokit, owner, repo }),
+            createReleases({ core, octokit, owner, repo }),
           ]),
         });
 
