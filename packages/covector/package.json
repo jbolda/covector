@@ -1,6 +1,6 @@
 {
   "name": "covector",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "license": "Apache-2.0",
   "main": "src",
   "files": [
