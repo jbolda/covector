@@ -46,32 +46,26 @@ main(function* run() {
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       console.log(`The covector output: ${payload}`);
     } else if (command === "publish") {
+      let covectored;
       if (core.getInput("createRelease") === "true") {
         const octokit = github.getOctokit(token);
         const { owner, repo } = github.context.repo;
 
-        const covectored = yield covector({
+        covectored = yield covector({
           command,
           filterPackages,
           modifyConfig: injectPublishFunctions([
             createReleases({ core, octokit, owner, repo }),
           ]),
         });
-
-        let packagesPublished = Object.keys(covectored).reduce((pub, pkg) => {
-          if (!covectored[pkg].published) {
-            return pub;
-          } else {
-            return `${pub}${pkg}`;
-          }
-        }, "");
-        core.setOutput("packagesPublished", packagesPublished);
       } else {
-        const covectored = yield covector({
+        covectored = yield covector({
           command,
           filterPackages,
         });
+      }
 
+      if (covectored) {
         let packagesPublished = Object.keys(covectored).reduce((pub, pkg) => {
           if (!covectored[pkg].published) {
             return pub;
@@ -80,16 +74,16 @@ main(function* run() {
           }
         }, "");
         core.setOutput("packagesPublished", packagesPublished);
-      }
 
-      for (let pkg of Object.keys(covectored)) {
-        if (covectored[pkg].command !== false) successfulPublish = true;
-      }
-      core.setOutput("successfulPublish", successfulPublish);
+        for (let pkg of Object.keys(covectored)) {
+          if (covectored[pkg].command !== false) successfulPublish = true;
+        }
+        core.setOutput("successfulPublish", successfulPublish);
 
-      core.setOutput("change", covectored);
-      const payload = JSON.stringify(covectored, undefined, 2);
-      console.log(`The covector output: ${payload}`);
+        core.setOutput("change", covectored);
+        const payload = JSON.stringify(covectored, undefined, 2);
+        console.log(`The covector output: ${payload}`);
+      }
     }
   } catch (error) {
     core.setFailed(error.message);
