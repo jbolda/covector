@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.2.2]
+
+-   Add a validation guardrail within the `status` command. This will run a nearly identical version application function. It can catch an error during the PR process rather than during the versioning process.
+    -   Bumped due to a bump in @covector/files.
+    -   [4437766](https://www.github.com/jbolda/covector/commit/44377667fe7c64207bc84140fb4954b23dc4424f) feat: version bump guardrail ([#137](https://www.github.com/jbolda/covector/pull/137)) on 2021-02-10
+
+## [0.2.1]
+
+-   Find all numbers in a PR no matter the quantity.
+    -   [4a39f15](https://www.github.com/jbolda/covector/commit/4a39f15b3b774ce171b3fa917db8f47d19823874) fix: find changelog PR numbers of any size ([#89](https://www.github.com/jbolda/covector/pull/89)) on 2020-07-10
+
+## [0.2.0]
+
+-   Pipe git info into changelog using sub-bullet points for each commit it was involved in.
+    -   [cc19486](https://www.github.com/jbolda/covector/commit/cc19486f86b78aec2c719e5dd17a2d72cbc8d450) feat: new command package and piped git info ([#78](https://www.github.com/jbolda/covector/pull/78)) on 2020-07-09
+    -   [de3248d](https://www.github.com/jbolda/covector/commit/de3248dfd70146392ff65e7065c2125daf527728) feat: dep bump note in changelog ([#87](https://www.github.com/jbolda/covector/pull/87)) on 2020-07-10
+-   Note in sub-bullets when a bump was due to a dependency (and that helps note where there summary text is from as well.)
+    -   [de3248d](https://www.github.com/jbolda/covector/commit/de3248dfd70146392ff65e7065c2125daf527728) feat: dep bump note in changelog ([#87](https://www.github.com/jbolda/covector/pull/87)) on 2020-07-10
+-   Allow complex commands specified as an object. This let's one specify a dryRunCommand that is executed in --dry-run mode instead (so no accidental publishes!) or to set pipe to true that the output is returned from the main covector function. The pipe likely won't be used directly, but can be consumed within the action to create a Github Release, etc.
+    -   Bumped due to a bump in covector.
+    -   [3ca050c](https://www.github.com/jbolda/covector/commit/3ca050c2c51821d229209e18391535c266b6b200) feat: advanced commands ([#71](https://www.github.com/jbolda/covector/pull/71)) on 2020-07-06
+
 ## [0.1.0]
 
 -   Add option to execute commands in "--dry-run" mode which will output the anticipated commands without running them and additional relevant information (such as the command pipe).

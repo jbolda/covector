@@ -1,6 +1,6 @@
 {
   "name": "action",
-  "version": "0.1.0",
+  "version": "0.3.3",
   "main": "dist/index.js",
   "license": "Apache-2.0",
   "scripts": {
@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "@actions/github": "^2.2.0",
-    "@effection/node": "0.7.0",
+    "@actions/github": "^4.0.0",
+    "@effection/node": "0.9.1",
     "@zeit/ncc": "^0.22.3"
   }
 }

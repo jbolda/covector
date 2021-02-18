@@ -1,39 +1,23 @@
-const { readPkgFile, writePkgFile } = require("@covector/files");
+const {
+  readPkgFile,
+  writePkgFile,
+  testSerializePkgFile,
+} = require("@covector/files");
 const { compareBumps } = require("@covector/assemble");
 const semver = require("semver");
+const cloneDeep = require("lodash.clonedeep");
 const path = require("path");
 
 module.exports.apply = function* ({
-  changeList,
+  commands,
   config,
   cwd = process.cwd(),
   bump = true,
 }) {
-  const parents = resolveParents({ config });
-  let changes = changeList.reduce((list, change) => {
-    list[change.pkg] = change;
-    list[change.pkg].parents = parents[change.pkg];
-    return list;
+  const changes = commands.reduce((finalChanges, command) => {
+    finalChanges[command.pkg] = command;
+    return finalChanges;
   }, {});
-
-  Object.keys(changes).forEach((main) => {
-    if (changes[main].parents.length > 0) {
-      changes[main].parents.forEach((pkg) => {
-        if (!!changes[pkg]) {
-          changes[pkg].type = compareBumps(
-            changes[main].type,
-            changes[pkg].type
-          );
-        } else {
-          changes[pkg] = config.packages[pkg];
-          changes[pkg].parents = [];
-          changes[pkg].pkg = pkg;
-          changes[pkg].type = changes[main].type;
-        }
-      });
-    }
-  });
-
   let allPackages = yield readAll({ changes, config, cwd });
 
   const bumps = bumpAll({ changes, allPackages });
@@ -50,6 +34,33 @@ module.exports.apply = function* ({
     });
   }
   return bumps;
+};
+
+module.exports.validateApply = async ({
+  commands,
+  config,
+  cwd = process.cwd(),
+}) => {
+  const changes = commands.reduce((finalChanges, command) => {
+    finalChanges[command.pkg] = command;
+    return finalChanges;
+  }, {});
+  let allPackages = await readAll({ changes, config, cwd });
+
+  const bumps = bumpAll({ changes, allPackages, logs: false }).reduce(
+    (final, current) => (!current.vfile ? final : final.concat([current])),
+    []
+  );
+
+  try {
+    for (let bump of bumps) {
+      testSerializePkgFile({ packageFile: bump });
+    }
+    // will throw on validation error and not return true
+    return true;
+  } catch (e) {
+    throw e;
+  }
 };
 
 const readAll = async ({ changes, config, cwd = process.cwd() }) => {
@@ -105,11 +116,51 @@ const resolveParents = ({ config }) => {
   }, {});
 };
 
-const bumpAll = ({ changes, allPackages }) => {
+module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
+  const parents = resolveParents({ config });
+
+  let changes = Object.keys(assembledChanges.releases).reduce(
+    (list, change) => {
+      list[change] = assembledChanges.releases[change];
+      list[change].parents = parents[change];
+      return list;
+    },
+    {}
+  );
+
+  Object.keys(changes).forEach((main) => {
+    if (changes[main].parents.length > 0) {
+      changes[main].parents.forEach((pkg) => {
+        if (!!changes[pkg]) {
+          // if a change is planned on the parent
+          // compare and bump the parent if the child is higher
+          changes[pkg].type = compareBumps(
+            changes[main].type,
+            changes[pkg].type
+          );
+        } else {
+          // if the parent doesn't have a release
+          // add one to adopt the next version of it's child
+          changes[pkg] = cloneDeep(changes[main]);
+          if (changes[pkg].changes) {
+            changes[pkg].changes.forEach((parentChange) => {
+              parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
+            });
+          }
+          changes[pkg].parents = parents[pkg];
+        }
+      });
+    }
+  });
+
+  return { releases: changes, changes: assembledChanges.changes };
+};
+
+const bumpAll = ({ changes, allPackages, logs = true }) => {
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
     if (!packageFiles[pkg].vfile) continue;
-    console.log(`bumping ${pkg} with ${changes[pkg].type}`);
+    if (logs) console.log(`bumping ${pkg} with ${changes[pkg].type}`);
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
       bumpType: changes[pkg].type,
@@ -132,7 +183,11 @@ const bumpAll = ({ changes, allPackages }) => {
 
 const bumpMain = ({ packageFile, bumpType }) => {
   let pkg = { ...packageFile };
-  pkg.version = semver.inc(pkg.version, bumpType);
+  let next = semver.inc(pkg.version, bumpType);
+  pkg.version = next;
+  pkg.versionMajor = semver.major(next);
+  pkg.versionMinor = semver.minor(next);
+  pkg.versionPatch = semver.patch(next);
   if (pkg.vfile.extname === ".json") {
     // for javascript
     pkg.pkg.version = semver.inc(pkg.pkg.version, bumpType);

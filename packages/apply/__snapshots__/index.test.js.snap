@@ -1,5 +1,87 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`list changes considering parents adds changes for dependency 1`] = `
+Object {
+  "changes": Object {
+    "changes": undefined,
+    "releases": Object {
+      "all": Object {
+        "dependencies": undefined,
+        "manager": "javascript",
+        "parents": Array [
+          "yarn-workspace-base-pkg-a",
+          "yarn-workspace-base-pkg-b",
+        ],
+        "path": undefined,
+        "pkg": "all",
+        "type": "minor",
+      },
+      "yarn-workspace-base-pkg-a": Object {
+        "dependencies": undefined,
+        "manager": "javascript",
+        "parents": Array [],
+        "path": undefined,
+        "pkg": "all",
+        "type": "minor",
+      },
+      "yarn-workspace-base-pkg-b": Object {
+        "dependencies": undefined,
+        "manager": "javascript",
+        "parents": Array [
+          "yarn-workspace-base-pkg-a",
+        ],
+        "path": undefined,
+        "pkg": "all",
+        "type": "minor",
+      },
+    },
+  },
+  "consoleDir": Array [],
+  "consoleLog": Array [],
+}
+`;
+
+exports[`list changes considering parents bumps higher due to dependency bump 1`] = `
+Object {
+  "changes": Object {
+    "changes": undefined,
+    "releases": Object {
+      "all": Object {
+        "dependencies": undefined,
+        "manager": "javascript",
+        "parents": Array [
+          "yarn-workspace-base-pkg-a",
+          "yarn-workspace-base-pkg-b",
+        ],
+        "path": undefined,
+        "pkg": "all",
+        "type": "minor",
+      },
+      "yarn-workspace-base-pkg-a": Object {
+        "dependencies": undefined,
+        "manager": "javascript",
+        "parents": Array [],
+        "path": undefined,
+        "pkg": "all",
+        "type": "minor",
+      },
+      "yarn-workspace-base-pkg-b": Object {
+        "dependencies": undefined,
+        "manager": "javascript",
+        "parents": Array [
+          "yarn-workspace-base-pkg-a",
+        ],
+        "path": undefined,
+        "pkg": "all",
+        "type": "minor",
+      },
+    },
+  },
+  "consoleDir": Array [],
+  "consoleLog": Array [],
+}
+`;
+
 exports[`package file apply bump bumps multi js json 1`] = `
 Object {
   "consoleDir": Array [],
@@ -37,6 +119,16 @@ Object {
     ],
     Array [
       "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump bumps multi rust toml as minor with object dep without version number 1`] = `
+Object {
+  "consoleError": Array [
+    Array [
+      "It appears that a dependency within this repo does not have a version specified.",
     ],
   ],
 }

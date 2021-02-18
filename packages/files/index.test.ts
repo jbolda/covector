@@ -1,6 +1,11 @@
-import { readPkgFile, configFile, changeFiles } from "./index"
-import mockConsole from "jest-mock-console"
-import fixtures from "fixturez"
+import {
+  readPkgFile,
+  configFile,
+  changeFiles,
+  changeFilesToVfile,
+} from "./index";
+import mockConsole from "jest-mock-console";
+import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 describe("file test", () => {
@@ -33,8 +38,12 @@ describe("file test", () => {
   it("globs changes", async () => {
     const restoreConsole = mockConsole(["info"]);
     const changesFolder = f.copy("changes.multiple-changes");
-    const changesArray = await changeFiles({ cwd: changesFolder });
-    expect(changesArray).toMatchSnapshot();
+    const changesPaths = await changeFiles({ cwd: changesFolder });
+    const changesVfiles = changeFilesToVfile({
+      cwd: changesFolder,
+      paths: changesPaths,
+    });
+    expect(changesVfiles).toMatchSnapshot();
     restoreConsole();
   });
 

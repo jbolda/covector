@@ -2,10 +2,12 @@
   "pkgManagers": {
     "rust": {
       "version": true,
+      "getPublishedVersion": "echo 0.5.2",
       "prepublish": "echo premode for ${ pkg.pkg }",
       "publish": [
         "echo publishing ${ pkg.pkg } would happen here",
         "echo running in ${ pkg.path }",
+        { "command": "ls", "runFromRoot": true },
         "ls"
       ],
       "postpublish": "echo postmode for ${ pkg.pkg }",

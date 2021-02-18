@@ -1,0 +1,24 @@
+{
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "publish": { "command": "echo publish", "pipe": true },
+      "build": { "command": "yarn build", "pipe": true },
+      "test": [
+        { "command": "yarn build", "pipe": true },
+        { "command": "yarn test", "dryRunCommand": false },
+        { "command": "echo boop", "dryRunCommand": "echo deboop" }
+      ]
+    }
+  },
+  "packages": {
+    "package-one": {
+      "path": "./packages/package-one",
+      "manager": "javascript"
+    },
+    "package-two": {
+      "path": "./packages/package-two",
+      "manager": "javascript"
+    }
+  }
+}

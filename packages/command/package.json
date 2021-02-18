@@ -1,0 +1,12 @@
+{
+  "name": "@covector/command",
+  "version": "0.2.0",
+  "files": [
+    "index.js"
+  ],
+  "license": "Apache-2.0",
+  "dependencies": {
+    "effection": "^0.7.0",
+    "strip-ansi": "^6.0.0"
+  }
+}

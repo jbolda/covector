@@ -1,4 +1,6 @@
 const { assemble, mergeIntoConfig } = require("./index");
+const fixtures = require("fixturez");
+const f = fixtures(__dirname);
 
 const assembledChanges = {
   releases: {
@@ -114,66 +116,151 @@ const config = {
   },
 };
 
-const testTextOne = `
+const configSpecial = {
+  ...config,
+  additionalBumpTypes: ["housekeeping", "workflows"],
+};
+
+const testTextOne = {
+  contents: `
 ---
 "assemble1": patch
 "assemble2": patch
 ---
     
 This is a test.
-`;
-const testTextTwo = `
+`,
+};
+const testTextTwo = {
+  contents: `
 ---
 "assemble1": minor
 "assemble2": patch
 ---
     
 This is a test.
-`;
-const testTextThree = `
+`,
+};
+const testTextThree = {
+  contents: `
 ---
 "assemble1": patch
 "assemble2": major
 ---
     
 This is a test.
-`;
-const testTextFour = `
+`,
+};
+const testTextFour = {
+  contents: `
 ---
 "assemble1": patch
 "@namespaced/assemble2": patch
 ---
     
-This is a test.
-`;
-const testTextFive = `
+This is a test. We might link out to a [website](https://www.jacobbolda.com).
+`,
+};
+const testTextFive = {
+  contents: `
 ---
 "all": minor
 ---
   
 This is a test.
-`;
+`,
+};
+const testTextSpecialOne = {
+  contents: `
+---
+"assemble1": housekeeping
+"assemble2": workflows
+---
+  
+This is a test.
+`,
+};
+const testTextSpecialTwo = {
+  contents: `
+---
+"assemble1": patch
+"assemble2": workflows
+"@namespaced/assemble2": explosions
+---
+  
+This is a test.
+`,
+};
 
 describe("assemble changes", () => {
-  it("runs", () => {
-    const assembled = assemble([
-      testTextOne,
-      testTextTwo,
-      testTextThree,
-      testTextFour,
-    ]);
+  it("runs", function* () {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+    });
     expect(assembled).toMatchSnapshot();
   });
 
-  it("assembles deps", () => {
-    const assembled = assemble([testTextFive], config.packages);
+  it("assembles deps", function* () {
+    const assembled = yield assemble({ vfiles: [testTextFive] });
     expect(assembled).toMatchSnapshot();
   });
 });
 
+describe("special bump types", () => {
+  it("valid additional bump types", function* () {
+    const assembled = yield assemble({
+      vfiles: [
+        testTextOne,
+        testTextTwo,
+        testTextThree,
+        testTextFour,
+        testTextSpecialOne,
+      ],
+      config: configSpecial,
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("invalid bump types", function* () {
+    expect.assertions(1);
+    try {
+      yield assemble({
+        vfiles: [
+          testTextOne,
+          testTextTwo,
+          testTextThree,
+          testTextFour,
+          testTextSpecialOne,
+        ],
+        config,
+      });
+    } catch (e) {
+      expect(e.message).toMatch(
+        "housekeeping specified for assemble1 is invalid.\n" +
+          "Try one of the following: major, minor, patch.\n"
+      );
+    }
+  });
+
+  it("one each valid and invalid", function* () {
+    expect.assertions(1);
+    try {
+      yield assemble({
+        vfiles: [testTextSpecialTwo],
+        config: configSpecial,
+      });
+    } catch (e) {
+      expect(e.message).toMatch(
+        "explosions specified for @namespaced/assemble2 is invalid.\n" +
+          "Try one of the following: major, minor, patch, housekeeping, workflows.\n"
+      );
+    }
+  });
+});
+
 describe("merge config test", () => {
-  it("merges version", async () => {
-    const mergedVersionConfig = await mergeIntoConfig({
+  it("merges version", function* () {
+    const mergedVersionConfig = yield mergeIntoConfig({
       config,
       assembledChanges,
       command: "version",
@@ -181,14 +268,14 @@ describe("merge config test", () => {
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges version without command", async () => {
+  it("merges version without command", function* () {
     let modifiedConfig = { ...config };
     delete modifiedConfig.pkgManagers.javascript.version;
     delete modifiedConfig.packages["assemble2"].version;
     delete modifiedConfig.packages["@namespaced/assemble1"].version;
     delete modifiedConfig.packages["@namespaced/assemble2"].version;
 
-    const mergedVersionConfig = await mergeIntoConfig({
+    const mergedVersionConfig = yield mergeIntoConfig({
       config: modifiedConfig,
       assembledChanges,
       command: "version",
@@ -196,7 +283,7 @@ describe("merge config test", () => {
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges nested bumps", async () => {
+  it("merges nested bumps", function* () {
     const nestedAssembledChanges = {
       releases: {
         assemble1: {
@@ -253,7 +340,7 @@ describe("merge config test", () => {
       },
     };
 
-    const mergedVersionConfig = await mergeIntoConfig({
+    const mergedVersionConfig = yield mergeIntoConfig({
       config: nestedConfig,
       assembledChanges: nestedAssembledChanges,
       command: "version",
@@ -261,12 +348,48 @@ describe("merge config test", () => {
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges publish", async () => {
-    // const mergedPublishConfig = await mergeIntoConfig({
-    //   config,
-    //   assembledChanges,
-    //   command: "publish",
-    // });
-    // expect(mergedPublishConfig).toMatchSnapshot();
+  it("merges publish", function* () {
+    const configFolder = f.copy("assemble");
+
+    const mergedPublishConfig = yield mergeIntoConfig({
+      cwd: configFolder,
+      config,
+      assembledChanges: [],
+      command: "publish",
+    });
+    expect(scrubVfile(mergedPublishConfig)).toMatchSnapshot();
   });
 });
+
+describe("merge filtered config test", () => {
+  it("merges version", function* () {
+    const mergedVersionConfig = yield mergeIntoConfig({
+      config,
+      assembledChanges,
+      command: "version",
+      filterPackages: ["assemble1", "@namespaced/assemble1"],
+    });
+    expect(mergedVersionConfig).toMatchSnapshot();
+  });
+
+  it("merges publish", function* () {
+    const configFolder = f.copy("assemble");
+
+    const mergedPublishConfig = yield mergeIntoConfig({
+      cwd: configFolder,
+      config,
+      assembledChanges,
+      command: "publish",
+      filterPackages: ["assemble1", "@namespaced/assemble1"],
+    });
+    expect(scrubVfile(mergedPublishConfig)).toMatchSnapshot();
+  });
+});
+
+// vfile returns fs information that is flaky between machines, scrub it
+const scrubVfile = (mergedPublishConfig) => {
+  return mergedPublishConfig.map((pkg) => {
+    delete pkg.pkgFile.vfile;
+    return pkg;
+  }, mergedPublishConfig);
+};
