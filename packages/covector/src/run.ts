@@ -31,6 +31,8 @@ export function* covector({
   command: string;
   dryRun: boolean;
   cwd?: string;
+  filterPackages: string[];
+  modifyConfig: (c: any) => Promise<any>;
 }) {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const changesPaths = yield changeFiles({
@@ -40,7 +42,6 @@ export function* covector({
   const changesVfiles = changeFilesToVfile({
     cwd,
     paths: changesPaths,
-    filterPackages,
   });
   const assembledChanges = yield assemble({
     cwd,
@@ -107,15 +108,28 @@ export function* covector({
       console.log(commands);
     }
 
-    let pkgCommandsRan = Object.keys(config.packages).reduce((pkgs, pkg) => {
-      pkgs[pkg] = {
-        precommand: false,
-        command: false,
-        postcommand: false,
-        applied: false,
-      };
-      return pkgs;
-    }, {});
+    let pkgCommandsRan = Object.keys(config.packages).reduce(
+      (
+        pkgs: {
+          [k: string]: {
+            precommand: boolean;
+            command: boolean;
+            postcommand: boolean;
+            applied: boolean;
+          };
+        },
+        pkg: string
+      ) => {
+        pkgs[pkg] = {
+          precommand: false,
+          command: false,
+          postcommand: false,
+          applied: false,
+        };
+        return pkgs;
+      },
+      {}
+    );
 
     pkgCommandsRan = yield attemptCommands({
       cwd,
@@ -133,10 +147,23 @@ export function* covector({
       bump: !dryRun,
     });
 
-    pkgCommandsRan = applied.reduce((pkgs, result) => {
-      pkgs[result.name].applied = result;
-      return pkgs;
-    }, pkgCommandsRan);
+    pkgCommandsRan = applied.reduce(
+      (
+        pkgs: {
+          [k: string]: {
+            precommand: boolean;
+            command: boolean;
+            postcommand: boolean;
+            applied: boolean | string;
+          };
+        },
+        result: string
+      ) => {
+        pkgs[result.name].applied = result;
+        return pkgs;
+      },
+      pkgCommandsRan
+    );
 
     pkgCommandsRan = yield fillChangelogs({
       applied,

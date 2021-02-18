@@ -21,6 +21,9 @@ interface Pkg {
 interface PkgMinimum {
   version: string;
   pkg: Pkg;
+  versionMajor: number;
+  versionMinor: number;
+  versionPatch: number;
 }
 
 interface PackageFile extends PkgMinimum {
@@ -106,7 +109,11 @@ export const writePkgFile = async ({
   return inputVfile;
 };
 
-export const testSerializePkgFile = ({ packageFile }) => {
+export const testSerializePkgFile = ({
+  packageFile,
+}: {
+  packageFile: PackageFile;
+}) => {
   try {
     stringifyPkg({
       newContents: packageFile.pkg,
@@ -161,7 +168,13 @@ export const changeFiles = async ({
   );
 };
 
-module.exports.changeFilesToVfile = ({ cwd, paths }) => {
+export const changeFilesToVfile = ({
+  cwd,
+  paths,
+}: {
+  cwd: string;
+  paths: string[];
+}) => {
   return paths.map((file) => {
     let v = vfile.readSync(path.join(cwd, file), "utf8");
     delete v.history;
@@ -171,7 +184,13 @@ module.exports.changeFilesToVfile = ({ cwd, paths }) => {
   });
 };
 
-module.exports.changeFilesRemove = ({ cwd, paths }) => {
+export const changeFilesRemove = ({
+  cwd,
+  paths,
+}: {
+  cwd: string;
+  paths: string[];
+}) => {
   return Promise.all(
     paths.map(async (changeFilePath) => {
       await fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
