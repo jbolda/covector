@@ -16,9 +16,10 @@ interface Pkg {
   name: string;
   version: string;
   dependencies?: object;
+  devDependencies?: object;
 }
 
-interface PkgMinimum {
+export interface PkgMinimum {
   version: string;
   pkg: Pkg;
   versionMajor: number;
@@ -41,13 +42,14 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
   switch (file.extname) {
     case ".toml":
       const parsedTOML = TOML.parse(file.contents);
+      // @ts-ignore
+      const { version } = parsedTOML.package;
       return {
+        version: version,
+        versionMajor: semver.major(version),
+        versionMinor: semver.minor(version),
+        versionPatch: semver.patch(version),
         // @ts-ignore
-        version: parsedTOML.package.version,
-        // @ts-ignore
-        versionMajor: semver.major(parsedTOML.package.version),
-        versionMinor: semver.minor(parsedTOML.package.version),
-        versionPatch: semver.patch(parsedTOML.package.version),
         pkg: parsedTOML,
       };
     case ".json":
@@ -154,8 +156,8 @@ export const changeFiles = async ({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Promise<VFile[]> => {
-  const paths = await globby(
+}): Promise<string[]> => {
+  return await globby(
     [
       path.posix.join(changeFolder, "*.md"),
       `!${path.posix.join(changeFolder, "README.md")}`,
@@ -174,7 +176,7 @@ export const changeFilesToVfile = ({
 }: {
   cwd: string;
   paths: string[];
-}) => {
+}): VFile[] => {
   return paths.map((file) => {
     let v = vfile.readSync(path.join(cwd, file), "utf8");
     delete v.history;

@@ -13,7 +13,12 @@ export function* cli(
 
 function parseOptions(
   argv: readonly string[]
-): { command: string; dryRun: boolean } {
+): {
+  command: string;
+  dryRun: boolean;
+  yes: boolean | undefined;
+  directory?: string;
+} {
   let rawOptions = yargs
     .scriptName("covector")
     .command("init", "initialize covector in your repo", function (yargs) {
@@ -27,6 +32,7 @@ function parseOptions(
         .option("directory", {
           alias: "d",
           describe: "specify a custom change folder",
+          default: ".changes",
           hidden: true,
         });
     })
@@ -51,7 +57,7 @@ function parseOptions(
 
   return {
     command: rawOptions._[0],
-    dryRun: rawOptions.dryRun,
+    dryRun: rawOptions["dry-run"],
     yes: rawOptions.yes,
     directory: rawOptions.directory,
   };

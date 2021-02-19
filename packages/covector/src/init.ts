@@ -1,20 +1,21 @@
-const inquirer = require("inquirer");
-const globby = require("globby");
-let fs;
-try {
-  // works in v10 and v14
-  fs = require("fs/promises");
-} catch (e) {
-  // for dealing with v12
-  fs = require("fs").promises;
-}
-const path = require("path");
-const { readPkgFile } = require("@covector/files");
+import inquirer from "inquirer";
+import globby from "globby";
+// works in v10 and v14
+import { default as fsSlashPromises } from "fs/promises";
+// for dealing with v12
+import { default as fsDotPromises } from "fs";
+const fs = fsSlashPromises || fsDotPromises.promises;
+import path from "path";
+import { readPkgFile, PkgMinimum } from "@covector/files";
 
-module.exports.init = function* init({
+export const init = function* init({
   cwd = process.cwd(),
   changeFolder = ".changes",
   yes,
+}: {
+  cwd: any;
+  changeFolder: string;
+  yes: boolean;
 }) {
   const answers = yield inquirer
     .prompt([
@@ -63,10 +64,12 @@ module.exports.init = function* init({
   }
 
   const pkgs = yield packageFiles({ cwd });
-  let packages = {};
-  let pkgManagers = {};
+  let packages: {
+    [k: string]: { path: string; manager: string; dependencies?: string[] };
+  } = {};
+  let pkgManagers: { [k: string]: boolean } = {};
   const pkgFiles = yield Promise.all(
-    pkgs.map((pkg) => readPkgFile({ file: `./${pkg}`, nickname: pkg }))
+    pkgs.map((pkg: string) => readPkgFile({ file: `./${pkg}`, nickname: pkg }))
   );
 
   for (let pkgFile of pkgFiles) {
@@ -135,7 +138,8 @@ module.exports.init = function* init({
   // .changes/config.json
   try {
     const testOpen = yield fs.open(
-      path.posix.join(cwd, changeFolder, "config.json")
+      path.posix.join(cwd, changeFolder, "config.json"),
+      "r"
     );
     console.log(
       `The config.json exists in ${changeFolder}, skipping creation.`
@@ -152,7 +156,8 @@ module.exports.init = function* init({
   // .changes/readme.md
   try {
     const testOpen = yield fs.open(
-      path.posix.join(cwd, changeFolder, "readme.md")
+      path.posix.join(cwd, changeFolder, "readme.md"),
+      "r"
     );
     console.log(`The readme.md exists in ${changeFolder}, skipping creation.`);
     yield testOpen.close();
@@ -165,7 +170,8 @@ module.exports.init = function* init({
     // github status
     try {
       const testOpen = yield fs.open(
-        path.posix.join(cwd, ".github", "workflows", "covector-status.yml")
+        path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
+        "r"
       );
       console.log(
         `The status workflow exists in ./.github/workflows, skipping creation.`
@@ -189,7 +195,8 @@ module.exports.init = function* init({
           ".github",
           "workflows",
           "covector-version-or-publish.yml"
-        )
+        ),
+        "r"
       );
       console.log(
         `The version/publish workflow exists in ./.github/workflows, skipping creation.`
@@ -217,7 +224,7 @@ module.exports.init = function* init({
   return "complete";
 };
 
-const packageFiles = async ({ cwd }) => {
+const packageFiles = async ({ cwd = process.cwd() }) => {
   return await globby(
     ["**/package.json", "**/Cargo.toml", "!**/__fixtures__", "!**/__tests__"],
     {
@@ -227,7 +234,13 @@ const packageFiles = async ({ cwd }) => {
   );
 };
 
-const derivePkgManager = async ({ path, pkgFile }) => {
+const derivePkgManager = async ({
+  path,
+  pkgFile,
+}: {
+  path: string;
+  pkgFile: { name: string };
+}) => {
   const actionFile = await globby(["**/action.yml"], {
     cwd: path,
     gitignore: true,
@@ -240,7 +253,13 @@ const derivePkgManager = async ({ path, pkgFile }) => {
 };
 
 // build dep graph
-const buildDependencyGraph = ({ pkgFile, pkgFiles }) => {
+const buildDependencyGraph = ({
+  pkgFile,
+  pkgFiles,
+}: {
+  pkgFile: PkgMinimum;
+  pkgFiles: PkgMinimum[];
+}) => {
   const pkgDeps = [
     ...(pkgFile.pkg.dependencies ? Object.keys(pkgFile.pkg.dependencies) : []),
     ...(pkgFile.pkg.devDependencies
@@ -248,7 +267,7 @@ const buildDependencyGraph = ({ pkgFile, pkgFiles }) => {
       : []),
   ];
 
-  return pkgDeps.reduce((deps, dep) => {
+  return pkgDeps.reduce((deps: string[], dep: string) => {
     for (let pkg of pkgFiles) {
       if (dep === pkg.pkg.name) {
         return deps.concat([dep]);
@@ -313,6 +332,9 @@ jobs:
 const githubPublishWorkflow = ({
   branchName = "main",
   pkgManagers,
+}: {
+  branchName: string;
+  pkgManagers: { [k: string]: boolean };
 }) => `name: version or publish
 
 on:
