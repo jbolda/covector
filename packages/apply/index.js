@@ -159,7 +159,7 @@ module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
 const bumpAll = ({ changes, allPackages, logs = true }) => {
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
-    if (!packageFiles[pkg].vfile) continue;
+    if (!packageFiles[pkg].vfile || changes[pkg].type === "noop") continue;
     if (logs) console.log(`bumping ${pkg} with ${changes[pkg].type}`);
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
