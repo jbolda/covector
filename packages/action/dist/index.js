@@ -11291,7 +11291,7 @@ module.exports.changesConsideringParents = ({ assembledChanges, config }) => {
 const bumpAll = ({ changes, allPackages, logs = true }) => {
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
-    if (!packageFiles[pkg].vfile) continue;
+    if (!packageFiles[pkg].vfile || changes[pkg].type === "noop") continue;
     if (logs) console.log(`bumping ${pkg} with ${changes[pkg].type}`);
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
@@ -12283,7 +12283,7 @@ module.exports = new Type('tag:yaml.org,2002:float', {
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-const VERSION = "2.9.1";
+const VERSION = "2.10.0";
 
 /**
  * Some “list” response that can be paginated have a different response structure
@@ -23049,14 +23049,12 @@ exports.endpoint = endpoint;
 /***/ 2665:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
-var isObject = __webpack_require__(540),
+var baseTrim = __webpack_require__(5609),
+    isObject = __webpack_require__(540),
     isSymbol = __webpack_require__(1959);
 
 /** Used as references for various `Number` constants. */
 var NAN = 0 / 0;
-
-/** Used to match leading and trailing whitespace. */
-var reTrim = /^\s+|\s+$/g;
 
 /** Used to detect bad signed hexadecimal string values. */
 var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
@@ -23107,7 +23105,7 @@ function toNumber(value) {
   if (typeof value != 'string') {
     return value === 0 ? value : +value;
   }
-  value = value.replace(reTrim, '');
+  value = baseTrim(value);
   var isBinary = reIsBinary.test(value);
   return (isBinary || reIsOctal.test(value))
     ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
@@ -25484,6 +25482,7 @@ module.exports.init = function* init({
 
   for (let pkgFile of pkgFiles) {
     if (!pkgFile.pkg.workspaces) {
+      console.log(pkgFile);
       const manager = yield derivePkgManager({
         path: path.dirname(`./${pkgFile.name}`),
         pkgFile,
@@ -25491,7 +25490,7 @@ module.exports.init = function* init({
       pkgManagers[manager] = true;
       const dependencies = buildDependencyGraph({ pkgFile, pkgFiles });
 
-      packages[pkgFile.pkg.name] = {
+      packages[pkgFile.pkg.name || pkgFile.pkg.package.name] = {
         path: path.dirname(`./${pkgFile.name}`),
         manager,
         ...(dependencies.length > 0 ? { dependencies } : {}),
@@ -25641,7 +25640,7 @@ const packageFiles = async ({ cwd }) => {
 };
 
 const derivePkgManager = async ({ path, pkgFile }) => {
-  const actionFile = await globby(["**/action.yml"], {
+  const actionFile = await globby(["action.yml"], {
     cwd: path,
     gitignore: true,
   });
@@ -47419,6 +47418,32 @@ var RefCountSubscriber = (function (_super) {
 
 /***/ }),
 
+/***/ 5609:
+/***/ (function(module, __unusedexports, __webpack_require__) {
+
+var trimmedEndIndex = __webpack_require__(8322);
+
+/** Used to match leading whitespace. */
+var reTrimStart = /^\s+/;
+
+/**
+ * The base implementation of `_.trim`.
+ *
+ * @private
+ * @param {string} string The string to trim.
+ * @returns {string} Returns the trimmed string.
+ */
+function baseTrim(string) {
+  return string
+    ? string.slice(0, trimmedEndIndex(string) + 1).replace(reTrimStart, '')
+    : string;
+}
+
+module.exports = baseTrim;
+
+
+/***/ }),
+
 /***/ 5611:
 /***/ (function(__unusedmodule, exports) {
 
@@ -47941,6 +47966,7 @@ const compareBumps = (bumpOne, bumpTwo) => {
     ["major", 1],
     ["minor", 2],
     ["patch", 3],
+    ["noop", 4],
   ]);
   return bumps.get(bumpOne) < bumps.get(bumpTwo) ? bumpOne : bumpTwo;
 };
@@ -47954,14 +47980,17 @@ const mergeReleases = (changes, { additionalBumpTypes = [] }) => {
         additionalBumpTypes
       );
       if (bumpOptions.includes(change.releases[pkg])) {
+        const bumpType = additionalBumpTypes.includes(change.releases[pkg])
+          ? "noop"
+          : change.releases[pkg];
         if (!release[pkg]) {
           release[pkg] = {
-            type: change.releases[pkg],
+            type: bumpType,
             changes: cloneDeep([change]),
           };
         } else {
           release[pkg] = {
-            type: compareBumps(release[pkg].type, change.releases[pkg]),
+            type: compareBumps(release[pkg].type, bumpType),
             changes: cloneDeep([...release[pkg].changes, change]),
           };
         }
@@ -68117,12 +68146,16 @@ const Endpoints = {
     update: ["PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}"]
   },
   codeScanning: {
+    deleteAnalysis: ["DELETE /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}{?confirm_delete}"],
     getAlert: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}", {}, {
       renamedParameters: {
         alert_id: "alert_number"
       }
     }],
+    getAnalysis: ["GET /repos/{owner}/{repo}/code-scanning/analyses/{analysis_id}"],
+    getSarif: ["GET /repos/{owner}/{repo}/code-scanning/sarifs/{sarif_id}"],
     listAlertsForRepo: ["GET /repos/{owner}/{repo}/code-scanning/alerts"],
+    listAlertsInstances: ["GET /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}/instances"],
     listRecentAnalyses: ["GET /repos/{owner}/{repo}/code-scanning/analyses"],
     updateAlert: ["PATCH /repos/{owner}/{repo}/code-scanning/alerts/{alert_number}"],
     uploadSarif: ["POST /repos/{owner}/{repo}/code-scanning/sarifs"]
@@ -68394,6 +68427,25 @@ const Endpoints = {
     updateMembershipForAuthenticatedUser: ["PATCH /user/memberships/orgs/{org}"],
     updateWebhook: ["PATCH /orgs/{org}/hooks/{hook_id}"],
     updateWebhookConfigForOrg: ["PATCH /orgs/{org}/hooks/{hook_id}/config"]
+  },
+  packages: {
+    deletePackageForAuthenticatedUser: ["DELETE /user/packages/{package_type}/{package_name}"],
+    deletePackageForOrg: ["DELETE /orgs/{org}/packages/{package_type}/{package_name}"],
+    deletePackageVersionForAuthenticatedUser: ["DELETE /user/packages/{package_type}/{package_name}/versions/{package_version_id}"],
+    deletePackageVersionForOrg: ["DELETE /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"],
+    getAllPackageVersionsForAPackageOwnedByAnOrg: ["GET /orgs/{org}/packages/{package_type}/{package_name}/versions"],
+    getAllPackageVersionsForAPackageOwnedByTheAuthenticatedUser: ["GET /user/packages/{package_type}/{package_name}/versions"],
+    getAllPackageVersionsForPackageOwnedByUser: ["GET /users/{username}/packages/{package_type}/{package_name}/versions"],
+    getPackageForAuthenticatedUser: ["GET /user/packages/{package_type}/{package_name}"],
+    getPackageForOrganization: ["GET /orgs/{org}/packages/{package_type}/{package_name}"],
+    getPackageForUser: ["GET /users/{username}/packages/{package_type}/{package_name}"],
+    getPackageVersionForAuthenticatedUser: ["GET /user/packages/{package_type}/{package_name}/versions/{package_version_id}"],
+    getPackageVersionForOrganization: ["GET /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}"],
+    getPackageVersionForUser: ["GET /users/{username}/packages/{package_type}/{package_name}/versions/{package_version_id}"],
+    restorePackageForAuthenticatedUser: ["POST /user/packages/{package_type}/{package_name}/restore"],
+    restorePackageForOrg: ["POST /orgs/{org}/packages/{package_type}/{package_name}/restore"],
+    restorePackageVersionForAuthenticatedUser: ["POST /user/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"],
+    restorePackageVersionForOrg: ["POST /orgs/{org}/packages/{package_type}/{package_name}/versions/{package_version_id}/restore"]
   },
   projects: {
     addCollaborator: ["PUT /projects/{project_id}/collaborators/{username}", {
@@ -68996,7 +69048,7 @@ const Endpoints = {
   }
 };
 
-const VERSION = "4.10.3";
+const VERSION = "4.12.0";
 
 function endpointsToMethods(octokit, endpointsMap) {
   const newMethods = {};
@@ -69078,17 +69130,6 @@ function decorate(octokit, scope, methodName, defaults, decorations) {
 
   return Object.assign(withDecorations, requestWithDefaults);
 }
-
-/**
- * This plugin is a 1:1 copy of internal @octokit/rest plugins. The primary
- * goal is to rebuild @octokit/rest on top of @octokit/core. Once that is
- * done, we will remove the registerEndpoints methods and return the methods
- * directly as with the other plugins. At that point we will also remove the
- * legacy workarounds and deprecations.
- *
- * See the plan at
- * https://github.com/octokit/plugin-rest-endpoint-methods.js/pull/1
- */
 
 function restEndpointMethods(octokit) {
   return endpointsToMethods(octokit, Endpoints);
@@ -70368,6 +70409,32 @@ function scheduleObservable(input, scheduler) {
 }
 exports.scheduleObservable = scheduleObservable;
 //# sourceMappingURL=scheduleObservable.js.map
+
+/***/ }),
+
+/***/ 8322:
+/***/ (function(module) {
+
+/** Used to match a single whitespace character. */
+var reWhitespace = /\s/;
+
+/**
+ * Used by `_.trim` and `_.trimEnd` to get the index of the last non-whitespace
+ * character of `string`.
+ *
+ * @private
+ * @param {string} string The string to inspect.
+ * @returns {number} Returns the index of the last non-whitespace character.
+ */
+function trimmedEndIndex(string) {
+  var index = string.length;
+
+  while (index-- && reWhitespace.test(string.charAt(index))) {}
+  return index;
+}
+
+module.exports = trimmedEndIndex;
+
 
 /***/ }),
 
