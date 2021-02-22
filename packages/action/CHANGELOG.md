@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.4]
+
+-   Fix `init` Rust based packages coming in as undefined.
+    -   Bumped due to a bump in covector.
+    -   [1b8eca7](https://www.github.com/jbolda/covector/commit/1b8eca7267a2d39549e8937c2e02279e27ab8824) fix: rust based packages undefined ([#151](https://www.github.com/jbolda/covector/pull/151)) on 2021-02-22
+
 ## [0.3.3]
 
 -   The result of the action had the covector output scoped, and further on logs failed. Hoist it so it is in the correct scope.

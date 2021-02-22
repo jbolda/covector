@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.3]
+
+-   Fix additional bump types to be a no-op bump.
+    -   [15431f0](https://www.github.com/jbolda/covector/commit/15431f0661a30c8cb336194e39709147bfbd1aea) fix: additional bump type is no-op ([#149](https://www.github.com/jbolda/covector/pull/149)) on 2021-02-22
+
 ## [0.2.2]
 
 -   Add missing workspace dependencies. These were likely only functioning due to hoisting.
