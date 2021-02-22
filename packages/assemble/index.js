@@ -66,6 +66,7 @@ const compareBumps = (bumpOne, bumpTwo) => {
     ["major", 1],
     ["minor", 2],
     ["patch", 3],
+    ["noop", 4],
   ]);
   return bumps.get(bumpOne) < bumps.get(bumpTwo) ? bumpOne : bumpTwo;
 };
@@ -79,14 +80,17 @@ const mergeReleases = (changes, { additionalBumpTypes = [] }) => {
         additionalBumpTypes
       );
       if (bumpOptions.includes(change.releases[pkg])) {
+        const bumpType = additionalBumpTypes.includes(change.releases[pkg])
+          ? "noop"
+          : change.releases[pkg];
         if (!release[pkg]) {
           release[pkg] = {
-            type: change.releases[pkg],
+            type: bumpType,
             changes: cloneDeep([change]),
           };
         } else {
           release[pkg] = {
-            type: compareBumps(release[pkg].type, change.releases[pkg]),
+            type: compareBumps(release[pkg].type, bumpType),
             changes: cloneDeep([...release[pkg].changes, change]),
           };
         }
