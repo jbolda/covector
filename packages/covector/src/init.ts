@@ -6,6 +6,7 @@ import { default as fsSlashPromises } from "fs/promises";
 import { default as fsDotPromises } from "fs";
 const fs = fsSlashPromises || fsDotPromises.promises;
 import path from "path";
+// @ts-ignore
 import { readPkgFile, PkgMinimum } from "@covector/files";
 
 export const init = function* init({

@@ -1,24 +1,25 @@
-const {
+import {
   attemptCommands,
   confirmCommandsToRun,
   raceTime,
-} = require("@covector/command");
-// @ts-ignore
+  // @ts-ignore
+} from "@covector/command";
 import {
   configFile,
   changeFiles,
   changeFilesToVfile,
   changeFilesRemove,
+  // @ts-ignore
 } from "@covector/files";
 // @ts-ignore
 import { assemble, mergeIntoConfig } from "@covector/assemble";
 // @ts-ignore
 import { fillChangelogs } from "@covector/changelog";
-// @ts-ignore
 import {
   apply,
   changesConsideringParents,
   validateApply,
+  // @ts-ignore
 } from "@covector/apply";
 
 export function* covector({
@@ -154,10 +155,10 @@ export function* covector({
             precommand: boolean;
             command: boolean;
             postcommand: boolean;
-            applied: boolean | string;
+            applied: object;
           };
         },
-        result: string
+        result: { name: string }
       ) => {
         pkgs[result.name].applied = result;
         return pkgs;
@@ -219,15 +220,18 @@ export function* covector({
       command,
     });
 
-    let pkgCommandsRan = commands.reduce((pkgs: any, pkg: string): object => {
-      pkgs[pkg.pkg] = {
-        precommand: false,
-        command: false,
-        postcommand: false,
-        pkg,
-      };
-      return pkgs;
-    }, {});
+    let pkgCommandsRan = commands.reduce(
+      (pkgs: any, pkg: { pkg: string }): object => {
+        pkgs[pkg.pkg] = {
+          precommand: false,
+          command: false,
+          postcommand: false,
+          pkg,
+        };
+        return pkgs;
+      },
+      {}
+    );
 
     pkgCommandsRan = yield attemptCommands({
       cwd,
