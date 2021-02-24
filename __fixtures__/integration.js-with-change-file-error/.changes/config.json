@@ -1,0 +1,14 @@
+{
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "publish": "false"
+    }
+  },
+  "packages": {
+    "tauri.js": {
+      "path": "./",
+      "manager": "javascript"
+    }
+  }
+}

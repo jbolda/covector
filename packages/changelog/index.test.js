@@ -80,6 +80,110 @@ describe("changelog", () => {
     );
   });
 
+  it("creates and fills a changelog including meta and git info", function* () {
+    const projectFolder = f.copy("pkg.js-single-json");
+
+    const applied = [
+      {
+        name: "js-single-json-fixture",
+        version: "0.5.6",
+      },
+    ];
+
+    const assembledChanges = {
+      releases: {
+        "js-single-json-fixture": {
+          changes: [
+            {
+              meta: {
+                commits: [
+                  {
+                    filename: ".changes/change-file.md",
+                    hashShort: "3ca0504",
+                    hashLong: "3ca05042c51821d229209e18391535c266b6b200",
+                    date: "2020-07-06",
+                    commitSubject:
+                      "feat: advanced commands, closes #43 (#719999)",
+                  },
+                ],
+              },
+              releases: {
+                "js-single-json-fixture": "patch",
+              },
+              summary: "This is a test.",
+            },
+            {
+              meta: {
+                commits: [
+                  {
+                    filename: ".changes/change-file.md",
+                    hashShort: "3ca0504",
+                    hashLong: "3ca05042c51821d229209e18391535c266b6b200",
+                    date: "2020-07-06",
+                    commitSubject: "feat: advanced commands, closes #23 (#123)",
+                  },
+                ],
+              },
+              releases: {
+                "js-single-json-fixture": "patch",
+              },
+              summary: "This is another test.",
+            },
+            {
+              meta: {
+                commits: [
+                  {
+                    filename: ".changes/change-file.md",
+                    hashShort: "3ca0504",
+                    hashLong: "3ca05042c51821d229209e18391535c266b6b200",
+                    date: "2020-07-06",
+                    commitSubject: "feat: advanced commands, closes #9 (#8873)",
+                  },
+                ],
+              },
+              releases: {
+                "js-single-json-fixture": "patch",
+              },
+              summary: "This is the last test.",
+            },
+          ],
+          type: "patch",
+        },
+      },
+    };
+
+    const config = {
+      packages: {
+        "js-single-json-fixture": {
+          path: "./",
+          manager: "javascript",
+        },
+      },
+    };
+
+    yield fillChangelogs({
+      applied,
+      assembledChanges,
+      config,
+      cwd: projectFolder,
+    });
+
+    const changelog = yield toVFile.read(
+      projectFolder + "/CHANGELOG.md",
+      "utf-8"
+    );
+    expect(changelog.contents).toBe(
+      "# Changelog\n\n" +
+        "## [0.5.6]\n\n" +
+        "-   This is a test.\n" +
+        "    -   [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#43](/pull/43) ([#719999](/pull/719999)) on 2020-07-06\n" +
+        "-   This is another test.\n" +
+        "    -   [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#23](/pull/23) ([#123](/pull/123)) on 2020-07-06\n" +
+        "-   This is the last test.\n" +
+        "    -   [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#9](/pull/9) ([#8873](/pull/8873)) on 2020-07-06\n"
+    );
+  });
+
   it("creates a changelog for nicknamed pkgs", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
     // note the name in this package file is js-single-json-fixture

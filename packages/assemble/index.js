@@ -4,79 +4,151 @@ const stringify = require("remark-stringify");
 const frontmatter = require("remark-frontmatter");
 const parseFrontmatter = require("remark-parse-yaml");
 const template = require("lodash.template");
+const cloneDeep = require("lodash.clonedeep");
 const { readPkgFile } = require("@covector/files");
+const { runCommand } = require("@covector/command");
 const path = require("path");
 
-const processor = unified().use(parse).use(frontmatter).use(parseFrontmatter);
+const processor = unified()
+  .use(parse)
+  .use(frontmatter)
+  .use(parseFrontmatter)
+  .use(stringify);
 
-const parseChange = (testText) => {
-  const parsed = processor.parse(testText);
+const parseChange = function* ({ cwd, vfile }) {
+  const parsed = processor.parse(vfile.contents);
   const processed = processor.runSync(parsed);
   let changeset = {};
+  const [parsedChanges, ...remaining] = processed.children;
+  changeset.releases = parsedChanges.data.parsedValue;
+  changeset.summary = processor
+    .stringify({
+      type: "root",
+      children: remaining,
+    })
+    .trim();
   changeset.releases = processed.children[0].data.parsedValue;
-  changeset.summary = processed.children.reduce((summary, element) => {
-    if (element.type === "paragraph") {
-      return `${element.children.reduce(
-        (text, item) => `${text}${item.value}`,
-        ""
-      )}`;
-    } else {
-      return summary;
+  if (cwd) {
+    try {
+      let gitInfo = yield runCommand({
+        cwd,
+        pkgPath: "",
+        command: `git log --reverse --format="%h %H %as %s" ${vfile.data.filename}`,
+        log: false,
+      });
+      const commits = gitInfo.split(/\n/).map((commit) => {
+        const [hashShort, hashLong, date, ...rest] = commit.split(" ");
+        return {
+          hashShort,
+          hashLong,
+          date,
+          commitSubject: rest.join(" "),
+        };
+      });
+
+      changeset.meta = {
+        ...vfile.data,
+        commits,
+      };
+    } catch (e) {
+      changeset.meta = {
+        ...vfile.data,
+      };
     }
-  }, "");
+  }
   return changeset;
 };
 
 const compareBumps = (bumpOne, bumpTwo) => {
-  // major, premajor, minor, preminor, patch, prepatch, or prerelease
+  // major, minor, or patch
   // enum and use Int to compare
   let bumps = new Map([
     ["major", 1],
-    ["premajor", 2],
-    ["minor", 3],
-    ["preminor", 4],
-    ["patch", 5],
-    ["prepatch", 6],
-    ["prerelease", 7],
+    ["minor", 2],
+    ["patch", 3],
+    ["noop", 4],
   ]);
   return bumps.get(bumpOne) < bumps.get(bumpTwo) ? bumpOne : bumpTwo;
 };
 
 module.exports.compareBumps = compareBumps;
 
-const mergeReleases = (changes) => {
+const mergeReleases = (changes, { additionalBumpTypes = [] }) => {
   return changes.reduce((release, change) => {
     Object.keys(change.releases).forEach((pkg) => {
-      if (!release[pkg]) {
-        release[pkg] = {
-          type: change.releases[pkg],
-          changes: [change],
-        };
+      const bumpOptions = ["major", "minor", "patch"].concat(
+        additionalBumpTypes
+      );
+      if (bumpOptions.includes(change.releases[pkg])) {
+        const bumpType = additionalBumpTypes.includes(change.releases[pkg])
+          ? "noop"
+          : change.releases[pkg];
+        if (!release[pkg]) {
+          release[pkg] = {
+            type: bumpType,
+            changes: cloneDeep([change]),
+          };
+        } else {
+          release[pkg] = {
+            type: compareBumps(release[pkg].type, bumpType),
+            changes: cloneDeep([...release[pkg].changes, change]),
+          };
+        }
       } else {
-        release[pkg] = {
-          type: compareBumps(release[pkg].type, change.releases[pkg]),
-          changes: [...release[pkg].changes, change],
-        };
+        throw new Error(
+          `${change.releases[pkg]} specified for ${pkg} is invalid.\n` +
+            `Try one of the following${
+              !change.meta ? `` : ` in ${change.meta.filename}`
+            }: ` +
+            `${bumpOptions.join(", ")}.\n`
+        );
       }
     });
     return release;
   }, {});
 };
 
-module.exports.assemble = (texts) => {
+module.exports.assemble = function* ({ cwd, vfiles, config = {} }) {
   let plan = {};
-  plan.changes = texts.map((text) => parseChange(text));
-  plan.releases = mergeReleases(plan.changes);
+  let changes = yield function* () {
+    let allVfiles = vfiles.map((vfile) => parseChange({ cwd, vfile }));
+    let yieldedV = [];
+    for (let v of allVfiles) {
+      yieldedV = [...yieldedV, yield v];
+    }
+    return yieldedV;
+  };
+  plan.changes = changes;
+  plan.releases = mergeReleases(changes, config);
+
+  if (Object.keys(config).length > 0) {
+    for (let pkg of Object.keys(plan.releases)) {
+      if (!config.packages[pkg]) {
+        let changesContainingError = plan.releases[pkg].changes.reduce(
+          (files, file) => {
+            files = `${files}${files === "" ? "" : ", "}${file.meta.filename}`;
+            return files;
+          },
+          ""
+        );
+        throw Error(
+          `${pkg} listed in ${changesContainingError} does not exist in the .changes/config.json`
+        );
+      }
+    }
+  }
+
   return plan;
 };
 
-module.exports.mergeIntoConfig = ({
+module.exports.mergeIntoConfig = function* ({
   config,
   assembledChanges,
   command,
   cwd,
   dryRun = false,
-}) => {
+  filterPackages = [],
+}) {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce((pkged, pkg) => {
@@ -84,11 +156,18 @@ module.exports.mergeIntoConfig = ({
     const commandItems = { pkg, pkgManager, config };
     const mergedCommand = mergeCommand({ ...commandItems, command });
 
-    let getPublishedVersion;
+    let publishElements = {};
+    publishElements.subPublishCommand = command.slice(7, 999);
     if (command === "publish") {
-      getPublishedVersion = mergeCommand({
+      publishElements[
+        `getPublishedVersion${publishElements.subPublishCommand}`
+      ] = mergeCommand({
         ...commandItems,
-        command: "getPublishedVersion",
+        command: `getPublishedVersion${publishElements.subPublishCommand}`,
+      });
+      publishElements["assets"] = mergeCommand({
+        ...commandItems,
+        command: "assets",
       });
     }
 
@@ -102,7 +181,18 @@ module.exports.mergeIntoConfig = ({
           ...commandItems,
           command: `post${command}`,
         }),
-        ...(!getPublishedVersion ? {} : { getPublishedVersion }),
+        ...(!publishElements[
+          `getPublishedVersion${publishElements.subPublishCommand}`
+        ]
+          ? {}
+          : {
+              [`getPublishedVersion${publishElements.subPublishCommand}`]: publishElements[
+                `getPublishedVersion${publishElements.subPublishCommand}`
+              ],
+            }),
+        ...(!publishElements[publishElements.assets]
+          ? {}
+          : { assets: publishElements[publishElements.assets] }),
         manager: config.packages[pkg].manager,
         dependencies: config.packages[pkg].dependencies,
       };
@@ -112,10 +202,14 @@ module.exports.mergeIntoConfig = ({
   }, {});
 
   const pipeOutput = {};
-  const commands = Object.keys(
-    command !== "version" ? pkgCommands : assembledChanges.releases
-  ).map(async (pkg) => {
-    if (!pkgCommands[pkg]) return null;
+  let commands = [];
+  for (let pkg of Object.keys(
+    uesPackageSubset(
+      command !== "version" ? pkgCommands : assembledChanges.releases,
+      filterPackages
+    )
+  )) {
+    if (!pkgCommands[pkg]) continue;
 
     const pkgs =
       command !== "version" ? config.packages : assembledChanges.releases;
@@ -124,11 +218,11 @@ module.exports.mergeIntoConfig = ({
       pkg: pkgCommands[pkg],
     };
 
-    const extraPublishParams =
+    let extraPublishParams =
       command == "version"
         ? {}
         : {
-            pkgFile: await readPkgFile({
+            pkgFile: yield readPkgFile({
               file: path.join(
                 cwd,
                 config.packages[pkg].path,
@@ -139,20 +233,40 @@ module.exports.mergeIntoConfig = ({
               ),
               nickname: pkg,
             }),
-            ...(!pkgCommands[pkg].getPublishedVersion
-              ? {}
-              : {
-                  getPublishedVersion: template(
-                    pkgCommands[pkg].getPublishedVersion
-                  )(pipeToTemplate),
-                }),
           };
 
     if (command !== "version" && !!extraPublishParams.pkgFile) {
       pipeToTemplate.pkgFile = {
         name: extraPublishParams.pkgFile.name,
         version: extraPublishParams.pkgFile.version,
+        versionMajor: extraPublishParams.pkgFile.versionMajor,
+        versionMinor: extraPublishParams.pkgFile.versionMinor,
+        versionPatch: extraPublishParams.pkgFile.versionPatch,
         pkg: extraPublishParams.pkgFile.pkg,
+      };
+    }
+
+    if (command !== "version") {
+      let subPublishCommand = command.slice(7, 999);
+      // add these after that they can use pkgFile
+      extraPublishParams = {
+        ...extraPublishParams,
+        ...(!pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
+          ? {}
+          : {
+              [`getPublishedVersion${subPublishCommand}`]: template(
+                pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
+              )(pipeToTemplate),
+            }),
+        ...(!pkgCommands[pkg].assets
+          ? {}
+          : {
+              assets: templateCommands(
+                pkgCommands[pkg].assets,
+                pipeToTemplate,
+                ["path", "name"]
+              ),
+            }),
       };
     }
 
@@ -164,33 +278,39 @@ module.exports.mergeIntoConfig = ({
 
     const merged = {
       pkg,
+      ...(!pkgs[pkg].parents ? {} : { parents: pkgs[pkg].parents }),
       ...extraPublishParams,
       path: pkgCommands[pkg].path,
       type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
       dependencies: pkgCommands[pkg].dependencies,
-      precommand: templateCommands(pkgCommands[pkg].precommand, pipeToTemplate),
-      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate),
+      precommand: templateCommands(
+        pkgCommands[pkg].precommand,
+        pipeToTemplate,
+        ["command", "dryRunCommand", "runFromRoot"]
+      ),
+      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate, [
+        "command",
+        "dryRunCommand",
+      ]),
       postcommand: templateCommands(
         pkgCommands[pkg].postcommand,
-        pipeToTemplate
+        pipeToTemplate,
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
     };
 
-    return merged;
-  });
+    commands = [...commands, merged];
+  }
 
-  if (dryRun)
+  if (dryRun) {
+    console.log("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
       console.log(pkg, "pipe", pipeOutput[pkg].pipe)
     );
+  }
 
-  return Promise.all(commands).then((values) =>
-    values.reduce(
-      (acc, current) => (!current ? acc : acc.concat([current])),
-      []
-    )
-  );
+  return commands;
 };
 
 const mergeCommand = ({ pkg, pkgManager, command, config }) => {
@@ -209,8 +329,35 @@ const mergeCommand = ({ pkg, pkgManager, command, config }) => {
   return mergedCommand;
 };
 
-const templateCommands = (command, pipe) => {
+const uesPackageSubset = (commands, subset = []) =>
+  !!subset && subset.length === 0
+    ? commands
+    : subset.reduce((pkgCommands, pkg) => {
+        if (!commands[pkg]) {
+          return pkgCommands;
+        } else {
+          pkgCommands[pkg] = commands[pkg];
+          return pkgCommands;
+        }
+      }, {});
+
+const templateCommands = (command, pipe, complexCommands) => {
   if (!command) return null;
   const commands = !Array.isArray(command) ? [command] : command;
-  return commands.map((c) => template(c)(pipe));
+  return commands.map((c) => {
+    if (typeof c === "object") {
+      return {
+        ...c,
+        ...complexCommands.reduce((templated, complex) => {
+          templated[complex] =
+            typeof c[complex] === "string"
+              ? template(c[complex])(pipe)
+              : c[complex];
+          return templated;
+        }, {}),
+      };
+    } else {
+      return typeof c === "function" ? c : template(c)(pipe);
+    }
+  });
 };

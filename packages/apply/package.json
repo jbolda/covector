@@ -1,11 +1,13 @@
 {
   "name": "@covector/apply",
-  "version": "0.1.0",
+  "version": "0.2.3",
   "license": "Apache-2.0",
   "files": [
     "index.js"
   ],
   "dependencies": {
+    "@covector/files": "0.2.1",
+    "lodash.clonedeep": "^4.5.0",
     "semver": "^7.3.2"
   }
 }

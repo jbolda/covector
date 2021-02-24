@@ -7,12 +7,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - run: yarn
+      - run: yarn workspace action build
       - name: covector status
         uses: ./packages/action
         id: covector
         with:
           command: 'status'
-      - name: dump output
+      - name: dump covector output
         env:
-          COVECTOR_DUMP: ${{ toJson(steps.covector) }}
-        run: echo "$COVECTOR_DUMP"
+          COVECTOR_CONTEXT: ${{ toJson(steps.covector) }}
+        run: echo "$COVECTOR_CONTEXT"

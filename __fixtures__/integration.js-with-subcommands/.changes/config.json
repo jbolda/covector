@@ -1,0 +1,21 @@
+{
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "getPublishedVersion-primary": "echo 2.3.1",
+      "publish-primary": { "command": "echo publish", "pipe": true },
+      "getPublishedVersionSecondary": "echo 1.9.0",
+      "publishSecondary": { "command": "echo publish", "pipe": true }
+    }
+  },
+  "packages": {
+    "package-one": {
+      "path": "./packages/package-one",
+      "manager": "javascript"
+    },
+    "package-two": {
+      "path": "./packages/package-two",
+      "manager": "javascript"
+    }
+  }
+}

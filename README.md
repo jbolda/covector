@@ -1,43 +1,44 @@
 # covector
 
-Sane package change management for single packages, monorepos, and polyglot.
+Transparent and flexible change management for publishing packages and assets. Publish and deploy from a single asset repository, monorepos, and even multi-language repositories.
+
+## Docs
+
+The documentation can be found in the main [covector](./packages/covector) folder. It is placed there that it will be packaged when publishing to npm.
 
 ## Packages
 
-| package | version |
-| ------- | ------- |
-| [covector](./packages/covector) | [![npm](https://img.shields.io/npm/v/covector?style=for-the-badge)](https://www.npmjs.com/package/covector) |
-| [@covector/assemble](./packages/assemble) | [![npm](https://img.shields.io/npm/v/@covector/assemble?style=for-the-badge)](https://www.npmjs.com/package/@covector/assemble) |
-| [@covector/apply](./packages/apply) | [![npm](https://img.shields.io/npm/v/@covector/apply?style=for-the-badge)](https://www.npmjs.com/package/@covector/apply) |
+Below is a list of all of the packages within this repository. The usage and docs are in the main [covector](./packages/covector) folder.
+
+| package                                     | version                                                                                                                           |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| [covector](./packages/covector)             | [![npm](https://img.shields.io/npm/v/covector?style=for-the-badge)](https://www.npmjs.com/package/covector)                       |
+| [action](./packages/action)                 | git tag, e.g. `v0`                                                                                                                |
+| [@covector/apply](./packages/apply)         | [![npm](https://img.shields.io/npm/v/@covector/apply?style=for-the-badge)](https://www.npmjs.com/package/@covector/apply)         |
+| [@covector/assemble](./packages/assemble)   | [![npm](https://img.shields.io/npm/v/@covector/assemble?style=for-the-badge)](https://www.npmjs.com/package/@covector/assemble)   |
 | [@covector/changelog](./packages/changelog) | [![npm](https://img.shields.io/npm/v/@covector/changelog?style=for-the-badge)](https://www.npmjs.com/package/@covector/changelog) |
-| [@covector/files](./packages/files) | [![npm](https://img.shields.io/npm/v/@covector/files?style=for-the-badge)](https://www.npmjs.com/package/@covector/files) |
+| [@covector/command](./packages/command)     | [![npm](https://img.shields.io/npm/v/@covector/command?style=for-the-badge)](https://www.npmjs.com/package/@covector/command)     |
+| [@covector/files](./packages/files)         | [![npm](https://img.shields.io/npm/v/@covector/files?style=for-the-badge)](https://www.npmjs.com/package/@covector/files)         |
 
+## Prior Art
 
-## Applying Changes
+We drew on inspiration from [changesets](https://github.com/atlassian/changesets) which specifically focuses on the npm ecosystem with the expectation to publish to [npmjs.com](https://www.npmjs.com/). We had a need for much greater flexibility, primarily around additional languages, which changesets wasn't looking to handle. You may notice some similarities around the markdown based change files, and begins to diverge from there. Since we started the codebase from scratch, it also opened the door for incredibly flexible and unique publishing schemes, deep changelogs, and the ability to publish to any "target" with any "asset" (such as publishing a website, a github action or a vscode extension even!).
 
-As you create PRs and make changes that require a version bump, please add a new markdown file in this folder. You do not note the version *number*, but rather the type of bump that you expect: major, minor, or patch. The filename is not important, as long as it is a `.md`, but we recommend it represents the overall change for our sanity.
+Below we other alternatives that we had investigated. There are also a fair number in the [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/#tooling-for-conventional-commits) ecosystem.
 
-When you select the version bump required, you do *not* need to consider depedencies. Only note the package with the actual change, and any packages that depend on that package will be bumped automatically in the process.
-
-Use the following format:
-```md
----
-"tauri.js": patch
-"tauri": minor
----
-
-Change summary goes here
-
-```
-
-Summaries do not have a specific character limit, but are text only. These summaries are used within the (future implementation of) changelogs. They will give context to the change and also point back to the original PR if more details and context are needed.
-
-Changes will be designated as a `major`, `minor` or `patch` as further described in [semver](https://semver.org/).
-
-Given a version number MAJOR.MINOR.PATCH, increment the:
-
-- MAJOR version when you make incompatible API changes,
-- MINOR version when you add functionality in a backwards compatible manner, and
-- PATCH version when you make backwards compatible bug fixes.
-
-Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format, but will be discussed prior to usage (as extra steps will be necessary in consideration of merging and publishing).
+- [covector](https://github.com/jbolda/covector)
+- [semver-tool](https://github.com/fsaintjacques/semver-tool)
+- [semantic-release](https://github.com/semantic-release/semantic-release)
+- [changesets](https://github.com/atlassian/changesets)
+- [rush](https://github.com/microsoft/rushstack)
+- [yarn2](https://yarnpkg.com/features/release-workflow)
+- [np](https://github.com/sindresorhus/np)
+- [generate-changelog](https://github.com/lob/generate-changelog)
+- [semversioner](https://github.com/raulgomis/semversioner)
+- [chglog](https://github.com/goreleaser/chglog)
+- [goreleaser](https://github.com/goreleaser/goreleaser)
+- [bumped](https://github.com/bumped/bumped)
+- [-changelog](https://github.com/bumped/bumped-changelog)
+- [bumped-changelog](https://github.com/bumped/bumped-changelog)
+- [standard-version](https://github.com/conventional-changelog/standard-version)
+- [change](https://github.com/adamtabrams/change)

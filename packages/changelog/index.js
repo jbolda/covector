@@ -11,6 +11,7 @@ module.exports.fillChangelogs = async ({
   assembledChanges,
   config,
   cwd,
+  pkgCommandsRan,
   create = true,
 }) => {
   const changelogs = await readAllChangelogs({
@@ -26,12 +27,26 @@ module.exports.fillChangelogs = async ({
   const writtenChanges = applyChanges({
     changelogs,
     assembledChanges,
+    config,
   });
 
   if (create) {
-    return await writeAllChangelogs({ writtenChanges });
-  } else {
+    await writeAllChangelogs({ writtenChanges });
+  }
+
+  if (!pkgCommandsRan) {
     return;
+  } else {
+    pkgCommandsRan = Object.keys(pkgCommandsRan).reduce((pkgs, pkg) => {
+      writtenChanges.forEach((change) => {
+        if (change.pkg === pkg) {
+          pkgs[pkg].command = change.addition;
+        }
+      });
+      return pkgs;
+    }, pkgCommandsRan);
+
+    return pkgCommandsRan;
   }
 };
 
@@ -51,7 +66,10 @@ const readAllChangelogs = ({ applied, packages, cwd }) => {
   );
 };
 
-const applyChanges = ({ changelogs, assembledChanges }) => {
+const applyChanges = ({ changelogs, assembledChanges, config }) => {
+  const gitSiteUrl = !config.gitSiteUrl
+    ? "/"
+    : config.gitSiteUrl.replace(/\/$/, "") + "/";
   return changelogs.map((change) => {
     let changelog = processor.parse(change.changelog.contents);
     let addition = "";
@@ -59,7 +77,28 @@ const applyChanges = ({ changelogs, assembledChanges }) => {
       addition = `## [${change.changes.version}]\nBumped due to dependency.`;
     } else {
       addition = assembledChanges.releases[change.changes.name].changes.reduce(
-        (finalString, release) => `${finalString}\n - ${release.summary}`,
+        (finalString, release) =>
+          !release.meta || (!!release.meta && !release.meta.commits)
+            ? `${finalString}\n- ${release.summary}`
+            : `${finalString}\n- ${release.summary}\n${
+                !release.meta.dependencies
+                  ? ""
+                  : `    - ${release.meta.dependencies}\n`
+              }${release.meta.commits
+                .map(
+                  (commit) =>
+                    `    - [${commit.hashShort}](${gitSiteUrl}commit/${
+                      commit.hashLong
+                    }) ${commit.commitSubject.replace(
+                      /(#[0-9]+)/g,
+                      (match) =>
+                        `[${match}](${gitSiteUrl}pull/${match.substr(
+                          1,
+                          999999
+                        )})`
+                    )} on ${commit.date}`
+                )
+                .join("\n")}`,
         `## [${change.changes.version}]`
       );
     }
@@ -72,12 +111,12 @@ const applyChanges = ({ changelogs, assembledChanges }) => {
       changelogRemainingElements
     );
     change.changelog.contents = processor.stringify(changelog);
-    return change;
+    return { pkg: change.changes.name, change, addition };
   });
 };
 
 const writeAllChangelogs = ({ writtenChanges }) => {
   return Promise.all(
-    writtenChanges.map((changelog) => writeChangelog({ ...changelog }))
+    writtenChanges.map((changelog) => writeChangelog({ ...changelog.change }))
   );
 };
