@@ -370,6 +370,46 @@ Array [
 
 exports[`merge filtered config test merges version 1`] = `Array []`;
 
+exports[`special bump types handles an only noop 1`] = `
+Object {
+  "changes": Array [
+    Object {
+      "releases": Object {
+        "assemble1": "housekeeping",
+        "assemble2": "workflows",
+      },
+      "summary": "This is a test.",
+    },
+  ],
+  "releases": Object {
+    "assemble1": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "housekeeping",
+            "assemble2": "workflows",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "noop",
+    },
+    "assemble2": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "housekeeping",
+            "assemble2": "workflows",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "noop",
+    },
+  },
+}
+`;
+
 exports[`special bump types valid additional bump types 1`] = `
 Object {
   "changes": Array [
@@ -460,7 +500,7 @@ Object {
           "summary": "This is a test.",
         },
       ],
-      "type": "housekeeping",
+      "type": "minor",
     },
     "assemble2": Object {
       "changes": Array [
@@ -493,7 +533,7 @@ Object {
           "summary": "This is a test.",
         },
       ],
-      "type": "workflows",
+      "type": "major",
     },
   },
 }

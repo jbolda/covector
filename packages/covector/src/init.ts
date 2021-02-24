@@ -74,6 +74,7 @@ export const init = function* init({
 
   for (let pkgFile of pkgFiles) {
     if (!pkgFile.pkg.workspaces) {
+      console.log(pkgFile);
       const manager = yield derivePkgManager({
         path: path.dirname(`./${pkgFile.name}`),
         pkgFile,
@@ -81,7 +82,7 @@ export const init = function* init({
       pkgManagers[manager] = true;
       const dependencies = buildDependencyGraph({ pkgFile, pkgFiles });
 
-      packages[pkgFile.pkg.name] = {
+      packages[pkgFile.pkg.name || pkgFile.pkg.package.name] = {
         path: path.dirname(`./${pkgFile.name}`),
         manager,
         ...(dependencies.length > 0 ? { dependencies } : {}),
@@ -241,7 +242,7 @@ const derivePkgManager = async ({
   path: string;
   pkgFile: { name: string };
 }) => {
-  const actionFile = await globby(["**/action.yml"], {
+  const actionFile = await globby(["action.yml"], {
     cwd: path,
     gitignore: true,
   });

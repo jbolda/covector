@@ -256,6 +256,14 @@ describe("special bump types", () => {
       );
     }
   });
+
+  it("handles an only noop", function* () {
+    const assembled = yield assemble({
+      vfiles: [testTextSpecialOne],
+      config: configSpecial,
+    });
+    expect(assembled).toMatchSnapshot();
+  });
 });
 
 describe("merge config test", () => {
