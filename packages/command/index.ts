@@ -1,7 +1,27 @@
-const { spawn, timeout } = require("effection");
-const { exec } = require("@effection/node");
-const stripAnsi = require("strip-ansi");
-const path = require("path");
+import { spawn, timeout } from "effection";
+import { exec } from "@effection/node";
+import stripAnsi from "strip-ansi";
+import path from "path";
+
+type ComplexCommand = {
+  pkg: string;
+  pkgFile: { version: string };
+  path: string;
+  [getPublishedVersion: string]: any;
+};
+
+type RunningCommand = {
+  command?: string | Function;
+  shouldRunCommand?: boolean;
+  runFromRoot?: boolean;
+};
+
+type NormalizedCommand = {
+  command?: string;
+  runFromRoot?: boolean;
+  dryRunCommand?: boolean;
+  pipe?: boolean;
+};
 
 const attemptCommands = function* ({
   cwd,
@@ -10,19 +30,35 @@ const attemptCommands = function* ({
   commandPrefix = "",
   pkgCommandsRan,
   dryRun,
+}: {
+  cwd: string;
+  commands: {
+    pkg: string;
+    path: string;
+    [getPublishedVersion: string]: string;
+  }[];
+  command: string; // is this used?
+  commandPrefix: string;
+  pkgCommandsRan: object;
+  dryRun: boolean;
 }) {
-  let _pkgCommandsRan = { ...pkgCommandsRan };
+  let _pkgCommandsRan: { [k: string]: { [c: string]: string | boolean } } = {
+    ...pkgCommandsRan,
+  };
   for (let pkg of commands) {
     if (!pkg[`${commandPrefix}command`]) continue;
-    const pubCommands =
-      typeof pkg[`${commandPrefix}command`] === "string" ||
-      typeof pkg[`${commandPrefix}command`] === "function" ||
-      !Array.isArray(pkg[`${commandPrefix}command`])
-        ? [pkg[`${commandPrefix}command`]]
-        : pkg[`${commandPrefix}command`];
+    const c: string | Function | [] = pkg[`${commandPrefix}command`];
+    const pubCommands: (NormalizedCommand | string | Function)[] =
+      typeof c === "string" || typeof c === "function" || !Array.isArray(c)
+        ? [c]
+        : c;
     let stdout = "";
     for (let pubCommand of pubCommands) {
-      const runningCommand = { runFromRoot: pubCommand.runFromRoot };
+      const runningCommand: RunningCommand = {
+        ...(typeof pubCommand === "object"
+          ? { runFromRoot: pubCommand.runFromRoot }
+          : {}),
+      };
       if (
         typeof pubCommand === "object" &&
         pubCommand.dryRunCommand === false
@@ -46,12 +82,12 @@ const attemptCommands = function* ({
         runningCommand.shouldRunCommand = !dryRun;
       }
 
-      if (runningCommand.shouldRunCommand) {
+      if (runningCommand.shouldRunCommand && runningCommand.command) {
         if (typeof runningCommand.command === "function") {
           try {
             yield runningCommand.command(pkg);
 
-            if (pubCommand.pipe) {
+            if (typeof pubCommand === "object" && pubCommand.pipe) {
               console.warn(`We cannot pipe the function command in ${pkg.pkg}`);
             }
           } catch (e) {
@@ -68,7 +104,7 @@ const attemptCommands = function* ({
             }]: ${runningCommand.command}`,
           });
 
-          if (pubCommand.pipe) {
+          if (typeof pubCommand === "object" && pubCommand.pipe) {
             stdout = `${stdout}${ranCommand}\n`;
           }
         }
@@ -88,22 +124,26 @@ const attemptCommands = function* ({
   return _pkgCommandsRan;
 };
 
-const confirmCommandsToRun = function* ({ cwd, commands, command }) {
+const confirmCommandsToRun = function* ({
+  cwd,
+  commands,
+  command,
+}: {
+  cwd: string;
+  commands: ComplexCommand[];
+  command: string;
+}) {
   let subPublishCommand = command.slice(7, 999);
-  let commandsToRun = [];
+  let commandsToRun: ComplexCommand[] = [];
   for (let pkg of commands) {
-    if (!!pkg[`getPublishedVersion${subPublishCommand}`]) {
+    const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
+    if (!!getPublishedVersion) {
       const version = yield runCommand({
-        command: pkg[`getPublishedVersion${subPublishCommand}`],
+        command: getPublishedVersion,
         cwd,
         pkg: pkg.pkg,
         pkgPath: pkg.path,
-        stdio: "pipe",
-        log: `Checking if ${pkg.pkg}@${
-          pkg.pkgFile.version
-        } is already published with: ${
-          pkg[`getPublishedVersion${subPublishCommand}`]
-        }`,
+        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${getPublishedVersion}`,
       });
 
       if (pkg.pkgFile.version === version) {
@@ -126,6 +166,12 @@ const runCommand = function* ({
   cwd,
   pkgPath,
   log = `running command for ${pkg}`,
+}: {
+  pkg: string;
+  command: string;
+  cwd: string;
+  pkgPath: string;
+  log: false | string;
 }) {
   if (log !== false) console.log(log);
   raceTime();
@@ -142,19 +188,19 @@ const runCommand = function* ({
   return child;
 };
 
-const sh = function* (command, options, log) {
+const sh = function* (command: string, options: object, log: false | string) {
   let child = yield exec(command, options);
 
   if (log !== false) {
     yield spawn(
-      child.stdout.subscribe().forEach(function* (datum) {
+      child.stdout.subscribe().forEach(function* (datum: Buffer) {
         const out = stripAnsi(datum.toString().trim());
         if (out !== "") console.log(out);
       })
     );
 
     yield spawn(
-      child.stderr.subscribe().forEach(function* (datum) {
+      child.stderr.subscribe().forEach(function* (datum: Buffer) {
         const out = stripAnsi(datum.toString().trim());
         if (out !== "") console.error(out);
       })
@@ -168,6 +214,9 @@ const sh = function* (command, options, log) {
 const raceTime = function ({
   t = 1200000,
   msg = `timeout out waiting ${t / 1000}s for command`,
+}: {
+  t?: number;
+  msg?: string;
 } = {}) {
   return spawn(function* () {
     yield timeout(t);
