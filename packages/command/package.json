@@ -4,9 +4,19 @@
   "files": [
     "index.js"
   ],
+  "scripts": {
+    "build": "rollup --config",
+    "prepublishOnly": "yarn build"
+  },
   "license": "Apache-2.0",
   "dependencies": {
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@rollup/plugin-typescript": "^8.2.0",
     "effection": "^0.7.0",
-    "strip-ansi": "^6.0.0"
+    "rollup": "^2.40.0",
+    "strip-ansi": "^6.0.0",
+    "tslib": "^2.1.0",
+    "typescript": "^4.2.3"
   }
 }
