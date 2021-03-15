@@ -1,11 +1,12 @@
-const { fillChangelogs } = require("./index");
-const toVFile = require("to-vfile");
-const mockConsole = require("jest-mock-console");
-const fixtures = require("fixturez");
+import { fillChangelogs } from "./index";
+//@ts-ignore
+import toVFile from "to-vfile";
+import mockConsole, { RestoreConsole } from "jest-mock-console";
+import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 describe("changelog", () => {
-  let restoreConsole;
+  let restoreConsole: RestoreConsole;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir"]);
   });
@@ -62,21 +63,23 @@ describe("changelog", () => {
 
     yield fillChangelogs({
       applied,
+      //@ts-ignore
       assembledChanges,
       config,
       cwd: projectFolder,
     });
 
+    //@ts-ignore
     const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
     expect(changelog.contents).toBe(
       "# Changelog\n\n" +
-        "## [0.5.6]\n\n" +
-        "-   This is a test.\n" +
-        "-   This is another test.\n" +
-        "-   This is the last test.\n"
+        "## \\[0.5.6]\n\n" +
+        "- This is a test.\n" +
+        "- This is another test.\n" +
+        "- This is the last test.\n"
     );
   });
 
@@ -163,24 +166,26 @@ describe("changelog", () => {
 
     yield fillChangelogs({
       applied,
+      //@ts-ignore
       assembledChanges,
       config,
       cwd: projectFolder,
     });
 
+    //@ts-ignore
     const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
     expect(changelog.contents).toBe(
       "# Changelog\n\n" +
-        "## [0.5.6]\n\n" +
-        "-   This is a test.\n" +
-        "    -   [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#43](/pull/43) ([#719999](/pull/719999)) on 2020-07-06\n" +
-        "-   This is another test.\n" +
-        "    -   [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#23](/pull/23) ([#123](/pull/123)) on 2020-07-06\n" +
-        "-   This is the last test.\n" +
-        "    -   [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#9](/pull/9) ([#8873](/pull/8873)) on 2020-07-06\n"
+        "## \\[0.5.6]\n\n" +
+        "- This is a test.\n" +
+        "  - [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#43](/pull/43) ([#719999](/pull/719999)) on 2020-07-06\n" +
+        "- This is another test.\n" +
+        "  - [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#23](/pull/23) ([#123](/pull/123)) on 2020-07-06\n" +
+        "- This is the last test.\n" +
+        "  - [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#9](/pull/9) ([#8873](/pull/8873)) on 2020-07-06\n"
     );
   });
 
@@ -235,21 +240,23 @@ describe("changelog", () => {
 
     yield fillChangelogs({
       applied,
+      //@ts-ignore
       assembledChanges,
       config,
       cwd: projectFolder,
     });
 
+    //@ts-ignore
     const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
     expect(changelog.contents).toBe(
       "# Changelog\n\n" +
-        "## [0.5.6]\n\n" +
-        "-   This is a test.\n" +
-        "-   This is another test.\n" +
-        "-   This is the last test.\n"
+        "## \\[0.5.6]\n\n" +
+        "- This is a test.\n" +
+        "- This is another test.\n" +
+        "- This is the last test.\n"
     );
   });
 
@@ -302,31 +309,35 @@ describe("changelog", () => {
 
     yield fillChangelogs({
       applied,
+      //@ts-ignore
       assembledChanges,
       config,
       cwd: projectFolder,
     });
 
+    //@ts-ignore
     const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
     expect(changelog.contents).toBe(
       "# Changelog\n\n" +
-        "## [0.9.0]\n\n" +
-        "-   This is a test.\n" +
-        "-   This is another test.\n" +
-        "-   This is the last test.\n\n" +
-        "## [0.8.16]\n\n" +
-        "-   Adds a command line interface option to tauri apps, configurable under tauri.conf.json > tauri > cli.\n" +
-        "-   Fixes no-server mode not running on another machine due to fs::read_to_string usage instead of the include_str macro.\n" +
-        "    Build no longer fails when compiling without environment variables, now the app will show an error.\n" +
-        "-   Adds desktop notifications API.\n" +
-        "-   Properly reflect tauri.conf.json changes on app when running tauri dev.\n"
+        "## \\[0.9.0]\n\n" +
+        "- This is a test.\n" +
+        "- This is another test.\n" +
+        "- This is the last test.\n\n" +
+        "## \\[0.8.16]\n\n" +
+        "- Adds a command line interface option to tauri apps, configurable under tauri.conf.json > tauri > cli.\n" +
+        "- Fixes no-server mode not running on another machine due to fs::read_to_string usage instead of the include_str macro.\n" +
+        "- Build no longer fails when compiling without environment variables, now the app will show an error.\n" +
+        "- Adds desktop notifications API.\n" +
+        "- Properly reflect tauri.conf.json changes on app when running tauri dev.\n"
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
