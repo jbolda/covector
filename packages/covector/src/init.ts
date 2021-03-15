@@ -1,11 +1,8 @@
 import inquirer from "inquirer";
 import globby from "globby";
-// works in v10 and v14
-import { default as fsSlashPromises } from "fs/promises";
-import { Dir } from "fs";
-// for dealing with v12
-import { default as fsDotPromises } from "fs";
-const fs = fsSlashPromises || fsDotPromises.promises;
+import { default as fsDefault, Dir } from "fs";
+// this is compatible with node@12+
+const fs = fsDefault.promises;
 import path from "path";
 // @ts-ignore
 import { readPkgFile, PackageFile } from "@covector/files";
@@ -81,9 +78,10 @@ export const init = function* init({
   let pkgManagers: { [k: string]: boolean } = {};
   //@ts-ignore
   const pkgFiles: PackageFile[] = yield Promise.all(
-    pkgs.map((pkg: string) => readPkgFile({ file: `./${pkg}`, nickname: pkg }))
+    pkgs.map((pkg: string) =>
+      readPkgFile({ file: path.posix.join(cwd, `${pkg}`), nickname: pkg })
+    )
   );
-
   for (let pkgFile of pkgFiles) {
     //@ts-ignore
     if (!pkgFile.pkg.workspaces) {
