@@ -17,8 +17,5 @@ jobs:
       - uses: actions/checkout@v2
       - run: yarn
       - run: yarn build
-      - name: covector build
-        uses: ./packages/action
-        with:
-          command: pkg
+      - run: yarn workspace action pkg
       - run: yarn test
