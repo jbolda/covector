@@ -2,12 +2,19 @@
   "name": "@covector/apply",
   "version": "0.2.3",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/jbolda/covector#readme",
+  "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbolda/covector.git"
+  },
+  "main": "dist",
   "files": [
-    "index.js"
+    "dist/**/*"
   ],
   "scripts": {
     "build": "rollup --config",
-    "prepublishOnly": "yarn build"
+    "prepublishOnly": "rollup --config"
   },
   "dependencies": {
     "@covector/files": "0.2.1",
@@ -21,5 +28,8 @@
     "rollup": "^2.40.0",
     "tslib": "^2.1.0",
     "typescript": "^4.2.3"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }

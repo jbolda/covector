@@ -3,14 +3,20 @@
   "version": "0.3.4",
   "main": "dist/index.js",
   "license": "Apache-2.0",
+  "homepage": "https://github.com/jbolda/covector#readme",
+  "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
   "scripts": {
     "run-source": "node index.js",
-    "build": "ncc build index.js -o dist"
+    "pkg": "ncc build index.js -o dist",
+    "build": "echo noop"
   },
   "dependencies": {
     "@actions/core": "^1.2.4",
     "@actions/github": "^4.0.0",
     "@effection/node": "0.9.1",
     "@zeit/ncc": "^0.22.3"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }

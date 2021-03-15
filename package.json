@@ -6,8 +6,8 @@
   "author": "Jacob Bolda <me@jacobbolda.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "covector": "node ./packages/covector/bin/covector.js",
-    "build": "node ./packages/covector/bin/covector.js build",
+    "covector": "node ./packages/covector/dist/bin/covector.js",
+    "build": "yarn workspaces run build",
     "test": "jest",
     "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.{js,ts}\"",
     "postinstall": "patch-package"
