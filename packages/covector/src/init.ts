@@ -1,11 +1,11 @@
 import inquirer from "inquirer";
 import globby from "globby";
 // works in v10 and v14
-import fs from "fs/promises";
+import { default as fsSlashPromises } from "fs/promises";
 import { Dir } from "fs";
 // for dealing with v12
-// import { default as fsDotPromises } from "fs";
-// const fs = fsSlashPromises || fsDotPromises.promises;
+import { default as fsDotPromises } from "fs";
+const fs = fsSlashPromises || fsDotPromises.promises;
 import path from "path";
 // @ts-ignore
 import { readPkgFile, PackageFile } from "@covector/files";
