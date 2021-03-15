@@ -1,8 +1,9 @@
-const { covector } = require("./index");
-const { main } = require("effection");
-const toVFile = require("to-vfile");
-const path = require("path");
-const fixtures = require("fixturez");
+import { covector } from "./index";
+import { main } from "effection";
+//@ts-ignore
+import toVFile from "to-vfile";
+import path from "path";
+import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 let consoleMock = console as jest.Mocked<Console>;
@@ -20,7 +21,7 @@ const mockConsole = (toMock: string[]) => {
 const { injectPublishFunctions } = require("./../action/utils");
 
 describe("integration test in production mode", () => {
-  let restoreConsole;
+  let restoreConsole: Function;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir", "info", "error"]);
   });
@@ -52,10 +53,11 @@ describe("integration test in production mode", () => {
       })
     );
     await expect(covectored).rejects.toThrow();
+    //@ts-ignore
     delete covectored.id;
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleDir: console.dir.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleDir: consoleMock.dir.mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
@@ -69,11 +71,13 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      //@ts-ignore
       covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
+        //@ts-ignore
         delete pkgs[pkg].applied.vfile;
         return pkgs;
       }, covectored),
@@ -85,8 +89,8 @@ describe("integration test in production mode", () => {
     );
     expect(changelogTauriCore.contents).toBe(
       "# Changelog\n\n" +
-        "## [0.6.0]\n\n" +
-        "-   Summary about the changes in tauri\n"
+        "## \\[0.6.0]\n\n" +
+        "- Summary about the changes in tauri\n"
     );
 
     const changelogTaurijs = await toVFile.read(
@@ -95,8 +99,8 @@ describe("integration test in production mode", () => {
     );
     expect(changelogTaurijs.contents).toBe(
       "# Changelog\n\n" +
-        "## [0.7.0]\n\n" +
-        "-   Summary about the changes in tauri\n"
+        "## \\[0.7.0]\n\n" +
+        "- Summary about the changes in tauri\n"
     );
   });
 
@@ -109,8 +113,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
@@ -155,15 +159,15 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
 
   it("allows modifying the config", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const modifyConfig = async (pullConfig) => {
+    const modifyConfig = async (pullConfig: any) => {
       const config = await pullConfig;
       return Object.keys(config.pkgManagers).reduce(
         (finalConfig, pkgManager) => {
@@ -200,7 +204,7 @@ describe("integration test in production mode", () => {
         modifyConfig,
       })
     );
-    expect(console.log.mock.calls).toMatchSnapshot();
+    expect(consoleMock.log.mock.calls).toMatchSnapshot();
   });
 
   it("uses the action config modification", async () => {
@@ -211,7 +215,7 @@ describe("integration test in production mode", () => {
         command: "publish",
         cwd: fullIntegration,
         modifyConfig: injectPublishFunctions([
-          async (pkg) =>
+          async (pkg: any) =>
             console.log(
               `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`
             ),
@@ -219,7 +223,7 @@ describe("integration test in production mode", () => {
         ]),
       })
     );
-    expect(console.log.mock.calls).toMatchSnapshot();
+    expect(consoleMock.log.mock.calls).toMatchSnapshot();
   });
 });
 
@@ -253,11 +257,13 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      //@ts-ignore
       covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
+        //@ts-ignore
         delete pkgs[pkg].applied.vfile;
         return pkgs;
       }, covectored),
@@ -289,8 +295,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -325,8 +331,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -344,11 +350,13 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      //@ts-ignore
       covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
+        //@ts-ignore
         delete pkgs[pkg].applied.vfile;
         return pkgs;
       }, covectored),
@@ -379,8 +387,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -396,8 +404,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -413,8 +421,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -431,11 +439,13 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      //@ts-ignore
       covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
         // remove these as they are dependent on the OS
         // and user running them so would always fail
+        //@ts-ignore
         delete pkgs[pkg].applied.vfile;
         return pkgs;
       }, covectored),
@@ -467,8 +477,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -485,8 +495,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -503,8 +513,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -512,7 +522,7 @@ describe("integration test for complex commands", () => {
 });
 
 // vfile returns fs information that is flaky between machines, scrub it
-const scrubVfile = (covectored) => {
+const scrubVfile = (covectored: any) => {
   return Object.keys(covectored).reduce((c, pkg) => {
     delete c[pkg].pkg.pkgFile.vfile;
     return c;
@@ -530,8 +540,8 @@ describe("integration test to invoke sub commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -547,8 +557,8 @@ describe("integration test to invoke sub commands", () => {
       })
     );
     expect({
-      consoleLog: console.log.mock.calls,
-      consoleInfo: console.info.mock.calls,
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();

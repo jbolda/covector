@@ -6861,7 +6861,12 @@ Object {
     "fail": [Function],
     "fork": [Function],
     "isRequired": false,
-    "operation": Object {},
+    "operation": Object {
+      "next": [Function],
+      "return": [Function],
+      "throw": [Function],
+      Symbol(Symbol.iterator): [Function],
+    },
     "reject": [Function],
     "resolve": [Function],
     "result": [Error: react listed in .changes/change-file-pkg-non-exists.md does not exist in the .changes/config.json],

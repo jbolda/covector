@@ -1,5 +1,5 @@
 import yargs from "yargs";
-const { init } = require("./init.js");
+const { init } = require("./init");
 
 export function* cli(
   argv: readonly string[],
@@ -7,7 +7,9 @@ export function* cli(
 ) {
   const options = parseOptions(argv);
   if (options.command === "init")
+    //@ts-ignore
     return yield init({ ...options, changeFolder: options.directory });
+  //@ts-ignore
   return yield covector(options);
 }
 

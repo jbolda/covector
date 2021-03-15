@@ -1,24 +1,30 @@
 import inquirer from "inquirer";
 import globby from "globby";
 // works in v10 and v14
-import { default as fsSlashPromises } from "fs/promises";
+import fs from "fs/promises";
+import { Dir } from "fs";
 // for dealing with v12
-import { default as fsDotPromises } from "fs";
-const fs = fsSlashPromises || fsDotPromises.promises;
+// import { default as fsDotPromises } from "fs";
+// const fs = fsSlashPromises || fsDotPromises.promises;
 import path from "path";
 // @ts-ignore
-import { readPkgFile, PkgMinimum } from "@covector/files";
+import { readPkgFile, PackageFile } from "@covector/files";
+
+// for future typescripting reference
+// most of the @ts-ignore have to do with Dir/FileHandle vs string
+// and not considering yield correctly?
 
 export const init = function* init({
   cwd = process.cwd(),
   changeFolder = ".changes",
   yes,
 }: {
-  cwd: any;
+  cwd: string;
   changeFolder: string;
   yes: boolean;
-}) {
-  const answers = yield inquirer
+}): Generator<string> {
+  //@ts-ignore
+  const answers: { [k: string]: string } = yield inquirer
     .prompt([
       {
         type: "input",
@@ -56,34 +62,43 @@ export const init = function* init({
     });
 
   try {
-    const testOpen = yield fs.opendir(path.posix.join(cwd, changeFolder));
+    //@ts-ignore
+    const testOpen: Dir = yield fs.opendir(path.posix.join(cwd, changeFolder));
     console.log(`The ${changeFolder} folder exists, skipping creation.`);
+    //@ts-ignore
     yield testOpen.close();
   } catch (e) {
     console.log(`Creating the ${changeFolder} directory.`);
+    //@ts-ignore
     yield fs.mkdir(path.posix.join(cwd, changeFolder));
   }
 
-  const pkgs = yield packageFiles({ cwd });
+  //@ts-ignore
+  const pkgs: string[] = yield packageFiles({ cwd });
   let packages: {
     [k: string]: { path: string; manager: string; dependencies?: string[] };
   } = {};
   let pkgManagers: { [k: string]: boolean } = {};
-  const pkgFiles = yield Promise.all(
+  //@ts-ignore
+  const pkgFiles: PackageFile[] = yield Promise.all(
     pkgs.map((pkg: string) => readPkgFile({ file: `./${pkg}`, nickname: pkg }))
   );
 
   for (let pkgFile of pkgFiles) {
+    //@ts-ignore
     if (!pkgFile.pkg.workspaces) {
       console.log(pkgFile);
-      const manager = yield derivePkgManager({
+      //@ts-ignore
+      const manager: string = yield derivePkgManager({
         path: path.dirname(`./${pkgFile.name}`),
+        //@ts-ignore
         pkgFile,
       });
       pkgManagers[manager] = true;
       const dependencies = buildDependencyGraph({ pkgFile, pkgFiles });
 
-      packages[pkgFile.pkg.name || pkgFile.pkg.package.name] = {
+      //@ts-ignore
+      packages[pkgFile?.pkg?.name || pkgFile?.pkg?.package?.name] = {
         path: path.dirname(`./${pkgFile.name}`),
         manager,
         ...(dependencies.length > 0 ? { dependencies } : {}),
@@ -139,6 +154,7 @@ export const init = function* init({
 
   // .changes/config.json
   try {
+    //@ts-ignore
     const testOpen = yield fs.open(
       path.posix.join(cwd, changeFolder, "config.json"),
       "r"
@@ -146,9 +162,11 @@ export const init = function* init({
     console.log(
       `The config.json exists in ${changeFolder}, skipping creation.`
     );
+    //@ts-ignore
     yield testOpen.close();
   } catch (e) {
     console.log("Writing out the config file.");
+    //@ts-ignore
     yield fs.writeFile(
       path.posix.join(cwd, changeFolder, "config.json"),
       JSON.stringify(config, null, 2)
@@ -157,20 +175,24 @@ export const init = function* init({
 
   // .changes/readme.md
   try {
+    //@ts-ignore
     const testOpen = yield fs.open(
       path.posix.join(cwd, changeFolder, "readme.md"),
       "r"
     );
     console.log(`The readme.md exists in ${changeFolder}, skipping creation.`);
+    //@ts-ignore
     yield testOpen.close();
   } catch (e) {
     console.log("Writing out a readme to serve as your guide.");
+    //@ts-ignore
     yield fs.writeFile(path.posix.join(cwd, changeFolder, "readme.md"), readme);
   }
 
   if (answers["github actions"]) {
     // github status
     try {
+      //@ts-ignore
       const testOpen = yield fs.open(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
         "r"
@@ -178,11 +200,13 @@ export const init = function* init({
       console.log(
         `The status workflow exists in ./.github/workflows, skipping creation.`
       );
+      //@ts-ignore
       yield testOpen.close();
     } catch (e) {
       console.log(
         "Writing out covector-status.yml to give you a covector update on PR."
       );
+      //@ts-ignore
       yield fs.writeFile(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
         githubStatusWorkflow()
@@ -191,6 +215,7 @@ export const init = function* init({
 
     // github version and publish
     try {
+      //@ts-ignore
       const testOpen = yield fs.open(
         path.posix.join(
           cwd,
@@ -203,11 +228,13 @@ export const init = function* init({
       console.log(
         `The version/publish workflow exists in ./.github/workflows, skipping creation.`
       );
+      //@ts-ignore
       yield testOpen.close();
     } catch (e) {
       console.log(
         "Writing out covector-version-or-publish.yml to version and publish your packages."
       );
+      //@ts-ignore
       yield fs.writeFile(
         path.posix.join(
           cwd,
@@ -259,19 +286,19 @@ const buildDependencyGraph = ({
   pkgFile,
   pkgFiles,
 }: {
-  pkgFile: PkgMinimum;
-  pkgFiles: PkgMinimum[];
+  pkgFile: PackageFile;
+  pkgFiles: PackageFile[];
 }) => {
   const pkgDeps = [
-    ...(pkgFile.pkg.dependencies ? Object.keys(pkgFile.pkg.dependencies) : []),
-    ...(pkgFile.pkg.devDependencies
+    ...(pkgFile.pkg?.dependencies ? Object.keys(pkgFile.pkg.dependencies) : []),
+    ...(pkgFile.pkg?.devDependencies
       ? Object.keys(pkgFile.pkg.devDependencies)
       : []),
   ];
 
   return pkgDeps.reduce((deps: string[], dep: string) => {
     for (let pkg of pkgFiles) {
-      if (dep === pkg.pkg.name) {
+      if (dep === pkg?.pkg?.name) {
         return deps.concat([dep]);
       }
     }
