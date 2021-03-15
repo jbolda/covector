@@ -6,7 +6,12 @@ import pkg from "./package.json";
 export default {
   treeshake: true,
   perf: true,
-  input: { index: "src/index.ts", cli: "src/cli.ts", run: "src/run.ts" },
+  input: {
+    index: "src/index.ts",
+    cli: "src/cli.ts",
+    run: "src/run.ts",
+    init: "src/init.ts",
+  },
   output: {
     dir: "dist",
     format: "cjs",
