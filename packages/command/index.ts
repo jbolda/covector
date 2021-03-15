@@ -1,4 +1,4 @@
-import { spawn, timeout } from "effection";
+import { spawn, timeout, Operation } from "effection";
 import { exec } from "@effection/node";
 import stripAnsi from "strip-ansi";
 import path from "path";
@@ -23,10 +23,10 @@ type NormalizedCommand = {
   pipe?: boolean;
 };
 
-const attemptCommands = function* ({
+export const attemptCommands = function* ({
   cwd,
   commands,
-  command, // is this used?
+  command,
   commandPrefix = "",
   pkgCommandsRan,
   dryRun,
@@ -35,10 +35,10 @@ const attemptCommands = function* ({
   commands: {
     pkg: string;
     path: string;
-    [getPublishedVersion: string]: string;
+    [k: string]: string;
   }[];
-  command: string; // is this used?
-  commandPrefix: string;
+  command: string; // the covector command that was ran
+  commandPrefix?: string;
   pkgCommandsRan: object;
   dryRun: boolean;
 }) {
@@ -94,7 +94,7 @@ const attemptCommands = function* ({
             console.error(e);
           }
         } else {
-          const ranCommand = yield runCommand({
+          const ranCommand = yield* runCommand({
             command: runningCommand.command,
             cwd,
             pkg: pkg.pkg,
@@ -124,7 +124,7 @@ const attemptCommands = function* ({
   return _pkgCommandsRan;
 };
 
-const confirmCommandsToRun = function* ({
+export const confirmCommandsToRun = function* ({
   cwd,
   commands,
   command,
@@ -138,7 +138,7 @@ const confirmCommandsToRun = function* ({
   for (let pkg of commands) {
     const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
     if (!!getPublishedVersion) {
-      const version = yield runCommand({
+      const version = yield* runCommand({
         command: getPublishedVersion,
         cwd,
         pkg: pkg.pkg,
@@ -160,23 +160,23 @@ const confirmCommandsToRun = function* ({
   return commandsToRun;
 };
 
-const runCommand = function* ({
-  pkg,
+export const runCommand = function* ({
+  pkg = "package",
   command,
   cwd,
   pkgPath,
   log = `running command for ${pkg}`,
 }: {
-  pkg: string;
+  pkg?: string;
   command: string;
   cwd: string;
   pkgPath: string;
   log: false | string;
-}) {
+}): Generator<string> {
   if (log !== false) console.log(log);
   raceTime();
 
-  let child = yield sh(
+  const child = yield* sh(
     command,
     {
       cwd: path.join(cwd, pkgPath),
@@ -188,10 +188,16 @@ const runCommand = function* ({
   return child;
 };
 
-const sh = function* (command: string, options: object, log: false | string) {
-  let child = yield exec(command, options);
+const sh = function* (
+  command: string,
+  options: object,
+  log: false | string
+): Generator<string> {
+  // @ts-ignore
+  let child = yield* exec(command, options);
 
   if (log !== false) {
+    // @ts-ignore
     yield spawn(
       child.stdout.subscribe().forEach(function* (datum: Buffer) {
         const out = stripAnsi(datum.toString().trim());
@@ -199,6 +205,7 @@ const sh = function* (command: string, options: object, log: false | string) {
       })
     );
 
+    // @ts-ignore
     yield spawn(
       child.stderr.subscribe().forEach(function* (datum: Buffer) {
         const out = stripAnsi(datum.toString().trim());
@@ -208,10 +215,12 @@ const sh = function* (command: string, options: object, log: false | string) {
   }
 
   const out = yield child.expect();
-  return stripAnsi(Buffer.concat(out.tail).toString().trim());
+  // @ts-ignore
+  const stripped: string = stripAnsi(Buffer.concat(out.tail).toString().trim());
+  return stripped;
 };
 
-const raceTime = function ({
+export const raceTime = function ({
   t = 1200000,
   msg = `timeout out waiting ${t / 1000}s for command`,
 }: {
