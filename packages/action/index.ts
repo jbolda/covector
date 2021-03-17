@@ -1,15 +1,15 @@
-const core = require("@actions/core");
-const github = require("@actions/github");
-const { main } = require("@effection/node");
-const { covector } = require("../covector");
-const {
+import core from "@actions/core";
+import github from "@actions/github";
+import { main } from "@effection/node";
+import { covector, Covector } from "../covector/src/run";
+import {
   commandText,
   packageListToArray,
   injectPublishFunctions,
   createReleases,
-} = require("./utils");
+} from "./utils";
 
-main(function* run() {
+main(function* run(): Generator<any, void, any> {
   try {
     const token =
       core.getInput("token") === ""
@@ -33,7 +33,7 @@ main(function* run() {
     if (command === "status") {
       const covectored = yield covector({ command, filterPackages });
     } else if (command === "version") {
-      const covectored = yield covector({ command, filterPackages });
+      const covectored: Covector = yield covector({ command, filterPackages });
       core.setOutput("successfulPublish", successfulPublish);
 
       const covectoredSmushed = Object.keys(covectored).reduce((text, pkg) => {
@@ -46,8 +46,8 @@ main(function* run() {
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       console.log(`The covector output: ${payload}`);
     } else if (command === "publish") {
-      let covectored;
-      if (core.getInput("createRelease") === "true") {
+      let covectored: Covector;
+      if (core.getInput("createRelease") === "true" && token) {
         const octokit = github.getOctokit(token);
         const { owner, repo } = github.context.repo;
 

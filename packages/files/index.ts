@@ -6,36 +6,48 @@ import path from "path";
 import TOML from "@tauri-apps/toml";
 import semver from "semver";
 
-interface VFile {
+export interface VFile {
   contents: string;
   path: string;
   extname: string;
+  data: { filename: string };
 }
 
-interface Pkg {
+// Pkg for toml has a `.packages` so we need to address this union
+// or otherwise normalize it, and it will be an issue as
+// we add other PackageFile types / sources
+export interface Pkg {
   name: string;
   version: string;
-  dependencies?: object;
-  devDependencies?: object;
+  dependencies?: { [k: string]: string };
+  devDependencies?: { [k: string]: string };
 }
 
 export interface PkgMinimum {
-  version: string;
-  pkg: Pkg;
-  versionMajor: number;
-  versionMinor: number;
-  versionPatch: number;
+  version?: string;
+  pkg?: Pkg;
+  versionMajor?: number;
+  versionMinor?: number;
+  versionPatch?: number;
 }
 
-interface PackageFile extends PkgMinimum {
-  vfile: VFile;
-  name: string;
+export interface PackageFile extends PkgMinimum {
+  vfile?: VFile;
+  name?: string;
 }
 
-type ConfigFile = {
-  vfile: VFile;
-  packages: {};
-  pkgManagers: {};
+export type ConfigFile = {
+  vfile?: VFile;
+  gitSiteUrl?: string;
+  pkgManagers?: { [k: string]: { version?: string; publish?: string } };
+  packages: {
+    [k: string]: {
+      manager?: string;
+      path?: string;
+      dependencies?: string[];
+    };
+  };
+  additionalBumpTypes?: string[];
 };
 
 const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
@@ -102,6 +114,8 @@ export const writePkgFile = async ({
 }: {
   packageFile: PackageFile;
 }): Promise<VFile> => {
+  if (!packageFile.vfile)
+    throw new Error(`no vfile present for ${packageFile.name}`);
   const vFileNext = { ...packageFile.vfile };
   vFileNext.contents = stringifyPkg({
     newContents: packageFile.pkg,
@@ -117,6 +131,7 @@ export const testSerializePkgFile = ({
   packageFile: PackageFile;
 }) => {
   try {
+    if (!packageFile.vfile) throw `no vfile present`;
     stringifyPkg({
       newContents: packageFile.pkg,
       extname: packageFile.vfile.extname,
@@ -205,6 +220,13 @@ export const changeFilesRemove = ({
       console.info(`${changeFilePath} was deleted`)
     );
   });
+};
+
+export type ChangelogFile = {
+  path: string;
+  contents: string;
+  extname: string;
+  data: { filename: string };
 };
 
 export const readChangelog = async ({

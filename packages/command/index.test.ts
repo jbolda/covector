@@ -1,11 +1,12 @@
-const { attemptCommands, runCommand } = require("./index");
-const toVFile = require("to-vfile");
-const mockConsole = require("jest-mock-console");
-const fixtures = require("fixturez");
+import { attemptCommands } from "./index";
+import mockConsole, { RestoreConsole } from "jest-mock-console";
+import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+import { PipeTemplate } from "../assemble/index";
+
 describe("command", () => {
-  let restoreConsole;
+  let restoreConsole: RestoreConsole;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir"]);
   });
@@ -20,11 +21,13 @@ describe("command", () => {
           {
             name: "pkg-nickname",
             version: "0.5.6",
+            //@ts-ignore
             command: async () => console.log("boop"),
           },
         ],
       });
 
+      //@ts-ignore
       expect(console.log.mock.calls).toEqual([["boop"]]);
     });
 
@@ -34,6 +37,7 @@ describe("command", () => {
           {
             name: "pkg-nickname",
             version: "0.5.6",
+            //@ts-ignore
             command: [
               async () => console.log("boop"),
               async () => console.log("booop"),
@@ -44,6 +48,7 @@ describe("command", () => {
         ],
       });
 
+      //@ts-ignore
       expect(console.log.mock.calls).toEqual([
         ["boop"],
         ["booop"],
@@ -58,12 +63,14 @@ describe("command", () => {
           {
             name: "pkg-nickname",
             version: "0.5.6",
+            //@ts-ignore
             command: async (pkg) =>
               console.log(`boop ${pkg.name}@${pkg.version}`),
           },
         ],
       });
 
+      //@ts-ignore
       expect(console.log.mock.calls).toEqual([["boop pkg-nickname@0.5.6"]]);
     });
 
@@ -73,16 +80,22 @@ describe("command", () => {
           {
             name: "pkg-nickname",
             version: "0.5.6",
+            //@ts-ignore
             command: [
-              async (pkg) => console.log(`boop ${pkg.name}@${pkg.version}`),
-              async (pkg) => console.log(`booop ${pkg.name}@${pkg.version}`),
-              async (pkg) => console.log(`boooop ${pkg.name}@${pkg.version}`),
-              async (pkg) => console.log(`booooop ${pkg.name}@${pkg.version}`),
+              async (pkg: any) =>
+                console.log(`boop ${pkg.name}@${pkg.version}`),
+              async (pkg: any) =>
+                console.log(`booop ${pkg.name}@${pkg.version}`),
+              async (pkg: any) =>
+                console.log(`boooop ${pkg.name}@${pkg.version}`),
+              async (pkg: any) =>
+                console.log(`booooop ${pkg.name}@${pkg.version}`),
             ],
           },
         ],
       });
 
+      //@ts-ignore
       expect(console.log.mock.calls).toEqual([
         ["boop pkg-nickname@0.5.6"],
         ["booop pkg-nickname@0.5.6"],

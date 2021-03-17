@@ -10,7 +10,8 @@ jobs:
         with:
           fetch-depth: 0
       - run: yarn
-      - run: yarn workspace action build
+      - run: yarn build
+      - run: yarn workspace action pkg
       - name: covector status
         uses: ./packages/action
         id: covector

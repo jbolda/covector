@@ -108,7 +108,7 @@
       "path": "./packages/action",
       "manager": "javascript",
       "build": false,
-      "preversion": "yarn build",
+      "preversion": "yarn pkg",
       "publish": false,
       "getPublishedVersion": false,
       "dependencies": ["covector"],

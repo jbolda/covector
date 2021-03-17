@@ -1,11 +1,12 @@
-const { apply, changesConsideringParents, validateApply } = require("./index");
-const toVFile = require("to-vfile");
-const mockConsole = require("jest-mock-console");
-const fixtures = require("fixturez");
+import { apply, changesConsideringParents, validateApply } from "./index";
+//@ts-ignore
+import toVFile from "to-vfile";
+import mockConsole, { RestoreConsole } from "jest-mock-console";
+import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 describe("package file apply bump", () => {
-  let restoreConsole;
+  let restoreConsole: RestoreConsole;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir"]);
   });
@@ -36,7 +37,9 @@ describe("package file apply bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({ commands, config, cwd: jsonFolder });
+    //@ts-ignore
     const modifiedVFile = yield toVFile.read(
       jsonFolder + "/package.json",
       "utf-8"
@@ -51,7 +54,9 @@ describe("package file apply bump", () => {
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -79,7 +84,9 @@ describe("package file apply bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
+    //@ts-ignore
     const modifiedVFile = yield toVFile.read(
       rustFolder + "/Cargo.toml",
       "utf-8"
@@ -89,7 +96,9 @@ describe("package file apply bump", () => {
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -140,7 +149,9 @@ describe("package file apply bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({ commands, config, cwd: jsonFolder });
+    //@ts-ignore
     const modifiedPkgAVFile = yield toVFile.read(
       jsonFolder + "/packages/pkg-a/package.json",
       "utf-8"
@@ -155,6 +166,7 @@ describe("package file apply bump", () => {
         "}\n"
     );
 
+    //@ts-ignore
     const modifiedPkgBVFile = yield toVFile.read(
       jsonFolder + "/packages/pkg-b/package.json",
       "utf-8"
@@ -167,7 +179,9 @@ describe("package file apply bump", () => {
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -207,8 +221,10 @@ describe("package file apply bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
+    //@ts-ignore
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
@@ -222,6 +238,7 @@ describe("package file apply bump", () => {
         'rust_pkg_b_fixture = "0.9.0"\n'
     );
 
+    //@ts-ignore
     const modifiedBPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
@@ -231,7 +248,9 @@ describe("package file apply bump", () => {
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -271,8 +290,10 @@ describe("package file apply bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
+    //@ts-ignore
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
@@ -286,6 +307,7 @@ describe("package file apply bump", () => {
         'rust_pkg_b_fixture = { version = "0.9.0", path = "../rust_pkg_b_fixture" }\n'
     );
 
+    //@ts-ignore
     const modifiedBPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
@@ -295,7 +317,9 @@ describe("package file apply bump", () => {
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -335,8 +359,10 @@ describe("package file apply bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
+    //@ts-ignore
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
@@ -350,6 +376,7 @@ describe("package file apply bump", () => {
         'rust_pkg_b_fixture = "0.9"\n'
     );
 
+    //@ts-ignore
     const modifiedBPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
@@ -359,7 +386,9 @@ describe("package file apply bump", () => {
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -399,8 +428,10 @@ describe("package file apply bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
+    //@ts-ignore
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
@@ -414,6 +445,7 @@ describe("package file apply bump", () => {
         'rust_pkg_b_fixture = { version = "0.8", path = "../rust_pkg_b_fixture" }\n'
     );
 
+    //@ts-ignore
     const modifiedBPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
@@ -423,7 +455,9 @@ describe("package file apply bump", () => {
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -463,8 +497,10 @@ describe("package file apply bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
+    //@ts-ignore
     const modifiedAPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
@@ -478,6 +514,7 @@ describe("package file apply bump", () => {
         'rust_pkg_b_fixture = { version = "0.9", path = "../rust_pkg_b_fixture" }\n'
     );
 
+    //@ts-ignore
     const modifiedBPKGVFile = yield toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
@@ -487,14 +524,16 @@ describe("package file apply bump", () => {
     );
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
 });
 
 describe("list changes considering parents", () => {
-  let restoreConsole;
+  let restoreConsole: RestoreConsole;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir"]);
   });
@@ -531,10 +570,13 @@ describe("list changes considering parents", () => {
       },
     };
 
+    //@ts-ignore
     const changes = changesConsideringParents({ assembledChanges, config });
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
@@ -576,10 +618,13 @@ describe("list changes considering parents", () => {
       },
     };
 
+    //@ts-ignore
     const changes = changesConsideringParents({ assembledChanges, config });
 
     expect({
+      //@ts-ignore
       consoleLog: console.log.mock.calls,
+      //@ts-ignore
       consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
@@ -612,6 +657,7 @@ describe("package file apply bump", () => {
 
     expect.assertions(1);
     await expect(async () =>
+      //@ts-ignore
       validateApply({ commands, config, cwd: jsonFolder })
     ).not.toThrow();
   });
@@ -641,6 +687,7 @@ describe("package file apply bump", () => {
 
     expect.assertions(1);
     await expect(async () =>
+      //@ts-ignore
       validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
@@ -693,6 +740,7 @@ describe("package file apply bump", () => {
 
     expect.assertions(1);
     await expect(async () =>
+      //@ts-ignore
       validateApply({ commands, config, cwd: jsonFolder })
     ).not.toThrow();
   });
@@ -734,6 +782,7 @@ describe("package file apply bump", () => {
 
     expect.assertions(1);
     await expect(async () =>
+      //@ts-ignore
       validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
@@ -775,6 +824,7 @@ describe("package file apply bump", () => {
 
     expect.assertions(1);
     await expect(async () =>
+      //@ts-ignore
       validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
@@ -816,6 +866,7 @@ describe("package file apply bump", () => {
 
     expect.assertions(1);
     await expect(async () =>
+      //@ts-ignore
       validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
@@ -857,6 +908,7 @@ describe("package file apply bump", () => {
 
     expect.assertions(1);
     const validated = await validateApply({
+      //@ts-ignore
       commands,
       config,
       cwd: rustFolder,
@@ -903,6 +955,7 @@ describe("package file apply bump", () => {
 
     expect.assertions(2);
     try {
+      //@ts-ignore
       await validateApply({ commands, config, cwd: rustFolder });
     } catch (e) {
       expect(e.message).toMatch(
@@ -911,6 +964,7 @@ describe("package file apply bump", () => {
     }
 
     expect({
+      //@ts-ignore
       consoleError: console.error.mock.calls,
     }).toMatchSnapshot();
 

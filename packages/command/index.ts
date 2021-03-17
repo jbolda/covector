@@ -1,28 +1,64 @@
-const { spawn, timeout } = require("effection");
-const { exec } = require("@effection/node");
-const stripAnsi = require("strip-ansi");
-const path = require("path");
+import { spawn, timeout, Operation } from "effection";
+import { exec } from "@effection/node";
+import stripAnsi from "strip-ansi";
+import path from "path";
 
-const attemptCommands = function* ({
+type ComplexCommand = {
+  pkg: string;
+  pkgFile: { version: string };
+  path: string;
+  [getPublishedVersion: string]: any;
+};
+
+type RunningCommand = {
+  command?: string | Function;
+  shouldRunCommand?: boolean;
+  runFromRoot?: boolean;
+};
+
+type NormalizedCommand = {
+  command?: string;
+  runFromRoot?: boolean;
+  dryRunCommand?: boolean;
+  pipe?: boolean;
+};
+
+export const attemptCommands = function* ({
   cwd,
   commands,
-  command, // is this used?
+  command,
   commandPrefix = "",
   pkgCommandsRan,
   dryRun,
+}: {
+  cwd: string;
+  commands: {
+    pkg: string;
+    path: string;
+    [k: string]: string;
+  }[];
+  command: string; // the covector command that was ran
+  commandPrefix?: string;
+  pkgCommandsRan: object;
+  dryRun: boolean;
 }) {
-  let _pkgCommandsRan = { ...pkgCommandsRan };
+  let _pkgCommandsRan: { [k: string]: { [c: string]: string | boolean } } = {
+    ...pkgCommandsRan,
+  };
   for (let pkg of commands) {
     if (!pkg[`${commandPrefix}command`]) continue;
-    const pubCommands =
-      typeof pkg[`${commandPrefix}command`] === "string" ||
-      typeof pkg[`${commandPrefix}command`] === "function" ||
-      !Array.isArray(pkg[`${commandPrefix}command`])
-        ? [pkg[`${commandPrefix}command`]]
-        : pkg[`${commandPrefix}command`];
+    const c: string | Function | [] = pkg[`${commandPrefix}command`];
+    const pubCommands: (NormalizedCommand | string | Function)[] =
+      typeof c === "string" || typeof c === "function" || !Array.isArray(c)
+        ? [c]
+        : c;
     let stdout = "";
     for (let pubCommand of pubCommands) {
-      const runningCommand = { runFromRoot: pubCommand.runFromRoot };
+      const runningCommand: RunningCommand = {
+        ...(typeof pubCommand === "object"
+          ? { runFromRoot: pubCommand.runFromRoot }
+          : {}),
+      };
       if (
         typeof pubCommand === "object" &&
         pubCommand.dryRunCommand === false
@@ -46,18 +82,19 @@ const attemptCommands = function* ({
         runningCommand.shouldRunCommand = !dryRun;
       }
 
-      if (runningCommand.shouldRunCommand) {
+      if (runningCommand.shouldRunCommand && runningCommand.command) {
         if (typeof runningCommand.command === "function") {
           try {
             yield runningCommand.command(pkg);
 
-            if (pubCommand.pipe) {
+            if (typeof pubCommand === "object" && pubCommand.pipe) {
               console.warn(`We cannot pipe the function command in ${pkg.pkg}`);
             }
           } catch (e) {
             console.error(e);
           }
         } else {
+          //@ts-ignore TODO generator error
           const ranCommand = yield runCommand({
             command: runningCommand.command,
             cwd,
@@ -68,7 +105,7 @@ const attemptCommands = function* ({
             }]: ${runningCommand.command}`,
           });
 
-          if (pubCommand.pipe) {
+          if (typeof pubCommand === "object" && pubCommand.pipe) {
             stdout = `${stdout}${ranCommand}\n`;
           }
         }
@@ -88,22 +125,27 @@ const attemptCommands = function* ({
   return _pkgCommandsRan;
 };
 
-const confirmCommandsToRun = function* ({ cwd, commands, command }) {
+export const confirmCommandsToRun = function* ({
+  cwd,
+  commands,
+  command,
+}: {
+  cwd: string;
+  commands: ComplexCommand[];
+  command: string;
+}) {
   let subPublishCommand = command.slice(7, 999);
-  let commandsToRun = [];
+  let commandsToRun: ComplexCommand[] = [];
   for (let pkg of commands) {
-    if (!!pkg[`getPublishedVersion${subPublishCommand}`]) {
+    const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
+    if (!!getPublishedVersion) {
+      //@ts-ignore TODO generator error
       const version = yield runCommand({
-        command: pkg[`getPublishedVersion${subPublishCommand}`],
+        command: getPublishedVersion,
         cwd,
         pkg: pkg.pkg,
         pkgPath: pkg.path,
-        stdio: "pipe",
-        log: `Checking if ${pkg.pkg}@${
-          pkg.pkgFile.version
-        } is already published with: ${
-          pkg[`getPublishedVersion${subPublishCommand}`]
-        }`,
+        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${getPublishedVersion}`,
       });
 
       if (pkg.pkgFile.version === version) {
@@ -120,17 +162,24 @@ const confirmCommandsToRun = function* ({ cwd, commands, command }) {
   return commandsToRun;
 };
 
-const runCommand = function* ({
-  pkg,
+export const runCommand = function* ({
+  pkg = "package",
   command,
   cwd,
   pkgPath,
   log = `running command for ${pkg}`,
-}) {
+}: {
+  pkg?: string;
+  command: string;
+  cwd: string;
+  pkgPath: string;
+  log: false | string;
+}): Generator<string> {
   if (log !== false) console.log(log);
   raceTime();
 
-  let child = yield sh(
+  //@ts-ignore TODO generator error
+  const child = yield sh(
     command,
     {
       cwd: path.join(cwd, pkgPath),
@@ -142,19 +191,26 @@ const runCommand = function* ({
   return child;
 };
 
-const sh = function* (command, options, log) {
-  let child = yield exec(command, options);
+const sh = function* (
+  command: string,
+  options: object,
+  log: false | string
+): Generator<string> {
+  // @ts-ignore
+  let child: any = yield exec(command, options);
 
   if (log !== false) {
+    // @ts-ignore
     yield spawn(
-      child.stdout.subscribe().forEach(function* (datum) {
+      child.stdout.subscribe().forEach(function* (datum: Buffer) {
         const out = stripAnsi(datum.toString().trim());
         if (out !== "") console.log(out);
       })
     );
 
+    // @ts-ignore
     yield spawn(
-      child.stderr.subscribe().forEach(function* (datum) {
+      child.stderr.subscribe().forEach(function* (datum: Buffer) {
         const out = stripAnsi(datum.toString().trim());
         if (out !== "") console.error(out);
       })
@@ -162,12 +218,17 @@ const sh = function* (command, options, log) {
   }
 
   const out = yield child.expect();
-  return stripAnsi(Buffer.concat(out.tail).toString().trim());
+  // @ts-ignore
+  const stripped: string = stripAnsi(Buffer.concat(out.tail).toString().trim());
+  return stripped;
 };
 
-const raceTime = function ({
+export const raceTime = function ({
   t = 1200000,
   msg = `timeout out waiting ${t / 1000}s for command`,
+}: {
+  t?: number;
+  msg?: string;
 } = {}) {
   return spawn(function* () {
     yield timeout(t);
