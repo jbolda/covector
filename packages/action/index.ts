@@ -1,5 +1,5 @@
-import core from "@actions/core";
-import github from "@actions/github";
+import * as core from "@actions/core";
+import * as github from "@actions/github";
 import { main } from "@effection/node";
 import { covector, Covector } from "../covector/src/run";
 import {
@@ -15,7 +15,7 @@ main(function* run(): Generator<any, void, any> {
       core.getInput("token") === ""
         ? process.env.GITHUB_TOKEN
         : core.getInput("token");
-    const inputCommand = core.getInput("command");
+    const inputCommand = core.getInput("command") || "status";
     const filterPackages = packageListToArray(core.getInput("filterPackages"));
     let command = inputCommand;
     if (inputCommand === "version-or-publish") {
