@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@covector/files": "0.2.1",
-    "lodash.template": "^4.5.0",
+    "lodash": "^4.17.21",
     "remark-parse": "^9.0.0",
     "remark-stringify": "^9.0.1",
     "to-vfile": "^6.1.0",
