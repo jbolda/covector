@@ -58,6 +58,7 @@ function parseOptions(
     .parse(argv);
 
   return {
+    //@ts-ignore
     command: rawOptions._[0],
     dryRun: rawOptions["dry-run"],
     yes: rawOptions.yes,
