@@ -24,8 +24,6 @@
     "to-vfile": "^6.1.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.0",
     "@rollup/plugin-typescript": "^8.2.0",
     "@types/jest": "^26.0.3",
     "@types/semver": "^7.3.4",

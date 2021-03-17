@@ -32,8 +32,6 @@
     "yargs": "^15.3.1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.0",
     "@rollup/plugin-typescript": "^8.2.0",
     "@types/inquirer": "^7.3.1",
     "rollup": "^2.41.4",

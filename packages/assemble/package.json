@@ -28,8 +28,6 @@
     "unified": "^9.2.1"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^17.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.0",
     "@rollup/plugin-typescript": "^8.2.0",
     "@types/js-yaml": "^4.0.0",
     "@types/lodash.clonedeep": "^4.5.6",

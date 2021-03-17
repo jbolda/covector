@@ -1,6 +1,4 @@
 import typescript from "@rollup/plugin-typescript";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
 import pkg from "./package.json";
 
 export default {
@@ -18,11 +16,7 @@ export default {
     entryFileNames: "[name].js",
     exports: "named",
   },
-  plugins: [
-    typescript({ module: "CommonJS", exclude: ["**.test.ts"] }),
-    commonjs({ extensions: [".js"] }),
-    nodeResolve(),
-  ],
+  plugins: [typescript({ module: "CommonJS", exclude: ["**.test.ts"] })],
   external: [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
