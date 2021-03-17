@@ -14,7 +14,7 @@ export default {
     exports: "named",
   },
   plugins: [
-    typescript({ module: "CommonJS" }),
+    typescript({ module: "CommonJS", exclude: ["**.test.ts"] }),
     commonjs({ extensions: [".js"] }),
     resolve({
       // pass custom options to the resolve plugin
