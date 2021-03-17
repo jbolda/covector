@@ -7,18 +7,25 @@
   "license": "Apache-2.0",
   "scripts": {
     "covector": "node ./packages/covector/bin/covector.js",
+    "build": "yarn workspaces run build",
     "test": "jest",
-    "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.js\"",
+    "pretty": "prettier --write \"{src,__{tests,mocks}__}/**/*.{js,ts}\"",
     "postinstall": "patch-package"
   },
   "workspaces": [
     "packages/**/*"
   ],
   "devDependencies": {
+    "@types/jest": "^26.0.3",
     "jest": "^26.1.0",
     "jest-mock-console": "^1.0.1",
     "patch-package": "^6.2.2",
     "postinstall-postinstall": "^2.1.0",
-    "prettier": "^2.0.5"
+    "prettier": "^2.0.5",
+    "ts-jest": "^26.1.1"
+  },
+  "volta": {
+    "node": "14.16.0",
+    "yarn": "1.22.10"
   }
 }

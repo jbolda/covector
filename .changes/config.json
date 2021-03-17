@@ -3,6 +3,7 @@
   "additionalBumpTypes": ["housekeeping"],
   "pkgManagers": {
     "javascript": {
+      "build": "yarn build",
       "version": true,
       "getPublishedVersion": "npm view ${ pkg.pkg } version",
       "prepublish": [{ "command": "npm pack", "dryRunCommand": true }],
@@ -47,6 +48,7 @@
     "@covector/apply": {
       "path": "./packages/apply",
       "manager": "javascript",
+      "build": false,
       "dependencies": ["@covector/files", "all"],
       "assets": [
         {
@@ -58,6 +60,7 @@
     "@covector/assemble": {
       "path": "./packages/assemble",
       "manager": "javascript",
+      "build": false,
       "dependencies": ["@covector/command", "@covector/files", "all"],
       "assets": [
         {
@@ -80,6 +83,7 @@
     "@covector/files": {
       "path": "./packages/files",
       "manager": "javascript",
+      "build": false,
       "dependencies": ["all"],
       "assets": [
         {
@@ -91,7 +95,8 @@
     "@covector/command": {
       "path": "./packages/command",
       "manager": "javascript",
-      "dependencies": ["all"],
+      "build": false,
+      "dependencies": ["@covector/files", "all"],
       "assets": [
         {
           "path": "./packages/command/covector-command-${ pkgFile.version }.tgz",
@@ -102,6 +107,8 @@
     "action": {
       "path": "./packages/action",
       "manager": "javascript",
+      "build": false,
+      "preversion": "yarn pkg",
       "publish": false,
       "getPublishedVersion": false,
       "dependencies": ["covector"],
@@ -109,6 +116,7 @@
     },
     "all": {
       "version": true,
+      "build": false,
       "publish": false
     }
   }
