@@ -17,7 +17,7 @@
     "prepublishOnly": "rollup --config"
   },
   "dependencies": {
-    "effection": "^0.7.0",
+    "execa": "^5.0.0",
     "strip-ansi": "^6.0.0"
   },
   "devDependencies": {

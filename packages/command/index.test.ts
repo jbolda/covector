@@ -1,9 +1,7 @@
-import { attemptCommands } from "./index";
+import { attemptCommands, sh } from "./index";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
-
-import { PipeTemplate } from "../assemble/index";
 
 describe("command", () => {
   let restoreConsole: RestoreConsole;
@@ -103,5 +101,23 @@ describe("command", () => {
         ["booooop pkg-nickname@0.5.6"],
       ]);
     });
+  });
+
+  describe("sh", () => {
+    it("considers piped commands", function* (): Generator<any> {
+      const out = yield sh(
+        "echo this thing | echo but actually this",
+        {},
+        false
+      );
+      expect(out).toBe("but actually this");
+    });
+
+    // it("issues simple commands", function* (): Generator<any> {
+    // this errors out for some reason? error below
+    // TypeError: Cannot read property 'link' of undefined
+    // const out = yield sh("ls", {}, false);
+    // expect(out).toBe("this thing");
+    // });
   });
 });
