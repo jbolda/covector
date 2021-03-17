@@ -1,5 +1,6 @@
-import { spawn, timeout, Operation } from "effection";
+import { spawn, timeout } from "effection";
 import { exec } from "@effection/node";
+import execa from "execa";
 import stripAnsi from "strip-ansi";
 import path from "path";
 
@@ -191,36 +192,57 @@ export const runCommand = function* ({
   return child;
 };
 
-const sh = function* (
+export const sh = function* (
   command: string,
   options: object,
   log: false | string
 ): Generator<string> {
-  // @ts-ignore
-  let child: any = yield exec(command, options);
-
-  if (log !== false) {
+  if (command.includes("|")) {
+    try {
+      //@ts-ignore
+      const child: any = yield execa.command(command, {
+        ...options,
+        shell: true,
+        all: true,
+        timeout: 1200000,
+      });
+      const out = child.stdout;
+      if (log !== false) {
+        console.log(out);
+      }
+      return out;
+    } catch (e) {
+      throw new Error(e);
+    }
+  } else {
     // @ts-ignore
-    yield spawn(
-      child.stdout.subscribe().forEach(function* (datum: Buffer) {
-        const out = stripAnsi(datum.toString().trim());
-        if (out !== "") console.log(out);
-      })
-    );
+    let child: any = yield exec(command, options);
 
-    // @ts-ignore
-    yield spawn(
-      child.stderr.subscribe().forEach(function* (datum: Buffer) {
-        const out = stripAnsi(datum.toString().trim());
-        if (out !== "") console.error(out);
-      })
+    if (log !== false) {
+      // @ts-ignore
+      yield spawn(
+        child.stdout.subscribe().forEach(function* (datum: Buffer) {
+          const out = stripAnsi(datum.toString().trim());
+          if (out !== "") console.log(out);
+        })
+      );
+
+      // @ts-ignore
+      yield spawn(
+        child.stderr.subscribe().forEach(function* (datum: Buffer) {
+          const out = stripAnsi(datum.toString().trim());
+          if (out !== "") console.error(out);
+        })
+      );
+    }
+
+    const out = yield child.expect();
+    const stripped: string = stripAnsi(
+      //@ts-ignore
+      Buffer.concat(out.tail).toString().trim()
     );
+    return stripped;
   }
-
-  const out = yield child.expect();
-  // @ts-ignore
-  const stripped: string = stripAnsi(Buffer.concat(out.tail).toString().trim());
-  return stripped;
 };
 
 export const raceTime = function ({
@@ -234,11 +256,4 @@ export const raceTime = function ({
     yield timeout(t);
     throw new Error(msg);
   });
-};
-
-module.exports = {
-  attemptCommands,
-  confirmCommandsToRun,
-  runCommand,
-  raceTime,
 };
