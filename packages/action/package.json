@@ -6,15 +6,19 @@
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
   "scripts": {
-    "run-source": "node index.js",
-    "pkg": "ncc build index.js -o dist",
+    "run-source": "ncc run index.ts",
+    "pkg": "ncc build index.ts -o dist -m",
     "build": "echo noop"
   },
   "dependencies": {
-    "@actions/core": "^1.2.4",
+    "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0",
-    "@effection/node": "0.9.1",
-    "@zeit/ncc": "^0.22.3"
+    "@effection/node": "0.9.1"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.27.0",
+    "tslib": "^2.1.0",
+    "typescript": "^4.2.3"
   },
   "volta": {
     "extends": "../../package.json"

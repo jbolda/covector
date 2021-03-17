@@ -1,4 +1,4 @@
-const { packageListToArray } = require("./utils");
+import { packageListToArray } from "./utils";
 
 describe("packageListToArray", () => {
   it("returns empty array on empty string", () => {
