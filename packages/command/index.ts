@@ -94,7 +94,8 @@ export const attemptCommands = function* ({
             console.error(e);
           }
         } else {
-          const ranCommand = yield* runCommand({
+          //@ts-ignore TODO generator error
+          const ranCommand = yield runCommand({
             command: runningCommand.command,
             cwd,
             pkg: pkg.pkg,
@@ -138,7 +139,8 @@ export const confirmCommandsToRun = function* ({
   for (let pkg of commands) {
     const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
     if (!!getPublishedVersion) {
-      const version = yield* runCommand({
+      //@ts-ignore TODO generator error
+      const version = yield runCommand({
         command: getPublishedVersion,
         cwd,
         pkg: pkg.pkg,
@@ -176,7 +178,8 @@ export const runCommand = function* ({
   if (log !== false) console.log(log);
   raceTime();
 
-  const child = yield* sh(
+  //@ts-ignore TODO generator error
+  const child = yield sh(
     command,
     {
       cwd: path.join(cwd, pkgPath),
@@ -194,7 +197,7 @@ const sh = function* (
   log: false | string
 ): Generator<string> {
   // @ts-ignore
-  let child = yield* exec(command, options);
+  let child: any = yield exec(command, options);
 
   if (log !== false) {
     // @ts-ignore

@@ -41,7 +41,8 @@ const parseChange = function* ({ cwd, vfile }: { cwd?: string; vfile: VFile }) {
 
   if (cwd) {
     try {
-      let gitInfo = yield* runCommand({
+      //@ts-ignore TODO generator error
+      let gitInfo = yield runCommand({
         cwd,
         pkgPath: "",
         command: `git log --reverse --format="%h %H %as %s" ${vfile.data.filename}`,
@@ -198,9 +199,21 @@ export const assemble = function* ({
   return plan;
 };
 
+type PK = {
+  pkg: string;
+  path?: string;
+  precommand: string | null;
+  command: string | null;
+  postcommand: string | null;
+  manager?: string;
+  dependencies?: string[];
+  getPublishedVersion?: string;
+  assets?: { name: string; path: string }[];
+};
+
 export type PipeTemplate = {
-  release: {};
-  pkg: { name: string; version: string };
+  release: { type: string; parents?: string[] };
+  pkg: PK;
   pkgFile?: PackageFile;
 };
 
@@ -222,13 +235,13 @@ export const mergeIntoConfig = function* ({
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce(
-    (pkged: { [k: string]: { [k: string]: any } }, pkg) => {
+    (pkged: { [k: string]: PK }, pkg) => {
       const pkgManager = config.packages[pkg].manager;
       const commandItems = { pkg, pkgManager, config };
       const mergedCommand = mergeCommand({ ...commandItems, command });
 
       let publishElements: {
-        [k: string]: string | false | string[] | null | undefined;
+        [k: string]: any;
       } = {};
       publishElements.subPublishCommand = command.slice(7, 999);
       if (command === "publish") {
@@ -295,7 +308,6 @@ export const mergeIntoConfig = function* ({
       command !== "version" ? config.packages : assembledChanges.releases;
     const pipeToTemplate: PipeTemplate = {
       release: pkgs[pkg],
-      //@ts-ignore
       pkg: pkgCommands[pkg],
     };
 
@@ -334,10 +346,12 @@ export const mergeIntoConfig = function* ({
       // add these after that they can use pkgFile
       extraPublishParams = {
         ...extraPublishParams,
+        //@ts-ignore no index type string
         ...(!pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
           ? {}
           : {
               [`getPublishedVersion${subPublishCommand}`]: template(
+                //@ts-ignore no index type string
                 pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
               )(pipeToTemplate),
             }),
