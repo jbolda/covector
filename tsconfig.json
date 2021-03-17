@@ -10,5 +10,6 @@
     "moduleResolution": "node",
     "importHelpers": true
   },
-  "include": ["."]
+  "include": ["."],
+  "exclude": ["__fixtures__"]
 }
