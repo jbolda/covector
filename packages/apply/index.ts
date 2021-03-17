@@ -7,7 +7,7 @@ import {
 } from "@covector/files";
 import { compareBumps, CommonBumps } from "@covector/assemble";
 import semver from "semver";
-import cloneDeep from "lodash.clonedeep";
+import { cloneDeep } from "lodash";
 import path from "path";
 
 type Releases = {
