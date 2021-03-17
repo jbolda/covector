@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-    - main
+      - main
 
 jobs:
   test:
@@ -17,5 +17,4 @@ jobs:
       - uses: actions/checkout@v2
       - run: yarn
       - run: yarn build
-      - run: yarn workspace action pkg
       - run: yarn test
