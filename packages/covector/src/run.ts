@@ -8,14 +8,27 @@ import {
   changeFiles,
   changeFilesToVfile,
   changeFilesRemove,
+  ConfigFile,
 } from "@covector/files";
-import { assemble, mergeIntoConfig } from "@covector/assemble";
+import { assemble, mergeIntoConfig, PipeTemplate } from "@covector/assemble";
 import { fillChangelogs } from "@covector/changelog";
 import {
   apply,
   changesConsideringParents,
   validateApply,
 } from "@covector/apply";
+
+export type Covector = {
+  [k: string]: {
+    precommand: string | false;
+    command: string | false;
+    postcommand: string | false;
+    applied: string | false;
+    published?: boolean;
+  };
+};
+
+export { ConfigFile, PipeTemplate };
 
 export function* covector({
   command,
@@ -25,11 +38,11 @@ export function* covector({
   modifyConfig = async (c) => c,
 }: {
   command: string;
-  dryRun: boolean;
+  dryRun?: boolean;
   cwd?: string;
-  filterPackages: string[];
-  modifyConfig: (c: any) => Promise<any>;
-}): Generator<object> {
+  filterPackages?: string[];
+  modifyConfig?: (c: any) => Promise<any>;
+}): Generator<any, Covector | string, any> {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const changesPaths = yield changeFiles({
     cwd,
@@ -101,7 +114,8 @@ export function* covector({
   } else if (command === "config") {
     //@ts-ignore
     delete config.vfile;
-    return console.dir(config);
+    console.dir(config);
+    return "config returned";
   } else if (command === "version") {
     //@ts-ignore
     yield raceTime({ t: config.timeout });
@@ -126,15 +140,14 @@ export function* covector({
       console.log(commands);
     }
 
-    //@ts-ignore
-    let pkgCommandsRan = Object.keys(config.packages).reduce(
+    let pkgCommandsRan: Covector = Object.keys(config.packages).reduce(
       (
         pkgs: {
           [k: string]: {
-            precommand: boolean;
-            command: boolean;
-            postcommand: boolean;
-            applied: boolean;
+            precommand: string | false;
+            command: string | false;
+            postcommand: string | false;
+            applied: string | false;
           };
         },
         pkg: string
@@ -257,9 +270,7 @@ export function* covector({
       command,
     });
 
-    //@ts-ignore
-    let pkgCommandsRan = commands.reduce(
-      //@ts-ignore
+    let pkgCommandsRan: Covector = commands.reduce(
       (pkgs: any, pkg: { pkg: string }): object => {
         pkgs[pkg.pkg] = {
           precommand: false,

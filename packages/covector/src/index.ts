@@ -1,4 +1,4 @@
-import { covector } from "./run"
+import { covector } from "./run";
 import { cli } from "./cli";
 
-export { covector, cli }
+export { covector, cli };

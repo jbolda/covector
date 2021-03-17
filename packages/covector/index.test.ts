@@ -1,4 +1,4 @@
-import { covector } from "./index";
+import { covector } from "./src";
 import { main } from "effection";
 //@ts-ignore
 import toVFile from "to-vfile";
@@ -18,7 +18,7 @@ const mockConsole = (toMock: string[]) => {
     global.console = originalConsole;
   };
 };
-const { injectPublishFunctions } = require("./../action/utils");
+import { injectPublishFunctions } from "./../action/utils";
 
 describe("integration test in production mode", () => {
   let restoreConsole: Function;
