@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.4.1]
+
+- The action `dist` folder was accidentally gitignored. We want to commit it so actions can run directly from the dist without install.
+  - [ac2f857](https://www.github.com/jbolda/covector/commit/ac2f857403fe970fec04c29d19ec199acf97ac65) chore: fix gitignore for action ([#160](https://www.github.com/jbolda/covector/pull/160)) on 2021-03-18
+
 ## \[0.4.0]
 
 - Bump effection to stable v1.
