@@ -6,6 +6,7 @@ const fs = fsDefault.promises;
 import path from "path";
 // @ts-ignore
 import { readPkgFile, PackageFile } from "@covector/files";
+import covectorPackageFile from "../package.json";
 
 // for future typescripting reference
 // most of the @ts-ignore have to do with Dir/FileHandle vs string
@@ -85,7 +86,6 @@ export const init = function* init({
   for (let pkgFile of pkgFiles) {
     //@ts-ignore
     if (!pkgFile.pkg.workspaces) {
-      console.log(pkgFile);
       //@ts-ignore
       const manager: string = yield derivePkgManager({
         path: path.dirname(`./${pkgFile.name}`),
@@ -188,6 +188,25 @@ export const init = function* init({
   }
 
   if (answers["github actions"]) {
+    const covectorVersionSplit = covectorPackageFile.version.split(".");
+    let covectorVersion: string = `${covectorVersionSplit[0]}.${covectorVersionSplit[1]}`;
+
+    try {
+      //@ts-ignore
+      const testOpen: Dir = yield fs.opendir(
+        path.posix.join(cwd, "./.github/workflows/")
+      );
+      console.log(`The .github/workflows folder exists, skipping creation.`);
+      //@ts-ignore
+      yield testOpen.close();
+    } catch (e) {
+      console.log(`Creating the .github/workflows directory.`);
+      //@ts-ignore
+      yield fs.mkdir(path.posix.join(cwd, "./.github/workflows/"), {
+        recursive: true,
+      });
+    }
+
     // github status
     try {
       //@ts-ignore
@@ -207,7 +226,7 @@ export const init = function* init({
       //@ts-ignore
       yield fs.writeFile(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
-        githubStatusWorkflow()
+        githubStatusWorkflow({ version: covectorVersion })
       );
     }
 
@@ -243,6 +262,7 @@ export const init = function* init({
         githubPublishWorkflow({
           pkgManagers,
           branchName: answers["branch name"],
+          version: covectorVersion,
         })
       );
     }
@@ -338,7 +358,11 @@ Given a version number MAJOR.MINOR.PATCH, increment the:
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format, but will be discussed prior to usage (as extra steps will be necessary in consideration of merging and publishing).
 `;
 
-const githubStatusWorkflow = () => `name: covector status
+const githubStatusWorkflow = ({
+  version = "0",
+}: {
+  version?: string;
+}) => `name: covector status
 on: [pull_request]
 
 jobs:
@@ -348,9 +372,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          fetch-depth: 0 # required for use of git history
       - name: covector status
-        uses: jbolda/covector/packages/action@covector-v0
+        uses: jbolda/covector/packages/action@covector-v${version}
         id: covector
         with:
           command: 'status'
@@ -359,9 +383,11 @@ jobs:
 const githubPublishWorkflow = ({
   branchName = "main",
   pkgManagers,
+  version = "0",
 }: {
   branchName: string;
   pkgManagers: { [k: string]: boolean };
+  version?: string;
 }) => `name: version or publish
 
 on:
@@ -381,7 +407,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          fetch-depth: 0${
+          fetch-depth: 0 # required for use of git history${
             pkgManagers.javascript
               ? `
       - uses: actions/setup-node@v1
@@ -401,11 +427,19 @@ jobs:
           git config --global user.name "\${{ github.event.pusher.name }}"
           git config --global user.email "\${{ github.event.pusher.email }}"
       - name: covector version or publish (publish when no change files present)
-        uses: jbolda/covector/packages/action@covector-v0
+        uses: jbolda/covector/packages/action@covector-v${version}
         id: covector
-        env:
-          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}
-          CARGO_AUDIT_OPTIONS: \${{ secrets.CARGO_AUDIT_OPTIONS }}
+        env:${
+          pkgManagers.javascript
+            ? `
+          NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}`
+            : ""
+        }${
+  pkgManagers.rust
+    ? `
+          CARGO_AUDIT_OPTIONS: \${{ secrets.CARGO_AUDIT_OPTIONS }}`
+    : ""
+}
         with:
           token: \${{ secrets.GITHUB_TOKEN }}
           command: 'version-or-publish'
