@@ -231,18 +231,22 @@ export type ChangelogFile = {
 
 export const readChangelog = async ({
   cwd,
+  create = true,
 }: {
   cwd: string;
+  create?: boolean;
 }): Promise<VFile> => {
   let file = null;
   try {
     file = await vfile.read(path.join(cwd, "CHANGELOG.md"), "utf8");
   } catch {
-    console.log("Could not load the CHANGELOG.md. Creating one.");
-    file = {
-      path: path.join(cwd, "CHANGELOG.md"),
-      contents: "# Changelog\n\n\n",
-    };
+    if (create) {
+      console.log("Could not load the CHANGELOG.md. Creating one.");
+      file = {
+        path: path.join(cwd, "CHANGELOG.md"),
+        contents: "# Changelog\n\n\n",
+      };
+    }
   }
   return file;
 };

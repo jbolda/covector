@@ -2,6 +2,7 @@ import {
   attemptCommands,
   confirmCommandsToRun,
   raceTime,
+  ComplexCommand,
 } from "@covector/command";
 import {
   configFile,
@@ -11,7 +12,7 @@ import {
   ConfigFile,
 } from "@covector/files";
 import { assemble, mergeIntoConfig, PipeTemplate } from "@covector/assemble";
-import { fillChangelogs } from "@covector/changelog";
+import { fillChangelogs, pullLastChangelog } from "@covector/changelog";
 import {
   apply,
   changesConsideringParents,
@@ -263,7 +264,7 @@ export function* covector({
       return `No commands configured to run on [${command}].`;
     }
 
-    const commandsToRun = yield confirmCommandsToRun({
+    const commandsToRun: ComplexCommand[] = yield confirmCommandsToRun({
       cwd,
       //@ts-ignore
       commands,
@@ -282,6 +283,16 @@ export function* covector({
       },
       {}
     );
+
+    pkgCommandsRan = yield pullLastChangelog({
+      applied: commandsToRun.map((command) => ({
+        name: command.pkg,
+        version: "",
+      })),
+      config,
+      cwd,
+      pkgCommandsRan,
+    });
 
     pkgCommandsRan = yield attemptCommands({
       cwd,

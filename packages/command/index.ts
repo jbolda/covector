@@ -4,7 +4,7 @@ import execa from "execa";
 import stripAnsi from "strip-ansi";
 import path from "path";
 
-type ComplexCommand = {
+export type ComplexCommand = {
   pkg: string;
   pkgFile: { version: string };
   path: string;
@@ -134,13 +134,12 @@ export const confirmCommandsToRun = function* ({
   cwd: string;
   commands: ComplexCommand[];
   command: string;
-}) {
+}): Generator<any, ComplexCommand[], any> {
   let subPublishCommand = command.slice(7, 999);
   let commandsToRun: ComplexCommand[] = [];
   for (let pkg of commands) {
     const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
     if (!!getPublishedVersion) {
-      //@ts-ignore TODO generator error
       const version = yield runCommand({
         command: getPublishedVersion,
         cwd,
