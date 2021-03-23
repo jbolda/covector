@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@covector/files": "0.3.0",
+    "@covector/assemble": "0.5.0",
     "semver": "^7.3.2"
   },
   "devDependencies": {

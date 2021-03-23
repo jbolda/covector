@@ -22,6 +22,7 @@
     "strip-ansi": "^6.0.0"
   },
   "devDependencies": {
+    "@covector/assemble": "0.5.0",
     "@rollup/plugin-typescript": "^8.2.0",
     "rollup": "^2.41.4",
     "tslib": "^2.1.0",
