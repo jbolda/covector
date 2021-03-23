@@ -1,5 +1,5 @@
 import fs from "fs";
-import { ConfigFile, PipeTemplate } from "../covector/src/run";
+import { ConfigFile, FunctionPipe } from "../covector/src/run";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -80,23 +80,23 @@ export const createReleases = curry(
       owner: string;
       repo: string;
     },
-    pipe: PipeTemplate
+    pipe: FunctionPipe
   ): Promise<void> => {
     if (!pipe.pkgFile) {
       console.log(
-        `skipping Github Release for ${pipe.pkg.pkg}, no package file present`
+        `skipping Github Release for ${pipe.pkg}, no package file present`
       );
       return;
     }
     console.log(
-      `creating Github Release for ${pipe.pkg.pkg}@${pipe.pkgFile.version}`
+      `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
     );
     const createReleaseResponse = await octokit.repos.createRelease({
       owner,
       repo,
       tag_name: `${pipe.pkg}-v${pipe.pkgFile.version}`,
       name: `${pipe.pkg} v${pipe.pkgFile.version}`,
-      body: commandText(pipe.pkg),
+      body: commandText(pipe.pkgCommandsRan),
       draft: core.getInput("draftRelease") === "true" ? true : false,
     });
     const { data } = createReleaseResponse;
@@ -106,9 +106,9 @@ export const createReleases = curry(
     console.log("release created: ", data);
     const { id: releaseId } = data;
 
-    if (pipe.pkg.assets) {
+    if (pipe.assets) {
       try {
-        for (let asset of pipe.pkg.assets) {
+        for (let asset of pipe.assets) {
           console.log(
             `uploading asset ${asset.name} for ${pipe.pkg}@${pipe.pkgFile.version}`
           );
