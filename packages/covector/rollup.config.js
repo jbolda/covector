@@ -1,4 +1,5 @@
 import typescript from "@rollup/plugin-typescript";
+import json from "@rollup/plugin-json";
 import pkg from "./package.json";
 
 export default {
@@ -16,10 +17,12 @@ export default {
     entryFileNames: "[name].js",
     exports: "named",
   },
-  plugins: [typescript({ module: "CommonJS", exclude: ["**.test.ts"] })],
+  plugins: [json(), typescript()],
   external: [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
+    "fs",
+    "path",
   ],
   watch: {
     chokidar: true,

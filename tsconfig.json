@@ -10,6 +10,12 @@
     "moduleResolution": "node",
     "importHelpers": true
   },
-  "include": ["."],
-  "exclude": ["__fixtures__", "**/*.config.js", "**/dist/**", "**/bin/**"]
+  "baseUrl": ".",
+  "exclude": [
+    "__fixtures__",
+    "**/*.config.js",
+    "**/dist/**",
+    "**/bin/**",
+    "**/*.test.ts"
+  ]
 }
