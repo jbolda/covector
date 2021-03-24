@@ -16,13 +16,13 @@
     "packages/**/*"
   ],
   "devDependencies": {
-    "@types/jest": "^26.0.3",
-    "jest": "^26.1.0",
+    "@types/jest": "^26.0.21",
+    "jest": "^26.6.3",
     "jest-mock-console": "^1.0.1",
-    "patch-package": "^6.2.2",
+    "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
-    "prettier": "^2.0.5",
-    "ts-jest": "^26.1.1"
+    "prettier": "^2.2.1",
+    "ts-jest": "^26.5.4"
   },
   "volta": {
     "node": "14.16.0",

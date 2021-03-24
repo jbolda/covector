@@ -11,10 +11,11 @@ export default {
     entryFileNames: "[name].js",
     exports: "named",
   },
-  plugins: [typescript({ module: "CommonJS", exclude: ["**.test.ts"] })],
+  plugins: [typescript()],
   external: [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.peerDependencies || {}),
+    "path",
   ],
   watch: {
     chokidar: true,
