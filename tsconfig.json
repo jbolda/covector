@@ -11,5 +11,5 @@
     "importHelpers": true
   },
   "include": ["."],
-  "exclude": ["__fixtures__"]
+  "exclude": ["__fixtures__", "**/*.config.js", "**/dist/**", "**/bin/**"]
 }

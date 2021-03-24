@@ -4,12 +4,7 @@ import execa from "execa";
 import stripAnsi from "strip-ansi";
 import path from "path";
 
-type ComplexCommand = {
-  pkg: string;
-  pkgFile: { version: string };
-  path: string;
-  [getPublishedVersion: string]: any;
-};
+import { PkgVersion, PkgPublish } from "@covector/assemble";
 
 type RunningCommand = {
   command?: string | Function;
@@ -33,21 +28,19 @@ export const attemptCommands = function* ({
   dryRun,
 }: {
   cwd: string;
-  commands: {
-    pkg: string;
-    path: string;
-    [k: string]: string;
-  }[];
+  commands: (PkgVersion | PkgPublish)[];
   command: string; // the covector command that was ran
   commandPrefix?: string;
-  pkgCommandsRan: object;
+  pkgCommandsRan?: object;
   dryRun: boolean;
-}) {
+}): Generator<any, { [k: string]: { [c: string]: string | boolean } }, string> {
   let _pkgCommandsRan: { [k: string]: { [c: string]: string | boolean } } = {
     ...pkgCommandsRan,
   };
   for (let pkg of commands) {
+    //@ts-ignore
     if (!pkg[`${commandPrefix}command`]) continue;
+    //@ts-ignore
     const c: string | Function | [] = pkg[`${commandPrefix}command`];
     const pubCommands: (NormalizedCommand | string | Function)[] =
       typeof c === "string" || typeof c === "function" || !Array.isArray(c)
@@ -86,7 +79,8 @@ export const attemptCommands = function* ({
       if (runningCommand.shouldRunCommand && runningCommand.command) {
         if (typeof runningCommand.command === "function") {
           try {
-            yield runningCommand.command(pkg);
+            const pipeToFunction = { ...pkg, pkgCommandsRan: _pkgCommandsRan };
+            yield runningCommand.command(pipeToFunction);
 
             if (typeof pubCommand === "object" && pubCommand.pipe) {
               console.warn(`We cannot pipe the function command in ${pkg.pkg}`);
@@ -95,12 +89,11 @@ export const attemptCommands = function* ({
             console.error(e);
           }
         } else {
-          //@ts-ignore TODO generator error
           const ranCommand = yield runCommand({
             command: runningCommand.command,
             cwd,
             pkg: pkg.pkg,
-            pkgPath: runningCommand.runFromRoot === true ? "" : pkg.path,
+            pkgPath: runningCommand.runFromRoot === true ? "" : pkg.path || "",
             log: `${pkg.pkg} [${commandPrefix}${command}${
               runningCommand.runFromRoot === true ? " run from the cwd" : ""
             }]: ${runningCommand.command}`,
@@ -132,24 +125,26 @@ export const confirmCommandsToRun = function* ({
   command,
 }: {
   cwd: string;
-  commands: ComplexCommand[];
+  commands: PkgPublish[];
   command: string;
-}) {
+}): Generator<any, PkgPublish[], any> {
   let subPublishCommand = command.slice(7, 999);
-  let commandsToRun: ComplexCommand[] = [];
+  let commandsToRun: PkgPublish[] = [];
   for (let pkg of commands) {
+    //@ts-ignore
     const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
     if (!!getPublishedVersion) {
-      //@ts-ignore TODO generator error
       const version = yield runCommand({
         command: getPublishedVersion,
         cwd,
         pkg: pkg.pkg,
-        pkgPath: pkg.path,
-        log: `Checking if ${pkg.pkg}@${pkg.pkgFile.version} is already published with: ${getPublishedVersion}`,
+        pkgPath: pkg.path || "",
+        log: `Checking if ${pkg.pkg}${
+          !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
+        } is already published with: ${getPublishedVersion}`,
       });
 
-      if (pkg.pkgFile.version === version) {
+      if (pkg.pkgFile && pkg.pkgFile.version === version) {
         console.log(
           `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
         );

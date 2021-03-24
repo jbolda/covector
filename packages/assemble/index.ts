@@ -198,21 +198,146 @@ export const assemble = function* ({
   return plan;
 };
 
-type PK = {
+export type PkgVersion = {
   pkg: string;
   path?: string;
+  type?: string;
+  parents?: string[];
   precommand: string | null;
   command: string | null;
   postcommand: string | null;
   manager?: string;
   dependencies?: string[];
-  getPublishedVersion?: string;
-  assets?: { name: string; path: string }[];
 };
 
-export type PipeTemplate = {
-  release: { type: string; parents?: string[] };
-  pkg: PK;
+type Release = {
+  type: string;
+  changes: { type: string; parents?: string[] }[];
+  parents?: string[];
+};
+
+type PipeVersionTemplate = {
+  release: Release;
+  pkg: PkgVersion;
+};
+
+export const mergeChangesToConfig = function* ({
+  config,
+  assembledChanges,
+  command,
+  dryRun = false,
+  filterPackages = [],
+}: {
+  config: ConfigFile;
+  assembledChanges: { releases: {} };
+  command: string;
+  cwd: string;
+  dryRun: boolean;
+  filterPackages: string[];
+}) {
+  // build in assembledChanges to only issue commands with ones with changes
+  // and pipe in data to template function
+  const pkgCommands = Object.keys(config.packages).reduce(
+    (pkged: { [k: string]: PkgVersion }, pkg) => {
+      const pkgManager = config.packages[pkg].manager;
+      const commandItems = { pkg, pkgManager, config };
+      const mergedCommand = mergeCommand({ ...commandItems, command });
+
+      if (!!mergedCommand) {
+        pkged[pkg] = {
+          pkg: pkg,
+          path: config.packages[pkg].path,
+          precommand: mergeCommand({
+            ...commandItems,
+            command: `pre${command}`,
+          }),
+          command: mergedCommand,
+          postcommand: mergeCommand({
+            ...commandItems,
+            command: `post${command}`,
+          }),
+          manager: config.packages[pkg].manager,
+          dependencies: config.packages[pkg].dependencies,
+        };
+      }
+
+      return pkged;
+    },
+    {}
+  );
+
+  const pipeOutput: {
+    [k: string]: { name?: string; pipe?: PipeVersionTemplate };
+  } = {};
+  let commands: { [k: string]: string | any }[] = [];
+  for (let pkg of Object.keys(
+    usePackageSubset(assembledChanges.releases, filterPackages)
+  )) {
+    if (!pkgCommands[pkg]) continue;
+
+    const pkgs: { [k: string]: Release } = assembledChanges.releases;
+    const pipeToTemplate: PipeVersionTemplate = {
+      release: pkgs[pkg],
+      pkg: pkgCommands[pkg],
+    };
+
+    if (dryRun) {
+      pipeOutput[pkg] = {};
+      pipeOutput[pkg].name = pkg;
+      pipeOutput[pkg].pipe = pipeToTemplate;
+    }
+
+    const merged = {
+      pkg,
+      ...(!pkgs[pkg].parents ? {} : { parents: pkgs[pkg].parents }),
+      path: pkgCommands[pkg].path,
+      type: pkgs[pkg].type || null,
+      manager: pkgCommands[pkg].manager,
+      dependencies: pkgCommands[pkg].dependencies,
+      precommand: templateCommands(
+        pkgCommands[pkg].precommand,
+        pipeToTemplate,
+        ["command", "dryRunCommand", "runFromRoot"]
+      ),
+      command: templateCommands(pkgCommands[pkg].command, pipeToTemplate, [
+        "command",
+        "dryRunCommand",
+      ]),
+      postcommand: templateCommands(
+        pkgCommands[pkg].postcommand,
+        pipeToTemplate,
+        ["command", "dryRunCommand", "runFromRoot"]
+      ),
+    };
+
+    commands = [...commands, merged];
+  }
+
+  if (dryRun) {
+    console.log("==== data piped into commands ===");
+    Object.keys(pipeOutput).forEach((pkg) =>
+      console.log(pkg, "pipe", pipeOutput[pkg].pipe)
+    );
+  }
+
+  return commands;
+};
+
+export type PkgPublish = {
+  pkg: string;
+  path?: string;
+  precommand?: (string | any)[] | null;
+  command?: (string | any)[] | null;
+  postcommand?: (string | any)[] | null;
+  manager: string;
+  dependencies?: string[];
+  getPublishedVersion?: string;
+  assets?: { name: string; path: string }[];
+  pkgFile?: PackageFile;
+};
+
+type PipePublishTemplate = {
+  pkg: PkgPublish;
   pkgFile?: PackageFile;
 };
 
@@ -230,11 +355,11 @@ export const mergeIntoConfig = function* ({
   cwd: string;
   dryRun: boolean;
   filterPackages: string[];
-}) {
+}): Generator<any, PkgPublish[], any> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce(
-    (pkged: { [k: string]: PK }, pkg) => {
+    (pkged: { [k: string]: PkgPublish }, pkg) => {
       const pkgManager = config.packages[pkg].manager;
       const commandItems = { pkg, pkgManager, config };
       const mergedCommand = mergeCommand({ ...commandItems, command });
@@ -259,7 +384,7 @@ export const mergeIntoConfig = function* ({
       if (!!mergedCommand) {
         pkged[pkg] = {
           pkg: pkg,
-          path: config.packages[pkg].path,
+          path: config.packages[pkg].path || "",
           precommand: mergeCommand({
             ...commandItems,
             command: `pre${command}`,
@@ -281,7 +406,7 @@ export const mergeIntoConfig = function* ({
           ...(!publishElements.assets
             ? {}
             : { assets: publishElements.assets }),
-          manager: config.packages[pkg].manager,
+          manager: config.packages[pkg].manager || "",
           dependencies: config.packages[pkg].dependencies,
         };
       }
@@ -292,79 +417,63 @@ export const mergeIntoConfig = function* ({
   );
 
   const pipeOutput: {
-    [k: string]: { name?: string; pipe?: PipeTemplate };
+    [k: string]: { name?: string; pipe?: PipePublishTemplate };
   } = {};
-  let commands: { [k: string]: string | any }[] = [];
-  for (let pkg of Object.keys(
-    usePackageSubset(
-      command !== "version" ? pkgCommands : assembledChanges.releases,
-      filterPackages
-    )
-  )) {
+  let commands: PkgPublish[] = [];
+  for (let pkg of Object.keys(usePackageSubset(pkgCommands, filterPackages))) {
     if (!pkgCommands[pkg]) continue;
 
-    const pkgs: { [k: string]: { parents: string[]; type: string } } =
-      command !== "version" ? config.packages : assembledChanges.releases;
-    const pipeToTemplate: PipeTemplate = {
-      release: pkgs[pkg],
+    const pipeToTemplate: PipePublishTemplate = {
       pkg: pkgCommands[pkg],
     };
 
-    let extraPublishParams =
-      command == "version"
+    let extraPublishParams = {
+      // @ts-ignore TODO this returns a Promise and TS doesn't like that
+      pkgFile: yield readPkgFile({
+        file: path.join(
+          cwd,
+          //@ts-ignore
+          config.packages[pkg].path,
+          !!config.packages[pkg].manager &&
+            config.packages[pkg].manager === "rust"
+            ? "Cargo.toml"
+            : "package.json"
+        ),
+        nickname: pkg,
+      }),
+    };
+
+    pipeToTemplate.pkgFile = {
+      name: extraPublishParams.pkgFile.name,
+      version: extraPublishParams.pkgFile.version,
+      versionMajor: extraPublishParams.pkgFile.versionMajor,
+      versionMinor: extraPublishParams.pkgFile.versionMinor,
+      versionPatch: extraPublishParams.pkgFile.versionPatch,
+      pkg: extraPublishParams.pkgFile.pkg,
+    };
+
+    let subPublishCommand = command.slice(7, 999);
+    // add these after that they can use pkgFile
+    extraPublishParams = {
+      ...extraPublishParams,
+      //@ts-ignore no index type string
+      ...(!pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
         ? {}
         : {
-            // @ts-ignore TODO this returns a Promise and TS doesn't like that
-            pkgFile: yield readPkgFile({
-              file: path.join(
-                cwd,
-                //@ts-ignore
-                config.packages[pkg].path,
-                !!config.packages[pkg].manager &&
-                  config.packages[pkg].manager === "rust"
-                  ? "Cargo.toml"
-                  : "package.json"
-              ),
-              nickname: pkg,
-            }),
-          };
-
-    if (command !== "version" && !!extraPublishParams.pkgFile) {
-      pipeToTemplate.pkgFile = {
-        name: extraPublishParams.pkgFile.name,
-        version: extraPublishParams.pkgFile.version,
-        versionMajor: extraPublishParams.pkgFile.versionMajor,
-        versionMinor: extraPublishParams.pkgFile.versionMinor,
-        versionPatch: extraPublishParams.pkgFile.versionPatch,
-        pkg: extraPublishParams.pkgFile.pkg,
-      };
-    }
-
-    if (command !== "version") {
-      let subPublishCommand = command.slice(7, 999);
-      // add these after that they can use pkgFile
-      extraPublishParams = {
-        ...extraPublishParams,
-        //@ts-ignore no index type string
-        ...(!pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
-          ? {}
-          : {
-              [`getPublishedVersion${subPublishCommand}`]: template(
-                //@ts-ignore no index type string
-                pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
-              )(pipeToTemplate),
-            }),
-        ...(!pkgCommands[pkg].assets
-          ? {}
-          : {
-              assets: templateCommands(
-                pkgCommands[pkg].assets,
-                pipeToTemplate,
-                ["path", "name"]
-              ),
-            }),
-      };
-    }
+            [`getPublishedVersion${subPublishCommand}`]: template(
+              //@ts-ignore no index type string
+              pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
+            )(pipeToTemplate),
+          }),
+      ...(!pkgCommands[pkg].assets
+        ? {}
+        : {
+            assets: templateCommands(pkgCommands[pkg].assets, pipeToTemplate, [
+              "path",
+              "name",
+            ]),
+          }),
+    };
 
     if (dryRun) {
       pipeOutput[pkg] = {};
@@ -372,12 +481,10 @@ export const mergeIntoConfig = function* ({
       pipeOutput[pkg].pipe = pipeToTemplate;
     }
 
-    const merged = {
+    const merged: PkgPublish = {
       pkg,
-      ...(!pkgs[pkg].parents ? {} : { parents: pkgs[pkg].parents }),
       ...extraPublishParams,
       path: pkgCommands[pkg].path,
-      type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,
       dependencies: pkgCommands[pkg].dependencies,
       precommand: templateCommands(
@@ -454,7 +561,7 @@ const usePackageSubset = (commands: any, subset: string[] = []) =>
 
 const templateCommands = (
   command: any,
-  pipe: PipeTemplate,
+  pipe: PipePublishTemplate | PipeVersionTemplate,
   complexCommands: string[]
 ) => {
   if (!command) return null;
@@ -475,6 +582,7 @@ const templateCommands = (
         ),
       };
     } else {
+      // if it is a function, we pipe when we run the function
       return typeof c === "function" ? c : template(c)(pipe);
     }
   });

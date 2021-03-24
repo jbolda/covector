@@ -18,7 +18,7 @@ describe("command", () => {
         commands: [
           {
             name: "pkg-nickname",
-            version: "0.5.6",
+            pkgFile: { version: "0.5.6" },
             //@ts-ignore
             command: async () => console.log("boop"),
           },
@@ -33,9 +33,8 @@ describe("command", () => {
       yield attemptCommands({
         commands: [
           {
-            name: "pkg-nickname",
-            version: "0.5.6",
-            //@ts-ignore
+            pkg: "pkg-nickname",
+            manager: "none",
             command: [
               async () => console.log("boop"),
               async () => console.log("booop"),
@@ -44,6 +43,9 @@ describe("command", () => {
             ],
           },
         ],
+        command: "publish",
+        cwd: "",
+        dryRun: false,
       });
 
       //@ts-ignore
@@ -59,13 +61,16 @@ describe("command", () => {
       yield attemptCommands({
         commands: [
           {
-            name: "pkg-nickname",
-            version: "0.5.6",
+            pkg: "pkg-nickname",
+            pkgFile: { version: "0.5.6" },
             //@ts-ignore
-            command: async (pkg) =>
-              console.log(`boop ${pkg.name}@${pkg.version}`),
+            command: async (pkg: any) =>
+              console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
           },
         ],
+        command: "publish",
+        cwd: "",
+        dryRun: false,
       });
 
       //@ts-ignore
@@ -76,21 +81,25 @@ describe("command", () => {
       yield attemptCommands({
         commands: [
           {
-            name: "pkg-nickname",
-            version: "0.5.6",
+            pkg: "pkg-nickname",
+            pkgFile: { version: "0.5.6" },
+            manager: "none",
             //@ts-ignore
             command: [
               async (pkg: any) =>
-                console.log(`boop ${pkg.name}@${pkg.version}`),
+                console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
               async (pkg: any) =>
-                console.log(`booop ${pkg.name}@${pkg.version}`),
+                console.log(`booop ${pkg.pkg}@${pkg.pkgFile.version}`),
               async (pkg: any) =>
-                console.log(`boooop ${pkg.name}@${pkg.version}`),
+                console.log(`boooop ${pkg.pkg}@${pkg.pkgFile.version}`),
               async (pkg: any) =>
-                console.log(`booooop ${pkg.name}@${pkg.version}`),
+                console.log(`booooop ${pkg.pkg}@${pkg.pkgFile.version}`),
             ],
           },
         ],
+        command: "publish",
+        cwd: "",
+        dryRun: false,
       });
 
       //@ts-ignore

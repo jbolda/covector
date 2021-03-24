@@ -205,7 +205,6 @@ Array [
     },
     "postcommand": null,
     "precommand": null,
-    "type": null,
   },
   Object {
     "command": Array [
@@ -231,7 +230,6 @@ Array [
     },
     "postcommand": null,
     "precommand": null,
-    "type": null,
   },
   Object {
     "command": Array [
@@ -257,7 +255,6 @@ Array [
     },
     "postcommand": null,
     "precommand": null,
-    "type": null,
   },
 ]
 `;
@@ -337,7 +334,6 @@ Array [
     },
     "postcommand": null,
     "precommand": null,
-    "type": null,
   },
   Object {
     "command": Array [
@@ -363,7 +359,6 @@ Array [
     },
     "postcommand": null,
     "precommand": null,
-    "type": null,
   },
 ]
 `;

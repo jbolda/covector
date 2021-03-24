@@ -1,4 +1,4 @@
-import { assemble, mergeIntoConfig } from "./index";
+import { assemble, mergeIntoConfig, mergeChangesToConfig } from "./index";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -281,7 +281,7 @@ describe("special bump types", () => {
 
 describe("merge config test", () => {
   it("merges version", function* (): Generator<any> {
-    const mergedVersionConfig = yield mergeIntoConfig({
+    const mergedVersionConfig = yield mergeChangesToConfig({
       //@ts-ignore
       config,
       assembledChanges,
@@ -301,7 +301,7 @@ describe("merge config test", () => {
     //@ts-ignore
     delete modifiedConfig.packages["@namespaced/assemble2"].version;
 
-    const mergedVersionConfig = yield mergeIntoConfig({
+    const mergedVersionConfig = yield mergeChangesToConfig({
       //@ts-ignore
       config: modifiedConfig,
       assembledChanges,
@@ -367,7 +367,7 @@ describe("merge config test", () => {
       },
     };
 
-    const mergedVersionConfig = yield mergeIntoConfig({
+    const mergedVersionConfig = yield mergeChangesToConfig({
       //@ts-ignore
       config: nestedConfig,
       assembledChanges: nestedAssembledChanges,
@@ -393,7 +393,7 @@ describe("merge config test", () => {
 
 describe("merge filtered config test", () => {
   it("merges version", function* (): Generator<any> {
-    const mergedVersionConfig = yield mergeIntoConfig({
+    const mergedVersionConfig = yield mergeChangesToConfig({
       //@ts-ignore
       config,
       assembledChanges,

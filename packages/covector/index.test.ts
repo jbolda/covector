@@ -1,5 +1,5 @@
 import { covector } from "./src";
-import { main } from "effection";
+import { run } from "effection";
 //@ts-ignore
 import toVFile from "to-vfile";
 import path from "path";
@@ -31,7 +31,7 @@ describe("integration test in production mode", () => {
 
   it("passes correct config for js and rust", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "status",
         cwd: fullIntegration,
@@ -46,7 +46,7 @@ describe("integration test in production mode", () => {
 
   it("fails status for non-existant package", async () => {
     const fullIntegration = f.copy("integration.js-with-change-file-error");
-    const covectored = main(
+    const covectored = run(
       covector({
         command: "status",
         cwd: fullIntegration,
@@ -64,7 +64,7 @@ describe("integration test in production mode", () => {
 
   it("runs version for js and rust", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "version",
         cwd: fullIntegration,
@@ -106,7 +106,7 @@ describe("integration test in production mode", () => {
 
   it("runs publish for js and rust", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "publish",
         cwd: fullIntegration,
@@ -121,7 +121,7 @@ describe("integration test in production mode", () => {
 
   it("fails with error", async () => {
     const fullIntegration = f.copy("integration.js-with-publish-error");
-    const covectored = main(
+    const covectored = run(
       covector({
         command: "publish",
         cwd: fullIntegration,
@@ -137,7 +137,7 @@ describe("integration test in production mode", () => {
 
   it("runs test for js and rust", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "test",
         cwd: fullIntegration,
@@ -152,7 +152,7 @@ describe("integration test in production mode", () => {
 
   it("runs build for js and rust", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "build",
         cwd: fullIntegration,
@@ -197,7 +197,7 @@ describe("integration test in production mode", () => {
       );
     };
 
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "publish",
         cwd: fullIntegration,
@@ -210,7 +210,7 @@ describe("integration test in production mode", () => {
   it("uses the action config modification", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
 
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "publish",
         cwd: fullIntegration,
@@ -231,7 +231,7 @@ describe("integration test in --dry-run mode", () => {
   it("passes correct config for js and rust", async () => {
     const restoreConsole = mockConsole(["log", "dir"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "status",
         cwd: fullIntegration,
@@ -249,7 +249,7 @@ describe("integration test in --dry-run mode", () => {
   it("runs version for js and rust", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "version",
         cwd: fullIntegration,
@@ -287,7 +287,7 @@ describe("integration test in --dry-run mode", () => {
   it("runs publish for js and rust", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "publish",
         cwd: fullIntegration,
@@ -305,7 +305,7 @@ describe("integration test in --dry-run mode", () => {
   it("runs test for js and rust", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "test",
         cwd: fullIntegration,
@@ -323,7 +323,7 @@ describe("integration test in --dry-run mode", () => {
   it("runs build for js and rust", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "build",
         cwd: fullIntegration,
@@ -343,7 +343,7 @@ describe("integration test for complex commands", () => {
   it("runs version for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "version",
         cwd: fullIntegration,
@@ -380,7 +380,7 @@ describe("integration test for complex commands", () => {
   it("runs publish for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "publish",
         cwd: fullIntegration,
@@ -397,7 +397,7 @@ describe("integration test for complex commands", () => {
   it("runs test for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "test",
         cwd: fullIntegration,
@@ -414,7 +414,7 @@ describe("integration test for complex commands", () => {
   it("runs build for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "build",
         cwd: fullIntegration,
@@ -431,7 +431,7 @@ describe("integration test for complex commands", () => {
   it("runs version in --dry-run mode", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "version",
         cwd: fullIntegration,
@@ -469,7 +469,7 @@ describe("integration test for complex commands", () => {
   it("runs publish in --dry-run mode", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "publish",
         cwd: fullIntegration,
@@ -487,7 +487,7 @@ describe("integration test for complex commands", () => {
   it("runs test in --dry-run mode", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "test",
         cwd: fullIntegration,
@@ -505,7 +505,7 @@ describe("integration test for complex commands", () => {
   it("runs build in --dry-run mode", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "build",
         cwd: fullIntegration,
@@ -533,7 +533,7 @@ describe("integration test to invoke sub commands", () => {
   it("runs publish-primary in prod mode", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-subcommands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "publish-primary",
         cwd: fullIntegration,
@@ -550,7 +550,7 @@ describe("integration test to invoke sub commands", () => {
   it("runs publishSecondary in prod mode", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-subcommands");
-    const covectored = await main(
+    const covectored = await run(
       covector({
         command: "publishSecondary",
         cwd: fullIntegration,

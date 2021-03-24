@@ -11,10 +11,10 @@ import parse from "remark-parse";
 import stringify from "remark-stringify";
 
 type PkgCommandResponse = {
-  precommand: string | boolean;
+  precommand?: string | boolean;
   command: string | boolean;
-  postcommand: string | boolean;
-  pkg: Pkg;
+  postcommand?: string | boolean;
+  pkg?: Pkg;
 };
 
 type Meta = {
@@ -98,20 +98,71 @@ export const fillChangelogs = async ({
   }
 };
 
+export const pullLastChangelog = async ({
+  applied,
+  config,
+  cwd,
+  pkgCommandsRan,
+}: {
+  applied: { name: string; version: string }[];
+  config: ConfigFile;
+  cwd: string;
+  pkgCommandsRan?: { [k: string]: PkgCommandResponse };
+}) => {
+  const changelogs = await readAllChangelogs({
+    applied: applied.reduce(
+      (
+        final: { name: string; version: string; changelog?: ChangelogFile }[],
+        current
+      ) =>
+        !config.packages[current.name].path ? final : final.concat([current]),
+      []
+    ),
+    packages: config.packages,
+    cwd,
+    create: false,
+  });
+
+  const pulledChanges = pullChanges({
+    changelogs,
+  });
+
+  if (!pkgCommandsRan) {
+    return;
+  } else {
+    pkgCommandsRan = Object.keys(pkgCommandsRan).reduce(
+      (pkgs: { [k: string]: PkgCommandResponse }, pkg) => {
+        pulledChanges.forEach((change) => {
+          if (change?.pkg === pkg && change.changelog) {
+            pkgs[pkg].command = change.changelog;
+          }
+        });
+        return pkgs;
+      },
+      pkgCommandsRan
+    );
+
+    return pkgCommandsRan;
+  }
+};
+
 const readAllChangelogs = ({
   applied,
   packages,
   cwd,
+  create = true,
 }: {
   applied: { name: string; version: string }[];
   packages: ConfigFile["packages"];
   cwd: string;
+  create?: boolean;
 }) => {
   return Promise.all(
     applied.map((change) =>
       readChangelog({
         //@ts-ignore
         cwd: path.join(cwd, packages[change.name].path),
+        create,
       })
     )
   ).then((changelogs) =>
@@ -189,6 +240,46 @@ const applyChanges = ({
       change.changelog.contents = processor.stringify(changelog);
     }
     return { pkg: change.changes.name, change, addition };
+  });
+};
+
+const pullChanges = ({
+  changelogs,
+}: {
+  changelogs: {
+    changes: { name: string; version: string };
+    changelog?: ChangelogFile;
+  }[];
+}) => {
+  const processor: any = unified().use(parse).use(stringify, {
+    bullet: "-",
+    listItemIndent: "one",
+  });
+
+  return changelogs.map((change) => {
+    if (change.changelog) {
+      let changelogParsed = processor.parse(change.changelog.contents);
+      const startNode = 1;
+      const nextNode: number = changelogParsed.children
+        .slice(startNode + 1)
+        .findIndex((node: any) => node.type === "heading");
+      const endNode =
+        nextNode && nextNode > 0 ? nextNode + startNode + 1 : 9999;
+      let changelogAST = {
+        ...changelogParsed,
+        children: changelogParsed.children.slice(startNode, endNode),
+      };
+      const changelog = processor.stringify(changelogAST);
+      return {
+        pkg: change.changes.name,
+        changelog,
+      };
+    } else {
+      return {
+        pkg: change.changes.name,
+        changelog: false,
+      };
+    }
   });
 };
 
