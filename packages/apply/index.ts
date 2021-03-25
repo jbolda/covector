@@ -10,12 +10,18 @@ import semver from "semver";
 import { cloneDeep } from "lodash";
 import path from "path";
 
+type ChangeParsed = {
+  releases: {[k: string]: string}
+  summary: string
+  meta: {dependencies: string}
+}
+
 type Releases = {
   [k: string]: {
     parents: string[];
     type: CommonBumps;
     dependencies?: string[];
-    changes?: { meta: { dependencies: string } }[];
+    changes?: ChangeParsed[];
   };
 };
 
@@ -175,13 +181,20 @@ const resolveParents = ({ config }: { config: ConfigFile }) => {
   );
 };
 
+type Changed = {
+  [k: string]: {
+    parents: string[];
+    type: CommonBumps;
+    changes?: ChangeParsed[];
+  };
+}
 export const changesConsideringParents = ({
   assembledChanges,
   config,
 }: {
   assembledChanges: {
     releases: Releases;
-    changes: {};
+    changes: ChangeParsed[];
   };
   config: ConfigFile;
 }) => {
@@ -189,13 +202,7 @@ export const changesConsideringParents = ({
 
   let changes = Object.keys(assembledChanges.releases).reduce(
     (
-      list: {
-        [k: string]: {
-          parents: string[];
-          type: CommonBumps;
-          changes?: { meta: { dependencies: string } }[];
-        };
-      },
+      list: Changed,
       change
     ) => {
       list[change] = assembledChanges.releases[change];
@@ -205,33 +212,37 @@ export const changesConsideringParents = ({
     {}
   );
 
-  Object.keys(changes).forEach((main) => {
+  return { releases: parentBump(changes, parents), changes: assembledChanges.changes };
+};
+
+const parentBump = (initialChanges: Changed, parents: any): Changed => {
+  let changes = {...initialChanges}
+  let recurse = false
+  Object.keys(initialChanges).forEach((main) => {
     if (changes[main].parents.length > 0) {
       changes[main].parents.forEach((pkg) => {
+        // pkg is the parent and main is the child
         if (!!changes[pkg]) {
           // if a change is planned on the parent
-          // compare and bump the parent if the child is higher
-          changes[pkg].type = compareBumps(
-            changes[main].type,
-            changes[pkg].type
-          );
+          // we don't need to plan a release
         } else {
           // if the parent doesn't have a release
           // add one to adopt the next version of it's child
-          changes[pkg] = cloneDeep(changes[main]);
+          changes[pkg] = {...cloneDeep(changes[main]), type: 'patch'};
           if (changes[pkg].changes) {
             changes[pkg].changes!.forEach((parentChange) => {
               parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
             });
           }
           changes[pkg].parents = parents[pkg];
+          // we also need to presume recursion to update the parents' parents
+          recurse = true
         }
       });
     }
   });
-
-  return { releases: changes, changes: assembledChanges.changes };
-};
+  return recurse ? parentBump(changes, parents) : changes
+}
 
 const bumpAll = ({
   changes,

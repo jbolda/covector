@@ -99,7 +99,7 @@ describe("integration test in production mode", () => {
     );
     expect(changelogTaurijs.contents).toBe(
       "# Changelog\n\n" +
-        "## \\[0.7.0]\n\n" +
+        "## \\[0.6.3]\n\n" +
         "- Summary about the changes in tauri\n"
     );
   });
