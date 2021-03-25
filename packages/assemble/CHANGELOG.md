@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.6.0]
+
+- Roll up bumps from children recursively to bump parents unlimited levels deep. These bumps are done as a `patch` bump as they are automatic. Any parent bumps that would result in a `minor` or `major` change will likely include breaking changes in the package itself. This would imply that a specific change file would be included for it as well, as opposed to relying on a bump from a child.
+  - [1ff1290](https://www.github.com/jbolda/covector/commit/1ff12906d125aeff3d5574092efe1fa469e06198) feat: roll up all bumps as a patch ([#170](https://www.github.com/jbolda/covector/pull/170)) on 2021-03-25
+- Split up config merge function into two functions, one for version and one for publish, et al. This makes the types easier to reason about.
+  - [66539a8](https://www.github.com/jbolda/covector/commit/66539a800365ccfb28f95291b066e77114863382) fix: GitHub release pipe ([#164](https://www.github.com/jbolda/covector/pull/164)) on 2021-03-24
+
 ## \[0.5.0]
 
 - Convert covector to typescript.

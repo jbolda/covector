@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.3.1]
+
+- Add missing dependencies that likely worked due to hoisting.
+  - [60e8fc7](https://www.github.com/jbolda/covector/commit/60e8fc79cef13f2a2b442d772db0d9b8b9695ceb) chore: bump devDeps and fix tsconfig/rollup issues ([#165](https://www.github.com/jbolda/covector/pull/165)) on 2021-03-24
+
 ## \[0.3.0]
 
 - Convert covector to typescript.

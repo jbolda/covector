@@ -1,5 +1,14 @@
 # Changelog
 
+## \[0.3.1]
+
+- Add missing dependencies that likely worked due to hoisting.
+  - [60e8fc7](https://www.github.com/jbolda/covector/commit/60e8fc79cef13f2a2b442d772db0d9b8b9695ceb) chore: bump devDeps and fix tsconfig/rollup issues ([#165](https://www.github.com/jbolda/covector/pull/165)) on 2021-03-24
+- Pull the most recent changelog into the chain of output. This opens up piping it into the Github Release.
+  - [66539a8](https://www.github.com/jbolda/covector/commit/66539a800365ccfb28f95291b066e77114863382) fix: GitHub release pipe ([#164](https://www.github.com/jbolda/covector/pull/164)) on 2021-03-24
+- Split up config merge function into two functions, one for version and one for publish, et al. This makes the types easier to reason about.
+  - [66539a8](https://www.github.com/jbolda/covector/commit/66539a800365ccfb28f95291b066e77114863382) fix: GitHub release pipe ([#164](https://www.github.com/jbolda/covector/pull/164)) on 2021-03-24
+
 ## \[0.3.0]
 
 - Bump effection to stable v1.
