@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.4.2]
+
+- Pipe the previous command output into function commands. This is primarily for the Github Releases which injects functions and will need the changelog output from `pkgCommandsRan`.
+  - [66539a8](https://www.github.com/jbolda/covector/commit/66539a800365ccfb28f95291b066e77114863382) fix: GitHub release pipe ([#164](https://www.github.com/jbolda/covector/pull/164)) on 2021-03-24
+
 ## \[0.4.1]
 
 - The action `dist` folder was accidentally gitignored. We want to commit it so actions can run directly from the dist without install.

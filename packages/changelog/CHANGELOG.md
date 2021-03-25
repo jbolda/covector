@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.4.0]
+
+- Pull the most recent changelog into the chain of output. This opens up piping it into the Github Release.
+  - [66539a8](https://www.github.com/jbolda/covector/commit/66539a800365ccfb28f95291b066e77114863382) fix: GitHub release pipe ([#164](https://www.github.com/jbolda/covector/pull/164)) on 2021-03-24
+
 ## \[0.3.0]
 
 - Convert covector to typescript.

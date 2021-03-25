@@ -1,5 +1,18 @@
 # Changelog
 
+## \[0.5.2]
+
+- Add missing dependencies that likely worked due to hoisting.
+  - [60e8fc7](https://www.github.com/jbolda/covector/commit/60e8fc79cef13f2a2b442d772db0d9b8b9695ceb) chore: bump devDeps and fix tsconfig/rollup issues ([#165](https://www.github.com/jbolda/covector/pull/165)) on 2021-03-24
+- The `init` should consider if there is an existing `.github` folder. Also, set the default action version to `major.minor`.
+  - [0c7fa68](https://www.github.com/jbolda/covector/commit/0c7fa680932b0010f07aeb72d6f400a58ce088b1) fix: init github folder ([#162](https://www.github.com/jbolda/covector/pull/162)) on 2021-03-18
+- Pipe the previous command output into function commands. This is primarily for the Github Releases which injects functions and will need the changelog output from `pkgCommandsRan`.
+  - [66539a8](https://www.github.com/jbolda/covector/commit/66539a800365ccfb28f95291b066e77114863382) fix: GitHub release pipe ([#164](https://www.github.com/jbolda/covector/pull/164)) on 2021-03-24
+- Pull the most recent changelog into the chain of output. This opens up piping it into the Github Release.
+  - [66539a8](https://www.github.com/jbolda/covector/commit/66539a800365ccfb28f95291b066e77114863382) fix: GitHub release pipe ([#164](https://www.github.com/jbolda/covector/pull/164)) on 2021-03-24
+- Split up config merge function into two functions, one for version and one for publish, et al. This makes the types easier to reason about.
+  - [66539a8](https://www.github.com/jbolda/covector/commit/66539a800365ccfb28f95291b066e77114863382) fix: GitHub release pipe ([#164](https://www.github.com/jbolda/covector/pull/164)) on 2021-03-24
+
 ## \[0.5.1]
 
 - The action `dist` folder was accidentally gitignored. We want to commit it so actions can run directly from the dist without install.
