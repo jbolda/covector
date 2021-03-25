@@ -22,7 +22,7 @@ Object {
         "parents": Array [],
         "path": undefined,
         "pkg": "all",
-        "type": "minor",
+        "type": "patch",
       },
       "yarn-workspace-base-pkg-b": Object {
         "dependencies": undefined,
@@ -32,7 +32,7 @@ Object {
         ],
         "path": undefined,
         "pkg": "all",
-        "type": "minor",
+        "type": "patch",
       },
     },
   },
@@ -41,7 +41,7 @@ Object {
 }
 `;
 
-exports[`list changes considering parents bumps higher due to dependency bump 1`] = `
+exports[`list changes considering parents bumps patch due to dependency bump 1`] = `
 Object {
   "changes": Object {
     "changes": undefined,
@@ -63,7 +63,7 @@ Object {
         "parents": Array [],
         "path": undefined,
         "pkg": "all",
-        "type": "minor",
+        "type": "patch",
       },
       "yarn-workspace-base-pkg-b": Object {
         "dependencies": undefined,
@@ -73,7 +73,170 @@ Object {
         ],
         "path": undefined,
         "pkg": "all",
+        "type": "patch",
+      },
+    },
+  },
+  "consoleDir": Array [],
+  "consoleLog": Array [],
+}
+`;
+
+exports[`list changes considering parents rolls up the parent bumps 1`] = `
+Object {
+  "changes": Object {
+    "changes": undefined,
+    "releases": Object {
+      "pkg-a": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": "Bumped due to a bump in pkg-c.",
+            },
+            "releases": Object {
+              "pkg-c": "patch",
+              "pkg-d": "major",
+            },
+            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
+          },
+        ],
+        "parents": Array [
+          "pkg-overall",
+        ],
+        "type": "patch",
+      },
+      "pkg-b": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {},
+            "releases": Object {
+              "pkg-b": "minor",
+            },
+            "summary": "The pkg-b doesn't have a dep bump, but can dep bump pkg-a and pkg-overall with a patch.",
+          },
+        ],
+        "parents": Array [
+          "pkg-overall",
+        ],
         "type": "minor",
+      },
+      "pkg-c": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {},
+            "releases": Object {
+              "pkg-c": "patch",
+              "pkg-d": "major",
+            },
+            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
+          },
+        ],
+        "parents": Array [
+          "pkg-a",
+        ],
+        "type": "patch",
+      },
+      "pkg-d": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {},
+            "releases": Object {
+              "pkg-c": "patch",
+              "pkg-d": "major",
+            },
+            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
+          },
+        ],
+        "parents": Array [
+          "pkg-c",
+          "pkg-four",
+        ],
+        "type": "major",
+      },
+      "pkg-four": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": "Bumped due to a bump in pkg-d.",
+            },
+            "releases": Object {
+              "pkg-c": "patch",
+              "pkg-d": "major",
+            },
+            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
+          },
+        ],
+        "parents": Array [
+          "pkg-three",
+        ],
+        "type": "patch",
+      },
+      "pkg-one": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": "Bumped due to a bump in pkg-two.",
+            },
+            "releases": Object {
+              "pkg-c": "patch",
+              "pkg-d": "major",
+            },
+            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
+          },
+        ],
+        "parents": Array [],
+        "type": "patch",
+      },
+      "pkg-overall": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": "Bumped due to a bump in pkg-b.",
+            },
+            "releases": Object {
+              "pkg-b": "minor",
+            },
+            "summary": "The pkg-b doesn't have a dep bump, but can dep bump pkg-a and pkg-overall with a patch.",
+          },
+        ],
+        "parents": Array [],
+        "type": "patch",
+      },
+      "pkg-three": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": "Bumped due to a bump in pkg-four.",
+            },
+            "releases": Object {
+              "pkg-c": "patch",
+              "pkg-d": "major",
+            },
+            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
+          },
+        ],
+        "parents": Array [
+          "pkg-two",
+        ],
+        "type": "patch",
+      },
+      "pkg-two": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": "Bumped due to a bump in pkg-three.",
+            },
+            "releases": Object {
+              "pkg-c": "patch",
+              "pkg-d": "major",
+            },
+            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
+          },
+        ],
+        "parents": Array [
+          "pkg-one",
+        ],
+        "type": "patch",
       },
     },
   },
