@@ -86,7 +86,15 @@ export function* run(): Generator<any, any, any> {
         core.setOutput("successfulPublish", successfulPublish);
 
         core.setOutput("change", covectored);
-        const payload = JSON.stringify(covectored, undefined, 2);
+        const payload = JSON.stringify(
+          Object.keys(covectored).reduce((c, pkg) => {
+            //@ts-ignore
+            delete c[pkg].pkg.pkgFile.vfile;
+            return c;
+          }, covectored),
+          undefined,
+          2
+        );
         console.log(`The covector output: ${payload}`);
         return covectored;
       }

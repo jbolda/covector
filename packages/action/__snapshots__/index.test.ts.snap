@@ -1,0 +1,207 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`full e2e test tests publish 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "package-one [publish]: echo publish",
+    ],
+    Array [
+      "publish",
+    ],
+    Array [
+      "creating Github Release for package-one@2.3.1",
+    ],
+    Array [
+      "release created: ",
+      Object {
+        "body": "publish
+
+",
+        "draft": false,
+        "id": "boop",
+        "name": "package-one v2.3.1",
+        "owner": "genericOwner",
+        "repo": "genericRepo",
+        "tag_name": "package-one-v2.3.1",
+      },
+    ],
+    Array [
+      "package-two [publish]: echo publish",
+    ],
+    Array [
+      "publish",
+    ],
+    Array [
+      "creating Github Release for package-two@1.9.0",
+    ],
+    Array [
+      "release created: ",
+      Object {
+        "body": "publish
+
+",
+        "draft": false,
+        "id": "boop",
+        "name": "package-two v1.9.0",
+        "owner": "genericOwner",
+        "repo": "genericRepo",
+        "tag_name": "package-two-v1.9.0",
+      },
+    ],
+    Array [
+      "The covector output: {
+  \\"package-one\\": {
+    \\"precommand\\": false,
+    \\"command\\": \\"publish\\\\n\\",
+    \\"postcommand\\": false,
+    \\"pkg\\": {
+      \\"pkg\\": \\"package-one\\",
+      \\"pkgFile\\": {
+        \\"version\\": \\"2.3.1\\",
+        \\"versionMajor\\": 2,
+        \\"versionMinor\\": 3,
+        \\"versionPatch\\": 1,
+        \\"pkg\\": {
+          \\"name\\": \\"package-one\\",
+          \\"version\\": \\"2.3.1\\",
+          \\"license\\": \\"MIT\\",
+          \\"scripts\\": {
+            \\"build\\": \\"yarn info tauri@0.8.0 description\\",
+            \\"test\\": \\"yarn info covector@0.1.0 license\\"
+          }
+        },
+        \\"name\\": \\"package-one\\"
+      },
+      \\"path\\": \\"./packages/package-one\\",
+      \\"manager\\": \\"javascript\\",
+      \\"precommand\\": null,
+      \\"command\\": [
+        {
+          \\"command\\": \\"echo publish\\",
+          \\"pipe\\": true
+        },
+        null
+      ],
+      \\"postcommand\\": null
+    }
+  },
+  \\"package-two\\": {
+    \\"precommand\\": false,
+    \\"command\\": \\"publish\\\\n\\",
+    \\"postcommand\\": false,
+    \\"pkg\\": {
+      \\"pkg\\": \\"package-two\\",
+      \\"pkgFile\\": {
+        \\"version\\": \\"1.9.0\\",
+        \\"versionMajor\\": 1,
+        \\"versionMinor\\": 9,
+        \\"versionPatch\\": 0,
+        \\"pkg\\": {
+          \\"name\\": \\"package-two\\",
+          \\"version\\": \\"1.9.0\\",
+          \\"license\\": \\"MIT\\",
+          \\"scripts\\": {
+            \\"build\\": \\"echo this command is not piped, it is run from scripts for pk2\\",
+            \\"test\\": \\"echo this command is not piped, it is run from the test script\\"
+          }
+        },
+        \\"name\\": \\"package-two\\"
+      },
+      \\"path\\": \\"./packages/package-two\\",
+      \\"manager\\": \\"javascript\\",
+      \\"precommand\\": null,
+      \\"command\\": [
+        {
+          \\"command\\": \\"echo publish\\",
+          \\"pipe\\": true
+        },
+        null
+      ],
+      \\"postcommand\\": null
+    }
+  }
+}",
+    ],
+  ],
+  "covectoredAction": Object {
+    "package-one": Object {
+      "command": "publish
+",
+      "pkg": Object {
+        "command": Array [
+          Object {
+            "command": "echo publish",
+            "dryRunCommand": undefined,
+            "pipe": true,
+          },
+          [Function],
+        ],
+        "dependencies": undefined,
+        "manager": "javascript",
+        "path": "./packages/package-one",
+        "pkg": "package-one",
+        "pkgFile": Object {
+          "name": "package-one",
+          "pkg": Object {
+            "license": "MIT",
+            "name": "package-one",
+            "scripts": Object {
+              "build": "yarn info tauri@0.8.0 description",
+              "test": "yarn info covector@0.1.0 license",
+            },
+            "version": "2.3.1",
+          },
+          "version": "2.3.1",
+          "versionMajor": 2,
+          "versionMinor": 3,
+          "versionPatch": 1,
+        },
+        "postcommand": null,
+        "precommand": null,
+      },
+      "postcommand": false,
+      "precommand": false,
+    },
+    "package-two": Object {
+      "command": "publish
+",
+      "pkg": Object {
+        "command": Array [
+          Object {
+            "command": "echo publish",
+            "dryRunCommand": undefined,
+            "pipe": true,
+          },
+          [Function],
+        ],
+        "dependencies": undefined,
+        "manager": "javascript",
+        "path": "./packages/package-two",
+        "pkg": "package-two",
+        "pkgFile": Object {
+          "name": "package-two",
+          "pkg": Object {
+            "license": "MIT",
+            "name": "package-two",
+            "scripts": Object {
+              "build": "echo this command is not piped, it is run from scripts for pk2",
+              "test": "echo this command is not piped, it is run from the test script",
+            },
+            "version": "1.9.0",
+          },
+          "version": "1.9.0",
+          "versionMajor": 1,
+          "versionMinor": 9,
+          "versionPatch": 0,
+        },
+        "postcommand": null,
+        "precommand": null,
+      },
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;

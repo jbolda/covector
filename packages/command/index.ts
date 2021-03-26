@@ -79,7 +79,13 @@ export const attemptCommands = function* ({
       if (runningCommand.shouldRunCommand && runningCommand.command) {
         if (typeof runningCommand.command === "function") {
           try {
-            const pipeToFunction = { ...pkg, pkgCommandsRan: _pkgCommandsRan };
+            const pipeToFunction = {
+              ...pkg,
+              pkgCommandsRan: {
+                ..._pkgCommandsRan[pkg.pkg],
+                [`${commandPrefix}command`]: stdout,
+              },
+            };
             yield runningCommand.command(pipeToFunction);
 
             if (typeof pubCommand === "object" && pubCommand.pipe) {
