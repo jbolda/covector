@@ -1,1 +1,1 @@
-declare module 'fixturez'
+declare module "fixturez";

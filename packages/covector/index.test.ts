@@ -18,7 +18,7 @@ const mockConsole = (toMock: string[]) => {
     global.console = originalConsole;
   };
 };
-import { injectPublishFunctions } from "./../action/utils";
+import { injectPublishFunctions } from "../action/src/utils";
 
 describe("integration test in production mode", () => {
   let restoreConsole: Function;
