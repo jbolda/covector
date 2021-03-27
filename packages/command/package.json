@@ -1,6 +1,6 @@
 {
   "name": "@covector/command",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "license": "Apache-2.0",
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
@@ -23,7 +23,7 @@
     "strip-ansi": "^6.0.0"
   },
   "devDependencies": {
-    "@covector/assemble": "0.6.0",
+    "@covector/assemble": "0.6.1",
     "@rollup/plugin-typescript": "^8.2.0",
     "rollup": "^2.42.4",
     "tslib": "^2.1.0",
