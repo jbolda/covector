@@ -9,6 +9,10 @@ inputs:
     description: Github Token or PAT for creating releases / posting messages
     required: false
     default: ""
+  cwd:
+    description: The directory to run covector within.
+    required: false
+    default: ""
   createRelease:
     description: Opt-in to create a release on publish
     required: false

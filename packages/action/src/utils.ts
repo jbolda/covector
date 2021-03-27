@@ -1,5 +1,5 @@
 import fs from "fs";
-import { ConfigFile, FunctionPipe } from "../covector/src/run";
+import { ConfigFile, FunctionPipe } from "../../covector/src/run";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -25,7 +25,7 @@ export const commandText = (pkg: {
 };
 
 export const packageListToArray = (list: string): string[] => {
-  if (list === "") {
+  if (list === "" || !list) {
     return [];
   } else {
     return list.split(",");
@@ -64,8 +64,8 @@ function curry(func: Function): Function {
   };
 }
 
-type Methods = { [k: string]: Function };
-type MoreMethods = { [k: string]: Methods };
+export type Methods = { [k: string]: Function };
+export type MoreMethods = { [k: string]: Methods };
 
 export const createReleases = curry(
   async (
