@@ -38,6 +38,10 @@ export const attemptCommands = function* ({
     ...pkgCommandsRan,
   };
   for (let pkg of commands) {
+    const initialStdout = `${
+      //@ts-ignore
+      pkgCommandsRan[pkg.pkg][`${commandPrefix}command`]
+    }\n`;
     //@ts-ignore
     if (!pkg[`${commandPrefix}command`]) continue;
     //@ts-ignore
@@ -46,7 +50,7 @@ export const attemptCommands = function* ({
       typeof c === "string" || typeof c === "function" || !Array.isArray(c)
         ? [c]
         : c;
-    let stdout = "";
+    let stdout = initialStdout ? initialStdout : "";
     for (let pubCommand of pubCommands) {
       const runningCommand: RunningCommand = {
         ...(typeof pubCommand === "object"

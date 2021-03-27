@@ -16,7 +16,11 @@ Object {
     Array [
       "release created: ",
       Object {
-        "body": "publish
+        "body": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+publish
 
 ",
         "draft": false,
@@ -39,7 +43,11 @@ Object {
     Array [
       "release created: ",
       Object {
-        "body": "publish
+        "body": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+publish
 
 ",
         "draft": false,
@@ -54,7 +62,7 @@ Object {
       "The covector output: {
   \\"package-one\\": {
     \\"precommand\\": false,
-    \\"command\\": \\"publish\\\\n\\",
+    \\"command\\": \\"## \\\\\\\\[2.3.1]\\\\n\\\\n- Added some cool things.\\\\n\\\\npublish\\\\n\\",
     \\"postcommand\\": false,
     \\"pkg\\": {
       \\"pkg\\": \\"package-one\\",
@@ -89,7 +97,7 @@ Object {
   },
   \\"package-two\\": {
     \\"precommand\\": false,
-    \\"command\\": \\"publish\\\\n\\",
+    \\"command\\": \\"## \\\\\\\\[1.9.0]\\\\n\\\\n- Added some even cooler things.\\\\n\\\\npublish\\\\n\\",
     \\"postcommand\\": false,
     \\"pkg\\": {
       \\"pkg\\": \\"package-two\\",
@@ -127,7 +135,11 @@ Object {
   ],
   "covectoredAction": Object {
     "package-one": Object {
-      "command": "publish
+      "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+publish
 ",
       "pkg": Object {
         "command": Array [
@@ -165,7 +177,11 @@ Object {
       "precommand": false,
     },
     "package-two": Object {
-      "command": "publish
+      "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+publish
 ",
       "pkg": Object {
         "command": Array [
