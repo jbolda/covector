@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.6.1]
+
+- Mock out full Github Release flow to help in testing the Github Action. Adjust command pipe to function to fix `undefined` being piped to Github Release body.
+  - Bumped due to a bump in @covector/command.
+  - [a7e1b20](https://www.github.com/jbolda/covector/commit/a7e1b209c704829bc8cb54bd220862e627bbee01) fix: mock out full GitHub release flow ([#172](https://www.github.com/jbolda/covector/pull/172)) on 2021-03-27
+
 ## \[0.6.0]
 
 - Roll up bumps from children recursively to bump parents unlimited levels deep. These bumps are done as a `patch` bump as they are automatic. Any parent bumps that would result in a `minor` or `major` change will likely include breaking changes in the package itself. This would imply that a specific change file would be included for it as well, as opposed to relying on a bump from a child.
