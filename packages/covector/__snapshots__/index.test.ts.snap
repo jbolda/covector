@@ -25,7 +25,11 @@ Object {
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": "$ yarn info tauri@0.8.0 description
+      "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+$ yarn info tauri@0.8.0 description
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
       "pkg": Object {
@@ -63,7 +67,11 @@ Multi-binding collection of libraries and templates for building Tauri apps
       "precommand": false,
     },
     "package-two": Object {
-      "command": "$ echo this command is not piped, it is run from scripts for pk2
+      "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+$ echo this command is not piped, it is run from scripts for pk2
 this command is not piped, it is run from scripts for pk2
 ",
       "pkg": Object {
@@ -260,7 +268,11 @@ Object {
     Array [
       Object {
         "package-one": Object {
-          "command": true,
+          "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+",
           "pkg": Object {
             "command": Array [
               Object {
@@ -296,7 +308,11 @@ Object {
           "precommand": false,
         },
         "package-two": Object {
-          "command": true,
+          "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+",
           "pkg": Object {
             "command": Array [
               Object {
@@ -336,7 +352,11 @@ Object {
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": true,
+      "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+",
       "pkg": Object {
         "command": Array [
           Object {
@@ -372,7 +392,11 @@ Object {
       "precommand": false,
     },
     "package-two": Object {
-      "command": true,
+      "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+",
       "pkg": Object {
         "command": Array [
           Object {
@@ -430,7 +454,11 @@ Object {
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": "publish
+      "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+publish
 ",
       "pkg": Object {
         "command": Array [
@@ -467,7 +495,11 @@ Object {
       "precommand": false,
     },
     "package-two": Object {
-      "command": "publish
+      "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+publish
 ",
       "pkg": Object {
         "command": Array [
@@ -663,7 +695,11 @@ Object {
     Array [
       Object {
         "package-one": Object {
-          "command": true,
+          "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+",
           "pkg": Object {
             "command": Array [
               Object {
@@ -699,7 +735,11 @@ Object {
           "precommand": false,
         },
         "package-two": Object {
-          "command": true,
+          "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+",
           "pkg": Object {
             "command": Array [
               Object {
@@ -739,7 +779,11 @@ Object {
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": true,
+      "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+",
       "pkg": Object {
         "command": Array [
           Object {
@@ -775,7 +819,11 @@ Object {
       "precommand": false,
     },
     "package-two": Object {
-      "command": true,
+      "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+",
       "pkg": Object {
         "command": Array [
           Object {
@@ -869,7 +917,11 @@ Object {
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": "$ yarn info tauri@0.8.0 description
+      "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+$ yarn info tauri@0.8.0 description
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
       "pkg": Object {
@@ -915,7 +967,11 @@ Multi-binding collection of libraries and templates for building Tauri apps
       "precommand": false,
     },
     "package-two": Object {
-      "command": "$ echo this command is not piped, it is run from scripts for pk2
+      "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+$ echo this command is not piped, it is run from scripts for pk2
 this command is not piped, it is run from scripts for pk2
 ",
       "pkg": Object {
@@ -1174,7 +1230,11 @@ Object {
     Array [
       Object {
         "package-one": Object {
-          "command": true,
+          "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+",
           "pkg": Object {
             "command": Array [
               Object {
@@ -1218,7 +1278,11 @@ Object {
           "precommand": false,
         },
         "package-two": Object {
-          "command": true,
+          "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+",
           "pkg": Object {
             "command": Array [
               Object {
@@ -1266,7 +1330,11 @@ Object {
   ],
   "covectorReturn": Object {
     "package-one": Object {
-      "command": true,
+      "command": "## \\\\[2.3.1]
+
+- Added some cool things.
+
+",
       "pkg": Object {
         "command": Array [
           Object {
@@ -1310,7 +1378,11 @@ Object {
       "precommand": false,
     },
     "package-two": Object {
-      "command": true,
+      "command": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+
+",
       "pkg": Object {
         "command": Array [
           Object {
