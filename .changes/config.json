@@ -44,7 +44,7 @@
         }
       ]
     },
-    "@covector/apply": {
+    "apply": {
       "path": "./packages/apply",
       "manager": "javascript",
       "dependencies": ["@covector/files", "@covector/assemble", "all"],
@@ -55,7 +55,7 @@
         }
       ]
     },
-    "@covector/assemble": {
+    "assemble": {
       "path": "./packages/assemble",
       "manager": "javascript",
       "dependencies": ["@covector/command", "@covector/files", "all"],
@@ -66,7 +66,7 @@
         }
       ]
     },
-    "@covector/changelog": {
+    "changelog": {
       "path": "./packages/changelog",
       "manager": "javascript",
       "dependencies": ["@covector/files", "all"],
@@ -77,7 +77,7 @@
         }
       ]
     },
-    "@covector/files": {
+    "files": {
       "path": "./packages/files",
       "manager": "javascript",
       "dependencies": ["all"],
@@ -88,7 +88,7 @@
         }
       ]
     },
-    "@covector/command": {
+    "command": {
       "path": "./packages/command",
       "manager": "javascript",
       "dependencies": ["@covector/files", "@covector/assemble", "all"],
