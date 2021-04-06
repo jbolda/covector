@@ -13,9 +13,9 @@
     "dist/**/*"
   ],
   "scripts": {
-    "build": "rollup --config",
+    "build": "tsc -b",
     "clean": "rimraf dist",
-    "prepublishOnly": "rollup --config"
+    "prepublishOnly": "tsc -b"
   },
   "dependencies": {
     "@covector/files": "0.3.1",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.168",
+    "tslib": "^2.2.0",
     "typescript": "^4.2.3"
   },
   "volta": {
