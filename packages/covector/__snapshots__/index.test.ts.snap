@@ -5,19 +5,21 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "package-one [build]: yarn build",
+      "package-one [build]: npm run build",
     ],
     Array [
-      "$ yarn info tauri@0.8.0 description",
+      "> package-one@2.3.1 build
+> npm info tauri@0.8.0 description",
     ],
     Array [
       "Multi-binding collection of libraries and templates for building Tauri apps",
     ],
     Array [
-      "package-two [build]: yarn build",
+      "package-two [build]: npm run build",
     ],
     Array [
-      "$ echo this command is not piped, it is run from scripts for pk2",
+      "> package-two@1.9.0 build
+> echo this command is not piped, it is run from scripts for pk2",
     ],
     Array [
       "this command is not piped, it is run from scripts for pk2",
@@ -29,13 +31,15 @@ Object {
 
 - Added some cool things.
 
-$ yarn info tauri@0.8.0 description
+> package-one@2.3.1 build
+> npm info tauri@0.8.0 description
+
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
       "pkg": Object {
         "command": Array [
           Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "dryRunCommand": undefined,
             "pipe": true,
           },
@@ -50,8 +54,8 @@ Multi-binding collection of libraries and templates for building Tauri apps
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -71,13 +75,15 @@ Multi-binding collection of libraries and templates for building Tauri apps
 
 - Added some even cooler things.
 
-$ echo this command is not piped, it is run from scripts for pk2
+> package-two@1.9.0 build
+> echo this command is not piped, it is run from scripts for pk2
+
 this command is not piped, it is run from scripts for pk2
 ",
       "pkg": Object {
         "command": Array [
           Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "dryRunCommand": undefined,
             "pipe": true,
           },
@@ -125,7 +131,7 @@ Object {
       Object {
         "pkg": Object {
           "command": Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "pipe": true,
           },
           "dependencies": undefined,
@@ -141,8 +147,8 @@ Object {
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -159,7 +165,7 @@ Object {
       Object {
         "pkg": Object {
           "command": Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "pipe": true,
           },
           "dependencies": undefined,
@@ -195,7 +201,7 @@ Object {
         Object {
           "command": Array [
             Object {
-              "command": "yarn build",
+              "command": "npm run build",
               "dryRunCommand": undefined,
               "pipe": true,
             },
@@ -210,8 +216,8 @@ Object {
               "license": "MIT",
               "name": "package-one",
               "scripts": Object {
-                "build": "yarn info tauri@0.8.0 description",
-                "test": "yarn info covector@0.1.0 license",
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
               },
               "version": "2.3.1",
             },
@@ -226,7 +232,7 @@ Object {
         Object {
           "command": Array [
             Object {
-              "command": "yarn build",
+              "command": "npm run build",
               "dryRunCommand": undefined,
               "pipe": true,
             },
@@ -257,10 +263,10 @@ Object {
       ],
     ],
     Array [
-      "dryRun >> package-one [build]: yarn build",
+      "dryRun >> package-one [build]: npm run build",
     ],
     Array [
-      "dryRun >> package-two [build]: yarn build",
+      "dryRun >> package-two [build]: npm run build",
     ],
     Array [
       "==== result ===",
@@ -276,7 +282,7 @@ Object {
           "pkg": Object {
             "command": Array [
               Object {
-                "command": "yarn build",
+                "command": "npm run build",
                 "dryRunCommand": undefined,
                 "pipe": true,
               },
@@ -291,8 +297,8 @@ Object {
                 "license": "MIT",
                 "name": "package-one",
                 "scripts": Object {
-                  "build": "yarn info tauri@0.8.0 description",
-                  "test": "yarn info covector@0.1.0 license",
+                  "build": "npm info tauri@0.8.0 description",
+                  "test": "npm info covector@0.1.0 license",
                 },
                 "version": "2.3.1",
               },
@@ -316,7 +322,7 @@ Object {
           "pkg": Object {
             "command": Array [
               Object {
-                "command": "yarn build",
+                "command": "npm run build",
                 "dryRunCommand": undefined,
                 "pipe": true,
               },
@@ -360,7 +366,7 @@ Object {
       "pkg": Object {
         "command": Array [
           Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "dryRunCommand": undefined,
             "pipe": true,
           },
@@ -375,8 +381,8 @@ Object {
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -400,7 +406,7 @@ Object {
       "pkg": Object {
         "command": Array [
           Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "dryRunCommand": undefined,
             "pipe": true,
           },
@@ -478,8 +484,8 @@ publish
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -568,8 +574,8 @@ Object {
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -637,8 +643,8 @@ Object {
               "license": "MIT",
               "name": "package-one",
               "scripts": Object {
-                "build": "yarn info tauri@0.8.0 description",
-                "test": "yarn info covector@0.1.0 license",
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
               },
               "version": "2.3.1",
             },
@@ -718,8 +724,8 @@ Object {
                 "license": "MIT",
                 "name": "package-one",
                 "scripts": Object {
-                  "build": "yarn info tauri@0.8.0 description",
-                  "test": "yarn info covector@0.1.0 license",
+                  "build": "npm info tauri@0.8.0 description",
+                  "test": "npm info covector@0.1.0 license",
                 },
                 "version": "2.3.1",
               },
@@ -802,8 +808,8 @@ Object {
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -867,19 +873,21 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "package-one [test]: yarn build",
+      "package-one [test]: npm run build",
     ],
     Array [
-      "$ yarn info tauri@0.8.0 description",
+      "> package-one@2.3.1 build
+> npm info tauri@0.8.0 description",
     ],
     Array [
       "Multi-binding collection of libraries and templates for building Tauri apps",
     ],
     Array [
-      "package-one [test]: yarn test",
+      "package-one [test]: npm test",
     ],
     Array [
-      "$ yarn info covector@0.1.0 license",
+      "> package-one@2.3.1 test
+> npm info covector@0.1.0 license",
     ],
     Array [
       "Apache-2.0",
@@ -891,19 +899,21 @@ Object {
       "boop",
     ],
     Array [
-      "package-two [test]: yarn build",
+      "package-two [test]: npm run build",
     ],
     Array [
-      "$ echo this command is not piped, it is run from scripts for pk2",
+      "> package-two@1.9.0 build
+> echo this command is not piped, it is run from scripts for pk2",
     ],
     Array [
       "this command is not piped, it is run from scripts for pk2",
     ],
     Array [
-      "package-two [test]: yarn test",
+      "package-two [test]: npm test",
     ],
     Array [
-      "$ echo this command is not piped, it is run from the test script",
+      "> package-two@1.9.0 test
+> echo this command is not piped, it is run from the test script",
     ],
     Array [
       "this command is not piped, it is run from the test script",
@@ -921,18 +931,20 @@ Object {
 
 - Added some cool things.
 
-$ yarn info tauri@0.8.0 description
+> package-one@2.3.1 build
+> npm info tauri@0.8.0 description
+
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
       "pkg": Object {
         "command": Array [
           Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "dryRunCommand": undefined,
             "pipe": true,
           },
           Object {
-            "command": "yarn test",
+            "command": "npm test",
             "dryRunCommand": false,
           },
           Object {
@@ -950,8 +962,8 @@ Multi-binding collection of libraries and templates for building Tauri apps
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -971,18 +983,20 @@ Multi-binding collection of libraries and templates for building Tauri apps
 
 - Added some even cooler things.
 
-$ echo this command is not piped, it is run from scripts for pk2
+> package-two@1.9.0 build
+> echo this command is not piped, it is run from scripts for pk2
+
 this command is not piped, it is run from scripts for pk2
 ",
       "pkg": Object {
         "command": Array [
           Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "dryRunCommand": undefined,
             "pipe": true,
           },
           Object {
-            "command": "yarn test",
+            "command": "npm test",
             "dryRunCommand": false,
           },
           Object {
@@ -1034,11 +1048,11 @@ Object {
         "pkg": Object {
           "command": Array [
             Object {
-              "command": "yarn build",
+              "command": "npm run build",
               "pipe": true,
             },
             Object {
-              "command": "yarn test",
+              "command": "npm test",
               "dryRunCommand": false,
             },
             Object {
@@ -1059,8 +1073,8 @@ Object {
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -1078,11 +1092,11 @@ Object {
         "pkg": Object {
           "command": Array [
             Object {
-              "command": "yarn build",
+              "command": "npm run build",
               "pipe": true,
             },
             Object {
-              "command": "yarn test",
+              "command": "npm test",
               "dryRunCommand": false,
             },
             Object {
@@ -1123,12 +1137,12 @@ Object {
         Object {
           "command": Array [
             Object {
-              "command": "yarn build",
+              "command": "npm run build",
               "dryRunCommand": undefined,
               "pipe": true,
             },
             Object {
-              "command": "yarn test",
+              "command": "npm test",
               "dryRunCommand": false,
             },
             Object {
@@ -1146,8 +1160,8 @@ Object {
               "license": "MIT",
               "name": "package-one",
               "scripts": Object {
-                "build": "yarn info tauri@0.8.0 description",
-                "test": "yarn info covector@0.1.0 license",
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
               },
               "version": "2.3.1",
             },
@@ -1162,12 +1176,12 @@ Object {
         Object {
           "command": Array [
             Object {
-              "command": "yarn build",
+              "command": "npm run build",
               "dryRunCommand": undefined,
               "pipe": true,
             },
             Object {
-              "command": "yarn test",
+              "command": "npm test",
               "dryRunCommand": false,
             },
             Object {
@@ -1201,10 +1215,10 @@ Object {
       ],
     ],
     Array [
-      "dryRun >> package-one [test]: yarn build",
+      "dryRun >> package-one [test]: npm run build",
     ],
     Array [
-      "dryRun >> package-one [test]: yarn test",
+      "dryRun >> package-one [test]: npm test",
     ],
     Array [
       "package-one [test]: echo deboop",
@@ -1213,10 +1227,10 @@ Object {
       "deboop",
     ],
     Array [
-      "dryRun >> package-two [test]: yarn build",
+      "dryRun >> package-two [test]: npm run build",
     ],
     Array [
-      "dryRun >> package-two [test]: yarn test",
+      "dryRun >> package-two [test]: npm test",
     ],
     Array [
       "package-two [test]: echo deboop",
@@ -1238,12 +1252,12 @@ Object {
           "pkg": Object {
             "command": Array [
               Object {
-                "command": "yarn build",
+                "command": "npm run build",
                 "dryRunCommand": undefined,
                 "pipe": true,
               },
               Object {
-                "command": "yarn test",
+                "command": "npm test",
                 "dryRunCommand": false,
               },
               Object {
@@ -1261,8 +1275,8 @@ Object {
                 "license": "MIT",
                 "name": "package-one",
                 "scripts": Object {
-                  "build": "yarn info tauri@0.8.0 description",
-                  "test": "yarn info covector@0.1.0 license",
+                  "build": "npm info tauri@0.8.0 description",
+                  "test": "npm info covector@0.1.0 license",
                 },
                 "version": "2.3.1",
               },
@@ -1286,12 +1300,12 @@ Object {
           "pkg": Object {
             "command": Array [
               Object {
-                "command": "yarn build",
+                "command": "npm run build",
                 "dryRunCommand": undefined,
                 "pipe": true,
               },
               Object {
-                "command": "yarn test",
+                "command": "npm test",
                 "dryRunCommand": false,
               },
               Object {
@@ -1338,12 +1352,12 @@ Object {
       "pkg": Object {
         "command": Array [
           Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "dryRunCommand": undefined,
             "pipe": true,
           },
           Object {
-            "command": "yarn test",
+            "command": "npm test",
             "dryRunCommand": false,
           },
           Object {
@@ -1361,8 +1375,8 @@ Object {
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -1386,12 +1400,12 @@ Object {
       "pkg": Object {
         "command": Array [
           Object {
-            "command": "yarn build",
+            "command": "npm run build",
             "dryRunCommand": undefined,
             "pipe": true,
           },
           Object {
-            "command": "yarn test",
+            "command": "npm test",
             "dryRunCommand": false,
           },
           Object {
@@ -3538,13 +3552,12 @@ Object {
             },
             "scripts": Object {
               "build": "webpack --progress",
-              "build-release": "yarn build --display none --progress false",
+              "build-release": "npm run build --display none --progress false",
               "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
               "lint": "eslint --ext ts ./src/**/*.ts",
               "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-              "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
-              "prepublishOnly": "yarn build-release",
-              "pretest": "yarn build",
+              "prepublishOnly": "npm run build-release",
+              "pretest": "npm run build",
               "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
               "test:local": "jest --runInBand",
             },
@@ -4092,13 +4105,12 @@ Object {
               },
               "scripts": Object {
                 "build": "webpack --progress",
-                "build-release": "yarn build --display none --progress false",
+                "build-release": "npm run build --display none --progress false",
                 "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
                 "lint": "eslint --ext ts ./src/**/*.ts",
                 "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-                "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
-                "prepublishOnly": "yarn build-release",
-                "pretest": "yarn build",
+                "prepublishOnly": "npm run build-release",
+                "pretest": "npm run build",
                 "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
                 "test:local": "jest --runInBand",
               },
@@ -5168,13 +5180,12 @@ Object {
                 },
                 "scripts": Object {
                   "build": "webpack --progress",
-                  "build-release": "yarn build --display none --progress false",
+                  "build-release": "npm run build --display none --progress false",
                   "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
                   "lint": "eslint --ext ts ./src/**/*.ts",
                   "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-                  "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
-                  "prepublishOnly": "yarn build-release",
-                  "pretest": "yarn build",
+                  "prepublishOnly": "npm run build-release",
+                  "pretest": "npm run build",
                   "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
                   "test:local": "jest --runInBand",
                 },
@@ -5743,13 +5754,12 @@ Object {
             },
             "scripts": Object {
               "build": "webpack --progress",
-              "build-release": "yarn build --display none --progress false",
+              "build-release": "npm run build --display none --progress false",
               "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
               "lint": "eslint --ext ts ./src/**/*.ts",
               "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-              "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
-              "prepublishOnly": "yarn build-release",
-              "pretest": "yarn build",
+              "prepublishOnly": "npm run build-release",
+              "pretest": "npm run build",
               "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
               "test:local": "jest --runInBand",
             },
@@ -6280,13 +6290,12 @@ Object {
               },
               "scripts": Object {
                 "build": "webpack --progress",
-                "build-release": "yarn build --display none --progress false",
+                "build-release": "npm run build --display none --progress false",
                 "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
                 "lint": "eslint --ext ts ./src/**/*.ts",
                 "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-                "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
-                "prepublishOnly": "yarn build-release",
-                "pretest": "yarn build",
+                "prepublishOnly": "npm run build-release",
+                "pretest": "npm run build",
                 "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
                 "test:local": "jest --runInBand",
               },
@@ -6607,13 +6616,12 @@ Object {
           },
           "scripts": Object {
             "build": "webpack --progress",
-            "build-release": "yarn build --display none --progress false",
+            "build-release": "npm run build --display none --progress false",
             "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
             "lint": "eslint --ext ts ./src/**/*.ts",
             "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-            "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
-            "prepublishOnly": "yarn build-release",
-            "pretest": "yarn build",
+            "prepublishOnly": "npm run build-release",
+            "pretest": "npm run build",
             "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
             "test:local": "jest --runInBand",
           },
@@ -8100,13 +8108,12 @@ tauri-utils",
             },
             "scripts": Object {
               "build": "webpack --progress",
-              "build-release": "yarn build --display none --progress false",
+              "build-release": "npm run build --display none --progress false",
               "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
               "lint": "eslint --ext ts ./src/**/*.ts",
               "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-              "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
-              "prepublishOnly": "yarn build-release",
-              "pretest": "yarn build",
+              "prepublishOnly": "npm run build-release",
+              "pretest": "npm run build",
               "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
               "test:local": "jest --runInBand",
             },
@@ -8471,13 +8478,12 @@ Object {
           },
           "scripts": Object {
             "build": "webpack --progress",
-            "build-release": "yarn build --display none --progress false",
+            "build-release": "npm run build --display none --progress false",
             "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty",
             "lint": "eslint --ext ts ./src/**/*.ts",
             "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-            "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
-            "prepublishOnly": "yarn build-release",
-            "pretest": "yarn build",
+            "prepublishOnly": "npm run build-release",
+            "pretest": "npm run build",
             "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
             "test:local": "jest --runInBand",
           },
@@ -8718,8 +8724,8 @@ Object {
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },
@@ -8814,8 +8820,8 @@ Object {
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },

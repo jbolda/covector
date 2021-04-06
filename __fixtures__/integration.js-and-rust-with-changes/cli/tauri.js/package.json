@@ -11,14 +11,13 @@
   },
   "scripts": {
     "build": "webpack --progress",
-    "build-release": "yarn build --display none --progress false",
+    "build-release": "npm run build --display none --progress false",
     "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\"(build|dev)\"",
-    "pretest": "yarn build",
-    "prepublishOnly": "yarn build-release",
+    "pretest": "npm run build",
+    "prepublishOnly": "npm run build-release",
     "test:local": "jest --runInBand",
     "lint": "eslint --ext ts ./src/**/*.ts",
     "lint-fix": "eslint --fix --ext ts ./src/**/*.ts",
-    "lint:lockfile": "lockfile-lint --path yarn.lock --type yarn --validate-https --allowed-hosts npm yarn",
     "build:tauri[rust]": "cd ../tauri && TAURI_DIST_DIR=../../test/fixture/dist TAURI_DIR=../test/fixture cargo publish --dry-run --allow-dirty"
   },
   "repository": {
