@@ -40,9 +40,6 @@ target
 .env
 .env.test
 
-# lockfiles, as a lib we don't need to lock
-yarn.lock
-
 # rollup output
 dist
 # but we want the action dist

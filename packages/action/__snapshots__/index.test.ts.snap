@@ -76,8 +76,8 @@ publish
           \\"version\\": \\"2.3.1\\",
           \\"license\\": \\"MIT\\",
           \\"scripts\\": {
-            \\"build\\": \\"yarn info tauri@0.8.0 description\\",
-            \\"test\\": \\"yarn info covector@0.1.0 license\\"
+            \\"build\\": \\"npm info tauri@0.8.0 description\\",
+            \\"test\\": \\"npm info covector@0.1.0 license\\"
           }
         },
         \\"name\\": \\"package-one\\"
@@ -160,8 +160,8 @@ publish
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
-              "build": "yarn info tauri@0.8.0 description",
-              "test": "yarn info covector@0.1.0 license",
+              "build": "npm info tauri@0.8.0 description",
+              "test": "npm info covector@0.1.0 license",
             },
             "version": "2.3.1",
           },

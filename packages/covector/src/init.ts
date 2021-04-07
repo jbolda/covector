@@ -6,7 +6,7 @@ const fs = fsDefault.promises;
 import path from "path";
 // @ts-ignore
 import { readPkgFile, PackageFile } from "@covector/files";
-import covectorPackageFile from "../package.json";
+const covectorPackageFile = require("../package.json");
 
 // for future typescripting reference
 // most of the @ts-ignore have to do with Dir/FileHandle vs string

@@ -4,7 +4,7 @@ Transparent and flexible change management for publishing packages and assets. P
 
 ## Usage
 
-This library is primarily designed as a CLI, but we do also have a GitHub Action that can be used. The CLI commands can be used within any CI/CD environment. To use this in a production setting, we expect a `.changes` folder where one would put the `config.json`. (Eventually an `init` command can bootstrap this for you. Would love to see a PR adding this.) We typically will recommend adding covector as a dev dependency at the root. Then one can run `yarn covector` to access the commands. We include a dry run mode that you can test the version and publish commands with.
+This library is primarily designed as a CLI, but we do also have a GitHub Action that can be used. The CLI commands can be used within any CI/CD environment. To use this in a production setting, we expect a `.changes` folder where one would put the `config.json`. (Eventually an `init` command can bootstrap this for you. Would love to see a PR adding this.) We typically will recommend adding covector as a dev dependency at the root. Then one can run `npm run covector` to access the commands. We include a dry run mode that you can test the version and publish commands with.
 
 ### Primary Commands
 
