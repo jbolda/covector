@@ -43,6 +43,12 @@ export interface PackageFile extends PkgMinimum {
   name?: string;
 }
 
+export interface PreFile {
+  vfile?: VFile;
+  tag: string;
+  changes: string[] | [];
+}
+
 export type ConfigFile = {
   vfile?: VFile;
   gitSiteUrl?: string;
@@ -210,6 +216,45 @@ export const writePkgFile = async ({
   vFileNext.contents = stringifyPkg({
     newContents: packageFile.pkg,
     extname: packageFile.vfile.extname,
+  });
+  const inputVfile = await vfile.write(vFileNext, "utf8");
+  return inputVfile;
+};
+
+export const readPreFile = async ({
+  cwd,
+  changeFolder = ".changes",
+}: {
+  cwd: string;
+  changeFolder?: string;
+}): Promise<PreFile | null> => {
+  try {
+    const inputVfile = await vfile.read(
+      path.join(cwd, changeFolder, "pre.json"),
+      "utf8"
+    );
+    const parsed = JSON.parse(inputVfile.contents);
+    return {
+      vfile: inputVfile,
+      ...parsed,
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+export const writePreFile = async ({
+  preFile,
+}: {
+  preFile: PreFile;
+}): Promise<VFile> => {
+  if (!preFile.vfile)
+    throw new Error(`We could not find the pre.json to update.`);
+  const { tag, changes } = preFile;
+  const vFileNext = { ...preFile.vfile };
+  vFileNext.contents = stringifyPkg({
+    newContents: { tag, changes },
+    extname: preFile.vfile.extname,
   });
   const inputVfile = await vfile.write(vFileNext, "utf8");
   return inputVfile;
