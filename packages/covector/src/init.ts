@@ -106,25 +106,15 @@ export const init = function* init({
 
   const javascript = {
     version: true,
-    getPublishedVersion: "npm view ${ pkg.pkg } version",
-    publish: [
-      {
-        command: "npm publish --access public",
-        dryRunCommand: "echo publish here",
-      },
-    ],
+    getPublishedVersion: "npm view ${ pkgFile.pkg.name } version",
+    publish: ["npm publish --access public"],
   };
 
   const rust = {
     version: true,
     getPublishedVersion:
       'cargo search ${ pkg.pkg } --limit 1 | sed -nE \'s/^[^"]*"//; s/".*//1p\' -',
-    publish: [
-      {
-        command: "cargo publish --no-verify",
-        dryRunCommand: "cargo publish --no-verify --dry-run --allow-dirty",
-      },
-    ],
+    publish: ["cargo publish"],
   };
 
   const githubAction = {
