@@ -218,6 +218,8 @@ export function* covector({
     }
 
     return pkgCommandsRan;
+  } else if (command === "preview") {
+    console.log('WIP');
   } else {
     yield raceTime({ t: config.timeout });
     const commands: PkgPublish[] = yield mergeIntoConfig({
