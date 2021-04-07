@@ -16,9 +16,15 @@ export function* run(): Generator<any, any, any> {
       core.getInput("token") === ""
         ? process.env.GITHUB_TOKEN || ""
         : core.getInput("token");
-    const inputCommand = core.getInput("command") || "status";
+    const inputCommand = core.getInput("command");
+
+    if (!inputCommand) {
+      throw new Error("Must specify command for action. See README.");
+    };
+
     const filterPackages = packageListToArray(core.getInput("filterPackages"));
     let command = inputCommand;
+
     if (inputCommand === "version-or-publish") {
       if ((yield covector({ command: "status" })) === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
@@ -98,7 +104,9 @@ export function* run(): Generator<any, any, any> {
         console.log(`The covector output: ${payload}`);
         return covectored;
       }
-    }
+    } else {
+      throw new Error(`Command "${command}" not recognized. See README for which commands are available.`);
+    };
   } catch (error) {
     core.setFailed(error.message);
   }
