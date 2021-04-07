@@ -220,6 +220,7 @@ export function* covector({
     return pkgCommandsRan;
   } else if (command === "preview") {
     console.log('WIP');
+    return 'placeholder';
   } else {
     yield raceTime({ t: config.timeout });
     const commands: PkgPublish[] = yield mergeIntoConfig({

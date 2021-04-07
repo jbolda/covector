@@ -13,7 +13,7 @@ jobs:
       - run: yarn build
       - run: yarn workspace action pkg
       - name: covector preview
-        uses: minkimcello/covector/packages/action@mk/previews
+        uses: jbolda/covector/packages/action@mk/previews
         id: covector
         with:
           command: preview
