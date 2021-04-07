@@ -105,7 +105,7 @@ export function* run(): Generator<any, any, any> {
         return covectored;
       }
     } else if (command === "preview") {
-      const previewLabel = github.context.payload.pull_request.labels.filter(({ name }) => name === 'preview').length;
+      const previewLabel = github?.context?.payload?.pull_request?.labels?.filter(({ name } : { name: String }) => name === 'preview').length;
       if (!previewLabel) {
         console.log('Not publishing any preview packages because the "preview" label has not been applied to this pull request.')
       } else {
