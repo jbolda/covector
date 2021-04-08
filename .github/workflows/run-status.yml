@@ -10,7 +10,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: volta-cli/action@v1
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run build
       - run: npm run pkg -w action
       - name: covector status
