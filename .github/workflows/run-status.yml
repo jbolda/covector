@@ -10,9 +10,6 @@ jobs:
         with:
           fetch-depth: 0
       - uses: volta-cli/action@v1
-      - uses: actions/setup-node@v2
-        with:
-          registry-url: "https://registry.npmjs.org"
       - run: npm ci --ignore-scripts
       - run: npm run build
       - run: npm run pkg -w action
