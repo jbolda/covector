@@ -1,4 +1,5 @@
 import unified from "unified";
+import { Root, YAML as Frontmatter, Content } from "mdast";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
 import frontmatter from "remark-frontmatter";
@@ -11,10 +12,24 @@ type Changeset = {
   //TODO can we narrow this more?
   releases?: { [k: string]: string } | {};
   summary?: {};
-  meta?: { filename: string; commits?: string[] };
+  meta?: {
+    filename: string;
+    commits?: {
+      hashShort: string;
+      hashLong: string;
+      date: string;
+      commitSubject: string;
+    }[];
+  };
 };
 
-const parseChange = function* ({ cwd, vfile }: { cwd?: string; vfile: VFile }) {
+const parseChange = function* ({
+  cwd,
+  vfile,
+}: {
+  cwd?: string;
+  vfile: VFile;
+}): Generator<any, Changeset, any> {
   const processor = unified()
     .use(parse)
     .use(frontmatter, ["yaml"])
@@ -23,11 +38,13 @@ const parseChange = function* ({ cwd, vfile }: { cwd?: string; vfile: VFile }) {
     });
 
   const parsed = processor.parse(vfile.contents.trim());
-  //@ts-ignore
-  const processed = yield processor.run(parsed);
+  const processed: Root = yield processor.run(parsed);
   let changeset: Changeset = {};
-  const [parsedChanges, ...remaining] = processed.children;
-  const parsedYaml = yaml.load(parsedChanges.value);
+  const [parsedChanges, ...remaining]: (
+    | Frontmatter
+    | Content
+  )[] = processed.children;
+  const parsedYaml = yaml.load(parsedChanges.value as string);
   changeset.releases =
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
   changeset.summary = processor
@@ -39,7 +56,6 @@ const parseChange = function* ({ cwd, vfile }: { cwd?: string; vfile: VFile }) {
 
   if (cwd) {
     try {
-      //@ts-ignore TODO generator error
       let gitInfo = yield runCommand({
         cwd,
         pkgPath: "",
