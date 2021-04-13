@@ -215,6 +215,32 @@ describe("assemble changes", () => {
   });
 });
 
+describe("assemble changes in preMode", () => {
+  it("with no existing changes", function* (): Generator<any> {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      preMode: { on: true, prevFiles: [] },
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("with existing changes that upgrade", function* (): Generator<any> {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      preMode: { on: true, prevFiles: [testTextOne] },
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("with existing changes with the same bump", function* (): Generator<any> {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextFour],
+      preMode: { on: true, prevFiles: [testTextOne] },
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+});
+
 describe("special bump types", () => {
   it("valid additional bump types", function* (): Generator<any> {
     const assembled = yield assemble({

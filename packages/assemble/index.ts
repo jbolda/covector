@@ -9,9 +9,8 @@ import { readPkgFile, VFile, PackageFile, ConfigFile } from "@covector/files";
 import { runCommand } from "@covector/command";
 
 type Changeset = {
-  //TODO can we narrow this more?
-  releases?: { [k: string]: string } | {};
-  summary?: {};
+  releases?: { [k: string]: CommonBumps } | {};
+  summary?: string;
   meta?: {
     filename: string;
     commits?: {
@@ -21,6 +20,37 @@ type Changeset = {
       commitSubject: string;
     }[];
   };
+};
+
+export type CommonBumps = "major" | "minor" | "patch" | "prerelease" | "noop";
+
+type Change = {
+  releases: { [k: string]: CommonBumps };
+  meta?: { filename?: string };
+};
+
+type Release = {
+  type: string;
+  changes: Change[];
+  parents?: string[];
+};
+
+export type PkgVersion = {
+  pkg: string;
+  path?: string;
+  packageFileName?: string;
+  type?: string;
+  parents?: string[];
+  precommand: string | null;
+  command: string | null;
+  postcommand: string | null;
+  manager?: string;
+  dependencies?: string[];
+};
+
+type PipeVersionTemplate = {
+  release: Release;
+  pkg: PkgVersion;
 };
 
 const parseChange = function* ({
@@ -85,8 +115,6 @@ const parseChange = function* ({
   return changeset;
 };
 
-export type CommonBumps = "major" | "minor" | "patch" | "noop";
-
 export const compareBumps = (bumpOne: CommonBumps, bumpTwo: CommonBumps) => {
   // major, minor, or patch
   // enum and use Int to compare
@@ -94,56 +122,46 @@ export const compareBumps = (bumpOne: CommonBumps, bumpTwo: CommonBumps) => {
     ["major", 1],
     ["minor", 2],
     ["patch", 3],
-    ["noop", 4],
+    ["prerelease", 4],
+    ["noop", 5],
   ]);
   return bumps.get(bumpOne)! < bumps.get(bumpTwo)! ? bumpOne : bumpTwo;
-};
-
-type Change = {
-  releases: { [k: string]: CommonBumps };
-  meta?: { filename?: string };
 };
 
 const mergeReleases = (
   changes: Change[],
   { additionalBumpTypes = [] }: { additionalBumpTypes?: string[] }
 ) => {
-  return changes.reduce(
-    (
-      release: { [k: string]: { type: CommonBumps; changes: Change[] } },
-      change
-    ) => {
-      Object.keys(change.releases).forEach((pkg) => {
-        const bumpOptions = ["major", "minor", "patch", "noop"].concat(
-          additionalBumpTypes
-        );
+  return changes.reduce((release: { [k: string]: Release }, change) => {
+    Object.keys(change.releases).forEach((pkg) => {
+      const bumpOptions = ["major", "minor", "patch", "noop"].concat(
+        additionalBumpTypes
+      );
 
-        assertBumpType(
-          pkg,
-          change.releases[pkg],
-          bumpOptions,
-          !change.meta ? `` : ` in ${change.meta.filename}`
-        );
+      assertBumpType(
+        pkg,
+        change.releases[pkg],
+        bumpOptions,
+        !change.meta ? `` : ` in ${change.meta.filename}`
+      );
 
-        const bumpType = additionalBumpTypes.includes(change.releases[pkg])
-          ? "noop"
-          : change.releases[pkg];
-        if (!release[pkg]) {
-          release[pkg] = {
-            type: bumpType,
-            changes: cloneDeep([change]),
-          };
-        } else {
-          release[pkg] = {
-            type: compareBumps(release[pkg].type, bumpType),
-            changes: cloneDeep([...release[pkg].changes, change]),
-          };
-        }
-      });
-      return release;
-    },
-    {}
-  );
+      const bumpType = additionalBumpTypes.includes(change.releases[pkg])
+        ? "noop"
+        : change.releases[pkg];
+      if (!release[pkg]) {
+        release[pkg] = {
+          type: bumpType,
+          changes: cloneDeep([change]),
+        };
+      } else {
+        release[pkg] = {
+          type: compareBumps(release[pkg].type, bumpType),
+          changes: cloneDeep([...release[pkg].changes, change]),
+        };
+      }
+    });
+    return release;
+  }, {});
 };
 
 function assertBumpType(
@@ -166,13 +184,15 @@ export const assemble = function* ({
   cwd,
   vfiles,
   config,
+  preMode = { on: false, prevFiles: [] },
 }: {
   cwd?: string;
   vfiles: VFile[];
   config?: ConfigFile;
+  preMode?: { on: boolean; prevFiles: VFile[] };
 }) {
   let plan: {
-    changes?: {};
+    changes?: Change[];
     releases?: {
       [k: string]: {
         type: CommonBumps;
@@ -180,16 +200,26 @@ export const assemble = function* ({
       };
     };
   } = {};
-  let changes: Change[] = yield function* () {
-    let allVfiles = vfiles.map((vfile) => parseChange({ cwd, vfile }));
-    let yieldedV: Change[] = [];
-    for (let v of allVfiles) {
-      yieldedV = [...yieldedV, yield v];
-    }
-    return yieldedV;
-  };
-  plan.changes = changes;
-  plan.releases = mergeReleases(changes, config || {});
+
+  // if in prerelease mode, we only make bumps if the new one is "larger" than the last
+  // otherwise we only want a prerelease bump (which just increments the ending number)
+  if (preMode.on) {
+    const allChanges: Change[] = yield changesParsed({ cwd, vfiles });
+    const allMergedRelease = mergeReleases(allChanges, config || {});
+    const previousChanges: Change[] = yield changesParsed({
+      cwd,
+      vfiles: preMode.prevFiles,
+    });
+    const previousMergedRelease = mergeReleases(previousChanges, config || {});
+    const diffed = changeDiff({ allMergedRelease, previousMergedRelease });
+    // TODO mush these and decide what _needs_ to be bumped
+    plan.changes = previousChanges;
+    plan.releases = diffed;
+  } else {
+    let changes: Change[] = yield changesParsed({ cwd, vfiles });
+    plan.changes = changes;
+    plan.releases = mergeReleases(changes, config || {});
+  }
 
   if (config && Object.keys(config).length > 0) {
     for (let pkg of Object.keys(plan.releases)) {
@@ -213,28 +243,46 @@ export const assemble = function* ({
   return plan;
 };
 
-export type PkgVersion = {
-  pkg: string;
-  path?: string;
-  packageFileName?: string;
-  type?: string;
-  parents?: string[];
-  precommand: string | null;
-  command: string | null;
-  postcommand: string | null;
-  manager?: string;
-  dependencies?: string[];
+const changesParsed = function* ({
+  cwd,
+  vfiles,
+}: {
+  cwd?: string;
+  vfiles: VFile[];
+}): Generator<any, Change[], any> {
+  const allVfiles = vfiles.map((vfile) => parseChange({ cwd, vfile }));
+  let yieldedV: Change[] = [];
+  for (let v of allVfiles) {
+    yieldedV = [...yieldedV, yield v];
+  }
+  return yieldedV;
 };
 
-type Release = {
-  type: string;
-  changes: { type: string; parents?: string[] }[];
-  parents?: string[];
-};
-
-type PipeVersionTemplate = {
-  release: Release;
-  pkg: PkgVersion;
+const changeDiff = ({
+  allMergedRelease,
+  previousMergedRelease,
+}: {
+  allMergedRelease: { [k: string]: Release };
+  previousMergedRelease: { [k: string]: Release };
+}) => {
+  let diffed = { ...allMergedRelease };
+  Object.keys(allMergedRelease).forEach((pkg: string) => {
+    if (previousMergedRelease[pkg]) {
+      const nextBump = allMergedRelease[pkg].type;
+      const lastBump = previousMergedRelease[pkg].type;
+      const compared = compareBumps(lastBump, nextBump);
+      if (lastBump !== compared) {
+        //@ts-ignore TODO template string doesn't play nice with the type
+        diffed[pkg].type = `pre${compared}`;
+      } else {
+        diffed[pkg].type = "prerelease";
+      }
+    } else {
+      //@ts-ignore TODO template string doesn't play nice with the type
+      diffed[pkg].type = `pre${diffed[pkg].type}`;
+    }
+  });
+  return diffed;
 };
 
 export const mergeChangesToConfig = function* ({
