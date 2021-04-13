@@ -11,6 +11,7 @@
     "watch": "tsc --build --watch tsconfig.packages.json",
     "clean": "tsc --build --clean tsconfig.packages.json",
     "wipe": "npm run clean -ws && rimraf node_modules dist tsconfig.tsbuildinfo && npm i",
+    "build:action": "npm run pkg -w action",
     "test": "jest",
     "pretty": "prettier --write \"**/{!dist, **}/*.{js,ts}\""
   },

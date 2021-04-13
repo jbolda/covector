@@ -3,8 +3,7 @@ description: "Sane change management in polyglot, monorepos, single"
 inputs:
   command:
     description: "covector cli command to run"
-    required: false
-    default: "status"
+    required: true
   token:
     description: Github Token or PAT for creating releases / posting messages
     required: false
