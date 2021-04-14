@@ -321,8 +321,66 @@ export function* covector({
       dryRun,
     });
     
+    const publishCommands: PkgPublish[] = yield mergeIntoConfig({
+      assembledChanges,
+      config,
+      command: "publish",
+      cwd,
+      dryRun,
+      filterPackages,
+    });
+
+    if (publishCommands.length === 0) {
+      console.log(`No commands configured to run on publish.`);
+      return `No commands configured to run on publish.`;
+    }
+
+    const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
+      cwd,
+      commands: publishCommands,
+      command: 'publish',
+    });
+
+    pkgCommandsRan = publishCommands.reduce(
+      (pkgs: any, pkg: { pkg: string }): object => {
+        pkgs[pkg.pkg] = {
+          precommand: false,
+          command: false,
+          postcommand: false,
+          pkg,
+        };
+        return pkgs;
+      },
+      {}
+    );
+
+    pkgCommandsRan = yield attemptCommands({
+      cwd,
+      commands: commandsToRun,
+      commandPrefix: "pre",
+      command: "publish",
+      pkgCommandsRan,
+      dryRun,
+    });
+
+    pkgCommandsRan = yield attemptCommands({
+      cwd,
+      commands: commandsToRun,
+      command: "publish",
+      pkgCommandsRan,
+      dryRun,
+    });
+    
+    pkgCommandsRan = yield attemptCommands({
+      cwd,
+      commands: commandsToRun,
+      commandPrefix: "post",
+      command: "publish",
+      pkgCommandsRan,
+      dryRun,
+    });
+
     return pkgCommandsRan;
-    // publish logic here // get from the else
   } else {
     yield raceTime({ t: config.timeout });
     const commands: PkgPublish[] = yield mergeIntoConfig({
