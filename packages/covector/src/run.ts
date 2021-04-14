@@ -48,12 +48,16 @@ export function* covector({
   cwd = process.cwd(),
   filterPackages = [],
   modifyConfig = async (c) => c,
+  context,
+  previewVersion
 }: {
   command: string;
   dryRun?: boolean;
   cwd?: string;
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
+  context?: any;
+  previewVersion?: string;
 }): Generator<any, Covector | string, any> {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const changesPaths = yield changeFiles({
@@ -219,8 +223,106 @@ export function* covector({
 
     return pkgCommandsRan;
   } else if (command === "preview") {
-    console.log('WIP');
-    return 'placeholder';
+    yield raceTime({ t: config.timeout });
+
+    let versionTemplate;
+    
+    switch(previewVersion){
+      case "date":
+        versionTemplate = `${Date.now()}`;
+        break;
+      case "sha":
+        versionTemplate = `${context.after.substring(0, 7)}`;
+        break;
+      default:
+        throw new Error(`Preview version template you specified, "${previewVersion}", is invalid.`)
+    };
+
+    const versionChanges = changesConsideringParents({
+      assembledChanges,
+      config,
+    });
+
+    //@ts-ignore
+    const versionCommands: PkgVersion[] = yield mergeChangesToConfig({
+      assembledChanges: versionChanges,
+      config,
+      command: "version",
+      dryRun,
+      filterPackages,
+    });
+
+    let pkgCommandsRan: Covector = Object.keys(config.packages).reduce(
+      (
+        pkgs: {
+          [k: string]: {
+            precommand: string | false;
+            command: string | false;
+            postcommand: string | false;
+            applied: string | false;
+          };
+        },
+        pkg: string
+      ) => {
+        pkgs[pkg] = {
+          precommand: false,
+          command: false,
+          postcommand: false,
+          applied: false,
+        };
+        return pkgs;
+      },
+      {}
+    );
+
+    pkgCommandsRan = yield attemptCommands({
+      cwd,
+      commands: versionCommands,
+      commandPrefix: "pre",
+      command: "version",
+      pkgCommandsRan,
+      dryRun,
+    });
+
+    const applied = yield apply({
+      //@ts-ignore
+      commands: versionCommands,
+      config,
+      cwd,
+      bump: !dryRun,
+      preview: true,
+      previewTemplate: versionTemplate,
+    });
+
+    pkgCommandsRan = applied.reduce(
+      (
+        pkgs: {
+          [k: string]: {
+            precommand: boolean;
+            command: boolean;
+            postcommand: boolean;
+            applied: object;
+          };
+        },
+        result: { name: string }
+      ) => {
+        pkgs[result.name].applied = result;
+        return pkgs;
+      },
+      pkgCommandsRan
+    );
+
+    pkgCommandsRan = yield attemptCommands({
+      cwd,
+      commands: versionCommands,
+      commandPrefix: "post",
+      command: "version",
+      pkgCommandsRan,
+      dryRun,
+    });
+    
+    return pkgCommandsRan;
+    // publish logic here // get from the else
   } else {
     yield raceTime({ t: config.timeout });
     const commands: PkgPublish[] = yield mergeIntoConfig({
