@@ -145,7 +145,6 @@ export function* run(): Generator<any, any, any> {
           command,
           filterPackages,
           cwd,
-          // context: github.context.payload,
           previewVersion: versionTemplate
         });
 
