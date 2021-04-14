@@ -370,15 +370,6 @@ export function* covector({
       pkgCommandsRan,
       dryRun,
     });
-    
-    pkgCommandsRan = yield attemptCommands({
-      cwd,
-      commands: commandsToRun,
-      commandPrefix: "post",
-      command: "publish",
-      pkgCommandsRan,
-      dryRun,
-    });
 
     return pkgCommandsRan;
   } else {
