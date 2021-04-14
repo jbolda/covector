@@ -24,6 +24,14 @@ inputs:
     description: A comma separated list (no spaces) of packages to run commands on rather than everything listed in the config.
     required: false
     default: ""
+  label:
+    description: "the Github pull request label that triggers preview packages"
+    required: false
+    default: preview
+  previewVersion:
+    description: Template for how the preview packages should be versioned
+    required: false
+    default: date
 outputs:
   change:
     description: The changes that were applied
