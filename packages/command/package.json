@@ -8,10 +8,8 @@
     "type": "git",
     "url": "https://github.com/jbolda/covector.git"
   },
-  "main": "dist",
-  "files": [
-    "dist/**/*"
-  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf dist node_modules",
