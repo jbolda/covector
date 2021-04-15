@@ -290,7 +290,6 @@ export function* covector({
       config,
       cwd,
       bump: !dryRun,
-      preview: true,
       previewTemplate: versionTemplate,
     });
 

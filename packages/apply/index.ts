@@ -39,14 +39,12 @@ export const apply = function* ({
   config,
   cwd = process.cwd(),
   bump = true,
-  preview = false,
   previewTemplate = '',
 }: {
   commands: PackageCommand[];
   config: ConfigFile;
   cwd: string;
   bump: boolean;
-  preview?: boolean;
   previewTemplate: string;
 }) {
   const changes = commands.reduce(
