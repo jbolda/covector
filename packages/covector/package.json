@@ -13,6 +13,9 @@
   "bin": {
     "covector": "./bin/covector.js"
   },
+  "files": [
+    "bin/*"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf dist",
