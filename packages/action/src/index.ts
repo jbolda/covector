@@ -155,11 +155,10 @@ export function* run(): Generator<any, any, any> {
         });
 
         if (covectored) {
-          let packagesPublished = Object.entries(covectored).reduce((pub, pkg) => {
-            //@ts-ignore
+          //@ts-ignore
+          let packagesPublished: any = Object.entries(covectored).reduce((pub: Array<string>, pkg: Array<any>) => {
             if(pkg[1].published){
-              //@ts-ignore
-              let { name: pkgName, version: pkgVersion } = pkg[1].pkg.pkgFile.pkg
+              let { name: pkgName, version: pkgVersion }: any = pkg[1].pkg.pkgFile.pkg;
               return pub.concat(`${pkgName}@${pkgVersion}`);
             }
           }, []);
@@ -177,7 +176,7 @@ export function* run(): Generator<any, any, any> {
                 }
               },
               after
-            } = github.context.payload;
+            }: any = github.context.payload;
 
             const { data } = yield octokit.rest.issues.listComments({
               owner,
@@ -185,14 +184,14 @@ export function* run(): Generator<any, any, any> {
               issue_number,
             });
 
-            const covectorComments = data.filter(comment => comment.body.includes('<!-- covector comment -->'));
+            const covectorComments = data.filter((comment: any) => comment.body.includes('<!-- covector comment -->'));
 
             let prComment = () => {
               let commentHead = '';
               let commentBody = '';
               if (packagesPublished.length) {
                 commentHead = `The following preview packages have been published by Covector:`
-                commentBody = packagesPublished.reduce((result, publishedPackage) => {
+                commentBody = packagesPublished.reduce((result: string, publishedPackage: string) => {
                   return `${result}- \`${publishedPackage}\`\n`;
                 }, '')
               } else {
