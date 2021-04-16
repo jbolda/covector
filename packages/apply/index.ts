@@ -39,13 +39,15 @@ export const apply = function* ({
   cwd = process.cwd(),
   bump = true,
   previewVersion = '',
+  prereleaseIdentifier = null,
 }: {
   commands: PackageCommand[];
   config: ConfigFile;
   cwd: string;
   bump: boolean;
   previewVersion: string;
-}) {
+  prereleaseIdentifier: string | null;
+}): Generator<any, PackageFile[], any> {
   const changes = commands.reduce(
     (finalChanges: { [k: string]: PackageCommand }, command) => {
       finalChanges[command.pkg] = command;
@@ -56,7 +58,7 @@ export const apply = function* ({
 
   // @ts-ignore since TS doesn't like yielding on a Promise
   let allPackages = yield readAll({ changes, config, cwd });
-  const bumps = bumpAll({ changes, allPackages, previewVersion });
+  const bumps = bumpAll({ changes, allPackages, previewVersion, prereleaseIdentifier });
 
   if (bump) {
     yield writeAll({
@@ -78,10 +80,12 @@ export const validateApply = async ({
   commands,
   config,
   cwd = process.cwd(),
+  prereleaseIdentifier = null,
 }: {
   commands: PackageCommand[];
   config: ConfigFile;
   cwd: string;
+  prereleaseIdentifier: string | null;
 }) => {
   const changes = commands.reduce(
     (finalChanges: { [k: string]: PackageCommand }, command) => {
@@ -92,7 +96,12 @@ export const validateApply = async ({
   );
   let allPackages = await readAll({ changes, config, cwd });
 
-  const bumps = bumpAll({ changes, allPackages, logs: false }).reduce(
+  const bumps = bumpAll({
+    changes,
+    allPackages,
+    logs: false,
+    prereleaseIdentifier,
+  }).reduce(
     (final: PackageFile[], current) =>
       !current.vfile ? final : final.concat([current]),
     []
@@ -186,12 +195,14 @@ type Changed = {
 export const changesConsideringParents = ({
   assembledChanges,
   config,
+  prereleaseIdentifier = null,
 }: {
   assembledChanges: {
     releases: Releases;
     changes: ChangeParsed[];
   };
   config: ConfigFile;
+  prereleaseIdentifier: string | null;
 }) => {
   const parents = resolveParents({ config });
 
@@ -205,7 +216,7 @@ export const changesConsideringParents = ({
   );
 
   return {
-    releases: parentBump(changes, parents),
+    releases: parentBump(changes, parents, prereleaseIdentifier),
     changes: assembledChanges.changes,
   };
 };
@@ -223,7 +234,12 @@ const parentBump = (initialChanges: Changed, parents: any): Changed => {
         } else {
           // if the parent doesn't have a release
           // add one to adopt the next version of it's child
-          changes[pkg] = { ...cloneDeep(changes[main]), type: "patch" };
+          changes[pkg] = {
+            ...cloneDeep(changes[main]),
+            // prerelease will do bump the X in `-beta.X` if it is already a prerelease
+            // or it will do a prepatch if it isn't a prerelease
+            type: !prereleaseIdentifier ? "patch" : "prerelease",
+          };
           if (changes[pkg].changes) {
             changes[pkg].changes!.forEach((parentChange) => {
               parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
@@ -236,7 +252,7 @@ const parentBump = (initialChanges: Changed, parents: any): Changed => {
       });
     }
   });
-  return recurse ? parentBump(changes, parents) : changes;
+  return recurse ? parentBump(changes, parents, prereleaseIdentifier) : changes;
 };
 
 const bumpAll = ({
@@ -244,11 +260,13 @@ const bumpAll = ({
   allPackages,
   logs = true,
   previewVersion = '',
+  prereleaseIdentifier = null,
 }: {
   changes: Releases;
   allPackages: { [k: string]: PackageFile };
   logs?: boolean;
   previewVersion?: string;
+  prereleaseIdentifier: string | null;
 }) => {
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
@@ -259,6 +277,7 @@ const bumpAll = ({
       packageFile: packageFiles[pkg],
       bumpType: changes[pkg].type,
       previewVersion,
+      prereleaseIdentifier,
     });
     if (changes[pkg] && changes[pkg].dependencies) {
       let deps = changes[pkg].dependencies!;
@@ -269,6 +288,7 @@ const bumpAll = ({
             dep: pkgDep,
             bumpType: changes[pkgDep].type,
             preview: !!previewVersion
+            prereleaseIdentifier,
           });
         }
       }
@@ -282,16 +302,18 @@ const bumpMain = ({
   packageFile,
   bumpType,
   previewVersion,
+  prereleaseIdentifier = null,
 }: {
   packageFile: PackageFile;
   bumpType: CommonBumps;
   previewVersion: string;
+  prereleaseIdentifier: string | null;
 }) => {
   let pkg = { ...packageFile };
   if (!pkg.version)
     throw new Error(`${pkg.name} does not have a version number.`);
   // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-  let next = semver.inc(pkg.version, bumpType);
+  let next = semver.inc(pkg.version, bumpType, prereleaseIdentifier);
   if (next) {
     pkg.version = next;
     pkg.versionMajor = semver.major(next);
@@ -302,12 +324,18 @@ const bumpMain = ({
     if (pkg.vfile.extname === ".json") {
       // for javascript
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-      let version = previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : semver.inc(pkg.pkg.version, bumpType);
+      let version = previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : semver.inc(pkg.pkg.version, bumpType, prereleaseIdentifier);
       if (version) pkg.pkg.version = version;
     } else if (pkg.vfile.extname === ".toml") {
       // for rust
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-      let version =  previewVersion ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`) : semver.inc(pkg.pkg.package.version, bumpType);
+      let version =  previewVersion ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`) : semver.inc(
+        // @ts-ignore
+        pkg.pkg.package.version,
+        // @ts-ignore
+        bumpType,
+        prereleaseIdentifier
+      );
       // @ts-ignore TODO we need to normalize Pkg for toml? Or make some union type
       if (version) pkg.pkg.package.version = version;
     } else {
@@ -325,11 +353,13 @@ const bumpDeps = ({
   dep,
   bumpType,
   preview = false,
+  prereleaseIdentifier = null,
 }: {
   packageFile: PackageFile;
   dep: string;
   bumpType: string;
   preview: boolean;
+  prereleaseIdentifier: string | null;
 }) => {
   let pkg = { ...packageFile };
 
@@ -346,7 +376,8 @@ const bumpDeps = ({
           let version = preview ? semver.valid(`${pkg.pkg.version}`) : semver.inc(
             pkg.pkg.dependencies[dep],
             // @ts-ignore TODO deal with ReleaseType
-            bumpType
+            bumpType,
+            prereleaseIdentifier
           );
           if (version) pkg.pkg.dependencies[dep] = version;
         } else if (
@@ -357,14 +388,31 @@ const bumpDeps = ({
           // for rust
           if (typeof pkg.pkg.dependencies[dep] === "object") {
             // @ts-ignore TODO deal with nest toml
-            pkg.pkg.dependencies[dep].version =  preview ? semver.valid(`${pkg.pkg.version}`) : incWithPartials(
+
+            if (!pkg.pkg.dependencies[dep].version) {
+              throw new Error(
+                `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +
+                  `This cannot be published. ` +
+                  `Please pin it to a MAJOR.MINOR.PATCH reference.`
+              );
+            } else {
+              let version = preview ? semver.valid(`${pkg.pkg.version}`) : incWithPartials(
+                dep,
+                // @ts-ignore TODO deal with nest toml
+                pkg.pkg.dependencies[dep].version,
+                bumpType,
+                prereleaseIdentifier
+              );
               // @ts-ignore TODO deal with nest toml
-              pkg.pkg.dependencies[dep].version,
-              bumpType
-            );
+              if (version) pkg.pkg.dependencies[dep].version = version;
+            }
           } else {
-            // @ts-ignore
-            let version =  preview ? semver.valid(`${pkg.pkg.package.version}`) : incWithPartials(pkg.pkg.dependencies[dep], bumpType);
+            let version = preview ? semver.valid(`${pkg.pkg.package.version}`) : incWithPartials(
+              dep,
+              pkg.pkg.dependencies[dep],
+              bumpType,
+              prereleaseIdentifier
+            );
             if (version) pkg.pkg.dependencies[dep] = version;
           }
         }
@@ -391,11 +439,23 @@ const bumpDeps = ({
   return pkg;
 };
 
-const incWithPartials = (version: string, bumpType: string) => {
+const incWithPartials = (
+  dependency: string,
+  version: string,
+  bumpType: string,
+  prereleaseIdentifier: string | null
+) => {
   if (semver.valid(version)) {
     // @ts-ignore TODO deal with ReleaseType
-    return semver.inc(version, bumpType);
+    return semver.inc(version, bumpType, prereleaseIdentifier);
   } else {
+    if (prereleaseIdentifier !== null) {
+      console.warn(
+        `bump for ${dependency} skipped as ${version} is a range, and does not specifically include prereleases. ` +
+          `Please pin to a major.minor.patch for a prerelease bump.`
+      );
+      return null;
+    }
     try {
       const coerced = semver.coerce(version);
       if (!coerced)

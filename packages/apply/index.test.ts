@@ -1121,7 +1121,8 @@ describe("package file apply bump (async/await)", () => {
       await validateApply({ commands, config, cwd: rustFolder });
     } catch (e) {
       expect(e.message).toMatch(
-        "within rust_pkg_a_fixture => Can only stringify objects, not null"
+        "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
+          "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
       );
     }
 
