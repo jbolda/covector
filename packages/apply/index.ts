@@ -319,6 +319,7 @@ const bumpMain = ({
     pkg.versionMajor = semver.major(next);
     pkg.versionMinor = semver.minor(next);
     pkg.versionPatch = semver.patch(next);
+    pkg.versionPrerelease = semver.prerelease(next);
   }
   if (pkg.vfile && pkg.pkg) {
     if (pkg.vfile.extname === ".json") {

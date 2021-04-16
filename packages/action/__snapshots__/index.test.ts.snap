@@ -71,6 +71,7 @@ publish
         \\"versionMajor\\": 2,
         \\"versionMinor\\": 3,
         \\"versionPatch\\": 1,
+        \\"versionPrerelease\\": null,
         \\"pkg\\": {
           \\"name\\": \\"package-one\\",
           \\"version\\": \\"2.3.1\\",
@@ -106,6 +107,7 @@ publish
         \\"versionMajor\\": 1,
         \\"versionMinor\\": 9,
         \\"versionPatch\\": 0,
+        \\"versionPrerelease\\": null,
         \\"pkg\\": {
           \\"name\\": \\"package-two\\",
           \\"version\\": \\"1.9.0\\",
@@ -169,6 +171,7 @@ publish
           "versionMajor": 2,
           "versionMinor": 3,
           "versionPatch": 1,
+          "versionPrerelease": null,
         },
         "postcommand": null,
         "precommand": null,
@@ -211,6 +214,7 @@ publish
           "versionMajor": 1,
           "versionMinor": 9,
           "versionPatch": 0,
+          "versionPrerelease": null,
         },
         "postcommand": null,
         "precommand": null,

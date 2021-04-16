@@ -36,6 +36,7 @@ export interface PkgMinimum {
   versionMajor?: number;
   versionMinor?: number;
   versionPatch?: number;
+  versionPrerelease?: readonly string[] | (string | number)[] | null;
 }
 
 export interface PackageFile extends PkgMinimum {
@@ -75,6 +76,7 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
         versionMajor: semver.major(version),
         versionMinor: semver.minor(version),
         versionPatch: semver.patch(version),
+        versionPrerelease: semver.prerelease(version),
         // @ts-ignore
         pkg: parsedTOML,
       };
@@ -85,6 +87,7 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
         versionMajor: semver.major(parsedJSON.version),
         versionMinor: semver.minor(parsedJSON.version),
         versionPatch: semver.patch(parsedJSON.version),
+        versionPrerelease: semver.prerelease(parsedJSON.version),
         pkg: parsedJSON,
       };
     case ".yml":
