@@ -5,10 +5,12 @@ import {
 } from "@covector/command";
 import {
   configFile,
+  readPreFile,
   changeFiles,
   changeFilesToVfile,
   changeFilesRemove,
   ConfigFile,
+  writePreFile,
 } from "@covector/files";
 import {
   assemble,
@@ -62,6 +64,9 @@ export function* covector({
   previewVersion?: string;
 }): Generator<any, Covector | string, any> {
   const config = yield modifyConfig(yield configFile({ cwd }));
+  const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
+  const prereleaseIdentifier = !pre ? null : pre.tag;
+
   const changesPaths = yield changeFiles({
     cwd,
     changeFolder: config.changeFolder,
@@ -74,6 +79,7 @@ export function* covector({
     cwd,
     vfiles: changesVfiles,
     config,
+    preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
 
   if (command === "status" || !command) {
@@ -92,6 +98,7 @@ export function* covector({
       const changes = changesConsideringParents({
         assembledChanges,
         config,
+        prereleaseIdentifier,
       });
       const commands = yield mergeIntoConfig({
         assembledChanges: changes,
@@ -105,6 +112,7 @@ export function* covector({
         commands,
         config,
         cwd,
+        prereleaseIdentifier,
       });
 
       return `There are ${
@@ -123,6 +131,7 @@ export function* covector({
     const changes = changesConsideringParents({
       assembledChanges,
       config,
+      prereleaseIdentifier,
     });
 
     const commands: PkgVersion[] = yield mergeChangesToConfig({
@@ -176,6 +185,7 @@ export function* covector({
       config,
       cwd,
       bump: !dryRun,
+      prereleaseIdentifier,
     });
 
     pkgCommandsRan = applied.reduce(
@@ -215,8 +225,14 @@ export function* covector({
       dryRun,
     });
 
-    if (command === "version" && !dryRun)
-      yield changeFilesRemove({ cwd, paths: changesPaths });
+    if (command === "version" && !dryRun) {
+      if (pre) {
+        pre.changes = changesPaths;
+        yield writePreFile({ preFile: pre });
+      } else {
+        yield changeFilesRemove({ cwd, paths: changesPaths });
+      }
+    }
 
     if (dryRun) {
       console.log("==== result ===");
