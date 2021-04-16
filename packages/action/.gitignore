@@ -1,0 +1,3 @@
+# files on windows from running the pkg script
+dist/**/*.exe
+dist/**/*.node
