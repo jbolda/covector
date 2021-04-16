@@ -149,6 +149,76 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
+  it("fails bump single js json that satisfies range", function* () {
+    const jsonFolder = f.copy("pkg.js-single-json");
+
+    const commands = [
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: "./",
+        pkg: "js-single-json-fixture",
+        type: "minor",
+        parents: [],
+        errorOnVersionRange: ">= 0.6.0",
+      },
+    ];
+
+    const config = {
+      packages: {
+        "js-single-json-fixture": {
+          path: "./",
+          manager: "javascript",
+        },
+      },
+    };
+
+    //@ts-ignore
+    const applied = apply({ commands, config, cwd: jsonFolder });
+    expect(applied.return).toThrow();
+    expect({
+      //@ts-ignore
+      consoleLog: console.log.mock.calls,
+      //@ts-ignore
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+
+  it("fails bumps single rust toml that satisfies range", function* () {
+    const rustFolder = f.copy("pkg.rust-single");
+
+    const commands = [
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./",
+        pkg: "rust-single-fixture",
+        type: "minor",
+        parents: [],
+        errorOnVersionRange: ">= 0.6.0",
+      },
+    ];
+
+    const config = {
+      packages: {
+        "rust-single-fixture": {
+          path: "./",
+          manager: "rust",
+        },
+      },
+    };
+
+    //@ts-ignore
+    const applied = apply({ commands, config, cwd: rustFolder });
+    expect(applied.return).toThrow();
+    expect({
+      //@ts-ignore
+      consoleLog: console.log.mock.calls,
+      //@ts-ignore
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+
   it("bumps multi js json", function* () {
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
@@ -1144,7 +1214,7 @@ describe("packge file applies preview bump", () => {
     restoreConsole();
   });
 
-  it('bumps single js json', function* () {
+  it("bumps single js json", function* () {
     const jsonFolder = f.copy("pkg.js-single-json"); // 0.5.9
 
     const commands = [
@@ -1168,7 +1238,12 @@ describe("packge file applies preview bump", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: jsonFolder, previewVersion: 'branch-name.12345' });
+    yield apply({
+      commands,
+      config,
+      cwd: jsonFolder,
+      previewVersion: "branch-name.12345",
+    });
     //@ts-ignore
     const modifiedVFile = yield toVFile.read(
       jsonFolder + "/package.json",
@@ -1238,7 +1313,12 @@ describe("packge file applies preview bump", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: jsonFolder, previewVersion: 'branch-name.12345' });
+    yield apply({
+      commands,
+      config,
+      cwd: jsonFolder,
+      previewVersion: "branch-name.12345",
+    });
     //@ts-ignore
     const modifiedPkgAVFile = yield toVFile.read(
       jsonFolder + "/packages/pkg-a/package.json",
@@ -1273,4 +1353,4 @@ describe("packge file applies preview bump", () => {
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
-})
+});

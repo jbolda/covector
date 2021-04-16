@@ -394,5 +394,16 @@ Object {
       "bumping js-single-json-fixture to 0.5.9-branch-name.12345 to publish a preview",
     ],
   ],
+exports[`package file apply bump fails bump single js json that satisfies range 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [],
+}
+`;
+
+exports[`package file apply bump fails bumps single rust toml that satisfies range 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [],
 }
 `;

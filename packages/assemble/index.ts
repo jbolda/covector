@@ -46,6 +46,7 @@ export type PkgVersion = {
   postcommand: string | null;
   manager?: string;
   dependencies?: string[];
+  errorOnVersionRange?: string;
 };
 
 type PipeVersionTemplate = {
@@ -66,6 +67,7 @@ export type PkgPublish = {
   getPublishedVersion?: string;
   assets?: { name: string; path: string }[];
   pkgFile?: PackageFile;
+  errorOnVersionRange?: string;
 };
 
 type PipePublishTemplate = {
@@ -352,7 +354,7 @@ export const mergeChangesToConfig = function* ({
       const commandItems = { pkg, pkgManager, config };
       const mergedCommand = mergeCommand({ ...commandItems, command });
 
-      if (!!mergedCommand) {
+      if (!!mergedCommand || command === "status") {
         pkged[pkg] = {
           pkg: pkg,
           path: config.packages[pkg].path,
@@ -370,6 +372,10 @@ export const mergeChangesToConfig = function* ({
           }),
           manager: config.packages[pkg].manager,
           dependencies: config.packages[pkg].dependencies,
+          errorOnVersionRange: mergeCommand({
+            ...commandItems,
+            command: `errorOnVersionRange`,
+          }),
         };
       }
 
@@ -420,6 +426,7 @@ export const mergeChangesToConfig = function* ({
         pipeToTemplate,
         ["command", "dryRunCommand", "runFromRoot"]
       ),
+      errorOnVersionRange: pkgCommands[pkg].errorOnVersionRange,
     };
 
     commands = [...commands, merged];
@@ -510,6 +517,10 @@ export const mergeIntoConfig = function* ({
             : { assets: publishElements.assets }),
           manager: config.packages[pkg].manager || "",
           dependencies: config.packages[pkg].dependencies,
+          errorOnVersionRange: mergeCommand({
+            ...commandItems,
+            command: `errorOnVersionRange`,
+          }),
         };
       }
 
@@ -595,6 +606,7 @@ export const mergeIntoConfig = function* ({
         pipeToTemplate,
         ["command", "dryRunCommand", "runFromRoot"]
       ),
+      errorOnVersionRange: pkgCommands[pkg].errorOnVersionRange,
     };
 
     commands = [...commands, merged];

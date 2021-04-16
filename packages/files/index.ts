@@ -53,13 +53,22 @@ export interface PreFile {
 export type ConfigFile = {
   vfile?: VFile;
   gitSiteUrl?: string;
-  pkgManagers?: { [k: string]: { version?: string; publish?: string } };
+  pkgManagers?: {
+    [k: string]: {
+      version?: string;
+      publish?: string;
+      errorOnVersionRange?: string;
+    };
+  };
   packages: {
     [k: string]: {
       manager?: string;
       path?: string;
       dependencies?: string[];
       packageFileName?: string;
+      version?: string;
+      publish?: string;
+      errorOnVersionRange?: string;
     };
   };
   additionalBumpTypes?: string[];

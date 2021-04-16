@@ -21,6 +21,7 @@ type Releases = {
     type: CommonBumps;
     dependencies?: string[];
     changes?: ChangeParsed[];
+    errorOnVersionRange?: string;
   };
 };
 
@@ -134,7 +135,7 @@ const readAll = async ({
   let files = Object.keys(changes).reduce(
     (fileList: { [k: string]: PackageFile }, change) => {
       fileList[change] = { ...templateShell };
-      if (changes[change].parents.length > 0)
+      if (changes[change].parents && changes[change].parents.length > 0)
         changes[change].parents.forEach(
           (parent) => (fileList[parent] = { ...templateShell })
         );
@@ -278,6 +279,7 @@ const bumpAll = ({
       bumpType: changes[pkg].type,
       previewVersion,
       prereleaseIdentifier,
+      errorOnVersionRange: changes[pkg].errorOnVersionRange,
     });
     if (changes[pkg] && changes[pkg].dependencies) {
       let deps = changes[pkg].dependencies!;
@@ -303,11 +305,13 @@ const bumpMain = ({
   bumpType,
   previewVersion,
   prereleaseIdentifier = null,
+  errorOnVersionRange,
 }: {
   packageFile: PackageFile;
   bumpType: CommonBumps;
   previewVersion: string;
   prereleaseIdentifier: string | null;
+  errorOnVersionRange?: string;
 }) => {
   let pkg = { ...packageFile };
   if (!pkg.version)
@@ -326,7 +330,20 @@ const bumpMain = ({
       // for javascript
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
       let version = previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : semver.inc(pkg.pkg.version, bumpType, prereleaseIdentifier);
-      if (version) pkg.pkg.version = version;
+      if (version) {
+        pkg.pkg.version = version;
+
+        if (
+          errorOnVersionRange &&
+          semver.satisfies(version, errorOnVersionRange)
+        ) {
+          throw new Error(
+            `${pkg.name} will be bumped to ${version}. ` +
+              `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
+              `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
+          );
+        }
+      }
     } else if (pkg.vfile.extname === ".toml") {
       // for rust
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
@@ -337,13 +354,38 @@ const bumpMain = ({
         bumpType,
         prereleaseIdentifier
       );
-      // @ts-ignore TODO we need to normalize Pkg for toml? Or make some union type
-      if (version) pkg.pkg.package.version = version;
+      if (version) {
+        // @ts-ignore TODO we need to normalize Pkg for toml? Or make some union type
+        pkg.pkg.package.version = version;
+        if (
+          errorOnVersionRange &&
+          semver.satisfies(version, errorOnVersionRange)
+        ) {
+          throw new Error(
+            `${pkg.name} will be bumped to ${version}. ` +
+              `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
+              `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
+          );
+        }
+      }
+
     } else {
       // assume version is at the root
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
       let version = semver.inc(pkg.pkg.version, bumpType);
-      if (version) pkg.pkg.version = version;
+      if (version) {
+        pkg.pkg.version = version;
+        if (
+          errorOnVersionRange &&
+          semver.satisfies(version, errorOnVersionRange)
+        ) {
+          throw new Error(
+            `${pkg.name} will be bumped to ${version}. ` +
+              `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
+              `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
+          );
+        }
+      }
     }
   }
   return pkg;

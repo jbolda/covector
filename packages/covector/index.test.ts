@@ -286,6 +286,52 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 
+  it("fails version with errorOnVersionRange", async () => {
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const modifyConfig = async (pullConfig: any) => {
+      const config = await pullConfig;
+      let modified = { ...config };
+      modified.pkgManagers.rust.errorOnVersionRange = ">= 0.0.1";
+      modified.pkgManagers.javascript.errorOnVersionRange = ">= 0.0.1";
+      return modified;
+    };
+    const covectored = run(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+        modifyConfig,
+      })
+    );
+    await expect(covectored).rejects.toThrow();
+    expect({
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+    }).toMatchSnapshot();
+  }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
+
+  it("fails status with errorOnVersionRange", async () => {
+    const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const modifyConfig = async (pullConfig: any) => {
+      const config = await pullConfig;
+      let modified = { ...config };
+      modified.pkgManagers.rust.errorOnVersionRange = ">= 0.0.1";
+      modified.pkgManagers.javascript.errorOnVersionRange = ">= 0.0.1";
+      return modified;
+    };
+    const covectored = run(
+      covector({
+        command: "status",
+        cwd: fullIntegration,
+        modifyConfig,
+      })
+    );
+    await expect(covectored).rejects.toThrow();
+    expect({
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+    }).toMatchSnapshot();
+  }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
+
   it("runs test for js and rust", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = await run(

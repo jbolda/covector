@@ -93,7 +93,8 @@ publish
         },
         null
       ],
-      \\"postcommand\\": null
+      \\"postcommand\\": null,
+      \\"errorOnVersionRange\\": null
     }
   },
   \\"package-two\\": {
@@ -129,7 +130,8 @@ publish
         },
         null
       ],
-      \\"postcommand\\": null
+      \\"postcommand\\": null,
+      \\"errorOnVersionRange\\": null
     }
   }
 }",
@@ -153,6 +155,7 @@ publish
           [Function],
         ],
         "dependencies": undefined,
+        "errorOnVersionRange": null,
         "manager": "javascript",
         "path": "./packages/package-one",
         "pkg": "package-one",
@@ -196,6 +199,7 @@ publish
           [Function],
         ],
         "dependencies": undefined,
+        "errorOnVersionRange": null,
         "manager": "javascript",
         "path": "./packages/package-two",
         "pkg": "package-two",

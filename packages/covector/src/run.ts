@@ -100,7 +100,8 @@ export function* covector({
         config,
         prereleaseIdentifier,
       });
-      const commands = yield mergeIntoConfig({
+
+      const commands = yield mergeChangesToConfig({
         assembledChanges: changes,
         config,
         command,
@@ -108,6 +109,7 @@ export function* covector({
         filterPackages,
         cwd,
       });
+
       const applied = yield validateApply({
         commands,
         config,
