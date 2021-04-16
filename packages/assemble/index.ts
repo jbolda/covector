@@ -137,17 +137,18 @@ const parseChange = function* ({
   return changeset;
 };
 
+// major, minor, or patch
+// enum and use Int to compare
+const bumpMap = new Map<CommonBumps, number>([
+  ["major", 1],
+  ["minor", 2],
+  ["patch", 3],
+  ["prerelease", 4],
+  ["noop", 5],
+]);
+
 export const compareBumps = (bumpOne: CommonBumps, bumpTwo: CommonBumps) => {
-  // major, minor, or patch
-  // enum and use Int to compare
-  let bumps = new Map<CommonBumps, number>([
-    ["major", 1],
-    ["minor", 2],
-    ["patch", 3],
-    ["prerelease", 4],
-    ["noop", 5],
-  ]);
-  return bumps.get(bumpOne)! < bumps.get(bumpTwo)! ? bumpOne : bumpTwo;
+  return bumpMap.get(bumpOne)! < bumpMap.get(bumpTwo)! ? bumpOne : bumpTwo;
 };
 
 const mergeReleases = (
@@ -239,13 +240,33 @@ export const assemble = function* ({
           return newVFiles;
         }
       }, []);
-
       const newChanges: Change[] = yield changesParsed({
         cwd,
         vfiles: newVfiles,
       });
       const newMergedRelease = mergeReleases(newChanges, config || {});
-      const diffed = changeDiff({ allMergedRelease, newMergedRelease });
+
+      const oldVfiles = vfiles.reduce((newVFiles: VFile[], vfile) => {
+        const prevFile = preMode.prevFiles.find(
+          (filename) => vfile.data.filename === filename
+        );
+        if (prevFile) {
+          return newVFiles.concat([vfile]);
+        } else {
+          return newVFiles;
+        }
+      }, []);
+      const oldChanges: Change[] = yield changesParsed({
+        cwd,
+        vfiles: oldVfiles,
+      });
+      const oldMergedRelease = mergeReleases(oldChanges, config || {});
+
+      const diffed = changeDiff({
+        allMergedRelease,
+        newMergedRelease,
+        oldMergedRelease,
+      });
       plan.changes = newChanges;
       plan.releases = diffed;
     } else {
@@ -300,21 +321,23 @@ const changesParsed = function* ({
 const changeDiff = ({
   allMergedRelease,
   newMergedRelease,
+  oldMergedRelease,
 }: {
   allMergedRelease: { [k: string]: Release };
   newMergedRelease?: { [k: string]: Release };
+  oldMergedRelease?: { [k: string]: Release };
 }) => {
-  if (newMergedRelease) {
+  if (newMergedRelease && oldMergedRelease) {
     let diffed = { ...newMergedRelease };
     Object.keys(newMergedRelease).forEach((pkg: string) => {
-      const nextBump = newMergedRelease[pkg].type;
-      const overallBump = allMergedRelease[pkg]?.type;
-      const compared = compareBumps(nextBump, overallBump);
-      if (nextBump === overallBump) {
-        diffed[pkg].type = "prerelease";
-      } else {
+      const nextBump = newMergedRelease[pkg]?.type || "noop";
+      const oldBump = oldMergedRelease[pkg]?.type || "noop";
+      //@ts-ignore bumpMap could be undefined?
+      if (bumpMap.get(nextBump) <= bumpMap.get(oldBump)) {
         //@ts-ignore TODO template string doesn't play nice with the type
-        diffed[pkg].type = `pre${compared}`;
+        diffed[pkg].type = `pre${nextBump}`;
+      } else {
+        diffed[pkg].type = "prerelease";
       }
     });
     return diffed;

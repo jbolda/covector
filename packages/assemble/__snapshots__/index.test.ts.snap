@@ -62,7 +62,7 @@ Object {
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
         },
       ],
-      "type": "prerelease",
+      "type": "prepatch",
     },
     "assemble1": Object {
       "changes": Array [
@@ -88,7 +88,7 @@ Object {
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
         },
       ],
-      "type": "prerelease",
+      "type": "preminor",
     },
     "assemble2": Object {
       "changes": Array [
@@ -107,7 +107,7 @@ Object {
           "summary": "This is a test.",
         },
       ],
-      "type": "prerelease",
+      "type": "premajor",
     },
   },
 }
@@ -142,7 +142,7 @@ Object {
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
         },
       ],
-      "type": "prerelease",
+      "type": "prepatch",
     },
     "assemble1": Object {
       "changes": Array [
@@ -161,7 +161,7 @@ Object {
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
         },
       ],
-      "type": "prerelease",
+      "type": "preminor",
     },
     "assemble2": Object {
       "changes": Array [
@@ -173,7 +173,7 @@ Object {
           "summary": "This is a test.",
         },
       ],
-      "type": "prerelease",
+      "type": "prepatch",
     },
   },
 }

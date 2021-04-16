@@ -10998,7 +10998,7 @@ Object {
       "Could not load the CHANGELOG.md. Creating one.",
     ],
     Array [
-      "bumping tauri-api with prerelease",
+      "bumping tauri-api with prepatch",
     ],
     Array [
       "bumping tauri with prerelease",
