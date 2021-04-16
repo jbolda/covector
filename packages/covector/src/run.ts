@@ -223,7 +223,7 @@ export function* covector({
 
     return pkgCommandsRan;
   } else if (command === "preview") {
-    yield raceTime({ t: config.timeout * 2 });
+    yield raceTime({ t: config.timeout });
 
     let versionTemplate;
     
