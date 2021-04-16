@@ -31,10 +31,24 @@ Object {
   "changes": Array [
     Object {
       "releases": Object {
-        "assemble1": "patch",
+        "assemble1": "minor",
         "assemble2": "patch",
       },
       "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "assemble1": "patch",
+        "assemble2": "major",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "@namespaced/assemble2": "patch",
+        "assemble1": "patch",
+      },
+      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
     },
   ],
   "releases": Object {
@@ -48,17 +62,10 @@ Object {
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
         },
       ],
-      "type": "prepatch",
+      "type": "prerelease",
     },
     "assemble1": Object {
       "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-        },
         Object {
           "releases": Object {
             "assemble1": "minor",
@@ -81,17 +88,10 @@ Object {
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
         },
       ],
-      "type": "preminor",
+      "type": "prerelease",
     },
     "assemble2": Object {
       "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-        },
         Object {
           "releases": Object {
             "assemble1": "minor",
@@ -107,7 +107,7 @@ Object {
           "summary": "This is a test.",
         },
       ],
-      "type": "premajor",
+      "type": "prerelease",
     },
   },
 }
@@ -118,10 +118,17 @@ Object {
   "changes": Array [
     Object {
       "releases": Object {
-        "assemble1": "patch",
+        "assemble1": "minor",
         "assemble2": "patch",
       },
       "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "@namespaced/assemble2": "patch",
+        "assemble1": "patch",
+      },
+      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
     },
   ],
   "releases": Object {
@@ -135,17 +142,10 @@ Object {
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
         },
       ],
-      "type": "prepatch",
+      "type": "prerelease",
     },
     "assemble1": Object {
       "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-        },
         Object {
           "releases": Object {
             "assemble1": "minor",
@@ -161,17 +161,10 @@ Object {
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
         },
       ],
-      "type": "preminor",
+      "type": "prerelease",
     },
     "assemble2": Object {
       "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-        },
         Object {
           "releases": Object {
             "assemble1": "minor",
@@ -188,7 +181,36 @@ Object {
 
 exports[`assemble changes in preMode with no existing changes 1`] = `
 Object {
-  "changes": Array [],
+  "changes": Array [
+    Object {
+      "releases": Object {
+        "assemble1": "patch",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "assemble1": "minor",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "assemble1": "patch",
+        "assemble2": "major",
+      },
+      "summary": "This is a test.",
+    },
+    Object {
+      "releases": Object {
+        "@namespaced/assemble2": "patch",
+        "assemble1": "patch",
+      },
+      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+    },
+  ],
   "releases": Object {
     "@namespaced/assemble2": Object {
       "changes": Array [

@@ -53,6 +53,26 @@ type PipeVersionTemplate = {
   pkg: PkgVersion;
 };
 
+export type PkgPublish = {
+  pkg: string;
+  path?: string;
+  packageFileName?: string;
+  changelog?: string;
+  precommand?: (string | any)[] | null;
+  command?: (string | any)[] | null;
+  postcommand?: (string | any)[] | null;
+  manager: string;
+  dependencies?: string[];
+  getPublishedVersion?: string;
+  assets?: { name: string; path: string }[];
+  pkgFile?: PackageFile;
+};
+
+type PipePublishTemplate = {
+  pkg: PkgPublish;
+  pkgFile?: PackageFile;
+};
+
 const parseChange = function* ({
   cwd,
   vfile,
@@ -189,7 +209,7 @@ export const assemble = function* ({
   cwd?: string;
   vfiles: VFile[];
   config?: ConfigFile;
-  preMode?: { on: boolean; prevFiles: VFile[] };
+  preMode?: { on: boolean; prevFiles: string[] };
 }) {
   let plan: {
     changes?: Change[];
@@ -206,15 +226,32 @@ export const assemble = function* ({
   if (preMode.on) {
     const allChanges: Change[] = yield changesParsed({ cwd, vfiles });
     const allMergedRelease = mergeReleases(allChanges, config || {});
-    const previousChanges: Change[] = yield changesParsed({
-      cwd,
-      vfiles: preMode.prevFiles,
-    });
-    const previousMergedRelease = mergeReleases(previousChanges, config || {});
-    const diffed = changeDiff({ allMergedRelease, previousMergedRelease });
-    // TODO mush these and decide what _needs_ to be bumped
-    plan.changes = previousChanges;
-    plan.releases = diffed;
+    if (preMode.prevFiles.length > 0) {
+      const newVfiles = vfiles.reduce((newVFiles: VFile[], vfile) => {
+        const prevFile = preMode.prevFiles.find(
+          (filename) => vfile.data.filename === filename
+        );
+        if (!prevFile) {
+          return newVFiles.concat([vfile]);
+        } else {
+          return newVFiles;
+        }
+      }, []);
+
+      const newChanges: Change[] = yield changesParsed({
+        cwd,
+        vfiles: newVfiles,
+      });
+      const newMergedRelease = mergeReleases(newChanges, config || {});
+      const diffed = changeDiff({ allMergedRelease, newMergedRelease });
+      plan.changes = newChanges;
+      plan.releases = diffed;
+    } else {
+      plan.changes = allChanges;
+      plan.releases = changeDiff({
+        allMergedRelease,
+      });
+    }
   } else {
     let changes: Change[] = yield changesParsed({ cwd, vfiles });
     plan.changes = changes;
@@ -260,29 +297,36 @@ const changesParsed = function* ({
 
 const changeDiff = ({
   allMergedRelease,
-  previousMergedRelease,
+  newMergedRelease,
 }: {
   allMergedRelease: { [k: string]: Release };
-  previousMergedRelease: { [k: string]: Release };
+  newMergedRelease?: { [k: string]: Release };
 }) => {
-  let diffed = { ...allMergedRelease };
-  Object.keys(allMergedRelease).forEach((pkg: string) => {
-    if (previousMergedRelease[pkg]) {
-      const nextBump = allMergedRelease[pkg].type;
-      const lastBump = previousMergedRelease[pkg].type;
-      const compared = compareBumps(lastBump, nextBump);
-      if (lastBump !== compared) {
+  if (newMergedRelease) {
+    let diffed = { ...newMergedRelease };
+    Object.keys(newMergedRelease).forEach((pkg: string) => {
+      const nextBump = newMergedRelease[pkg].type;
+      const overallBump = allMergedRelease[pkg]?.type;
+      const compared = compareBumps(nextBump, overallBump);
+      if (nextBump === overallBump) {
+        diffed[pkg].type = "prerelease";
+      } else {
         //@ts-ignore TODO template string doesn't play nice with the type
         diffed[pkg].type = `pre${compared}`;
-      } else {
-        diffed[pkg].type = "prerelease";
       }
-    } else {
-      //@ts-ignore TODO template string doesn't play nice with the type
-      diffed[pkg].type = `pre${diffed[pkg].type}`;
-    }
-  });
-  return diffed;
+    });
+    return diffed;
+  } else {
+    return Object.keys(allMergedRelease).reduce(
+      (diffed: { [k: string]: Release }, pkg: string) => {
+        diffed[pkg] = { ...allMergedRelease[pkg] };
+        //@ts-ignore TODO template string doesn't play nice with the type
+        diffed[pkg].type = `pre${allMergedRelease[pkg].type}`;
+        return diffed;
+      },
+      {}
+    );
+  }
 };
 
 export const mergeChangesToConfig = function* ({
@@ -389,26 +433,6 @@ export const mergeChangesToConfig = function* ({
   }
 
   return commands;
-};
-
-export type PkgPublish = {
-  pkg: string;
-  path?: string;
-  packageFileName?: string;
-  changelog?: string;
-  precommand?: (string | any)[] | null;
-  command?: (string | any)[] | null;
-  postcommand?: (string | any)[] | null;
-  manager: string;
-  dependencies?: string[];
-  getPublishedVersion?: string;
-  assets?: { name: string; path: string }[];
-  pkgFile?: PackageFile;
-};
-
-type PipePublishTemplate = {
-  pkg: PkgPublish;
-  pkgFile?: PackageFile;
 };
 
 export const mergeIntoConfig = function* ({
