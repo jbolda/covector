@@ -86,6 +86,13 @@ export function* covector({
     if (changesVfiles.length === 0) {
       console.info("There are no changes.");
       return "No changes.";
+    } else if (!!pre && assembledChanges?.changes?.length === 0) {
+      console.info("There are no changes.");
+      console.log(
+        "We have previously released the changes in these files:",
+        changesPaths
+      );
+      return "No changes.";
     } else {
       // write out all of the changes
       // TODO make it pretty
