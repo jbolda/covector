@@ -235,7 +235,7 @@ export function* covector({
         versionTemplate = `${context.after.substring(0, 7)}`;
         break;
       default:
-        throw new Error(`Preview version template you specified, "${previewVersion}", is invalid.`)
+        throw new Error(`Preview version template you specified, "${previewVersion}", is invalid. Please use 'date' or 'sha'.`)
     };
 
     const versionChanges = changesConsideringParents({
