@@ -114,6 +114,12 @@ export function* run(): Generator<any, any, any> {
         throw new Error(`The 'preview' command for the covector action is only meant to run on pull requests.`);
       }
 
+      console.log('github', github);
+
+      if (github.context.eventName !== "pull_request") {
+        throw new Error(`The 'preview' command for the covector action is only meant to run on pull requests.`);
+      }
+
       if (!previewLabel) {
         console.log(`Not publishing any preview packages because the "${configuredLabel}" label has not been applied to this pull request.`);
       } else {
