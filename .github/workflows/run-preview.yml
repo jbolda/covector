@@ -9,10 +9,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - run: yarn
-      - run: yarn build
+      - uses: volta-cli/action@v1
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm run pkg -w action
       - name: covector preview
-        uses: jbolda/covector/packages/action@mk/previews
+        uses: ./packages/action
         id: covector
         with:
           command: preview
