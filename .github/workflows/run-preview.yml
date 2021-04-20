@@ -12,6 +12,7 @@ jobs:
       - uses: volta-cli/action@v1
       - run: npm ci --ignore-scripts
       - run: npm run build
+      - run: npm run pkg -w action
       - name: covector preview
         uses: ./packages/action
         id: covector
