@@ -4,19 +4,14 @@
     "strict": true,
     "module": "commonjs",
     "target": "es6",
-    "allowJs": true,
     "pretty": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "declarationMap": true,
-    "importHelpers": true
-  },
-  "exclude": [
-    "__fixtures__",
-    "**/*.config.js",
-    "**/dist/**",
-    "**/bin/**",
-    "**/*.test.ts"
-  ]
+    "checkJs": false,
+    "preserveSymlinks": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "declarationMap": true
+  }
 }
