@@ -1,9 +1,16 @@
-// @ts-ignore
+//@ts-ignore
 import vfile from "to-vfile";
+//@ts-ignore
 import globby from "globby";
+//@ts-ignore
 import fs from "fs";
+//@ts-ignore
 import path from "path";
+//@ts-ignore
 import TOML from "@tauri-apps/toml";
+//@ts-ignore
+import yaml from "js-yaml";
+//@ts-ignore
 import semver from "semver";
 
 export interface VFile {
@@ -45,6 +52,7 @@ export type ConfigFile = {
       manager?: string;
       path?: string;
       dependencies?: string[];
+      packageFileName?: string;
     };
   };
   additionalBumpTypes?: string[];
@@ -73,8 +81,42 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
         versionPatch: semver.patch(parsedJSON.version),
         pkg: parsedJSON,
       };
+    case ".yml":
+    case ".yaml":
+      const parsedYAML = yaml.load(file.contents);
+      // type narrow:
+      if (
+        typeof parsedYAML === "string" ||
+        typeof parsedYAML === "number" ||
+        parsedYAML === null ||
+        parsedYAML === undefined
+      )
+        throw new Error(`file improperly structured`);
+      //@ts-ignore version is not on object?
+      if (parsedYAML && (!parsedYAML.name || !parsedYAML.version))
+        throw new Error(`missing version`);
+      const verifiedYAML = parsedYAML as { name: string; version: string };
+      return {
+        version: verifiedYAML.version,
+        versionMajor: semver.major(verifiedYAML.version),
+        versionMinor: semver.minor(verifiedYAML.version),
+        versionPatch: semver.patch(verifiedYAML.version),
+        pkg: verifiedYAML,
+      };
+    default:
+      // default case assuming a file with just a version number
+      const stringVersion = file.contents.trim();
+      if (!semver.valid(stringVersion)) {
+        throw new Error("not valid version");
+      }
+      return {
+        version: stringVersion,
+        versionMajor: semver.major(stringVersion),
+        versionMinor: semver.minor(stringVersion),
+        versionPatch: semver.patch(stringVersion),
+        pkg: { name: "", version: stringVersion },
+      };
   }
-  throw new Error("Unknown package file type.");
 };
 
 const stringifyPkg = ({
@@ -82,31 +124,78 @@ const stringifyPkg = ({
   extname,
 }: {
   newContents: any;
-  extname: string;
+  extname?: string;
 }): string => {
   switch (extname) {
     case ".toml":
       return TOML.stringify(newContents);
     case ".json":
       return `${JSON.stringify(newContents, null, "  ")}\n`;
+    case ".yml":
+    case ".yaml":
+      return yaml.dump(newContents);
+    default:
+      return newContents.version;
   }
-  throw new Error("Unknown package file type.");
 };
 
 export const readPkgFile = async ({
+  //@ts-ignore Cannot find name 'process'. Do you need to install type definitions for node? even though we have them?
+  cwd = process.cwd(),
   file,
+  pkgConfig,
   nickname,
 }: {
-  file: string;
+  cwd?: string;
+  file?: string; // TODO, deprecate this
+  pkgConfig?: { manager?: string; path?: string; packageFileName?: string };
   nickname: string;
 }): Promise<PackageFile> => {
-  const inputVfile = await vfile.read(file, "utf8");
-  const parsed = parsePkg(inputVfile);
-  return {
-    vfile: inputVfile,
-    ...parsed,
-    name: nickname,
-  };
+  if (file) {
+    const inputVfile = await vfile.read(file, "utf8");
+    const parsed = parsePkg(inputVfile);
+    return {
+      vfile: inputVfile,
+      ...parsed,
+      name: nickname,
+    };
+  } else {
+    if (pkgConfig?.path && pkgConfig?.packageFileName) {
+      const configFile = path.join(
+        cwd,
+        pkgConfig.path,
+        pkgConfig.packageFileName
+      );
+      const inputVfile = await vfile.read(configFile, "utf8");
+      const parsed = parsePkg(inputVfile);
+      return {
+        vfile: inputVfile,
+        ...parsed,
+        name: nickname,
+      };
+    } else {
+      // it will fail if path points to a dir, then we derive it
+      let packageFile = "package.json"; // default
+      if (pkgConfig && pkgConfig.manager) {
+        if (/rust/.test(pkgConfig?.manager)) {
+          packageFile = "Cargo.toml";
+        } else if (
+          /dart/.test(pkgConfig?.manager) ||
+          /flutter/.test(pkgConfig?.manager)
+        ) {
+          packageFile = "pubspec.yaml";
+        }
+      }
+      const deriveFile = path.join(cwd, pkgConfig?.path || "", packageFile);
+      const inputVfile = await vfile.read(deriveFile, "utf8");
+      const parsed = parsePkg(inputVfile);
+      return {
+        vfile: inputVfile,
+        ...parsed,
+        name: nickname,
+      };
+    }
+  }
 };
 
 export const writePkgFile = async ({
@@ -162,8 +251,39 @@ export const configFile = async ({
   return {
     vfile: inputVfile,
     ...parsed,
+    ...checkFileOrDirectory({ cwd, config: parsed }),
   };
 };
+
+export const checkFileOrDirectory = ({
+  cwd,
+  config,
+}: {
+  cwd: string;
+  config: ConfigFile;
+}): ConfigFile["packages"] =>
+  !config.packages
+    ? {}
+    : {
+        packages: Object.keys(config.packages).reduce((packages, pkg) => {
+          const packagePath = config.packages[pkg].path;
+          if (!packagePath || !cwd) return packages;
+
+          const checkDir = fs.statSync(path.join(cwd, packagePath));
+          if (checkDir.isFile()) {
+            const dirName = path.dirname(packagePath);
+            const packageFileName = path.basename(packagePath);
+            packages[pkg] = {
+              ...packages[pkg],
+              path: dirName,
+              packageFileName,
+            };
+            return packages;
+          } else {
+            return packages;
+          }
+        }, config?.packages),
+      };
 
 export const changeFiles = async ({
   cwd,
@@ -210,9 +330,12 @@ export const changeFilesRemove = ({
 }) => {
   return Promise.all(
     paths.map(async (changeFilePath) => {
-      await fs.unlink(path.posix.join(cwd, changeFilePath), (err) => {
-        if (err) throw err;
-      });
+      await fs.unlink(
+        path.posix.join(cwd, changeFilePath),
+        (err: Error | null) => {
+          if (err) throw err;
+        }
+      );
       return changeFilePath;
     })
   ).then((deletedPaths) => {
@@ -231,19 +354,24 @@ export type ChangelogFile = {
 
 export const readChangelog = async ({
   cwd,
+  packagePath = "",
   create = true,
 }: {
   cwd: string;
+  packagePath?: string;
   create?: boolean;
 }): Promise<VFile> => {
   let file = null;
   try {
-    file = await vfile.read(path.join(cwd, "CHANGELOG.md"), "utf8");
+    file = await vfile.read(
+      path.join(cwd, packagePath, "CHANGELOG.md"),
+      "utf8"
+    );
   } catch {
     if (create) {
       console.log("Could not load the CHANGELOG.md. Creating one.");
       file = {
-        path: path.join(cwd, "CHANGELOG.md"),
+        path: path.join(cwd, packagePath, "CHANGELOG.md"),
         contents: "# Changelog\n\n\n",
       };
     }

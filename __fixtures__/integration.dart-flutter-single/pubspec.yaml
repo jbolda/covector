@@ -1,0 +1,31 @@
+name: test_app
+description: a great one
+homepage: https://github.com/
+version: 0.3.1
+
+environment:
+  sdk: ">=2.10.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meta: any
+  provider: ^4.3.2
+
+  related_package:
+    git:
+      url: git@github.com:jbolda/covector.git
+      ref: main
+      path: __fixtures__/haha/
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: any
+  json_serializable: any
+  mobx_codegen: any
+
+flutter:
+  assets:
+    - assets/schema/
+    - assets/localization/

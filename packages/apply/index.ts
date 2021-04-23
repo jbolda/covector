@@ -5,16 +5,15 @@ import {
   PackageFile,
   ConfigFile,
 } from "@covector/files";
-import { compareBumps, CommonBumps } from "@covector/assemble";
+import { CommonBumps } from "@covector/assemble";
 import semver from "semver";
 import { cloneDeep } from "lodash";
-import path from "path";
 
 type ChangeParsed = {
-  releases: {[k: string]: string}
-  summary: string
-  meta: {dependencies: string}
-}
+  releases: { [k: string]: string };
+  summary: string;
+  meta: { dependencies: string };
+};
 
 type Releases = {
   [k: string]: {
@@ -138,15 +137,8 @@ const readAll = async ({
       !config.packages[pkg].path
         ? { name: pkg }
         : readPkgFile({
-            file: path.join(
-              cwd,
-              //@ts-ignore
-              config.packages[pkg].path,
-              !!config.packages[pkg].manager &&
-                config.packages[pkg].manager === "rust"
-                ? "Cargo.toml"
-                : "package.json"
-            ),
+            cwd,
+            pkgConfig: config.packages[pkg],
             nickname: pkg,
           })
     )
@@ -187,7 +179,7 @@ type Changed = {
     type: CommonBumps;
     changes?: ChangeParsed[];
   };
-}
+};
 export const changesConsideringParents = ({
   assembledChanges,
   config,
@@ -201,10 +193,7 @@ export const changesConsideringParents = ({
   const parents = resolveParents({ config });
 
   let changes = Object.keys(assembledChanges.releases).reduce(
-    (
-      list: Changed,
-      change
-    ) => {
+    (list: Changed, change) => {
       list[change] = assembledChanges.releases[change];
       list[change].parents = parents[change];
       return list;
@@ -212,12 +201,15 @@ export const changesConsideringParents = ({
     {}
   );
 
-  return { releases: parentBump(changes, parents), changes: assembledChanges.changes };
+  return {
+    releases: parentBump(changes, parents),
+    changes: assembledChanges.changes,
+  };
 };
 
 const parentBump = (initialChanges: Changed, parents: any): Changed => {
-  let changes = {...initialChanges}
-  let recurse = false
+  let changes = { ...initialChanges };
+  let recurse = false;
   Object.keys(initialChanges).forEach((main) => {
     if (changes[main].parents.length > 0) {
       changes[main].parents.forEach((pkg) => {
@@ -228,7 +220,7 @@ const parentBump = (initialChanges: Changed, parents: any): Changed => {
         } else {
           // if the parent doesn't have a release
           // add one to adopt the next version of it's child
-          changes[pkg] = {...cloneDeep(changes[main]), type: 'patch'};
+          changes[pkg] = { ...cloneDeep(changes[main]), type: "patch" };
           if (changes[pkg].changes) {
             changes[pkg].changes!.forEach((parentChange) => {
               parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
@@ -236,13 +228,13 @@ const parentBump = (initialChanges: Changed, parents: any): Changed => {
           }
           changes[pkg].parents = parents[pkg];
           // we also need to presume recursion to update the parents' parents
-          recurse = true
+          recurse = true;
         }
       });
     }
   });
-  return recurse ? parentBump(changes, parents) : changes
-}
+  return recurse ? parentBump(changes, parents) : changes;
+};
 
 const bumpAll = ({
   changes,

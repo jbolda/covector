@@ -5,7 +5,6 @@ import {
   Pkg,
   ChangelogFile,
 } from "@covector/files";
-import path from "path";
 import unified from "unified";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
@@ -99,25 +98,17 @@ export const fillChangelogs = async ({
 };
 
 export const pullLastChangelog = async ({
-  applied,
   config,
   cwd,
-  pkgCommandsRan,
 }: {
-  applied: { name: string; version: string }[];
   config: ConfigFile;
   cwd: string;
-  pkgCommandsRan?: { [k: string]: PkgCommandResponse };
 }) => {
   const changelogs = await readAllChangelogs({
-    applied: applied.reduce(
-      (
-        final: { name: string; version: string; changelog?: ChangelogFile }[],
-        current
-      ) =>
-        !config.packages[current.name].path ? final : final.concat([current]),
-      []
-    ),
+    applied: Object.keys(config.packages).map((pkg) => ({
+      name: pkg,
+      version: "",
+    })),
     packages: config.packages,
     cwd,
     create: false,
@@ -127,24 +118,33 @@ export const pullLastChangelog = async ({
     changelogs,
   });
 
-  if (!pkgCommandsRan) {
-    return;
-  } else {
-    pkgCommandsRan = Object.keys(pkgCommandsRan).reduce(
-      (pkgs: { [k: string]: PkgCommandResponse }, pkg) => {
-        pulledChanges.forEach((change) => {
-          if (change?.pkg === pkg && change.changelog) {
-            pkgs[pkg].command = change.changelog;
-          }
-        });
-        return pkgs;
-      },
-      pkgCommandsRan
-    );
-
-    return pkgCommandsRan;
-  }
+  return pulledChanges.reduce(
+    (changelogs: { [k: string]: { pkg: string; changelog: string } }, pkg) => {
+      changelogs[pkg.pkg] = pkg;
+      return changelogs;
+    },
+    {}
+  );
 };
+
+export const pipeChangelogToCommands = async ({
+  changelogs,
+  pkgCommandsRan,
+}: {
+  changelogs: { [k: string]: { pkg: string; changelog: string } };
+  pkgCommandsRan: { [k: string]: PkgCommandResponse };
+}) =>
+  Object.keys(pkgCommandsRan).reduce(
+    (pkgs: { [k: string]: PkgCommandResponse }, pkg) => {
+      Object.keys(changelogs).forEach((pkg) => {
+        if (pkgs[pkg]) {
+          pkgs[pkg].command = changelogs[pkg].changelog;
+        }
+      });
+      return pkgs;
+    },
+    pkgCommandsRan
+  );
 
 const readAllChangelogs = ({
   applied,
@@ -160,8 +160,8 @@ const readAllChangelogs = ({
   return Promise.all(
     applied.map((change) =>
       readChangelog({
-        //@ts-ignore
-        cwd: path.join(cwd, packages[change.name].path),
+        cwd,
+        packagePath: packages[change.name].path,
         create,
       })
     )

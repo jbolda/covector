@@ -130,6 +130,10 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
           "command": Object {
             "command": "npm run build",
             "pipe": true,
@@ -164,6 +168,10 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
           "command": Object {
             "command": "npm run build",
             "pipe": true,
@@ -557,6 +565,10 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
           "command": Object {
             "command": "echo publish",
             "pipe": true,
@@ -591,6 +603,10 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
           "command": Object {
             "command": "echo publish",
             "pipe": true,
@@ -1046,6 +1062,10 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
           "command": Array [
             Object {
               "command": "npm run build",
@@ -1090,6 +1110,10 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
           "command": Array [
             Object {
               "command": "npm run build",
@@ -1574,6 +1598,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo the files in the \${ pkg.pkg } folder are",
             "ls",
@@ -1701,6 +1726,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo the files in the \${ pkg.pkg } folder are",
             "ls",
@@ -1844,6 +1870,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo the files in the \${ pkg.pkg } folder are",
             "ls",
@@ -1929,6 +1956,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo the files in the \${ pkg.pkg } folder are",
             "ls",
@@ -1971,6 +1999,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo the files in the \${ pkg.pkg } folder are",
             "ls",
@@ -3443,6 +3472,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": "echo publishing \${ pkg.pkg } would happen here",
           "dependencies": Array [
             "tauri",
@@ -3575,6 +3605,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo publishing \${ pkg.pkg } would happen here",
             "echo running in \${ pkg.path }",
@@ -3708,6 +3739,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo publishing \${ pkg.pkg } would happen here",
             "echo running in \${ pkg.path }",
@@ -3857,6 +3889,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo publishing \${ pkg.pkg } would happen here",
             "echo running in \${ pkg.path }",
@@ -3948,6 +3981,7 @@ Object {
       "pipe",
       Object {
         "pkg": Object {
+          "changelog": false,
           "command": Array [
             "echo publishing \${ pkg.pkg } would happen here",
             "echo running in \${ pkg.path }",
@@ -7401,6 +7435,125 @@ Object {
 }
 `;
 
+exports[`integration test in production mode runs publish for dart / flutter 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "test_app [publish]: echo publishing",
+    ],
+    Array [
+      "publishing",
+    ],
+  ],
+  "covectorReturn": Object {
+    "test_app": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing",
+        ],
+        "dependencies": undefined,
+        "manager": "flutter",
+        "path": ".",
+        "pkg": "test_app",
+        "pkgFile": Object {
+          "name": "test_app",
+          "pkg": Object {
+            "dependencies": Object {
+              "flutter": Object {
+                "sdk": "flutter",
+              },
+              "meta": "any",
+              "provider": "^4.3.2",
+              "related_package": Object {
+                "git": Object {
+                  "path": "__fixtures__/haha/",
+                  "ref": "main",
+                  "url": "git@github.com:jbolda/covector.git",
+                },
+              },
+            },
+            "description": "a great one",
+            "dev_dependencies": Object {
+              "build_runner": "any",
+              "flutter_test": Object {
+                "sdk": "flutter",
+              },
+              "json_serializable": "any",
+              "mobx_codegen": "any",
+            },
+            "environment": Object {
+              "sdk": ">=2.10.0 <3.0.0",
+            },
+            "flutter": Object {
+              "assets": Array [
+                "assets/schema/",
+                "assets/localization/",
+              ],
+            },
+            "homepage": "https://github.com/",
+            "name": "test_app",
+            "version": "0.3.1",
+          },
+          "version": "0.3.1",
+          "versionMajor": 0,
+          "versionMinor": 3,
+          "versionPatch": 1,
+        },
+        "postcommand": null,
+        "precommand": null,
+      },
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
+exports[`integration test in production mode runs publish for general file 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "general-pkg [publish]: echo publishing",
+    ],
+    Array [
+      "publishing",
+    ],
+  ],
+  "covectorReturn": Object {
+    "general-pkg": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing",
+        ],
+        "dependencies": undefined,
+        "manager": "",
+        "path": ".",
+        "pkg": "general-pkg",
+        "pkgFile": Object {
+          "name": "general-pkg",
+          "pkg": Object {
+            "name": "",
+            "version": "6.1.0",
+          },
+          "version": "6.1.0",
+          "versionMajor": 6,
+          "versionMinor": 1,
+          "versionPatch": 0,
+        },
+        "postcommand": null,
+        "precommand": null,
+      },
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
 exports[`integration test in production mode runs publish for js and rust 1`] = `
 Object {
   "consoleInfo": Array [],
@@ -8143,6 +8296,121 @@ Object {
     ],
   ],
   "covectorReturn": "No commands configured to run on [test].",
+}
+`;
+
+exports[`integration test in production mode runs version for dart / flutter 1`] = `
+Object {
+  "consoleInfo": Array [
+    Array [
+      ".changes/first-change.md was deleted",
+    ],
+    Array [
+      ".changes/second-change.md was deleted",
+    ],
+  ],
+  "consoleLog": Array [
+    Array [
+      "bumping test_app with minor",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+  ],
+  "covectorReturn": Object {
+    "test_app": Object {
+      "applied": Object {
+        "name": "test_app",
+        "pkg": Object {
+          "dependencies": Object {
+            "flutter": Object {
+              "sdk": "flutter",
+            },
+            "meta": "any",
+            "provider": "^4.3.2",
+            "related_package": Object {
+              "git": Object {
+                "path": "__fixtures__/haha/",
+                "ref": "main",
+                "url": "git@github.com:jbolda/covector.git",
+              },
+            },
+          },
+          "description": "a great one",
+          "dev_dependencies": Object {
+            "build_runner": "any",
+            "flutter_test": Object {
+              "sdk": "flutter",
+            },
+            "json_serializable": "any",
+            "mobx_codegen": "any",
+          },
+          "environment": Object {
+            "sdk": ">=2.10.0 <3.0.0",
+          },
+          "flutter": Object {
+            "assets": Array [
+              "assets/schema/",
+              "assets/localization/",
+            ],
+          },
+          "homepage": "https://github.com/",
+          "name": "test_app",
+          "version": "0.3.1",
+        },
+        "version": "0.4.0",
+        "versionMajor": 0,
+        "versionMinor": 4,
+        "versionPatch": 0,
+      },
+      "command": "## [0.4.0]
+- Summary about the changes in test_app
+- Summary about the changes again(!) in test_app",
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
+exports[`integration test in production mode runs version for general file 1`] = `
+Object {
+  "consoleInfo": Array [
+    Array [
+      ".changes/first-change.md was deleted",
+    ],
+    Array [
+      ".changes/second-change.md was deleted",
+    ],
+  ],
+  "consoleLog": Array [
+    Array [
+      "bumping general-pkg with minor",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+  ],
+  "covectorReturn": Object {
+    "general-pkg": Object {
+      "applied": Object {
+        "name": "general-pkg",
+        "pkg": Object {
+          "name": "",
+          "version": "6.1.0",
+        },
+        "version": "6.2.0",
+        "versionMajor": 6,
+        "versionMinor": 2,
+        "versionPatch": 0,
+      },
+      "command": "## [6.2.0]
+- Summary about the changes in general-pkg
+- A general summary about the generally changes in general-pkg generally",
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
 }
 `;
 

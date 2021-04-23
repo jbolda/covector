@@ -17,7 +17,11 @@ import {
   PkgVersion,
   PkgPublish,
 } from "@covector/assemble";
-import { fillChangelogs, pullLastChangelog } from "@covector/changelog";
+import {
+  fillChangelogs,
+  pullLastChangelog,
+  pipeChangelogToCommands,
+} from "@covector/changelog";
 import {
   apply,
   changesConsideringParents,
@@ -118,15 +122,15 @@ export function* covector({
       assembledChanges,
       config,
     });
-    //@ts-ignore
+
     const commands: PkgVersion[] = yield mergeChangesToConfig({
       assembledChanges: changes,
       config,
       command,
       dryRun,
       filterPackages,
+      cwd,
     });
-
     if (dryRun) {
       console.log("==== commands ready to run ===");
       console.log(commands);
@@ -223,6 +227,11 @@ export function* covector({
     return 'placeholder';
   } else {
     yield raceTime({ t: config.timeout });
+    const changelogs = yield pullLastChangelog({
+      config,
+      cwd,
+    });
+
     const commands: PkgPublish[] = yield mergeIntoConfig({
       assembledChanges,
       config,
@@ -230,6 +239,7 @@ export function* covector({
       cwd,
       dryRun,
       filterPackages,
+      changelogs,
     });
 
     if (dryRun) {
@@ -261,13 +271,8 @@ export function* covector({
       {}
     );
 
-    pkgCommandsRan = yield pullLastChangelog({
-      applied: commandsToRun.map((command) => ({
-        name: command.pkg,
-        version: "",
-      })),
-      config,
-      cwd,
+    pkgCommandsRan = yield pipeChangelogToCommands({
+      changelogs,
       pkgCommandsRan,
     });
 

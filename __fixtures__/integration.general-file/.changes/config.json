@@ -1,0 +1,9 @@
+{
+  "packages": {
+    "general-pkg": {
+      "path": "./VERSION",
+      "version": true,
+      "publish": "echo publishing"
+    }
+  }
+}
