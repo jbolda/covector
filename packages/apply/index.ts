@@ -300,6 +300,11 @@ const bumpMain = ({
       let version = semver.inc(pkg.pkg.package.version, bumpType);
       // @ts-ignore TODO we need to normalize Pkg for toml? Or make some union type
       if (version) pkg.pkg.package.version = version;
+    } else {
+      // assume version is at the root
+      // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
+      let version = semver.inc(pkg.pkg.version, bumpType);
+      if (version) pkg.pkg.version = version;
     }
   }
   return pkg;

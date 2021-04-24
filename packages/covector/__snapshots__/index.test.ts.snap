@@ -8356,7 +8356,7 @@ Object {
           },
           "homepage": "https://github.com/",
           "name": "test_app",
-          "version": "0.3.1",
+          "version": "0.4.0",
         },
         "version": "0.4.0",
         "versionMajor": 0,
@@ -8397,7 +8397,7 @@ Object {
         "name": "general-pkg",
         "pkg": Object {
           "name": "",
-          "version": "6.1.0",
+          "version": "6.2.0",
         },
         "version": "6.2.0",
         "versionMajor": 6,

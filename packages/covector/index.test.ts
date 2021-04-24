@@ -135,6 +135,14 @@ describe("integration test in production mode", () => {
         "- Summary about the changes in test_app\n" +
         "- Summary about the changes again(!) in test_app\n"
     );
+
+    const versionFile = await toVFile.read(
+      path.join(fullIntegration, "pubspec.yaml"),
+      "utf-8"
+    );
+    expect(versionFile.contents).toEqual(
+      expect.stringContaining("version: 0.4.0\n")
+    );
   });
 
   it("runs version for general file", async () => {
@@ -168,6 +176,12 @@ describe("integration test in production mode", () => {
         "- Summary about the changes in general-pkg\n" +
         "- A general summary about the generally changes in general-pkg generally\n"
     );
+
+    const versionFile = await toVFile.read(
+      path.join(fullIntegration, "VERSION"),
+      "utf-8"
+    );
+    expect(versionFile.contents).toBe("6.2.0");
   });
 
   it("runs publish for js and rust", async () => {
