@@ -32,6 +32,10 @@ inputs:
     description: Template for how the preview packages should be versioned
     required: false
     default: date
+  identifier:
+    description: Identifier for prerelease version template
+    required: false
+    default: branch
 outputs:
   change:
     description: The changes that were applied

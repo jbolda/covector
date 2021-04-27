@@ -108,8 +108,7 @@ export function* run(): Generator<any, any, any> {
       const configuredLabel = core.getInput("label");
       const previewLabel = github?.context?.payload?.pull_request?.labels?.filter(({ name } : { name: String }) => name === configuredLabel).length;
       const previewVersion = core.getInput("previewVersion");
-
-      console.log('github', github);
+      const versionIdentifier = core.getInput('identifier');
 
       if (github.context.eventName !== "pull_request") {
         throw new Error(`The 'preview' command for the covector action is only meant to run on pull requests.`);
@@ -119,13 +118,35 @@ export function* run(): Generator<any, any, any> {
         console.log(`Not publishing any preview packages because the "${configuredLabel}" label has not been applied to this pull request.`);
       } else {
         let covectored: Covector;
+        const branchName = github?.context?.payload?.pull_request?.head?.ref;
+        let identifier;
+        let versionTemplate;
+        
+        switch(versionIdentifier){
+          case "branch":
+            identifier = branchName.replace(/\_/g, '-').replace(/\//g, '-');
+            break;
+          default:
+            throw new Error(`Version identifier you specified, "${versionIdentifier}", is invalid.`)
+        }
+
+        switch(previewVersion){
+          case "date":
+            versionTemplate = `${identifier}.${Date.now()}`;
+            break;
+          case "sha":
+            versionTemplate = `${identifier}.${github.context.payload.after.substring(0, 7)}`;
+            break;
+          default:
+            throw new Error(`Preview version template you specified, "${previewVersion}", is invalid. Please use 'date' or 'sha'.`)
+        };
 
         covectored = yield covector({
           command,
           filterPackages,
           cwd,
           context: github.context.payload,
-          previewVersion
+          previewVersion: versionTemplate
         });
 
         if (covectored) {

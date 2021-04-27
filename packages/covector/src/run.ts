@@ -48,8 +48,7 @@ export function* covector({
   cwd = process.cwd(),
   filterPackages = [],
   modifyConfig = async (c) => c,
-  context,
-  previewVersion
+  previewVersion = '',
 }: {
   command: string;
   dryRun?: boolean;
@@ -225,19 +224,6 @@ export function* covector({
   } else if (command === "preview") {
     yield raceTime({ t: config.timeout });
 
-    let versionTemplate;
-    
-    switch(previewVersion){
-      case "date":
-        versionTemplate = `${Date.now()}`;
-        break;
-      case "sha":
-        versionTemplate = `${context.after.substring(0, 7)}`;
-        break;
-      default:
-        throw new Error(`Preview version template you specified, "${previewVersion}", is invalid. Please use 'date' or 'sha'.`)
-    };
-
     const versionChanges = changesConsideringParents({
       assembledChanges,
       config,
@@ -290,7 +276,7 @@ export function* covector({
       config,
       cwd,
       bump: !dryRun,
-      previewTemplate: versionTemplate,
+      previewVersion,
     });
 
     pkgCommandsRan = applied.reduce(
