@@ -5,7 +5,7 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-describe("package file apply bump", () => {
+describe("package file apply bump (snapshot)", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir"]);
@@ -750,7 +750,7 @@ describe("list changes considering parents", () => {
   });
 });
 
-describe("package file apply bump", () => {
+describe("package file apply bump (async/await)", () => {
   it("bumps single js json", async () => {
     const jsonFolder = f.copy("pkg.js-single-json");
 
@@ -1090,3 +1090,143 @@ describe("package file apply bump", () => {
     restoreConsole();
   });
 });
+
+describe("packge file applies preview bump", () => {
+  let restoreConsole: RestoreConsole;
+  beforeEach(() => {
+    restoreConsole = mockConsole(["log", "dir"]);
+  });
+  afterEach(() => {
+    restoreConsole();
+  });
+
+  it('bumps single js json', function* () {
+    const jsonFolder = f.copy("pkg.js-single-json"); // 0.5.9
+
+    const commands = [
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: "./",
+        pkg: "js-single-json-fixture",
+        type: "minor",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        "js-single-json-fixture": {
+          path: "./",
+          manager: "javascript",
+        },
+      },
+    };
+
+    //@ts-ignore
+    yield apply({ commands, config, cwd: jsonFolder, previewVersion: 'branch-name.12345' });
+    //@ts-ignore
+    const modifiedVFile = yield toVFile.read(
+      jsonFolder + "/package.json",
+      "utf-8"
+    );
+    expect(modifiedVFile.contents).toBe(
+      "{\n" +
+        '  "private": true,\n' +
+        '  "name": "js-single-json-fixture",\n' +
+        '  "description": "A single package at the root. No monorepo setup.",\n' +
+        '  "version": "0.5.9-branch-name.12345"\n' +
+        "}\n"
+    );
+
+    expect({
+      //@ts-ignore
+      consoleLog: console.log.mock.calls,
+      //@ts-ignore
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+
+  it("bumps multi js json", function* () {
+    const jsonFolder = f.copy("pkg.js-yarn-workspace"); // 1.0.0
+
+    const commands = [
+      {
+        dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        manager: "javascript",
+        path: "./",
+        pkg: "yarn-workspace-base-pkg-a",
+        type: "minor",
+        parents: [],
+      },
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: undefined,
+        pkg: "yarn-workspace-base-pkg-b",
+        type: "minor",
+        parents: ["yarn-workspace-base-pkg-a"],
+      },
+      {
+        dependencies: undefined,
+        manager: "javascript",
+        path: undefined,
+        pkg: "all",
+        type: "minor",
+        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
+      },
+    ];
+
+    const config = {
+      packages: {
+        "yarn-workspace-base-pkg-a": {
+          path: "./packages/pkg-a/",
+          manager: "javascript",
+          dependencies: ["yarn-workspace-base-pkg-b", "all"],
+        },
+        "yarn-workspace-base-pkg-b": {
+          path: "./packages/pkg-b/",
+          manager: "javascript",
+          dependencies: ["all"],
+        },
+        all: { version: true },
+      },
+    };
+
+    //@ts-ignore
+    yield apply({ commands, config, cwd: jsonFolder, previewVersion: 'branch-name.12345' });
+    //@ts-ignore
+    const modifiedPkgAVFile = yield toVFile.read(
+      jsonFolder + "/packages/pkg-a/package.json",
+      "utf-8"
+    );
+    expect(modifiedPkgAVFile.contents).toBe(
+      "{\n" +
+        '  "name": "yarn-workspace-base-pkg-a",\n' +
+        '  "version": "1.0.0-branch-name.12345",\n' +
+        '  "dependencies": {\n' +
+        '    "yarn-workspace-base-pkg-b": "1.0.0-branch-name.12345"\n' +
+        "  }\n" +
+        "}\n"
+    );
+
+    //@ts-ignore
+    const modifiedPkgBVFile = yield toVFile.read(
+      jsonFolder + "/packages/pkg-b/package.json",
+      "utf-8"
+    );
+    expect(modifiedPkgBVFile.contents).toBe(
+      "{\n" +
+        '  "name": "yarn-workspace-base-pkg-b",\n' +
+        '  "version": "1.0.0-branch-name.12345"\n' +
+        "}\n"
+    );
+
+    expect({
+      //@ts-ignore
+      consoleLog: console.log.mock.calls,
+      //@ts-ignore
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+})
