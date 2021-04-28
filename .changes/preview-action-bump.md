@@ -1,7 +1,7 @@
 ---
-"action": patch
-"covector": patch
-"apply": patch
+"action": minor
+"covector": minor
+"apply": minor
 ---
 
 Add preview command for versioning and publishing preview packages
