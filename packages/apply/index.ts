@@ -275,7 +275,7 @@ const bumpAll = ({
             packageFile: packageFiles[pkg],
             dep: pkgDep,
             bumpType: changes[pkgDep].type,
-            previewVersion,
+            preview: !!previewVersion
           });
         }
       }
@@ -326,12 +326,12 @@ const bumpDeps = ({
   packageFile,
   dep,
   bumpType,
-  previewVersion,
+  preview = false,
 }: {
   packageFile: PackageFile;
   dep: string;
   bumpType: string;
-  previewVersion: string;
+  preview: boolean;
 }) => {
   let pkg = { ...packageFile };
 
@@ -345,7 +345,7 @@ const bumpDeps = ({
       ) {
         if (pkg.vfile!.extname === ".json") {
           // for javascript
-          let version = previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : semver.inc(
+          let version = preview ? semver.valid(`${pkg.pkg.version}`) : semver.inc(
             pkg.pkg.dependencies[dep],
             // @ts-ignore TODO deal with ReleaseType
             bumpType
@@ -355,13 +355,13 @@ const bumpDeps = ({
           // for rust
           if (typeof pkg.pkg.dependencies[dep] === "object") {
             // @ts-ignore TODO deal with nest toml
-            pkg.pkg.dependencies[dep].version =  previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : incWithPartials(
+            pkg.pkg.dependencies[dep].version =  preview ? semver.valid(`${pkg.pkg.version}`) : incWithPartials(
               // @ts-ignore TODO deal with nest toml
               pkg.pkg.dependencies[dep].version,
               bumpType
             );
           } else {
-            let version =  previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : incWithPartials(pkg.pkg.dependencies[dep], bumpType);
+            let version =  preview ? semver.valid(`${pkg.pkg.version}`) : incWithPartials(pkg.pkg.dependencies[dep], bumpType);
             if (version) pkg.pkg.dependencies[dep] = version;
           }
         }
