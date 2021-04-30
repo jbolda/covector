@@ -8352,9 +8352,9 @@ Object {
                 "path": "objectDep",
                 "url": "git://github.com/boop.git",
               },
-              "version": "3.8.97",
+              "version": "3.8.98",
             },
-            "test_app_two": "0.1.7",
+            "test_app_two": "0.2.0",
           },
           "description": "a great one",
           "dev_dependencies": Object {
