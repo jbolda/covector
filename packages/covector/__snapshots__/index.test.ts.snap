@@ -8299,7 +8299,179 @@ Object {
 }
 `;
 
-exports[`integration test in production mode runs version for dart / flutter 1`] = `
+exports[`integration test in production mode runs version for dart / flutter multi 1`] = `
+Object {
+  "consoleInfo": Array [
+    Array [
+      ".changes/first-change.md was deleted",
+    ],
+    Array [
+      ".changes/second-change.md was deleted",
+    ],
+  ],
+  "consoleLog": Array [
+    Array [
+      "bumping test_app_two with minor",
+    ],
+    Array [
+      "bumping test_app_three with patch",
+    ],
+    Array [
+      "bumping test_app_one with patch",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+    Array [
+      "Could not load the CHANGELOG.md. Creating one.",
+    ],
+  ],
+  "covectorReturn": Object {
+    "test_app_one": Object {
+      "applied": Object {
+        "name": "test_app_one",
+        "pkg": Object {
+          "dependencies": Object {
+            "flutter": Object {
+              "sdk": "flutter",
+            },
+            "meta": "any",
+            "provider": "^4.3.2",
+            "related_package": Object {
+              "git": Object {
+                "path": "__fixtures__/haha/",
+                "ref": "main",
+                "url": "git@github.com:jbolda/covector.git",
+              },
+            },
+            "test_app_three": Object {
+              "git": Object {
+                "path": "objectDep",
+                "url": "git://github.com/boop.git",
+              },
+              "version": "3.8.97",
+            },
+            "test_app_two": "0.1.7",
+          },
+          "description": "a great one",
+          "dev_dependencies": Object {
+            "build_runner": "any",
+            "flutter_test": Object {
+              "sdk": "flutter",
+            },
+            "json_serializable": "any",
+            "mobx_codegen": "any",
+          },
+          "environment": Object {
+            "sdk": ">=2.10.0 <3.0.0",
+          },
+          "flutter": Object {
+            "assets": Array [
+              "assets/schema/",
+              "assets/localization/",
+            ],
+          },
+          "homepage": "https://github.com/",
+          "name": "test_app_one",
+          "version": "0.3.2",
+        },
+        "version": "0.3.2",
+        "versionMajor": 0,
+        "versionMinor": 3,
+        "versionPatch": 2,
+      },
+      "command": "## [0.3.2]
+- Summary about the changes in test_app_two",
+      "postcommand": false,
+      "precommand": false,
+    },
+    "test_app_three": Object {
+      "applied": Object {
+        "name": "test_app_three",
+        "pkg": Object {
+          "dependencies": Object {
+            "flutter": Object {
+              "sdk": "flutter",
+            },
+            "meta": "any",
+            "provider": "^4.3.2",
+          },
+          "description": "a great one",
+          "environment": Object {
+            "sdk": ">=2.10.0 <3.0.0",
+          },
+          "homepage": "https://github.com/",
+          "name": "test_app_three",
+          "version": "3.8.98",
+        },
+        "version": "3.8.98",
+        "versionMajor": 3,
+        "versionMinor": 8,
+        "versionPatch": 98,
+      },
+      "command": "## [3.8.98]
+- Summary about the changes in test_app_three",
+      "postcommand": false,
+      "precommand": false,
+    },
+    "test_app_two": Object {
+      "applied": Object {
+        "name": "test_app_two",
+        "pkg": Object {
+          "dependencies": Object {
+            "flutter": Object {
+              "sdk": "flutter",
+            },
+            "meta": "any",
+            "provider": "^4.3.2",
+            "related_package": Object {
+              "git": Object {
+                "path": "__fixtures__/haha/",
+                "ref": "main",
+                "url": "git@github.com:jbolda/covector.git",
+              },
+            },
+          },
+          "description": "a great one",
+          "dev_dependencies": Object {
+            "build_runner": "any",
+            "flutter_test": Object {
+              "sdk": "flutter",
+            },
+            "json_serializable": "any",
+            "mobx_codegen": "any",
+          },
+          "environment": Object {
+            "sdk": ">=2.10.0 <3.0.0",
+          },
+          "flutter": Object {
+            "assets": Array [
+              "assets/schema/",
+              "assets/localization/",
+            ],
+          },
+          "homepage": "https://github.com/",
+          "name": "test_app_two",
+          "version": "0.2.0",
+        },
+        "version": "0.2.0",
+        "versionMajor": 0,
+        "versionMinor": 2,
+        "versionPatch": 0,
+      },
+      "command": "## [0.2.0]
+- Summary about the changes in test_app_two",
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
+exports[`integration test in production mode runs version for dart / flutter single 1`] = `
 Object {
   "consoleInfo": Array [
     Array [

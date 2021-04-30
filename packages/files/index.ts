@@ -133,6 +133,7 @@ const stringifyPkg = ({
       return `${JSON.stringify(newContents, null, "  ")}\n`;
     case ".yml":
     case ".yaml":
+      // this clobbers gaps between sections: https://github.com/nodeca/js-yaml/issues/441
       return yaml.dump(newContents);
     default:
       return newContents.version;

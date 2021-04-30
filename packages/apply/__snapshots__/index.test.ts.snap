@@ -360,3 +360,14 @@ Object {
   ],
 }
 `;
+
+exports[`package file apply bump bumps single yaml toml 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping test_app with minor",
+    ],
+  ],
+}
+`;

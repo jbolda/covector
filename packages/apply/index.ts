@@ -337,7 +337,11 @@ const bumpDeps = ({
             bumpType
           );
           if (version) pkg.pkg.dependencies[dep] = version;
-        } else if (pkg.vfile!.extname === ".toml") {
+        } else if (
+          pkg.vfile!.extname === ".toml" ||
+          pkg.vfile!.extname === ".yaml" ||
+          pkg.vfile!.extname === ".yml"
+        ) {
           // for rust
           if (typeof pkg.pkg.dependencies[dep] === "object") {
             // @ts-ignore TODO deal with nest toml
