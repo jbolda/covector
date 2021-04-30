@@ -364,13 +364,24 @@ Object {
 exports[`packge file applies preview bump bumps multi js json 1`] = `
 Object {
   "consoleDir": Array [],
-  "consoleLog": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping yarn-workspace-base-pkg-a to 1.0.0-branch-name.12345 to publish a preview",
+    ],
+    Array [
+      "bumping yarn-workspace-base-pkg-b to 1.0.0-branch-name.12345 to publish a preview",
+    ],
+  ],
 }
 `;
 
 exports[`packge file applies preview bump bumps single js json 1`] = `
 Object {
   "consoleDir": Array [],
-  "consoleLog": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping js-single-json-fixture to 0.5.9-branch-name.12345 to publish a preview",
+    ],
+  ],
 }
 `;

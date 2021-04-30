@@ -262,6 +262,7 @@ const bumpAll = ({
   for (let pkg of Object.keys(changes)) {
     if (!packageFiles[pkg].vfile || changes[pkg].type === "noop") continue;
     if (logs && !previewVersion) console.log(`bumping ${pkg} with ${changes[pkg].type}`);
+    if (previewVersion) console.log(`bumping ${pkg} to ${packageFiles[pkg].version}-${previewVersion} to publish a preview`);
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
       bumpType: changes[pkg].type,
