@@ -1519,6 +1519,15 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
+      "bumping tauri to 0.5.2-branch-name.12345 to publish a preview",
+    ],
+    Array [
+      "bumping tauri-updater to 0.4.2-branch-name.12345 to publish a preview",
+    ],
+    Array [
+      "bumping tauri.js to 0.6.2-branch-name.12345 to publish a preview",
+    ],
+    Array [
       "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
     ],
     Array [
