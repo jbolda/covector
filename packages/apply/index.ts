@@ -315,7 +315,7 @@ const bumpMain = ({
     } else if (pkg.vfile.extname === ".toml") {
       // for rust
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-      let version =  previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : semver.inc(pkg.pkg.package.version, bumpType);
+      let version =  previewVersion ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`) : semver.inc(pkg.pkg.package.version, bumpType);
       // @ts-ignore TODO we need to normalize Pkg for toml? Or make some union type
       if (version) pkg.pkg.package.version = version;
     }
@@ -362,7 +362,8 @@ const bumpDeps = ({
               bumpType
             );
           } else {
-            let version =  preview ? semver.valid(`${pkg.pkg.version}`) : incWithPartials(pkg.pkg.dependencies[dep], bumpType);
+            // @ts-ignore
+            let version =  preview ? semver.valid(`${pkg.pkg.package.version}`) : incWithPartials(pkg.pkg.dependencies[dep], bumpType);
             if (version) pkg.pkg.dependencies[dep] = version;
           }
         }
