@@ -1,0 +1,19 @@
+{
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "publish": "echo publishing ${ pkg.pkg } would happen here"
+    }
+  },
+  "packages": {
+    "package-a": {
+      "path": "./package-a",
+      "manager": "javascript",
+      "dependencies": ["package-b"]
+    },
+    "package-b": {
+      "path": "./package-b",
+      "manager": "javascript"
+    }
+  }
+}
