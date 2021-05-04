@@ -575,7 +575,7 @@ describe("integration test for preview command", () => {
   });
 
   it("runs version and publish for js and rust", async () => {
-    const fullIntegration = f.copy("integration.js-only");
+    const fullIntegration = f.copy("integration.js-and-rust-for-preview");
     const covectored = await run(
       covector({
         command: "preview",
