@@ -381,7 +381,7 @@ const bumpDeps = ({
         if (pkg.vfile!.extname === ".json") {
           // for javascript
           // @ts-ignore TODO deal with ReleaseType
-          let version =  previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : semver.inc(pkg.pkg.devDependencies[dep], bumpType);
+          let version =  preview ? semver.valid(`${pkg.pkg.version}`) : semver.inc(pkg.pkg.devDependencies[dep], bumpType);
           if (version) pkg.pkg.devDependencies[dep] = version;
         }
       }
