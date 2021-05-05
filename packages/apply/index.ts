@@ -39,11 +39,13 @@ export const apply = function* ({
   config,
   cwd = process.cwd(),
   bump = true,
+  previewVersion = '',
 }: {
   commands: PackageCommand[];
   config: ConfigFile;
   cwd: string;
   bump: boolean;
+  previewVersion: string;
 }) {
   const changes = commands.reduce(
     (finalChanges: { [k: string]: PackageCommand }, command) => {
@@ -52,10 +54,11 @@ export const apply = function* ({
     },
     {}
   );
+
   // @ts-ignore since TS doesn't like yielding on a Promise
   let allPackages = yield readAll({ changes, config, cwd });
+  const bumps = bumpAll({ changes, allPackages, previewVersion });
 
-  const bumps = bumpAll({ changes, allPackages });
   if (bump) {
     yield writeAll({
       bumps: bumps.reduce(
@@ -248,18 +251,22 @@ const bumpAll = ({
   changes,
   allPackages,
   logs = true,
+  previewVersion = '',
 }: {
   changes: Releases;
   allPackages: { [k: string]: PackageFile };
   logs?: boolean;
+  previewVersion?: string;
 }) => {
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
     if (!packageFiles[pkg].vfile || changes[pkg].type === "noop") continue;
-    if (logs) console.log(`bumping ${pkg} with ${changes[pkg].type}`);
+    if (logs && !previewVersion) console.log(`bumping ${pkg} with ${changes[pkg].type}`);
+    if (previewVersion) console.log(`bumping ${pkg} to ${packageFiles[pkg].version}-${previewVersion} to publish a preview`);
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
       bumpType: changes[pkg].type,
+      previewVersion,
     });
     if (changes[pkg] && changes[pkg].dependencies) {
       let deps = changes[pkg].dependencies!;
@@ -269,6 +276,7 @@ const bumpAll = ({
             packageFile: packageFiles[pkg],
             dep: pkgDep,
             bumpType: changes[pkgDep].type,
+            preview: !!previewVersion
           });
         }
       }
@@ -281,9 +289,11 @@ const bumpAll = ({
 const bumpMain = ({
   packageFile,
   bumpType,
+  previewVersion,
 }: {
   packageFile: PackageFile;
   bumpType: CommonBumps;
+  previewVersion: string;
 }) => {
   let pkg = { ...packageFile };
   if (!pkg.version)
@@ -300,12 +310,12 @@ const bumpMain = ({
     if (pkg.vfile.extname === ".json") {
       // for javascript
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-      let version = semver.inc(pkg.pkg.version, bumpType);
+      let version = previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : semver.inc(pkg.pkg.version, bumpType);
       if (version) pkg.pkg.version = version;
     } else if (pkg.vfile.extname === ".toml") {
       // for rust
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-      let version = semver.inc(pkg.pkg.package.version, bumpType);
+      let version =  previewVersion ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`) : semver.inc(pkg.pkg.package.version, bumpType);
       // @ts-ignore TODO we need to normalize Pkg for toml? Or make some union type
       if (version) pkg.pkg.package.version = version;
     }
@@ -317,10 +327,12 @@ const bumpDeps = ({
   packageFile,
   dep,
   bumpType,
+  preview = false,
 }: {
   packageFile: PackageFile;
   dep: string;
   bumpType: string;
+  preview: boolean;
 }) => {
   let pkg = { ...packageFile };
 
@@ -334,7 +346,7 @@ const bumpDeps = ({
       ) {
         if (pkg.vfile!.extname === ".json") {
           // for javascript
-          let version = semver.inc(
+          let version = preview ? semver.valid(`${pkg.pkg.version}`) : semver.inc(
             pkg.pkg.dependencies[dep],
             // @ts-ignore TODO deal with ReleaseType
             bumpType
@@ -344,13 +356,14 @@ const bumpDeps = ({
           // for rust
           if (typeof pkg.pkg.dependencies[dep] === "object") {
             // @ts-ignore TODO deal with nest toml
-            pkg.pkg.dependencies[dep].version = incWithPartials(
+            pkg.pkg.dependencies[dep].version =  preview ? semver.valid(`${pkg.pkg.version}`) : incWithPartials(
               // @ts-ignore TODO deal with nest toml
               pkg.pkg.dependencies[dep].version,
               bumpType
             );
           } else {
-            let version = incWithPartials(pkg.pkg.dependencies[dep], bumpType);
+            // @ts-ignore
+            let version =  preview ? semver.valid(`${pkg.pkg.package.version}`) : incWithPartials(pkg.pkg.dependencies[dep], bumpType);
             if (version) pkg.pkg.dependencies[dep] = version;
           }
         }
@@ -368,7 +381,7 @@ const bumpDeps = ({
         if (pkg.vfile!.extname === ".json") {
           // for javascript
           // @ts-ignore TODO deal with ReleaseType
-          let version = semver.inc(pkg.pkg.devDependencies[dep], bumpType);
+          let version =  preview ? semver.valid(`${pkg.pkg.version}`) : semver.inc(pkg.pkg.devDependencies[dep], bumpType);
           if (version) pkg.pkg.devDependencies[dep] = version;
         }
       }

@@ -564,3 +564,30 @@ describe("integration test to invoke sub commands", () => {
     restoreConsole();
   });
 });
+
+describe("integration test for preview command", () => {
+  let restoreConsole: Function;
+  beforeEach(() => {
+    restoreConsole = mockConsole(["log", "dir", "info", "error"]);
+  });
+  afterEach(() => {
+    restoreConsole();
+  });
+
+  it("runs version and publish for js and rust", async () => {
+    const fullIntegration = f.copy("integration.js-and-rust-for-preview");
+    const covectored = await run(
+      covector({
+        command: "preview",
+        cwd: fullIntegration,
+        previewVersion: 'branch-name.12345'
+      })
+    );
+
+    expect({
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      covectorReturn: scrubVfile(covectored),
+    }).toMatchSnapshot();
+  });
+})

@@ -245,7 +245,17 @@ Object {
 }
 `;
 
-exports[`package file apply bump bumps multi js json 1`] = `
+exports[`package file apply bump (async/await) bumps multi rust toml as minor with object dep without version number 1`] = `
+Object {
+  "consoleError": Array [
+    Array [
+      "It appears that a dependency within this repo does not have a version specified.",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump (snapshot) bumps multi js json 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -259,7 +269,7 @@ Object {
 }
 `;
 
-exports[`package file apply bump bumps multi rust toml 1`] = `
+exports[`package file apply bump (snapshot) bumps multi rust toml 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -273,7 +283,7 @@ Object {
 }
 `;
 
-exports[`package file apply bump bumps multi rust toml as minor with object dep missing patch 1`] = `
+exports[`package file apply bump (snapshot) bumps multi rust toml as minor with object dep missing patch 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -287,17 +297,7 @@ Object {
 }
 `;
 
-exports[`package file apply bump bumps multi rust toml as minor with object dep without version number 1`] = `
-Object {
-  "consoleError": Array [
-    Array [
-      "It appears that a dependency within this repo does not have a version specified.",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump bumps multi rust toml as patch with object dep missing patch 1`] = `
+exports[`package file apply bump (snapshot) bumps multi rust toml as patch with object dep missing patch 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -311,7 +311,7 @@ Object {
 }
 `;
 
-exports[`package file apply bump bumps multi rust toml with dep missing patch 1`] = `
+exports[`package file apply bump (snapshot) bumps multi rust toml with dep missing patch 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -325,7 +325,7 @@ Object {
 }
 `;
 
-exports[`package file apply bump bumps multi rust toml with object dep 1`] = `
+exports[`package file apply bump (snapshot) bumps multi rust toml with object dep 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -339,7 +339,7 @@ Object {
 }
 `;
 
-exports[`package file apply bump bumps single js json 1`] = `
+exports[`package file apply bump (snapshot) bumps single js json 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -350,12 +350,37 @@ Object {
 }
 `;
 
-exports[`package file apply bump bumps single rust toml 1`] = `
+exports[`package file apply bump (snapshot) bumps single rust toml 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
     Array [
       "bumping rust-single-fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`packge file applies preview bump bumps multi js json 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping yarn-workspace-base-pkg-a to 1.0.0-branch-name.12345 to publish a preview",
+    ],
+    Array [
+      "bumping yarn-workspace-base-pkg-b to 1.0.0-branch-name.12345 to publish a preview",
+    ],
+  ],
+}
+`;
+
+exports[`packge file applies preview bump bumps single js json 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping js-single-json-fixture to 0.5.9-branch-name.12345 to publish a preview",
     ],
   ],
 }

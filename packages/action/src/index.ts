@@ -105,45 +105,65 @@ export function* run(): Generator<any, any, any> {
         return covectored;
       }
     } else if (command === "preview") {
-      const previewLabel = github?.context?.payload?.pull_request?.labels?.filter(({ name } : { name: String }) => name === 'preview').length;
+      const configuredLabel = core.getInput("label");
+      const previewLabel = github?.context?.payload?.pull_request?.labels?.filter(({ name } : { name: String }) => name === configuredLabel).length;
+      const previewVersion = core.getInput("previewVersion");
+      const versionIdentifier = core.getInput('identifier');
+
+      if (github.context.eventName !== "pull_request") {
+        throw new Error(`The 'preview' command for the covector action is only meant to run on pull requests.`);
+      }
+
       if (!previewLabel) {
-        console.log('Not publishing any preview packages because the "preview" label has not been applied to this pull request.')
+        console.log(`Not publishing any preview packages because the "${configuredLabel}" label has not been applied to this pull request.`);
       } else {
         let covectored: Covector;
-        // if (core.getInput("createRelease") === "true" && token) {
-        //   const octokit = github.getOctokit(token);
-        //   const { owner, repo } = github.context.repo;
-        //   covectored = yield covector({
-        //     command,
-        //     filterPackages,
-        //     cwd,
-        //     modifyConfig: injectPublishFunctions([
-        //       createReleases({ core, octokit, owner, repo }),
-        //     ]),
-        //   });
-        // } else {
-          covectored = yield covector({
-            command,
-            filterPackages,
-            cwd,
-          });
-        // }
+        const branchName = github?.context?.payload?.pull_request?.head?.ref;
+        let identifier;
+        let versionTemplate;
+        
+        switch(versionIdentifier){
+          case "branch":
+            identifier = branchName.replace(/\_/g, '-').replace(/\//g, '-');
+            break;
+          default:
+            throw new Error(`Version identifier you specified, "${versionIdentifier}", is invalid.`)
+        }
 
-        // if (covectored) {
-        //   let packagesPublished = Object.keys(covectored).reduce((pub, pkg) => {
-        //     if (!covectored[pkg].published) {
-        //       return pub;
-        //     } else {
-        //       return `${pub}${pkg}`;
-        //     }
-        //   }, "");
-        //   core.setOutput("packagesPublished", packagesPublished);
-          // for (let pkg of Object.keys(covectored)) {
-          //   if (covectored[pkg].command !== false) successfulPublish = true;
-          // }
-          // core.setOutput("successfulPublish", successfulPublish);
-          // core.setOutput("change", covectored);
-        // }
+        switch(previewVersion){
+          case "date":
+            versionTemplate = `${identifier}.${Date.now()}`;
+            break;
+          case "sha":
+            versionTemplate = `${identifier}.${github.context.payload.after.substring(0, 7)}`;
+            break;
+          default:
+            throw new Error(`Preview version template you specified, "${previewVersion}", is invalid. Please use 'date' or 'sha'.`)
+        };
+
+        covectored = yield covector({
+          command,
+          filterPackages,
+          cwd,
+          // context: github.context.payload,
+          previewVersion: versionTemplate
+        });
+
+        if (covectored) {
+          let packagesPublished = Object.keys(covectored).reduce((pub, pkg) => {
+            if (!covectored[pkg].published) {
+              return pub;
+            } else {
+              return `${pub}${pkg}`;
+            }
+          }, "");
+          core.setOutput("packagesPublished", packagesPublished);
+          for (let pkg of Object.keys(covectored)) {
+            if (covectored[pkg].command !== false) successfulPublish = true;
+          }
+          core.setOutput("successfulPublish", successfulPublish);
+          core.setOutput("change", covectored);
+        }
       }
     } else {
       throw new Error(`Command "${command}" not recognized. See README for which commands are available.`);
