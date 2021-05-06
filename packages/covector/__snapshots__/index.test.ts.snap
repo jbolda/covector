@@ -1538,6 +1538,137 @@ Object {
 }
 `;
 
+exports[`integration test for preview command runs version and publish for js and rust 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping package-b to 0.0.1-branch-name.12345 to publish a preview",
+    ],
+    Array [
+      "bumping package-a to 0.0.1-branch-name.12345 to publish a preview",
+    ],
+    Array [
+      "bumping package-c to 0.0.1-branch-name.12345 to publish a preview",
+    ],
+    Array [
+      "package-a [publish]: echo publishing package-a would happen here",
+    ],
+    Array [
+      "publishing package-a would happen here",
+    ],
+    Array [
+      "package-b [publish]: echo publishing package-b would happen here",
+    ],
+    Array [
+      "publishing package-b would happen here",
+    ],
+    Array [
+      "package-c [publish]: echo publishing package-c would happen here",
+    ],
+    Array [
+      "publishing package-c would happen here",
+    ],
+  ],
+  "covectorReturn": Object {
+    "package-a": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing package-a would happen here",
+        ],
+        "dependencies": Array [
+          "package-b",
+        ],
+        "manager": "javascript",
+        "path": "./package-a",
+        "pkg": "package-a",
+        "pkgFile": Object {
+          "name": "package-a",
+          "pkg": Object {
+            "dependencies": Object {
+              "package-b": "0.0.1-branch-name.12345",
+            },
+            "name": "package-a",
+            "version": "0.0.1-branch-name.12345",
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+        },
+        "postcommand": null,
+        "precommand": null,
+      },
+      "postcommand": false,
+      "precommand": false,
+    },
+    "package-b": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing package-b would happen here",
+        ],
+        "dependencies": undefined,
+        "manager": "javascript",
+        "path": "./package-b",
+        "pkg": "package-b",
+        "pkgFile": Object {
+          "name": "package-b",
+          "pkg": Object {
+            "dependencies": Object {},
+            "name": "package-b",
+            "version": "0.0.1-branch-name.12345",
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+        },
+        "postcommand": null,
+        "precommand": null,
+      },
+      "postcommand": false,
+      "precommand": false,
+    },
+    "package-c": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing package-c would happen here",
+        ],
+        "dependencies": Array [
+          "package-b",
+        ],
+        "manager": "rust",
+        "path": "./package-c",
+        "pkg": "package-c",
+        "pkgFile": Object {
+          "name": "package-c",
+          "pkg": Object {
+            "dependencies": Object {
+              "package-b": "0.0.1-branch-name.12345",
+            },
+            "package": Object {
+              "name": "package-c",
+              "version": "0.0.1-branch-name.12345",
+            },
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+        },
+        "postcommand": null,
+        "precommand": null,
+      },
+      "postcommand": false,
+      "precommand": false,
+    },
+  },
+}
+`;
+
 exports[`integration test in --dry-run mode passes correct config for js and rust 1`] = `
 Object {
   "consoleDir": Array [

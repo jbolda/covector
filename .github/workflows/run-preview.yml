@@ -17,6 +17,7 @@ jobs:
         uses: ./packages/action
         id: covector
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           command: preview
       - name: dump covector output
         env:
