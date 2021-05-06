@@ -53,6 +53,7 @@ export function* covector({
   filterPackages = [],
   modifyConfig = async (c) => c,
   previewVersion = '',
+  branchTag = '',
 }: {
   command: string;
   dryRun?: boolean;
@@ -60,6 +61,7 @@ export function* covector({
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
   previewVersion?: string;
+  branchTag?: string;
 }): Generator<any, Covector | string, any> {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const changesPaths = yield changeFiles({
@@ -318,6 +320,15 @@ export function* covector({
       filterPackages,
     });
 
+    const publishCommandsWithTags: PkgPublish[] = publishCommands.map(pkg => {
+      //@ts-ignore
+      if(pkg.command.length === 1){
+        //@ts-ignore
+        pkg.command = pkg.command[0] + ` --tag ${branchTag}`
+      };
+      return pkg;
+    });
+
     if (publishCommands.length === 0) {
       console.log(`No commands configured to run on publish.`);
       return `No commands configured to run on publish.`;
@@ -325,7 +336,7 @@ export function* covector({
 
     const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
       cwd,
-      commands: publishCommands,
+      commands: publishCommandsWithTags,
       command: 'publish',
     });
 
