@@ -37,6 +37,8 @@ inputs:
     required: false
     default: branch
 outputs:
+  status:
+    description: The changes that were applied
   change:
     description: The changes that were applied
   commandRan:

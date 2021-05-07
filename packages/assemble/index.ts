@@ -6,7 +6,6 @@ import yaml from "js-yaml";
 import { template, cloneDeep } from "lodash";
 import { readPkgFile, VFile, PackageFile, ConfigFile } from "@covector/files";
 import { runCommand } from "@covector/command";
-import path from "path";
 
 type Changeset = {
   //TODO can we narrow this more?
@@ -201,6 +200,7 @@ export const assemble = function* ({
 export type PkgVersion = {
   pkg: string;
   path?: string;
+  packageFileName?: string;
   type?: string;
   parents?: string[];
   precommand: string | null;
@@ -225,6 +225,7 @@ export const mergeChangesToConfig = function* ({
   config,
   assembledChanges,
   command,
+  cwd,
   dryRun = false,
   filterPackages = [],
 }: {
@@ -247,6 +248,9 @@ export const mergeChangesToConfig = function* ({
         pkged[pkg] = {
           pkg: pkg,
           path: config.packages[pkg].path,
+          ...(!config.packages[pkg]?.packageFileName
+            ? {}
+            : { packageFileName: config.packages[pkg]?.packageFileName }),
           precommand: mergeCommand({
             ...commandItems,
             command: `pre${command}`,
@@ -326,6 +330,8 @@ export const mergeChangesToConfig = function* ({
 export type PkgPublish = {
   pkg: string;
   path?: string;
+  packageFileName?: string;
+  changelog?: string;
   precommand?: (string | any)[] | null;
   command?: (string | any)[] | null;
   postcommand?: (string | any)[] | null;
@@ -348,6 +354,7 @@ export const mergeIntoConfig = function* ({
   cwd,
   dryRun = false,
   filterPackages = [],
+  changelogs,
 }: {
   config: ConfigFile;
   assembledChanges: { releases: {} };
@@ -355,6 +362,7 @@ export const mergeIntoConfig = function* ({
   cwd: string;
   dryRun: boolean;
   filterPackages: string[];
+  changelogs?: { [k: string]: { name: string; changelog: string } };
 }): Generator<any, PkgPublish[], any> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
@@ -384,7 +392,13 @@ export const mergeIntoConfig = function* ({
       if (!!mergedCommand) {
         pkged[pkg] = {
           pkg: pkg,
-          path: config.packages[pkg].path || "",
+          path: config.packages[pkg].path,
+          ...(!config.packages[pkg]?.packageFileName
+            ? {}
+            : { packageFileName: config.packages[pkg]?.packageFileName }),
+          ...(!changelogs || !changelogs[pkg]
+            ? {}
+            : { changelog: changelogs[pkg].changelog }),
           precommand: mergeCommand({
             ...commandItems,
             command: `pre${command}`,
@@ -428,17 +442,9 @@ export const mergeIntoConfig = function* ({
     };
 
     let extraPublishParams = {
-      // @ts-ignore TODO this returns a Promise and TS doesn't like that
       pkgFile: yield readPkgFile({
-        file: path.join(
-          cwd,
-          //@ts-ignore
-          config.packages[pkg].path,
-          !!config.packages[pkg].manager &&
-            config.packages[pkg].manager === "rust"
-            ? "Cargo.toml"
-            : "package.json"
-        ),
+        cwd,
+        pkgConfig: pkgCommands[pkg],
         nickname: pkg,
       }),
     };

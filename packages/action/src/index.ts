@@ -26,7 +26,9 @@ export function* run(): Generator<any, any, any> {
     let command = inputCommand;
 
     if (inputCommand === "version-or-publish") {
-      if ((yield covector({ command: "status" })) === "No changes.") {
+      const status = yield covector({ command: "status" });
+      core.setOutput("status", status);
+      if (status === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
         command = "publish";
       } else {
@@ -38,6 +40,7 @@ export function* run(): Generator<any, any, any> {
     let successfulPublish = false;
     if (command === "status") {
       const covectored = yield covector({ command, filterPackages, cwd });
+      core.setOutput("status", covectored);
     } else if (command === "version") {
       const covectored: Covector = yield covector({
         command,

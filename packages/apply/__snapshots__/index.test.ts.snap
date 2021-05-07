@@ -361,6 +361,17 @@ Object {
 }
 `;
 
+exports[`package file apply bump (snapshot) bumps single yaml toml 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping test_app with minor",
+    ],
+  ],
+}
+`;
+
 exports[`packge file applies preview bump bumps multi js json 1`] = `
 Object {
   "consoleDir": Array [],

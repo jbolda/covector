@@ -1,4 +1,8 @@
-import { fillChangelogs, pullLastChangelog } from "./index";
+import {
+  fillChangelogs,
+  pullLastChangelog,
+  pipeChangelogToCommands,
+} from "./index";
 //@ts-ignore
 import toVFile from "to-vfile";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
@@ -433,21 +437,23 @@ describe("changelog", () => {
       cwd: projectFolder,
     });
 
-    const pkgCommandsRan = {
+    let pkgCommandsRan = {
       [pkgName]: {
         command: "",
       },
     };
 
     //@ts-ignore
-    const changelog = yield pullLastChangelog({
-      applied,
-      //@ts-ignore
+    const changelogs = yield pullLastChangelog({
       config,
       cwd: projectFolder,
+    });
+
+    pkgCommandsRan = yield pipeChangelogToCommands({
+      changelogs,
       pkgCommandsRan,
     });
-    expect(changelog[pkgName].command).toBe(
+    expect(pkgCommandsRan[pkgName].command).toBe(
       "## \\[0.5.6]\n\n" +
         "- This is a test.\n" +
         "  - [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#43](/pull/43) ([#719999](/pull/719999)) on 2020-07-06\n" +
@@ -458,7 +464,7 @@ describe("changelog", () => {
     );
   });
 
-  it("reads a changelog with multiple entries", function* () {
+  it("reads a changelog with multiple entries", function* (): Generator<any> {
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [
@@ -521,21 +527,24 @@ describe("changelog", () => {
       cwd: projectFolder,
     });
 
-    const pkgCommandsRan = {
+    let pkgCommandsRan = {
       [pkgName]: {
         command: "",
       },
     };
 
-    //@ts-ignore
-    const changelog = yield pullLastChangelog({
-      applied,
-      //@ts-ignore
+    const changelogs = yield pullLastChangelog({
       config,
       cwd: projectFolder,
+    });
+
+    //@ts-ignore
+    pkgCommandsRan = yield pipeChangelogToCommands({
+      //@ts-ignore
+      changelogs,
       pkgCommandsRan,
     });
-    expect(changelog[pkgName].command).toBe(
+    expect(pkgCommandsRan[pkgName].command).toBe(
       "## \\[0.9.0]\n\n" +
         "- This is a test.\n" +
         "- This is another test.\n" +

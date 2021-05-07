@@ -1,0 +1,10 @@
+{
+  "packages": {
+    "test_app": {
+      "path": ".",
+      "manager": "flutter",
+      "version": true,
+      "publish": "echo publishing"
+    }
+  }
+}

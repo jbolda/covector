@@ -103,6 +103,52 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
+  it("bumps single yaml toml", function* () {
+    const rustFolder = f.copy("pkg.dart-flutter-single");
+
+    const commands = [
+      {
+        dependencies: undefined,
+        manager: "flutter",
+        path: "./",
+        pkg: "test_app",
+        type: "minor",
+        parents: [],
+      },
+    ];
+
+    const config = {
+      packages: {
+        test_app: {
+          path: "./",
+          manager: "flutter",
+        },
+      },
+    };
+
+    //@ts-ignore
+    yield apply({ commands, config, cwd: rustFolder });
+    //@ts-ignore
+    const modifiedVFile = yield toVFile.read(
+      rustFolder + "/pubspec.yaml",
+      "utf-8"
+    );
+    expect(modifiedVFile.contents).toBe(
+      "name: test_app\ndescription: a great one\nhomepage: https://github.com/\nversion: 0.4.0\n" +
+        "environment:\n  sdk: '>=2.10.0 <3.0.0'\n" +
+        "dependencies:\n  flutter:\n    sdk: flutter\n  meta: any\n  provider: ^4.3.2\n  related_package:\n    git:\n      url: git@github.com:jbolda/covector.git\n      ref: main\n      path: __fixtures__/haha/\n" +
+        "dev_dependencies:\n  flutter_test:\n    sdk: flutter\n  build_runner: any\n  json_serializable: any\n  mobx_codegen: any\n" +
+        "flutter:\n  assets:\n    - assets/schema/\n    - assets/localization/\n"
+    );
+
+    expect({
+      //@ts-ignore
+      consoleLog: console.log.mock.calls,
+      //@ts-ignore
+      consoleDir: console.dir.mock.calls,
+    }).toMatchSnapshot();
+  });
+
   it("bumps multi js json", function* () {
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
@@ -637,15 +683,17 @@ describe("list changes considering parents", () => {
           "pkg-c": "patch",
           "pkg-d": "major",
         },
-        summary: "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
-        meta: {}
+        summary:
+          "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
+        meta: {},
       },
       {
         releases: {
           "pkg-b": "minor",
         },
-        summary: "The pkg-b doesn't have a dep bump, but can dep bump pkg-a and pkg-overall with a patch.",
-        meta: {}
+        summary:
+          "The pkg-b doesn't have a dep bump, but can dep bump pkg-a and pkg-overall with a patch.",
+        meta: {},
       },
     ];
 
@@ -671,17 +719,12 @@ describe("list changes considering parents", () => {
         "pkg-overall": {
           path: "./packages/pkg-overall/",
           manager: "javascript",
-          dependencies: [
-            "pkg-a",
-            "pkg-b",
-          ],
+          dependencies: ["pkg-a", "pkg-b"],
         },
         "pkg-a": {
           path: "./packages/pkg-a/",
           manager: "javascript",
-          dependencies: [
-            "pkg-c",
-          ],
+          dependencies: ["pkg-c"],
         },
         "pkg-b": {
           path: "./packages/pkg-b/",
@@ -726,19 +769,19 @@ describe("list changes considering parents", () => {
     // console.error(changes)
 
     // these are directly defined in the change files
-    expect(changes.releases['pkg-b'].type).toBe('minor')
-    expect(changes.releases['pkg-c'].type).toBe('patch')
-    expect(changes.releases['pkg-d'].type).toBe('major')
+    expect(changes.releases["pkg-b"].type).toBe("minor");
+    expect(changes.releases["pkg-c"].type).toBe("patch");
+    expect(changes.releases["pkg-d"].type).toBe("major");
 
-    // these are the top level rolled up 
-    expect(changes.releases['pkg-overall'].type).toBe('patch')
-    expect(changes.releases['pkg-a'].type).toBe('patch')
-    
+    // these are the top level rolled up
+    expect(changes.releases["pkg-overall"].type).toBe("patch");
+    expect(changes.releases["pkg-a"].type).toBe("patch");
+
     // rolls up from pkg-d
-    expect(changes.releases['pkg-four'].type).toBe('patch')
-    expect(changes.releases['pkg-three'].type).toBe('patch')
-    expect(changes.releases['pkg-two'].type).toBe('patch')
-    expect(changes.releases['pkg-one'].type).toBe('patch')
+    expect(changes.releases["pkg-four"].type).toBe("patch");
+    expect(changes.releases["pkg-three"].type).toBe("patch");
+    expect(changes.releases["pkg-two"].type).toBe("patch");
+    expect(changes.releases["pkg-one"].type).toBe("patch");
 
     expect({
       //@ts-ignore

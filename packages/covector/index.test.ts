@@ -104,8 +104,158 @@ describe("integration test in production mode", () => {
     );
   });
 
+  it("runs version for dart / flutter single", async () => {
+    const fullIntegration = f.copy("integration.dart-flutter-single");
+    const covectored = await run(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      //@ts-ignore
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
+        //@ts-ignore
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
+    }).toMatchSnapshot();
+
+    const changelog = await toVFile.read(
+      path.join(fullIntegration, "CHANGELOG.md"),
+      "utf-8"
+    );
+    expect(changelog.contents).toBe(
+      "# Changelog\n\n" +
+        "## \\[0.4.0]\n\n" +
+        "- Summary about the changes in test_app\n" +
+        "- Summary about the changes again(!) in test_app\n"
+    );
+
+    const versionFile = await toVFile.read(
+      path.join(fullIntegration, "pubspec.yaml"),
+      "utf-8"
+    );
+    expect(versionFile.contents).toEqual(
+      expect.stringContaining("version: 0.4.0\n")
+    );
+  });
+
+  it("runs version for dart / flutter multi", async () => {
+    const fullIntegration = f.copy("integration.dart-flutter-multi");
+    const covectored = await run(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      //@ts-ignore
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
+        //@ts-ignore
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
+    }).toMatchSnapshot();
+
+    const changelog = await toVFile.read(
+      path.join(fullIntegration, "dart", "CHANGELOG.md"),
+      "utf-8"
+    );
+    expect(changelog.contents).toBe(
+      "# Changelog\n\n" +
+        "## \\[0.3.2]\n\n" +
+        "- Summary about the changes in test_app_two\n"
+    );
+
+    const versionFile = await toVFile.read(
+      path.join(fullIntegration, "dart", "pubspec.yaml"),
+      "utf-8"
+    );
+    expect(versionFile.contents).toEqual(
+      expect.stringContaining("version: 0.3.2\n")
+    );
+  });
+
+  it("runs version for general file", async () => {
+    const fullIntegration = f.copy("integration.general-file");
+    const covectored = await run(
+      covector({
+        command: "version",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      //@ts-ignore
+      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
+        // remove these as they are dependent on the OS
+        // and user running them so would always fail
+        //@ts-ignore
+        delete pkgs[pkg].applied.vfile;
+        return pkgs;
+      }, covectored),
+    }).toMatchSnapshot();
+
+    const changelog = await toVFile.read(
+      path.join(fullIntegration, "CHANGELOG.md"),
+      "utf-8"
+    );
+    expect(changelog.contents).toBe(
+      "# Changelog\n\n" +
+        "## \\[6.2.0]\n\n" +
+        "- Summary about the changes in general-pkg\n" +
+        "- A general summary about the generally changes in general-pkg generally\n"
+    );
+
+    const versionFile = await toVFile.read(
+      path.join(fullIntegration, "VERSION"),
+      "utf-8"
+    );
+    expect(versionFile.contents).toBe("6.2.0");
+  });
+
   it("runs publish for js and rust", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
+    const covectored = await run(
+      covector({
+        command: "publish",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      covectorReturn: scrubVfile(covectored),
+    }).toMatchSnapshot();
+  });
+
+  it("runs publish for dart / flutter", async () => {
+    const fullIntegration = f.copy("integration.dart-flutter-single");
+    const covectored = await run(
+      covector({
+        command: "publish",
+        cwd: fullIntegration,
+      })
+    );
+    expect({
+      consoleLog: consoleMock.log.mock.calls,
+      consoleInfo: consoleMock.info.mock.calls,
+      covectorReturn: scrubVfile(covectored),
+    }).toMatchSnapshot();
+  });
+
+  it("runs publish for general file", async () => {
+    const fullIntegration = f.copy("integration.general-file");
     const covectored = await run(
       covector({
         command: "publish",

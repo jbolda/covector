@@ -1,0 +1,13 @@
+name: test_app_three
+description: a great one
+homepage: https://github.com/
+version: 3.8.97
+
+environment:
+  sdk: ">=2.10.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  meta: any
+  provider: ^4.3.2
