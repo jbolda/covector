@@ -742,7 +742,7 @@ describe("integration test for preview command", () => {
   });
 });
 
-describe.only("integration test for preview command with dist tags", () => {
+describe("integration test for preview command with dist tags", () => {
   let restoreConsole: Function;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir", "info", "error"]);

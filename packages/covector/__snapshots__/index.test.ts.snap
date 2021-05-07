@@ -507,6 +507,7 @@ publish
       },
       "postcommand": false,
       "precommand": false,
+      "published": true,
     },
     "package-two": Object {
       "command": "## \\\\[1.9.0]
@@ -548,6 +549,7 @@ publish
       },
       "postcommand": false,
       "precommand": false,
+      "published": true,
     },
   },
 }
@@ -755,6 +757,7 @@ Object {
           },
           "postcommand": false,
           "precommand": false,
+          "published": true,
         },
         "package-two": Object {
           "command": "## \\\\[1.9.0]
@@ -795,6 +798,7 @@ Object {
           },
           "postcommand": false,
           "precommand": false,
+          "published": true,
         },
       },
     ],
@@ -839,6 +843,7 @@ Object {
       },
       "postcommand": false,
       "precommand": false,
+      "published": true,
     },
     "package-two": Object {
       "command": "## \\\\[1.9.0]
@@ -879,6 +884,7 @@ Object {
       },
       "postcommand": false,
       "precommand": false,
+      "published": true,
     },
   },
 }
@@ -1552,31 +1558,47 @@ Object {
       "bumping package-c to 0.0.1-branch-name.12345 to publish a preview",
     ],
     Array [
-      "package-a [publish]: echo publishing package-a would happen here",
+      "package-a [prepublish]: echo prepublishing package-a would happen here",
     ],
     Array [
-      "publishing package-a would happen here",
+      "prepublishing package-a would happen here",
     ],
     Array [
-      "package-b [publish]: echo publishing package-b would happen here",
+      "package-b [prepublish]: echo prepublishing package-b would happen here",
     ],
     Array [
-      "publishing package-b would happen here",
+      "prepublishing package-b would happen here",
     ],
     Array [
-      "package-c [publish]: echo publishing package-c would happen here",
+      "package-c [prepublish]: echo prepublishing package-c would happen here",
     ],
     Array [
-      "publishing package-c would happen here",
+      "prepublishing package-c would happen here",
+    ],
+    Array [
+      "package-a [publish]: echo publishing package-a would happen here --tag ",
+    ],
+    Array [
+      "publishing package-a would happen here --tag",
+    ],
+    Array [
+      "package-b [publish]: echo publishing package-b would happen here --tag ",
+    ],
+    Array [
+      "publishing package-b would happen here --tag",
+    ],
+    Array [
+      "package-c [publish]: echo publishing package-c would happen here --tag ",
+    ],
+    Array [
+      "publishing package-c would happen here --tag",
     ],
   ],
   "covectorReturn": Object {
     "package-a": Object {
       "command": true,
       "pkg": Object {
-        "command": Array [
-          "echo publishing package-a would happen here",
-        ],
+        "command": "echo publishing package-a would happen here --tag ",
         "dependencies": Array [
           "package-b",
         ],
@@ -1597,18 +1619,21 @@ Object {
           "versionMinor": 0,
           "versionPatch": 1,
         },
-        "postcommand": null,
-        "precommand": null,
+        "postcommand": Array [
+          "echo postpublishing package-a would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-a would happen here",
+        ],
       },
       "postcommand": false,
-      "precommand": false,
+      "precommand": true,
+      "published": true,
     },
     "package-b": Object {
       "command": true,
       "pkg": Object {
-        "command": Array [
-          "echo publishing package-b would happen here",
-        ],
+        "command": "echo publishing package-b would happen here --tag ",
         "dependencies": undefined,
         "manager": "javascript",
         "path": "./package-b",
@@ -1625,18 +1650,21 @@ Object {
           "versionMinor": 0,
           "versionPatch": 1,
         },
-        "postcommand": null,
-        "precommand": null,
+        "postcommand": Array [
+          "echo postpublishing package-b would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-b would happen here",
+        ],
       },
       "postcommand": false,
-      "precommand": false,
+      "precommand": true,
+      "published": true,
     },
     "package-c": Object {
       "command": true,
       "pkg": Object {
-        "command": Array [
-          "echo publishing package-c would happen here",
-        ],
+        "command": "echo publishing package-c would happen here --tag ",
         "dependencies": Array [
           "package-b",
         ],
@@ -1659,11 +1687,16 @@ Object {
           "versionMinor": 0,
           "versionPatch": 1,
         },
-        "postcommand": null,
-        "precommand": null,
+        "postcommand": Array [
+          "echo postpublishing package-c would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-c would happen here",
+        ],
       },
       "postcommand": false,
-      "precommand": false,
+      "precommand": true,
+      "published": true,
     },
   },
 }
@@ -1681,6 +1714,24 @@ Object {
     ],
     Array [
       "bumping package-c to 0.0.1-branch-name.12345 to publish a preview",
+    ],
+    Array [
+      "package-a [prepublish]: echo prepublishing package-a would happen here",
+    ],
+    Array [
+      "prepublishing package-a would happen here",
+    ],
+    Array [
+      "package-b [prepublish]: echo prepublishing package-b would happen here",
+    ],
+    Array [
+      "prepublishing package-b would happen here",
+    ],
+    Array [
+      "package-c [prepublish]: echo prepublishing package-c would happen here",
+    ],
+    Array [
+      "prepublishing package-c would happen here",
     ],
     Array [
       "package-a [publish]: echo publishing package-a would happen here --tag branch_name",
@@ -1726,11 +1777,16 @@ Object {
           "versionMinor": 0,
           "versionPatch": 1,
         },
-        "postcommand": null,
-        "precommand": null,
+        "postcommand": Array [
+          "echo postpublishing package-a would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-a would happen here",
+        ],
       },
       "postcommand": false,
-      "precommand": false,
+      "precommand": true,
+      "published": true,
     },
     "package-b": Object {
       "command": true,
@@ -1752,11 +1808,16 @@ Object {
           "versionMinor": 0,
           "versionPatch": 1,
         },
-        "postcommand": null,
-        "precommand": null,
+        "postcommand": Array [
+          "echo postpublishing package-b would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-b would happen here",
+        ],
       },
       "postcommand": false,
-      "precommand": false,
+      "precommand": true,
+      "published": true,
     },
     "package-c": Object {
       "command": true,
@@ -1784,11 +1845,16 @@ Object {
           "versionMinor": 0,
           "versionPatch": 1,
         },
-        "postcommand": null,
-        "precommand": null,
+        "postcommand": Array [
+          "echo postpublishing package-c would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-c would happen here",
+        ],
       },
       "postcommand": false,
-      "precommand": false,
+      "precommand": true,
+      "published": true,
     },
   },
 }
@@ -5169,6 +5235,7 @@ Object {
           },
           "postcommand": true,
           "precommand": true,
+          "published": true,
         },
         "tauri-bundler": Object {
           "command": true,
@@ -5306,6 +5373,7 @@ Object {
           },
           "postcommand": true,
           "precommand": true,
+          "published": true,
         },
         "tauri-utils": Object {
           "command": true,
@@ -5358,6 +5426,7 @@ Object {
           },
           "postcommand": true,
           "precommand": true,
+          "published": true,
         },
         "tauri.js": Object {
           "command": true,
@@ -5491,6 +5560,7 @@ Object {
           },
           "postcommand": false,
           "precommand": false,
+          "published": true,
         },
       },
     ],
@@ -5743,6 +5813,7 @@ Object {
       },
       "postcommand": true,
       "precommand": true,
+      "published": true,
     },
     "tauri-bundler": Object {
       "command": true,
@@ -5880,6 +5951,7 @@ Object {
       },
       "postcommand": true,
       "precommand": true,
+      "published": true,
     },
     "tauri-utils": Object {
       "command": true,
@@ -5932,6 +6004,7 @@ Object {
       },
       "postcommand": true,
       "precommand": true,
+      "published": true,
     },
     "tauri.js": Object {
       "command": true,
@@ -6065,6 +6138,7 @@ Object {
       },
       "postcommand": false,
       "precommand": false,
+      "published": true,
     },
   },
 }
@@ -8216,6 +8290,7 @@ tauri-utils",
       },
       "postcommand": true,
       "precommand": true,
+      "published": true,
     },
     "tauri-bundler": Object {
       "command": true,
@@ -8353,6 +8428,7 @@ tauri-utils",
       },
       "postcommand": true,
       "precommand": true,
+      "published": true,
     },
     "tauri-utils": Object {
       "command": true,
@@ -8405,6 +8481,7 @@ tauri-utils",
       },
       "postcommand": true,
       "precommand": true,
+      "published": true,
     },
     "tauri.js": Object {
       "command": true,
@@ -8538,6 +8615,7 @@ tauri-utils",
       },
       "postcommand": false,
       "precommand": false,
+      "published": true,
     },
   },
 }
