@@ -125,3 +125,22 @@ Your configuration may look something like this.
   }
 }
 ```
+
+## Prereleases
+
+We have initial support for prereleases. Functionally, you put your repository into "prerelease mode". Every package within the repo will begin apply bumps as prerelease numbers related to the type of bump being applied. Enabling this is currently a manual process with support via CLI commands planned in a future release.
+
+To enable, add a `pre.json` file with your `.changes` folder.
+
+```
+{
+  "tag": "beta",
+  "changes": []
+}
+```
+
+During the versioning step, the change files will be recorded in this array and kept within the `.changes` folder instead of being removed. This provides a record on the previously applied bumps and inform the next bump. It will resolve to `premajor`, `preminor`, or `prepatch` if a bump of that impact has not yet been applied. If a new change added with a bump at or below that "impact", than it resolves to a `prerelease` bump. As you configure prerelease mode, we recommend making use of `covector version --dry-run` to help provide feedback.
+
+When you are ready to release the stable version, remove the `pre.json` and all of your change files. Add a new change file announcing the stable version, and apply the bumps to the packages coming out of prerelease.
+
+Prereleases in general complicate considerations, and introduce many foot-guns. We expect to expand functionality here, but look to do it with guardrails and assistance to hopefully prevent issues.
