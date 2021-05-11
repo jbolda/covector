@@ -222,7 +222,11 @@ export const changesConsideringParents = ({
   };
 };
 
-const parentBump = (initialChanges: Changed, parents: any): Changed => {
+const parentBump = (
+  initialChanges: Changed,
+  parents: any,
+  prereleaseIdentifier: string | null
+): Changed => {
   let changes = { ...initialChanges };
   let recurse = false;
   Object.keys(initialChanges).forEach((main) => {
@@ -289,7 +293,7 @@ const bumpAll = ({
             packageFile: packageFiles[pkg],
             dep: pkgDep,
             bumpType: changes[pkgDep].type,
-            preview: !!previewVersion
+            preview: !!previewVersion,
             prereleaseIdentifier,
           });
         }

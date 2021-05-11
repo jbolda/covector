@@ -30,7 +30,7 @@ type Change = {
 };
 
 type Release = {
-  type: string;
+  type: CommonBumps;
   changes: Change[];
   parents?: string[];
 };
