@@ -134,9 +134,9 @@ describe("package file apply bump (snapshot)", () => {
       "utf-8"
     );
     expect(modifiedVFile.contents).toBe(
-      "name: test_app\ndescription: a great one\nhomepage: https://github.com/\nversion: 0.4.0\n" +
+      "name: test_app\ndescription: a great one\nhomepage: 'https://github.com/'\nversion: 0.4.0\n" +
         "environment:\n  sdk: '>=2.10.0 <3.0.0'\n" +
-        "dependencies:\n  flutter:\n    sdk: flutter\n  meta: any\n  provider: ^4.3.2\n  related_package:\n    git:\n      url: git@github.com:jbolda/covector.git\n      ref: main\n      path: __fixtures__/haha/\n" +
+        "dependencies:\n  flutter:\n    sdk: flutter\n  meta: any\n  provider: ^4.3.2\n  related_package:\n    git:\n      url: 'git@github.com:jbolda/covector.git'\n      ref: main\n      path: __fixtures__/haha/\n" +
         "dev_dependencies:\n  flutter_test:\n    sdk: flutter\n  build_runner: any\n  json_serializable: any\n  mobx_codegen: any\n" +
         "flutter:\n  assets:\n    - assets/schema/\n    - assets/localization/\n"
     );

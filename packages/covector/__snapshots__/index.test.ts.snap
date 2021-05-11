@@ -144,6 +144,7 @@ Object {
           "pkg": "package-one",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "package-one",
@@ -182,6 +183,7 @@ Object {
           "pkg": "package-two",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "package-two",
@@ -581,6 +583,7 @@ Object {
           "pkg": "package-one",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "package-one",
@@ -619,6 +622,7 @@ Object {
           "pkg": "package-two",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "package-two",
@@ -1092,6 +1096,7 @@ Object {
           "pkg": "package-one",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "package-one",
@@ -1140,6 +1145,7 @@ Object {
           "pkg": "package-two",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "package-two",
@@ -1576,29 +1582,31 @@ Object {
       "prepublishing package-c would happen here",
     ],
     Array [
-      "package-a [publish]: echo publishing package-a would happen here --tag ",
+      "package-a [publish]: echo publishing  would happen here",
     ],
     Array [
-      "publishing package-a would happen here --tag",
+      "publishing would happen here",
     ],
     Array [
-      "package-b [publish]: echo publishing package-b would happen here --tag ",
+      "package-b [publish]: echo publishing  would happen here",
     ],
     Array [
-      "publishing package-b would happen here --tag",
+      "publishing would happen here",
     ],
     Array [
-      "package-c [publish]: echo publishing package-c would happen here --tag ",
+      "package-c [publish]: echo publishing  would happen here",
     ],
     Array [
-      "publishing package-c would happen here --tag",
+      "publishing would happen here",
     ],
   ],
   "covectorReturn": Object {
     "package-a": Object {
       "command": true,
       "pkg": Object {
-        "command": "echo publishing package-a would happen here --tag ",
+        "command": Array [
+          "echo publishing  would happen here",
+        ],
         "dependencies": Array [
           "package-b",
         ],
@@ -1633,7 +1641,9 @@ Object {
     "package-b": Object {
       "command": true,
       "pkg": Object {
-        "command": "echo publishing package-b would happen here --tag ",
+        "command": Array [
+          "echo publishing  would happen here",
+        ],
         "dependencies": undefined,
         "manager": "javascript",
         "path": "./package-b",
@@ -1664,7 +1674,9 @@ Object {
     "package-c": Object {
       "command": true,
       "pkg": Object {
-        "command": "echo publishing package-c would happen here --tag ",
+        "command": Array [
+          "echo publishing  would happen here",
+        ],
         "dependencies": Array [
           "package-b",
         ],
@@ -1937,6 +1949,7 @@ Object {
           "pkg": "tauri-bundler",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri-bundler",
@@ -2067,6 +2080,7 @@ Object {
           "pkg": "tauri",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri",
@@ -2211,6 +2225,7 @@ Object {
           "pkg": "tauri-api",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri-api",
@@ -2295,6 +2310,7 @@ Object {
           "pkg": "tauri-utils",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri-utils",
@@ -2338,6 +2354,7 @@ Object {
           "pkg": "tauri-updater",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri-updater",
@@ -3810,6 +3827,7 @@ Object {
           "pkg": "tauri.js",
           "postcommand": null,
           "precommand": null,
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri.js",
@@ -3950,6 +3968,7 @@ Object {
           "pkg": "tauri-bundler",
           "postcommand": "echo postmode for \${ pkg.pkg }",
           "precommand": "echo premode for \${ pkg.pkg }",
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri-bundler",
@@ -4086,6 +4105,7 @@ Object {
           "pkg": "tauri",
           "postcommand": "echo postmode for \${ pkg.pkg }",
           "precommand": "echo premode for \${ pkg.pkg }",
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri",
@@ -4236,6 +4256,7 @@ Object {
           "pkg": "tauri-api",
           "postcommand": "echo postmode for \${ pkg.pkg }",
           "precommand": "echo premode for \${ pkg.pkg }",
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri-api",
@@ -4326,6 +4347,7 @@ Object {
           "pkg": "tauri-utils",
           "postcommand": "echo postmode for \${ pkg.pkg }",
           "precommand": "echo premode for \${ pkg.pkg }",
+          "tag": "",
         },
         "pkgFile": Object {
           "name": "tauri-utils",
@@ -7842,6 +7864,7 @@ Object {
       },
       "postcommand": false,
       "precommand": false,
+      "published": true,
     },
   },
 }
@@ -7885,6 +7908,7 @@ Object {
       },
       "postcommand": false,
       "precommand": false,
+      "published": true,
     },
   },
 }
