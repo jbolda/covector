@@ -318,15 +318,7 @@ export function* covector({
       cwd,
       dryRun,
       filterPackages,
-    });
-
-    const publishCommandsWithTags: PkgPublish[] = publishCommands.map(pkg => {
-      //@ts-ignore
-      if(pkg.command.length === 1){
-        //@ts-ignore
-        pkg.command = pkg.command[0] + ` --tag ${branchTag}`
-      };
-      return pkg;
+      tag: branchTag,
     });
 
     if (publishCommands.length === 0) {
@@ -336,7 +328,7 @@ export function* covector({
 
     const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
       cwd,
-      commands: publishCommandsWithTags,
+      commands: publishCommands,
       command: 'publish',
     });
 

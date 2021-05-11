@@ -1734,29 +1734,31 @@ Object {
       "prepublishing package-c would happen here",
     ],
     Array [
-      "package-a [publish]: echo publishing package-a would happen here --tag branch_name",
+      "package-a [publish]: echo publishing --tag pkg.tag would happen here",
     ],
     Array [
-      "publishing package-a would happen here --tag branch_name",
+      "publishing --tag pkg.tag would happen here",
     ],
     Array [
-      "package-b [publish]: echo publishing package-b would happen here --tag branch_name",
+      "package-b [publish]: echo publishing --tag pkg.tag would happen here",
     ],
     Array [
-      "publishing package-b would happen here --tag branch_name",
+      "publishing --tag pkg.tag would happen here",
     ],
     Array [
-      "package-c [publish]: echo publishing package-c would happen here --tag branch_name",
+      "package-c [publish]: echo publishing --tag pkg.tag would happen here",
     ],
     Array [
-      "publishing package-c would happen here --tag branch_name",
+      "publishing --tag pkg.tag would happen here",
     ],
   ],
   "covectorReturn": Object {
     "package-a": Object {
       "command": true,
       "pkg": Object {
-        "command": "echo publishing package-a would happen here --tag branch_name",
+        "command": Array [
+          "echo publishing --tag pkg.tag would happen here",
+        ],
         "dependencies": Array [
           "package-b",
         ],
@@ -1791,7 +1793,9 @@ Object {
     "package-b": Object {
       "command": true,
       "pkg": Object {
-        "command": "echo publishing package-b would happen here --tag branch_name",
+        "command": Array [
+          "echo publishing --tag pkg.tag would happen here",
+        ],
         "dependencies": undefined,
         "manager": "javascript",
         "path": "./package-b",
@@ -1822,7 +1826,9 @@ Object {
     "package-c": Object {
       "command": true,
       "pkg": Object {
-        "command": "echo publishing package-c would happen here --tag branch_name",
+        "command": Array [
+          "echo publishing --tag pkg.tag would happen here",
+        ],
         "dependencies": Array [
           "package-b",
         ],
