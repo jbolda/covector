@@ -255,6 +255,7 @@ export function* covector({
     const versionChanges = changesConsideringParents({
       assembledChanges,
       config,
+      prereleaseIdentifier,
     });
 
     //@ts-ignore

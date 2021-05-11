@@ -247,11 +247,7 @@ Object {
 
 exports[`package file apply bump (async/await) bumps multi rust toml as minor with object dep without version number 1`] = `
 Object {
-  "consoleError": Array [
-    Array [
-      "It appears that a dependency within this repo does not have a version specified.",
-    ],
-  ],
+  "consoleError": Array [],
 }
 `;
 
@@ -372,6 +368,20 @@ Object {
 }
 `;
 
+exports[`package file apply bump (snapshot) fails bump single js json that satisfies range 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [],
+}
+`;
+
+exports[`package file apply bump (snapshot) fails bumps single rust toml that satisfies range 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [],
+}
+`;
+
 exports[`packge file applies preview bump bumps multi js json 1`] = `
 Object {
   "consoleDir": Array [],
@@ -394,16 +404,5 @@ Object {
       "bumping js-single-json-fixture to 0.5.9-branch-name.12345 to publish a preview",
     ],
   ],
-exports[`package file apply bump fails bump single js json that satisfies range 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [],
-}
-`;
-
-exports[`package file apply bump fails bumps single rust toml that satisfies range 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [],
 }
 `;

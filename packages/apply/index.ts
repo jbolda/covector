@@ -341,10 +341,10 @@ const bumpMain = ({
   if (pkg.vfile && pkg.pkg) {
     if (pkg.vfile.extname === ".json") {
       // for javascript
-      // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
       let version = previewVersion
         ? semver.valid(`${pkg.pkg.version}-${previewVersion}`)
-        : semver.inc(pkg.pkg.version, bumpType, prereleaseIdentifier);
+        : // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
+          semver.inc(pkg.pkg.version, bumpType, prereleaseIdentifier);
       if (version) {
         pkg.pkg.version = version;
 
@@ -361,13 +361,13 @@ const bumpMain = ({
       }
     } else if (pkg.vfile.extname === ".toml") {
       // for rust
-      // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
       let version = previewVersion
-        ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`)
-        : semver.inc(
-            // @ts-ignore
-            pkg.pkg.package.version,
-            // @ts-ignore
+      // @ts-ignore
+      ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`)
+      : semver.inc(
+        // @ts-ignore
+        pkg.pkg.package.version,
+        // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
             bumpType,
             prereleaseIdentifier
           );
@@ -471,7 +471,8 @@ const bumpDeps = ({
             }
           } else {
             let version = preview
-              ? semver.valid(`${pkg.pkg.package.version}`)
+              ? // @ts-ignore TODO deal with nest toml
+                semver.valid(`${pkg.pkg.package.version}`)
               : incWithPartials(
                   dep,
                   pkg.pkg.dependencies[dep],

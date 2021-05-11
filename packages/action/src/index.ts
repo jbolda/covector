@@ -171,8 +171,8 @@ export function* run(): Generator<any, any, any> {
         });
 
         if (covectored) {
-          //@ts-ignore
           let packagesPublished: any = Object.entries(covectored).reduce(
+            //@ts-ignore
             (pub: Array<string>, pkg: Array<any>) => {
               if (pkg[1].published) {
                 let {

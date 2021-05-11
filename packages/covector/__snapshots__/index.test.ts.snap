@@ -1634,6 +1634,7 @@ Object {
         "dependencies": Array [
           "package-b",
         ],
+        "errorOnVersionRange": null,
         "manager": "javascript",
         "path": "./package-a",
         "pkg": "package-a",
@@ -1650,6 +1651,10 @@ Object {
           "versionMajor": 0,
           "versionMinor": 0,
           "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
         },
         "postcommand": null,
         "precommand": null,
@@ -1664,6 +1669,7 @@ Object {
           "echo publishing package-b would happen here",
         ],
         "dependencies": undefined,
+        "errorOnVersionRange": null,
         "manager": "javascript",
         "path": "./package-b",
         "pkg": "package-b",
@@ -1678,6 +1684,10 @@ Object {
           "versionMajor": 0,
           "versionMinor": 0,
           "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
         },
         "postcommand": null,
         "precommand": null,
@@ -1694,6 +1704,7 @@ Object {
         "dependencies": Array [
           "package-b",
         ],
+        "errorOnVersionRange": null,
         "manager": "rust",
         "path": "./package-c",
         "pkg": "package-c",
@@ -1712,6 +1723,10 @@ Object {
           "versionMajor": 0,
           "versionMinor": 0,
           "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
         },
         "postcommand": null,
         "precommand": null,
@@ -7859,6 +7874,7 @@ Object {
           "echo publishing",
         ],
         "dependencies": undefined,
+        "errorOnVersionRange": null,
         "manager": "flutter",
         "path": ".",
         "pkg": "test_app",
@@ -7935,6 +7951,7 @@ Object {
           "echo publishing",
         ],
         "dependencies": undefined,
+        "errorOnVersionRange": null,
         "manager": "",
         "path": ".",
         "pkg": "general-pkg",
@@ -8797,6 +8814,7 @@ Object {
         "versionMajor": 0,
         "versionMinor": 3,
         "versionPatch": 2,
+        "versionPrerelease": null,
       },
       "command": "## [0.3.2]
 - Summary about the changes in test_app_two",
@@ -8826,6 +8844,7 @@ Object {
         "versionMajor": 3,
         "versionMinor": 8,
         "versionPatch": 98,
+        "versionPrerelease": null,
       },
       "command": "## [3.8.98]
 - Summary about the changes in test_app_three",
@@ -8876,6 +8895,7 @@ Object {
         "versionMajor": 0,
         "versionMinor": 2,
         "versionPatch": 0,
+        "versionPrerelease": null,
       },
       "command": "## [0.2.0]
 - Summary about the changes in test_app_two",
@@ -8949,6 +8969,7 @@ Object {
         "versionMajor": 0,
         "versionMinor": 4,
         "versionPatch": 0,
+        "versionPrerelease": null,
       },
       "command": "## [0.4.0]
 - Summary about the changes in test_app
@@ -8990,6 +9011,7 @@ Object {
         "versionMajor": 6,
         "versionMinor": 2,
         "versionPatch": 0,
+        "versionPrerelease": null,
       },
       "command": "## [6.2.0]
 - Summary about the changes in general-pkg

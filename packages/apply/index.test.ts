@@ -1237,8 +1237,8 @@ describe("packge file applies preview bump", () => {
       },
     };
 
-    //@ts-ignore
     yield apply({
+      //@ts-ignore
       commands,
       config,
       cwd: jsonFolder,
@@ -1312,9 +1312,10 @@ describe("packge file applies preview bump", () => {
       },
     };
 
-    //@ts-ignore
     yield apply({
+      //@ts-ignore
       commands,
+      //@ts-ignore
       config,
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
