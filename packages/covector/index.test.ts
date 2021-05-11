@@ -1011,7 +1011,7 @@ describe("integration test for preview command", () => {
       covector({
         command: "preview",
         cwd: fullIntegration,
-        previewVersion: 'branch-name.12345'
+        previewVersion: "branch-name.12345",
       })
     );
 
@@ -1021,4 +1021,4 @@ describe("integration test for preview command", () => {
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
-})
+});

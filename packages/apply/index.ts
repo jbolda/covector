@@ -39,7 +39,7 @@ export const apply = function* ({
   config,
   cwd = process.cwd(),
   bump = true,
-  previewVersion = '',
+  previewVersion = "",
   prereleaseIdentifier = null,
 }: {
   commands: PackageCommand[];
@@ -59,7 +59,12 @@ export const apply = function* ({
 
   // @ts-ignore since TS doesn't like yielding on a Promise
   let allPackages = yield readAll({ changes, config, cwd });
-  const bumps = bumpAll({ changes, allPackages, previewVersion, prereleaseIdentifier });
+  const bumps = bumpAll({
+    changes,
+    allPackages,
+    previewVersion,
+    prereleaseIdentifier,
+  });
 
   if (bump) {
     yield writeAll({
@@ -264,7 +269,7 @@ const bumpAll = ({
   changes,
   allPackages,
   logs = true,
-  previewVersion = '',
+  previewVersion = "",
   prereleaseIdentifier = null,
 }: {
   changes: Releases;
@@ -276,8 +281,12 @@ const bumpAll = ({
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
     if (!packageFiles[pkg].vfile || changes[pkg].type === "noop") continue;
-    if (logs && !previewVersion) console.log(`bumping ${pkg} with ${changes[pkg].type}`);
-    if (previewVersion) console.log(`bumping ${pkg} to ${packageFiles[pkg].version}-${previewVersion} to publish a preview`);
+    if (logs && !previewVersion)
+      console.log(`bumping ${pkg} with ${changes[pkg].type}`);
+    if (previewVersion)
+      console.log(
+        `bumping ${pkg} to ${packageFiles[pkg].version}-${previewVersion} to publish a preview`
+      );
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
       bumpType: changes[pkg].type,
@@ -333,7 +342,9 @@ const bumpMain = ({
     if (pkg.vfile.extname === ".json") {
       // for javascript
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-      let version = previewVersion ? semver.valid(`${pkg.pkg.version}-${previewVersion}`) : semver.inc(pkg.pkg.version, bumpType, prereleaseIdentifier);
+      let version = previewVersion
+        ? semver.valid(`${pkg.pkg.version}-${previewVersion}`)
+        : semver.inc(pkg.pkg.version, bumpType, prereleaseIdentifier);
       if (version) {
         pkg.pkg.version = version;
 
@@ -351,13 +362,15 @@ const bumpMain = ({
     } else if (pkg.vfile.extname === ".toml") {
       // for rust
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-      let version =  previewVersion ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`) : semver.inc(
-        // @ts-ignore
-        pkg.pkg.package.version,
-        // @ts-ignore
-        bumpType,
-        prereleaseIdentifier
-      );
+      let version = previewVersion
+        ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`)
+        : semver.inc(
+            // @ts-ignore
+            pkg.pkg.package.version,
+            // @ts-ignore
+            bumpType,
+            prereleaseIdentifier
+          );
       if (version) {
         // @ts-ignore TODO we need to normalize Pkg for toml? Or make some union type
         pkg.pkg.package.version = version;
@@ -372,7 +385,6 @@ const bumpMain = ({
           );
         }
       }
-
     } else {
       // assume version is at the root
       // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
@@ -420,12 +432,14 @@ const bumpDeps = ({
       ) {
         if (pkg.vfile!.extname === ".json") {
           // for javascript
-          let version = preview ? semver.valid(`${pkg.pkg.version}`) : semver.inc(
-            pkg.pkg.dependencies[dep],
-            // @ts-ignore TODO deal with ReleaseType
-            bumpType,
-            prereleaseIdentifier
-          );
+          let version = preview
+            ? semver.valid(`${pkg.pkg.version}`)
+            : semver.inc(
+                pkg.pkg.dependencies[dep],
+                // @ts-ignore TODO deal with ReleaseType
+                bumpType,
+                prereleaseIdentifier
+              );
           if (version) pkg.pkg.dependencies[dep] = version;
         } else if (
           pkg.vfile!.extname === ".toml" ||
@@ -443,23 +457,27 @@ const bumpDeps = ({
                   `Please pin it to a MAJOR.MINOR.PATCH reference.`
               );
             } else {
-              let version = preview ? semver.valid(`${pkg.pkg.version}`) : incWithPartials(
-                dep,
-                // @ts-ignore TODO deal with nest toml
-                pkg.pkg.dependencies[dep].version,
-                bumpType,
-                prereleaseIdentifier
-              );
+              let version = preview
+                ? semver.valid(`${pkg.pkg.version}`)
+                : incWithPartials(
+                    dep,
+                    // @ts-ignore TODO deal with nest toml
+                    pkg.pkg.dependencies[dep].version,
+                    bumpType,
+                    prereleaseIdentifier
+                  );
               // @ts-ignore TODO deal with nest toml
               if (version) pkg.pkg.dependencies[dep].version = version;
             }
           } else {
-            let version = preview ? semver.valid(`${pkg.pkg.package.version}`) : incWithPartials(
-              dep,
-              pkg.pkg.dependencies[dep],
-              bumpType,
-              prereleaseIdentifier
-            );
+            let version = preview
+              ? semver.valid(`${pkg.pkg.package.version}`)
+              : incWithPartials(
+                  dep,
+                  pkg.pkg.dependencies[dep],
+                  bumpType,
+                  prereleaseIdentifier
+                );
             if (version) pkg.pkg.dependencies[dep] = version;
           }
         }
@@ -476,8 +494,10 @@ const bumpDeps = ({
       ) {
         if (pkg.vfile!.extname === ".json") {
           // for javascript
-          // @ts-ignore TODO deal with ReleaseType
-          let version =  preview ? semver.valid(`${pkg.pkg.version}`) : semver.inc(pkg.pkg.devDependencies[dep], bumpType);
+          let version = preview
+            ? semver.valid(`${pkg.pkg.version}`)
+            : // @ts-ignore TODO deal with ReleaseType
+              semver.inc(pkg.pkg.devDependencies[dep], bumpType);
           if (version) pkg.pkg.devDependencies[dep] = version;
         }
       }

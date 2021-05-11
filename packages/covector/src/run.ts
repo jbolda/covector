@@ -54,7 +54,7 @@ export function* covector({
   cwd = process.cwd(),
   filterPackages = [],
   modifyConfig = async (c) => c,
-  previewVersion = '',
+  previewVersion = "",
 }: {
   command: string;
   dryRun?: boolean;
@@ -333,7 +333,7 @@ export function* covector({
       pkgCommandsRan,
       dryRun,
     });
-    
+
     const publishCommands: PkgPublish[] = yield mergeIntoConfig({
       assembledChanges,
       config,
@@ -351,7 +351,7 @@ export function* covector({
     const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
       cwd,
       commands: publishCommands,
-      command: 'publish',
+      command: "publish",
     });
 
     pkgCommandsRan = publishCommands.reduce(
