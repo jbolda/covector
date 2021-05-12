@@ -333,7 +333,7 @@ const changeDiff = ({
       const nextBump = newMergedRelease[pkg]?.type || "noop";
       const oldBump = oldMergedRelease[pkg]?.type || "noop";
       //@ts-ignore bumpMap could be undefined?
-      if (bumpMap.get(nextBump) <= bumpMap.get(oldBump)) {
+      if (bumpMap.get(nextBump) < bumpMap.get(oldBump)) {
         //@ts-ignore TODO template string doesn't play nice with the type
         diffed[pkg].type = `pre${nextBump}`;
       } else {

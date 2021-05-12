@@ -173,7 +173,7 @@ Object {
           "summary": "This is a test.",
         },
       ],
-      "type": "prepatch",
+      "type": "prerelease",
     },
   },
 }
