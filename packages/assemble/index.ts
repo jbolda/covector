@@ -30,6 +30,10 @@ const parseChange = function* ({ cwd, vfile }: { cwd?: string; vfile: VFile }) {
   const parsedYaml = yaml.load(parsedChanges.value);
   changeset.releases =
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
+  if (Object.keys(changeset.releases).length === 0)
+    throw new Error(
+      `${vfile.data.filename} didn't have any packages bumped. Please add a package bump.`
+    );
   changeset.summary = processor
     .stringify({
       type: "root",
