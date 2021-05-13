@@ -1843,6 +1843,7 @@ Object {
         "dependencies": Array [
           "package-b",
         ],
+        "errorOnVersionRange": null,
         "manager": "javascript",
         "path": "./package-a",
         "pkg": "package-a",
@@ -1859,6 +1860,10 @@ Object {
           "versionMajor": 0,
           "versionMinor": 0,
           "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
         },
         "postcommand": Array [
           "echo postpublishing package-a would happen here",
@@ -1878,6 +1883,7 @@ Object {
           "echo publishing would happen here",
         ],
         "dependencies": undefined,
+        "errorOnVersionRange": null,
         "manager": "javascript",
         "path": "./package-b",
         "pkg": "package-b",
@@ -1892,6 +1898,10 @@ Object {
           "versionMajor": 0,
           "versionMinor": 0,
           "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
         },
         "postcommand": Array [
           "echo postpublishing package-b would happen here",
@@ -1913,6 +1923,7 @@ Object {
         "dependencies": Array [
           "package-b",
         ],
+        "errorOnVersionRange": null,
         "manager": "rust",
         "path": "./package-c",
         "pkg": "package-c",
@@ -1931,6 +1942,10 @@ Object {
           "versionMajor": 0,
           "versionMinor": 0,
           "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
         },
         "postcommand": Array [
           "echo postpublishing package-c would happen here",

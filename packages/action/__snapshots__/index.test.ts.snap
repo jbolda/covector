@@ -95,7 +95,8 @@ publish
       ],
       \\"postcommand\\": null,
       \\"errorOnVersionRange\\": null
-    }
+    },
+    \\"published\\": true
   },
   \\"package-two\\": {
     \\"precommand\\": false,
@@ -132,7 +133,8 @@ publish
       ],
       \\"postcommand\\": null,
       \\"errorOnVersionRange\\": null
-    }
+    },
+    \\"published\\": true
   }
 }",
     ],
