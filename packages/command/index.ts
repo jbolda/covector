@@ -132,6 +132,9 @@ export const attemptCommands = function* ({
     if (!!pkgCommandsRan)
       _pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] =
         stdout !== "" ? stdout : true;
+
+    if (!!pkgCommandsRan && command === 'publish' && !commandPrefix)
+      _pkgCommandsRan[pkg.pkg]['published'] = true
   }
   return _pkgCommandsRan;
 };

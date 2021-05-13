@@ -2,11 +2,15 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "publish": "echo publishing ${ pkg.pkg } would happen here"
+      "publish": "echo publishing${ !pkg.tag ? ' --tag ' + pkg.tag : null } would happen here",
+      "prepublish": "echo prepublishing ${ pkg.pkg } would happen here",
+      "postpublish": "echo postpublishing ${ pkg.pkg } would happen here"
     },
     "rust": {
       "version": true,
-      "publish": "echo publishing ${ pkg.pkg } would happen here"
+      "publish": "echo publishing${ pkg.tag ? ' --tag ' + pkg.tag : null } would happen here",
+      "prepublish": "echo prepublishing ${ pkg.pkg } would happen here",
+      "postpublish": "echo postpublishing ${ pkg.pkg } would happen here"
     }
   },
   "packages": {

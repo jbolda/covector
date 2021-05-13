@@ -136,6 +136,15 @@ export function* run(): Generator<any, any, any> {
         const branchName = github?.context?.payload?.pull_request?.head?.ref;
         let identifier;
         let versionTemplate;
+        const branchTag = branchName
+          .replace(/(?!.\_)\_/g, "__")
+          .replace(/\//g, "_");
+
+        if (branchName === "latest") {
+          throw new Error(
+            `Using the branch name, 'latest', will conflict with restricted tags when publishing packages. Please create another pull request with a different branch name.`
+          );
+        }
 
         switch (versionIdentifier) {
           case "branch":
@@ -168,6 +177,7 @@ export function* run(): Generator<any, any, any> {
           filterPackages,
           cwd,
           previewVersion: versionTemplate,
+          branchTag,
         });
 
         if (covectored) {

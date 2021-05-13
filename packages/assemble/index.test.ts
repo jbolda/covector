@@ -245,6 +245,32 @@ describe("assemble changes in preMode", () => {
   });
 });
 
+describe("errors on bad change files", () => {
+  const emptyChangefile = {
+    path: "",
+    extname: "",
+    data: { filename: ".changes/empty-file.md" },
+    contents: `---
+---
+  
+This doesn't bump much.
+`,
+  };
+
+  it("throws on no changes", function* (): Generator<any> {
+    expect.assertions(1);
+    try {
+      yield assemble({
+        vfiles: [emptyChangefile],
+      });
+    } catch (e) {
+      expect(e.message).toMatch(
+        ".changes/empty-file.md didn't have any packages bumped. Please add a package bump."
+      );
+    }
+  });
+});
+
 describe("special bump types", () => {
   it("valid additional bump types", function* (): Generator<any> {
     const assembled = yield assemble({

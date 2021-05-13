@@ -59,6 +59,7 @@ export type PkgPublish = {
   path?: string;
   packageFileName?: string;
   changelog?: string;
+  tag?: string;
   precommand?: (string | any)[] | null;
   command?: (string | any)[] | null;
   postcommand?: (string | any)[] | null;
@@ -99,6 +100,10 @@ const parseChange = function* ({
   const parsedYaml = yaml.load(parsedChanges.value as string);
   changeset.releases =
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
+  if (Object.keys(changeset.releases).length === 0)
+    throw new Error(
+      `${vfile.data.filename} didn't have any packages bumped. Please add a package bump.`
+    );
   changeset.summary = processor
     .stringify({
       type: "root",
@@ -473,6 +478,7 @@ export const mergeIntoConfig = function* ({
   dryRun = false,
   filterPackages = [],
   changelogs,
+  tag = "",
 }: {
   config: ConfigFile;
   assembledChanges: { releases: {} };
@@ -481,9 +487,11 @@ export const mergeIntoConfig = function* ({
   dryRun: boolean;
   filterPackages: string[];
   changelogs?: { [k: string]: { name: string; changelog: string } };
+  tag?: string;
 }): Generator<any, PkgPublish[], any> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
+
   const pkgCommands = Object.keys(config.packages).reduce(
     (pkged: { [k: string]: PkgPublish }, pkg) => {
       const pkgManager = config.packages[pkg].manager;
@@ -560,7 +568,7 @@ export const mergeIntoConfig = function* ({
     if (!pkgCommands[pkg]) continue;
 
     const pipeToTemplate: PipePublishTemplate = {
-      pkg: pkgCommands[pkg],
+      pkg: { ...pkgCommands[pkg], tag },
     };
 
     let extraPublishParams = {

@@ -55,6 +55,7 @@ export function* covector({
   filterPackages = [],
   modifyConfig = async (c) => c,
   previewVersion = "",
+  branchTag = "",
 }: {
   command: string;
   dryRun?: boolean;
@@ -62,6 +63,7 @@ export function* covector({
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
   previewVersion?: string;
+  branchTag?: string;
 }): Generator<any, Covector | string, any> {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
@@ -342,6 +344,7 @@ export function* covector({
       cwd,
       dryRun,
       filterPackages,
+      tag: branchTag,
     });
 
     if (publishCommands.length === 0) {
