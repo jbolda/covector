@@ -255,6 +255,151 @@ export const readPreFile = async ({
   }
 };
 
+export const getPackageFileVersion = ({
+  pkg,
+  property = "version",
+  dep,
+}: {
+  pkg: PackageFile;
+  property?: string;
+  dep?: string;
+}): string => {
+  if (pkg.vfile && pkg.pkg) {
+    if (property === "version") {
+      if (pkg.vfile.extname === ".json") {
+        return pkg.pkg.version;
+      } else if (pkg.vfile.extname === ".toml") {
+        // @ts-ignore
+        return pkg.pkg.package.version;
+      } else {
+        // covers yaml and generic
+        return pkg.pkg.version;
+      }
+    } else if (property === "dependencies") {
+      // same for every supported package file
+      if (!dep || !pkg.pkg.dependencies) return "";
+      if (typeof pkg.pkg.dependencies[dep] === "object") {
+        //@ts-ignore
+        if (!pkg.pkg.dependencies[dep].version) {
+          throw new Error(
+            `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +
+              `This cannot be published. ` +
+              `Please pin it to a MAJOR.MINOR.PATCH reference.`
+          );
+        }
+        //@ts-ignore
+        return pkg.pkg.dependencies[dep].version;
+      } else {
+        return pkg.pkg.dependencies[dep];
+      }
+    } else if (property === "devDependencies") {
+      // same for every supported package file
+      if (!dep || !pkg.pkg.devDependencies) return "";
+      if (typeof pkg.pkg.devDependencies[dep] === "object") {
+        //@ts-ignore
+        if (!pkg.pkg.devDependencies[dep].version) {
+          throw new Error(
+            `${pkg.name} has a devDependency on ${dep}, and ${dep} does not have a version number. ` +
+              `This cannot be published. ` +
+              `Please pin it to a MAJOR.MINOR.PATCH reference.`
+          );
+        }
+        //@ts-ignore
+        return pkg.pkg.devDependencies[dep].version;
+      } else {
+        return pkg.pkg.devDependencies[dep];
+      }
+    } else if (property === "dev-dependencies") {
+      // same for every supported package file
+      //@ts-ignore
+      if (!dep || !pkg.pkg[property]) return "";
+      //@ts-ignore
+      if (typeof pkg.pkg[property][dep] === "object") {
+        //@ts-ignore
+        if (!pkg.pkg[property][dep].version) {
+          throw new Error(
+            `${pkg.name} has a devDependency on ${dep}, and ${dep} does not have a version number. ` +
+              `This cannot be published. ` +
+              `Please pin it to a MAJOR.MINOR.PATCH reference.`
+          );
+        }
+        //@ts-ignore
+        return pkg.pkg[property][dep].version;
+      } else {
+        //@ts-ignore
+        return pkg.pkg[property][dep];
+      }
+    } else {
+      return "";
+    }
+  }
+  return "";
+};
+
+export const setPackageFileVersion = ({
+  pkg,
+  version,
+  property = "version",
+  dep,
+}: {
+  pkg: PackageFile;
+  version: string;
+  property?: string;
+  dep?: string;
+}): PackageFile => {
+  if (pkg.vfile && pkg.pkg) {
+    if (property === "version") {
+      if (pkg.vfile.extname === ".json") {
+        pkg.pkg.version = version;
+      } else if (pkg.vfile.extname === ".toml") {
+        // @ts-ignore
+        pkg.pkg.package.version = version;
+      } else {
+        // covers yaml and generic
+        pkg.pkg.version = version;
+      }
+    } else if (
+      property === "dependencies" ||
+      property === "devDependencies" ||
+      property === "dev-dependencies"
+    ) {
+      if (property === "dependencies") {
+        // same for every supported package file
+        if (!dep || !pkg.pkg.dependencies) return pkg;
+        if (typeof pkg.pkg.dependencies[dep] === "object") {
+          // @ts-ignore TODO deal with nest toml
+          pkg.pkg.dependencies[dep].version = version;
+        } else {
+          pkg.pkg.dependencies[dep] = version;
+        }
+      } else if (property === "devDependencies") {
+        // same for every supported package file
+        if (!dep || !pkg.pkg.devDependencies) return pkg;
+        if (typeof pkg.pkg.devDependencies[dep] === "object") {
+          // @ts-ignore TODO deal with nest toml
+          pkg.pkg.devDependencies[dep].version = version;
+        } else {
+          pkg.pkg.devDependencies[dep] = version;
+        }
+      } else if (property === "dev-dependencies") {
+        // same for every supported package file
+        //@ts-ignore
+        if (!dep || !pkg.pkg[property]) return pkg;
+        //@ts-ignore
+        if (typeof pkg.pkg[property][dep] === "object") {
+          //@ts-ignore
+          // @ts-ignore TODO deal with nest toml
+          pkg.pkg[property][dep].version = version;
+        } else {
+          //@ts-ignore
+          pkg.pkg[property][dep] = version;
+        }
+      }
+    }
+  }
+  return pkg;
+};
+
 export const writePreFile = async ({
   preFile,
 }: {
