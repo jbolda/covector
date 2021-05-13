@@ -344,6 +344,7 @@ export type PkgPublish = {
   getPublishedVersion?: string;
   assets?: { name: string; path: string }[];
   pkgFile?: PackageFile;
+  tag?: string;
 };
 
 type PipePublishTemplate = {
@@ -359,6 +360,7 @@ export const mergeIntoConfig = function* ({
   dryRun = false,
   filterPackages = [],
   changelogs,
+  tag = '',
 }: {
   config: ConfigFile;
   assembledChanges: { releases: {} };
@@ -367,9 +369,11 @@ export const mergeIntoConfig = function* ({
   dryRun: boolean;
   filterPackages: string[];
   changelogs?: { [k: string]: { name: string; changelog: string } };
+  tag?: string;
 }): Generator<any, PkgPublish[], any> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
+
   const pkgCommands = Object.keys(config.packages).reduce(
     (pkged: { [k: string]: PkgPublish }, pkg) => {
       const pkgManager = config.packages[pkg].manager;
@@ -442,7 +446,7 @@ export const mergeIntoConfig = function* ({
     if (!pkgCommands[pkg]) continue;
 
     const pipeToTemplate: PipePublishTemplate = {
-      pkg: pkgCommands[pkg],
+      pkg: {...pkgCommands[pkg], tag},
     };
 
     let extraPublishParams = {

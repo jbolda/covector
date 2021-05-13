@@ -128,14 +128,19 @@ export function* run(): Generator<any, any, any> {
         const branchName = github?.context?.payload?.pull_request?.head?.ref;
         let identifier;
         let versionTemplate;
+        const branchTag = branchName.replace(/(?!.\_)\_/g, '__').replace(/\//g, '_');
+
+        if (branchName === "latest") {
+          throw new Error(`Using the branch name, 'latest', will conflict with restricted tags when publishing packages. Please create another pull request with a different branch name.`);
+        }
         
         switch(versionIdentifier){
           case "branch":
             identifier = branchName.replace(/\_/g, '-').replace(/\//g, '-');
             break;
           default:
-            throw new Error(`Version identifier you specified, "${versionIdentifier}", is invalid.`)
-        }
+            throw new Error(`Version identifier you specified, "${versionIdentifier}", is invalid.`);
+        };
 
         switch(previewVersion){
           case "date":
@@ -145,14 +150,15 @@ export function* run(): Generator<any, any, any> {
             versionTemplate = `${identifier}.${github.context.payload.after.substring(0, 7)}`;
             break;
           default:
-            throw new Error(`Preview version template you specified, "${previewVersion}", is invalid. Please use 'date' or 'sha'.`)
+            throw new Error(`Preview version template you specified, "${previewVersion}", is invalid. Please use 'date' or 'sha'.`);
         };
 
         covectored = yield covector({
           command,
           filterPackages,
           cwd,
-          previewVersion: versionTemplate
+          previewVersion: versionTemplate,
+          branchTag
         });
 
         if (covectored) {
