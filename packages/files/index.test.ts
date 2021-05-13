@@ -1,5 +1,6 @@
 import {
   readPkgFile,
+  readPreFile,
   configFile,
   changeFiles,
   changeFilesToVfile,
@@ -111,6 +112,29 @@ describe("file test", () => {
     const configFolder = f.copy("config.simple");
     const configArray = await configFile({ cwd: configFolder });
     expect((configArray as any).stuff).toBe("here");
+  });
+
+  describe("parses pre", () => {
+    it("parses pre without changes", async () => {
+      const preFolder = f.copy("pre.without-changes");
+      const preFile = await readPreFile({ cwd: preFolder });
+      expect(preFile?.tag).toBe("beta");
+      expect(preFile?.changes.length).toBe(0);
+    });
+
+    it("parses pre with changes", async () => {
+      const preFolder = f.copy("pre.with-changes");
+      const preFile = await readPreFile({ cwd: preFolder });
+      expect(preFile?.tag).toBe("beta");
+      expect(preFile?.changes.length).toBe(3);
+      expect(preFile?.changes[1]).toBe("chocolate-pudding.md");
+    });
+
+    it("returns cleanly without pre", async () => {
+      const preFolder = f.copy("pkg.js-basic");
+      const preFile = await readPreFile({ cwd: preFolder });
+      expect(preFile).toBe(null);
+    });
   });
 
   it("globs changes", async () => {

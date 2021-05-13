@@ -2,7 +2,11 @@ import { assemble, mergeIntoConfig, mergeChangesToConfig } from "./index";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-const vfilePart = { path: "", extname: "", data: { filename: "" } };
+const vfilePart = (filename: string) => ({
+  path: "",
+  extname: "",
+  data: { filename },
+});
 
 const assembledChanges = {
   releases: {
@@ -124,7 +128,7 @@ const configSpecial = {
 };
 
 const testTextOne = {
-  ...vfilePart,
+  ...vfilePart("testTextOne"),
   contents: `
 ---
 "assemble1": patch
@@ -135,7 +139,7 @@ This is a test.
 `,
 };
 const testTextTwo = {
-  ...vfilePart,
+  ...vfilePart("testTextTwo"),
   contents: `
 ---
 "assemble1": minor
@@ -146,7 +150,7 @@ This is a test.
 `,
 };
 const testTextThree = {
-  ...vfilePart,
+  ...vfilePart("testTextThree"),
   contents: `
 ---
 "assemble1": patch
@@ -157,7 +161,7 @@ This is a test.
 `,
 };
 const testTextFour = {
-  ...vfilePart,
+  ...vfilePart("testTextFour"),
   contents: `
 ---
 "assemble1": patch
@@ -168,7 +172,7 @@ This is a test. We might link out to a [website](https://www.jacobbolda.com).
 `,
 };
 const testTextFive = {
-  ...vfilePart,
+  ...vfilePart("testTextFive"),
   contents: `
 ---
 "all": minor
@@ -178,7 +182,7 @@ This is a test.
 `,
 };
 const testTextSpecialOne = {
-  ...vfilePart,
+  ...vfilePart("testTextSpecialOne"),
   contents: `
 ---
 "assemble1": housekeeping
@@ -189,7 +193,7 @@ This is a test.
 `,
 };
 const testTextSpecialTwo = {
-  ...vfilePart,
+  ...vfilePart("testTextSpecialTwo"),
   contents: `
 ---
 "assemble1": patch
@@ -211,6 +215,32 @@ describe("assemble changes", () => {
 
   it("assembles deps", function* (): Generator<any> {
     const assembled = yield assemble({ vfiles: [testTextFive] });
+    expect(assembled).toMatchSnapshot();
+  });
+});
+
+describe("assemble changes in preMode", () => {
+  it("with no existing changes", function* (): Generator<any> {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      preMode: { on: true, prevFiles: [] },
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("with existing changes that upgrade", function* (): Generator<any> {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      preMode: { on: true, prevFiles: [testTextOne.data.filename] },
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("with existing changes with the same bump", function* (): Generator<any> {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextFour],
+      preMode: { on: true, prevFiles: [testTextOne.data.filename] },
+    });
     expect(assembled).toMatchSnapshot();
   });
 });

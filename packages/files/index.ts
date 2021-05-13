@@ -36,6 +36,7 @@ export interface PkgMinimum {
   versionMajor?: number;
   versionMinor?: number;
   versionPatch?: number;
+  versionPrerelease?: readonly string[] | (string | number)[] | null;
 }
 
 export interface PackageFile extends PkgMinimum {
@@ -43,16 +44,31 @@ export interface PackageFile extends PkgMinimum {
   name?: string;
 }
 
+export interface PreFile {
+  vfile?: VFile;
+  tag: string;
+  changes: string[] | [];
+}
+
 export type ConfigFile = {
   vfile?: VFile;
   gitSiteUrl?: string;
-  pkgManagers?: { [k: string]: { version?: string; publish?: string } };
+  pkgManagers?: {
+    [k: string]: {
+      version?: string;
+      publish?: string;
+      errorOnVersionRange?: string;
+    };
+  };
   packages: {
     [k: string]: {
       manager?: string;
       path?: string;
       dependencies?: string[];
       packageFileName?: string;
+      version?: string;
+      publish?: string;
+      errorOnVersionRange?: string;
     };
   };
   additionalBumpTypes?: string[];
@@ -69,6 +85,7 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
         versionMajor: semver.major(version),
         versionMinor: semver.minor(version),
         versionPatch: semver.patch(version),
+        versionPrerelease: semver.prerelease(version),
         // @ts-ignore
         pkg: parsedTOML,
       };
@@ -79,6 +96,7 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
         versionMajor: semver.major(parsedJSON.version),
         versionMinor: semver.minor(parsedJSON.version),
         versionPatch: semver.patch(parsedJSON.version),
+        versionPrerelease: semver.prerelease(parsedJSON.version),
         pkg: parsedJSON,
       };
     case ".yml":
@@ -210,6 +228,45 @@ export const writePkgFile = async ({
   vFileNext.contents = stringifyPkg({
     newContents: packageFile.pkg,
     extname: packageFile.vfile.extname,
+  });
+  const inputVfile = await vfile.write(vFileNext, "utf8");
+  return inputVfile;
+};
+
+export const readPreFile = async ({
+  cwd,
+  changeFolder = ".changes",
+}: {
+  cwd: string;
+  changeFolder?: string;
+}): Promise<PreFile | null> => {
+  try {
+    const inputVfile = await vfile.read(
+      path.join(cwd, changeFolder, "pre.json"),
+      "utf8"
+    );
+    const parsed = JSON.parse(inputVfile.contents);
+    return {
+      vfile: inputVfile,
+      ...parsed,
+    };
+  } catch (error) {
+    return null;
+  }
+};
+
+export const writePreFile = async ({
+  preFile,
+}: {
+  preFile: PreFile;
+}): Promise<VFile> => {
+  if (!preFile.vfile)
+    throw new Error(`We could not find the pre.json to update.`);
+  const { tag, changes } = preFile;
+  const vFileNext = { ...preFile.vfile };
+  vFileNext.contents = stringifyPkg({
+    newContents: { tag, changes },
+    extname: preFile.vfile.extname,
   });
   const inputVfile = await vfile.write(vFileNext, "utf8");
   return inputVfile;

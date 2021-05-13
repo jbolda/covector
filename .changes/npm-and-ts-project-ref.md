@@ -1,10 +1,10 @@
 ---
+"covector": patch
 "action": patch
 "@covector/apply": patch
 "@covector/assemble": patch
 "@covector/changelog": patch
 "@covector/command": patch
-"covector": patch
 "@covector/files": patch
 ---
 

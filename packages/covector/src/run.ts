@@ -5,10 +5,12 @@ import {
 } from "@covector/command";
 import {
   configFile,
+  readPreFile,
   changeFiles,
   changeFilesToVfile,
   changeFilesRemove,
   ConfigFile,
+  writePreFile,
 } from "@covector/files";
 import {
   assemble,
@@ -52,8 +54,8 @@ export function* covector({
   cwd = process.cwd(),
   filterPackages = [],
   modifyConfig = async (c) => c,
-  previewVersion = '',
-  branchTag = '',
+  previewVersion = "",
+  branchTag = "",
 }: {
   command: string;
   dryRun?: boolean;
@@ -64,6 +66,9 @@ export function* covector({
   branchTag?: string;
 }): Generator<any, Covector | string, any> {
   const config = yield modifyConfig(yield configFile({ cwd }));
+  const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
+  const prereleaseIdentifier = !pre ? null : pre.tag;
+
   const changesPaths = yield changeFiles({
     cwd,
     changeFolder: config.changeFolder,
@@ -76,11 +81,19 @@ export function* covector({
     cwd,
     vfiles: changesVfiles,
     config,
+    preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
 
   if (command === "status" || !command) {
     if (changesVfiles.length === 0) {
       console.info("There are no changes.");
+      return "No changes.";
+    } else if (!!pre && assembledChanges?.changes?.length === 0) {
+      console.info("There are no changes.");
+      console.log(
+        "We have previously released the changes in these files:",
+        changesPaths
+      );
       return "No changes.";
     } else {
       // write out all of the changes
@@ -94,8 +107,10 @@ export function* covector({
       const changes = changesConsideringParents({
         assembledChanges,
         config,
+        prereleaseIdentifier,
       });
-      const commands = yield mergeIntoConfig({
+
+      const commands = yield mergeChangesToConfig({
         assembledChanges: changes,
         config,
         command,
@@ -103,10 +118,12 @@ export function* covector({
         filterPackages,
         cwd,
       });
+
       const applied = yield validateApply({
         commands,
         config,
         cwd,
+        prereleaseIdentifier,
       });
 
       return `There are ${
@@ -125,6 +142,7 @@ export function* covector({
     const changes = changesConsideringParents({
       assembledChanges,
       config,
+      prereleaseIdentifier,
     });
 
     const commands: PkgVersion[] = yield mergeChangesToConfig({
@@ -178,6 +196,7 @@ export function* covector({
       config,
       cwd,
       bump: !dryRun,
+      prereleaseIdentifier,
     });
 
     pkgCommandsRan = applied.reduce(
@@ -217,8 +236,14 @@ export function* covector({
       dryRun,
     });
 
-    if (command === "version" && !dryRun)
-      yield changeFilesRemove({ cwd, paths: changesPaths });
+    if (command === "version" && !dryRun) {
+      if (pre) {
+        pre.changes = changesPaths;
+        yield writePreFile({ preFile: pre });
+      } else {
+        yield changeFilesRemove({ cwd, paths: changesPaths });
+      }
+    }
 
     if (dryRun) {
       console.log("==== result ===");
@@ -232,6 +257,7 @@ export function* covector({
     const versionChanges = changesConsideringParents({
       assembledChanges,
       config,
+      prereleaseIdentifier,
     });
 
     //@ts-ignore
@@ -310,7 +336,7 @@ export function* covector({
       pkgCommandsRan,
       dryRun,
     });
-    
+
     const publishCommands: PkgPublish[] = yield mergeIntoConfig({
       assembledChanges,
       config,
@@ -329,7 +355,7 @@ export function* covector({
     const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
       cwd,
       commands: publishCommands,
-      command: 'publish',
+      command: "publish",
     });
 
     pkgCommandsRan = publishCommands.reduce(

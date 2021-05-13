@@ -1,5 +1,5 @@
 import { spawn, timeout } from "effection";
-import { exec } from "@effection/node";
+import { exec, Process } from "@effection/node";
 import execa from "execa";
 import stripAnsi from "strip-ansi";
 import path from "path";
@@ -49,9 +49,9 @@ export const attemptCommands = function* ({
         ? //@ts-ignore
           pkgCommandsRan[pkg.pkg][`${commandPrefix}command`]
         : false;
-    //@ts-ignore
+    //@ts-ignore template literals issues
     if (!pkg[`${commandPrefix}command`]) continue;
-    //@ts-ignore
+    //@ts-ignore template literals issues
     const c: string | Function | [] = pkg[`${commandPrefix}command`];
     const pubCommands: (NormalizedCommand | string | Function)[] =
       typeof c === "string" || typeof c === "function" || !Array.isArray(c)
@@ -151,7 +151,7 @@ export const confirmCommandsToRun = function* ({
   let subPublishCommand = command.slice(7, 999);
   let commandsToRun: PkgPublish[] = [];
   for (let pkg of commands) {
-    //@ts-ignore
+    //@ts-ignore template literals issues
     const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
     if (!!getPublishedVersion) {
       const version = yield runCommand({
@@ -190,12 +190,11 @@ export const runCommand = function* ({
   cwd: string;
   pkgPath: string;
   log: false | string;
-}): Generator<string> {
+}): Generator<any, string, any> {
   if (log !== false) console.log(log);
   raceTime();
 
-  //@ts-ignore TODO generator error
-  const child = yield sh(
+  return yield* sh(
     command,
     {
       cwd: path.join(cwd, pkgPath),
@@ -203,19 +202,16 @@ export const runCommand = function* ({
     },
     log
   );
-
-  return child;
 };
 
 export const sh = function* (
   command: string,
   options: object,
   log: false | string
-): Generator<string> {
+): Generator<any, string, any> {
   if (command.includes("|")) {
     try {
-      //@ts-ignore
-      const child: any = yield execa.command(command, {
+      const child = yield execa.command(command, {
         ...options,
         shell: true,
         all: true,
@@ -230,30 +226,32 @@ export const sh = function* (
       throw new Error(e);
     }
   } else {
-    // @ts-ignore
-    let child: any = yield exec(command, options);
+    let child: Process = yield exec(command, options);
 
     if (log !== false) {
-      // @ts-ignore
       yield spawn(
-        child.stdout.subscribe().forEach(function* (datum: Buffer) {
-          const out = stripAnsi(datum.toString().trim());
-          if (out !== "") console.log(out);
-        })
+        child.stdout
+          .subscribe()
+          //@ts-ignore Types of parameters 'datum' and 'value' are incompatible. Type 'unknown' is not assignable to type 'Buffer'.
+          .forEach(function* (datum: Buffer): Generator<void> {
+            const out = stripAnsi(datum.toString().trim());
+            if (out !== "") console.log(out);
+          })
       );
 
-      // @ts-ignore
       yield spawn(
-        child.stderr.subscribe().forEach(function* (datum: Buffer) {
-          const out = stripAnsi(datum.toString().trim());
-          if (out !== "") console.error(out);
-        })
+        child.stderr
+          .subscribe()
+          //@ts-ignore Types of parameters 'datum' and 'value' are incompatible. Type 'unknown' is not assignable to type 'Buffer'.
+          .forEach(function* (datum: Buffer): Generator<void> {
+            const out = stripAnsi(datum.toString().trim());
+            if (out !== "") console.error(out);
+          })
       );
     }
 
     const out = yield child.expect();
     const stripped: string = stripAnsi(
-      //@ts-ignore
       Buffer.concat(out.tail).toString().trim()
     );
     return stripped;

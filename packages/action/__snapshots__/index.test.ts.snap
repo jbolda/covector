@@ -71,6 +71,7 @@ publish
         \\"versionMajor\\": 2,
         \\"versionMinor\\": 3,
         \\"versionPatch\\": 1,
+        \\"versionPrerelease\\": null,
         \\"pkg\\": {
           \\"name\\": \\"package-one\\",
           \\"version\\": \\"2.3.1\\",
@@ -92,7 +93,8 @@ publish
         },
         null
       ],
-      \\"postcommand\\": null
+      \\"postcommand\\": null,
+      \\"errorOnVersionRange\\": null
     },
     \\"published\\": true
   },
@@ -107,6 +109,7 @@ publish
         \\"versionMajor\\": 1,
         \\"versionMinor\\": 9,
         \\"versionPatch\\": 0,
+        \\"versionPrerelease\\": null,
         \\"pkg\\": {
           \\"name\\": \\"package-two\\",
           \\"version\\": \\"1.9.0\\",
@@ -128,7 +131,8 @@ publish
         },
         null
       ],
-      \\"postcommand\\": null
+      \\"postcommand\\": null,
+      \\"errorOnVersionRange\\": null
     },
     \\"published\\": true
   }
@@ -153,6 +157,7 @@ publish
           [Function],
         ],
         "dependencies": undefined,
+        "errorOnVersionRange": null,
         "manager": "javascript",
         "path": "./packages/package-one",
         "pkg": "package-one",
@@ -171,6 +176,7 @@ publish
           "versionMajor": 2,
           "versionMinor": 3,
           "versionPatch": 1,
+          "versionPrerelease": null,
         },
         "postcommand": null,
         "precommand": null,
@@ -196,6 +202,7 @@ publish
           [Function],
         ],
         "dependencies": undefined,
+        "errorOnVersionRange": null,
         "manager": "javascript",
         "path": "./packages/package-two",
         "pkg": "package-two",
@@ -214,6 +221,7 @@ publish
           "versionMajor": 1,
           "versionMinor": 9,
           "versionPatch": 0,
+          "versionPrerelease": null,
         },
         "postcommand": null,
         "precommand": null,
