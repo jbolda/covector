@@ -1582,19 +1582,19 @@ Object {
       "prepublishing package-c would happen here",
     ],
     Array [
-      "package-a [publish]: echo publishing  would happen here",
+      "package-a [publish]: echo publishing --tag  would happen here",
     ],
     Array [
-      "publishing would happen here",
+      "publishing --tag would happen here",
     ],
     Array [
-      "package-b [publish]: echo publishing  would happen here",
+      "package-b [publish]: echo publishing --tag  would happen here",
     ],
     Array [
-      "publishing would happen here",
+      "publishing --tag would happen here",
     ],
     Array [
-      "package-c [publish]: echo publishing  would happen here",
+      "package-c [publish]: echo publishing would happen here",
     ],
     Array [
       "publishing would happen here",
@@ -1605,7 +1605,7 @@ Object {
       "command": true,
       "pkg": Object {
         "command": Array [
-          "echo publishing  would happen here",
+          "echo publishing --tag  would happen here",
         ],
         "dependencies": Array [
           "package-b",
@@ -1642,7 +1642,7 @@ Object {
       "command": true,
       "pkg": Object {
         "command": Array [
-          "echo publishing  would happen here",
+          "echo publishing --tag  would happen here",
         ],
         "dependencies": undefined,
         "manager": "javascript",
@@ -1675,7 +1675,7 @@ Object {
       "command": true,
       "pkg": Object {
         "command": Array [
-          "echo publishing  would happen here",
+          "echo publishing would happen here",
         ],
         "dependencies": Array [
           "package-b",
@@ -1746,22 +1746,22 @@ Object {
       "prepublishing package-c would happen here",
     ],
     Array [
-      "package-a [publish]: echo publishing --tag pkg.tag would happen here",
+      "package-a [publish]: echo publishing would happen here",
     ],
     Array [
-      "publishing --tag pkg.tag would happen here",
+      "publishing would happen here",
     ],
     Array [
-      "package-b [publish]: echo publishing --tag pkg.tag would happen here",
+      "package-b [publish]: echo publishing would happen here",
     ],
     Array [
-      "publishing --tag pkg.tag would happen here",
+      "publishing would happen here",
     ],
     Array [
-      "package-c [publish]: echo publishing --tag pkg.tag would happen here",
+      "package-c [publish]: echo publishing --tag branch_name would happen here",
     ],
     Array [
-      "publishing --tag pkg.tag would happen here",
+      "publishing --tag branch_name would happen here",
     ],
   ],
   "covectorReturn": Object {
@@ -1769,7 +1769,7 @@ Object {
       "command": true,
       "pkg": Object {
         "command": Array [
-          "echo publishing --tag pkg.tag would happen here",
+          "echo publishing would happen here",
         ],
         "dependencies": Array [
           "package-b",
@@ -1806,7 +1806,7 @@ Object {
       "command": true,
       "pkg": Object {
         "command": Array [
-          "echo publishing --tag pkg.tag would happen here",
+          "echo publishing would happen here",
         ],
         "dependencies": undefined,
         "manager": "javascript",
@@ -1839,7 +1839,7 @@ Object {
       "command": true,
       "pkg": Object {
         "command": Array [
-          "echo publishing --tag pkg.tag would happen here",
+          "echo publishing --tag branch_name would happen here",
         ],
         "dependencies": Array [
           "package-b",
