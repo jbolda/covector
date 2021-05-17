@@ -348,7 +348,9 @@ export function* covector({
       dryRun,
     });
 
-    const publishCommands: PkgPublish[] = yield mergeIntoConfig({
+    const {
+      commands: publishCommands,
+    }: { commands: PkgPublish[] } = yield mergeIntoConfig({
       assembledChanges,
       config,
       command: "publish",

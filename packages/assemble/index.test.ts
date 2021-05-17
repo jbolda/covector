@@ -476,8 +476,8 @@ describe("merge filtered config test", () => {
 
 // vfile returns fs information that is flaky between machines, scrub it
 const scrubVfile = (mergedPublishConfig: any) => {
-  return mergedPublishConfig.map((pkg: any) => {
+  return mergedPublishConfig.commands.map((pkg: any) => {
     delete pkg.pkgFile.vfile;
     return pkg;
-  }, mergedPublishConfig);
+  }, mergedPublishConfig.commands);
 };
