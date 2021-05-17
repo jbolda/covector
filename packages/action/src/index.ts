@@ -26,7 +26,7 @@ export function* run(): Generator<any, any, any> {
     let command = inputCommand;
 
     if (inputCommand === "version-or-publish") {
-      const status = yield covector({ command: "status" });
+      const status = yield covector({ command: "status", cwd });
       core.setOutput("status", status);
       if (status === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
@@ -42,23 +42,35 @@ export function* run(): Generator<any, any, any> {
       const covectored = yield covector({ command, filterPackages, cwd });
       core.setOutput("status", covectored);
     } else if (command === "version") {
+      const status = yield covector({ command: "status", cwd });
+      core.setOutput("status", status);
+
       const covectored: Covector = yield covector({
         command,
         filterPackages,
         cwd,
       });
       core.setOutput("successfulPublish", successfulPublish);
+      core.setOutput("templatePipe", covectored.pipeTemplate);
 
-      const covectoredSmushed = Object.keys(covectored).reduce((text, pkg) => {
-        if (typeof covectored[pkg].command === "string") {
-          text = `${text}\n\n\n# ${pkg}\n\n${commandText(covectored[pkg])}`;
-        }
-        return text;
-      }, "# Version Updates\n\nMerging this PR will bump all of the applicable packages based on your change files.\n\n");
+      const covectoredSmushed = Object.keys(covectored.commandsRan).reduce(
+        (text, pkg) => {
+          if (typeof covectored.commandsRan[pkg].command === "string") {
+            text = `${text}\n\n\n# ${pkg}\n\n${commandText(
+              covectored.commandsRan[pkg]
+            )}`;
+          }
+          return text;
+        },
+        "# Version Updates\n\nMerging this PR will bump all of the applicable packages based on your change files.\n\n"
+      );
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       console.log(`The covector output: ${payload}`);
     } else if (command === "publish") {
+      const status = yield covector({ command: "status", cwd });
+      core.setOutput("status", status);
+
       let covectored: Covector;
       if (core.getInput("createRelease") === "true" && token) {
         const octokit = github.getOctokit(token);
@@ -79,28 +91,33 @@ export function* run(): Generator<any, any, any> {
         });
       }
 
-      if (covectored) {
-        let packagesPublished = Object.keys(covectored).reduce((pub, pkg) => {
-          if (!covectored[pkg].published) {
-            return pub;
-          } else {
-            return `${pub}${pkg}`;
-          }
-        }, "");
+      if (covectored.commandsRan) {
+        let packagesPublished = Object.keys(covectored.commandsRan).reduce(
+          (pub, pkg) => {
+            if (!covectored.commandsRan[pkg].published) {
+              return pub;
+            } else {
+              return pub === "" ? pkg : `${pub},${pkg}`;
+            }
+          },
+          ""
+        );
         core.setOutput("packagesPublished", packagesPublished);
+        core.setOutput("templatePipe", JSON.stringify(covectored.pipeTemplate));
 
-        for (let pkg of Object.keys(covectored)) {
-          if (covectored[pkg].command !== false) successfulPublish = true;
+        for (let pkg of Object.keys(covectored.commandsRan)) {
+          if (covectored.commandsRan[pkg].command !== false)
+            successfulPublish = true;
         }
         core.setOutput("successfulPublish", successfulPublish);
 
-        core.setOutput("change", covectored);
+        core.setOutput("change", covectored.commandsRan);
         const payload = JSON.stringify(
-          Object.keys(covectored).reduce((c, pkg) => {
+          Object.keys(covectored.commandsRan).reduce((c, pkg) => {
             //@ts-ignore
             delete c[pkg].pkg.pkgFile.vfile;
             return c;
-          }, covectored),
+          }, covectored.commandsRan),
           undefined,
           2
         );
@@ -132,6 +149,7 @@ export function* run(): Generator<any, any, any> {
           `Not publishing any preview packages because the "${configuredLabel}" label has not been applied to this pull request.`
         );
       } else {
+        // primarily runs publish
         let covectored: Covector;
         const branchName = github?.context?.payload?.pull_request?.head?.ref;
         let identifier;
@@ -180,8 +198,10 @@ export function* run(): Generator<any, any, any> {
           branchTag,
         });
 
-        if (covectored) {
-          let packagesPublished: any = Object.entries(covectored).reduce(
+        if (covectored.commandsRan) {
+          let packagesPublished: any = Object.entries(
+            covectored.commandsRan
+          ).reduce(
             //@ts-ignore
             (pub: Array<string>, pkg: Array<any>) => {
               if (pkg[1].published) {
@@ -256,11 +276,13 @@ export function* run(): Generator<any, any, any> {
           }
 
           core.setOutput("packagesPublished", packagesPublished);
-          for (let pkg of Object.keys(covectored)) {
-            if (covectored[pkg].command !== false) successfulPublish = true;
+          core.setOutput("templatePipe", covectored.pipeTemplate);
+          for (let pkg of Object.keys(covectored.commandsRan)) {
+            if (covectored.commandsRan[pkg].command !== false)
+              successfulPublish = true;
           }
           core.setOutput("successfulPublish", successfulPublish);
-          core.setOutput("change", covectored);
+          core.setOutput("change", covectored.commandsRan);
         }
       }
     } else {

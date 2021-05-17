@@ -38,9 +38,14 @@ export type PkgCommandsRan = {
   published?: boolean;
 };
 
-export type Covector = {
+export type CommandsRan = {
   [k: string]: PkgCommandsRan;
 };
+
+export interface Covector {
+  commandsRan: CommandsRan;
+  pipeTemplate?: object;
+}
 
 export interface FunctionPipe extends PkgPublish {
   pkgCommandsRan: PkgCommandsRan;
@@ -110,7 +115,7 @@ export function* covector({
         prereleaseIdentifier,
       });
 
-      const commands = yield mergeChangesToConfig({
+      const { commands } = yield mergeChangesToConfig({
         assembledChanges: changes,
         config,
         command,
@@ -145,7 +150,13 @@ export function* covector({
       prereleaseIdentifier,
     });
 
-    const commands: PkgVersion[] = yield mergeChangesToConfig({
+    const {
+      commands,
+      pipeTemplate,
+    }: {
+      commands: PkgVersion[];
+      pipeTemplate: any;
+    } = yield mergeChangesToConfig({
       assembledChanges: changes,
       config,
       command,
@@ -158,7 +169,7 @@ export function* covector({
       console.log(commands);
     }
 
-    let pkgCommandsRan: Covector = Object.keys(config.packages).reduce(
+    let pkgCommandsRan: CommandsRan = Object.keys(config.packages).reduce(
       (
         pkgs: {
           [k: string]: {
@@ -250,7 +261,7 @@ export function* covector({
       console.log(pkgCommandsRan);
     }
 
-    return pkgCommandsRan;
+    return { commandsRan: pkgCommandsRan, pipeTemplate };
   } else if (command === "preview") {
     yield raceTime({ t: config.timeout });
 
@@ -260,16 +271,16 @@ export function* covector({
       prereleaseIdentifier,
     });
 
-    //@ts-ignore
-    const versionCommands: PkgVersion[] = yield mergeChangesToConfig({
+    const { commands: versionCommands } = yield mergeChangesToConfig({
       assembledChanges: versionChanges,
       config,
       command: "version",
       dryRun,
       filterPackages,
+      cwd,
     });
 
-    let pkgCommandsRan: Covector = Object.keys(config.packages).reduce(
+    let pkgCommandsRan: CommandsRan = Object.keys(config.packages).reduce(
       (
         pkgs: {
           [k: string]: {
@@ -302,12 +313,12 @@ export function* covector({
     });
 
     const applied = yield apply({
-      //@ts-ignore
       commands: versionCommands,
       config,
       cwd,
       bump: !dryRun,
       previewVersion,
+      prereleaseIdentifier,
     });
 
     pkgCommandsRan = applied.reduce(
@@ -388,7 +399,7 @@ export function* covector({
       dryRun,
     });
 
-    return pkgCommandsRan;
+    return { commandsRan: pkgCommandsRan, pipeTemplate: publishCommands };
   } else {
     yield raceTime({ t: config.timeout });
     const changelogs = yield pullLastChangelog({
@@ -396,7 +407,10 @@ export function* covector({
       cwd,
     });
 
-    const commands: PkgPublish[] = yield mergeIntoConfig({
+    const {
+      commands,
+      pipeTemplate,
+    }: { commands: PkgPublish[]; pipeTemplate: any } = yield mergeIntoConfig({
       assembledChanges,
       config,
       command,
@@ -422,7 +436,7 @@ export function* covector({
       command,
     });
 
-    let pkgCommandsRan: Covector = commands.reduce(
+    let pkgCommandsRan: CommandsRan = commands.reduce(
       (pkgs: any, pkg: { pkg: string }): object => {
         pkgs[pkg.pkg] = {
           precommand: false,
@@ -469,6 +483,6 @@ export function* covector({
       console.log(pkgCommandsRan);
     }
 
-    return pkgCommandsRan;
+    return { commandsRan: pkgCommandsRan, pipeTemplate };
   }
 }

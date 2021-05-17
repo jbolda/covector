@@ -41,9 +41,9 @@ export type PkgVersion = {
   packageFileName?: string;
   type?: string;
   parents?: string[];
-  precommand: string | null;
-  command: string | null;
-  postcommand: string | null;
+  precommand?: (string | any)[] | null;
+  command?: (string | any)[] | null;
+  postcommand?: (string | any)[] | null;
   manager?: string;
   dependencies?: string[];
   errorOnVersionRange?: string;
@@ -373,7 +373,7 @@ export const mergeChangesToConfig = function* ({
   cwd: string;
   dryRun: boolean;
   filterPackages: string[];
-}) {
+}): Generator<any, { commands: PkgVersion[]; pipeTemplate: any }, any> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce(
@@ -415,7 +415,7 @@ export const mergeChangesToConfig = function* ({
   const pipeOutput: {
     [k: string]: { name?: string; pipe?: PipeVersionTemplate };
   } = {};
-  let commands: { [k: string]: string | any }[] = [];
+  let commands: PkgVersion[] = [];
   for (let pkg of Object.keys(
     usePackageSubset(assembledChanges.releases, filterPackages)
   )) {
@@ -427,13 +427,11 @@ export const mergeChangesToConfig = function* ({
       pkg: pkgCommands[pkg],
     };
 
-    if (dryRun) {
-      pipeOutput[pkg] = {};
-      pipeOutput[pkg].name = pkg;
-      pipeOutput[pkg].pipe = pipeToTemplate;
-    }
+    pipeOutput[pkg] = {};
+    pipeOutput[pkg].name = pkg;
+    pipeOutput[pkg].pipe = pipeToTemplate;
 
-    const merged = {
+    const merged: PkgVersion = {
       pkg,
       ...(!pkgs[pkg].parents ? {} : { parents: pkgs[pkg].parents }),
       path: pkgCommands[pkg].path,
@@ -467,7 +465,7 @@ export const mergeChangesToConfig = function* ({
     );
   }
 
-  return commands;
+  return { commands, pipeTemplate: pipeOutput };
 };
 
 export const mergeIntoConfig = function* ({
@@ -488,7 +486,7 @@ export const mergeIntoConfig = function* ({
   filterPackages: string[];
   changelogs?: { [k: string]: { name: string; changelog: string } };
   tag?: string;
-}): Generator<any, PkgPublish[], any> {
+}): Generator<any, { commands: PkgPublish[]; pipeTemplate: any }, any> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
 
@@ -611,11 +609,9 @@ export const mergeIntoConfig = function* ({
           }),
     };
 
-    if (dryRun) {
-      pipeOutput[pkg] = {};
-      pipeOutput[pkg].name = pkg;
-      pipeOutput[pkg].pipe = pipeToTemplate;
-    }
+    pipeOutput[pkg] = {};
+    pipeOutput[pkg].name = pkg;
+    pipeOutput[pkg].pipe = pipeToTemplate;
 
     const merged: PkgPublish = {
       pkg,
@@ -650,7 +646,7 @@ export const mergeIntoConfig = function* ({
     );
   }
 
-  return commands;
+  return { commands, pipeTemplate: pipeOutput };
 };
 
 const mergeCommand = ({
