@@ -1,6 +1,8 @@
 import {
   readPkgFile,
   writePkgFile,
+  getPackageFileVersion,
+  setPackageFileVersion,
   testSerializePkgFile,
   PackageFile,
   ConfigFile,
@@ -302,7 +304,7 @@ const bumpAll = ({
             packageFile: packageFiles[pkg],
             dep: pkgDep,
             bumpType: changes[pkgDep].type,
-            preview: !!previewVersion,
+            previewVersion,
             prereleaseIdentifier,
           });
         }
@@ -338,70 +340,20 @@ const bumpMain = ({
     pkg.versionPatch = semver.patch(next);
     pkg.versionPrerelease = semver.prerelease(next);
   }
-  if (pkg.vfile && pkg.pkg) {
-    if (pkg.vfile.extname === ".json") {
-      // for javascript
-      let version = previewVersion
-        ? semver.valid(`${pkg.pkg.version}-${previewVersion}`)
-        : // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-          semver.inc(pkg.pkg.version, bumpType, prereleaseIdentifier);
-      if (version) {
-        pkg.pkg.version = version;
-
-        if (
-          errorOnVersionRange &&
-          semver.satisfies(version, errorOnVersionRange)
-        ) {
-          throw new Error(
-            `${pkg.name} will be bumped to ${version}. ` +
-              `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
-              `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
-          );
-        }
-      }
-    } else if (pkg.vfile.extname === ".toml") {
-      // for rust
-      let version = previewVersion
-      // @ts-ignore
-      ? semver.valid(`${pkg.pkg.package.version}-${previewVersion}`)
-      : semver.inc(
-        // @ts-ignore
-        pkg.pkg.package.version,
-        // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-            bumpType,
-            prereleaseIdentifier
-          );
-      if (version) {
-        // @ts-ignore TODO we need to normalize Pkg for toml? Or make some union type
-        pkg.pkg.package.version = version;
-        if (
-          errorOnVersionRange &&
-          semver.satisfies(version, errorOnVersionRange)
-        ) {
-          throw new Error(
-            `${pkg.name} will be bumped to ${version}. ` +
-              `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
-              `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
-          );
-        }
-      }
-    } else {
-      // assume version is at the root
-      // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-      let version = semver.inc(pkg.pkg.version, bumpType);
-      if (version) {
-        pkg.pkg.version = version;
-        if (
-          errorOnVersionRange &&
-          semver.satisfies(version, errorOnVersionRange)
-        ) {
-          throw new Error(
-            `${pkg.name} will be bumped to ${version}. ` +
-              `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
-              `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
-          );
-        }
-      }
+  const prevVersion = getPackageFileVersion({ pkg });
+  let version =
+    previewVersion && previewVersion !== ""
+      ? semver.valid(`${prevVersion}-${previewVersion}`)
+      : // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
+        semver.inc(prevVersion, bumpType, prereleaseIdentifier);
+  if (version) {
+    pkg = setPackageFileVersion({ pkg, version });
+    if (errorOnVersionRange && semver.satisfies(version, errorOnVersionRange)) {
+      throw new Error(
+        `${pkg.name} will be bumped to ${version}. ` +
+          `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
+          `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
+      );
     }
   }
   return pkg;
@@ -411,103 +363,48 @@ const bumpDeps = ({
   packageFile,
   dep,
   bumpType,
-  preview = false,
+  previewVersion,
   prereleaseIdentifier = null,
 }: {
   packageFile: PackageFile;
   dep: string;
   bumpType: string;
-  preview: boolean;
+  previewVersion: string;
   prereleaseIdentifier: string | null;
 }) => {
   let pkg = { ...packageFile };
 
-  if (pkg.pkg && pkg.vfile && pkg.pkg.dependencies)
-    Object.keys(pkg.pkg.dependencies).forEach((existingDep) => {
-      if (
-        existingDep === dep &&
-        pkg.pkg &&
-        pkg.pkg!.dependencies &&
-        pkg.pkg!.dependencies[dep]
-      ) {
-        if (pkg.vfile!.extname === ".json") {
-          // for javascript
-          let version = preview
-            ? semver.valid(`${pkg.pkg.version}`)
-            : semver.inc(
-                pkg.pkg.dependencies[dep],
-                // @ts-ignore TODO deal with ReleaseType
-                bumpType,
-                prereleaseIdentifier
-              );
-          if (version) pkg.pkg.dependencies[dep] = version;
-        } else if (
-          pkg.vfile!.extname === ".toml" ||
-          pkg.vfile!.extname === ".yaml" ||
-          pkg.vfile!.extname === ".yml"
-        ) {
-          // for rust
-          if (typeof pkg.pkg.dependencies[dep] === "object") {
-            // @ts-ignore TODO deal with nest toml
-
-            if (!pkg.pkg.dependencies[dep].version) {
-              throw new Error(
-                `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +
-                  `This cannot be published. ` +
-                  `Please pin it to a MAJOR.MINOR.PATCH reference.`
-              );
-            } else {
-              let version = preview
-                ? semver.valid(`${pkg.pkg.version}`)
-                : incWithPartials(
-                    dep,
-                    // @ts-ignore TODO deal with nest toml
-                    pkg.pkg.dependencies[dep].version,
-                    bumpType,
-                    prereleaseIdentifier
-                  );
-              // @ts-ignore TODO deal with nest toml
-              if (version) pkg.pkg.dependencies[dep].version = version;
+  if (pkg.pkg && pkg.vfile)
+    ["dependencies", "devDependencies", "dev-dependencies"].forEach(
+      (property) => {
+        // @ts-ignore
+        if (pkg.pkg[property]) {
+          // @ts-ignore
+          Object.keys(pkg.pkg[property]).forEach((existingDep) => {
+            if (existingDep === dep) {
+              const prevVersion = getPackageFileVersion({ pkg, property, dep });
+              let version =
+                previewVersion && previewVersion !== ""
+                  ? semver.valid(`${prevVersion}-${previewVersion}`)
+                  : incConsideringPartials(
+                      dep,
+                      prevVersion,
+                      // @ts-ignore TODO deal with ReleaseType
+                      bumpType,
+                      prereleaseIdentifier
+                    );
+              if (version)
+                pkg = setPackageFileVersion({ pkg, version, property, dep });
             }
-          } else {
-            let version = preview
-              ? // @ts-ignore TODO deal with nest toml
-                semver.valid(`${pkg.pkg.package.version}`)
-              : incWithPartials(
-                  dep,
-                  pkg.pkg.dependencies[dep],
-                  bumpType,
-                  prereleaseIdentifier
-                );
-            if (version) pkg.pkg.dependencies[dep] = version;
-          }
+          });
         }
       }
-    });
-
-  if (pkg.pkg && pkg.vfile && pkg.pkg.devDependencies)
-    Object.keys(pkg.pkg.devDependencies).forEach((existingDep) => {
-      if (
-        existingDep === dep &&
-        pkg.pkg &&
-        pkg.pkg!.devDependencies &&
-        pkg.pkg!.devDependencies[dep]
-      ) {
-        if (pkg.vfile!.extname === ".json") {
-          // for javascript
-          let version = preview
-            ? semver.valid(`${pkg.pkg.version}`)
-            : // @ts-ignore TODO deal with ReleaseType
-              semver.inc(pkg.pkg.devDependencies[dep], bumpType);
-          if (version) pkg.pkg.devDependencies[dep] = version;
-        }
-      }
-    });
+    );
 
   return pkg;
 };
 
-const incWithPartials = (
+const incConsideringPartials = (
   dependency: string,
   version: string,
   bumpType: string,
