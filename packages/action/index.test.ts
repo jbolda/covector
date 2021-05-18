@@ -87,6 +87,7 @@ describe("full e2e test", () => {
   let restoreConsole: Function;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir", "info", "error"]);
+    jest.clearAllMocks();
   });
   afterEach(() => {
     restoreConsole();
@@ -104,31 +105,88 @@ describe("full e2e test", () => {
       },
     }));
 
-  it("tests publish", async () => {
+  it("tests publish input", async () => {
     const cwd: string = f.copy("integration.js-with-complex-commands");
 
-    jest.spyOn(core, "getInput").mockImplementation((arg) => {
-      switch (arg) {
-        case "command":
-          return "publish";
-        case "cwd":
-          return cwd;
-        case "createRelease":
-          return "true";
-        case "draftRelease":
-          return "false";
-        case "token":
-          return "randomsequenceofcharactersforsecurity";
-        default:
-          return "";
-      }
-    });
+    const input: { [k: string]: string } = {
+      command: "publish",
+      cwd: cwd,
+      createRelease: "true",
+      draftRelease: "false",
+      token: "randomsequenceofcharactersforsecurity",
+    };
+
+    jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
     const covectoredAction = await run(covector());
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleDir: consoleMock.dir.mock.calls,
-      covectoredAction,
     }).toMatchSnapshot();
+    expect(core.setOutput).toMatchSnapshot();
+  });
+
+  it("tests status output", async () => {
+    const cwd: string = f.copy("integration.js-with-complex-commands");
+
+    const input: { [k: string]: string } = {
+      command: "status",
+      cwd: cwd,
+      createRelease: "false",
+      draftRelease: "false",
+      token: "randomsequenceofcharactersforsecurity",
+    };
+
+    jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+
+    const covectoredAction = await run(covector());
+    expect(core.setOutput).toHaveBeenCalledWith("commandRan", "status");
+    expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
+  });
+
+  it("tests version output", async () => {
+    const cwd: string = f.copy("integration.js-with-complex-commands");
+
+    const input: { [k: string]: string } = {
+      command: "version",
+      cwd: cwd,
+      createRelease: "false",
+      draftRelease: "false",
+      token: "randomsequenceofcharactersforsecurity",
+    };
+
+    jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+
+    const covectoredAction = await run(covector());
+    expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
+    expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
+    expect(core.setOutput).toHaveBeenCalledWith("successfulPublish", false);
+    // to cover template pipe
+    expect(core.setOutput).toMatchSnapshot();
+  });
+
+  it("tests publish output", async () => {
+    const cwd: string = f.copy("integration.js-with-complex-commands");
+
+    const input: { [k: string]: string } = {
+      command: "publish",
+      cwd: cwd,
+      createRelease: "false",
+      draftRelease: "false",
+      token: "randomsequenceofcharactersforsecurity",
+    };
+
+    jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+
+    const covectoredAction = await run(covector());
+    expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
+    expect(core.setOutput).toHaveBeenCalledWith("commandRan", "publish");
+    expect(core.setOutput).toHaveBeenCalledWith("successfulPublish", true);
+    expect(core.setOutput).toHaveBeenCalledWith(
+      "packagesPublished",
+      "package-one,package-two"
+    );
+    // to cover template pipe
+    expect(core.setOutput).toMatchSnapshot();
   });
 });

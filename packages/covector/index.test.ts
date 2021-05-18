@@ -71,17 +71,22 @@ describe("integration test in production mode", () => {
         cwd: fullIntegration,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelogTauriCore = await toVFile.read(
@@ -113,17 +118,22 @@ describe("integration test in production mode", () => {
         cwd: fullIntegration,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelog = await toVFile.read(
@@ -154,17 +164,22 @@ describe("integration test in production mode", () => {
         cwd: fullIntegration,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelog = await toVFile.read(
@@ -194,17 +209,22 @@ describe("integration test in production mode", () => {
         cwd: fullIntegration,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelog = await toVFile.read(
@@ -453,17 +473,22 @@ describe("integration test in --dry-run mode", () => {
         dryRun: true,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelogTauriCore = toVFile.read(
@@ -567,17 +592,22 @@ describe("integration test with preMode `on`", () => {
         cwd: fullIntegration,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelogTauriCore = await toVFile.read(
@@ -707,25 +737,35 @@ Boop again.
       '{\n  "tag": "beta",\n  "changes": [\n    ".changes/first-change.md",\n    ".changes/second-change.md",\n    ".changes/third-change.md"\n  ]\n}\n'
     );
 
+    if (typeof covectoredOne !== "object")
+      throw new Error("We are expecting an object here.");
+    if (typeof covectoredTwo !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturnOne: Object.keys(covectoredOne).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectoredOne),
+      covectorReturnOne: Object.keys(covectoredOne.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectoredOne.commandsRan
+      ),
       //@ts-ignore
-      covectorReturnTwo: Object.keys(covectoredTwo).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectoredTwo),
+      covectorReturnTwo: Object.keys(covectoredTwo.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectoredTwo.commandsRan
+      ),
     }).toMatchSnapshot();
   });
 
@@ -741,17 +781,22 @@ Boop again.
         dryRun: true,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelogTauriCore = toVFile.read(
@@ -780,17 +825,22 @@ describe("integration test for complex commands", () => {
         cwd: fullIntegration,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelogTauriCore = toVFile.read(
@@ -869,17 +919,22 @@ describe("integration test for complex commands", () => {
         dryRun: true,
       })
     );
+    if (typeof covectored !== "object")
+      throw new Error("We are expecting an object here.");
     expect({
       consoleLog: consoleMock.log.mock.calls,
       consoleInfo: consoleMock.info.mock.calls,
       //@ts-ignore
-      covectorReturn: Object.keys(covectored).reduce((pkgs, pkg) => {
-        // remove these as they are dependent on the OS
-        // and user running them so would always fail
-        //@ts-ignore
-        delete pkgs[pkg].applied.vfile;
-        return pkgs;
-      }, covectored),
+      covectorReturn: Object.keys(covectored.commandsRan).reduce(
+        (pkgs, pkg) => {
+          // remove these as they are dependent on the OS
+          // and user running them so would always fail
+          //@ts-ignore
+          delete pkgs[pkg].applied.vfile;
+          return pkgs;
+        },
+        covectored.commandsRan
+      ),
     }).toMatchSnapshot();
 
     const changelogTauriCore = toVFile.read(
@@ -954,10 +1009,10 @@ describe("integration test for complex commands", () => {
 
 // vfile returns fs information that is flaky between machines, scrub it
 const scrubVfile = (covectored: any) => {
-  return Object.keys(covectored).reduce((c, pkg) => {
+  return Object.keys(covectored.commandsRan).reduce((c, pkg) => {
     delete c[pkg].pkg.pkgFile.vfile;
     return c;
-  }, covectored);
+  }, covectored.commandsRan);
 };
 
 describe("integration test to invoke sub commands", () => {

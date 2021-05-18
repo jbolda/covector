@@ -47,6 +47,8 @@ outputs:
     description: Boolean as a string if we published anything. Useful to skip follow-on steps with nothing published.
   packagesPublished:
     description: Comma separated list of all of the packages that published. Most useful for chaining runs together to act on the filtered list.
+  templatePipe:
+    description: A stringified key/value pair object of the `pipe` that is passed to each command.
 runs:
   using: "node12"
   main: "dist/index.js"
