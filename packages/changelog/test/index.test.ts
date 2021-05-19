@@ -2,7 +2,7 @@ import {
   fillChangelogs,
   pullLastChangelog,
   pipeChangelogToCommands,
-} from "./index";
+} from "../src";
 //@ts-ignore
 import toVFile from "to-vfile";
 import mockConsole, { RestoreConsole } from "jest-mock-console";

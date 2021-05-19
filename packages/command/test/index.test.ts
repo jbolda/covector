@@ -1,4 +1,4 @@
-import { attemptCommands, sh } from "./index";
+import { attemptCommands, sh } from "../src";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);

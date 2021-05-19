@@ -4,7 +4,7 @@ import execa from "execa";
 import stripAnsi from "strip-ansi";
 import path from "path";
 
-import { PkgVersion, PkgPublish } from "@covector/assemble";
+import type { PkgVersion, PkgPublish } from "@covector/assemble";
 
 type RunningCommand = {
   command?: string | Function;
@@ -133,8 +133,8 @@ export const attemptCommands = function* ({
       _pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] =
         stdout !== "" ? stdout : true;
 
-    if (!!pkgCommandsRan && command === 'publish' && !commandPrefix)
-      _pkgCommandsRan[pkg.pkg]['published'] = true
+    if (!!pkgCommandsRan && command === "publish" && !commandPrefix)
+      _pkgCommandsRan[pkg.pkg]["published"] = true;
   }
   return _pkgCommandsRan;
 };

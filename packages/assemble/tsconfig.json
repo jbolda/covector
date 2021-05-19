@@ -1,7 +1,10 @@
 {
   "extends": "../../tsconfig.base.json",
+  "references": [{ "path": "../files" }, { "path": "../command" }],
   "compilerOptions": {
-    "outDir": "dist"
+    "baseUrl": ".",
+    "outDir": "dist",
+    "rootDir": "src"
   },
-  "include": ["index.ts"]
+  "include": ["src/**/*.ts"]
 }

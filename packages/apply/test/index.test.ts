@@ -1,4 +1,4 @@
-import { apply, changesConsideringParents, validateApply } from "./index";
+import { apply, changesConsideringParents, validateApply } from "../src";
 //@ts-ignore
 import toVFile from "to-vfile";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
