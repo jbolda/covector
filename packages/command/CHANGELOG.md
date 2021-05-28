@@ -1,5 +1,20 @@
 # Changelog
 
+## \[0.4.0]
+
+- Bump `@effection/node` which fixes and now supports node 16 on Windows. (Other platforms had full support.)
+  - [78222c4](https://www.github.com/jbolda/covector/commit/78222c47dcee04a8478d0e4abddb499b5eb95f74) bump @effection/node for node@16 windows support ([#210](https://www.github.com/jbolda/covector/pull/210)) on 2021-05-28
+- Improve types on generator based shell commands. This won't affect the published assets, but improve use to downstream TS users (and covector).
+  - [e388cc7](https://www.github.com/jbolda/covector/commit/e388cc7ee98080e33744898737635711f3f30987) feat: prerelease mode and publishing ([#180](https://www.github.com/jbolda/covector/pull/180)) on 2021-05-13
+- This switches to using Typescript project references to build (previously rollup). It should affect the underlying packages or use.
+  - [a9aedb1](https://www.github.com/jbolda/covector/commit/a9aedb1d5de01972b0576cc339788397e6ad829f) chore: build workflow updates ([#175](https://www.github.com/jbolda/covector/pull/175)) on 2021-04-07
+  - [5506b19](https://www.github.com/jbolda/covector/commit/5506b195e176ecec1c49af83cac0f8c490ba845e) feat: add preview command to covector ([#187](https://www.github.com/jbolda/covector/pull/187)) on 2021-05-05
+  - [e388cc7](https://www.github.com/jbolda/covector/commit/e388cc7ee98080e33744898737635711f3f30987) feat: prerelease mode and publishing ([#180](https://www.github.com/jbolda/covector/pull/180)) on 2021-05-13
+- Pass head branch name into covector for running preview in action
+  Tag gets piped into template in assemble
+  Fix published boolean bug in command
+  - [2bdc840](https://www.github.com/jbolda/covector/commit/2bdc84046523f3dca61f3623f1ea893445c9fffb) feat: Add dist-tag for preview publishing... and fix the published boolean bug ([#200](https://www.github.com/jbolda/covector/pull/200)) on 2021-05-13
+
 ## \[0.3.2]
 
 - Mock out full Github Release flow to help in testing the Github Action. Adjust command pipe to function to fix `undefined` being piped to Github Release body.

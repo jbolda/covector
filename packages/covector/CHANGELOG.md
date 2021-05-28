@@ -1,5 +1,31 @@
 # Changelog
 
+## \[0.6.0]
+
+- Adjust output from assemble and covector to expose the template that is piped into each command. This allows us to set it as an output in the github action.
+  - [5797e79](https://www.github.com/jbolda/covector/commit/5797e792f532ad9bcb40c19cda080ca7713c0d91) feat: github action output template pipe ([#208](https://www.github.com/jbolda/covector/pull/208)) on 2021-05-18
+- Bump `@effection/node` which fixes and now supports node 16 on Windows. (Other platforms had full support.)
+  - [78222c4](https://www.github.com/jbolda/covector/commit/78222c47dcee04a8478d0e4abddb499b5eb95f74) bump @effection/node for node@16 windows support ([#210](https://www.github.com/jbolda/covector/pull/210)) on 2021-05-28
+- Implement `errorOnVersionRange` which allows one to set a range which, when satisfied, will fail a `covector status` or `covector version`. This guardrail can help prevent a package from accidentally being bumped to the next major version.
+  - [e388cc7](https://www.github.com/jbolda/covector/commit/e388cc7ee98080e33744898737635711f3f30987) feat: prerelease mode and publishing ([#180](https://www.github.com/jbolda/covector/pull/180)) on 2021-05-13
+- Update `covector init` to create the yml with `actions/setup-node@v2`.
+  - [2db4726](https://www.github.com/jbolda/covector/commit/2db47268d9300b77d089ab4049a789d36ea83999) fix: remove postinstall and adjust node setup for CI ([#182](https://www.github.com/jbolda/covector/pull/182)) on 2021-04-08
+- Update `init` to only use simple string based commands. These are easier to grok for users first starting with covector and looking to understand what the `init` has created. Also prefer the `pkgFile` based names in the publish step to make it easier for someone to switch to using nicknames for packages easier (and less foot-guns).
+  - [5692f42](https://www.github.com/jbolda/covector/commit/5692f42372528bc249a057d738059e34e3706b04) fix: improve init output for easier onboarding ([#178](https://www.github.com/jbolda/covector/pull/178)) on 2021-04-14
+- This switches to using Typescript project references to build (previously rollup). It should affect the underlying packages or use.
+  - [a9aedb1](https://www.github.com/jbolda/covector/commit/a9aedb1d5de01972b0576cc339788397e6ad829f) chore: build workflow updates ([#175](https://www.github.com/jbolda/covector/pull/175)) on 2021-04-07
+  - [5506b19](https://www.github.com/jbolda/covector/commit/5506b195e176ecec1c49af83cac0f8c490ba845e) feat: add preview command to covector ([#187](https://www.github.com/jbolda/covector/pull/187)) on 2021-05-05
+  - [e388cc7](https://www.github.com/jbolda/covector/commit/e388cc7ee98080e33744898737635711f3f30987) feat: prerelease mode and publishing ([#180](https://www.github.com/jbolda/covector/pull/180)) on 2021-05-13
+- Pass head branch name into covector for running preview in action
+  Tag gets piped into template in assemble
+  Fix published boolean bug in command
+  - [2bdc840](https://www.github.com/jbolda/covector/commit/2bdc84046523f3dca61f3623f1ea893445c9fffb) feat: Add dist-tag for preview publishing... and fix the published boolean bug ([#200](https://www.github.com/jbolda/covector/pull/200)) on 2021-05-13
+- Add preview command for versioning and publishing preview packages
+  - [f6db347](https://www.github.com/jbolda/covector/commit/f6db347f22fa027da85da85a6328296407e60b51) feat: preparations of covector/action for building and publishing preview packages ([#179](https://www.github.com/jbolda/covector/pull/179)) on 2021-04-13
+  - [5506b19](https://www.github.com/jbolda/covector/commit/5506b195e176ecec1c49af83cac0f8c490ba845e) feat: add preview command to covector ([#187](https://www.github.com/jbolda/covector/pull/187)) on 2021-05-05
+- Add support for yaml based package files. Add support for generic file whose only content is a version number.
+  - [e8c98f5](https://www.github.com/jbolda/covector/commit/e8c98f5c627e172f56c11d17022f198ca3cb9883) feat: yaml and generic file support ([#196](https://www.github.com/jbolda/covector/pull/196)) on 2021-05-07
+
 ## \[0.5.3]
 
 - Mock out full Github Release flow to help in testing the Github Action. Adjust command pipe to function to fix `undefined` being piped to Github Release body.
