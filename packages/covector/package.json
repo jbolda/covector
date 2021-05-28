@@ -27,7 +27,7 @@
     "@covector/changelog": "0.4.0",
     "@covector/command": "0.3.2",
     "@covector/files": "0.3.1",
-    "@effection/node": "^1.0.1",
+    "@effection/node": "^1.0.2",
     "globby": "^11.0.1",
     "inquirer": "^7.3.3",
     "yargs": "^15.3.1"

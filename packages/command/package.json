@@ -16,7 +16,7 @@
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
-    "@effection/node": "^1.0.1",
+    "@effection/node": "^1.0.2",
     "effection": "^1.0.0",
     "execa": "^5.0.0",
     "strip-ansi": "^6.0.0"
