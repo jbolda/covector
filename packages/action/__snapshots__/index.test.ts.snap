@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`full e2e test tests publish input 1`] = `
+exports[`full e2e test of publish input 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -24,7 +24,6 @@ publish
 
 ",
         "draft": false,
-        "id": "boop",
         "name": "package-one v2.3.1",
         "owner": "genericOwner",
         "repo": "genericRepo",
@@ -51,7 +50,6 @@ publish
 
 ",
         "draft": false,
-        "id": "boop",
         "name": "package-two v1.9.0",
         "owner": "genericOwner",
         "repo": "genericRepo",
@@ -142,7 +140,7 @@ publish
 }
 `;
 
-exports[`full e2e test tests publish input 2`] = `
+exports[`full e2e test of publish input 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -306,7 +304,7 @@ publish
 }
 `;
 
-exports[`full e2e test tests publish output 1`] = `
+exports[`full e2e test of publish output 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -452,7 +450,7 @@ publish
 }
 `;
 
-exports[`full e2e test tests version output 1`] = `
+exports[`full e2e test of version output 1`] = `
 [MockFunction] {
   "calls": Array [
     Array [

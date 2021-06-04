@@ -88,18 +88,47 @@ export const createReleases = curry(
       );
       return;
     }
-    console.log(
-      `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
-    );
-    const createReleaseResponse = await octokit.repos.createRelease({
+
+    // TODO check what response this gives for true/false scenarios
+    // and confirm tests for each case
+    const existingRelease = await octokit.repos.getReleaseByTag({
       owner,
       repo,
-      tag_name: `${pipe.pkg}-v${pipe.pkgFile.version}`,
-      name: `${pipe.pkg} v${pipe.pkgFile.version}`,
-      body: commandText(pipe.pkgCommandsRan),
-      draft: core.getInput("draftRelease") === "true" ? true : false,
+      tag: `${pipe.pkg}-v${pipe.pkgFile.version}`,
     });
-    const { data } = createReleaseResponse;
+
+    let releaseResponse;
+    // TODO does response give us anything else we should check for in this logic?
+    if (existingRelease && existingRelease.draft) {
+      console.log(
+        `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
+      );
+      // TODO does this response match the createRelease response closely enough
+      // to pipe the data out in the same manner?
+      // TODO check tag_name in createRelease vs release_id vs ???
+      // are we giving it all the necessary info to properly update?
+      releaseResponse = await octokit.repos.updateRelease({
+        owner,
+        repo,
+        release_id: existingRelease.id,
+        body: commandText(pipe.pkgCommandsRan),
+        draft: false,
+      });
+    } else {
+      console.log(
+        `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
+      );
+      releaseResponse = await octokit.repos.createRelease({
+        owner,
+        repo,
+        tag_name: `${pipe.pkg}-v${pipe.pkgFile.version}`,
+        name: `${pipe.pkg} v${pipe.pkgFile.version}`,
+        body: commandText(pipe.pkgCommandsRan),
+        draft: core.getInput("draftRelease") === "true" ? true : false,
+      });
+    }
+
+    const { data } = releaseResponse;
 
     core.setOutput(`${pipe.pkg}-published`, "true");
 
