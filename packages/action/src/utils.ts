@@ -89,51 +89,52 @@ export const createReleases = curry(
       return;
     }
 
-    // TODO check what response this gives for true/false scenarios
-    // and confirm tests for each case
-    const existingRelease = await octokit.repos.getReleaseByTag({
-      owner,
-      repo,
-      tag: `${pipe.pkg}-v${pipe.pkgFile.version}`,
-    });
+    const releaseTag = `${pipe.pkg}-v${pipe.pkgFile.version}`;
+    const existingRelease = await octokit.repos
+      .listReleases({
+        owner,
+        repo,
+      })
+      .then((releases) =>
+        releases.data.find((r) => r.draft && r.tag_name === releaseTag)
+      )
+      .catch((e) => null);
 
     let releaseResponse;
-    // TODO does response give us anything else we should check for in this logic?
     if (existingRelease && existingRelease.draft) {
       console.log(
         `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
       );
-      // TODO does this response match the createRelease response closely enough
-      // to pipe the data out in the same manner?
-      // TODO check tag_name in createRelease vs release_id vs ???
-      // are we giving it all the necessary info to properly update?
-      releaseResponse = await octokit.repos.updateRelease({
-        owner,
-        repo,
-        release_id: existingRelease.id,
-        body: commandText(pipe.pkgCommandsRan),
-        draft: false,
-      });
+      releaseResponse = await octokit.repos
+        .updateRelease({
+          owner,
+          repo,
+          release_id: existingRelease.id,
+          body: commandText(pipe.pkgCommandsRan),
+          draft: false,
+        })
+        .then((response) => response.data);
     } else {
       console.log(
         `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
       );
-      releaseResponse = await octokit.repos.createRelease({
-        owner,
-        repo,
-        tag_name: `${pipe.pkg}-v${pipe.pkgFile.version}`,
-        name: `${pipe.pkg} v${pipe.pkgFile.version}`,
-        body: commandText(pipe.pkgCommandsRan),
-        draft: core.getInput("draftRelease") === "true" ? true : false,
-      });
+      releaseResponse = await octokit.repos
+        .createRelease({
+          owner,
+          repo,
+          tag_name: releaseTag,
+          name: `${pipe.pkg} v${pipe.pkgFile.version}`,
+          body: commandText(pipe.pkgCommandsRan),
+          draft: core.getInput("draftRelease") === "true" ? true : false,
+        })
+        .then((response) => response.data);
     }
 
-    const { data } = releaseResponse;
-
     core.setOutput(`${pipe.pkg}-published`, "true");
+    // releaseResponse.upload_url is available on both responses
 
-    console.log("release created: ", data);
-    const { id: releaseId } = data;
+    console.log("release created: ", releaseResponse);
+    const { id: releaseId } = releaseResponse;
 
     if (pipe.assets) {
       try {
