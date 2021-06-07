@@ -36,6 +36,9 @@ jobs:
         env:
           COVECTOR_CONTEXT: ${{ toJson(steps.covector) }}
         run: echo "$COVECTOR_CONTEXT"
+      - name: sync lockfile
+        if: steps.covector.outputs.commandRan == 'version'
+        run: npm install
       - name: create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v3
