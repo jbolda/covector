@@ -69,6 +69,7 @@ export type PkgPublish = {
   assets?: { name: string; path: string }[];
   pkgFile?: PackageFile;
   errorOnVersionRange?: string;
+  releaseTag?: string;
 };
 
 type PipePublishTemplate = {
@@ -550,6 +551,10 @@ export const mergeIntoConfig = function* ({
             ...commandItems,
             command: `errorOnVersionRange`,
           }),
+          releaseTag: mergeCommand({
+            ...commandItems,
+            command: `releaseTag`,
+          }),
         };
       }
 
@@ -634,6 +639,14 @@ export const mergeIntoConfig = function* ({
         ["command", "dryRunCommand", "runFromRoot"]
       ),
       errorOnVersionRange: pkgCommands[pkg].errorOnVersionRange,
+      releaseTag: templateCommands(
+        [
+          pkgCommands[pkg].releaseTag ||
+            "${ pkgFile.pkg.name }-v${ pkgFile.version }",
+        ],
+        pipeToTemplate,
+        ["releaseTag"]
+      )![0],
     };
 
     commands = [...commands, merged];

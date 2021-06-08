@@ -92,7 +92,8 @@ publish
         null
       ],
       \\"postcommand\\": null,
-      \\"errorOnVersionRange\\": null
+      \\"errorOnVersionRange\\": null,
+      \\"releaseTag\\": \\"package-one-v2.3.1\\"
     },
     \\"published\\": true
   },
@@ -130,7 +131,8 @@ publish
         null
       ],
       \\"postcommand\\": null,
-      \\"errorOnVersionRange\\": null
+      \\"errorOnVersionRange\\": null,
+      \\"releaseTag\\": \\"package-two-v1.9.0\\"
     },
     \\"published\\": true
   }
@@ -165,7 +167,7 @@ exports[`full e2e test of publish input 2`] = `
     ],
     Array [
       "templatePipe",
-      "{\\"package-one\\":{\\"name\\":\\"package-one\\",\\"pipe\\":{\\"pkg\\":{\\"pkg\\":\\"package-one\\",\\"path\\":\\"./packages/package-one\\",\\"changelog\\":\\"## \\\\\\\\[2.3.1]\\\\n\\\\n- Added some cool things.\\\\n\\",\\"precommand\\":null,\\"command\\":[{\\"command\\":\\"echo publish\\",\\"pipe\\":true},null],\\"postcommand\\":null,\\"manager\\":\\"javascript\\",\\"errorOnVersionRange\\":null,\\"tag\\":\\"\\"},\\"pkgFile\\":{\\"name\\":\\"package-one\\",\\"version\\":\\"2.3.1\\",\\"versionMajor\\":2,\\"versionMinor\\":3,\\"versionPatch\\":1,\\"pkg\\":{\\"name\\":\\"package-one\\",\\"version\\":\\"2.3.1\\",\\"license\\":\\"MIT\\",\\"scripts\\":{\\"build\\":\\"npm info tauri@0.8.0 description\\",\\"test\\":\\"npm info covector@0.1.0 license\\"}}}}},\\"package-two\\":{\\"name\\":\\"package-two\\",\\"pipe\\":{\\"pkg\\":{\\"pkg\\":\\"package-two\\",\\"path\\":\\"./packages/package-two\\",\\"changelog\\":\\"## \\\\\\\\[1.9.0]\\\\n\\\\n- Added some even cooler things.\\\\n\\",\\"precommand\\":null,\\"command\\":[{\\"command\\":\\"echo publish\\",\\"pipe\\":true},null],\\"postcommand\\":null,\\"manager\\":\\"javascript\\",\\"errorOnVersionRange\\":null,\\"tag\\":\\"\\"},\\"pkgFile\\":{\\"name\\":\\"package-two\\",\\"version\\":\\"1.9.0\\",\\"versionMajor\\":1,\\"versionMinor\\":9,\\"versionPatch\\":0,\\"pkg\\":{\\"name\\":\\"package-two\\",\\"version\\":\\"1.9.0\\",\\"license\\":\\"MIT\\",\\"scripts\\":{\\"build\\":\\"echo this command is not piped, it is run from scripts for pk2\\",\\"test\\":\\"echo this command is not piped, it is run from the test script\\"}}}}}}",
+      "{\\"package-one\\":{\\"name\\":\\"package-one\\",\\"pipe\\":{\\"pkg\\":{\\"pkg\\":\\"package-one\\",\\"path\\":\\"./packages/package-one\\",\\"changelog\\":\\"## \\\\\\\\[2.3.1]\\\\n\\\\n- Added some cool things.\\\\n\\",\\"precommand\\":null,\\"command\\":[{\\"command\\":\\"echo publish\\",\\"pipe\\":true},null],\\"postcommand\\":null,\\"manager\\":\\"javascript\\",\\"errorOnVersionRange\\":null,\\"releaseTag\\":null,\\"tag\\":\\"\\"},\\"pkgFile\\":{\\"name\\":\\"package-one\\",\\"version\\":\\"2.3.1\\",\\"versionMajor\\":2,\\"versionMinor\\":3,\\"versionPatch\\":1,\\"pkg\\":{\\"name\\":\\"package-one\\",\\"version\\":\\"2.3.1\\",\\"license\\":\\"MIT\\",\\"scripts\\":{\\"build\\":\\"npm info tauri@0.8.0 description\\",\\"test\\":\\"npm info covector@0.1.0 license\\"}}}}},\\"package-two\\":{\\"name\\":\\"package-two\\",\\"pipe\\":{\\"pkg\\":{\\"pkg\\":\\"package-two\\",\\"path\\":\\"./packages/package-two\\",\\"changelog\\":\\"## \\\\\\\\[1.9.0]\\\\n\\\\n- Added some even cooler things.\\\\n\\",\\"precommand\\":null,\\"command\\":[{\\"command\\":\\"echo publish\\",\\"pipe\\":true},null],\\"postcommand\\":null,\\"manager\\":\\"javascript\\",\\"errorOnVersionRange\\":null,\\"releaseTag\\":null,\\"tag\\":\\"\\"},\\"pkgFile\\":{\\"name\\":\\"package-two\\",\\"version\\":\\"1.9.0\\",\\"versionMajor\\":1,\\"versionMinor\\":9,\\"versionPatch\\":0,\\"pkg\\":{\\"name\\":\\"package-two\\",\\"version\\":\\"1.9.0\\",\\"license\\":\\"MIT\\",\\"scripts\\":{\\"build\\":\\"echo this command is not piped, it is run from scripts for pk2\\",\\"test\\":\\"echo this command is not piped, it is run from the test script\\"}}}}}}",
     ],
     Array [
       "successfulPublish",
@@ -214,6 +216,7 @@ publish
             },
             "postcommand": null,
             "precommand": null,
+            "releaseTag": "package-one-v2.3.1",
           },
           "postcommand": false,
           "precommand": false,
@@ -259,6 +262,7 @@ publish
             },
             "postcommand": null,
             "precommand": null,
+            "releaseTag": "package-two-v1.9.0",
           },
           "postcommand": false,
           "precommand": false,
@@ -321,7 +325,7 @@ exports[`full e2e test of publish output 1`] = `
     ],
     Array [
       "templatePipe",
-      "{\\"package-one\\":{\\"name\\":\\"package-one\\",\\"pipe\\":{\\"pkg\\":{\\"pkg\\":\\"package-one\\",\\"path\\":\\"./packages/package-one\\",\\"changelog\\":\\"## \\\\\\\\[2.3.1]\\\\n\\\\n- Added some cool things.\\\\n\\",\\"precommand\\":null,\\"command\\":{\\"command\\":\\"echo publish\\",\\"pipe\\":true},\\"postcommand\\":null,\\"manager\\":\\"javascript\\",\\"errorOnVersionRange\\":null,\\"tag\\":\\"\\"},\\"pkgFile\\":{\\"name\\":\\"package-one\\",\\"version\\":\\"2.3.1\\",\\"versionMajor\\":2,\\"versionMinor\\":3,\\"versionPatch\\":1,\\"pkg\\":{\\"name\\":\\"package-one\\",\\"version\\":\\"2.3.1\\",\\"license\\":\\"MIT\\",\\"scripts\\":{\\"build\\":\\"npm info tauri@0.8.0 description\\",\\"test\\":\\"npm info covector@0.1.0 license\\"}}}}},\\"package-two\\":{\\"name\\":\\"package-two\\",\\"pipe\\":{\\"pkg\\":{\\"pkg\\":\\"package-two\\",\\"path\\":\\"./packages/package-two\\",\\"changelog\\":\\"## \\\\\\\\[1.9.0]\\\\n\\\\n- Added some even cooler things.\\\\n\\",\\"precommand\\":null,\\"command\\":{\\"command\\":\\"echo publish\\",\\"pipe\\":true},\\"postcommand\\":null,\\"manager\\":\\"javascript\\",\\"errorOnVersionRange\\":null,\\"tag\\":\\"\\"},\\"pkgFile\\":{\\"name\\":\\"package-two\\",\\"version\\":\\"1.9.0\\",\\"versionMajor\\":1,\\"versionMinor\\":9,\\"versionPatch\\":0,\\"pkg\\":{\\"name\\":\\"package-two\\",\\"version\\":\\"1.9.0\\",\\"license\\":\\"MIT\\",\\"scripts\\":{\\"build\\":\\"echo this command is not piped, it is run from scripts for pk2\\",\\"test\\":\\"echo this command is not piped, it is run from the test script\\"}}}}}}",
+      "{\\"package-one\\":{\\"name\\":\\"package-one\\",\\"pipe\\":{\\"pkg\\":{\\"pkg\\":\\"package-one\\",\\"path\\":\\"./packages/package-one\\",\\"changelog\\":\\"## \\\\\\\\[2.3.1]\\\\n\\\\n- Added some cool things.\\\\n\\",\\"precommand\\":null,\\"command\\":{\\"command\\":\\"echo publish\\",\\"pipe\\":true},\\"postcommand\\":null,\\"manager\\":\\"javascript\\",\\"errorOnVersionRange\\":null,\\"releaseTag\\":null,\\"tag\\":\\"\\"},\\"pkgFile\\":{\\"name\\":\\"package-one\\",\\"version\\":\\"2.3.1\\",\\"versionMajor\\":2,\\"versionMinor\\":3,\\"versionPatch\\":1,\\"pkg\\":{\\"name\\":\\"package-one\\",\\"version\\":\\"2.3.1\\",\\"license\\":\\"MIT\\",\\"scripts\\":{\\"build\\":\\"npm info tauri@0.8.0 description\\",\\"test\\":\\"npm info covector@0.1.0 license\\"}}}}},\\"package-two\\":{\\"name\\":\\"package-two\\",\\"pipe\\":{\\"pkg\\":{\\"pkg\\":\\"package-two\\",\\"path\\":\\"./packages/package-two\\",\\"changelog\\":\\"## \\\\\\\\[1.9.0]\\\\n\\\\n- Added some even cooler things.\\\\n\\",\\"precommand\\":null,\\"command\\":{\\"command\\":\\"echo publish\\",\\"pipe\\":true},\\"postcommand\\":null,\\"manager\\":\\"javascript\\",\\"errorOnVersionRange\\":null,\\"releaseTag\\":null,\\"tag\\":\\"\\"},\\"pkgFile\\":{\\"name\\":\\"package-two\\",\\"version\\":\\"1.9.0\\",\\"versionMajor\\":1,\\"versionMinor\\":9,\\"versionPatch\\":0,\\"pkg\\":{\\"name\\":\\"package-two\\",\\"version\\":\\"1.9.0\\",\\"license\\":\\"MIT\\",\\"scripts\\":{\\"build\\":\\"echo this command is not piped, it is run from scripts for pk2\\",\\"test\\":\\"echo this command is not piped, it is run from the test script\\"}}}}}}",
     ],
     Array [
       "successfulPublish",
@@ -369,6 +373,7 @@ publish
             },
             "postcommand": null,
             "precommand": null,
+            "releaseTag": "package-one-v2.3.1",
           },
           "postcommand": false,
           "precommand": false,
@@ -413,6 +418,7 @@ publish
             },
             "postcommand": null,
             "precommand": null,
+            "releaseTag": "package-two-v1.9.0",
           },
           "postcommand": false,
           "precommand": false,

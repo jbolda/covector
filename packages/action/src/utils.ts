@@ -67,6 +67,19 @@ function curry(func: Function): Function {
 export type Methods = { [k: string]: Function };
 export type MoreMethods = { [k: string]: Methods };
 
+type GithubRelease = {
+  id: number;
+  tag_name: string;
+  draft: boolean;
+  prerelease: boolean;
+};
+type GithubReleaseResponse = {
+  data: GithubRelease;
+};
+type GithubReleaseResponses = {
+  data: GithubRelease[];
+};
+
 export const createReleases = curry(
   async (
     {
@@ -89,16 +102,19 @@ export const createReleases = curry(
       return;
     }
 
-    const releaseTag = `${pipe.pkg}-v${pipe.pkgFile.version}`;
+    const releaseTag = pipe.releaseTag;
     const existingRelease = await octokit.repos
       .listReleases({
         owner,
         repo,
       })
-      .then((releases) =>
-        releases.data.find((r) => r.draft && r.tag_name === releaseTag)
-      )
-      .catch((e) => null);
+      .then((releases: GithubReleaseResponses) => {
+        const release = releases.data.find(
+          (r: GithubRelease) => r.draft && r.tag_name === releaseTag
+        );
+        return release ? release : null;
+      })
+      .catch((error: Error) => null);
 
     let releaseResponse;
     if (existingRelease && existingRelease.draft) {
@@ -110,10 +126,12 @@ export const createReleases = curry(
           owner,
           repo,
           release_id: existingRelease.id,
-          body: commandText(pipe.pkgCommandsRan),
+          body: `${
+            existingRelease.body ? `${existingRelease.body}\n` : ""
+          }${commandText(pipe.pkgCommandsRan)}`,
           draft: false,
         })
-        .then((response) => response.data);
+        .then((response: GithubReleaseResponse) => response.data);
     } else {
       console.log(
         `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
@@ -127,14 +145,13 @@ export const createReleases = curry(
           body: commandText(pipe.pkgCommandsRan),
           draft: core.getInput("draftRelease") === "true" ? true : false,
         })
-        .then((response) => response.data);
+        .then((response: GithubReleaseResponse) => response.data);
     }
-
     core.setOutput(`${pipe.pkg}-published`, "true");
     // releaseResponse.upload_url is available on both responses
+    // considering putting that to the output
 
     console.log("release created: ", releaseResponse);
-    const { id: releaseId } = releaseResponse;
 
     if (pipe.assets) {
       try {
@@ -145,7 +162,7 @@ export const createReleases = curry(
           const uploadedAsset = await octokit.repos.uploadReleaseAsset({
             owner,
             repo,
-            release_id: releaseId,
+            release_id: releaseResponse.id,
             name: asset.name,
             data: fs.readFileSync(asset.path),
           });
