@@ -102,6 +102,13 @@ export const createReleases = curry(
       return;
     }
 
+    if (!pipe.releaseTag) {
+      console.log(
+        `skipping Github Release for ${pipe.pkg}, releaseTag is null`
+      );
+      return;
+    }
+
     const releaseTag = pipe.releaseTag;
     const existingRelease = await octokit.repos
       .listReleases({
