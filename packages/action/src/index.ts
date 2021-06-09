@@ -11,7 +11,7 @@ import {
 export function* run(): Generator<any, any, any> {
   try {
     const cwd =
-      core.getInput("cwd") === "" ? process.env.cwd : core.getInput("cwd");
+      core.getInput("cwd") === "" ? process.cwd() : core.getInput("cwd");
     const token =
       core.getInput("token") === ""
         ? process.env.GITHUB_TOKEN || ""
@@ -27,7 +27,6 @@ export function* run(): Generator<any, any, any> {
 
     if (inputCommand === "version-or-publish") {
       const status = yield covector({ command: "status", cwd });
-      core.setOutput("status", status);
       if (status === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
         command = "publish";
@@ -41,6 +40,7 @@ export function* run(): Generator<any, any, any> {
     if (command === "status") {
       const covectored = yield covector({ command, filterPackages, cwd });
       core.setOutput("status", covectored);
+      core.setOutput("templatePipe", covectored.pipeTemplate);
     } else if (command === "version") {
       const status = yield covector({ command: "status", cwd });
       core.setOutput("status", status);
@@ -50,7 +50,6 @@ export function* run(): Generator<any, any, any> {
         filterPackages,
         cwd,
       });
-      core.setOutput("successfulPublish", successfulPublish);
       core.setOutput("templatePipe", covectored.pipeTemplate);
 
       const covectoredSmushed = Object.keys(covectored.commandsRan).reduce(
@@ -66,7 +65,9 @@ export function* run(): Generator<any, any, any> {
       );
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
+      core.startGroup(`covector version output`);
       console.log(`The covector output: ${payload}`);
+      core.endGroup();
     } else if (command === "publish") {
       const status = yield covector({ command: "status", cwd });
       core.setOutput("status", status);
@@ -121,7 +122,10 @@ export function* run(): Generator<any, any, any> {
           undefined,
           2
         );
+
+        core.startGroup(`covector publish output`);
         console.log(`The covector output: ${payload}`);
+        core.endGroup();
         return covectored;
       }
     } else if (command === "preview") {

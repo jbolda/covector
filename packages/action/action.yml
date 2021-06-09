@@ -2,7 +2,7 @@ name: "covector"
 description: "Sane change management in polyglot, monorepos, single"
 inputs:
   command:
-    description: "covector cli command to run"
+    description: covector cli command to run
     required: true
   token:
     description: Github Token or PAT for creating releases / posting messages
@@ -38,7 +38,7 @@ inputs:
     default: branch
 outputs:
   status:
-    description: The changes that were applied
+    description: Returns either "No changes." or a dynamic list of packages changed.
   change:
     description: The changes that were applied
   commandRan:

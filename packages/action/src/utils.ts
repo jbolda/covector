@@ -154,11 +154,18 @@ export const createReleases = curry(
         })
         .then((response: GithubReleaseResponse) => response.data);
     }
+    // keeping this one since this was originally used
+    // considered deprecated and will remove in v1
     core.setOutput(`${pipe.pkg}-published`, "true");
+    // this will be used moving forward
+    core.setOutput(`published-${pipe.pkg}`, "true");
+
     // releaseResponse.upload_url is available on both responses
     // considering putting that to the output
 
+    core.startGroup(`github release created for ${pipe.pkg}`);
     console.log("release created: ", releaseResponse);
+    core.endGroup();
 
     if (pipe.assets) {
       try {
@@ -166,13 +173,18 @@ export const createReleases = curry(
           console.log(
             `uploading asset ${asset.name} for ${pipe.pkg}@${pipe.pkgFile.version}`
           );
-          const uploadedAsset = await octokit.repos.uploadReleaseAsset({
-            owner,
-            repo,
-            release_id: releaseResponse.id,
-            name: asset.name,
-            data: fs.readFileSync(asset.path),
-          });
+          const uploadedAsset = await octokit.repos
+            .uploadReleaseAsset({
+              owner,
+              repo,
+              release_id: releaseResponse.id,
+              name: asset.name,
+              data: fs.readFileSync(asset.path),
+            })
+            .then((response: GithubReleaseResponse) => response.data);
+          core.startGroup(`asset uploaded to release for ${pipe.pkg}`);
+          console.log("release created: ", uploadedAsset);
+          core.endGroup();
         }
       } catch (error) {
         console.error(error);
