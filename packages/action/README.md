@@ -43,7 +43,14 @@ See the [action.yml](./action.yml) for outputs for your use or see below.
 
 Besides these static outputs, we also supply dynamic outputs for each of your packages. Replace the `*` with your package name. Note, this will not be listed in the [action.yml](./action.yml).
 
-| output       | description                                                                      | command |
-| ------------ | -------------------------------------------------------------------------------- | ------- |
-| published-\* | Will be set as `"true"` (stringified boolean) if the package has been published. | publish |
+| output         | description                                                                      | command |
+| -------------- | -------------------------------------------------------------------------------- | ------- |
+| published-\*   | Will be set as `"true"` (stringified boolean) if the package has been published. | publish |
+| willPublish-\* | Will be set as `"true"` (stringified boolean) if the package will be published.  | status  |
+| version-\*     | The current version number .                                                     | status  |
+
+Outputs will generally be specified in the [action.yml](./action.yml), but since these are dynamic, it is not possible. See the [docs noting this is an optional required](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs).
+
+> If you don't declare an output in your action metadata file, you can still set outputs and use them in a workflow.
+
 
