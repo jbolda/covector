@@ -2142,7 +2142,9 @@ Object {
       },
     ],
   ],
-  "covectorReturn": "There are 2 changes which include tauri with minor, tauri-updater with patch",
+  "covectorReturn": Object {
+    "response": "There are 2 changes which include tauri with minor, tauri-updater with patch",
+  },
 }
 `;
 
@@ -6519,7 +6521,9 @@ Object {
       "No commands configured to run on [test].",
     ],
   ],
-  "covectorReturn": "No commands configured to run on [test].",
+  "covectorReturn": Object {
+    "response": "No commands configured to run on [test].",
+  },
 }
 `;
 
@@ -7631,7 +7635,9 @@ Object {
       "tauri-updater => patch",
     ],
   ],
-  "covectorReturn": "There are 2 changes which include tauri with minor, tauri-updater with patch",
+  "covectorReturn": Object {
+    "response": "There are 2 changes which include tauri with minor, tauri-updater with patch",
+  },
 }
 `;
 
@@ -9063,7 +9069,9 @@ Object {
       "No commands configured to run on [test].",
     ],
   ],
-  "covectorReturn": "No commands configured to run on [test].",
+  "covectorReturn": Object {
+    "response": "No commands configured to run on [test].",
+  },
 }
 `;
 

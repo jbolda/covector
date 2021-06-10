@@ -1,4 +1,5 @@
 import { covector } from "./src";
+import { CovectorVersion } from "./src/run";
 import { run } from "effection";
 //@ts-ignore
 import toVFile from "to-vfile";
@@ -65,12 +66,12 @@ describe("integration test in production mode", () => {
 
   it("runs version for js and rust", async () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -112,12 +113,12 @@ describe("integration test in production mode", () => {
 
   it("runs version for dart / flutter single", async () => {
     const fullIntegration = f.copy("integration.dart-flutter-single");
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -158,12 +159,12 @@ describe("integration test in production mode", () => {
 
   it("runs version for dart / flutter multi", async () => {
     const fullIntegration = f.copy("integration.dart-flutter-multi");
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -203,12 +204,12 @@ describe("integration test in production mode", () => {
 
   it("runs version for general file", async () => {
     const fullIntegration = f.copy("integration.general-file");
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -466,13 +467,13 @@ describe("integration test in --dry-run mode", () => {
   it("runs version for js and rust", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
         dryRun: true,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -586,12 +587,12 @@ describe("integration test with preMode `on`", () => {
     // this enables "pre" mode
     makePre(fullIntegration);
 
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -637,12 +638,12 @@ describe("integration test with preMode `on`", () => {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
-    const covectoredOne = await run(
+    const covectoredOne = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
       })
-    );
+    )) as CovectorVersion;
 
     const changelogTauriCoreOne = await toVFile.read(
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
@@ -694,12 +695,12 @@ Boop again.
       "---\n" + '"tauri-api": patch\n' + "---\n\n" + "Boop again.\n"
     );
 
-    const covectoredTwo = await run(
+    const covectoredTwo = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
       })
-    );
+    )) as CovectorVersion;
 
     const changelogTauriCoreTwo = await toVFile.read(
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
@@ -774,13 +775,13 @@ Boop again.
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
         dryRun: true,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -819,12 +820,12 @@ describe("integration test for complex commands", () => {
   it("runs version for prod", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -912,13 +913,13 @@ describe("integration test for complex commands", () => {
   it("runs version in --dry-run mode", async () => {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await run(
+    const covectored = (await run(
       covector({
         command: "version",
         cwd: fullIntegration,
         dryRun: true,
       })
-    );
+    )) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({

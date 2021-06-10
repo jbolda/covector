@@ -35,6 +35,7 @@ See the [action.yml](./action.yml) for outputs for your use or see below.
 | output            | description                                                                                 | command                           |
 | ----------------- | ------------------------------------------------------------------------------------------- | --------------------------------- |
 | status            | Returns either "No changes." or a dyanmic list of packages changed.                         | status, version, publish          |
+| willPublish       | Will be set as `"true"` (stringified boolean) if the next step is to try publishing.        | status                            |
 | change            | The changes that were applied                                                               | version, preview                  |
 | commandRan        | The command ran (particularly useful for 'version-or-publish' input option).                | all                               |
 | successfulPublish | Boolean as a string if we published. Useful to skip follow-on steps with nothing published. | publish, preview                  |
@@ -52,5 +53,3 @@ Besides these static outputs, we also supply dynamic outputs for each of your pa
 Outputs will generally be specified in the [action.yml](./action.yml), but since these are dynamic, it is not possible. See the [docs noting this is an optional required](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs).
 
 > If you don't declare an output in your action metadata file, you can still set outputs and use them in a workflow.
-
-

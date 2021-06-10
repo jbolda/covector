@@ -130,7 +130,6 @@ describe("full e2e test", () => {
       const covectoredAction = await run(covector());
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
-      expect(core.setOutput).toHaveBeenCalledWith("successfulPublish", false);
       // to cover template pipe
       expect(core.setOutput).toMatchSnapshot();
     });
@@ -176,7 +175,14 @@ describe("full e2e test", () => {
         consoleLog: consoleMock.log.mock.calls,
         consoleDir: consoleMock.dir.mock.calls,
       }).toMatchSnapshot();
-      expect(core.setOutput).toMatchSnapshot();
+      expect(core.setOutput).toHaveBeenCalledWith(
+        "templatePipe",
+        expect.stringContaining("2.3.1")
+      );
+      expect(core.setOutput).toHaveBeenCalledWith(
+        "templatePipe",
+        expect.stringContaining("1.9.0")
+      );
     });
 
     it("output", async () => {
@@ -200,8 +206,14 @@ describe("full e2e test", () => {
         "packagesPublished",
         "package-one,package-two"
       );
-      // to cover template pipe
-      expect(core.setOutput).toMatchSnapshot();
+      expect(core.setOutput).toHaveBeenCalledWith(
+        "templatePipe",
+        expect.stringContaining("2.3.1")
+      );
+      expect(core.setOutput).toHaveBeenCalledWith(
+        "templatePipe",
+        expect.stringContaining("1.9.0")
+      );
     });
 
     it("github release update", async () => {
