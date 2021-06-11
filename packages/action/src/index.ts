@@ -56,10 +56,12 @@ export function* run(): Generator<any, any, any> {
         covectored.response === "No changes." &&
           covectored.pkgReadyToPublish.length > 0
       );
-      covectored.pkgReadyToPublish.forEach((pkg) => {
-        core.setOutput(`willPublish-${pkg.pkg}`, true);
-        core.setOutput(`version-${pkg.pkg}`, pkg?.pkgFile?.version ?? "");
-      });
+      if (covectored?.pkgReadyToPublish?.length > 0) {
+        covectored.pkgReadyToPublish.forEach((pkg) => {
+          core.setOutput(`willPublish-${pkg.pkg}`, true);
+          core.setOutput(`version-${pkg.pkg}`, pkg?.pkgFile?.version ?? "");
+        });
+      }
     } else if (command === "version") {
       const status: CovectorStatus = yield covector({ command: "status", cwd });
       core.setOutput("status", status.response);
