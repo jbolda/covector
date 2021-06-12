@@ -136,6 +136,18 @@ export function* covector({
         command: "publish",
       });
 
+      if (commandsToRun.length > 0) {
+        console.log(
+          `There ${
+            commandsToRun.length === 1
+              ? `is 1 package`
+              : `is ${commandsToRun.length} packages`
+          } ready to publish which includes${commandsToRun.map(
+            (pkg) => ` ${pkg.pkg}@${pkg.pkgFile?.version}`
+          )}`
+        );
+      }
+
       return <CovectorStatus>{
         pkgReadyToPublish: commandsToRun,
         response: "No changes.",
