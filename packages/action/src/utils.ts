@@ -158,7 +158,13 @@ export const createReleases = curry(
     // considered deprecated and will remove in v1
     core.setOutput(`${pipe.pkg}-published`, "true");
     // this will be used moving forward
-    core.setOutput(`published-${pipe.pkg}`, "true");
+    core.setOutput(
+      `published-${pipe.pkg}`
+        .replace(/\@/g, "-")
+        .replace(/\//g, "-")
+        .replace(/\_/g, "-"),
+      "true"
+    );
 
     // releaseResponse.upload_url is available on both responses
     // considering putting that to the output

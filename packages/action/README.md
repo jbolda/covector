@@ -42,7 +42,7 @@ See the [action.yml](./action.yml) for outputs for your use or see below.
 | packagesPublished | Comma separated list of all of the packages that published.                                 | publish, preview                  |
 | templatePipe      | A stringified key/value pair object of the `pipe` that is passed to each command.           | status, version, publish, preview |
 
-Besides these static outputs, we also supply dynamic outputs for each of your packages. Replace the `*` with your package name. Note, this will not be listed in the [action.yml](./action.yml).
+Besides these static outputs, we also supply dynamic outputs for each of your packages. Replace the `*` with your package name. Note, this will not be listed in the [action.yml](./action.yml). Outputs can only alphanumeric characters, and are replaced with a dash: `-`. For example, a scoped npm package of `@covector/awesome` would be `willPublish--covector-awesome`.
 
 | output         | description                                                                      | command |
 | -------------- | -------------------------------------------------------------------------------- | ------- |

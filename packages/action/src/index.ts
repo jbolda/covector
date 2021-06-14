@@ -58,8 +58,20 @@ export function* run(): Generator<any, any, any> {
       );
       if (covectored?.pkgReadyToPublish?.length > 0) {
         covectored.pkgReadyToPublish.forEach((pkg) => {
-          core.setOutput(`willPublish-${pkg.pkg}`, true);
-          core.setOutput(`version-${pkg.pkg}`, pkg?.pkgFile?.version ?? "");
+          core.setOutput(
+            `willPublish-${pkg.pkg}`
+              .replace(/\@/g, "-")
+              .replace(/\//g, "-")
+              .replace(/\_/g, "-"),
+            true
+          );
+          core.setOutput(
+            `version-${pkg.pkg}`
+              .replace(/\@/g, "-")
+              .replace(/\//g, "-")
+              .replace(/\_/g, "-"),
+            pkg?.pkgFile?.version ?? ""
+          );
         });
       }
     } else if (command === "version") {
