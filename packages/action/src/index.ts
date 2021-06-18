@@ -1,6 +1,11 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { covector, Covector } from "../../covector/src/run";
+import {
+  covector,
+  CovectorStatus,
+  CovectorVersion,
+  CovectorPublish,
+} from "../../covector/src/run";
 import {
   commandText,
   packageListToArray,
@@ -11,7 +16,7 @@ import {
 export function* run(): Generator<any, any, any> {
   try {
     const cwd =
-      core.getInput("cwd") === "" ? process.env.cwd : core.getInput("cwd");
+      core.getInput("cwd") === "" ? process.cwd() : core.getInput("cwd");
     const token =
       core.getInput("token") === ""
         ? process.env.GITHUB_TOKEN || ""
@@ -27,8 +32,7 @@ export function* run(): Generator<any, any, any> {
 
     if (inputCommand === "version-or-publish") {
       const status = yield covector({ command: "status", cwd });
-      core.setOutput("status", status);
-      if (status === "No changes.") {
+      if (status.response === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
         command = "publish";
       } else {
@@ -39,18 +43,46 @@ export function* run(): Generator<any, any, any> {
     core.setOutput("commandRan", command);
     let successfulPublish = false;
     if (command === "status") {
-      const covectored = yield covector({ command, filterPackages, cwd });
-      core.setOutput("status", covectored);
-    } else if (command === "version") {
-      const status = yield covector({ command: "status", cwd });
-      core.setOutput("status", status);
-
-      const covectored: Covector = yield covector({
+      const covectored: CovectorStatus = yield covector({
         command,
         filterPackages,
         cwd,
       });
-      core.setOutput("successfulPublish", successfulPublish);
+      core.setOutput("status", covectored.response);
+      core.setOutput("templatePipe", covectored.pipeTemplate);
+
+      core.setOutput(
+        `willPublish`,
+        covectored.response === "No changes." &&
+          covectored.pkgReadyToPublish.length > 0
+      );
+      if (covectored?.pkgReadyToPublish?.length > 0) {
+        covectored.pkgReadyToPublish.forEach((pkg) => {
+          core.setOutput(
+            `willPublish-${pkg.pkg}`
+              .replace(/\@/g, "-")
+              .replace(/\//g, "-")
+              .replace(/\_/g, "-"),
+            true
+          );
+          core.setOutput(
+            `version-${pkg.pkg}`
+              .replace(/\@/g, "-")
+              .replace(/\//g, "-")
+              .replace(/\_/g, "-"),
+            pkg?.pkgFile?.version ?? ""
+          );
+        });
+      }
+    } else if (command === "version") {
+      const status: CovectorStatus = yield covector({ command: "status", cwd });
+      core.setOutput("status", status.response);
+
+      const covectored: CovectorVersion = yield covector({
+        command,
+        filterPackages,
+        cwd,
+      });
       core.setOutput("templatePipe", covectored.pipeTemplate);
 
       const covectoredSmushed = Object.keys(covectored.commandsRan).reduce(
@@ -66,12 +98,14 @@ export function* run(): Generator<any, any, any> {
       );
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
+      core.startGroup(`covector version output`);
       console.log(`The covector output: ${payload}`);
+      core.endGroup();
     } else if (command === "publish") {
       const status = yield covector({ command: "status", cwd });
-      core.setOutput("status", status);
+      core.setOutput("status", status.response);
 
-      let covectored: Covector;
+      let covectored: CovectorPublish;
       if (core.getInput("createRelease") === "true" && token) {
         const octokit = github.getOctokit(token);
         const { owner, repo } = github.context.repo;
@@ -121,7 +155,10 @@ export function* run(): Generator<any, any, any> {
           undefined,
           2
         );
+
+        core.startGroup(`covector publish output`);
         console.log(`The covector output: ${payload}`);
+        core.endGroup();
         return covectored;
       }
     } else if (command === "preview") {
@@ -150,7 +187,7 @@ export function* run(): Generator<any, any, any> {
         );
       } else {
         // primarily runs publish
-        let covectored: Covector;
+        let covectored: CovectorPublish;
         const branchName = github?.context?.payload?.pull_request?.head?.ref;
         let identifier;
         let versionTemplate;

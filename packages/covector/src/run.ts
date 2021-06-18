@@ -42,10 +42,27 @@ export type CommandsRan = {
   [k: string]: PkgCommandsRan;
 };
 
-export interface Covector {
-  commandsRan: CommandsRan;
+export interface CovectorStatus {
+  response: string;
   pipeTemplate?: object;
+  pkgReadyToPublish: PkgPublish[];
 }
+
+export interface CovectorVersion {
+  commandsRan: CommandsRan;
+  pipeTemplate: object;
+}
+export interface CovectorPublish {
+  commandsRan: CommandsRan;
+  pipeTemplate: object;
+  response: string;
+}
+
+export type Covector =
+  | CovectorStatus
+  | CovectorVersion
+  | CovectorPublish
+  | { response: string };
 
 export interface FunctionPipe extends PkgPublish {
   pkgCommandsRan: PkgCommandsRan;
@@ -69,7 +86,7 @@ export function* covector({
   modifyConfig?: (c: any) => Promise<any>;
   previewVersion?: string;
   branchTag?: string;
-}): Generator<any, Covector | string, any> {
+}): Generator<any, Covector, any> {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? null : pre.tag;
@@ -92,14 +109,56 @@ export function* covector({
   if (command === "status" || !command) {
     if (changesVfiles.length === 0) {
       console.info("There are no changes.");
-      return "No changes.";
+
+      const {
+        commands: publishCommands,
+      }: { commands: PkgPublish[] } = yield mergeIntoConfig({
+        assembledChanges,
+        config,
+        command: "publish",
+        cwd,
+        dryRun,
+        filterPackages,
+        tag: branchTag,
+      });
+
+      if (publishCommands.length === 0) {
+        console.log(`No commands configured to run on publish.`);
+        return {
+          response: `No commands configured to run on publish.`,
+          pkgReadyToPublish: [],
+        };
+      }
+
+      const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
+        cwd,
+        commands: publishCommands,
+        command: "publish",
+      });
+
+      if (commandsToRun.length > 0) {
+        console.log(
+          `There ${
+            commandsToRun.length === 1
+              ? `is 1 package`
+              : `is ${commandsToRun.length} packages`
+          } ready to publish which includes${commandsToRun.map(
+            (pkg) => ` ${pkg.pkg}@${pkg.pkgFile?.version}`
+          )}`
+        );
+      }
+
+      return <CovectorStatus>{
+        pkgReadyToPublish: commandsToRun,
+        response: "No changes.",
+      };
     } else if (!!pre && assembledChanges?.changes?.length === 0) {
       console.info("There are no changes.");
       console.log(
         "We have previously released the changes in these files:",
         changesPaths
       );
-      return "No changes.";
+      return { pkgReadyToPublish: [], response: "No changes." };
     } else {
       // write out all of the changes
       // TODO make it pretty
@@ -131,17 +190,19 @@ export function* covector({
         prereleaseIdentifier,
       });
 
-      return `There are ${
-        Object.keys(assembledChanges.releases).length
-      } changes which include${Object.keys(assembledChanges.releases).map(
-        (release) =>
-          ` ${release} with ${assembledChanges.releases[release].type}`
-      )}`;
+      return <CovectorStatus>{
+        response: `There are ${
+          Object.keys(assembledChanges.releases).length
+        } changes which include${Object.keys(assembledChanges.releases).map(
+          (release) =>
+            ` ${release} with ${assembledChanges.releases[release].type}`
+        )}`,
+      };
     }
   } else if (command === "config") {
     delete config.vfile;
     console.dir(config);
-    return "config returned";
+    return { response: "config returned" };
   } else if (command === "version") {
     yield raceTime({ t: config.timeout });
     const changes = changesConsideringParents({
@@ -261,7 +322,7 @@ export function* covector({
       console.log(pkgCommandsRan);
     }
 
-    return { commandsRan: pkgCommandsRan, pipeTemplate };
+    return <CovectorVersion>{ commandsRan: pkgCommandsRan, pipeTemplate };
   } else if (command === "preview") {
     yield raceTime({ t: config.timeout });
 
@@ -362,7 +423,9 @@ export function* covector({
 
     if (publishCommands.length === 0) {
       console.log(`No commands configured to run on publish.`);
-      return `No commands configured to run on publish.`;
+      return {
+        response: `No commands configured to run on publish.`,
+      };
     }
 
     const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
@@ -429,7 +492,9 @@ export function* covector({
 
     if (commands.length === 0) {
       console.log(`No commands configured to run on [${command}].`);
-      return `No commands configured to run on [${command}].`;
+      return {
+        response: `No commands configured to run on [${command}].`,
+      };
     }
 
     const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
@@ -485,6 +550,6 @@ export function* covector({
       console.log(pkgCommandsRan);
     }
 
-    return { commandsRan: pkgCommandsRan, pipeTemplate };
+    return <CovectorPublish>{ commandsRan: pkgCommandsRan, pipeTemplate };
   }
 }

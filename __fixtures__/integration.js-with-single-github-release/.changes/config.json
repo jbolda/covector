@@ -1,0 +1,31 @@
+{
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "publish": { "command": "echo publish", "pipe": true },
+      "build": { "command": "npm run build", "pipe": true },
+      "test": [
+        { "command": "npm run build", "pipe": true },
+        { "command": "npm test", "dryRunCommand": false },
+        { "command": "echo boop", "dryRunCommand": "echo deboop" }
+      ],
+      "releaseTag": false
+    }
+  },
+  "packages": {
+    "package-one": {
+      "path": "./packages/package-one",
+      "manager": "javascript",
+      "releaseTag": "v${ pkgFile.version }"
+    },
+    "package-two": {
+      "path": "./packages/package-two",
+      "manager": "javascript",
+      "releaseTag": false
+    },
+    "package-three": {
+      "path": "./packages/package-three",
+      "manager": "javascript"
+    }
+  }
+}
