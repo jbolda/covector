@@ -69,7 +69,7 @@ export type PkgPublish = {
   assets?: { name: string; path: string }[];
   pkgFile?: PackageFile;
   errorOnVersionRange?: string;
-  releaseTag?: string;
+  releaseTag?: string | false;
 };
 
 type PipePublishTemplate = {
@@ -639,14 +639,17 @@ export const mergeIntoConfig = function* ({
         ["command", "dryRunCommand", "runFromRoot"]
       ),
       errorOnVersionRange: pkgCommands[pkg].errorOnVersionRange,
-      releaseTag: templateCommands(
-        [
-          pkgCommands[pkg].releaseTag ||
-            "${ pkgFile.pkg.name }-v${ pkgFile.version }",
-        ],
-        pipeToTemplate,
-        ["releaseTag"]
-      )![0],
+      releaseTag:
+        pkgCommands[pkg].releaseTag === false
+          ? false
+          : templateCommands(
+              [
+                pkgCommands[pkg].releaseTag ??
+                  "${ pkgFile.pkg.name }-v${ pkgFile.version }",
+              ],
+              pipeToTemplate,
+              ["releaseTag"]
+            )![0],
     };
 
     commands = [...commands, merged];
@@ -673,22 +676,10 @@ const mergeCommand = ({
   command: any;
   config: ConfigFile;
 }) => {
-  const managerCommand =
-    !!pkgManager &&
-    !!config.pkgManagers &&
-    !!config.pkgManagers[pkgManager] &&
-    //@ts-ignore
-    !!config.pkgManagers[pkgManager][command]
-      ? //@ts-ignore
-        config.pkgManagers[pkgManager][command]
-      : null;
-
-  const mergedCommand =
-    //@ts-ignore
-    !config.packages[pkg][command] && config.packages[pkg][command] !== false
-      ? managerCommand
-      : //@ts-ignore
-        config.packages[pkg][command];
+  //@ts-ignore
+  const managerCommand = config.pkgManagers?.[pkgManager]?.[command] ?? null;
+  //@ts-ignore
+  const mergedCommand = config.packages?.[pkg]?.[command] ?? managerCommand;
 
   return mergedCommand;
 };

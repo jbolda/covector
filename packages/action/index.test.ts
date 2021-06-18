@@ -216,7 +216,7 @@ describe("full e2e test", () => {
       );
     });
 
-    it("github release update", async () => {
+    it("github release update of all packages", async () => {
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -299,7 +299,7 @@ describe("full e2e test", () => {
       expect(createRelease).toHaveBeenCalledTimes(0);
     });
 
-    it("github release creation", async () => {
+    it("github release creation of all packages", async () => {
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -380,6 +380,140 @@ describe("full e2e test", () => {
         body: "## \\[1.9.0]\n\n- Added some even cooler things.\n\npublish\n\n",
       });
 
+      expect(updateRelease).toHaveBeenCalledTimes(0);
+    });
+
+    it("github release update of single package", async () => {
+      const cwd: string = f.copy("integration.js-with-single-github-release");
+
+      const input: { [k: string]: string } = {
+        command: "publish",
+        cwd: cwd,
+        createRelease: "true",
+        draftRelease: "false",
+        token: "randomsequenceofcharactersforsecurity",
+      };
+
+      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      const octokit = jest
+        .spyOn(github, "getOctokit")
+        // @ts-ignore
+        .mockImplementation((token: string) => ({
+          context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
+          repos: {
+            listReleases: jest.fn().mockResolvedValue({
+              data: [
+                {
+                  draft: true,
+                  body: "some stuff",
+                  id: 15,
+                  tag_name: "v2.3.1",
+                },
+              ],
+            }) as jest.MockedFunction<any>,
+            updateRelease: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+            createRelease: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+            uploadReleaseAsset: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+          },
+        }));
+
+      const covectoredAction = await run(covector());
+      expect(octokit).toHaveBeenCalledWith(input.token);
+      const {
+        listReleases,
+        createRelease,
+        updateRelease,
+        // @ts-ignore
+      } = github.getOctokit.mock.results[0].value.repos;
+      expect(listReleases).toHaveBeenCalledWith({
+        owner: "genericOwner",
+        repo: "genericRepo",
+      });
+      expect(listReleases).toHaveBeenCalledWith({
+        owner: "genericOwner",
+        repo: "genericRepo",
+      });
+
+      expect(updateRelease).toHaveBeenCalledWith({
+        owner: "genericOwner",
+        repo: "genericRepo",
+        release_id: 15,
+        draft: false,
+        body:
+          "some stuff\n## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
+      });
+
+      expect(updateRelease).toHaveBeenCalledTimes(1);
+      expect(createRelease).toHaveBeenCalledTimes(0);
+    });
+
+    it("github release creation of single package", async () => {
+      const cwd: string = f.copy("integration.js-with-single-github-release");
+
+      const input: { [k: string]: string } = {
+        command: "publish",
+        cwd: cwd,
+        createRelease: "true",
+        draftRelease: "false",
+        token: "randomsequenceofcharactersforsecurity",
+      };
+
+      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      const octokit = jest
+        .spyOn(github, "getOctokit")
+        // @ts-ignore
+        .mockImplementation((token: string) => ({
+          context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
+          repos: {
+            listReleases: jest.fn().mockResolvedValue({
+              data: [],
+            }) as jest.MockedFunction<any>,
+            updateRelease: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+            createRelease: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+            uploadReleaseAsset: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+          },
+        }));
+
+      const covectoredAction = await run(covector());
+      expect(octokit).toHaveBeenCalledWith(input.token);
+      const {
+        listReleases,
+        createRelease,
+        updateRelease,
+        // @ts-ignore
+      } = github.getOctokit.mock.results[0].value.repos;
+
+      expect(listReleases).toHaveBeenCalledWith({
+        owner: "genericOwner",
+        repo: "genericRepo",
+      });
+      expect(listReleases).toHaveBeenCalledWith({
+        owner: "genericOwner",
+        repo: "genericRepo",
+      });
+
+      expect(createRelease).toHaveBeenCalledWith({
+        owner: "genericOwner",
+        repo: "genericRepo",
+        name: "package-one v2.3.1",
+        tag_name: "v2.3.1",
+        draft: false,
+        body: "## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
+      });
+
+      expect(createRelease).toHaveBeenCalledTimes(1);
       expect(updateRelease).toHaveBeenCalledTimes(0);
     });
   });

@@ -1,0 +1,9 @@
+{
+  "name": "package-three",
+  "version": "0.7.5",
+  "license": "MIT",
+  "scripts": {
+    "build": "echo this command is not piped, it is run from scripts for pk2",
+    "test": "echo this command is not piped, it is run from the test script"
+  }
+}
