@@ -26,6 +26,7 @@
     "unified": "^9.2.1"
   },
   "devDependencies": {
+    "@covector/types": "^0.0.0",
     "@types/js-yaml": "^4.0.0",
     "@types/lodash": "^4.14.168",
     "fixturez": "^1.1.0",

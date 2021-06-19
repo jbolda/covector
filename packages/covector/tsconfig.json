@@ -7,10 +7,11 @@
   },
   "references": [
     { "path": "../files" },
+    { "path": "../changelog" },
+    { "path": "../command" },
     { "path": "../assemble" },
     { "path": "../apply" },
-    { "path": "../changelog" },
-    { "path": "../command" }
+    { "path": "../types" }
   ],
   "include": ["src/**/*.ts"]
 }

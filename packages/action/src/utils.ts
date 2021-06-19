@@ -1,5 +1,5 @@
 import fs from "fs";
-import { ConfigFile, FunctionPipe } from "../../covector/src/run";
+import type { ConfigFile, FunctionPipe } from "../../types/src";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;

@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../files" }, { "path": "../assemble" }],
+  "references": [{ "path": "../types" }],
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "dist",

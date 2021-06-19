@@ -22,7 +22,7 @@
     "strip-ansi": "^6.0.0"
   },
   "devDependencies": {
-    "@covector/assemble": "0.7.0",
+    "@covector/types": "^0.0.0",
     "tslib": "^2.2.0",
     "typescript": "^4.2.3"
   },

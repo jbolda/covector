@@ -1,17 +1,18 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import {
-  covector,
-  CovectorStatus,
-  CovectorVersion,
-  CovectorPublish,
-} from "../../covector/src/run";
+import { covector } from "../../covector/src/run";
 import {
   commandText,
   packageListToArray,
   injectPublishFunctions,
   createReleases,
 } from "./utils";
+
+import type {
+  CovectorStatus,
+  CovectorVersion,
+  CovectorPublish,
+} from "../../types/src";
 
 export function* run(): Generator<any, any, any> {
   try {

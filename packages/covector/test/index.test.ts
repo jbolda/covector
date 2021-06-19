@@ -1,5 +1,5 @@
 import { covector } from "../src";
-import { CovectorVersion } from "../src/run";
+import { CovectorVersion } from "@covector/types";
 import { run } from "effection";
 //@ts-ignore
 import toVFile from "to-vfile";

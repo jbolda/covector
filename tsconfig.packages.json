@@ -1,6 +1,7 @@
 {
   "files": [],
   "references": [
+    { "path": "./packages/types" },
     { "path": "./packages/files" },
     { "path": "./packages/command" },
     { "path": "./packages/changelog" },
