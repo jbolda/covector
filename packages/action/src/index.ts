@@ -32,7 +32,7 @@ export function* run(): Generator<any, any, any> {
 
     if (inputCommand === "version-or-publish") {
       const status = yield covector({ command: "status", cwd });
-      if (status.response === "No changes.") {
+      if (status === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
         command = "publish";
       } else {
