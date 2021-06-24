@@ -14,7 +14,9 @@
     "covector": "./bin/covector.js"
   },
   "files": [
-    "bin/*"
+    "bin/*",
+    "dist/*.js",
+    "dist/*.d.ts"
   ],
   "scripts": {
     "build": "tsc -b",
