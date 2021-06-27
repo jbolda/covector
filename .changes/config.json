@@ -47,7 +47,7 @@
     "@covector/apply": {
       "path": "./packages/apply",
       "manager": "javascript",
-      "dependencies": ["@covector/files", "@covector/assemble", "all"],
+      "dependencies": ["@covector/files", "all"],
       "assets": [
         {
           "path": "./packages/apply/covector-apply-${ pkgFile.version }.tgz",
@@ -91,13 +91,19 @@
     "@covector/command": {
       "path": "./packages/command",
       "manager": "javascript",
-      "dependencies": ["@covector/files", "@covector/assemble", "all"],
+      "dependencies": ["all"],
       "assets": [
         {
           "path": "./packages/command/covector-command-${ pkgFile.version }.tgz",
           "name": "covector-command-${ pkgFile.version }.tgz"
         }
       ]
+    },
+    "@covector/types": {
+      "path": "./packages/types",
+      "manager": "javascript",
+      "version": false,
+      "publish": false
     },
     "action": {
       "path": "./packages/action",

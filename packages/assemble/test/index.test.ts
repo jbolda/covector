@@ -1,4 +1,4 @@
-import { assemble, mergeIntoConfig, mergeChangesToConfig } from "./index";
+import { assemble, mergeIntoConfig, mergeChangesToConfig } from "../src";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 

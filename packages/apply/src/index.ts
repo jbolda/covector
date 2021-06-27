@@ -4,37 +4,18 @@ import {
   getPackageFileVersion,
   setPackageFileVersion,
   testSerializePkgFile,
-  PackageFile,
-  ConfigFile,
 } from "@covector/files";
-import { CommonBumps } from "@covector/assemble";
 import semver from "semver";
 import { cloneDeep } from "lodash";
 
-type ChangeParsed = {
-  releases: { [k: string]: string };
-  summary: string;
-  meta: { dependencies: string };
-};
-
-type Releases = {
-  [k: string]: {
-    parents: string[];
-    type: CommonBumps;
-    dependencies?: string[];
-    changes?: ChangeParsed[];
-    errorOnVersionRange?: string;
-  };
-};
-
-type PackageCommand = {
-  pkg: string;
-  dependencies?: string[];
-  manager?: string;
-  path: string;
-  type: CommonBumps;
-  parents: string[];
-};
+import type {
+  PackageFile,
+  ConfigFile,
+  CommonBumps,
+  ChangeParsed,
+  Releases,
+  PackageCommand,
+} from "@covector/types";
 
 export const apply = function* ({
   commands,

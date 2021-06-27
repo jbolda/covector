@@ -9,15 +9,12 @@ import {
   changeFiles,
   changeFilesToVfile,
   changeFilesRemove,
-  ConfigFile,
   writePreFile,
 } from "@covector/files";
 import {
   assemble,
   mergeIntoConfig,
   mergeChangesToConfig,
-  PkgVersion,
-  PkgPublish,
 } from "@covector/assemble";
 import {
   fillChangelogs,
@@ -30,45 +27,15 @@ import {
   validateApply,
 } from "@covector/apply";
 
-export type PkgCommandsRan = {
-  precommand: string | false;
-  command: string | false;
-  postcommand: string | false;
-  applied: string | false;
-  published?: boolean;
-};
-
-export type CommandsRan = {
-  [k: string]: PkgCommandsRan;
-};
-
-export interface CovectorStatus {
-  response: string;
-  pipeTemplate?: object;
-  pkgReadyToPublish: PkgPublish[];
-}
-
-export interface CovectorVersion {
-  commandsRan: CommandsRan;
-  pipeTemplate: object;
-}
-export interface CovectorPublish {
-  commandsRan: CommandsRan;
-  pipeTemplate: object;
-  response: string;
-}
-
-export type Covector =
-  | CovectorStatus
-  | CovectorVersion
-  | CovectorPublish
-  | { response: string };
-
-export interface FunctionPipe extends PkgPublish {
-  pkgCommandsRan: PkgCommandsRan;
-}
-
-export { ConfigFile };
+import type {
+  CommandsRan,
+  CovectorStatus,
+  CovectorVersion,
+  CovectorPublish,
+  Covector,
+  PkgVersion,
+  PkgPublish,
+} from "@covector/types";
 
 export function* covector({
   command,

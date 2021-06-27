@@ -4,7 +4,7 @@ import {
   configFile,
   changeFiles,
   changeFilesToVfile,
-} from "./index";
+} from "../src";
 import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);

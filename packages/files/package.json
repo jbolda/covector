@@ -24,6 +24,7 @@
     "to-vfile": "^6.1.0"
   },
   "devDependencies": {
+    "@covector/types": "^0.0.0",
     "@types/jest": "^26.0.21",
     "@types/js-yaml": "^4.0.0",
     "@types/node": "^14.14.41",

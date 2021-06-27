@@ -13,66 +13,13 @@ import yaml from "js-yaml";
 //@ts-ignore
 import semver from "semver";
 
-export interface VFile {
-  contents: string;
-  path: string;
-  extname: string;
-  data: { filename: string };
-}
-
-// Pkg for toml has a `.packages` so we need to address this union
-// or otherwise normalize it, and it will be an issue as
-// we add other PackageFile types / sources
-export interface Pkg {
-  name: string;
-  version: string;
-  dependencies?: { [k: string]: string };
-  devDependencies?: { [k: string]: string };
-}
-
-export interface PkgMinimum {
-  version?: string;
-  pkg?: Pkg;
-  versionMajor?: number;
-  versionMinor?: number;
-  versionPatch?: number;
-  versionPrerelease?: readonly string[] | (string | number)[] | null;
-}
-
-export interface PackageFile extends PkgMinimum {
-  vfile?: VFile;
-  name?: string;
-}
-
-export interface PreFile {
-  vfile?: VFile;
-  tag: string;
-  changes: string[] | [];
-}
-
-export type ConfigFile = {
-  vfile?: VFile;
-  gitSiteUrl?: string;
-  pkgManagers?: {
-    [k: string]: {
-      version?: string;
-      publish?: string;
-      errorOnVersionRange?: string;
-    };
-  };
-  packages: {
-    [k: string]: {
-      manager?: string;
-      path?: string;
-      dependencies?: string[];
-      packageFileName?: string;
-      version?: string;
-      publish?: string;
-      errorOnVersionRange?: string;
-    };
-  };
-  additionalBumpTypes?: string[];
-};
+import type {
+  VFile,
+  PkgMinimum,
+  PackageFile,
+  PreFile,
+  ConfigFile,
+} from "@covector/types";
 
 const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
   switch (file.extname) {
@@ -546,13 +493,6 @@ export const changeFilesRemove = ({
       console.info(`${changeFilePath} was deleted`)
     );
   });
-};
-
-export type ChangelogFile = {
-  path: string;
-  contents: string;
-  extname: string;
-  data: { filename: string };
 };
 
 export const readChangelog = async ({

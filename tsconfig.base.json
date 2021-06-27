@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "composite": true,
     "strict": true,
     "module": "commonjs",
     "target": "es6",
@@ -11,7 +10,17 @@
     "checkJs": false,
     "preserveSymlinks": true,
     "skipLibCheck": true,
+    "composite": true,
     "declaration": true,
-    "declarationMap": true
+    "declarationMap": true,
+    "paths": {
+      "@covector/types": ["packages/types/src"],
+      "covector": ["packages/covector/src"],
+      "@covector/files": ["packages/files/src"],
+      "@covector/command": ["packages/command/src"],
+      "@covector/changelog": ["packages/changelog/src"],
+      "@covector/assemble": ["packages/assemble/src"],
+      "@covector/apply": ["packages/apply/src"]
+    }
   }
 }

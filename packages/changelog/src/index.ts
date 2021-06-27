@@ -1,44 +1,14 @@
-import {
-  readChangelog,
-  writeChangelog,
-  ConfigFile,
-  Pkg,
-  ChangelogFile,
-} from "@covector/files";
+import { readChangelog, writeChangelog } from "@covector/files";
 import unified from "unified";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
 
-type PkgCommandResponse = {
-  precommand?: string | boolean;
-  command: string | boolean;
-  postcommand?: string | boolean;
-  pkg?: Pkg;
-};
-
-type Meta = {
-  dependencies: { [k: string]: string }[];
-  commits?: {
-    filename: string;
-    hashShort: string;
-    hashLong: string;
-    date: string;
-    commitSubject: string;
-  }[];
-};
-
-type AssembledChanges = {
-  releases: {
-    [k: string]: {
-      changes: {
-        summary: string;
-        meta?: Meta;
-      }[];
-    };
-  };
-  summary: string;
-  meta?: Meta;
-};
+import type {
+  ConfigFile,
+  ChangelogFile,
+  PkgCommandResponse,
+  AssembledChanges,
+} from "@covector/types";
 
 export const fillChangelogs = async ({
   applied,

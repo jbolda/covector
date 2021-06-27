@@ -5,77 +5,21 @@ import stringify from "remark-stringify";
 import frontmatter from "remark-frontmatter";
 import yaml from "js-yaml";
 import { template, cloneDeep } from "lodash";
-import { readPkgFile, VFile, PackageFile, ConfigFile } from "@covector/files";
+import { readPkgFile } from "@covector/files";
 import { runCommand } from "@covector/command";
 
-type Changeset = {
-  releases?: { [k: string]: CommonBumps } | {};
-  summary?: string;
-  meta?: {
-    filename: string;
-    commits?: {
-      hashShort: string;
-      hashLong: string;
-      date: string;
-      commitSubject: string;
-    }[];
-  };
-};
-
-export type CommonBumps = "major" | "minor" | "patch" | "prerelease" | "noop";
-
-type Change = {
-  releases: { [k: string]: CommonBumps };
-  meta?: { filename?: string };
-};
-
-type Release = {
-  type: CommonBumps;
-  changes: Change[];
-  parents?: string[];
-};
-
-export type PkgVersion = {
-  pkg: string;
-  path?: string;
-  packageFileName?: string;
-  type?: string;
-  parents?: string[];
-  precommand?: (string | any)[] | null;
-  command?: (string | any)[] | null;
-  postcommand?: (string | any)[] | null;
-  manager?: string;
-  dependencies?: string[];
-  errorOnVersionRange?: string;
-};
-
-type PipeVersionTemplate = {
-  release: Release;
-  pkg: PkgVersion;
-};
-
-export type PkgPublish = {
-  pkg: string;
-  path?: string;
-  packageFileName?: string;
-  changelog?: string;
-  tag?: string;
-  precommand?: (string | any)[] | null;
-  command?: (string | any)[] | null;
-  postcommand?: (string | any)[] | null;
-  manager: string;
-  dependencies?: string[];
-  getPublishedVersion?: string;
-  assets?: { name: string; path: string }[];
-  pkgFile?: PackageFile;
-  errorOnVersionRange?: string;
-  releaseTag?: string | false;
-};
-
-type PipePublishTemplate = {
-  pkg: PkgPublish;
-  pkgFile?: PackageFile;
-};
+import type {
+  VFile,
+  ConfigFile,
+  Changeset,
+  CommonBumps,
+  Change,
+  Release,
+  PkgVersion,
+  PipeVersionTemplate,
+  PkgPublish,
+  PipePublishTemplate,
+} from "@covector/types";
 
 const parseChange = function* ({
   cwd,

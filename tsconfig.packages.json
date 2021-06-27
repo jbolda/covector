@@ -1,11 +1,12 @@
 {
   "files": [],
   "references": [
+    { "path": "./packages/types" },
     { "path": "./packages/files" },
+    { "path": "./packages/command" },
+    { "path": "./packages/changelog" },
     { "path": "./packages/assemble" },
     { "path": "./packages/apply" },
-    { "path": "./packages/changelog" },
-    { "path": "./packages/command" },
     { "path": "./packages/covector" }
   ]
 }
