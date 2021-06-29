@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "name": "js-single-prerelease-json-fixture",
+  "description": "A single package at the root. No monorepo setup.",
+  "version": "0.5.9-abc.2"
+}
