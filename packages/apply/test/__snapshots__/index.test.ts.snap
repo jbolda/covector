@@ -387,10 +387,10 @@ Object {
   "consoleDir": Array [],
   "consoleLog": Array [
     Array [
-      "bumping yarn-workspace-base-pkg-a to 1.0.0-branch-name.12345 to publish a preview",
+      "bumping yarn-workspace-base-pkg-a with branch-name.12345 template to publish a preview",
     ],
     Array [
-      "bumping yarn-workspace-base-pkg-b to 1.0.0-branch-name.12345 to publish a preview",
+      "bumping yarn-workspace-base-pkg-b with branch-name.12345 template to publish a preview",
     ],
   ],
 }
@@ -401,7 +401,32 @@ Object {
   "consoleDir": Array [],
   "consoleLog": Array [
     Array [
-      "bumping js-single-json-fixture to 0.5.9-branch-name.12345 to publish a preview",
+      "bumping js-single-json-fixture with branch-name.12345 template to publish a preview",
+    ],
+  ],
+}
+`;
+
+exports[`packge file applies preview bump to pre-release bumps multi js json without pre-release 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping yarn-workspace-base-pkg-a with branch-name.12345 template to publish a preview",
+    ],
+    Array [
+      "bumping yarn-workspace-base-pkg-b with branch-name.12345 template to publish a preview",
+    ],
+  ],
+}
+`;
+
+exports[`packge file applies preview bump to pre-release bumps single js json without pre-release 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping js-single-prerelease-json-fixture with branch-name.12345 template to publish a preview",
     ],
   ],
 }
