@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.7.0]
+
+- Remove the `files` property of `package.json` to properly publish all of the `dist` files.
+  - [bfb1832](https://www.github.com/jbolda/covector/commit/bfb1832e676f14567ec3482bae872dbe6e892fb4) Include all file in dist directory ([#216](https://www.github.com/jbolda/covector/pull/216)) on 2021-06-30
+- Extract out types into separate package to remove issues with circular dependencies.
+  - [519da36](https://www.github.com/jbolda/covector/commit/519da362eff5628901a1f640120d39dd8234fdda) chore: set paths / references for TS and add types package ([#213](https://www.github.com/jbolda/covector/pull/213)) on 2021-06-26
+
 ## \[0.6.0]
 
 - Adjust output from assemble and covector to expose the template that is piped into each command. This allows us to set it as an output in the github action.

@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.6.0]
+
+- Adds the ability to update a Github Release if it exists and is a draft, or create it if it doesn't yet exist.
+  - [6742580](https://www.github.com/jbolda/covector/commit/674258044048a259b5dce1bc02b241dd0f17e978) feat: publish existing draft GitHub Release ([#211](https://www.github.com/jbolda/covector/pull/211)) on 2021-06-18
+- Allow one to specify the `releaseTag` that determines the Github Release tag used. This also let's you specify `false` to explicitly skip creating a Github Release for the package. resolves #203, resolves #204.
+  - [6742580](https://www.github.com/jbolda/covector/commit/674258044048a259b5dce1bc02b241dd0f17e978) feat: publish existing draft GitHub Release ([#211](https://www.github.com/jbolda/covector/pull/211)) on 2021-06-18
+
 ## \[0.5.0]
 
 - Adjust output from assemble and covector to expose the template that is piped into each command. This allows us to set it as an output in the github action.

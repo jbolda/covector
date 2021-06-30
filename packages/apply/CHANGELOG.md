@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.5.0]
+
+- Extract out types into separate package to remove issues with circular dependencies.
+  - [519da36](https://www.github.com/jbolda/covector/commit/519da362eff5628901a1f640120d39dd8234fdda) chore: set paths / references for TS and add types package ([#213](https://www.github.com/jbolda/covector/pull/213)) on 2021-06-26
+
 ## \[0.4.0]
 
 - Abstract out the file switches so `@covector/files` is the only package that considers file extensions.

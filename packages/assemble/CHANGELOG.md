@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.8.0]
+
+- Allow one to specify the `releaseTag` that determines the Github Release tag used. This also let's you specify `false` to explicitly skip creating a Github Release for the package. resolves #203, resolves #204.
+  - [6742580](https://www.github.com/jbolda/covector/commit/674258044048a259b5dce1bc02b241dd0f17e978) feat: publish existing draft GitHub Release ([#211](https://www.github.com/jbolda/covector/pull/211)) on 2021-06-18
+- Extract out types into separate package to remove issues with circular dependencies.
+  - [519da36](https://www.github.com/jbolda/covector/commit/519da362eff5628901a1f640120d39dd8234fdda) chore: set paths / references for TS and add types package ([#213](https://www.github.com/jbolda/covector/pull/213)) on 2021-06-26
+
 ## \[0.7.0]
 
 - Adjust output from assemble and covector to expose the template that is piped into each command. This allows us to set it as an output in the github action.
