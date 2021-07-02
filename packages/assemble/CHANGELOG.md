@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.8.1]
+
+- The ability to adjust the Github Release git tag was previously added, and the fallback used only worked for JavaScript packages. This fix uses the package nickname instead which will work for any package manager.
+  - [e4eb944](https://www.github.com/jbolda/covector/commit/e4eb944ae48fa8e3ba419f92eaf0254065887fbf) fix: github release tag using package nickname ([#218](https://www.github.com/jbolda/covector/pull/218)) on 2021-07-02
+
 ## \[0.8.0]
 
 - Allow one to specify the `releaseTag` that determines the Github Release tag used. This also let's you specify `false` to explicitly skip creating a Github Release for the package. resolves #203, resolves #204.

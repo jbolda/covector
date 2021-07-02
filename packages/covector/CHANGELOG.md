@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.7.1]
+
+- The ability to adjust the Github Release git tag was previously added, and the fallback used only worked for JavaScript packages. This fix uses the package nickname instead which will work for any package manager.
+  - Bumped due to a bump in @covector/assemble.
+  - [e4eb944](https://www.github.com/jbolda/covector/commit/e4eb944ae48fa8e3ba419f92eaf0254065887fbf) fix: github release tag using package nickname ([#218](https://www.github.com/jbolda/covector/pull/218)) on 2021-07-02
+
 ## \[0.7.0]
 
 - Remove the `files` property of `package.json` to properly publish all of the `dist` files.
