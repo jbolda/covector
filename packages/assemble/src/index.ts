@@ -589,7 +589,7 @@ export const mergeIntoConfig = function* ({
           : templateCommands(
               [
                 pkgCommands[pkg].releaseTag ??
-                  "${ pkgFile.pkg.name }-v${ pkgFile.version }",
+                  "${ pkg.pkg }-v${ pkgFile.version }",
               ],
               pipeToTemplate,
               ["releaseTag"]

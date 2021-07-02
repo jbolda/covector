@@ -586,7 +586,7 @@ Array [
     },
     "postcommand": null,
     "precommand": null,
-    "releaseTag": "@namedspaced/assemble2-v0.0.0",
+    "releaseTag": "@namespaced/assemble1-v0.0.0",
   },
   Object {
     "command": Array [
@@ -614,7 +614,7 @@ Array [
     },
     "postcommand": null,
     "precommand": null,
-    "releaseTag": "@namedspaced/assemble2-v0.0.0",
+    "releaseTag": "@namespaced/assemble2-v0.0.0",
   },
 ]
 `;
@@ -859,7 +859,7 @@ Array [
     },
     "postcommand": null,
     "precommand": null,
-    "releaseTag": "@namedspaced/assemble2-v0.0.0",
+    "releaseTag": "@namespaced/assemble1-v0.0.0",
   },
 ]
 `;
