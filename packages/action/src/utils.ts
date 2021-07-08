@@ -168,11 +168,11 @@ export const createReleases = curry(
 
     // releaseResponse.upload_url is available on both responses
     // considering putting that to the output
-    console.log("releaseId", releaseResponse.id);
     core.setOutput("releaseUploadUrl", releaseResponse.upload_url)
     core.setOutput("releaseId", releaseResponse.id)
 
     core.startGroup(`github release created for ${pipe.pkg}`);
+    console.log("releaseId", releaseResponse.id);
     console.log("release created: ", releaseResponse);
     core.endGroup();
 
