@@ -1639,13 +1639,13 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "bumping package-b with branch-name.12345 template to publish a preview",
+      "bumping package-b with branch-name.12345 identifier to publish a preview",
     ],
     Array [
-      "bumping package-a with branch-name.12345 template to publish a preview",
+      "bumping package-a with branch-name.12345 identifier to publish a preview",
     ],
     Array [
-      "bumping package-c with branch-name.12345 template to publish a preview",
+      "bumping package-c with branch-name.12345 identifier to publish a preview",
     ],
     Array [
       "package-a [prepublish]: echo prepublishing package-a would happen here",
@@ -1821,13 +1821,13 @@ Object {
   "consoleInfo": Array [],
   "consoleLog": Array [
     Array [
-      "bumping package-b with branch-name.12345 template to publish a preview",
+      "bumping package-b with branch-name.12345 identifier to publish a preview",
     ],
     Array [
-      "bumping package-a with branch-name.12345 template to publish a preview",
+      "bumping package-a with branch-name.12345 identifier to publish a preview",
     ],
     Array [
-      "bumping package-c with branch-name.12345 template to publish a preview",
+      "bumping package-c with branch-name.12345 identifier to publish a preview",
     ],
     Array [
       "package-a [prepublish]: echo prepublishing package-a would happen here",

@@ -269,7 +269,7 @@ const bumpAll = ({
     if (previewVersion)
       // change log (assume that the prerelease will be removed)
       console.log(
-        `bumping ${pkg} with ${previewVersion} template to publish a preview`
+        `bumping ${pkg} with ${previewVersion} identifier to publish a preview`
       );
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
