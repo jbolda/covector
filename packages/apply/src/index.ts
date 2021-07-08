@@ -267,8 +267,9 @@ const bumpAll = ({
     if (logs && !previewVersion)
       console.log(`bumping ${pkg} with ${changes[pkg].type}`);
     if (previewVersion)
+      // change log (assume that the prerelease will be removed)
       console.log(
-        `bumping ${pkg} to ${packageFiles[pkg].version}-${previewVersion} to publish a preview`
+        `bumping ${pkg} with ${previewVersion} identifier to publish a preview`
       );
     packageFiles[pkg] = bumpMain({
       packageFile: packageFiles[pkg],
@@ -322,9 +323,10 @@ const bumpMain = ({
     pkg.versionPrerelease = semver.prerelease(next);
   }
   const prevVersion = getPackageFileVersion({ pkg });
+  const preVersionCleaned = semver.prerelease(prevVersion) ? semver.inc(prevVersion, 'patch') : prevVersion;
   let version =
     previewVersion && previewVersion !== ""
-      ? semver.valid(`${prevVersion}-${previewVersion}`)
+      ? semver.valid(`${preVersionCleaned}-${previewVersion}`)
       : // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
         semver.inc(prevVersion, bumpType, prereleaseIdentifier);
   if (version) {
@@ -364,9 +366,10 @@ const bumpDeps = ({
           Object.keys(pkg.pkg[property]).forEach((existingDep) => {
             if (existingDep === dep) {
               const prevVersion = getPackageFileVersion({ pkg, property, dep });
+              const preVersionCleaned = semver.prerelease(prevVersion) ? semver.inc(prevVersion, 'patch') : prevVersion;
               let version =
                 previewVersion && previewVersion !== ""
-                  ? semver.valid(`${prevVersion}-${previewVersion}`)
+                  ? semver.valid(`${preVersionCleaned}-${previewVersion}`)
                   : incConsideringPartials(
                       dep,
                       prevVersion,
