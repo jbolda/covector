@@ -1,5 +1,10 @@
 # Changelog
 
+## \[0.6.0]
+
+- Preview version template overwrites the prerelease identifier
+  - [b6e21bc](https://www.github.com/jbolda/covector/commit/b6e21bc1267fa7a09fb5311f2944e32385f2fbb4) Preveiw versioning for packages in prerelease mode ([#217](https://www.github.com/jbolda/covector/pull/217)) on 2021-07-08
+
 ## \[0.5.0]
 
 - Extract out types into separate package to remove issues with circular dependencies.
