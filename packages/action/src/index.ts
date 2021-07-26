@@ -95,7 +95,7 @@ export function* run(): Generator<any, any, any> {
           }
           return text;
         },
-        "# Version Updates\n\nMerging this PR will bump all of the applicable packages based on your change files.\n\n"
+        "# Version Updates\n\nMerging this PR will release new versions of the following packages based on your change files.\n\n"
       );
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);

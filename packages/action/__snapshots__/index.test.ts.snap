@@ -164,7 +164,7 @@ exports[`full e2e test of version output 1`] = `
       "change",
       "# Version Updates
 
-Merging this PR will bump all of the applicable packages based on your change files.
+Merging this PR will release new versions of the following packages based on your change files.
 
 ",
     ],
