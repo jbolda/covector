@@ -818,6 +818,7 @@ Boop again.
 
 describe("integration test for complex commands", () => {
   it("runs version for prod", async () => {
+    jest.setTimeout(7000);
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = (await run(
