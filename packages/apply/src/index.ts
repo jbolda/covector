@@ -323,7 +323,9 @@ const bumpMain = ({
     pkg.versionPrerelease = semver.prerelease(next);
   }
   const prevVersion = getPackageFileVersion({ pkg });
-  const preVersionCleaned = semver.prerelease(prevVersion) ? semver.inc(prevVersion, 'patch') : prevVersion;
+  const preVersionCleaned = semver.prerelease(prevVersion)
+    ? semver.inc(prevVersion, "patch")
+    : prevVersion;
   let version =
     previewVersion && previewVersion !== ""
       ? semver.valid(`${preVersionCleaned}-${previewVersion}`)
@@ -366,7 +368,9 @@ const bumpDeps = ({
           Object.keys(pkg.pkg[property]).forEach((existingDep) => {
             if (existingDep === dep) {
               const prevVersion = getPackageFileVersion({ pkg, property, dep });
-              const preVersionCleaned = semver.prerelease(prevVersion) ? semver.inc(prevVersion, 'patch') : prevVersion;
+              const preVersionCleaned = semver.prerelease(prevVersion)
+                ? semver.inc(prevVersion, "patch")
+                : prevVersion;
               let version =
                 previewVersion && previewVersion !== ""
                   ? semver.valid(`${preVersionCleaned}-${previewVersion}`)

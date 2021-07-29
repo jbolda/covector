@@ -167,9 +167,9 @@ export const createReleases = curry(
     );
 
     // output information about the created release
-    core.setOutput("releaseUrl", releaseResponse.url)
-    core.setOutput("releaseUploadUrl", releaseResponse.upload_url)
-    core.setOutput("releaseId", releaseResponse.id)
+    core.setOutput("releaseUrl", releaseResponse.url);
+    core.setOutput("releaseUploadUrl", releaseResponse.upload_url);
+    core.setOutput("releaseId", releaseResponse.id);
 
     core.startGroup(`github release created for ${pipe.pkg}`);
     console.log("releaseId", releaseResponse.id);
