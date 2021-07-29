@@ -50,11 +50,11 @@ outputs:
   templatePipe:
     description: A stringified key/value pair object of the `pipe` that is passed to each command.
   releaseUrl:
-    description: The github.com URL for the created release
+    description: The URL users can navigate to in order to view the release.
   releaseUploadUrl:
-    description: The URL for uploading assets to the created release
+    description: The URL for uploading assets to the release, which could be used by GitHub Actions for additional uses.
   releaseId: 
-    description: The ID of the created release
+    description: The ID of the created release. Only present when `createRelease` is set to true.
 runs:
   using: "node12"
   main: "dist/index.js"
