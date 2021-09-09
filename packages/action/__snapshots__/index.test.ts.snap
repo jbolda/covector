@@ -17,6 +17,10 @@ Object {
       "creating Github Release for package-one@2.3.1",
     ],
     Array [
+      "releaseId",
+      undefined,
+    ],
+    Array [
       "release created: ",
       Object {
         "body": "## \\\\[2.3.1]
@@ -41,6 +45,10 @@ publish
     ],
     Array [
       "creating Github Release for package-two@1.9.0",
+    ],
+    Array [
+      "releaseId",
+      undefined,
     ],
     Array [
       "release created: ",
