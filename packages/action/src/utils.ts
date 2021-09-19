@@ -1,5 +1,6 @@
 import fs from "fs";
 import type { ConfigFile, FunctionPipe } from "../../types/src";
+import * as core from "@actions/core";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -110,6 +111,7 @@ export const createReleases = curry(
     }
 
     const releaseTag = pipe.releaseTag;
+    core.debug(`creating release with tag ${releaseTag}`);
     const existingRelease = await octokit.repos
       .listReleases({
         owner,
@@ -158,18 +160,23 @@ export const createReleases = curry(
     // considered deprecated and will remove in v1
     core.setOutput(`${pipe.pkg}-published`, "true");
     // this will be used moving forward
-    core.setOutput(
-      `published-${pipe.pkg}`
-        .replace(/\@/g, "-")
-        .replace(/\//g, "-")
-        .replace(/\_/g, "-"),
-      "true"
-    );
+    const cleanPipePkg = pipe.pkg
+      .replace(/\@/g, "-")
+      .replace(/\//g, "-")
+      .replace(/\_/g, "-");
+    core.setOutput(`published-${cleanPipePkg}`, "true");
 
     // output information about the created release
     core.setOutput("releaseUrl", releaseResponse.url);
     core.setOutput("releaseUploadUrl", releaseResponse.upload_url);
     core.setOutput("releaseId", releaseResponse.id);
+
+    core.setOutput(`${cleanPipePkg}-releaseUrl`, releaseResponse.url);
+    core.setOutput(
+      `${cleanPipePkg}-releaseUploadUrl`,
+      releaseResponse.upload_url
+    );
+    core.setOutput(`${cleanPipePkg}-releaseId`, releaseResponse.id);
 
     core.startGroup(`github release created for ${pipe.pkg}`);
     console.log("releaseId", releaseResponse.id);
