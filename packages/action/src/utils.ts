@@ -35,23 +35,40 @@ export const packageListToArray = (list: string): string[] => {
 
 export const injectPublishFunctions = curry(
   (functionsToInject: Function[], config: ConfigFile) => {
-    if (!config || !config.pkgManagers) return config;
-    return Object.keys(config.pkgManagers).reduce((finalConfig, pkgManager) => {
-      finalConfig.pkgManagers![pkgManager] = Object.keys(
-        config.pkgManagers![pkgManager]
-      ).reduce((pm: { [k: string]: any }, p) => {
-        if (p.startsWith("publish")) {
+    if (!config) return config;
+    if (!Array.isArray(functionsToInject))
+      throw new Error(
+        "injectPublishFunctions() in modifyConfig() expects an array"
+      );
+    return {
+      ...config,
+      pkgManagers: injectIntoPublish(config.pkgManagers, functionsToInject),
+      packages: injectIntoPublish(config.packages, functionsToInject),
+    };
+  }
+);
+
+const injectIntoPublish = (
+  packages: { [k: string]: object } | undefined,
+  functionsToInject: Function[]
+) => {
+  if (!packages) return {};
+  return Object.keys(packages).reduce((finalConfig, pkg) => {
+    finalConfig![pkg] = Object.keys(packages![pkg]).reduce(
+      (pm: { [k: string]: any }, p) => {
+        if (p.startsWith("publish") && pm[p]) {
           pm[p] = Array.isArray(pm[p])
             ? pm[p].concat(functionsToInject)
             : [pm[p]].concat(functionsToInject);
         }
         return pm;
-      }, config.pkgManagers![pkgManager] || { pkgManagers: {} });
+      },
+      packages![pkg] || {}
+    );
 
-      return finalConfig;
-    }, config || { pkgManagers: {} });
-  }
-);
+    return finalConfig;
+  }, packages);
+};
 
 function curry(func: Function): Function {
   return function f1(...args1: any[]): Promise<Function> | Function {
