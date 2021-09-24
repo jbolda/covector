@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.7.0]
+
+- The action created a release for any `publish` keys in `pkgManger`, but didn't do it for anything specified in `packages`. This meant that if you elected not to use `pkgManager`, it would not create a release. This has been fixed and it will now create a release. We also added some debug output to improve the debugging experience.
+  - [695feed](https://www.github.com/jbolda/covector/commit/695feed9133ff53b3edb9d6184f8f3a9f0959a0a) fix `packages` release creation (without `pkgManagers`) and add debug output ([#226](https://www.github.com/jbolda/covector/pull/226)) on 2021-09-23
+- Include information about the created release in the actions outputs
+  - [028ae89](https://www.github.com/jbolda/covector/commit/028ae8967a82c2dd8f8898f682599f5dcadb049d) Release info in action output ([#221](https://www.github.com/jbolda/covector/pull/221)) on 2021-09-09
+
 ## \[0.6.2]
 
 - Preview version template overwrites the prerelease identifier
