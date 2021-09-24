@@ -1,5 +1,6 @@
 import fs from "fs";
 import type { ConfigFile, FunctionPipe } from "../../types/src";
+import * as core from "@actions/core";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -34,23 +35,40 @@ export const packageListToArray = (list: string): string[] => {
 
 export const injectPublishFunctions = curry(
   (functionsToInject: Function[], config: ConfigFile) => {
-    if (!config || !config.pkgManagers) return config;
-    return Object.keys(config.pkgManagers).reduce((finalConfig, pkgManager) => {
-      finalConfig.pkgManagers![pkgManager] = Object.keys(
-        config.pkgManagers![pkgManager]
-      ).reduce((pm: { [k: string]: any }, p) => {
-        if (p.startsWith("publish")) {
+    if (!config) return config;
+    if (!Array.isArray(functionsToInject))
+      throw new Error(
+        "injectPublishFunctions() in modifyConfig() expects an array"
+      );
+    return {
+      ...config,
+      pkgManagers: injectIntoPublish(config.pkgManagers, functionsToInject),
+      packages: injectIntoPublish(config.packages, functionsToInject),
+    };
+  }
+);
+
+const injectIntoPublish = (
+  packages: { [k: string]: object } | undefined,
+  functionsToInject: Function[]
+) => {
+  if (!packages) return {};
+  return Object.keys(packages).reduce((finalConfig, pkg) => {
+    finalConfig![pkg] = Object.keys(packages![pkg]).reduce(
+      (pm: { [k: string]: any }, p) => {
+        if (p.startsWith("publish") && pm[p]) {
           pm[p] = Array.isArray(pm[p])
             ? pm[p].concat(functionsToInject)
             : [pm[p]].concat(functionsToInject);
         }
         return pm;
-      }, config.pkgManagers![pkgManager] || { pkgManagers: {} });
+      },
+      packages![pkg] || {}
+    );
 
-      return finalConfig;
-    }, config || { pkgManagers: {} });
-  }
-);
+    return finalConfig;
+  }, packages);
+};
 
 function curry(func: Function): Function {
   return function f1(...args1: any[]): Promise<Function> | Function {
@@ -110,6 +128,7 @@ export const createReleases = curry(
     }
 
     const releaseTag = pipe.releaseTag;
+    core.debug(`creating release with tag ${releaseTag}`);
     const existingRelease = await octokit.repos
       .listReleases({
         owner,
@@ -158,18 +177,23 @@ export const createReleases = curry(
     // considered deprecated and will remove in v1
     core.setOutput(`${pipe.pkg}-published`, "true");
     // this will be used moving forward
-    core.setOutput(
-      `published-${pipe.pkg}`
-        .replace(/\@/g, "-")
-        .replace(/\//g, "-")
-        .replace(/\_/g, "-"),
-      "true"
-    );
+    const cleanPipePkg = pipe.pkg
+      .replace(/\@/g, "-")
+      .replace(/\//g, "-")
+      .replace(/\_/g, "-");
+    core.setOutput(`published-${cleanPipePkg}`, "true");
 
     // output information about the created release
     core.setOutput("releaseUrl", releaseResponse.url);
     core.setOutput("releaseUploadUrl", releaseResponse.upload_url);
     core.setOutput("releaseId", releaseResponse.id);
+
+    core.setOutput(`${cleanPipePkg}-releaseUrl`, releaseResponse.url);
+    core.setOutput(
+      `${cleanPipePkg}-releaseUploadUrl`,
+      releaseResponse.upload_url
+    );
+    core.setOutput(`${cleanPipePkg}-releaseId`, releaseResponse.id);
 
     core.startGroup(`github release created for ${pipe.pkg}`);
     console.log("releaseId", releaseResponse.id);
