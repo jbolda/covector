@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.8.2]
+
+- Include a copy of the license in each package.
+  - Bumped due to a bump in all.
+  - [fa5c061](https://www.github.com/jbolda/covector/commit/fa5c061830d181ae9a52b183441890a25e07946a) chore: add license files to packages ([#225](https://www.github.com/jbolda/covector/pull/225)) on 2021-09-24
+
 ## \[0.8.1]
 
 - The ability to adjust the Github Release git tag was previously added, and the fallback used only worked for JavaScript packages. This fix uses the package nickname instead which will work for any package manager.
