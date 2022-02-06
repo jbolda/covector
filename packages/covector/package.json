@@ -24,7 +24,7 @@
     "@covector/changelog": "0.6.1",
     "@covector/command": "0.5.1",
     "@covector/files": "0.5.1",
-    "effection": "^2.0.1",
+    "effection": "^2.0.4",
     "globby": "^11.0.1",
     "inquirer": "^7.3.3",
     "yargs": "^15.3.1"
@@ -34,7 +34,7 @@
     "@types/inquirer": "^7.3.1",
     "fixturez": "^1.1.0",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.5"
   },
   "volta": {
     "extends": "../../package.json"

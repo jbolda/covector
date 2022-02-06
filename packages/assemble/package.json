@@ -18,7 +18,7 @@
   "dependencies": {
     "@covector/command": "0.5.1",
     "@covector/files": "0.5.1",
-    "js-yaml": "^4.0.0",
+    "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "remark-frontmatter": "^3.0.0",
     "remark-parse": "^9.0.0",
@@ -31,7 +31,7 @@
     "@types/lodash": "^4.14.168",
     "fixturez": "^1.1.0",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.5"
   },
   "volta": {
     "extends": "../../package.json"

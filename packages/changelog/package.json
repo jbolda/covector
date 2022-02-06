@@ -27,7 +27,7 @@
     "@covector/types": "^0.0.0",
     "@types/lodash": "^4.14.168",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.5"
   },
   "volta": {
     "extends": "../../package.json"
