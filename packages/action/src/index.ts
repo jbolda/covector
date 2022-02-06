@@ -334,7 +334,7 @@ export function* run(): Generator<any, any, any> {
         `Command "${command}" not recognized. See README for which commands are available.`
       );
     }
-  } catch (error) {
+  } catch (error: any) {
     core.setFailed(error.message);
   }
 }

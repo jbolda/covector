@@ -263,7 +263,7 @@ This doesn't bump much.
       yield assemble({
         vfiles: [emptyChangefile],
       });
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).toMatch(
         ".changes/empty-file.md didn't have any packages bumped. Please add a package bump."
       );
@@ -301,7 +301,7 @@ describe("special bump types", () => {
         //@ts-ignore
         config,
       });
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).toMatch(
         "housekeeping specified for assemble1 is invalid.\n" +
           "Try one of the following: major, minor, patch.\n"
@@ -317,7 +317,7 @@ describe("special bump types", () => {
         //@ts-ignore
         config: configSpecial,
       });
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).toMatch(
         "explosions specified for @namespaced/assemble2 is invalid.\n" +
           "Try one of the following: major, minor, patch, housekeeping, workflows.\n"

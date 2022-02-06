@@ -376,13 +376,13 @@ export const testSerializePkgFile = ({
       extname: packageFile.vfile.extname,
     });
     return true;
-  } catch (e) {
-    if (e.message === "Can only stringify objects, not null") {
+  } catch (e: any) {
+    if (e?.message === "Can only stringify objects, not null") {
       console.error(
         "It appears that a dependency within this repo does not have a version specified."
       );
     }
-    throw new Error(`within ${packageFile.name} => ${e.message}`);
+    throw new Error(`within ${packageFile.name} => ${e?.message}`);
   }
 };
 

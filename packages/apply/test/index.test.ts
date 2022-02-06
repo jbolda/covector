@@ -1189,7 +1189,7 @@ describe("package file apply bump (async/await)", () => {
     try {
       //@ts-ignore
       await validateApply({ commands, config, cwd: rustFolder });
-    } catch (e) {
+    } catch (e: any) {
       expect(e.message).toMatch(
         "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
           "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
