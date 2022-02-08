@@ -15,7 +15,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
