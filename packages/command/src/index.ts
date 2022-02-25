@@ -1,6 +1,6 @@
 import { spawn, timeout, Operation } from "effection";
 import { exec, Process } from "@effection/process";
-import execa from "execa";
+// import execa from "execa";
 import path from "path";
 
 import type {
@@ -200,30 +200,27 @@ export const sh = function* (
   options: object,
   log: false | string
 ): Generator<any, string, any> {
-  let child: Process = yield exec(command, options);
-  const stripAnsi = yield import("strip-ansi");
+  let out = "";
+  let child = yield exec(command, options);
+  // jest chokes on this, sitting it out for now
+  // const stripAnsi = yield import("strip-ansi");
 
-  if (log !== false) {
-    yield spawn(
-      child.stdout.forEach(function* (datum: Buffer): Operation<void> {
-        const out = stripAnsi.default(datum.toString().trim());
-        if (out !== "") console.log(out);
-      })
-    );
-
-    yield spawn(
-      child.stderr.forEach(function* (datum: Buffer): Operation<void> {
-        const out = stripAnsi.default(datum.toString().trim());
-        if (out !== "") console.error(out);
-      })
-    );
-  }
-
-  const out = yield child.expect();
-  const stripped: string = stripAnsi.default(
-    Buffer.concat(out.tail).toString().trim()
+  yield spawn(
+    child.stdout.forEach((text: String) => {
+      out = `${out}${text}`;
+      if (log !== false) console.log(text);
+    })
   );
-  return stripped;
+
+  yield spawn(
+    child.stderr.forEach((text: String) => {
+      out = `${out}${text}`;
+      if (log !== false) console.error(out);
+    })
+  );
+
+  yield child.expect();
+  return out.trim();
 };
 
 export const raceTime = function* ({

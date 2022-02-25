@@ -1,3 +1,4 @@
+import { run } from "effection";
 import { attemptCommands, sh } from "../src";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
@@ -113,20 +114,27 @@ describe("command", () => {
   });
 
   describe("sh", () => {
-    it("considers piped commands", function* (): Generator<any> {
-      const out = yield sh(
-        "echo this thing | echo but actually this",
-        {},
-        false
+    it("handle base command", async () => {
+      const out = await run(sh("npm help", {}, false));
+      expect(out.substring(0, 23)).toEqual(
+        `npm <command>
+
+Usage:
+
+`
+      );
+    });
+
+    it("handle single command", async () => {
+      const out = await run(sh("echo 'this thing'", {}, false));
+      expect(out).toBe("this thing");
+    });
+
+    it.skip("considers piped commands", async () => {
+      const out = await run(
+        sh("echo this thing | echo but actually this", { shell: true }, false)
       );
       expect(out).toBe("but actually this");
     });
-
-    // it("issues simple commands", function* (): Generator<any> {
-    // this errors out for some reason? error below
-    // TypeError: Cannot read property 'link' of undefined
-    // const out = yield sh("ls", {}, false);
-    // expect(out).toBe("this thing");
-    // });
   });
 });
