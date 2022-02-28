@@ -7,4 +7,9 @@ module.exports = {
       tsconfig: "tsconfig.base.json",
     },
   },
+  modulePaths: ["<rootDir>/packages/"],
+  moduleNameMapper: {
+    "^covector/(.*)$": "<rootDir>/packages/covector/$1",
+    "^@covector/(.*)$": "<rootDir>/packages/$1/src",
+  },
 };
