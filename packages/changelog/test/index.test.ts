@@ -18,7 +18,7 @@ describe("changelog", () => {
     restoreConsole();
   });
 
-  it("creates and fills a changelog", function* () {
+  it("creates and fills a changelog", async () => {
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -65,7 +65,7 @@ describe("changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    await fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -74,7 +74,7 @@ describe("changelog", () => {
     });
 
     //@ts-ignore
-    const changelog = yield toVFile.read(
+    const changelog = await toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
@@ -87,7 +87,7 @@ describe("changelog", () => {
     );
   });
 
-  it("creates and fills a changelog including meta and git info", function* () {
+  it("creates and fills a changelog including meta and git info", async () => {
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -168,7 +168,7 @@ describe("changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    await fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -177,7 +177,7 @@ describe("changelog", () => {
     });
 
     //@ts-ignore
-    const changelog = yield toVFile.read(
+    const changelog = await toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
@@ -193,7 +193,7 @@ describe("changelog", () => {
     );
   });
 
-  it("creates a changelog for nicknamed pkgs", function* () {
+  it("creates a changelog for nicknamed pkgs", async () => {
     const projectFolder = f.copy("pkg.js-single-json");
     // note the name in this package file is js-single-json-fixture
     // we use a "nickname" in our change files
@@ -242,7 +242,7 @@ describe("changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    await fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -251,7 +251,7 @@ describe("changelog", () => {
     });
 
     //@ts-ignore
-    const changelog = yield toVFile.read(
+    const changelog = await toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
@@ -264,7 +264,7 @@ describe("changelog", () => {
     );
   });
 
-  it("inserts into an existing changelog", function* () {
+  it("inserts into an existing changelog", async () => {
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [
@@ -311,7 +311,7 @@ describe("changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    await fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -320,7 +320,7 @@ describe("changelog", () => {
     });
 
     //@ts-ignore
-    const changelog = yield toVFile.read(
+    const changelog = await toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
@@ -346,7 +346,7 @@ describe("changelog", () => {
     }).toMatchSnapshot();
   });
 
-  it("reads back the recent change", function* () {
+  it("reads back the recent change", async () => {
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -429,7 +429,7 @@ describe("changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    await fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -444,12 +444,13 @@ describe("changelog", () => {
     };
 
     //@ts-ignore
-    const changelogs = yield pullLastChangelog({
+    const changelogs = await pullLastChangelog({
       config,
       cwd: projectFolder,
     });
 
-    pkgCommandsRan = yield pipeChangelogToCommands({
+    //@ts-ignore
+    pkgCommandsRan = await pipeChangelogToCommands({
       changelogs,
       pkgCommandsRan,
     });
@@ -464,7 +465,7 @@ describe("changelog", () => {
     );
   });
 
-  it("reads a changelog with multiple entries", function* (): Generator<any> {
+  it("reads a changelog with multiple entries", async () => {
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [
@@ -519,7 +520,7 @@ describe("changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    await fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -533,13 +534,13 @@ describe("changelog", () => {
       },
     };
 
-    const changelogs = yield pullLastChangelog({
+    const changelogs = await pullLastChangelog({
       config,
       cwd: projectFolder,
     });
 
     //@ts-ignore
-    pkgCommandsRan = yield pipeChangelogToCommands({
+    pkgCommandsRan = await pipeChangelogToCommands({
       //@ts-ignore
       changelogs,
       pkgCommandsRan,
