@@ -208,14 +208,14 @@ export const sh = function* (
   yield spawn(
     child.stdout.forEach((text: String) => {
       out = `${out}${text}`;
-      if (log !== false) console.log(text);
+      if (log !== false) console.log(text.toString().trim());
     })
   );
 
   yield spawn(
     child.stderr.forEach((text: String) => {
       out = `${out}${text}`;
-      if (log !== false) console.error(out);
+      if (log !== false) console.error(text.toString().trim());
     })
   );
 

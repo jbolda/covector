@@ -7535,22 +7535,13 @@ exports[`integration test in production mode fails status for non-existant packa
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [],
-  "covectorReturn": t {
-    "_promise": Promise {},
-    "blockOnReturnedContext": true,
-    "children": Set {},
-    "ensure": [Function],
-    "exitHooks": Set {},
-    "fail": [Function],
-    "fork": [Function],
-    "isRequired": false,
-    "operation": Object {},
-    "reject": [Function],
-    "resolve": [Function],
-    "result": [Error: react listed in .changes/change-file-pkg-non-exists.md does not exist in the .changes/config.json],
-    "resume": [Function],
-    "spawn": [Function],
+  "covectorReturn": Object {
+    "children": Array [],
+    "id": 101,
+    "labels": Object {},
     "state": "errored",
+    "type": "generator",
+    "yieldingTo": undefined,
   },
 }
 `;

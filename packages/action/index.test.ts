@@ -3,6 +3,7 @@ import * as github from "@actions/github";
 import { run as covector } from "./src";
 import { run } from "effection";
 import { packageListToArray } from "./src/utils";
+import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -11,19 +12,6 @@ jest.mock("@actions/github", () => ({
   getOctokit: jest.fn(),
   context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
 }));
-
-let consoleMock = console as jest.Mocked<Console>;
-const mockConsole = (toMock: string[]) => {
-  const originalConsole = { ...console };
-  debugger;
-  toMock.forEach((mock) => {
-    (console as any)[mock] = jest.fn();
-  });
-  consoleMock = console as jest.Mocked<Console>;
-  return () => {
-    global.console = originalConsole;
-  };
-};
 
 describe("packageListToArray", () => {
   it("returns empty array on empty string", () => {
@@ -172,8 +160,8 @@ describe("full e2e test", () => {
 
       const covectoredAction = await run(covector());
       expect({
-        consoleLog: consoleMock.log.mock.calls,
-        consoleDir: consoleMock.dir.mock.calls,
+        consoleLog: (console.log as any).mock.calls,
+        consoleDir: (console.dir as any).mock.calls,
       }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
@@ -284,16 +272,14 @@ describe("full e2e test", () => {
         repo: "genericRepo",
         release_id: 15,
         draft: false,
-        body:
-          "some stuff\n## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
+        body: "some stuff\n## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
       });
       expect(updateRelease).toHaveBeenCalledWith({
         owner: "genericOwner",
         repo: "genericRepo",
         release_id: 22,
         draft: false,
-        body:
-          "other stuff\n## \\[1.9.0]\n\n- Added some even cooler things.\n\npublish\n\n",
+        body: "other stuff\n## \\[1.9.0]\n\n- Added some even cooler things.\n\npublish\n\n",
       });
 
       expect(createRelease).toHaveBeenCalledTimes(0);
@@ -445,8 +431,7 @@ describe("full e2e test", () => {
         repo: "genericRepo",
         release_id: 15,
         draft: false,
-        body:
-          "some stuff\n## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
+        body: "some stuff\n## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
       });
 
       expect(updateRelease).toHaveBeenCalledTimes(1);

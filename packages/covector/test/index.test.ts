@@ -5,25 +5,13 @@ import { run } from "effection";
 import toVFile from "to-vfile";
 import path from "path";
 import * as fs from "fs";
+import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
-
-let consoleMock = console as jest.Mocked<Console>;
-const mockConsole = (toMock: string[]) => {
-  const originalConsole = { ...console };
-  debugger;
-  toMock.forEach((mock) => {
-    (console as any)[mock] = jest.fn();
-  });
-  consoleMock = console as jest.Mocked<Console>;
-  return () => {
-    global.console = originalConsole;
-  };
-};
 import { injectPublishFunctions } from "../../action/src/utils";
 
 describe("integration test in production mode", () => {
-  let restoreConsole: Function;
+  let restoreConsole: RestoreConsole;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir", "info", "error"]);
   });
@@ -40,8 +28,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleDir: consoleMock.dir.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
   });
@@ -58,8 +46,8 @@ describe("integration test in production mode", () => {
     //@ts-ignore
     delete covectored.id;
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleDir: consoleMock.dir.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
@@ -75,8 +63,8 @@ describe("integration test in production mode", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -122,8 +110,8 @@ describe("integration test in production mode", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -168,8 +156,8 @@ describe("integration test in production mode", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -213,8 +201,8 @@ describe("integration test in production mode", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -255,8 +243,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
@@ -270,8 +258,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
@@ -285,8 +273,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
@@ -301,8 +289,8 @@ describe("integration test in production mode", () => {
     );
     await expect(covectored).rejects.toThrow();
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       // covectorReturn: covectored, // skip this as npm publish has fs dep output which creates false positives
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
@@ -325,8 +313,8 @@ describe("integration test in production mode", () => {
     );
     await expect(covectored).rejects.toThrow();
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 
@@ -348,8 +336,8 @@ describe("integration test in production mode", () => {
     );
     await expect(covectored).rejects.toThrow();
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 
@@ -362,8 +350,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
   });
@@ -377,8 +365,8 @@ describe("integration test in production mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
@@ -422,7 +410,7 @@ describe("integration test in production mode", () => {
         modifyConfig,
       })
     );
-    expect(consoleMock.log.mock.calls).toMatchSnapshot();
+    expect((console.log as any).mock.calls).toMatchSnapshot();
   });
 
   it("uses the action config modification", async () => {
@@ -441,7 +429,7 @@ describe("integration test in production mode", () => {
         ]),
       })
     );
-    expect(consoleMock.log.mock.calls).toMatchSnapshot();
+    expect((console.log as any).mock.calls).toMatchSnapshot();
   });
 });
 
@@ -457,8 +445,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleDir: consoleMock.dir.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -477,8 +465,8 @@ describe("integration test in --dry-run mode", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -518,8 +506,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -536,8 +524,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
@@ -554,8 +542,8 @@ describe("integration test in --dry-run mode", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -596,8 +584,8 @@ describe("integration test with preMode `on`", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -743,8 +731,8 @@ Boop again.
     if (typeof covectoredTwo !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturnOne: Object.keys(covectoredOne.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -785,8 +773,8 @@ Boop again.
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -830,8 +818,8 @@ describe("integration test for complex commands", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -870,8 +858,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -887,8 +875,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -904,8 +892,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -924,8 +912,8 @@ describe("integration test for complex commands", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       //@ts-ignore
       covectorReturn: Object.keys(covectored.commandsRan).reduce(
         (pkgs, pkg) => {
@@ -965,8 +953,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -983,8 +971,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -1001,8 +989,8 @@ describe("integration test for complex commands", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -1028,8 +1016,8 @@ describe("integration test to invoke sub commands", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -1045,8 +1033,8 @@ describe("integration test to invoke sub commands", () => {
       })
     );
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
@@ -1073,8 +1061,8 @@ describe("integration test for preview command", () => {
     );
 
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
@@ -1101,8 +1089,8 @@ describe("integration test for preview command with dist tags", () => {
     );
 
     expect({
-      consoleLog: consoleMock.log.mock.calls,
-      consoleInfo: consoleMock.info.mock.calls,
+      consoleLog: (console.log as any).mock.calls,
+      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
   });
