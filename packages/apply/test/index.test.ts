@@ -1,6 +1,7 @@
 import { apply, changesConsideringParents, validateApply } from "../src";
 //@ts-ignore
 import toVFile from "to-vfile";
+import { run } from "effection";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
@@ -14,7 +15,7 @@ describe("package file apply bump (snapshot)", () => {
     restoreConsole();
   });
 
-  it("bumps single js json", function* () {
+  it("bumps single js json", async () => {
     const jsonFolder = f.copy("pkg.js-single-json");
 
     const commands = [
@@ -38,9 +39,9 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: jsonFolder });
+    await run(apply({ commands, config, cwd: jsonFolder }));
     //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
+    const modifiedVFile = await toVFile.read(
       jsonFolder + "/package.json",
       "utf-8"
     );
@@ -61,7 +62,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps single rust toml", function* () {
+  it("bumps single rust toml", async () => {
     const rustFolder = f.copy("pkg.rust-single");
 
     const commands = [
@@ -85,9 +86,9 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    await run(apply({ commands, config, cwd: rustFolder }));
     //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
+    const modifiedVFile = await toVFile.read(
       rustFolder + "/Cargo.toml",
       "utf-8"
     );
@@ -103,7 +104,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps single yaml toml", function* () {
+  it("bumps single yaml toml", async () => {
     const rustFolder = f.copy("pkg.dart-flutter-single");
 
     const commands = [
@@ -127,9 +128,9 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    await run(apply({ commands, config, cwd: rustFolder }));
     //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
+    const modifiedVFile = await toVFile.read(
       rustFolder + "/pubspec.yaml",
       "utf-8"
     );
@@ -149,7 +150,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("fails bump single js json that satisfies range", function* () {
+  it("fails bump single js json that satisfies range", async () => {
     const jsonFolder = f.copy("pkg.js-single-json");
 
     const commands = [
@@ -184,7 +185,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("fails bumps single rust toml that satisfies range", function* () {
+  it("fails bumps single rust toml that satisfies range", async () => {
     const rustFolder = f.copy("pkg.rust-single");
 
     const commands = [
@@ -219,7 +220,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps multi js json", function* () {
+  it("bumps multi js json", async () => {
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
     const commands = [
@@ -266,9 +267,9 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: jsonFolder });
+    await run(apply({ commands, config, cwd: jsonFolder }));
     //@ts-ignore
-    const modifiedPkgAVFile = yield toVFile.read(
+    const modifiedPkgAVFile = await toVFile.read(
       jsonFolder + "/packages/pkg-a/package.json",
       "utf-8"
     );
@@ -283,7 +284,7 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     //@ts-ignore
-    const modifiedPkgBVFile = yield toVFile.read(
+    const modifiedPkgBVFile = await toVFile.read(
       jsonFolder + "/packages/pkg-b/package.json",
       "utf-8"
     );
@@ -302,7 +303,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps multi rust toml", function* () {
+  it("bumps multi rust toml", async () => {
     const rustFolder = f.copy("pkg.rust-multi");
 
     const commands = [
@@ -338,10 +339,10 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    await run(apply({ commands, config, cwd: rustFolder }));
 
     //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
+    const modifiedAPKGVFile = await toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
     );
@@ -355,7 +356,7 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
+    const modifiedBPKGVFile = await toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
     );
@@ -371,7 +372,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps multi rust toml with object dep", function* () {
+  it("bumps multi rust toml with object dep", async () => {
     const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
     const commands = [
@@ -407,10 +408,10 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    await run(apply({ commands, config, cwd: rustFolder }));
 
     //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
+    const modifiedAPKGVFile = await toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
     );
@@ -424,7 +425,7 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
+    const modifiedBPKGVFile = await toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
     );
@@ -440,7 +441,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps multi rust toml with dep missing patch", function* () {
+  it("bumps multi rust toml with dep missing patch", async () => {
     const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
     const commands = [
@@ -476,10 +477,10 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    await run(apply({ commands, config, cwd: rustFolder }));
 
     //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
+    const modifiedAPKGVFile = await toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
     );
@@ -493,7 +494,7 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
+    const modifiedBPKGVFile = await toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
     );
@@ -509,7 +510,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps multi rust toml as patch with object dep missing patch", function* () {
+  it("bumps multi rust toml as patch with object dep missing patch", async () => {
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -545,10 +546,10 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    await run(apply({ commands, config, cwd: rustFolder }));
 
     //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
+    const modifiedAPKGVFile = await toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
     );
@@ -562,7 +563,7 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
+    const modifiedBPKGVFile = await toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
     );
@@ -578,7 +579,7 @@ describe("package file apply bump (snapshot)", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps multi rust toml as minor with object dep missing patch", function* () {
+  it("bumps multi rust toml as minor with object dep missing patch", async () => {
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -614,10 +615,10 @@ describe("package file apply bump (snapshot)", () => {
     };
 
     //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    await run(apply({ commands, config, cwd: rustFolder }));
 
     //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
+    const modifiedAPKGVFile = await toVFile.read(
       rustFolder + "/pkg-a/Cargo.toml",
       "utf-8"
     );
@@ -631,7 +632,7 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
+    const modifiedBPKGVFile = await toVFile.read(
       rustFolder + "/pkg-b/Cargo.toml",
       "utf-8"
     );
@@ -1214,7 +1215,7 @@ describe("packge file applies preview bump", () => {
     restoreConsole();
   });
 
-  it("bumps single js json", function* () {
+  it("bumps single js json", async () => {
     const jsonFolder = f.copy("pkg.js-single-json"); // 0.5.9
 
     const commands = [
@@ -1237,15 +1238,17 @@ describe("packge file applies preview bump", () => {
       },
     };
 
-    yield apply({
-      //@ts-ignore
-      commands,
-      config,
-      cwd: jsonFolder,
-      previewVersion: "branch-name.12345",
-    });
+    await run(
+      apply({
+        //@ts-ignore
+        commands,
+        config,
+        cwd: jsonFolder,
+        previewVersion: "branch-name.12345",
+      })
+    );
     //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
+    const modifiedVFile = await toVFile.read(
       jsonFolder + "/package.json",
       "utf-8"
     );
@@ -1266,7 +1269,7 @@ describe("packge file applies preview bump", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps multi js json", function* () {
+  it("bumps multi js json", async () => {
     const jsonFolder = f.copy("pkg.js-yarn-workspace"); // 1.0.0
 
     const commands = [
@@ -1312,16 +1315,18 @@ describe("packge file applies preview bump", () => {
       },
     };
 
-    yield apply({
-      //@ts-ignore
-      commands,
-      //@ts-ignore
-      config,
-      cwd: jsonFolder,
-      previewVersion: "branch-name.12345",
-    });
+    await run(
+      apply({
+        //@ts-ignore
+        commands,
+        //@ts-ignore
+        config,
+        cwd: jsonFolder,
+        previewVersion: "branch-name.12345",
+      })
+    );
     //@ts-ignore
-    const modifiedPkgAVFile = yield toVFile.read(
+    const modifiedPkgAVFile = await toVFile.read(
       jsonFolder + "/packages/pkg-a/package.json",
       "utf-8"
     );
@@ -1336,7 +1341,7 @@ describe("packge file applies preview bump", () => {
     );
 
     //@ts-ignore
-    const modifiedPkgBVFile = yield toVFile.read(
+    const modifiedPkgBVFile = await toVFile.read(
       jsonFolder + "/packages/pkg-b/package.json",
       "utf-8"
     );
@@ -1365,7 +1370,7 @@ describe("packge file applies preview bump to pre-release", () => {
     restoreConsole();
   });
 
-  it("bumps single js json without pre-release", function* () {
+  it("bumps single js json without pre-release", async () => {
     const jsonFolder = f.copy("pkg.js-single-prerelease-json"); // 0.5.9-abc.2
 
     const commands = [
@@ -1388,15 +1393,17 @@ describe("packge file applies preview bump to pre-release", () => {
       },
     };
 
-    yield apply({
-      //@ts-ignore
-      commands,
-      config,
-      cwd: jsonFolder,
-      previewVersion: "branch-name.12345",
-    });
+    await run(
+      apply({
+        //@ts-ignore
+        commands,
+        config,
+        cwd: jsonFolder,
+        previewVersion: "branch-name.12345",
+      })
+    );
     //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
+    const modifiedVFile = await toVFile.read(
       jsonFolder + "/package.json",
       "utf-8"
     );
@@ -1417,7 +1424,7 @@ describe("packge file applies preview bump to pre-release", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps multi js json without pre-release", function* () {
+  it("bumps multi js json without pre-release", async () => {
     const jsonFolder = f.copy("pkg.js-yarn-prerelease-workspace");
 
     const commands = [
@@ -1463,16 +1470,18 @@ describe("packge file applies preview bump to pre-release", () => {
       },
     };
 
-    yield apply({
-      //@ts-ignore
-      commands,
-      //@ts-ignore
-      config,
-      cwd: jsonFolder,
-      previewVersion: "branch-name.12345",
-    });
+    await run(
+      apply({
+        //@ts-ignore
+        commands,
+        //@ts-ignore
+        config,
+        cwd: jsonFolder,
+        previewVersion: "branch-name.12345",
+      })
+    );
     //@ts-ignore
-    const modifiedPkgAVFile = yield toVFile.read(
+    const modifiedPkgAVFile = await toVFile.read(
       jsonFolder + "/packages/pkg-a/package.json",
       "utf-8"
     );
@@ -1487,7 +1496,7 @@ describe("packge file applies preview bump to pre-release", () => {
     );
 
     //@ts-ignore
-    const modifiedPkgBVFile = yield toVFile.read(
+    const modifiedPkgBVFile = await toVFile.read(
       jsonFolder + "/packages/pkg-b/package.json",
       "utf-8"
     );
