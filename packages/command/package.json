@@ -17,9 +17,7 @@
   },
   "dependencies": {
     "@effection/process": "^2.0.4",
-    "effection": "^2.0.4",
-    "execa": "^5.0.0",
-    "strip-ansi": "^7.0.1"
+    "effection": "^2.0.4"
   },
   "devDependencies": {
     "@covector/types": "^0.0.0",
