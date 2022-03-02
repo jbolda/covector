@@ -1,6 +1,5 @@
-import { spawn, timeout, Operation } from "effection";
-import { exec, Process } from "@effection/process";
-// import execa from "execa";
+import { spawn, timeout } from "effection";
+import { exec } from "@effection/process";
 import path from "path";
 
 import type {
@@ -200,10 +199,15 @@ export const sh = function* (
   options: object,
   log: false | string
 ): Generator<any, string, any> {
+  let modifiedOptions = {};
+  //@ts-ignore
+  if (command.includes("|") && !options.shell) {
+    modifiedOptions = Object.assign({}, options, { shell: true });
+  } else {
+    modifiedOptions = options;
+  }
   let out = "";
-  let child = yield exec(command, options);
-  // jest chokes on this, sitting it out for now
-  // const stripAnsi = yield import("strip-ansi");
+  let child = yield exec(command, modifiedOptions);
 
   yield spawn(
     child.stdout.forEach((text: String) => {

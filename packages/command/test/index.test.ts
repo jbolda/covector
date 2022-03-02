@@ -138,9 +138,16 @@ Usage:
       expect(out).toBe("this thing");
     });
 
-    it.skip("considers piped commands", async () => {
+    it("considers piped commands, opted in", async () => {
       const out = await run(
         sh("echo this thing | echo but actually this", { shell: true }, false)
+      );
+      expect(out).toBe("but actually this");
+    });
+
+    it("considers piped commands, uses fallback to shell", async () => {
+      const out = await run(
+        sh("echo this thing | echo but actually this", {}, false)
       );
       expect(out).toBe("but actually this");
     });
