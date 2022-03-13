@@ -3,6 +3,7 @@ import {
   pullLastChangelog,
   pipeChangelogToCommands,
 } from "../src";
+import { it } from "@effection/jest";
 //@ts-ignore
 import toVFile from "to-vfile";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
@@ -18,7 +19,7 @@ describe("changelog", () => {
     restoreConsole();
   });
 
-  it("creates and fills a changelog", async () => {
+  it("creates and fills a changelog", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -65,7 +66,7 @@ describe("changelog", () => {
       },
     };
 
-    await fillChangelogs({
+    yield fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -74,7 +75,7 @@ describe("changelog", () => {
     });
 
     //@ts-ignore
-    const changelog = await toVFile.read(
+    const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
@@ -87,7 +88,7 @@ describe("changelog", () => {
     );
   });
 
-  it("creates and fills a changelog including meta and git info", async () => {
+  it("creates and fills a changelog including meta and git info", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -168,7 +169,7 @@ describe("changelog", () => {
       },
     };
 
-    await fillChangelogs({
+    yield fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -177,7 +178,7 @@ describe("changelog", () => {
     });
 
     //@ts-ignore
-    const changelog = await toVFile.read(
+    const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
@@ -193,7 +194,7 @@ describe("changelog", () => {
     );
   });
 
-  it("creates a changelog for nicknamed pkgs", async () => {
+  it("creates a changelog for nicknamed pkgs", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
     // note the name in this package file is js-single-json-fixture
     // we use a "nickname" in our change files
@@ -242,7 +243,7 @@ describe("changelog", () => {
       },
     };
 
-    await fillChangelogs({
+    yield fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -251,7 +252,7 @@ describe("changelog", () => {
     });
 
     //@ts-ignore
-    const changelog = await toVFile.read(
+    const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
@@ -264,7 +265,7 @@ describe("changelog", () => {
     );
   });
 
-  it("inserts into an existing changelog", async () => {
+  it("inserts into an existing changelog", function* () {
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [
@@ -311,7 +312,7 @@ describe("changelog", () => {
       },
     };
 
-    await fillChangelogs({
+    yield fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -320,7 +321,7 @@ describe("changelog", () => {
     });
 
     //@ts-ignore
-    const changelog = await toVFile.read(
+    const changelog = yield toVFile.read(
       projectFolder + "/CHANGELOG.md",
       "utf-8"
     );
@@ -346,7 +347,7 @@ describe("changelog", () => {
     }).toMatchSnapshot();
   });
 
-  it("reads back the recent change", async () => {
+  it("reads back the recent change", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -429,7 +430,7 @@ describe("changelog", () => {
       },
     };
 
-    await fillChangelogs({
+    yield fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -444,13 +445,13 @@ describe("changelog", () => {
     };
 
     //@ts-ignore
-    const changelogs = await pullLastChangelog({
+    const changelogs = yield pullLastChangelog({
       config,
       cwd: projectFolder,
     });
 
     //@ts-ignore
-    pkgCommandsRan = await pipeChangelogToCommands({
+    pkgCommandsRan = yield pipeChangelogToCommands({
       changelogs,
       pkgCommandsRan,
     });
@@ -465,7 +466,7 @@ describe("changelog", () => {
     );
   });
 
-  it("reads a changelog with multiple entries", async () => {
+  it("reads a changelog with multiple entries", function* () {
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [
@@ -520,7 +521,7 @@ describe("changelog", () => {
       },
     };
 
-    await fillChangelogs({
+    yield fillChangelogs({
       applied,
       //@ts-ignore
       assembledChanges,
@@ -534,13 +535,13 @@ describe("changelog", () => {
       },
     };
 
-    const changelogs = await pullLastChangelog({
+    const changelogs = yield pullLastChangelog({
       config,
       cwd: projectFolder,
     });
 
     //@ts-ignore
-    pkgCommandsRan = await pipeChangelogToCommands({
+    pkgCommandsRan = yield pipeChangelogToCommands({
       //@ts-ignore
       changelogs,
       pkgCommandsRan,

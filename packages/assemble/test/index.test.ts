@@ -1,5 +1,5 @@
+import { it } from "@effection/jest";
 import { assemble, mergeIntoConfig, mergeChangesToConfig } from "../src";
-import { run } from "effection";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -207,49 +207,41 @@ This is a test.
 };
 
 describe("assemble changes", () => {
-  it("runs", async () => {
-    const assembled = await run(
-      assemble({
-        vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
-      })
-    );
+  it("runs", function* () {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+    });
     expect(assembled).toMatchSnapshot();
   });
 
-  it("assembles deps", async () => {
-    const assembled = await run(assemble({ vfiles: [testTextFive] }));
+  it("assembles deps", function* () {
+    const assembled = yield assemble({ vfiles: [testTextFive] });
     expect(assembled).toMatchSnapshot();
   });
 });
 
 describe("assemble changes in preMode", () => {
-  it("with no existing changes", async () => {
-    const assembled = await run(
-      assemble({
-        vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
-        preMode: { on: true, prevFiles: [] },
-      })
-    );
+  it("with no existing changes", function* () {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      preMode: { on: true, prevFiles: [] },
+    });
     expect(assembled).toMatchSnapshot();
   });
 
-  it("with existing changes that upgrade", async () => {
-    const assembled = await run(
-      assemble({
-        vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
-        preMode: { on: true, prevFiles: [testTextOne.data.filename] },
-      })
-    );
+  it("with existing changes that upgrade", function* () {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      preMode: { on: true, prevFiles: [testTextOne.data.filename] },
+    });
     expect(assembled).toMatchSnapshot();
   });
 
-  it("with existing changes with the same bump", async () => {
-    const assembled = await run(
-      assemble({
-        vfiles: [testTextOne, testTextTwo, testTextFour],
-        preMode: { on: true, prevFiles: [testTextOne.data.filename] },
-      })
-    );
+  it("with existing changes with the same bump", function* () {
+    const assembled = yield assemble({
+      vfiles: [testTextOne, testTextTwo, testTextFour],
+      preMode: { on: true, prevFiles: [testTextOne.data.filename] },
+    });
     expect(assembled).toMatchSnapshot();
   });
 });
@@ -266,14 +258,12 @@ This doesn't bump much.
 `,
   };
 
-  it("throws on no changes", async () => {
+  it("throws on no changes", function* () {
     expect.assertions(1);
     try {
-      await run(
-        assemble({
-          vfiles: [emptyChangefile],
-        })
-      );
+      yield assemble({
+        vfiles: [emptyChangefile],
+      });
     } catch (e: any) {
       expect(e.message).toMatch(
         ".changes/empty-file.md didn't have any packages bumped. Please add a package bump."
@@ -283,9 +273,25 @@ This doesn't bump much.
 });
 
 describe("special bump types", () => {
-  it("valid additional bump types", async () => {
-    const assembled = await run(
-      assemble({
+  it("valid additional bump types", function* () {
+    const assembled = yield assemble({
+      vfiles: [
+        testTextOne,
+        testTextTwo,
+        testTextThree,
+        testTextFour,
+        testTextSpecialOne,
+      ],
+      //@ts-ignore
+      config: configSpecial,
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("invalid bump types", function* () {
+    expect.assertions(1);
+    try {
+      yield assemble({
         vfiles: [
           testTextOne,
           testTextTwo,
@@ -294,28 +300,8 @@ describe("special bump types", () => {
           testTextSpecialOne,
         ],
         //@ts-ignore
-        config: configSpecial,
-      })
-    );
-    expect(assembled).toMatchSnapshot();
-  });
-
-  it("invalid bump types", async () => {
-    expect.assertions(1);
-    try {
-      await run(
-        assemble({
-          vfiles: [
-            testTextOne,
-            testTextTwo,
-            testTextThree,
-            testTextFour,
-            testTextSpecialOne,
-          ],
-          //@ts-ignore
-          config,
-        })
-      );
+        config,
+      });
     } catch (e: any) {
       expect(e.message).toMatch(
         "housekeeping specified for assemble1 is invalid.\n" +
@@ -324,16 +310,14 @@ describe("special bump types", () => {
     }
   });
 
-  it("one each valid and invalid", async () => {
+  it("one each valid and invalid", function* () {
     expect.assertions(1);
     try {
-      await run(
-        assemble({
-          vfiles: [testTextSpecialTwo],
-          //@ts-ignore
-          config: configSpecial,
-        })
-      );
+      yield assemble({
+        vfiles: [testTextSpecialTwo],
+        //@ts-ignore
+        config: configSpecial,
+      });
     } catch (e: any) {
       expect(e.message).toMatch(
         "explosions specified for @namespaced/assemble2 is invalid.\n" +
@@ -342,33 +326,29 @@ describe("special bump types", () => {
     }
   });
 
-  it("handles an only noop", async () => {
-    const assembled = await run(
-      assemble({
-        vfiles: [testTextSpecialOne],
-        //@ts-ignore
-        config: configSpecial,
-      })
-    );
+  it("handles an only noop", function* () {
+    const assembled = yield assemble({
+      vfiles: [testTextSpecialOne],
+      //@ts-ignore
+      config: configSpecial,
+    });
     expect(assembled).toMatchSnapshot();
   });
 });
 
 describe("merge config test", () => {
-  it("merges version", async () => {
-    const mergedVersionConfig = await run(
+  it("merges version", function* () {
+    //@ts-ignore
+    const mergedVersionConfig = yield mergeChangesToConfig({
       //@ts-ignore
-      mergeChangesToConfig({
-        //@ts-ignore
-        config,
-        assembledChanges,
-        command: "version",
-      })
-    );
+      config,
+      assembledChanges,
+      command: "version",
+    });
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges version without command", async () => {
+  it("merges version without command", function* () {
     let modifiedConfig = { ...config };
     //@ts-ignore
     delete modifiedConfig.pkgManagers.javascript.version;
@@ -379,19 +359,17 @@ describe("merge config test", () => {
     //@ts-ignore
     delete modifiedConfig.packages["@namespaced/assemble2"].version;
 
-    const mergedVersionConfig = await run(
+    //@ts-ignore
+    const mergedVersionConfig = yield mergeChangesToConfig({
       //@ts-ignore
-      mergeChangesToConfig({
-        //@ts-ignore
-        config: modifiedConfig,
-        assembledChanges,
-        command: "version",
-      })
-    );
+      config: modifiedConfig,
+      assembledChanges,
+      command: "version",
+    });
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges nested bumps", async () => {
+  it("merges nested bumps", function* () {
     const nestedAssembledChanges = {
       releases: {
         assemble1: {
@@ -448,64 +426,56 @@ describe("merge config test", () => {
       },
     };
 
-    const mergedVersionConfig = await run(
+    //@ts-ignore
+    const mergedVersionConfig = yield mergeChangesToConfig({
       //@ts-ignore
-      mergeChangesToConfig({
-        //@ts-ignore
-        config: nestedConfig,
-        assembledChanges: nestedAssembledChanges,
-        command: "version",
-      })
-    );
+      config: nestedConfig,
+      assembledChanges: nestedAssembledChanges,
+      command: "version",
+    });
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges publish", async () => {
+  it("merges publish", function* () {
     const configFolder = f.copy("assemble");
 
-    const mergedPublishConfig = await run(
-      mergeIntoConfig({
-        cwd: configFolder,
-        //@ts-ignore
-        config,
-        //@ts-ignore
-        assembledChanges: [],
-        command: "publish",
-      })
-    );
+    const mergedPublishConfig = yield mergeIntoConfig({
+      cwd: configFolder,
+      //@ts-ignore
+      config,
+      //@ts-ignore
+      assembledChanges: [],
+      command: "publish",
+    });
     expect(scrubVfile(mergedPublishConfig)).toMatchSnapshot();
   });
 });
 
 describe("merge filtered config test", () => {
-  it("merges version", async () => {
-    const mergedVersionConfig = await run(
+  it("merges version", function* () {
+    //@ts-ignore
+    const mergedVersionConfig = yield mergeChangesToConfig({
       //@ts-ignore
-      mergeChangesToConfig({
-        //@ts-ignore
-        config,
-        assembledChanges,
-        command: "version",
-        filterPackages: ["assemble1", "@namespaced/assemble1"],
-      })
-    );
+      config,
+      assembledChanges,
+      command: "version",
+      filterPackages: ["assemble1", "@namespaced/assemble1"],
+    });
     expect(mergedVersionConfig).toMatchSnapshot();
   });
 
-  it("merges publish", async () => {
+  it("merges publish", function* () {
     const configFolder = f.copy("assemble");
 
-    const mergedPublishConfig = await run(
+    //@ts-ignore
+    const mergedPublishConfig = yield mergeIntoConfig({
+      cwd: configFolder,
       //@ts-ignore
-      mergeIntoConfig({
-        cwd: configFolder,
-        //@ts-ignore
-        config,
-        assembledChanges,
-        command: "publish",
-        filterPackages: ["assemble1", "@namespaced/assemble1"],
-      })
-    );
+      config,
+      assembledChanges,
+      command: "publish",
+      filterPackages: ["assemble1", "@namespaced/assemble1"],
+    });
     expect(scrubVfile(mergedPublishConfig)).toMatchSnapshot();
   });
 });

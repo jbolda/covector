@@ -7536,12 +7536,7 @@ Object {
   "consoleDir": Array [],
   "consoleLog": Array [],
   "covectorReturn": Object {
-    "children": Array [],
-    "id": 101,
-    "labels": Object {},
-    "state": "errored",
-    "type": "generator",
-    "yieldingTo": undefined,
+    Symbol(effection/v2/iterator-controller/claimed): true,
   },
 }
 `;

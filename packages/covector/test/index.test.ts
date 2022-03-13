@@ -1,6 +1,7 @@
 import { covector } from "../src";
 import { CovectorVersion } from "@covector/types";
 import { run } from "effection";
+import { it } from "@effection/jest";
 //@ts-ignore
 import toVFile from "to-vfile";
 import path from "path";
@@ -19,14 +20,12 @@ describe("integration test in production mode", () => {
     restoreConsole();
   });
 
-  it("passes correct config for js and rust", async () => {
+  it("passes correct config for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
-      covector({
-        command: "status",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "status",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleDir: (console.dir as any).mock.calls,
@@ -34,15 +33,13 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   });
 
-  it("fails status for non-existant package", async () => {
+  it("fails status for non-existant package", function* () {
     const fullIntegration = f.copy("integration.js-with-change-file-error");
-    const covectored = run(
-      covector({
-        command: "status",
-        cwd: fullIntegration,
-      })
-    );
-    await expect(covectored).rejects.toThrow();
+    const covectored = covector({
+      command: "status",
+      cwd: fullIntegration,
+    });
+    yield expect(run(covectored)).rejects.toThrow();
     //@ts-ignore
     delete covectored.id;
     expect({
@@ -52,14 +49,12 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 
-  it("runs version for js and rust", async () => {
+  it("runs version for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -78,7 +73,7 @@ describe("integration test in production mode", () => {
       ),
     }).toMatchSnapshot();
 
-    const changelogTauriCore = await toVFile.read(
+    const changelogTauriCore = yield toVFile.read(
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
       "utf-8"
     );
@@ -88,7 +83,7 @@ describe("integration test in production mode", () => {
         "- Summary about the changes in tauri\n"
     );
 
-    const changelogTaurijs = await toVFile.read(
+    const changelogTaurijs = yield toVFile.read(
       path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
       "utf-8"
     );
@@ -99,14 +94,12 @@ describe("integration test in production mode", () => {
     );
   });
 
-  it("runs version for dart / flutter single", async () => {
+  it("runs version for dart / flutter single", function* () {
     const fullIntegration = f.copy("integration.dart-flutter-single");
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -125,7 +118,7 @@ describe("integration test in production mode", () => {
       ),
     }).toMatchSnapshot();
 
-    const changelog = await toVFile.read(
+    const changelog = yield toVFile.read(
       path.join(fullIntegration, "CHANGELOG.md"),
       "utf-8"
     );
@@ -136,7 +129,7 @@ describe("integration test in production mode", () => {
         "- Summary about the changes again(!) in test_app\n"
     );
 
-    const versionFile = await toVFile.read(
+    const versionFile = yield toVFile.read(
       path.join(fullIntegration, "pubspec.yaml"),
       "utf-8"
     );
@@ -145,14 +138,12 @@ describe("integration test in production mode", () => {
     );
   });
 
-  it("runs version for dart / flutter multi", async () => {
+  it("runs version for dart / flutter multi", function* () {
     const fullIntegration = f.copy("integration.dart-flutter-multi");
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -171,7 +162,7 @@ describe("integration test in production mode", () => {
       ),
     }).toMatchSnapshot();
 
-    const changelog = await toVFile.read(
+    const changelog = yield toVFile.read(
       path.join(fullIntegration, "dart", "CHANGELOG.md"),
       "utf-8"
     );
@@ -181,7 +172,7 @@ describe("integration test in production mode", () => {
         "- Summary about the changes in test_app_two\n"
     );
 
-    const versionFile = await toVFile.read(
+    const versionFile = yield toVFile.read(
       path.join(fullIntegration, "dart", "pubspec.yaml"),
       "utf-8"
     );
@@ -190,14 +181,12 @@ describe("integration test in production mode", () => {
     );
   });
 
-  it("runs version for general file", async () => {
+  it("runs version for general file", function* () {
     const fullIntegration = f.copy("integration.general-file");
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -216,7 +205,7 @@ describe("integration test in production mode", () => {
       ),
     }).toMatchSnapshot();
 
-    const changelog = await toVFile.read(
+    const changelog = yield toVFile.read(
       path.join(fullIntegration, "CHANGELOG.md"),
       "utf-8"
     );
@@ -227,21 +216,19 @@ describe("integration test in production mode", () => {
         "- A general summary about the generally changes in general-pkg generally\n"
     );
 
-    const versionFile = await toVFile.read(
+    const versionFile = yield toVFile.read(
       path.join(fullIntegration, "VERSION"),
       "utf-8"
     );
     expect(versionFile.contents).toBe("6.2.0");
   });
 
-  it("runs publish for js and rust", async () => {
+  it("runs publish for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "publish",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -249,14 +236,12 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   });
 
-  it("runs publish for dart / flutter", async () => {
+  it("runs publish for dart / flutter", function* () {
     const fullIntegration = f.copy("integration.dart-flutter-single");
-    const covectored = await run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "publish",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -264,14 +249,12 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   });
 
-  it("runs publish for general file", async () => {
+  it("runs publish for general file", function* () {
     const fullIntegration = f.copy("integration.general-file");
-    const covectored = await run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "publish",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -279,15 +262,13 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   });
 
-  it("fails with error", async () => {
+  it("fails with error", function* () {
     const fullIntegration = f.copy("integration.js-with-publish-error");
-    const covectored = run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-      })
-    );
-    await expect(covectored).rejects.toThrow();
+    const covectored = covector({
+      command: "publish",
+      cwd: fullIntegration,
+    });
+    yield expect(run(covectored)).rejects.toThrow();
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -295,7 +276,7 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 
-  it("fails version with errorOnVersionRange", async () => {
+  it("fails version with errorOnVersionRange", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const modifyConfig = async (pullConfig: any) => {
       const config = await pullConfig;
@@ -304,21 +285,19 @@ describe("integration test in production mode", () => {
       modified.pkgManagers.javascript.errorOnVersionRange = ">= 0.0.1";
       return modified;
     };
-    const covectored = run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-        modifyConfig,
-      })
-    );
-    await expect(covectored).rejects.toThrow();
+    const covectored = covector({
+      command: "version",
+      cwd: fullIntegration,
+      modifyConfig,
+    });
+    yield expect(run(covectored)).rejects.toThrow();
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 
-  it("fails status with errorOnVersionRange", async () => {
+  it("fails status with errorOnVersionRange", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const modifyConfig = async (pullConfig: any) => {
       const config = await pullConfig;
@@ -327,28 +306,24 @@ describe("integration test in production mode", () => {
       modified.pkgManagers.javascript.errorOnVersionRange = ">= 0.0.1";
       return modified;
     };
-    const covectored = run(
-      covector({
-        command: "status",
-        cwd: fullIntegration,
-        modifyConfig,
-      })
-    );
-    await expect(covectored).rejects.toThrow();
+    const covectored = covector({
+      command: "status",
+      cwd: fullIntegration,
+      modifyConfig,
+    });
+    yield expect(run(covectored)).rejects.toThrow();
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
 
-  it("runs test for js and rust", async () => {
+  it("runs test for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
-      covector({
-        command: "test",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "test",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -356,14 +331,12 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   });
 
-  it("runs build for js and rust", async () => {
+  it("runs build for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
-      covector({
-        command: "build",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "build",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -371,7 +344,7 @@ describe("integration test in production mode", () => {
     }).toMatchSnapshot();
   });
 
-  it("allows modifying the config", async () => {
+  it("allows modifying the config", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const modifyConfig = async (pullConfig: any) => {
       const config = await pullConfig;
@@ -403,47 +376,41 @@ describe("integration test in production mode", () => {
       );
     };
 
-    const covectored = await run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-        modifyConfig,
-      })
-    );
+    const covectored = yield covector({
+      command: "publish",
+      cwd: fullIntegration,
+      modifyConfig,
+    });
     expect((console.log as any).mock.calls).toMatchSnapshot();
   });
 
-  it("uses the action config modification", async () => {
+  it("uses the action config modification", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
 
-    const covectored = await run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-        modifyConfig: injectPublishFunctions([
-          async (pkg: any) =>
-            console.log(
-              `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`
-            ),
-          async () => console.log(`push another log`),
-        ]),
-      })
-    );
+    const covectored = yield covector({
+      command: "publish",
+      cwd: fullIntegration,
+      modifyConfig: injectPublishFunctions([
+        async (pkg: any) =>
+          console.log(
+            `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`
+          ),
+        async () => console.log(`push another log`),
+      ]),
+    });
     expect((console.log as any).mock.calls).toMatchSnapshot();
   });
 });
 
 describe("integration test in --dry-run mode", () => {
-  it("passes correct config for js and rust", async () => {
+  it("passes correct config for js and rust", function* () {
     const restoreConsole = mockConsole(["log", "dir"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
-      covector({
-        command: "status",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    );
+    const covectored = yield covector({
+      command: "status",
+      cwd: fullIntegration,
+      dryRun: true,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleDir: (console.dir as any).mock.calls,
@@ -452,16 +419,14 @@ describe("integration test in --dry-run mode", () => {
     restoreConsole();
   });
 
-  it("runs version for js and rust", async () => {
+  it("runs version for js and rust", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+      dryRun: true,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -484,27 +449,25 @@ describe("integration test in --dry-run mode", () => {
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
       "utf-8"
     );
-    await expect(changelogTauriCore).rejects.toThrow();
+    yield expect(changelogTauriCore).rejects.toThrow();
 
     const changelogTaurijs = toVFile.read(
       path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
       "utf-8"
     );
-    await expect(changelogTaurijs).rejects.toThrow();
+    yield expect(changelogTaurijs).rejects.toThrow();
 
     restoreConsole();
   });
 
-  it("runs publish for js and rust", async () => {
+  it("runs publish for js and rust", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    );
+    const covectored = yield covector({
+      command: "publish",
+      cwd: fullIntegration,
+      dryRun: true,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -513,16 +476,14 @@ describe("integration test in --dry-run mode", () => {
     restoreConsole();
   });
 
-  it("runs test for js and rust", async () => {
+  it("runs test for js and rust", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
-      covector({
-        command: "test",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    );
+    const covectored = yield covector({
+      command: "test",
+      cwd: fullIntegration,
+      dryRun: true,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -531,16 +492,14 @@ describe("integration test in --dry-run mode", () => {
     restoreConsole();
   });
 
-  it("runs build for js and rust", async () => {
+  it("runs build for js and rust", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
-    const covectored = await run(
-      covector({
-        command: "build",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    );
+    const covectored = yield covector({
+      command: "build",
+      cwd: fullIntegration,
+      dryRun: true,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -570,17 +529,15 @@ describe("integration test with preMode `on`", () => {
     restoreConsole();
   });
 
-  it("runs version in production for js and rust", async () => {
+  it("runs version in production for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
 
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -599,7 +556,7 @@ describe("integration test with preMode `on`", () => {
       ),
     }).toMatchSnapshot();
 
-    const changelogTauriCore = await toVFile.read(
+    const changelogTauriCore = yield toVFile.read(
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
       "utf-8"
     );
@@ -610,7 +567,7 @@ describe("integration test with preMode `on`", () => {
         "- Summary about the changes in tauri\n"
     );
 
-    const changelogTaurijs = await toVFile.read(
+    const changelogTaurijs = yield toVFile.read(
       path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
       "utf-8"
     );
@@ -622,18 +579,16 @@ describe("integration test with preMode `on`", () => {
     );
   });
 
-  it("runs version in production with existing changes for js and rust", async () => {
+  it("runs version in production with existing changes for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
-    const covectoredOne = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-      })
-    )) as CovectorVersion;
+    const covectoredOne = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    })) as CovectorVersion;
 
-    const changelogTauriCoreOne = await toVFile.read(
+    const changelogTauriCoreOne = yield toVFile.read(
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
       "utf-8"
     );
@@ -643,7 +598,7 @@ describe("integration test with preMode `on`", () => {
         "- Summary about the changes in tauri\n"
     );
 
-    const changelogTaurijsOne = await toVFile.read(
+    const changelogTaurijsOne = yield toVFile.read(
       path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
       "utf-8"
     );
@@ -655,7 +610,7 @@ describe("integration test with preMode `on`", () => {
         "- Summary about the changes in tauri\n"
     );
 
-    const preOne = await toVFile.read(
+    const preOne = yield toVFile.read(
       path.join(fullIntegration, ".changes", "pre.json"),
       "utf-8"
     );
@@ -675,7 +630,7 @@ Boop again.
     );
 
     // double check the write and formatting
-    const newChange = await toVFile.read(
+    const newChange = yield toVFile.read(
       path.join(fullIntegration, ".changes", "third-change.md"),
       "utf-8"
     );
@@ -683,14 +638,12 @@ Boop again.
       "---\n" + '"tauri-api": patch\n' + "---\n\n" + "Boop again.\n"
     );
 
-    const covectoredTwo = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-      })
-    )) as CovectorVersion;
+    const covectoredTwo = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    })) as CovectorVersion;
 
-    const changelogTauriCoreTwo = await toVFile.read(
+    const changelogTauriCoreTwo = yield toVFile.read(
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
       "utf-8"
     );
@@ -703,7 +656,7 @@ Boop again.
         "- Summary about the changes in tauri\n"
     );
 
-    const changelogTaurijsTwo = await toVFile.read(
+    const changelogTaurijsTwo = yield toVFile.read(
       path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
       "utf-8"
     );
@@ -718,7 +671,7 @@ Boop again.
         "- Summary about the changes in tauri\n"
     );
 
-    const preTwo = await toVFile.read(
+    const preTwo = yield toVFile.read(
       path.join(fullIntegration, ".changes", "pre.json"),
       "utf-8"
     );
@@ -758,18 +711,16 @@ Boop again.
     }).toMatchSnapshot();
   });
 
-  it("runs version in --dry-run mode for js and rust", async () => {
+  it("runs version in --dry-run mode for js and rust", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+      dryRun: true,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -792,29 +743,27 @@ Boop again.
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
       "utf-8"
     );
-    await expect(changelogTauriCore).rejects.toThrow();
+    yield expect(changelogTauriCore).rejects.toThrow();
 
     const changelogTaurijs = toVFile.read(
       path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
       "utf-8"
     );
-    await expect(changelogTaurijs).rejects.toThrow();
+    yield expect(changelogTaurijs).rejects.toThrow();
 
     restoreConsole();
   });
 });
 
 describe("integration test for complex commands", () => {
-  it("runs version for prod", async () => {
+  it("runs version for prod", function* () {
     jest.setTimeout(7000);
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -837,26 +786,24 @@ describe("integration test for complex commands", () => {
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
       "utf-8"
     );
-    await expect(changelogTauriCore).rejects.toThrow();
+    yield expect(changelogTauriCore).rejects.toThrow();
 
     const changelogTaurijs = toVFile.read(
       path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
       "utf-8"
     );
-    await expect(changelogTaurijs).rejects.toThrow();
+    yield expect(changelogTaurijs).rejects.toThrow();
 
     restoreConsole();
   });
 
-  it("runs publish for prod", async () => {
+  it("runs publish for prod", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "publish",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -865,15 +812,13 @@ describe("integration test for complex commands", () => {
     restoreConsole();
   });
 
-  it("runs test for prod", async () => {
+  it("runs test for prod", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await run(
-      covector({
-        command: "test",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "test",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -882,15 +827,13 @@ describe("integration test for complex commands", () => {
     restoreConsole();
   });
 
-  it("runs build for prod", async () => {
+  it("runs build for prod", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await run(
-      covector({
-        command: "build",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "build",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -899,16 +842,14 @@ describe("integration test for complex commands", () => {
     restoreConsole();
   });
 
-  it("runs version in --dry-run mode", async () => {
+  it("runs version in --dry-run mode", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = (await run(
-      covector({
-        command: "version",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    )) as CovectorVersion;
+    const covectored = (yield covector({
+      command: "version",
+      cwd: fullIntegration,
+      dryRun: true,
+    })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect({
@@ -931,27 +872,25 @@ describe("integration test for complex commands", () => {
       path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
       "utf-8"
     );
-    await expect(changelogTauriCore).rejects.toThrow();
+    yield expect(changelogTauriCore).rejects.toThrow();
 
     const changelogTaurijs = toVFile.read(
       path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
       "utf-8"
     );
-    await expect(changelogTaurijs).rejects.toThrow();
+    yield expect(changelogTaurijs).rejects.toThrow();
 
     restoreConsole();
   });
 
-  it("runs publish in --dry-run mode", async () => {
+  it("runs publish in --dry-run mode", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await run(
-      covector({
-        command: "publish",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    );
+    const covectored = yield covector({
+      command: "publish",
+      cwd: fullIntegration,
+      dryRun: true,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -960,16 +899,14 @@ describe("integration test for complex commands", () => {
     restoreConsole();
   });
 
-  it("runs test in --dry-run mode", async () => {
+  it("runs test in --dry-run mode", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await run(
-      covector({
-        command: "test",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    );
+    const covectored = yield covector({
+      command: "test",
+      cwd: fullIntegration,
+      dryRun: true,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -978,16 +915,14 @@ describe("integration test for complex commands", () => {
     restoreConsole();
   });
 
-  it("runs build in --dry-run mode", async () => {
+  it("runs build in --dry-run mode", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const covectored = await run(
-      covector({
-        command: "build",
-        cwd: fullIntegration,
-        dryRun: true,
-      })
-    );
+    const covectored = yield covector({
+      command: "build",
+      cwd: fullIntegration,
+      dryRun: true,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -1006,15 +941,13 @@ const scrubVfile = (covectored: any) => {
 };
 
 describe("integration test to invoke sub commands", () => {
-  it("runs publish-primary in prod mode", async () => {
+  it("runs publish-primary in prod mode", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-subcommands");
-    const covectored = await run(
-      covector({
-        command: "publish-primary",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "publish-primary",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -1023,15 +956,13 @@ describe("integration test to invoke sub commands", () => {
     restoreConsole();
   });
 
-  it("runs publishSecondary in prod mode", async () => {
+  it("runs publishSecondary in prod mode", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
     const fullIntegration = f.copy("integration.js-with-subcommands");
-    const covectored = await run(
-      covector({
-        command: "publishSecondary",
-        cwd: fullIntegration,
-      })
-    );
+    const covectored = yield covector({
+      command: "publishSecondary",
+      cwd: fullIntegration,
+    });
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
@@ -1050,15 +981,13 @@ describe("integration test for preview command", () => {
     restoreConsole();
   });
 
-  it("runs version and publish for js and rust", async () => {
+  it("runs version and publish for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-for-preview");
-    const covectored = await run(
-      covector({
-        command: "preview",
-        cwd: fullIntegration,
-        previewVersion: "branch-name.12345",
-      })
-    );
+    const covectored = yield covector({
+      command: "preview",
+      cwd: fullIntegration,
+      previewVersion: "branch-name.12345",
+    });
 
     expect({
       consoleLog: (console.log as any).mock.calls,
@@ -1077,16 +1006,14 @@ describe("integration test for preview command with dist tags", () => {
     restoreConsole();
   });
 
-  it("runs version and publish for js and rust", async () => {
+  it("runs version and publish for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-for-preview");
-    const covectored = await run(
-      covector({
-        command: "preview",
-        cwd: fullIntegration,
-        previewVersion: "branch-name.12345",
-        branchTag: "branch_name",
-      })
-    );
+    const covectored = yield covector({
+      command: "preview",
+      cwd: fullIntegration,
+      previewVersion: "branch-name.12345",
+      branchTag: "branch_name",
+    });
 
     expect({
       consoleLog: (console.log as any).mock.calls,
