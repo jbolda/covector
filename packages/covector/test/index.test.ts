@@ -813,7 +813,7 @@ describe("integration test for complex commands", () => {
   });
 
   it("runs test for prod", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "info", "error"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = yield covector({
       command: "test",
@@ -828,7 +828,7 @@ describe("integration test for complex commands", () => {
   }, 10000);
 
   it("runs build for prod", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "info", "error"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = yield covector({
       command: "build",
