@@ -825,7 +825,7 @@ describe("integration test for complex commands", () => {
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
-  });
+  }, 10000);
 
   it("runs build for prod", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
