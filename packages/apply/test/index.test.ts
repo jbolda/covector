@@ -1,6 +1,8 @@
 import { apply, changesConsideringParents, validateApply } from "../src";
 //@ts-ignore
 import toVFile from "to-vfile";
+import { run } from "effection";
+import { it } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
@@ -657,7 +659,7 @@ describe("list changes considering parents", () => {
     restoreConsole();
   });
 
-  it("adds changes for dependency", () => {
+  it("adds changes for dependency", function* () {
     const assembledChanges = {
       releases: {
         all: {
@@ -698,7 +700,7 @@ describe("list changes considering parents", () => {
     }).toMatchSnapshot();
   });
 
-  it("bumps patch due to dependency bump", () => {
+  it("bumps patch due to dependency bump", function* () {
     const assembledChanges = {
       releases: {
         "yarn-workspace-base-pkg-a": {
@@ -746,7 +748,7 @@ describe("list changes considering parents", () => {
     }).toMatchSnapshot();
   });
 
-  it("rolls up the parent bumps", () => {
+  it("rolls up the parent bumps", function* () {
     const changesFiles = [
       {
         releases: {
@@ -864,7 +866,7 @@ describe("list changes considering parents", () => {
 });
 
 describe("package file apply bump (async/await)", () => {
-  it("bumps single js json", async () => {
+  it("bumps single js json", function* () {
     const jsonFolder = f.copy("pkg.js-single-json");
 
     const commands = [
@@ -888,13 +890,14 @@ describe("package file apply bump (async/await)", () => {
     };
 
     expect.assertions(1);
-    await expect(async () =>
-      //@ts-ignore
-      validateApply({ commands, config, cwd: jsonFolder })
+    expect(
+      async () =>
+        //@ts-ignore
+        await run(validateApply({ commands, config, cwd: jsonFolder }))
     ).not.toThrow();
   });
 
-  it("bumps single rust toml", async () => {
+  it("bumps single rust toml", function* () {
     const rustFolder = f.copy("pkg.rust-single");
 
     const commands = [
@@ -918,13 +921,13 @@ describe("package file apply bump (async/await)", () => {
     };
 
     expect.assertions(1);
-    await expect(async () =>
+    expect(
       //@ts-ignore
-      validateApply({ commands, config, cwd: rustFolder })
+      async () => await validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
 
-  it("bumps multi js json", async () => {
+  it("bumps multi js json", function* () {
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
     const commands = [
@@ -971,13 +974,13 @@ describe("package file apply bump (async/await)", () => {
     };
 
     expect.assertions(1);
-    await expect(async () =>
+    expect(
       //@ts-ignore
-      validateApply({ commands, config, cwd: jsonFolder })
+      async () => await validateApply({ commands, config, cwd: jsonFolder })
     ).not.toThrow();
   });
 
-  it("bumps multi rust toml", async () => {
+  it("bumps multi rust toml", function* () {
     const rustFolder = f.copy("pkg.rust-multi");
 
     const commands = [
@@ -1013,13 +1016,13 @@ describe("package file apply bump (async/await)", () => {
     };
 
     expect.assertions(1);
-    await expect(async () =>
+    expect(
       //@ts-ignore
-      validateApply({ commands, config, cwd: rustFolder })
+      async () => await validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
 
-  it("bumps multi rust toml with object dep", async () => {
+  it("bumps multi rust toml with object dep", function* () {
     const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
     const commands = [
@@ -1055,13 +1058,13 @@ describe("package file apply bump (async/await)", () => {
     };
 
     expect.assertions(1);
-    await expect(async () =>
+    expect(
       //@ts-ignore
-      validateApply({ commands, config, cwd: rustFolder })
+      async () => await validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
 
-  it("bumps multi rust toml with dep missing patch", async () => {
+  it("bumps multi rust toml with dep missing patch", function* () {
     const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
     const commands = [
@@ -1097,13 +1100,13 @@ describe("package file apply bump (async/await)", () => {
     };
 
     expect.assertions(1);
-    await expect(async () =>
+    expect(
       //@ts-ignore
-      validateApply({ commands, config, cwd: rustFolder })
+      async () => await validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
 
-  it("bumps multi rust toml as patch with object dep missing patch", async () => {
+  it("bumps multi rust toml as patch with object dep missing patch", function* () {
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -1139,7 +1142,8 @@ describe("package file apply bump (async/await)", () => {
     };
 
     expect.assertions(1);
-    const validated = await validateApply({
+    //@ts-ignore
+    const validated = yield validateApply({
       //@ts-ignore
       commands,
       config,
@@ -1148,7 +1152,7 @@ describe("package file apply bump (async/await)", () => {
     expect(validated).toBe(true);
   });
 
-  it("bumps multi rust toml as minor with object dep without version number", async () => {
+  it("bumps multi rust toml as minor with object dep without version number", function* () {
     let restoreConsole = mockConsole(["error"]);
 
     const rustFolder = f.copy("pkg.rust-multi-object-path-dep-only");
@@ -1188,8 +1192,8 @@ describe("package file apply bump (async/await)", () => {
     expect.assertions(2);
     try {
       //@ts-ignore
-      await validateApply({ commands, config, cwd: rustFolder });
-    } catch (e) {
+      yield validateApply({ commands, config, cwd: rustFolder });
+    } catch (e: any) {
       expect(e.message).toMatch(
         "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
           "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
@@ -1237,6 +1241,7 @@ describe("packge file applies preview bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({
       //@ts-ignore
       commands,
@@ -1312,6 +1317,7 @@ describe("packge file applies preview bump", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({
       //@ts-ignore
       commands,
@@ -1356,7 +1362,7 @@ describe("packge file applies preview bump", () => {
   });
 });
 
-describe("packge file applies preview bump to pre-release", () => {
+describe("package file applies preview bump to pre-release", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir"]);
@@ -1388,6 +1394,7 @@ describe("packge file applies preview bump to pre-release", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({
       //@ts-ignore
       commands,
@@ -1463,6 +1470,7 @@ describe("packge file applies preview bump to pre-release", () => {
       },
     };
 
+    //@ts-ignore
     yield apply({
       //@ts-ignore
       commands,

@@ -245,6 +245,31 @@ Object {
 }
 `;
 
+exports[`package file applies preview bump to pre-release bumps multi js json without pre-release 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
+    ],
+    Array [
+      "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
+    ],
+  ],
+}
+`;
+
+exports[`package file applies preview bump to pre-release bumps single js json without pre-release 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
+    ],
+  ],
+}
+`;
+
 exports[`package file apply bump (async/await) bumps multi rust toml as minor with object dep without version number 1`] = `
 Object {
   "consoleError": Array [],
@@ -402,31 +427,6 @@ Object {
   "consoleLog": Array [
     Array [
       "bumping js-single-json-fixture with branch-name.12345 identifier to publish a preview",
-    ],
-  ],
-}
-`;
-
-exports[`packge file applies preview bump to pre-release bumps multi js json without pre-release 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-    ],
-    Array [
-      "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-    ],
-  ],
-}
-`;
-
-exports[`packge file applies preview bump to pre-release bumps single js json without pre-release 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
     ],
   ],
 }

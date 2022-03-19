@@ -13,6 +13,7 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
+    "forceConsistentCasingInFileNames": true,
     "paths": {
       "@covector/types": ["packages/types/src"],
       "covector": ["packages/covector/src"],

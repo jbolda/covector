@@ -3,6 +3,7 @@ import {
   pullLastChangelog,
   pipeChangelogToCommands,
 } from "../src";
+import { it } from "@effection/jest";
 //@ts-ignore
 import toVFile from "to-vfile";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
@@ -449,6 +450,7 @@ describe("changelog", () => {
       cwd: projectFolder,
     });
 
+    //@ts-ignore
     pkgCommandsRan = yield pipeChangelogToCommands({
       changelogs,
       pkgCommandsRan,
@@ -464,7 +466,7 @@ describe("changelog", () => {
     );
   });
 
-  it("reads a changelog with multiple entries", function* (): Generator<any> {
+  it("reads a changelog with multiple entries", function* () {
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [

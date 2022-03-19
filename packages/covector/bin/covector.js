@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { main } = require("@effection/node");
+const { main } = require("effection");
 const { cli, covector } = require("covector");
 
 main(function* start() {

@@ -1,7 +1,6 @@
 import { spawn, timeout } from "effection";
-import { exec, Process } from "@effection/node";
+import { exec } from "@effection/process";
 import execa from "execa";
-import stripAnsi from "strip-ansi";
 import path from "path";
 
 import type {
@@ -184,7 +183,7 @@ export const runCommand = function* ({
   log: false | string;
 }): Generator<any, string, any> {
   if (log !== false) console.log(log);
-  raceTime();
+  yield raceTime();
 
   return yield* sh(
     command,
@@ -198,10 +197,10 @@ export const runCommand = function* ({
 
 export const sh = function* (
   command: string,
-  options: object,
+  options: { [k: string]: any },
   log: false | string
 ): Generator<any, string, any> {
-  if (command.includes("|")) {
+  if (command.includes("|") && !options.shell) {
     try {
       const child = yield execa.command(command, {
         ...options,
@@ -214,51 +213,42 @@ export const sh = function* (
         console.log(out);
       }
       return out;
-    } catch (e) {
-      throw new Error(e);
+    } catch (error: any) {
+      throw new Error(error);
     }
   } else {
-    let child: Process = yield exec(command, options);
+    let out = "";
+    let child = yield exec(command, options);
 
-    if (log !== false) {
-      yield spawn(
-        child.stdout
-          .subscribe()
-          //@ts-ignore Types of parameters 'datum' and 'value' are incompatible. Type 'unknown' is not assignable to type 'Buffer'.
-          .forEach(function* (datum: Buffer): Generator<void> {
-            const out = stripAnsi(datum.toString().trim());
-            if (out !== "") console.log(out);
-          })
-      );
-
-      yield spawn(
-        child.stderr
-          .subscribe()
-          //@ts-ignore Types of parameters 'datum' and 'value' are incompatible. Type 'unknown' is not assignable to type 'Buffer'.
-          .forEach(function* (datum: Buffer): Generator<void> {
-            const out = stripAnsi(datum.toString().trim());
-            if (out !== "") console.error(out);
-          })
-      );
-    }
-
-    const out = yield child.expect();
-    const stripped: string = stripAnsi(
-      Buffer.concat(out.tail).toString().trim()
+    yield spawn(
+      child.stdout.forEach((text: String) => {
+        out = `${out}${text}`;
+        if (log !== false) console.log(text.toString().trim());
+      })
     );
-    return stripped;
+
+    yield spawn(
+      child.stderr.forEach((text: String) => {
+        out = `${out}${text}`;
+        if (log !== false) console.error(text.toString().trim());
+      })
+    );
+
+    yield child.expect();
+    return out.trim();
   }
 };
 
-export const raceTime = function ({
+export const raceTime = function* ({
   t = 1200000,
   msg = `timeout out waiting ${t / 1000}s for command`,
 }: {
   t?: number;
   msg?: string;
-} = {}) {
-  return spawn(function* () {
-    yield timeout(t);
+} = {}): Generator<any> {
+  try {
+    yield spawn(timeout(t));
+  } catch (e) {
     throw new Error(msg);
-  });
+  }
 };
