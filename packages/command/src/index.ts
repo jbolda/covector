@@ -1,5 +1,6 @@
 import { spawn, timeout } from "effection";
 import { exec } from "@effection/process";
+import execa from "execa";
 import path from "path";
 
 import type {
@@ -196,35 +197,46 @@ export const runCommand = function* ({
 
 export const sh = function* (
   command: string,
-  options: object,
+  options: { [k: string]: any },
   log: false | string
 ): Generator<any, string, any> {
-  let modifiedOptions = {};
-  //@ts-ignore
   if (command.includes("|") && !options.shell) {
-    modifiedOptions = Object.assign({}, options, { shell: true });
+    try {
+      const child = yield execa.command(command, {
+        ...options,
+        shell: true,
+        all: true,
+        timeout: 1200000,
+      });
+      const out = child.stdout;
+      if (log !== false) {
+        console.log(out);
+      }
+      return out;
+    } catch (error: any) {
+      throw new Error(error);
+    }
   } else {
-    modifiedOptions = options;
+    let out = "";
+    let child = yield exec(command, options);
+
+    yield spawn(
+      child.stdout.forEach((text: String) => {
+        out = `${out}${text}`;
+        if (log !== false) console.log(text.toString().trim());
+      })
+    );
+
+    yield spawn(
+      child.stderr.forEach((text: String) => {
+        out = `${out}${text}`;
+        if (log !== false) console.error(text.toString().trim());
+      })
+    );
+
+    yield child.expect();
+    return out.trim();
   }
-  let out = "";
-  let child = yield exec(command, modifiedOptions);
-
-  yield spawn(
-    child.stdout.forEach((text: String) => {
-      out = `${out}${text}`;
-      if (log !== false) console.log(text.toString().trim());
-    })
-  );
-
-  yield spawn(
-    child.stderr.forEach((text: String) => {
-      out = `${out}${text}`;
-      if (log !== false) console.error(text.toString().trim());
-    })
-  );
-
-  yield child.expect();
-  return out.trim();
 };
 
 export const raceTime = function* ({
