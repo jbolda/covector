@@ -840,7 +840,7 @@ describe("integration test for complex commands", () => {
       covectorReturn: scrubVfile(covectored),
     }).toMatchSnapshot();
     restoreConsole();
-  });
+  }, 10000);
 
   it("runs version in --dry-run mode", function* () {
     const restoreConsole = mockConsole(["log", "info"]);
