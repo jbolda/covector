@@ -22,7 +22,7 @@ export interface PkgMinimum {
   versionMajor?: number;
   versionMinor?: number;
   versionPatch?: number;
-  versionPrerelease?: readonly string[] | (string | number)[] | null;
+  versionPrerelease?: readonly (string | number)[] | null;
 }
 
 export interface PackageFile extends PkgMinimum {
