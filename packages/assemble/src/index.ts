@@ -38,10 +38,9 @@ const parseChange = function* ({
   const parsed = processor.parse(vfile.contents.trim());
   const processed: Root = yield processor.run(parsed);
   let changeset: Changeset = {};
-  const [parsedChanges, ...remaining]: (
-    | Frontmatter
-    | Content
-  )[] = processed.children;
+  const [parsedChanges, ...remaining]: (Frontmatter | Content)[] =
+    processed.children;
+  //@ts-ignore
   const parsedYaml = yaml.load(parsedChanges.value as string);
   changeset.releases =
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
@@ -52,6 +51,7 @@ const parseChange = function* ({
   changeset.summary = processor
     .stringify({
       type: "root",
+      //@ts-ignore
       children: remaining,
     })
     .trim();
@@ -482,9 +482,10 @@ export const mergeIntoConfig = function* ({
           ]
             ? {}
             : {
-                [`getPublishedVersion${publishElements.subPublishCommand}`]: publishElements[
-                  `getPublishedVersion${publishElements.subPublishCommand}`
-                ],
+                [`getPublishedVersion${publishElements.subPublishCommand}`]:
+                  publishElements[
+                    `getPublishedVersion${publishElements.subPublishCommand}`
+                  ],
               }),
           ...(!publishElements.assets
             ? {}
