@@ -70,7 +70,7 @@ export const add = function* ({
   const frontmatter = `---
 ${answers.packages
   //@ts-ignore
-  .map((pkg) => `'${pkg}': ${packageBumps[pkg].bump}`)
+  .map((pkg) => `"${pkg}": ${packageBumps[pkg].bump}`)
   .join("\n")}
 ---\n\n`;
 
