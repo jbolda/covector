@@ -7,6 +7,10 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+const configDefaults = {
+  changeFolder: ".changes",
+};
+
 describe("package file apply bump (snapshot)", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
@@ -1129,6 +1133,7 @@ describe("package file apply bump (async/await)", () => {
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         rust_pkg_a_fixture: {
           path: "./pkg-a/",
@@ -1233,6 +1238,7 @@ describe("packge file applies preview bump", () => {
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         "js-single-json-fixture": {
           path: "./",
@@ -1386,6 +1392,7 @@ describe("package file applies preview bump to pre-release", () => {
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         "js-single-prerelease-json-fixture": {
           path: "./",
