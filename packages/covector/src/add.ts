@@ -65,6 +65,13 @@ export const add = function* ({
       }
       return true;
     },
+    filter: (input) => {
+      if (input.endsWith(".md")) {
+        return input;
+      } else {
+        return `${input}.md`;
+      }
+    },
   });
 
   const frontmatter = `---
@@ -76,7 +83,7 @@ ${answers.packages
 
   const content = `${frontmatter}${summary.input}\n`;
 
-  yield fs.writeFile(join(cwd, changeFolder, `${file.name}.md`), content);
+  yield fs.writeFile(join(cwd, changeFolder, `${file.name}`), content);
 
   return "complete";
 };
