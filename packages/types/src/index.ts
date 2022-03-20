@@ -1,3 +1,5 @@
+import { PathLike } from "fs";
+
 /* @covector/files */
 export interface VFile {
   contents: string;
@@ -38,6 +40,7 @@ export interface PreFile {
 
 export type ConfigFile = {
   vfile?: VFile;
+  changeFolder: PathLike;
   gitSiteUrl?: string;
   pkgManagers?: {
     [k: string]: {
