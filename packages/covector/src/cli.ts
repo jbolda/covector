@@ -1,21 +1,24 @@
 import yargs from "yargs";
 const { init } = require("./init");
+const { add } = require("./add");
 
 export function* cli(
   argv: readonly string[],
   covector: (arg0: { command: string; dryRun: boolean }) => any
 ) {
   const options = parseOptions(argv);
-  if (options.command === "init")
+  if (options.command === "init") {
     //@ts-ignore
     return yield init({ ...options, changeFolder: options.directory });
+  } else if (options.command === "add") {
+    //@ts-ignore
+    return yield add({ ...options, changeFolder: options.directory });
+  }
   //@ts-ignore
   return yield covector(options);
 }
 
-function parseOptions(
-  argv: readonly string[]
-): {
+function parseOptions(argv: readonly string[]): {
   command: string;
   dryRun: boolean;
   yes: boolean | undefined;

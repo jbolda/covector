@@ -10,6 +10,10 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+const configDefaults = {
+  changeFolder: ".changes",
+};
+
 describe("changelog", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
@@ -58,6 +62,7 @@ describe("changelog", () => {
     };
 
     const config = {
+      ...configDefaults,
       packages: {
         "js-single-json-fixture": {
           path: "./",
@@ -161,6 +166,7 @@ describe("changelog", () => {
     };
 
     const config = {
+      ...configDefaults,
       packages: {
         "js-single-json-fixture": {
           path: "./",
@@ -235,6 +241,7 @@ describe("changelog", () => {
     };
 
     const config = {
+      ...configDefaults,
       packages: {
         "pkg-nickname": {
           path: "./",
@@ -304,6 +311,7 @@ describe("changelog", () => {
     };
 
     const config = {
+      ...configDefaults,
       packages: {
         "changelog-js-pkg-fixture": {
           path: "./",
@@ -422,6 +430,7 @@ describe("changelog", () => {
     const pkgName = "js-single-json-fixture";
 
     const config = {
+      ...configDefaults,
       packages: {
         [pkgName]: {
           path: "./",
@@ -513,6 +522,7 @@ describe("changelog", () => {
     const pkgName = "changelog-js-pkg-fixture";
 
     const config = {
+      ...configDefaults,
       packages: {
         [pkgName]: {
           path: "./",
