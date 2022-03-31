@@ -1,11 +1,11 @@
-import { PathLike } from "fs";
+import type { PathLike } from "fs";
 
 /* @covector/files */
-export interface VFile {
-  contents: string;
-  path: string;
+export interface File {
+  content: string;
+  path: PathLike;
+  filename: string;
   extname: string;
-  data: { filename: string };
 }
 
 // Pkg for toml has a `.packages` so we need to address this union
@@ -28,18 +28,18 @@ export interface PkgMinimum {
 }
 
 export interface PackageFile extends PkgMinimum {
-  vfile?: VFile;
+  file?: File;
   name?: string;
 }
 
 export interface PreFile {
-  vfile?: VFile;
+  file?: File;
   tag: string;
   changes: string[] | [];
 }
 
 export type ConfigFile = {
-  vfile?: VFile;
+  file?: File;
   changeFolder: PathLike;
   gitSiteUrl?: string;
   pkgManagers?: {

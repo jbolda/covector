@@ -9,7 +9,7 @@ import { readPkgFile } from "@covector/files";
 import { runCommand } from "@covector/command";
 
 import type {
-  VFile,
+  File,
   ConfigFile,
   Changeset,
   CommonBumps,
@@ -23,10 +23,10 @@ import type {
 
 const parseChange = function* ({
   cwd,
-  vfile,
+  file,
 }: {
   cwd?: string;
-  vfile: VFile;
+  file: File;
 }): Generator<any, Changeset, any> {
   const processor = unified()
     .use(parse)
@@ -35,7 +35,7 @@ const parseChange = function* ({
       bullet: "-",
     });
 
-  const parsed = processor.parse(vfile.contents.trim());
+  const parsed = processor.parse(file.content.trim());
   const processed: Root = yield processor.run(parsed);
   let changeset: Changeset = {};
   const [parsedChanges, ...remaining]: (Frontmatter | Content)[] =
@@ -46,7 +46,7 @@ const parseChange = function* ({
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
   if (Object.keys(changeset.releases).length === 0)
     throw new Error(
-      `${vfile.data.filename} didn't have any packages bumped. Please add a package bump.`
+      `${file.filename} didn't have any packages bumped. Please add a package bump.`
     );
   changeset.summary = processor
     .stringify({
@@ -61,7 +61,7 @@ const parseChange = function* ({
       let gitInfo = yield runCommand({
         cwd,
         pkgPath: "",
-        command: `git log --reverse --format="%h %H %as %s" ${vfile.data.filename}`,
+        command: `git log --reverse --format="%h %H %as %s" ${file.filename}`,
         log: false,
       });
       const commits = gitInfo.split(/\n/).map((commit: string) => {
@@ -75,12 +75,12 @@ const parseChange = function* ({
       });
 
       changeset.meta = {
-        ...vfile.data,
+        ...file,
         commits,
       };
     } catch (e) {
       changeset.meta = {
-        ...vfile.data,
+        ...file,
       };
     }
   }
@@ -155,12 +155,12 @@ function assertBumpType(
 
 export const assemble = function* ({
   cwd,
-  vfiles,
+  files,
   config,
   preMode = { on: false, prevFiles: [] },
 }: {
   cwd?: string;
-  vfiles: VFile[];
+  files: File[];
   config?: ConfigFile;
   preMode?: { on: boolean; prevFiles: string[] };
 }) {
@@ -177,15 +177,15 @@ export const assemble = function* ({
   // if in prerelease mode, we only make bumps if the new one is "larger" than the last
   // otherwise we only want a prerelease bump (which just increments the ending number)
   if (preMode.on) {
-    const allChanges: Change[] = yield changesParsed({ cwd, vfiles });
+    const allChanges: Change[] = yield changesParsed({ cwd, files });
     const allMergedRelease = mergeReleases(allChanges, config || {});
     if (preMode.prevFiles.length > 0) {
-      const newVfiles = vfiles.reduce((newVFiles: VFile[], vfile) => {
+      const newVfiles = files.reduce((newVFiles: File[], file) => {
         const prevFile = preMode.prevFiles.find(
-          (filename) => vfile.data.filename === filename
+          (filename) => file.filename === filename
         );
         if (!prevFile) {
-          return newVFiles.concat([vfile]);
+          return newVFiles.concat([file]);
         } else {
           return newVFiles;
         }
@@ -196,12 +196,12 @@ export const assemble = function* ({
       });
       const newMergedRelease = mergeReleases(newChanges, config || {});
 
-      const oldVfiles = vfiles.reduce((newVFiles: VFile[], vfile) => {
+      const oldVfiles = files.reduce((newVFiles: File[], file) => {
         const prevFile = preMode.prevFiles.find(
-          (filename) => vfile.data.filename === filename
+          (filename) => file.filename === filename
         );
         if (prevFile) {
-          return newVFiles.concat([vfile]);
+          return newVFiles.concat([file]);
         } else {
           return newVFiles;
         }
@@ -226,7 +226,7 @@ export const assemble = function* ({
       });
     }
   } else {
-    let changes: Change[] = yield changesParsed({ cwd, vfiles });
+    let changes: Change[] = yield changesParsed({ cwd, files });
     plan.changes = changes;
     plan.releases = mergeReleases(changes, config || {});
   }
@@ -255,12 +255,12 @@ export const assemble = function* ({
 
 const changesParsed = function* ({
   cwd,
-  vfiles,
+  files,
 }: {
   cwd?: string;
-  vfiles: VFile[];
+  files: File[];
 }): Generator<any, Change[], any> {
-  const allVfiles = vfiles.map((vfile) => parseChange({ cwd, vfile }));
+  const allVfiles = files.map((file) => parseChange({ cwd, file }));
   let yieldedV: Change[] = [];
   for (let v of allVfiles) {
     yieldedV = [...yieldedV, yield v];

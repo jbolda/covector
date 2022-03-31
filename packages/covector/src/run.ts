@@ -7,7 +7,7 @@ import {
   configFile,
   readPreFile,
   changeFiles,
-  changeFilesToVfile,
+  loadChangeFiles,
   changeFilesRemove,
   writePreFile,
 } from "@covector/files";
@@ -62,13 +62,13 @@ export function* covector({
     cwd,
     changeFolder: config.changeFolder,
   });
-  const changesVfiles = changeFilesToVfile({
+  const changeFilesLoaded = yield loadChangeFiles({
     cwd,
     paths: changesPaths,
   });
   const assembledChanges = yield assemble({
     cwd,
-    vfiles: changesVfiles,
+    files: changeFilesLoaded,
     config,
     preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
@@ -77,17 +77,16 @@ export function* covector({
     if (changesVfiles.length === 0) {
       console.info("There are no changes.");
 
-      const {
-        commands: publishCommands,
-      }: { commands: PkgPublish[] } = yield mergeIntoConfig({
-        assembledChanges,
-        config,
-        command: "publish",
-        cwd,
-        dryRun,
-        filterPackages,
-        tag: branchTag,
-      });
+      const { commands: publishCommands }: { commands: PkgPublish[] } =
+        yield mergeIntoConfig({
+          assembledChanges,
+          config,
+          command: "publish",
+          cwd,
+          dryRun,
+          filterPackages,
+          tag: branchTag,
+        });
 
       if (publishCommands.length === 0) {
         console.log(`No commands configured to run on publish.`);
@@ -376,17 +375,16 @@ export function* covector({
       dryRun,
     });
 
-    const {
-      commands: publishCommands,
-    }: { commands: PkgPublish[] } = yield mergeIntoConfig({
-      assembledChanges,
-      config,
-      command: "publish",
-      cwd,
-      dryRun,
-      filterPackages,
-      tag: branchTag,
-    });
+    const { commands: publishCommands }: { commands: PkgPublish[] } =
+      yield mergeIntoConfig({
+        assembledChanges,
+        config,
+        command: "publish",
+        cwd,
+        dryRun,
+        filterPackages,
+        tag: branchTag,
+      });
 
     if (publishCommands.length === 0) {
       console.log(`No commands configured to run on publish.`);
