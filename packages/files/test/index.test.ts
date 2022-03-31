@@ -3,7 +3,7 @@ import {
   readPreFile,
   configFile,
   changeFiles,
-  changeFilesToVfile,
+  loadChangeFiles,
 } from "../src";
 import { it } from "@effection/jest";
 import mockConsole from "jest-mock-console";
@@ -13,26 +13,28 @@ const f = fixtures(__dirname);
 describe("file test", () => {
   describe("parses json", () => {
     const jsonFolder = f.copy("pkg.js-single-json");
+    console.dir(jsonFolder);
 
     it("with file specified", function* () {
-      const jsonVfile = yield readPkgFile({
-        file: jsonFolder + "/package.json",
+      const jsonFile = yield readPkgFile({
+        file: "package.json",
+        cwd: jsonFolder,
         nickname: "js-single-json-fixture",
       });
-      expect(jsonVfile.name).toBe("js-single-json-fixture");
-      expect(jsonVfile?.pkg?.name).toBe("js-single-json-fixture");
-      expect(jsonVfile.version).toBe("0.5.9");
+      expect(jsonFile.name).toBe("js-single-json-fixture");
+      expect(jsonFile?.pkg?.name).toBe("js-single-json-fixture");
+      expect(jsonFile.version).toBe("0.5.9");
     });
 
     it("by deriving", function* () {
-      const jsonVfile = yield readPkgFile({
+      const jsonFile = yield readPkgFile({
         cwd: jsonFolder,
         pkgConfig: { manager: "javascript", path: "." },
         nickname: "js-single-json-fixture",
       });
-      expect(jsonVfile.name).toBe("js-single-json-fixture");
-      expect(jsonVfile?.pkg?.name).toBe("js-single-json-fixture");
-      expect(jsonVfile.version).toBe("0.5.9");
+      expect(jsonFile.name).toBe("js-single-json-fixture");
+      expect(jsonFile?.pkg?.name).toBe("js-single-json-fixture");
+      expect(jsonFile.version).toBe("0.5.9");
     });
   });
 
@@ -40,26 +42,27 @@ describe("file test", () => {
     const cargoFolder = f.copy("pkg.rust-single");
 
     it("with file specified", function* () {
-      const cargoVfile = yield readPkgFile({
-        file: cargoFolder + "/Cargo.toml",
+      const cargoFile = yield readPkgFile({
+        file: "Cargo.toml",
+        cwd: cargoFolder,
         nickname: "rust-single-fixture",
       });
-      expect(cargoVfile.name).toBe("rust-single-fixture");
+      expect(cargoFile.name).toBe("rust-single-fixture");
       //@ts-ignore
-      expect(cargoVfile?.pkg?.package?.name).toBe("rust-single-fixture");
-      expect(cargoVfile.version).toBe("0.5.0");
+      expect(cargoFile?.pkg?.package?.name).toBe("rust-single-fixture");
+      expect(cargoFile.version).toBe("0.5.0");
     });
 
     it("by deriving", function* () {
-      const cargoVfile = yield readPkgFile({
+      const cargoFile = yield readPkgFile({
         cwd: cargoFolder,
         pkgConfig: { manager: "rust", path: "." },
         nickname: "rust-single-fixture",
       });
-      expect(cargoVfile.name).toBe("rust-single-fixture");
+      expect(cargoFile.name).toBe("rust-single-fixture");
       //@ts-ignore
-      expect(cargoVfile?.pkg?.package?.name).toBe("rust-single-fixture");
-      expect(cargoVfile.version).toBe("0.5.0");
+      expect(cargoFile?.pkg?.package?.name).toBe("rust-single-fixture");
+      expect(cargoFile.version).toBe("0.5.0");
     });
   });
 
@@ -67,46 +70,48 @@ describe("file test", () => {
     const yamlFolder = f.copy("pkg.dart-flutter-single");
 
     it("with file specified", function* () {
-      const yamlVfile = yield readPkgFile({
-        file: yamlFolder + "/pubspec.yaml",
+      const yamlFile = yield readPkgFile({
+        file: "pubspec.yaml",
+        cwd: yamlFolder,
         nickname: "test_app",
       });
-      expect(yamlVfile.name).toBe("test_app");
-      expect(yamlVfile?.pkg?.name).toBe("test_app");
-      expect(yamlVfile.version).toBe("0.3.1");
+      expect(yamlFile.name).toBe("test_app");
+      expect(yamlFile?.pkg?.name).toBe("test_app");
+      expect(yamlFile.version).toBe("0.3.1");
     });
 
     it("by deriving via dart", function* () {
-      const yamlVfile = yield readPkgFile({
+      const yamlFile = yield readPkgFile({
         cwd: yamlFolder,
         pkgConfig: { manager: "dart", path: "." },
         nickname: "test_app",
       });
-      expect(yamlVfile.name).toBe("test_app");
-      expect(yamlVfile?.pkg?.name).toBe("test_app");
-      expect(yamlVfile.version).toBe("0.3.1");
+      expect(yamlFile.name).toBe("test_app");
+      expect(yamlFile?.pkg?.name).toBe("test_app");
+      expect(yamlFile.version).toBe("0.3.1");
     });
 
     it("by deriving via flutter", function* () {
-      const yamlVfile = yield readPkgFile({
+      const yamlFile = yield readPkgFile({
         cwd: yamlFolder,
         pkgConfig: { manager: "flutter", path: "." },
         nickname: "test_app",
       });
-      expect(yamlVfile.name).toBe("test_app");
-      expect(yamlVfile?.pkg?.name).toBe("test_app");
-      expect(yamlVfile.version).toBe("0.3.1");
+      expect(yamlFile.name).toBe("test_app");
+      expect(yamlFile?.pkg?.name).toBe("test_app");
+      expect(yamlFile.version).toBe("0.3.1");
     });
   });
 
   it("parses general file", function* () {
     const generalFolder = f.copy("pkg.general-file");
-    const generalVfile = yield readPkgFile({
-      file: generalFolder + "/VERSION",
+    const generalFile = yield readPkgFile({
+      file: "VERSION",
+      cwd: generalFolder,
       nickname: "general-package",
     });
-    expect(generalVfile.name).toBe("general-package");
-    expect(generalVfile.version).toBe("6.1.0");
+    expect(generalFile.name).toBe("general-package");
+    expect(generalFile.version).toBe("6.1.0");
   });
 
   it("parses config", function* () {
@@ -142,11 +147,11 @@ describe("file test", () => {
     const restoreConsole = mockConsole(["info"]);
     const changesFolder = f.copy("changes.multiple-changes");
     const changesPaths = yield changeFiles({ cwd: changesFolder });
-    const changesVfiles = changeFilesToVfile({
+    const changesFiles = yield loadChangeFiles({
       cwd: changesFolder,
       paths: changesPaths,
     });
-    expect(changesVfiles).toMatchSnapshot();
+    expect(changesFiles).toMatchSnapshot();
     restoreConsole();
   });
 
