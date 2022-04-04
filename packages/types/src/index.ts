@@ -63,13 +63,6 @@ export type ConfigFile = {
   additionalBumpTypes?: string[];
 };
 
-export type ChangelogFile = {
-  path: string;
-  contents: string;
-  extname: string;
-  data: { filename: string };
-};
-
 /* @covector/command */
 export type RunningCommand = {
   command?: string | Function;
@@ -85,6 +78,11 @@ export type NormalizedCommand = {
 };
 
 /* @covector/changelog */
+export type Changelog = {
+  changes: { name: string; version: string };
+  changelog: File;
+};
+
 export type PkgCommandResponse = {
   precommand?: string | boolean;
   command: string | boolean;

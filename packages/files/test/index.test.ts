@@ -13,7 +13,6 @@ const f = fixtures(__dirname);
 describe("file test", () => {
   describe("parses json", () => {
     const jsonFolder = f.copy("pkg.js-single-json");
-    console.dir(jsonFolder);
 
     it("with file specified", function* () {
       const jsonFile = yield readPkgFile({

@@ -17,28 +17,30 @@ import type {
   ConfigFile,
 } from "@covector/types";
 
-function* loadFile(file: PathLike, cwd: string): Generator<any, File, any> {
-  if (typeof file !== "string")
+export function* loadFile(
+  file: PathLike,
+  cwd: string
+): Generator<any, File | void, any> {
+  if (typeof file === "string") {
+    const content = yield fs.readFile(path.join(cwd, file), {
+      encoding: "utf-8",
+    });
+    const parsedPath = path.parse(file);
     return {
-      content: "",
-      path: file,
-      filename: "",
-      extname: "",
+      content,
+      path: path.relative(cwd, path.join(cwd, file)),
+      filename: parsedPath?.name ?? "",
+      extname: parsedPath?.ext ?? "",
     };
-  const content = yield fs.readFile(path.join(cwd, file), "utf-8");
-  const parsedPath = path.parse(file);
-  return {
-    content,
-    path: path.relative(cwd, path.join(cwd, file)),
-    filename: parsedPath?.name ?? "",
-    extname: parsedPath?.ext ?? "",
-  };
+  }
 }
 
-export function* writeFile(file: File, cwd: string): Generator<any, File, any> {
+export function* saveFile(file: File, cwd: string): Generator<any, File, any> {
   if (typeof file.path !== "string")
     throw new Error(`Unable to handle saving of ${file}`);
-  yield fs.writeFile(path.join(cwd, file.path), file.content, "utf-8");
+  yield fs.writeFile(path.join(cwd, file.path), file.content, {
+    encoding: "utf-8",
+  });
   return file;
 }
 
@@ -195,7 +197,7 @@ export function* writePkgFile({
     newContents: packageFile.pkg,
     extname: packageFile.file.extname,
   });
-  const inputFile = yield writeFile(fileNext, cwd);
+  const inputFile = yield saveFile(fileNext, cwd);
   return inputFile;
 }
 
@@ -378,7 +380,7 @@ export function* writePreFile({
     newContents: { tag, changes },
     extname: preFile.file.extname,
   });
-  const inputFile = yield writeFile(fileNext, cwd);
+  const inputFile = yield saveFile(fileNext, cwd);
   return inputFile;
 }
 
@@ -517,7 +519,7 @@ export function* readChangelog({
     if (create) {
       console.log("Could not load the CHANGELOG.md. Creating one.");
       file = {
-        path: path.join(cwd, packagePath, "CHANGELOG.md"),
+        path: path.join(packagePath, "CHANGELOG.md"),
         content: "# Changelog\n\n\n",
       };
     }
@@ -531,7 +533,6 @@ export function* writeChangelog({
 }: {
   changelog: File;
   cwd: string;
-}): Generator<any, File, any> {
-  const inputFile = yield writeFile(changelog, cwd);
-  return inputFile;
+}): Generator<any, void | Error, any> {
+  return yield saveFile(changelog, cwd);
 }
