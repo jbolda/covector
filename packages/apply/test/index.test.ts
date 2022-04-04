@@ -1,6 +1,5 @@
 import { apply, changesConsideringParents, validateApply } from "../src";
-//@ts-ignore
-import toVFile from "to-vfile";
+import { loadFile } from "@covector/files";
 import { run } from "effection";
 import { it } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
@@ -45,12 +44,8 @@ describe("package file apply bump (snapshot)", () => {
 
     //@ts-ignore
     yield apply({ commands, config, cwd: jsonFolder });
-    //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
-      jsonFolder + "/package.json",
-      "utf-8"
-    );
-    expect(modifiedVFile.contents).toBe(
+    const modifiedFile = yield loadFile("package.json", jsonFolder);
+    expect(modifiedFile.content).toBe(
       "{\n" +
         '  "private": true,\n' +
         '  "name": "js-single-json-fixture",\n' +
@@ -92,12 +87,8 @@ describe("package file apply bump (snapshot)", () => {
 
     //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
-    //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
-      rustFolder + "/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedVFile.contents).toBe(
+    const modifiedFile = yield loadFile("Cargo.toml", rustFolder);
+    expect(modifiedFile.content).toBe(
       '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n'
     );
 
@@ -134,12 +125,8 @@ describe("package file apply bump (snapshot)", () => {
 
     //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
-    //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
-      rustFolder + "/pubspec.yaml",
-      "utf-8"
-    );
-    expect(modifiedVFile.contents).toBe(
+    const modifiedFile = yield loadFile("pubspec.yaml", rustFolder);
+    expect(modifiedFile.content).toBe(
       "name: test_app\ndescription: a great one\nhomepage: https://github.com/\nversion: 0.4.0\n" +
         "environment:\n  sdk: '>=2.10.0 <3.0.0'\n" +
         "dependencies:\n  flutter:\n    sdk: flutter\n  meta: any\n  provider: ^4.3.2\n  related_package:\n    git:\n      url: git@github.com:jbolda/covector.git\n      ref: main\n      path: __fixtures__/haha/\n" +
@@ -273,12 +260,11 @@ describe("package file apply bump (snapshot)", () => {
 
     //@ts-ignore
     yield apply({ commands, config, cwd: jsonFolder });
-    //@ts-ignore
-    const modifiedPkgAVFile = yield toVFile.read(
-      jsonFolder + "/packages/pkg-a/package.json",
-      "utf-8"
+    const modifiedPkgAFile = yield loadFile(
+      "packages/pkg-a/package.json",
+      jsonFolder
     );
-    expect(modifiedPkgAVFile.contents).toBe(
+    expect(modifiedPkgAFile.content).toBe(
       "{\n" +
         '  "name": "yarn-workspace-base-pkg-a",\n' +
         '  "version": "1.1.0",\n' +
@@ -288,12 +274,11 @@ describe("package file apply bump (snapshot)", () => {
         "}\n"
     );
 
-    //@ts-ignore
-    const modifiedPkgBVFile = yield toVFile.read(
-      jsonFolder + "/packages/pkg-b/package.json",
-      "utf-8"
+    const modifiedPkgBFile = yield loadFile(
+      "packages/pkg-b/package.json",
+      jsonFolder
     );
-    expect(modifiedPkgBVFile.contents).toBe(
+    expect(modifiedPkgBFile.content).toBe(
       "{\n" +
         '  "name": "yarn-workspace-base-pkg-b",\n' +
         '  "version": "1.1.0"\n' +
@@ -346,12 +331,8 @@ describe("package file apply bump (snapshot)", () => {
     //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
-    //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-a/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedAPKGVFile.contents).toBe(
+    const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
+    expect(modifiedAPKGFile.content).toBe(
       "[package]\n" +
         'name = "rust_pkg_a_fixture"\n' +
         'version = "0.6.0"\n' +
@@ -360,12 +341,8 @@ describe("package file apply bump (snapshot)", () => {
         'rust_pkg_b_fixture = "0.9.0"\n'
     );
 
-    //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-b/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedBPKGVFile.contents).toBe(
+    const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
+    expect(modifiedBPKGFile.content).toBe(
       "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
     );
 
@@ -415,12 +392,8 @@ describe("package file apply bump (snapshot)", () => {
     //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
-    //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-a/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedAPKGVFile.contents).toBe(
+    const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
+    expect(modifiedAPKGFile.content).toBe(
       "[package]\n" +
         'name = "rust_pkg_a_fixture"\n' +
         'version = "0.6.0"\n' +
@@ -430,11 +403,8 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-b/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedBPKGVFile.contents).toBe(
+    const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
+    expect(modifiedBPKGFile.content).toBe(
       "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
     );
 
@@ -484,12 +454,8 @@ describe("package file apply bump (snapshot)", () => {
     //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
-    //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-a/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedAPKGVFile.contents).toBe(
+    const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
+    expect(modifiedAPKGFile.content).toBe(
       "[package]\n" +
         'name = "rust_pkg_a_fixture"\n' +
         'version = "0.6.0"\n' +
@@ -499,11 +465,8 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-b/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedBPKGVFile.contents).toBe(
+    const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
+    expect(modifiedBPKGFile.content).toBe(
       "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
     );
 
@@ -553,12 +516,8 @@ describe("package file apply bump (snapshot)", () => {
     //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
-    //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-a/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedAPKGVFile.contents).toBe(
+    const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
+    expect(modifiedAPKGFile.content).toBe(
       "[package]\n" +
         'name = "rust_pkg_a_fixture"\n' +
         'version = "0.5.1"\n' +
@@ -567,12 +526,8 @@ describe("package file apply bump (snapshot)", () => {
         'rust_pkg_b_fixture = { version = "0.8", path = "../rust_pkg_b_fixture" }\n'
     );
 
-    //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-b/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedBPKGVFile.contents).toBe(
+    const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
+    expect(modifiedBPKGFile.content).toBe(
       "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.8.9"\n'
     );
 
@@ -622,12 +577,8 @@ describe("package file apply bump (snapshot)", () => {
     //@ts-ignore
     yield apply({ commands, config, cwd: rustFolder });
 
-    //@ts-ignore
-    const modifiedAPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-a/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedAPKGVFile.contents).toBe(
+    const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
+    expect(modifiedAPKGFile.content).toBe(
       "[package]\n" +
         'name = "rust_pkg_a_fixture"\n' +
         'version = "0.6.0"\n' +
@@ -636,12 +587,8 @@ describe("package file apply bump (snapshot)", () => {
         'rust_pkg_b_fixture = { version = "0.9", path = "../rust_pkg_b_fixture" }\n'
     );
 
-    //@ts-ignore
-    const modifiedBPKGVFile = yield toVFile.read(
-      rustFolder + "/pkg-b/Cargo.toml",
-      "utf-8"
-    );
-    expect(modifiedBPKGVFile.contents).toBe(
+    const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
+    expect(modifiedBPKGFile.content).toBe(
       "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
     );
 
@@ -1255,12 +1202,8 @@ describe("packge file applies preview bump", () => {
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
-    //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
-      jsonFolder + "/package.json",
-      "utf-8"
-    );
-    expect(modifiedVFile.contents).toBe(
+    const modifiedFile = yield loadFile("package.json", jsonFolder);
+    expect(modifiedFile.content).toBe(
       "{\n" +
         '  "private": true,\n' +
         '  "name": "js-single-json-fixture",\n' +
@@ -1332,12 +1275,11 @@ describe("packge file applies preview bump", () => {
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
-    //@ts-ignore
-    const modifiedPkgAVFile = yield toVFile.read(
-      jsonFolder + "/packages/pkg-a/package.json",
-      "utf-8"
+    const modifiedPkgAFile = yield loadFile(
+      "packages/pkg-a/package.json",
+      jsonFolder
     );
-    expect(modifiedPkgAVFile.contents).toBe(
+    expect(modifiedPkgAFile.content).toBe(
       "{\n" +
         '  "name": "yarn-workspace-base-pkg-a",\n' +
         '  "version": "1.0.0-branch-name.12345",\n' +
@@ -1347,12 +1289,11 @@ describe("packge file applies preview bump", () => {
         "}\n"
     );
 
-    //@ts-ignore
-    const modifiedPkgBVFile = yield toVFile.read(
-      jsonFolder + "/packages/pkg-b/package.json",
-      "utf-8"
+    const modifiedPkgBFile = yield loadFile(
+      "packages/pkg-b/package.json",
+      jsonFolder
     );
-    expect(modifiedPkgBVFile.contents).toBe(
+    expect(modifiedPkgBFile.content).toBe(
       "{\n" +
         '  "name": "yarn-workspace-base-pkg-b",\n' +
         '  "version": "1.0.0-branch-name.12345"\n' +
@@ -1409,12 +1350,8 @@ describe("package file applies preview bump to pre-release", () => {
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
-    //@ts-ignore
-    const modifiedVFile = yield toVFile.read(
-      jsonFolder + "/package.json",
-      "utf-8"
-    );
-    expect(modifiedVFile.contents).toBe(
+    const modifiedFile = yield loadFile("package.json", jsonFolder);
+    expect(modifiedFile.content).toBe(
       "{\n" +
         '  "private": true,\n' +
         '  "name": "js-single-prerelease-json-fixture",\n' +
@@ -1486,12 +1423,11 @@ describe("package file applies preview bump to pre-release", () => {
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
-    //@ts-ignore
-    const modifiedPkgAVFile = yield toVFile.read(
-      jsonFolder + "/packages/pkg-a/package.json",
-      "utf-8"
+    const modifiedPkgAFile = yield loadFile(
+      "packages/pkg-a/package.json",
+      jsonFolder
     );
-    expect(modifiedPkgAVFile.contents).toBe(
+    expect(modifiedPkgAFile.content).toBe(
       "{\n" +
         '  "name": "yarn-workspace-base-pkg-a",\n' +
         '  "version": "1.0.0-branch-name.12345",\n' +
@@ -1501,12 +1437,11 @@ describe("package file applies preview bump to pre-release", () => {
         "}\n"
     );
 
-    //@ts-ignore
-    const modifiedPkgBVFile = yield toVFile.read(
-      jsonFolder + "/packages/pkg-b/package.json",
-      "utf-8"
+    const modifiedPkgBFile = yield loadFile(
+      "packages/pkg-b/package.json",
+      jsonFolder
     );
-    expect(modifiedPkgBVFile.contents).toBe(
+    expect(modifiedPkgBFile.content).toBe(
       "{\n" +
         '  "name": "yarn-workspace-base-pkg-b",\n' +
         '  "version": "1.0.0-branch-name.12345"\n' +
