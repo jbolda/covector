@@ -1,3 +1,4 @@
+import { all } from "effection";
 import unified from "unified";
 import { Root, YAML as Frontmatter, Content } from "mdast";
 import parse from "remark-parse";
@@ -180,35 +181,35 @@ export const assemble = function* ({
     const allChanges: Change[] = yield changesParsed({ cwd, files });
     const allMergedRelease = mergeReleases(allChanges, config || {});
     if (preMode.prevFiles.length > 0) {
-      const newVfiles = files.reduce((newVFiles: File[], file) => {
+      const newFiles = files.reduce((newFiles: File[], file) => {
         const prevFile = preMode.prevFiles.find(
           (filename) => file.filename === filename
         );
         if (!prevFile) {
-          return newVFiles.concat([file]);
+          return newFiles.concat([file]);
         } else {
-          return newVFiles;
+          return newFiles;
         }
       }, []);
       const newChanges: Change[] = yield changesParsed({
         cwd,
-        vfiles: newVfiles,
+        files: newFiles,
       });
       const newMergedRelease = mergeReleases(newChanges, config || {});
 
-      const oldVfiles = files.reduce((newVFiles: File[], file) => {
+      const oldFiles = files.reduce((newFiles: File[], file) => {
         const prevFile = preMode.prevFiles.find(
           (filename) => file.filename === filename
         );
         if (prevFile) {
-          return newVFiles.concat([file]);
+          return newFiles.concat([file]);
         } else {
-          return newVFiles;
+          return newFiles;
         }
       }, []);
       const oldChanges: Change[] = yield changesParsed({
         cwd,
-        vfiles: oldVfiles,
+        files: oldFiles,
       });
       const oldMergedRelease = mergeReleases(oldChanges, config || {});
 
@@ -260,12 +261,8 @@ const changesParsed = function* ({
   cwd?: string;
   files: File[];
 }): Generator<any, Change[], any> {
-  const allVfiles = files.map((file) => parseChange({ cwd, file }));
-  let yieldedV: Change[] = [];
-  for (let v of allVfiles) {
-    yieldedV = [...yieldedV, yield v];
-  }
-  return yieldedV;
+  const allFiles = files.map((file) => parseChange({ cwd, file }));
+  return yield all(allFiles);
 };
 
 const changeDiff = ({

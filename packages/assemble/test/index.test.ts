@@ -3,10 +3,11 @@ import { assemble, mergeIntoConfig, mergeChangesToConfig } from "../src";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-const vfilePart = (filename: string) => ({
+const filePart = (filename: string) => ({
+  filename,
   path: "",
   extname: "",
-  data: { filename },
+  content: "",
 });
 
 const assembledChanges = {
@@ -18,7 +19,7 @@ const assembledChanges = {
             "@namespaced/assemble2": "patch",
             assemble1: "patch",
           },
-          summary: "This is a test.",
+          summary: "This is a namespaced test.",
         },
       ],
       type: "patch",
@@ -30,28 +31,28 @@ const assembledChanges = {
             assemble1: "patch",
             assemble2: "patch",
           },
-          summary: "This is a test.",
+          summary: "This is a a double patch test.",
         },
         {
           releases: {
             assemble1: "minor",
             assemble2: "patch",
           },
-          summary: "This is a test.",
+          summary: "This is a minor/patch test.",
         },
         {
           releases: {
             assemble1: "patch",
             assemble2: "major",
           },
-          summary: "This is a test.",
+          summary: "This is a patch/major test.",
         },
         {
           releases: {
             "@namespaced/assemble2": "patch",
             assemble1: "patch",
           },
-          summary: "This is a test.",
+          summary: "This is another double patch test.",
         },
       ],
       type: "minor",
@@ -63,21 +64,21 @@ const assembledChanges = {
             assemble1: "patch",
             assemble2: "patch",
           },
-          summary: "This is a test.",
+          summary: "This is the copy of the double patch test.",
         },
         {
           releases: {
             assemble1: "minor",
             assemble2: "patch",
           },
-          summary: "This is a test.",
+          summary: "This is the copy of the minor patch test.",
         },
         {
           releases: {
             assemble1: "patch",
             assemble2: "major",
           },
-          summary: "This is a test.",
+          summary: "This is the copy of the patch major test.",
         },
       ],
       type: "major",
@@ -129,8 +130,8 @@ const configSpecial = {
 };
 
 const testTextOne = {
-  ...vfilePart("testTextOne"),
-  contents: `
+  ...filePart("testTextOne"),
+  content: `
 ---
 "assemble1": patch
 "assemble2": patch
@@ -140,8 +141,8 @@ This is a test.
 `,
 };
 const testTextTwo = {
-  ...vfilePart("testTextTwo"),
-  contents: `
+  ...filePart("testTextTwo"),
+  content: `
 ---
 "assemble1": minor
 "assemble2": patch
@@ -151,8 +152,8 @@ This is a test.
 `,
 };
 const testTextThree = {
-  ...vfilePart("testTextThree"),
-  contents: `
+  ...filePart("testTextThree"),
+  content: `
 ---
 "assemble1": patch
 "assemble2": major
@@ -162,8 +163,8 @@ This is a test.
 `,
 };
 const testTextFour = {
-  ...vfilePart("testTextFour"),
-  contents: `
+  ...filePart("testTextFour"),
+  content: `
 ---
 "assemble1": patch
 "@namespaced/assemble2": patch
@@ -173,8 +174,8 @@ This is a test. We might link out to a [website](https://www.jacobbolda.com).
 `,
 };
 const testTextFive = {
-  ...vfilePart("testTextFive"),
-  contents: `
+  ...filePart("testTextFive"),
+  content: `
 ---
 "all": minor
 ---
@@ -183,8 +184,8 @@ This is a test.
 `,
 };
 const testTextSpecialOne = {
-  ...vfilePart("testTextSpecialOne"),
-  contents: `
+  ...filePart("testTextSpecialOne"),
+  content: `
 ---
 "assemble1": housekeeping
 "assemble2": workflows
@@ -194,8 +195,8 @@ This is a test.
 `,
 };
 const testTextSpecialTwo = {
-  ...vfilePart("testTextSpecialTwo"),
-  contents: `
+  ...filePart("testTextSpecialTwo"),
+  content: `
 ---
 "assemble1": patch
 "assemble2": workflows
@@ -209,13 +210,13 @@ This is a test.
 describe("assemble changes", () => {
   it("runs", function* () {
     const assembled = yield assemble({
-      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      files: [testTextOne, testTextTwo, testTextThree, testTextFour],
     });
     expect(assembled).toMatchSnapshot();
   });
 
   it("assembles deps", function* () {
-    const assembled = yield assemble({ vfiles: [testTextFive] });
+    const assembled = yield assemble({ files: [testTextFive] });
     expect(assembled).toMatchSnapshot();
   });
 });
@@ -223,7 +224,7 @@ describe("assemble changes", () => {
 describe("assemble changes in preMode", () => {
   it("with no existing changes", function* () {
     const assembled = yield assemble({
-      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      files: [testTextOne, testTextTwo, testTextThree, testTextFour],
       preMode: { on: true, prevFiles: [] },
     });
     expect(assembled).toMatchSnapshot();
@@ -231,16 +232,16 @@ describe("assemble changes in preMode", () => {
 
   it("with existing changes that upgrade", function* () {
     const assembled = yield assemble({
-      vfiles: [testTextOne, testTextTwo, testTextThree, testTextFour],
-      preMode: { on: true, prevFiles: [testTextOne.data.filename] },
+      files: [testTextOne, testTextTwo, testTextThree, testTextFour],
+      preMode: { on: true, prevFiles: [testTextOne.filename] },
     });
     expect(assembled).toMatchSnapshot();
   });
 
   it("with existing changes with the same bump", function* () {
     const assembled = yield assemble({
-      vfiles: [testTextOne, testTextTwo, testTextFour],
-      preMode: { on: true, prevFiles: [testTextOne.data.filename] },
+      files: [testTextOne, testTextTwo, testTextFour],
+      preMode: { on: true, prevFiles: [testTextOne.filename] },
     });
     expect(assembled).toMatchSnapshot();
   });
@@ -250,8 +251,8 @@ describe("errors on bad change files", () => {
   const emptyChangefile = {
     path: "",
     extname: "",
-    data: { filename: ".changes/empty-file.md" },
-    contents: `---
+    filename: ".changes/empty-file.md",
+    content: `---
 ---
   
 This doesn't bump much.
@@ -262,7 +263,7 @@ This doesn't bump much.
     expect.assertions(1);
     try {
       yield assemble({
-        vfiles: [emptyChangefile],
+        files: [emptyChangefile],
       });
     } catch (e: any) {
       expect(e.message).toMatch(
@@ -275,7 +276,7 @@ This doesn't bump much.
 describe("special bump types", () => {
   it("valid additional bump types", function* () {
     const assembled = yield assemble({
-      vfiles: [
+      files: [
         testTextOne,
         testTextTwo,
         testTextThree,
@@ -292,7 +293,7 @@ describe("special bump types", () => {
     expect.assertions(1);
     try {
       yield assemble({
-        vfiles: [
+        files: [
           testTextOne,
           testTextTwo,
           testTextThree,
@@ -314,7 +315,7 @@ describe("special bump types", () => {
     expect.assertions(1);
     try {
       yield assemble({
-        vfiles: [testTextSpecialTwo],
+        files: [testTextSpecialTwo],
         //@ts-ignore
         config: configSpecial,
       });
@@ -328,7 +329,7 @@ describe("special bump types", () => {
 
   it("handles an only noop", function* () {
     const assembled = yield assemble({
-      vfiles: [testTextSpecialOne],
+      files: [testTextSpecialOne],
       //@ts-ignore
       config: configSpecial,
     });
@@ -447,7 +448,7 @@ describe("merge config test", () => {
       assembledChanges: [],
       command: "publish",
     });
-    expect(scrubVfile(mergedPublishConfig)).toMatchSnapshot();
+    expect(mergedPublishConfig).toMatchSnapshot();
   });
 });
 
@@ -476,14 +477,6 @@ describe("merge filtered config test", () => {
       command: "publish",
       filterPackages: ["assemble1", "@namespaced/assemble1"],
     });
-    expect(scrubVfile(mergedPublishConfig)).toMatchSnapshot();
+    expect(mergedPublishConfig).toMatchSnapshot();
   });
 });
-
-// vfile returns fs information that is flaky between machines, scrub it
-const scrubVfile = (mergedPublishConfig: any) => {
-  return mergedPublishConfig.commands.map((pkg: any) => {
-    delete pkg.pkgFile.vfile;
-    return pkg;
-  }, mergedPublishConfig.commands);
-};
