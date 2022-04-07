@@ -5,7 +5,7 @@ const f = fixtures(__dirname);
 
 const filePart = (filename: string) => ({
   filename,
-  path: "",
+  path: `.changes/${filename}`,
   extname: "",
   content: "",
 });
@@ -233,7 +233,7 @@ describe("assemble changes in preMode", () => {
   it("with existing changes that upgrade", function* () {
     const assembled = yield assemble({
       files: [testTextOne, testTextTwo, testTextThree, testTextFour],
-      preMode: { on: true, prevFiles: [testTextOne.filename] },
+      preMode: { on: true, prevFiles: [testTextOne.path] },
     });
     expect(assembled).toMatchSnapshot();
   });
@@ -241,7 +241,7 @@ describe("assemble changes in preMode", () => {
   it("with existing changes with the same bump", function* () {
     const assembled = yield assemble({
       files: [testTextOne, testTextTwo, testTextFour],
-      preMode: { on: true, prevFiles: [testTextOne.filename] },
+      preMode: { on: true, prevFiles: [testTextOne.path] },
     });
     expect(assembled).toMatchSnapshot();
   });

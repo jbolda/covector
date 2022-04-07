@@ -183,7 +183,7 @@ export const assemble = function* ({
     if (preMode.prevFiles.length > 0) {
       const newFiles = files.reduce((newFiles: File[], file) => {
         const prevFile = preMode.prevFiles.find(
-          (filename) => file.filename === filename
+          (filename) => file.path === filename
         );
         if (!prevFile) {
           return newFiles.concat([file]);
