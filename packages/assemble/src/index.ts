@@ -47,7 +47,7 @@ const parseChange = function* ({
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
   if (Object.keys(changeset.releases).length === 0)
     throw new Error(
-      `${file.filename} didn't have any packages bumped. Please add a package bump.`
+      `${file.path} didn't have any packages bumped. Please add a package bump.`
     );
   changeset.summary = processor
     .stringify({
@@ -62,7 +62,7 @@ const parseChange = function* ({
       let gitInfo = yield runCommand({
         cwd,
         pkgPath: "",
-        command: `git log --reverse --format="%h %H %as %s" ${file.filename}`,
+        command: `git log --reverse --format="%h %H %as %s" ${file.path}`,
         log: false,
       });
       const commits = gitInfo.split(/\n/).map((commit: string) => {
@@ -116,7 +116,7 @@ const mergeReleases = (
         pkg,
         change.releases[pkg],
         bumpOptions,
-        !change.meta ? `` : ` in ${change.meta.filename}`
+        !change.meta ? `` : ` in ${change.meta.path}`
       );
 
       const bumpType = additionalBumpTypes.includes(change.releases[pkg])
@@ -199,7 +199,7 @@ export const assemble = function* ({
 
       const oldFiles = files.reduce((newFiles: File[], file) => {
         const prevFile = preMode.prevFiles.find(
-          (filename) => file.filename === filename
+          (filename) => file.path === filename
         );
         if (prevFile) {
           return newFiles.concat([file]);
@@ -238,7 +238,7 @@ export const assemble = function* ({
         let changesContainingError = plan.releases[pkg].changes.reduce(
           (files, file) => {
             files = `${files}${files === "" ? "" : ", "}${
-              file.meta && file.meta.filename ? file.meta.filename : ""
+              file.meta && file.meta.path ? file.meta.path : ""
             }`;
             return files;
           },

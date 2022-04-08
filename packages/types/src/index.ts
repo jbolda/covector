@@ -133,7 +133,7 @@ export type CommonBumps = "major" | "minor" | "patch" | "prerelease" | "noop";
 
 export type Change = {
   releases: { [k: string]: CommonBumps };
-  meta?: { filename?: string };
+  meta: File;
 };
 
 export type Release = {

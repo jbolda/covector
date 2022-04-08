@@ -26,6 +26,86 @@ Object {
 }
 `;
 
+exports[`assemble changes in preMode with existing changes and a first bump 1`] = `
+Object {
+  "changes": Array [
+    Object {
+      "releases": Object {
+        "assemble1": "minor",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+    },
+  ],
+  "releases": Object {
+    "assemble1": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "preminor",
+    },
+    "assemble2": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "prerelease",
+    },
+  },
+}
+`;
+
+exports[`assemble changes in preMode with existing changes and a lower bump 1`] = `
+Object {
+  "changes": Array [
+    Object {
+      "releases": Object {
+        "assemble1": "patch",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+    },
+  ],
+  "releases": Object {
+    "assemble1": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "prerelease",
+    },
+    "assemble2": Object {
+      "changes": Array [
+        Object {
+          "releases": Object {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+        },
+      ],
+      "type": "prerelease",
+    },
+  },
+}
+`;
+
 exports[`assemble changes in preMode with existing changes that upgrade 1`] = `
 Object {
   "changes": Array [
@@ -173,7 +253,7 @@ Object {
           "summary": "This is a test.",
         },
       ],
-      "type": "prepatch",
+      "type": "prerelease",
     },
   },
 }

@@ -227,6 +227,15 @@ describe("assemble changes in preMode", () => {
       files: [testTextOne, testTextTwo, testTextThree, testTextFour],
       preMode: { on: true, prevFiles: [] },
     });
+    expect(assembled.releases).toMatchObject({
+      "@namespaced/assemble2": { type: "prepatch" },
+    });
+    expect(assembled.releases).toMatchObject({
+      assemble1: { type: "preminor" },
+    });
+    expect(assembled.releases).toMatchObject({
+      assemble2: { type: "premajor" },
+    });
     expect(assembled).toMatchSnapshot();
   });
 
@@ -234,6 +243,23 @@ describe("assemble changes in preMode", () => {
     const assembled = yield assemble({
       files: [testTextOne, testTextTwo, testTextThree, testTextFour],
       preMode: { on: true, prevFiles: [testTextOne.path] },
+    });
+    expect(assembled.changes).not.toEqual(
+      expect.arrayContaining([
+        {
+          releases: { assemble1: "patch", assemble2: "patch" },
+          summary: "This is a test.",
+        },
+      ])
+    );
+    expect(assembled.releases).toMatchObject({
+      "@namespaced/assemble2": { type: "prepatch" },
+    });
+    expect(assembled.releases).toMatchObject({
+      assemble1: { type: "preminor" },
+    });
+    expect(assembled.releases).toMatchObject({
+      assemble2: { type: "premajor" },
     });
     expect(assembled).toMatchSnapshot();
   });
@@ -243,15 +269,76 @@ describe("assemble changes in preMode", () => {
       files: [testTextOne, testTextTwo, testTextFour],
       preMode: { on: true, prevFiles: [testTextOne.path] },
     });
+    expect(assembled.changes).not.toEqual(
+      expect.arrayContaining([
+        {
+          releases: { assemble1: "patch", assemble2: "patch" },
+          summary: "This is a test.",
+        },
+      ])
+    );
+    expect(assembled.releases).toMatchObject({
+      "@namespaced/assemble2": { type: "prepatch" },
+    });
+    expect(assembled.releases).toMatchObject({
+      assemble1: { type: "preminor" },
+    });
+    expect(assembled.releases).toMatchObject({
+      assemble2: { type: "prerelease" },
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("with existing changes and a first bump", function* () {
+    const assembled = yield assemble({
+      files: [testTextOne, testTextTwo],
+      preMode: { on: true, prevFiles: [testTextOne.path] },
+    });
+    expect(assembled.changes).not.toEqual(
+      expect.arrayContaining([
+        {
+          releases: { assemble1: "patch", assemble2: "patch" },
+          summary: "This is a test.",
+        },
+      ])
+    );
+    expect(assembled.releases).toMatchObject({
+      assemble1: { type: "preminor" },
+    });
+    expect(assembled.releases).toMatchObject({
+      assemble2: { type: "prerelease" },
+    });
+    expect(assembled).toMatchSnapshot();
+  });
+
+  it("with existing changes and a lower bump", function* () {
+    const assembled = yield assemble({
+      files: [testTextOne, testTextTwo],
+      preMode: { on: true, prevFiles: [testTextTwo.path] },
+    });
+    expect(assembled.changes).not.toEqual(
+      expect.arrayContaining([
+        {
+          releases: { assemble1: "minor", assemble2: "patch" },
+          summary: "This is a test.",
+        },
+      ])
+    );
+    expect(assembled.releases).toMatchObject({
+      assemble1: { type: "prerelease" },
+    });
+    expect(assembled.releases).toMatchObject({
+      assemble2: { type: "prerelease" },
+    });
     expect(assembled).toMatchSnapshot();
   });
 });
 
 describe("errors on bad change files", () => {
   const emptyChangefile = {
-    path: "",
+    path: ".changes/empty-file.md",
     extname: "",
-    filename: ".changes/empty-file.md",
+    filename: "empty-file.md",
     content: `---
 ---
   
