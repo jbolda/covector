@@ -1,9 +1,8 @@
 import { covector } from "../src";
 import { CovectorVersion } from "@covector/types";
 import { run } from "effection";
-import { it } from "@effection/jest";
-//@ts-ignore
-import toVFile from "to-vfile";
+import { it, captureError } from "@effection/jest";
+import { loadFile } from "@covector/files";
 import path from "path";
 import * as fs from "fs";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
@@ -40,8 +39,7 @@ describe("integration test in production mode", () => {
       cwd: fullIntegration,
     });
     yield expect(run(covectored)).rejects.toThrow();
-    //@ts-ignore
-    delete covectored.id;
+
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleDir: (console.dir as any).mock.calls,
@@ -60,34 +58,24 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelogTauriCore = yield toVFile.read(
-      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTauriCore = yield loadFile(
+      path.join("/tauri/", "CHANGELOG.md"),
+      fullIntegration
     );
-    expect(changelogTauriCore.contents).toBe(
+    expect(changelogTauriCore.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.0]\n\n" +
         "- Summary about the changes in tauri\n"
     );
 
-    const changelogTaurijs = yield toVFile.read(
-      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTaurijs = yield loadFile(
+      path.join("/cli/tauri.js/", "CHANGELOG.md"),
+      fullIntegration
     );
-    expect(changelogTaurijs.contents).toBe(
+    expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3]\n\n" +
         "- Summary about the changes in tauri\n"
@@ -105,35 +93,19 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelog = yield toVFile.read(
-      path.join(fullIntegration, "CHANGELOG.md"),
-      "utf-8"
-    );
-    expect(changelog.contents).toBe(
+    const changelog = yield loadFile("CHANGELOG.md", fullIntegration);
+    expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.4.0]\n\n" +
         "- Summary about the changes in test_app\n" +
         "- Summary about the changes again(!) in test_app\n"
     );
 
-    const versionFile = yield toVFile.read(
-      path.join(fullIntegration, "pubspec.yaml"),
-      "utf-8"
-    );
-    expect(versionFile.contents).toEqual(
+    const versionFile = yield loadFile("pubspec.yaml", fullIntegration);
+    expect(versionFile.content).toEqual(
       expect.stringContaining("version: 0.4.0\n")
     );
   });
@@ -149,34 +121,24 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelog = yield toVFile.read(
-      path.join(fullIntegration, "dart", "CHANGELOG.md"),
-      "utf-8"
+    const changelog = yield loadFile(
+      path.join("dart", "CHANGELOG.md"),
+      fullIntegration
     );
-    expect(changelog.contents).toBe(
+    expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.3.2]\n\n" +
         "- Summary about the changes in test_app_two\n"
     );
 
-    const versionFile = yield toVFile.read(
-      path.join(fullIntegration, "dart", "pubspec.yaml"),
-      "utf-8"
+    const versionFile = yield loadFile(
+      path.join("dart", "pubspec.yaml"),
+      fullIntegration
     );
-    expect(versionFile.contents).toEqual(
+    expect(versionFile.content).toEqual(
       expect.stringContaining("version: 0.3.2\n")
     );
   });
@@ -192,35 +154,19 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelog = yield toVFile.read(
-      path.join(fullIntegration, "CHANGELOG.md"),
-      "utf-8"
-    );
-    expect(changelog.contents).toBe(
+    const changelog = yield loadFile("CHANGELOG.md", fullIntegration);
+    expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[6.2.0]\n\n" +
         "- Summary about the changes in general-pkg\n" +
         "- A general summary about the generally changes in general-pkg generally\n"
     );
 
-    const versionFile = yield toVFile.read(
-      path.join(fullIntegration, "VERSION"),
-      "utf-8"
-    );
-    expect(versionFile.contents).toBe("6.2.0");
+    const versionFile = yield loadFile("VERSION", fullIntegration);
+    expect(versionFile.content).toBe("6.2.0");
   });
 
   it("runs publish for js and rust", function* () {
@@ -432,30 +378,20 @@ describe("integration test in --dry-run mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelogTauriCore = toVFile.read(
-      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTauriCore = yield captureError(
+      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration)
     );
-    yield expect(changelogTauriCore).rejects.toThrow();
+    expect(changelogTauriCore.effectionTrace[0].state).toEqual("erroring");
+    expect(changelogTauriCore.effectionTrace[1].state).toEqual("erroring");
 
-    const changelogTaurijs = toVFile.read(
-      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTaurijs = yield captureError(
+      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration)
     );
-    yield expect(changelogTaurijs).rejects.toThrow();
+    expect(changelogTaurijs.effectionTrace[0].state).toEqual("erroring");
+    expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");
 
     restoreConsole();
   });
@@ -543,43 +479,33 @@ describe("integration test with preMode `on`", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelogTauriCore = yield toVFile.read(
-      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTauriCore = yield loadFile(
+      path.join("/tauri/", "CHANGELOG.md"),
+      fullIntegration
     );
     // has a direct minor from 0.5.2
-    expect(changelogTauriCore.contents).toBe(
+    expect(changelogTauriCore.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.0-beta.0]\n\n" +
         "- Summary about the changes in tauri\n"
     );
 
-    const changelogTaurijs = yield toVFile.read(
-      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTaurijs = yield loadFile(
+      path.join("/cli/tauri.js/", "CHANGELOG.md"),
+      fullIntegration
     );
     // tauri.js through a dep bump
-    expect(changelogTaurijs.contents).toBe(
+    expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.0]\n\n" +
         "- Summary about the changes in tauri\n"
     );
   });
 
-  it("runs version in production with existing changes for js and rust", function* () {
+  it.only("runs version in production with existing changes for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
@@ -588,33 +514,33 @@ describe("integration test with preMode `on`", () => {
       cwd: fullIntegration,
     })) as CovectorVersion;
 
-    const changelogTauriCoreOne = yield toVFile.read(
-      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTauriCoreOne = yield loadFile(
+      path.join("/tauri/", "CHANGELOG.md"),
+      fullIntegration
     );
-    expect(changelogTauriCoreOne.contents).toBe(
+    expect(changelogTauriCoreOne.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.0-beta.0]\n\n" +
         "- Summary about the changes in tauri\n"
     );
 
-    const changelogTaurijsOne = yield toVFile.read(
-      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTaurijsOne = yield loadFile(
+      path.join("/cli/tauri.js/", "CHANGELOG.md"),
+      fullIntegration
     );
     // tauri.js does not have a change file directly or through a dep bump
     // so it should remain the same
-    expect(changelogTaurijsOne.contents).toBe(
+    expect(changelogTaurijsOne.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.0]\n\n" +
         "- Summary about the changes in tauri\n"
     );
 
-    const preOne = yield toVFile.read(
-      path.join(fullIntegration, ".changes", "pre.json"),
-      "utf-8"
+    const preOne = yield loadFile(
+      path.join(".changes", "pre.json"),
+      fullIntegration
     );
-    expect(preOne.contents).toBe(
+    expect(preOne.content).toBe(
       '{\n  "tag": "beta",\n  "changes": [\n    ".changes/first-change.md",\n    ".changes/second-change.md"\n  ]\n}\n'
     );
 
@@ -630,11 +556,11 @@ Boop again.
     );
 
     // double check the write and formatting
-    const newChange = yield toVFile.read(
-      path.join(fullIntegration, ".changes", "third-change.md"),
-      "utf-8"
+    const newChange = yield loadFile(
+      path.join(".changes", "third-change.md"),
+      fullIntegration
     );
-    expect(newChange.contents).toBe(
+    expect(newChange.content).toBe(
       "---\n" + '"tauri-api": patch\n' + "---\n\n" + "Boop again.\n"
     );
 
@@ -643,11 +569,11 @@ Boop again.
       cwd: fullIntegration,
     })) as CovectorVersion;
 
-    const changelogTauriCoreTwo = yield toVFile.read(
-      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTauriCoreTwo = yield loadFile(
+      path.join("/tauri/", "CHANGELOG.md"),
+      fullIntegration
     );
-    expect(changelogTauriCoreTwo.contents).toBe(
+    expect(changelogTauriCoreTwo.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.0-beta.1]\n\n" +
         "- Boop again.\n" +
@@ -656,13 +582,13 @@ Boop again.
         "- Summary about the changes in tauri\n"
     );
 
-    const changelogTaurijsTwo = yield toVFile.read(
-      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTaurijsTwo = yield loadFile(
+      path.join("/cli/tauri.js/", "CHANGELOG.md"),
+      fullIntegration
     );
     // tauri.js does not have a change file directly or through a dep bump
     // so it should remain the same
-    expect(changelogTaurijsTwo.contents).toBe(
+    expect(changelogTaurijsTwo.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.1]\n\n" +
         "- Boop again.\n" +
@@ -671,11 +597,11 @@ Boop again.
         "- Summary about the changes in tauri\n"
     );
 
-    const preTwo = yield toVFile.read(
-      path.join(fullIntegration, ".changes", "pre.json"),
-      "utf-8"
+    const preTwo = yield loadFile(
+      path.join(".changes", "pre.json"),
+      fullIntegration
     );
-    expect(preTwo.contents).toBe(
+    expect(preTwo.content).toBe(
       '{\n  "tag": "beta",\n  "changes": [\n    ".changes/first-change.md",\n    ".changes/second-change.md",\n    ".changes/third-change.md"\n  ]\n}\n'
     );
 
@@ -686,28 +612,8 @@ Boop again.
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturnOne: Object.keys(covectoredOne.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectoredOne.commandsRan
-      ),
-      //@ts-ignore
-      covectorReturnTwo: Object.keys(covectoredTwo.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectoredTwo.commandsRan
-      ),
+      covectorReturnOne: covectoredOne,
+      covectorReturnTwo: covectoredTwo,
     }).toMatchSnapshot();
   });
 
@@ -726,30 +632,20 @@ Boop again.
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelogTauriCore = toVFile.read(
-      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTauriCore = yield captureError(
+      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration)
     );
-    yield expect(changelogTauriCore).rejects.toThrow();
+    expect(changelogTauriCore.effectionTrace[0].state).toEqual("erroring");
+    expect(changelogTauriCore.effectionTrace[1].state).toEqual("erroring");
 
-    const changelogTaurijs = toVFile.read(
-      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTaurijs = yield captureError(
+      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration)
     );
-    yield expect(changelogTaurijs).rejects.toThrow();
+    expect(changelogTaurijs.effectionTrace[0].state).toEqual("erroring");
+    expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");
 
     restoreConsole();
   });
@@ -769,30 +665,20 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelogTauriCore = toVFile.read(
-      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTauriCore = yield captureError(
+      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration)
     );
-    yield expect(changelogTauriCore).rejects.toThrow();
+    expect(changelogTauriCore.effectionTrace[0].state).toEqual("erroring");
+    expect(changelogTauriCore.effectionTrace[1].state).toEqual("erroring");
 
-    const changelogTaurijs = toVFile.read(
-      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTaurijs = yield captureError(
+      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration)
     );
-    yield expect(changelogTaurijs).rejects.toThrow();
+    expect(changelogTaurijs.effectionTrace[0].state).toEqual("erroring");
+    expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");
 
     restoreConsole();
   });
@@ -855,30 +741,20 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      //@ts-ignore
-      covectorReturn: Object.keys(covectored.commandsRan).reduce(
-        (pkgs, pkg) => {
-          // remove these as they are dependent on the OS
-          // and user running them so would always fail
-          //@ts-ignore
-          delete pkgs[pkg].applied.vfile;
-          return pkgs;
-        },
-        covectored.commandsRan
-      ),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
 
-    const changelogTauriCore = toVFile.read(
-      path.join(fullIntegration, "/tauri/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTauriCore = yield captureError(
+      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration)
     );
-    yield expect(changelogTauriCore).rejects.toThrow();
+    expect(changelogTauriCore.effectionTrace[0].state).toEqual("erroring");
+    expect(changelogTauriCore.effectionTrace[1].state).toEqual("erroring");
 
-    const changelogTaurijs = toVFile.read(
-      path.join(fullIntegration, "/cli/tauri.js/", "CHANGELOG.md"),
-      "utf-8"
+    const changelogTaurijs = yield captureError(
+      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration)
     );
-    yield expect(changelogTaurijs).rejects.toThrow();
+    expect(changelogTaurijs.effectionTrace[0].state).toEqual("erroring");
+    expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");
 
     restoreConsole();
   });

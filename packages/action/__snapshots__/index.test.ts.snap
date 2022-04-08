@@ -76,6 +76,12 @@ publish
     \\"pkg\\": {
       \\"pkg\\": \\"package-one\\",
       \\"pkgFile\\": {
+        \\"file\\": {
+          \\"content\\": \\"{\\\\n  \\\\\\"name\\\\\\": \\\\\\"package-one\\\\\\",\\\\n  \\\\\\"version\\\\\\": \\\\\\"2.3.1\\\\\\",\\\\n  \\\\\\"license\\\\\\": \\\\\\"MIT\\\\\\",\\\\n  \\\\\\"scripts\\\\\\": {\\\\n    \\\\\\"build\\\\\\": \\\\\\"npm info tauri@0.8.0 description\\\\\\",\\\\n    \\\\\\"test\\\\\\": \\\\\\"npm info covector@0.1.0 license\\\\\\"\\\\n  }\\\\n}\\\\n\\",
+          \\"path\\": \\"packages/package-one/package.json\\",
+          \\"filename\\": \\"package\\",
+          \\"extname\\": \\".json\\"
+        },
         \\"version\\": \\"2.3.1\\",
         \\"versionMajor\\": 2,
         \\"versionMinor\\": 3,
@@ -115,6 +121,12 @@ publish
     \\"pkg\\": {
       \\"pkg\\": \\"package-two\\",
       \\"pkgFile\\": {
+        \\"file\\": {
+          \\"content\\": \\"{\\\\n  \\\\\\"name\\\\\\": \\\\\\"package-two\\\\\\",\\\\n  \\\\\\"version\\\\\\": \\\\\\"1.9.0\\\\\\",\\\\n  \\\\\\"license\\\\\\": \\\\\\"MIT\\\\\\",\\\\n  \\\\\\"scripts\\\\\\": {\\\\n    \\\\\\"build\\\\\\": \\\\\\"echo this command is not piped, it is run from scripts for pk2\\\\\\",\\\\n    \\\\\\"test\\\\\\": \\\\\\"echo this command is not piped, it is run from the test script\\\\\\"\\\\n  }\\\\n}\\\\n\\",
+          \\"path\\": \\"packages/package-two/package.json\\",
+          \\"filename\\": \\"package\\",
+          \\"extname\\": \\".json\\"
+        },
         \\"version\\": \\"1.9.0\\",
         \\"versionMajor\\": 1,
         \\"versionMinor\\": 9,

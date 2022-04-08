@@ -74,7 +74,7 @@ export function* covector({
   });
 
   if (command === "status" || !command) {
-    if (changesVfiles.length === 0) {
+    if (changeFilesLoaded.length === 0) {
       console.info("There are no changes.");
 
       const { commands: publishCommands }: { commands: PkgPublish[] } =
@@ -277,7 +277,7 @@ export function* covector({
     if (command === "version" && !dryRun) {
       if (pre) {
         pre.changes = changesPaths;
-        yield writePreFile({ preFile: pre });
+        yield writePreFile({ preFile: pre, cwd });
       } else {
         yield changeFilesRemove({ cwd, paths: changesPaths });
       }
