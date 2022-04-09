@@ -28,7 +28,7 @@ export function* loadFile(
     const parsedPath = path.parse(file);
     return {
       content,
-      path: path.relative(cwd, path.join(cwd, file)),
+      path: path.posix.relative(cwd, path.join(cwd, file)),
       filename: parsedPath?.name ?? "",
       extname: parsedPath?.ext ?? "",
     };
