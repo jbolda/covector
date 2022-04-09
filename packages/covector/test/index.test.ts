@@ -505,7 +505,7 @@ describe("integration test with preMode `on`", () => {
     );
   });
 
-  it.only("runs version in production with existing changes for js and rust", function* () {
+  it("runs version in production with existing changes for js and rust", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
