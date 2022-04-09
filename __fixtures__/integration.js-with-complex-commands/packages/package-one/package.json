@@ -1,5 +1,6 @@
 {
   "name": "package-one",
+  "description": "shrugs",
   "version": "2.3.1",
   "license": "MIT",
   "scripts": {

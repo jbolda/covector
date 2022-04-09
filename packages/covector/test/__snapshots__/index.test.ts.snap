@@ -54,6 +54,7 @@ Multi-binding collection of libraries and templates for building Tauri apps
           "file": Object {
             "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -68,6 +69,7 @@ Multi-binding collection of libraries and templates for building Tauri apps
           },
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -116,6 +118,7 @@ this command is not piped, it is run from scripts for pk2
           "file": Object {
             "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -130,6 +133,7 @@ this command is not piped, it is run from scripts for pk2
           },
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
@@ -188,6 +192,7 @@ Object {
         "pkgFile": Object {
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -229,6 +234,7 @@ Object {
         "pkgFile": Object {
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
@@ -266,6 +272,7 @@ Object {
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -280,6 +287,7 @@ Object {
             },
             "name": "package-one",
             "pkg": Object {
+              "description": "shrugs",
               "license": "MIT",
               "name": "package-one",
               "scripts": Object {
@@ -315,6 +323,7 @@ Object {
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -329,6 +338,7 @@ Object {
             },
             "name": "package-two",
             "pkg": Object {
+              "description": "shrugs",
               "license": "MIT",
               "name": "package-two",
               "scripts": Object {
@@ -383,6 +393,7 @@ Object {
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -397,6 +408,7 @@ Object {
               },
               "name": "package-one",
               "pkg": Object {
+                "description": "shrugs",
                 "license": "MIT",
                 "name": "package-one",
                 "scripts": Object {
@@ -441,6 +453,7 @@ Object {
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -455,6 +468,7 @@ Object {
               },
               "name": "package-two",
               "pkg": Object {
+                "description": "shrugs",
                 "license": "MIT",
                 "name": "package-two",
                 "scripts": Object {
@@ -503,6 +517,7 @@ Object {
           "file": Object {
             "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -517,6 +532,7 @@ Object {
           },
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -561,6 +577,7 @@ Object {
           "file": Object {
             "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -575,6 +592,7 @@ Object {
           },
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
@@ -642,6 +660,7 @@ publish
           "file": Object {
             "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -656,6 +675,7 @@ publish
           },
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -702,6 +722,7 @@ publish
           "file": Object {
             "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -716,6 +737,7 @@ publish
           },
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
@@ -775,6 +797,7 @@ Object {
         "pkgFile": Object {
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -816,6 +839,7 @@ Object {
         "pkgFile": Object {
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
@@ -853,6 +877,7 @@ Object {
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -867,6 +892,7 @@ Object {
             },
             "name": "package-one",
             "pkg": Object {
+              "description": "shrugs",
               "license": "MIT",
               "name": "package-one",
               "scripts": Object {
@@ -902,6 +928,7 @@ Object {
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -916,6 +943,7 @@ Object {
             },
             "name": "package-two",
             "pkg": Object {
+              "description": "shrugs",
               "license": "MIT",
               "name": "package-two",
               "scripts": Object {
@@ -970,6 +998,7 @@ Object {
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -984,6 +1013,7 @@ Object {
               },
               "name": "package-one",
               "pkg": Object {
+                "description": "shrugs",
                 "license": "MIT",
                 "name": "package-one",
                 "scripts": Object {
@@ -1029,6 +1059,7 @@ Object {
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1043,6 +1074,7 @@ Object {
               },
               "name": "package-two",
               "pkg": Object {
+                "description": "shrugs",
                 "license": "MIT",
                 "name": "package-two",
                 "scripts": Object {
@@ -1092,6 +1124,7 @@ Object {
           "file": Object {
             "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1106,6 +1139,7 @@ Object {
           },
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -1151,6 +1185,7 @@ Object {
           "file": Object {
             "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1165,6 +1200,7 @@ Object {
           },
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
@@ -1285,6 +1321,7 @@ Multi-binding collection of libraries and templates for building Tauri apps
           "file": Object {
             "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1299,6 +1336,7 @@ Multi-binding collection of libraries and templates for building Tauri apps
           },
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -1355,6 +1393,7 @@ this command is not piped, it is run from scripts for pk2
           "file": Object {
             "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1369,6 +1408,7 @@ this command is not piped, it is run from scripts for pk2
           },
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
@@ -1437,6 +1477,7 @@ Object {
         "pkgFile": Object {
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -1488,6 +1529,7 @@ Object {
         "pkgFile": Object {
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
@@ -1533,6 +1575,7 @@ Object {
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1547,6 +1590,7 @@ Object {
             },
             "name": "package-one",
             "pkg": Object {
+              "description": "shrugs",
               "license": "MIT",
               "name": "package-one",
               "scripts": Object {
@@ -1590,6 +1634,7 @@ Object {
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1604,6 +1649,7 @@ Object {
             },
             "name": "package-two",
             "pkg": Object {
+              "description": "shrugs",
               "license": "MIT",
               "name": "package-two",
               "scripts": Object {
@@ -1684,6 +1730,7 @@ Object {
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1698,6 +1745,7 @@ Object {
               },
               "name": "package-one",
               "pkg": Object {
+                "description": "shrugs",
                 "license": "MIT",
                 "name": "package-one",
                 "scripts": Object {
@@ -1750,6 +1798,7 @@ Object {
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1764,6 +1813,7 @@ Object {
               },
               "name": "package-two",
               "pkg": Object {
+                "description": "shrugs",
                 "license": "MIT",
                 "name": "package-two",
                 "scripts": Object {
@@ -1820,6 +1870,7 @@ Object {
           "file": Object {
             "content": "{
   \\"name\\": \\"package-one\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1834,6 +1885,7 @@ Object {
           },
           "name": "package-one",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-one",
             "scripts": Object {
@@ -1886,6 +1938,7 @@ Object {
           "file": Object {
             "content": "{
   \\"name\\": \\"package-two\\",
+  \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
   \\"scripts\\": {
@@ -1900,6 +1953,7 @@ Object {
           },
           "name": "package-two",
           "pkg": Object {
+            "description": "shrugs",
             "license": "MIT",
             "name": "package-two",
             "scripts": Object {
