@@ -27,7 +27,7 @@ export function* loadFile(
     });
     const parsedPath = path.parse(file);
     return {
-      content: content.replace("\r", ""),
+      content: content.replace(/\\r/g, ""),
       path: path.posix
         .relative(cwd, path.posix.join(cwd, file))
         .split("\\")
