@@ -162,7 +162,7 @@ describe("full e2e test", () => {
       expect({
         consoleLog: (console.log as any).mock.calls,
         // the log gets random /r on windows in CI
-        consoleDir: (console.dir as any).mock.calls.map((log) =>
+        consoleDir: (console.dir as any).mock.calls.map((log: any) =>
           typeof log === "string" ? log.replace(/\\r/g, "") : log
         ),
       }).toMatchSnapshot();
