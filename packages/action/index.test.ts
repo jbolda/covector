@@ -96,6 +96,7 @@ describe("full e2e test", () => {
       jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
       const covectoredAction = await run(covector());
+      expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "status");
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
     });
@@ -116,6 +117,7 @@ describe("full e2e test", () => {
       jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
       const covectoredAction = await run(covector());
+      expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
       // to cover template pipe
@@ -192,6 +194,7 @@ describe("full e2e test", () => {
       jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
       const covectoredAction = await run(covector());
+      expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "publish");
       expect(core.setOutput).toHaveBeenCalledWith("successfulPublish", true);
@@ -256,6 +259,7 @@ describe("full e2e test", () => {
         }));
 
       const covectoredAction = await run(covector());
+      expect({ covectoredAction }).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
         listReleases,
@@ -337,6 +341,7 @@ describe("full e2e test", () => {
         }));
 
       const covectoredAction = await run(covector());
+      expect({ covectoredAction }).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
         listReleases,
@@ -415,6 +420,7 @@ describe("full e2e test", () => {
         }));
 
       const covectoredAction = await run(covector());
+      expect({ covectoredAction }).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
         listReleases,
@@ -477,6 +483,7 @@ describe("full e2e test", () => {
         }));
 
       const covectoredAction = await run(covector());
+      expect({ covectoredAction }).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
         listReleases,
