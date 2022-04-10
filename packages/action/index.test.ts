@@ -159,15 +159,15 @@ describe("full e2e test", () => {
       jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
       const covectoredAction = await run(covector());
-      expect({
+      expect(
         // the log gets random /r on windows in CI
-        consoleLog: (console.log as any).mock.calls.map((log: any) =>
-          typeof log === "string" ? log.replace(/\\r/g, "") : log
-        ),
-        consoleDir: (console.dir as any).mock.calls.map((log: any) =>
-          typeof log === "string" ? log.replace(/\\r/g, "") : log
-        ),
-      }).toMatchSnapshot();
+        (console.log as any).mock.calls.map((logArray: any) =>
+          logArray.map((log: any) =>
+            typeof log === "string" ? log.replace(/\\r/g, "") : log
+          )
+        )
+      ).toMatchSnapshot();
+      expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
         expect.stringContaining("2.3.1")
