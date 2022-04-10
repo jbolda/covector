@@ -1,11 +1,11 @@
-import { PathLike } from "fs";
+import type { PathLike } from "fs";
 
 /* @covector/files */
-export interface VFile {
-  contents: string;
-  path: string;
+export interface File {
+  content: string;
+  path: PathLike;
+  filename: string;
   extname: string;
-  data: { filename: string };
 }
 
 // Pkg for toml has a `.packages` so we need to address this union
@@ -28,18 +28,18 @@ export interface PkgMinimum {
 }
 
 export interface PackageFile extends PkgMinimum {
-  vfile?: VFile;
+  file?: File;
   name?: string;
 }
 
 export interface PreFile {
-  vfile?: VFile;
+  file?: File;
   tag: string;
   changes: string[] | [];
 }
 
 export type ConfigFile = {
-  vfile?: VFile;
+  file?: File;
   changeFolder: PathLike;
   gitSiteUrl?: string;
   pkgManagers?: {
@@ -63,13 +63,6 @@ export type ConfigFile = {
   additionalBumpTypes?: string[];
 };
 
-export type ChangelogFile = {
-  path: string;
-  contents: string;
-  extname: string;
-  data: { filename: string };
-};
-
 /* @covector/command */
 export type RunningCommand = {
   command?: string | Function;
@@ -85,6 +78,11 @@ export type NormalizedCommand = {
 };
 
 /* @covector/changelog */
+export type Changelog = {
+  changes: { name: string; version: string };
+  changelog: File;
+};
+
 export type PkgCommandResponse = {
   precommand?: string | boolean;
   command: string | boolean;
@@ -135,7 +133,7 @@ export type CommonBumps = "major" | "minor" | "patch" | "prerelease" | "noop";
 
 export type Change = {
   releases: { [k: string]: CommonBumps };
-  meta?: { filename?: string };
+  meta: File;
 };
 
 export type Release = {

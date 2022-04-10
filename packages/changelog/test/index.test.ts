@@ -4,8 +4,7 @@ import {
   pipeChangelogToCommands,
 } from "../src";
 import { it } from "@effection/jest";
-//@ts-ignore
-import toVFile from "to-vfile";
+import { loadFile } from "@covector/files";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
@@ -79,12 +78,8 @@ describe("changelog", () => {
       cwd: projectFolder,
     });
 
-    //@ts-ignore
-    const changelog = yield toVFile.read(
-      projectFolder + "/CHANGELOG.md",
-      "utf-8"
-    );
-    expect(changelog.contents).toBe(
+    const changelog = yield loadFile("CHANGELOG.md", projectFolder);
+    expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.5.6]\n\n" +
         "- This is a test.\n" +
@@ -183,12 +178,8 @@ describe("changelog", () => {
       cwd: projectFolder,
     });
 
-    //@ts-ignore
-    const changelog = yield toVFile.read(
-      projectFolder + "/CHANGELOG.md",
-      "utf-8"
-    );
-    expect(changelog.contents).toBe(
+    const changelog = yield loadFile("CHANGELOG.md", projectFolder);
+    expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.5.6]\n\n" +
         "- This is a test.\n" +
@@ -258,12 +249,8 @@ describe("changelog", () => {
       cwd: projectFolder,
     });
 
-    //@ts-ignore
-    const changelog = yield toVFile.read(
-      projectFolder + "/CHANGELOG.md",
-      "utf-8"
-    );
-    expect(changelog.contents).toBe(
+    const changelog = yield loadFile("CHANGELOG.md", projectFolder);
+    expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.5.6]\n\n" +
         "- This is a test.\n" +
@@ -328,12 +315,8 @@ describe("changelog", () => {
       cwd: projectFolder,
     });
 
-    //@ts-ignore
-    const changelog = yield toVFile.read(
-      projectFolder + "/CHANGELOG.md",
-      "utf-8"
-    );
-    expect(changelog.contents).toBe(
+    const changelog = yield loadFile("CHANGELOG.md", projectFolder);
+    expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.9.0]\n\n" +
         "- This is a test.\n" +

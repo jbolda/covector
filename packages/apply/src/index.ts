@@ -1,3 +1,4 @@
+import { all } from "effection";
 import {
   readPkgFile,
   writePkgFile,
@@ -17,7 +18,7 @@ import type {
   PackageCommand,
 } from "@covector/types";
 
-export const apply = function* ({
+export function* apply({
   commands,
   config,
   cwd = process.cwd(),
@@ -53,9 +54,10 @@ export const apply = function* ({
     yield writeAll({
       bumps: bumps.reduce(
         (final: PackageFile[], current) =>
-          !current.vfile ? final : final.concat([current]),
+          !current.file ? final : final.concat([current]),
         []
       ),
+      cwd,
     });
   } else {
     bumps.forEach((b) => {
@@ -63,9 +65,9 @@ export const apply = function* ({
     });
   }
   return bumps;
-};
+}
 
-export const validateApply = async ({
+export function* validateApply({
   commands,
   config,
   cwd = process.cwd(),
@@ -75,7 +77,7 @@ export const validateApply = async ({
   config: ConfigFile;
   cwd: string;
   prereleaseIdentifier: string | null;
-}) => {
+}): Generator<any, true | Error, any> {
   const changes = commands.reduce(
     (finalChanges: { [k: string]: PackageCommand }, command) => {
       finalChanges[command.pkg] = command;
@@ -83,7 +85,7 @@ export const validateApply = async ({
     },
     {}
   );
-  let allPackages = await readAll({ changes, config, cwd });
+  let allPackages = yield readAll({ changes, config, cwd });
 
   const bumps = bumpAll({
     changes,
@@ -92,7 +94,7 @@ export const validateApply = async ({
     prereleaseIdentifier,
   }).reduce(
     (final: PackageFile[], current) =>
-      !current.vfile ? final : final.concat([current]),
+      !current.file ? final : final.concat([current]),
     []
   );
 
@@ -105,9 +107,9 @@ export const validateApply = async ({
   } catch (e) {
     throw e;
   }
-};
+}
 
-const readAll = async ({
+function* readAll({
   changes,
   config,
   cwd = process.cwd(),
@@ -115,7 +117,7 @@ const readAll = async ({
   changes: { [k: string]: { parents: string[] } };
   config: ConfigFile;
   cwd: string;
-}): Promise<{ [k: string]: PackageFile }> => {
+}): Generator<any, { [k: string]: PackageFile }, any> {
   let templateShell: PackageFile = {
     version: "",
     pkg: { name: "", version: "" },
@@ -133,10 +135,12 @@ const readAll = async ({
   );
 
   const pkgs: string[] = Object.keys(files);
-  const pkgFiles = await Promise.all(
+  const pkgFiles = yield all(
     Object.keys(files).map((pkg) =>
       !config.packages[pkg].path
-        ? { name: pkg }
+        ? function* () {
+            return { name: pkg };
+          }
         : readPkgFile({
             cwd,
             pkgConfig: config.packages[pkg],
@@ -149,11 +153,17 @@ const readAll = async ({
     list[pkg] = pkgFiles[index];
     return list;
   }, files);
-};
+}
 
-const writeAll = function* ({ bumps }: { bumps: PackageFile[] }) {
+const writeAll = function* ({
+  bumps,
+  cwd,
+}: {
+  bumps: PackageFile[];
+  cwd: string;
+}) {
   for (let bump of bumps) {
-    yield writePkgFile({ packageFile: bump });
+    yield writePkgFile({ packageFile: bump, cwd });
   }
 };
 
@@ -263,7 +273,7 @@ const bumpAll = ({
 }) => {
   let packageFiles = { ...allPackages };
   for (let pkg of Object.keys(changes)) {
-    if (!packageFiles[pkg].vfile || changes[pkg].type === "noop") continue;
+    if (!packageFiles[pkg].file || changes[pkg].type === "noop") continue;
     if (logs && !previewVersion)
       console.log(`bumping ${pkg} with ${changes[pkg].type}`);
     if (previewVersion)
@@ -359,7 +369,7 @@ const bumpDeps = ({
 }) => {
   let pkg = { ...packageFile };
 
-  if (pkg.pkg && pkg.vfile)
+  if (pkg.pkg && pkg.file)
     ["dependencies", "devDependencies", "dev-dependencies"].forEach(
       (property) => {
         // @ts-ignore

@@ -1,30 +1,57 @@
-//@ts-ignore
-import vfile from "to-vfile";
-//@ts-ignore
+import { default as fsDefault, PathLike, statSync } from "fs";
+// this is compatible with node@12+
+const fs = fsDefault.promises;
+
+import { all } from "effection";
 import globby from "globby";
-//@ts-ignore
-import fs from "fs";
-//@ts-ignore
 import path from "path";
-//@ts-ignore
 import TOML from "@tauri-apps/toml";
-//@ts-ignore
 import yaml from "js-yaml";
-//@ts-ignore
 import semver from "semver";
 
 import type {
-  VFile,
+  File,
   PkgMinimum,
   PackageFile,
   PreFile,
   ConfigFile,
 } from "@covector/types";
 
-const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
+export function* loadFile(
+  file: PathLike,
+  cwd: string
+): Generator<any, File | void, any> {
+  if (typeof file === "string") {
+    const content = yield fs.readFile(path.join(cwd, file), {
+      encoding: "utf-8",
+    });
+    const parsedPath = path.parse(file);
+    return {
+      content,
+      path: path.posix
+        .relative(cwd, path.posix.join(cwd, file))
+        .split("\\")
+        .join("/"),
+      filename: parsedPath?.name ?? "",
+      extname: parsedPath?.ext ?? "",
+    };
+  }
+}
+
+export function* saveFile(file: File, cwd: string): Generator<any, File, any> {
+  if (typeof file.path !== "string")
+    throw new Error(`Unable to handle saving of ${file}`);
+  yield fs.writeFile(path.join(cwd, file.path), file.content, {
+    encoding: "utf-8",
+  });
+  return file;
+}
+
+const parsePkg = (file: Partial<File>): PkgMinimum => {
+  if (!file.content) throw new Error(`${file.path} does not have any content`);
   switch (file.extname) {
     case ".toml":
-      const parsedTOML = TOML.parse(file.contents);
+      const parsedTOML = TOML.parse(file.content);
       // @ts-ignore
       const { version } = parsedTOML.package;
       return {
@@ -37,7 +64,7 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
         pkg: parsedTOML,
       };
     case ".json":
-      const parsedJSON = JSON.parse(file.contents);
+      const parsedJSON = JSON.parse(file.content);
       return {
         version: parsedJSON.version,
         versionMajor: semver.major(parsedJSON.version),
@@ -48,7 +75,7 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
       };
     case ".yml":
     case ".yaml":
-      const parsedYAML = yaml.load(file.contents);
+      const parsedYAML = yaml.load(file.content);
       // type narrow:
       if (
         typeof parsedYAML === "string" ||
@@ -70,7 +97,7 @@ const parsePkg = (file: { extname: string; contents: string }): PkgMinimum => {
       };
     default:
       // default case assuming a file with just a version number
-      const stringVersion = file.contents.trim();
+      const stringVersion = file.content.trim();
       if (!semver.valid(stringVersion)) {
         throw new Error("not valid version");
       }
@@ -105,8 +132,7 @@ const stringifyPkg = ({
   }
 };
 
-export const readPkgFile = async ({
-  //@ts-ignore Cannot find name 'process'. Do you need to install type definitions for node? even though we have them?
+export function* readPkgFile({
   cwd = process.cwd(),
   file,
   pkgConfig,
@@ -116,26 +142,22 @@ export const readPkgFile = async ({
   file?: string; // TODO, deprecate this
   pkgConfig?: { manager?: string; path?: string; packageFileName?: string };
   nickname: string;
-}): Promise<PackageFile> => {
+}): Generator<any, PackageFile, any> {
   if (file) {
-    const inputVfile = await vfile.read(file, "utf8");
-    const parsed = parsePkg(inputVfile);
+    const inputFile = yield loadFile(file, cwd);
+    const parsed = parsePkg(inputFile);
     return {
-      vfile: inputVfile,
+      file: inputFile,
       ...parsed,
       name: nickname,
     };
   } else {
     if (pkgConfig?.path && pkgConfig?.packageFileName) {
-      const configFile = path.join(
-        cwd,
-        pkgConfig.path,
-        pkgConfig.packageFileName
-      );
-      const inputVfile = await vfile.read(configFile, "utf8");
-      const parsed = parsePkg(inputVfile);
+      const configFile = path.join(pkgConfig.path, pkgConfig.packageFileName);
+      const inputFile = yield loadFile(configFile, cwd);
+      const parsed = parsePkg(inputFile);
       return {
-        vfile: inputVfile,
+        file: inputFile,
         ...parsed,
         name: nickname,
       };
@@ -152,55 +174,54 @@ export const readPkgFile = async ({
           packageFile = "pubspec.yaml";
         }
       }
-      const deriveFile = path.join(cwd, pkgConfig?.path || "", packageFile);
-      const inputVfile = await vfile.read(deriveFile, "utf8");
-      const parsed = parsePkg(inputVfile);
+      const deriveFile = path.join(pkgConfig?.path || "", packageFile);
+      const inputFile = yield loadFile(deriveFile, cwd);
+      const parsed = parsePkg(inputFile);
       return {
-        vfile: inputVfile,
+        file: inputFile,
         ...parsed,
         name: nickname,
       };
     }
   }
-};
+}
 
-export const writePkgFile = async ({
+export function* writePkgFile({
   packageFile,
+  cwd,
 }: {
   packageFile: PackageFile;
-}): Promise<VFile> => {
-  if (!packageFile.vfile)
+  cwd: string;
+}): Generator<any, File, any> {
+  if (!packageFile.file)
     throw new Error(`no vfile present for ${packageFile.name}`);
-  const vFileNext = { ...packageFile.vfile };
-  vFileNext.contents = stringifyPkg({
+  const fileNext = { ...packageFile.file };
+  fileNext.content = stringifyPkg({
     newContents: packageFile.pkg,
-    extname: packageFile.vfile.extname,
+    extname: packageFile.file.extname,
   });
-  const inputVfile = await vfile.write(vFileNext, "utf8");
-  return inputVfile;
-};
+  const inputFile = yield saveFile(fileNext, cwd);
+  return inputFile;
+}
 
-export const readPreFile = async ({
+export function* readPreFile({
   cwd,
   changeFolder = ".changes",
 }: {
   cwd: string;
   changeFolder?: string;
-}): Promise<PreFile | null> => {
+}): Generator<any, PreFile | null, any> {
   try {
-    const inputVfile = await vfile.read(
-      path.join(cwd, changeFolder, "pre.json"),
-      "utf8"
-    );
-    const parsed = JSON.parse(inputVfile.contents);
+    const inputFile = yield loadFile(path.join(changeFolder, "pre.json"), cwd);
+    const parsed = JSON.parse(inputFile.content);
     return {
-      vfile: inputVfile,
+      file: inputFile,
       ...parsed,
     };
   } catch (error) {
     return null;
   }
-};
+}
 
 export const getPackageFileVersion = ({
   pkg,
@@ -211,11 +232,11 @@ export const getPackageFileVersion = ({
   property?: string;
   dep?: string;
 }): string => {
-  if (pkg.vfile && pkg.pkg) {
+  if (pkg.file && pkg.pkg) {
     if (property === "version") {
-      if (pkg.vfile.extname === ".json") {
+      if (pkg.file.extname === ".json") {
         return pkg.pkg.version;
-      } else if (pkg.vfile.extname === ".toml") {
+      } else if (pkg.file.extname === ".toml") {
         // @ts-ignore
         return pkg.pkg.package.version;
       } else {
@@ -294,11 +315,11 @@ export const setPackageFileVersion = ({
   property?: string;
   dep?: string;
 }): PackageFile => {
-  if (pkg.vfile && pkg.pkg) {
+  if (pkg.file && pkg.pkg) {
     if (property === "version") {
-      if (pkg.vfile.extname === ".json") {
+      if (pkg.file.extname === ".json") {
         pkg.pkg.version = version;
-      } else if (pkg.vfile.extname === ".toml") {
+      } else if (pkg.file.extname === ".toml") {
         // @ts-ignore
         pkg.pkg.package.version = version;
       } else {
@@ -347,22 +368,24 @@ export const setPackageFileVersion = ({
   return pkg;
 };
 
-export const writePreFile = async ({
+export function* writePreFile({
   preFile,
+  cwd,
 }: {
   preFile: PreFile;
-}): Promise<VFile> => {
-  if (!preFile.vfile)
+  cwd: string;
+}): Generator<any, File, any> {
+  if (!preFile.file)
     throw new Error(`We could not find the pre.json to update.`);
   const { tag, changes } = preFile;
-  const vFileNext = { ...preFile.vfile };
-  vFileNext.contents = stringifyPkg({
+  const fileNext = { ...preFile.file };
+  fileNext.content = stringifyPkg({
     newContents: { tag, changes },
-    extname: preFile.vfile.extname,
+    extname: preFile.file.extname,
   });
-  const inputVfile = await vfile.write(vFileNext, "utf8");
-  return inputVfile;
-};
+  const inputFile = yield saveFile(fileNext, cwd);
+  return inputFile;
+}
 
 export const testSerializePkgFile = ({
   packageFile,
@@ -370,10 +393,10 @@ export const testSerializePkgFile = ({
   packageFile: PackageFile;
 }) => {
   try {
-    if (!packageFile.vfile) throw `no vfile present`;
+    if (!packageFile.file) throw `no package file present`;
     stringifyPkg({
       newContents: packageFile.pkg,
-      extname: packageFile.vfile.extname,
+      extname: packageFile.file.extname,
     });
     return true;
   } catch (e: any) {
@@ -386,24 +409,21 @@ export const testSerializePkgFile = ({
   }
 };
 
-export const configFile = async ({
+export function* configFile({
   cwd,
   changeFolder = ".changes",
 }: {
   cwd: string;
   changeFolder?: string;
-}): Promise<ConfigFile> => {
-  const inputVfile = await vfile.read(
-    path.join(cwd, changeFolder, "config.json"),
-    "utf8"
-  );
-  const parsed = JSON.parse(inputVfile.contents);
+}): Generator<any, ConfigFile, any> {
+  const inputFile = yield loadFile(path.join(changeFolder, "config.json"), cwd);
+  const parsed = JSON.parse(inputFile.content);
   return {
-    vfile: inputVfile,
+    file: inputFile,
     ...parsed,
     ...checkFileOrDirectory({ cwd, config: parsed }),
   };
-};
+}
 
 export const checkFileOrDirectory = ({
   cwd,
@@ -419,7 +439,7 @@ export const checkFileOrDirectory = ({
           const packagePath = config.packages[pkg].path;
           if (!packagePath || !cwd) return packages;
 
-          const checkDir = fs.statSync(path.join(cwd, packagePath));
+          const checkDir = statSync(path.join(cwd, packagePath));
           if (checkDir.isFile()) {
             const dirName = path.dirname(packagePath);
             const packageFileName = path.basename(packagePath);
@@ -455,22 +475,18 @@ export const changeFiles = async ({
   );
 };
 
-export const changeFilesToVfile = ({
+export function* loadChangeFiles({
   cwd,
   paths,
 }: {
   cwd: string;
   paths: string[];
-}): VFile[] => {
-  return paths.map((file) => {
-    let v = vfile.readSync(path.join(cwd, file), "utf8");
-    delete v.history;
-    delete v.cwd;
-    v.data.filename = file;
-    return v;
-  });
-};
+}): Generator<any, File[], any> {
+  const files = paths.map((file) => loadFile(file, cwd));
+  return yield all(files);
+}
 
+// redo this into a generator
 export const changeFilesRemove = ({
   cwd,
   paths,
@@ -480,12 +496,7 @@ export const changeFilesRemove = ({
 }) => {
   return Promise.all(
     paths.map(async (changeFilePath) => {
-      await fs.unlink(
-        path.posix.join(cwd, changeFilePath),
-        (err: Error | null) => {
-          if (err) throw err;
-        }
-      );
+      await fs.unlink(path.posix.join(cwd, changeFilePath));
       return changeFilePath;
     })
   ).then((deletedPaths) => {
@@ -495,7 +506,7 @@ export const changeFilesRemove = ({
   });
 };
 
-export const readChangelog = async ({
+export function* readChangelog({
   cwd,
   packagePath = "",
   create = true,
@@ -503,30 +514,28 @@ export const readChangelog = async ({
   cwd: string;
   packagePath?: string;
   create?: boolean;
-}): Promise<VFile> => {
+}): Generator<any, File, any> {
   let file = null;
   try {
-    file = await vfile.read(
-      path.join(cwd, packagePath, "CHANGELOG.md"),
-      "utf8"
-    );
+    file = yield loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
   } catch {
     if (create) {
       console.log("Could not load the CHANGELOG.md. Creating one.");
       file = {
-        path: path.join(cwd, packagePath, "CHANGELOG.md"),
-        contents: "# Changelog\n\n\n",
+        path: path.join(packagePath, "CHANGELOG.md"),
+        content: "# Changelog\n\n\n",
       };
     }
   }
   return file;
-};
+}
 
-export const writeChangelog = async ({
+export function* writeChangelog({
   changelog,
+  cwd,
 }: {
-  changelog: VFile;
-}): Promise<VFile> => {
-  const inputVfile = await vfile.write(changelog, "utf8");
-  return inputVfile;
-};
+  changelog: File;
+  cwd: string;
+}): Generator<any, void | Error, any> {
+  return yield saveFile(changelog, cwd);
+}

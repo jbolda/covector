@@ -1,16 +1,18 @@
+import { all } from "effection";
 import { readChangelog, writeChangelog } from "@covector/files";
 import unified from "unified";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
 
 import type {
+  File,
   ConfigFile,
-  ChangelogFile,
+  Changelog,
   PkgCommandResponse,
   AssembledChanges,
 } from "@covector/types";
 
-export const fillChangelogs = async ({
+export function* fillChangelogs({
   applied,
   assembledChanges,
   config,
@@ -24,13 +26,17 @@ export const fillChangelogs = async ({
   cwd: string;
   pkgCommandsRan?: { [k: string]: PkgCommandResponse };
   create?: boolean;
-}) => {
-  const changelogs = await readAllChangelogs({
+}): Generator<
+  any,
+  | {
+      [k: string]: PkgCommandResponse;
+    }
+  | undefined,
+  any
+> {
+  const changelogs = yield readAllChangelogs({
     applied: applied.reduce(
-      (
-        final: { name: string; version: string; changelog?: ChangelogFile }[],
-        current
-      ) =>
+      (final: { name: string; version: string; changelog?: File }[], current) =>
         !config.packages[current.name].path ? final : final.concat([current]),
       []
     ),
@@ -45,7 +51,7 @@ export const fillChangelogs = async ({
   });
 
   if (create) {
-    await writeAllChangelogs({ writtenChanges });
+    yield writeAllChangelogs({ writtenChanges, cwd });
   }
 
   if (!pkgCommandsRan) {
@@ -65,16 +71,16 @@ export const fillChangelogs = async ({
 
     return pkgCommandsRan;
   }
-};
+}
 
-export const pullLastChangelog = async ({
+export function* pullLastChangelog({
   config,
   cwd,
 }: {
   config: ConfigFile;
   cwd: string;
-}) => {
-  const changelogs = await readAllChangelogs({
+}): Generator<any, { [k: string]: { pkg: string; changelog: string } }, any> {
+  const changelogs = yield readAllChangelogs({
     applied: Object.keys(config.packages).map((pkg) => ({
       name: pkg,
       version: "",
@@ -95,7 +101,7 @@ export const pullLastChangelog = async ({
     },
     {}
   );
-};
+}
 
 export const pipeChangelogToCommands = async ({
   changelogs,
@@ -116,7 +122,7 @@ export const pipeChangelogToCommands = async ({
     pkgCommandsRan
   );
 
-const readAllChangelogs = ({
+function* readAllChangelogs({
   applied,
   packages,
   cwd,
@@ -126,22 +132,20 @@ const readAllChangelogs = ({
   packages: ConfigFile["packages"];
   cwd: string;
   create?: boolean;
-}) => {
-  return Promise.all(
-    applied.map((change) =>
-      readChangelog({
-        cwd,
-        packagePath: packages[change.name].path,
-        create,
-      })
-    )
-  ).then((changelogs) =>
-    changelogs.map((changelog, index) => ({
-      changes: applied[index],
-      changelog,
-    }))
+}): Generator<any, Changelog[], any> {
+  const prepChangelogs = applied.map((change) =>
+    readChangelog({
+      cwd,
+      packagePath: packages[change.name].path,
+      create,
+    })
   );
-};
+  const loadedChangelogs: File[] = yield all(prepChangelogs);
+  return loadedChangelogs.map((changelog, index) => ({
+    changes: applied[index],
+    changelog,
+  }));
+}
 
 const applyChanges = ({
   changelogs,
@@ -150,7 +154,7 @@ const applyChanges = ({
 }: {
   changelogs: {
     changes: { name: string; version: string };
-    changelog?: ChangelogFile;
+    changelog?: File;
   }[];
   assembledChanges: AssembledChanges;
   config: ConfigFile;
@@ -167,7 +171,7 @@ const applyChanges = ({
   return changelogs.map((change) => {
     let addition = "";
     if (change.changelog) {
-      let changelog = processor.parse(change.changelog.contents);
+      let changelog = processor.parse(change.changelog.content);
       if (!assembledChanges.releases[change.changes.name]) {
         addition = `## [${change.changes.version}]\nBumped due to dependency.`;
       } else {
@@ -207,7 +211,7 @@ const applyChanges = ({
         parsedAddition.children,
         changelogRemainingElements
       );
-      change.changelog.contents = processor.stringify(changelog);
+      change.changelog.content = processor.stringify(changelog);
     }
     return { pkg: change.changes.name, change, addition };
   });
@@ -218,7 +222,7 @@ const pullChanges = ({
 }: {
   changelogs: {
     changes: { name: string; version: string };
-    changelog?: ChangelogFile;
+    changelog?: File;
   }[];
 }) => {
   const processor: any = unified().use(parse).use(stringify, {
@@ -228,7 +232,7 @@ const pullChanges = ({
 
   return changelogs.map((change) => {
     if (change.changelog) {
-      let changelogParsed = processor.parse(change.changelog.contents);
+      let changelogParsed = processor.parse(change.changelog.content);
       const startNode = 1;
       const nextNode: number = changelogParsed.children
         .slice(startNode + 1)
@@ -253,8 +257,9 @@ const pullChanges = ({
   });
 };
 
-const writeAllChangelogs = ({
+function* writeAllChangelogs({
   writtenChanges,
+  cwd,
 }: {
   writtenChanges: {
     pkg: string;
@@ -263,19 +268,20 @@ const writeAllChangelogs = ({
         name: string;
         version: string;
       };
-      changelog?: ChangelogFile;
+      changelog?: File;
     };
     addition: string;
   }[];
-}) => {
-  return Promise.all(
+  cwd: string;
+}): Generator<any, any, any> {
+  return yield all(
     writtenChanges.map((changes) => {
       const { changelog } = changes.change;
       if (changelog) {
-        return writeChangelog({ changelog });
+        return writeChangelog({ changelog, cwd });
       } else {
         throw new Error(`Changelog not properly created: ${changes}`);
       }
     })
   );
-};
+}
