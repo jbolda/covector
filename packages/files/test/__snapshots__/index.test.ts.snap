@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`file test globs changes 1`] = `
+exports[`general file test globs changes 1`] = `
 Array [
   Object {
     "content": "---
@@ -27,4 +27,4 @@ Summary about the changes in pkg-b
 ]
 `;
 
-exports[`file test ignores readme 1`] = `Array []`;
+exports[`general file test ignores readme 1`] = `Array []`;
