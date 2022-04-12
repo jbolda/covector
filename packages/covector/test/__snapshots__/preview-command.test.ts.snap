@@ -1,0 +1,437 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`integration test for preview command runs version and publish for js and rust 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping package-b with branch-name.12345 identifier to publish a preview",
+    ],
+    Array [
+      "bumping package-a with branch-name.12345 identifier to publish a preview",
+    ],
+    Array [
+      "bumping package-c with branch-name.12345 identifier to publish a preview",
+    ],
+    Array [
+      "package-a [prepublish]: echo prepublishing package-a would happen here",
+    ],
+    Array [
+      "prepublishing package-a would happen here",
+    ],
+    Array [
+      "package-b [prepublish]: echo prepublishing package-b would happen here",
+    ],
+    Array [
+      "prepublishing package-b would happen here",
+    ],
+    Array [
+      "package-c [prepublish]: echo prepublishing package-c would happen here",
+    ],
+    Array [
+      "prepublishing package-c would happen here",
+    ],
+    Array [
+      "package-a [publish]: echo publishing --tag  would happen here",
+    ],
+    Array [
+      "publishing --tag would happen here",
+    ],
+    Array [
+      "package-b [publish]: echo publishing --tag  would happen here",
+    ],
+    Array [
+      "publishing --tag would happen here",
+    ],
+    Array [
+      "package-c [publish]: echo publishing would happen here",
+    ],
+    Array [
+      "publishing would happen here",
+    ],
+  ],
+  "covectorReturn": Object {
+    "package-a": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing --tag  would happen here",
+        ],
+        "dependencies": Array [
+          "package-b",
+        ],
+        "errorOnVersionRange": null,
+        "manager": "javascript",
+        "path": "./package-a",
+        "pkg": "package-a",
+        "pkgFile": Object {
+          "file": Object {
+            "content": "{
+  \\"name\\": \\"package-a\\",
+  \\"version\\": \\"0.0.1-branch-name.12345\\",
+  \\"dependencies\\": {
+    \\"package-b\\": \\"0.0.1-branch-name.12345\\"
+  }
+}
+",
+            "extname": ".json",
+            "filename": "package",
+            "path": "package-a/package.json",
+          },
+          "name": "package-a",
+          "pkg": Object {
+            "dependencies": Object {
+              "package-b": "0.0.1-branch-name.12345",
+            },
+            "name": "package-a",
+            "version": "0.0.1-branch-name.12345",
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
+        },
+        "postcommand": Array [
+          "echo postpublishing package-a would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-a would happen here",
+        ],
+        "releaseTag": "package-a-v0.0.1-branch-name.12345",
+      },
+      "postcommand": false,
+      "precommand": true,
+      "published": true,
+    },
+    "package-b": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing --tag  would happen here",
+        ],
+        "dependencies": undefined,
+        "errorOnVersionRange": null,
+        "manager": "javascript",
+        "path": "./package-b",
+        "pkg": "package-b",
+        "pkgFile": Object {
+          "file": Object {
+            "content": "{
+  \\"name\\": \\"package-b\\",
+  \\"version\\": \\"0.0.1-branch-name.12345\\",
+  \\"dependencies\\": {}
+}
+",
+            "extname": ".json",
+            "filename": "package",
+            "path": "package-b/package.json",
+          },
+          "name": "package-b",
+          "pkg": Object {
+            "dependencies": Object {},
+            "name": "package-b",
+            "version": "0.0.1-branch-name.12345",
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
+        },
+        "postcommand": Array [
+          "echo postpublishing package-b would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-b would happen here",
+        ],
+        "releaseTag": "package-b-v0.0.1-branch-name.12345",
+      },
+      "postcommand": false,
+      "precommand": true,
+      "published": true,
+    },
+    "package-c": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing would happen here",
+        ],
+        "dependencies": Array [
+          "package-b",
+        ],
+        "errorOnVersionRange": null,
+        "manager": "rust",
+        "path": "./package-c",
+        "pkg": "package-c",
+        "pkgFile": Object {
+          "file": Object {
+            "content": "[package]
+name = \\"package-c\\"
+version = \\"0.0.1-branch-name.12345\\"
+
+[dependencies]
+package-b = \\"0.0.1-branch-name.12345\\"
+",
+            "extname": ".toml",
+            "filename": "Cargo",
+            "path": "package-c/Cargo.toml",
+          },
+          "name": "package-c",
+          "pkg": Object {
+            "dependencies": Object {
+              "package-b": "0.0.1-branch-name.12345",
+            },
+            "package": Object {
+              "name": "package-c",
+              "version": "0.0.1-branch-name.12345",
+            },
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
+        },
+        "postcommand": Array [
+          "echo postpublishing package-c would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-c would happen here",
+        ],
+        "releaseTag": "package-c-v0.0.1-branch-name.12345",
+      },
+      "postcommand": false,
+      "precommand": true,
+      "published": true,
+    },
+  },
+}
+`;
+
+exports[`integration test for preview command with dist tags runs version and publish for js and rust 1`] = `
+Object {
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping package-b with branch-name.12345 identifier to publish a preview",
+    ],
+    Array [
+      "bumping package-a with branch-name.12345 identifier to publish a preview",
+    ],
+    Array [
+      "bumping package-c with branch-name.12345 identifier to publish a preview",
+    ],
+    Array [
+      "package-a [prepublish]: echo prepublishing package-a would happen here",
+    ],
+    Array [
+      "prepublishing package-a would happen here",
+    ],
+    Array [
+      "package-b [prepublish]: echo prepublishing package-b would happen here",
+    ],
+    Array [
+      "prepublishing package-b would happen here",
+    ],
+    Array [
+      "package-c [prepublish]: echo prepublishing package-c would happen here",
+    ],
+    Array [
+      "prepublishing package-c would happen here",
+    ],
+    Array [
+      "package-a [publish]: echo publishing would happen here",
+    ],
+    Array [
+      "publishing would happen here",
+    ],
+    Array [
+      "package-b [publish]: echo publishing would happen here",
+    ],
+    Array [
+      "publishing would happen here",
+    ],
+    Array [
+      "package-c [publish]: echo publishing --tag branch_name would happen here",
+    ],
+    Array [
+      "publishing --tag branch_name would happen here",
+    ],
+  ],
+  "covectorReturn": Object {
+    "package-a": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing would happen here",
+        ],
+        "dependencies": Array [
+          "package-b",
+        ],
+        "errorOnVersionRange": null,
+        "manager": "javascript",
+        "path": "./package-a",
+        "pkg": "package-a",
+        "pkgFile": Object {
+          "file": Object {
+            "content": "{
+  \\"name\\": \\"package-a\\",
+  \\"version\\": \\"0.0.1-branch-name.12345\\",
+  \\"dependencies\\": {
+    \\"package-b\\": \\"0.0.1-branch-name.12345\\"
+  }
+}
+",
+            "extname": ".json",
+            "filename": "package",
+            "path": "package-a/package.json",
+          },
+          "name": "package-a",
+          "pkg": Object {
+            "dependencies": Object {
+              "package-b": "0.0.1-branch-name.12345",
+            },
+            "name": "package-a",
+            "version": "0.0.1-branch-name.12345",
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
+        },
+        "postcommand": Array [
+          "echo postpublishing package-a would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-a would happen here",
+        ],
+        "releaseTag": "package-a-v0.0.1-branch-name.12345",
+      },
+      "postcommand": false,
+      "precommand": true,
+      "published": true,
+    },
+    "package-b": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing would happen here",
+        ],
+        "dependencies": undefined,
+        "errorOnVersionRange": null,
+        "manager": "javascript",
+        "path": "./package-b",
+        "pkg": "package-b",
+        "pkgFile": Object {
+          "file": Object {
+            "content": "{
+  \\"name\\": \\"package-b\\",
+  \\"version\\": \\"0.0.1-branch-name.12345\\",
+  \\"dependencies\\": {}
+}
+",
+            "extname": ".json",
+            "filename": "package",
+            "path": "package-b/package.json",
+          },
+          "name": "package-b",
+          "pkg": Object {
+            "dependencies": Object {},
+            "name": "package-b",
+            "version": "0.0.1-branch-name.12345",
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
+        },
+        "postcommand": Array [
+          "echo postpublishing package-b would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-b would happen here",
+        ],
+        "releaseTag": "package-b-v0.0.1-branch-name.12345",
+      },
+      "postcommand": false,
+      "precommand": true,
+      "published": true,
+    },
+    "package-c": Object {
+      "command": true,
+      "pkg": Object {
+        "command": Array [
+          "echo publishing --tag branch_name would happen here",
+        ],
+        "dependencies": Array [
+          "package-b",
+        ],
+        "errorOnVersionRange": null,
+        "manager": "rust",
+        "path": "./package-c",
+        "pkg": "package-c",
+        "pkgFile": Object {
+          "file": Object {
+            "content": "[package]
+name = \\"package-c\\"
+version = \\"0.0.1-branch-name.12345\\"
+
+[dependencies]
+package-b = \\"0.0.1-branch-name.12345\\"
+",
+            "extname": ".toml",
+            "filename": "Cargo",
+            "path": "package-c/Cargo.toml",
+          },
+          "name": "package-c",
+          "pkg": Object {
+            "dependencies": Object {
+              "package-b": "0.0.1-branch-name.12345",
+            },
+            "package": Object {
+              "name": "package-c",
+              "version": "0.0.1-branch-name.12345",
+            },
+          },
+          "version": "0.0.1-branch-name.12345",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 1,
+          "versionPrerelease": Array [
+            "branch-name",
+            12345,
+          ],
+        },
+        "postcommand": Array [
+          "echo postpublishing package-c would happen here",
+        ],
+        "precommand": Array [
+          "echo prepublishing package-c would happen here",
+        ],
+        "releaseTag": "package-c-v0.0.1-branch-name.12345",
+      },
+      "postcommand": false,
+      "precommand": true,
+      "published": true,
+    },
+  },
+}
+`;
