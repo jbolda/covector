@@ -177,7 +177,7 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
   });
 
@@ -190,7 +190,7 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
   });
 
@@ -203,7 +203,7 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
   });
 
@@ -285,7 +285,7 @@ describe("integration test in production mode", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
   });
 
@@ -346,11 +346,3 @@ describe("integration test in production mode", () => {
     expect((console.log as any).mock.calls).toMatchSnapshot();
   });
 });
-
-// vfile returns fs information that is flaky between machines, scrub it
-const scrubVfile = (covectored: any) => {
-  return Object.keys(covectored.commandsRan).reduce((c, pkg) => {
-    delete c[pkg].pkg.pkgFile.vfile;
-    return c;
-  }, covectored.commandsRan);
-};

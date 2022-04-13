@@ -49,7 +49,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -64,7 +64,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
   }, 10000);
@@ -79,7 +79,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
   }, 10000);
@@ -126,7 +126,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -142,7 +142,7 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -158,19 +158,11 @@ describe("integration test for complex commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
   });
 });
-
-// vfile returns fs information that is flaky between machines, scrub it
-const scrubVfile = (covectored: any) => {
-  return Object.keys(covectored.commandsRan).reduce((c, pkg) => {
-    delete c[pkg].pkg.pkgFile.vfile;
-    return c;
-  }, covectored.commandsRan);
-};
 
 describe("integration test to invoke sub commands", () => {
   it("runs publish-primary in prod mode", function* () {
@@ -183,7 +175,7 @@ describe("integration test to invoke sub commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
   });
@@ -198,7 +190,7 @@ describe("integration test to invoke sub commands", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
   });

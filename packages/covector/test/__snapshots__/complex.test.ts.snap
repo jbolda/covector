@@ -26,8 +26,9 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "package-one": Object {
-      "command": "## \\\\[2.3.1]
+    "commandsRan": Object {
+      "package-one": Object {
+        "command": "## \\\\[2.3.1]
 
 - Added some cool things.
 
@@ -37,22 +38,22 @@ Object {
 npm WARN Ignoring workspaces for specified package(s) 
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "npm run build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-one\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
@@ -63,36 +64,36 @@ Multi-binding collection of libraries and templates for building Tauri apps
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-one/package.json",
+            },
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+            "versionPrerelease": null,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-one-v2.3.1",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
-    },
-    "package-two": Object {
-      "command": "## \\\\[1.9.0]
+      "package-two": Object {
+        "command": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 
@@ -101,22 +102,22 @@ Multi-binding collection of libraries and templates for building Tauri apps
 
 this command is not piped, it is run from scripts for pk2
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "npm run build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-two\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
@@ -127,33 +128,118 @@ this command is not piped, it is run from scripts for pk2
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-two/package.json",
+            },
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+            "versionPrerelease": null,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-two-v1.9.0",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
+    },
+    "pipeTemplate": Object {
+      "package-one": Object {
+        "name": "package-one",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
+            "command": Object {
+              "command": "npm run build",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+        },
+      },
+      "package-two": Object {
+        "name": "package-two",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
+            "command": Object {
+              "command": "npm run build",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+        },
+      },
     },
   },
 }
@@ -494,28 +580,29 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "package-one": Object {
-      "command": "## \\\\[2.3.1]
+    "commandsRan": Object {
+      "package-one": Object {
+        "command": "## \\\\[2.3.1]
 
 - Added some cool things.
 
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "npm run build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-one\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
@@ -526,56 +613,56 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-one/package.json",
+            },
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+            "versionPrerelease": null,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-one-v2.3.1",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
-    },
-    "package-two": Object {
-      "command": "## \\\\[1.9.0]
+      "package-two": Object {
+        "command": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "npm run build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-two\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
@@ -586,33 +673,118 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-two/package.json",
+            },
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+            "versionPrerelease": null,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-two-v1.9.0",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
+    },
+    "pipeTemplate": Object {
+      "package-one": Object {
+        "name": "package-one",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
+            "command": Object {
+              "command": "npm run build",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+        },
+      },
+      "package-two": Object {
+        "name": "package-two",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
+            "command": Object {
+              "command": "npm run build",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+        },
+      },
     },
   },
 }
@@ -636,29 +808,30 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "package-one": Object {
-      "command": "## \\\\[2.3.1]
+    "commandsRan": Object {
+      "package-one": Object {
+        "command": "## \\\\[2.3.1]
 
 - Added some cool things.
 
 publish
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-one\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
@@ -669,58 +842,58 @@ publish
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-one/package.json",
+            },
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+            "versionPrerelease": null,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-one-v2.3.1",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
+        "postcommand": false,
+        "precommand": false,
+        "published": true,
       },
-      "postcommand": false,
-      "precommand": false,
-      "published": true,
-    },
-    "package-two": Object {
-      "command": "## \\\\[1.9.0]
+      "package-two": Object {
+        "command": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 
 publish
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-two\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
@@ -731,34 +904,119 @@ publish
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-two/package.json",
+            },
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+            "versionPrerelease": null,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-two-v1.9.0",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
+        "postcommand": false,
+        "precommand": false,
+        "published": true,
       },
-      "postcommand": false,
-      "precommand": false,
-      "published": true,
+    },
+    "pipeTemplate": Object {
+      "package-one": Object {
+        "name": "package-one",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+        },
+      },
+      "package-two": Object {
+        "name": "package-two",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+        },
+      },
     },
   },
 }
@@ -1101,28 +1359,29 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "package-one": Object {
-      "command": "## \\\\[2.3.1]
+    "commandsRan": Object {
+      "package-one": Object {
+        "command": "## \\\\[2.3.1]
 
 - Added some cool things.
 
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-one\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
@@ -1133,57 +1392,57 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-one/package.json",
+            },
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+            "versionPrerelease": null,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-one-v2.3.1",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
+        "postcommand": false,
+        "precommand": false,
+        "published": true,
       },
-      "postcommand": false,
-      "precommand": false,
-      "published": true,
-    },
-    "package-two": Object {
-      "command": "## \\\\[1.9.0]
+      "package-two": Object {
+        "command": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-two\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
@@ -1194,34 +1453,119 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-two/package.json",
+            },
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+            "versionPrerelease": null,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-two-v1.9.0",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
+        "postcommand": false,
+        "precommand": false,
+        "published": true,
       },
-      "postcommand": false,
-      "precommand": false,
-      "published": true,
+    },
+    "pipeTemplate": Object {
+      "package-one": Object {
+        "name": "package-one",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+        },
+      },
+      "package-two": Object {
+        "name": "package-two",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+        },
+      },
     },
   },
 }
@@ -1285,8 +1629,9 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "package-one": Object {
-      "command": "## \\\\[2.3.1]
+    "commandsRan": Object {
+      "package-one": Object {
+        "command": "## \\\\[2.3.1]
 
 - Added some cool things.
 
@@ -1296,30 +1641,30 @@ Object {
 npm WARN Ignoring workspaces for specified package(s) 
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-          Object {
-            "command": "npm test",
-            "dryRunCommand": false,
-          },
-          Object {
-            "command": "echo boop",
-            "dryRunCommand": "echo deboop",
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "npm run build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+            Object {
+              "command": "npm test",
+              "dryRunCommand": false,
+            },
+            Object {
+              "command": "echo boop",
+              "dryRunCommand": "echo deboop",
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-one\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
@@ -1330,36 +1675,36 @@ Multi-binding collection of libraries and templates for building Tauri apps
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-one/package.json",
+            },
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+            "versionPrerelease": null,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-one-v2.3.1",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
-    },
-    "package-two": Object {
-      "command": "## \\\\[1.9.0]
+      "package-two": Object {
+        "command": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 
@@ -1368,30 +1713,30 @@ Multi-binding collection of libraries and templates for building Tauri apps
 
 this command is not piped, it is run from scripts for pk2
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-          Object {
-            "command": "npm test",
-            "dryRunCommand": false,
-          },
-          Object {
-            "command": "echo boop",
-            "dryRunCommand": "echo deboop",
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "npm run build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+            Object {
+              "command": "npm test",
+              "dryRunCommand": false,
+            },
+            Object {
+              "command": "echo boop",
+              "dryRunCommand": "echo deboop",
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-two\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
@@ -1402,33 +1747,138 @@ this command is not piped, it is run from scripts for pk2
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-two/package.json",
+            },
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+            "versionPrerelease": null,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-two-v1.9.0",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
+    },
+    "pipeTemplate": Object {
+      "package-one": Object {
+        "name": "package-one",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
+            "command": Array [
+              Object {
+                "command": "npm run build",
+                "pipe": true,
+              },
+              Object {
+                "command": "npm test",
+                "dryRunCommand": false,
+              },
+              Object {
+                "command": "echo boop",
+                "dryRunCommand": "echo deboop",
+              },
+            ],
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+        },
+      },
+      "package-two": Object {
+        "name": "package-two",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
+            "command": Array [
+              Object {
+                "command": "npm run build",
+                "pipe": true,
+              },
+              Object {
+                "command": "npm test",
+                "dryRunCommand": false,
+              },
+              Object {
+                "command": "echo boop",
+                "dryRunCommand": "echo deboop",
+              },
+            ],
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+        },
+      },
     },
   },
 }
@@ -1839,36 +2289,37 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "package-one": Object {
-      "command": "## \\\\[2.3.1]
+    "commandsRan": Object {
+      "package-one": Object {
+        "command": "## \\\\[2.3.1]
 
 - Added some cool things.
 
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-          Object {
-            "command": "npm test",
-            "dryRunCommand": false,
-          },
-          Object {
-            "command": "echo boop",
-            "dryRunCommand": "echo deboop",
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "npm run build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+            Object {
+              "command": "npm test",
+              "dryRunCommand": false,
+            },
+            Object {
+              "command": "echo boop",
+              "dryRunCommand": "echo deboop",
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-one\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"2.3.1\\",
@@ -1879,64 +2330,64 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-one/package.json",
+            },
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+            "versionPrerelease": null,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-one-v2.3.1",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
-    },
-    "package-two": Object {
-      "command": "## \\\\[1.9.0]
+      "package-two": Object {
+        "command": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-          Object {
-            "command": "npm test",
-            "dryRunCommand": false,
-          },
-          Object {
-            "command": "echo boop",
-            "dryRunCommand": "echo deboop",
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "npm run build",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+            Object {
+              "command": "npm test",
+              "dryRunCommand": false,
+            },
+            Object {
+              "command": "echo boop",
+              "dryRunCommand": "echo deboop",
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-two\\",
   \\"description\\": \\"shrugs\\",
   \\"version\\": \\"1.9.0\\",
@@ -1947,33 +2398,138 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-two/package.json",
+            },
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+            "versionPrerelease": null,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-two-v1.9.0",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
+    },
+    "pipeTemplate": Object {
+      "package-one": Object {
+        "name": "package-one",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
+
+- Added some cool things.
+",
+            "command": Array [
+              Object {
+                "command": "npm run build",
+                "pipe": true,
+              },
+              Object {
+                "command": "npm test",
+                "dryRunCommand": false,
+              },
+              Object {
+                "command": "echo boop",
+                "dryRunCommand": "echo deboop",
+              },
+            ],
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+        },
+      },
+      "package-two": Object {
+        "name": "package-two",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
+
+- Added some even cooler things.
+",
+            "command": Array [
+              Object {
+                "command": "npm run build",
+                "pipe": true,
+              },
+              Object {
+                "command": "npm test",
+                "dryRunCommand": false,
+              },
+              Object {
+                "command": "echo boop",
+                "dryRunCommand": "echo deboop",
+              },
+            ],
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+        },
+      },
     },
   },
 }
@@ -2074,25 +2630,26 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "package-one": Object {
-      "command": "publish
+    "commandsRan": Object {
+      "package-one": Object {
+        "command": "publish
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-one\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
@@ -2102,52 +2659,52 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": Object {
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-one/package.json",
+            },
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+            "versionPrerelease": null,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-one-v2.3.1",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
-    },
-    "package-two": Object {
-      "command": "publish
+      "package-two": Object {
+        "command": "publish
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-two\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
@@ -2157,32 +2714,109 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": Object {
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-two/package.json",
+            },
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+            "versionPrerelease": null,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-two-v1.9.0",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
+    },
+    "pipeTemplate": Object {
+      "package-one": Object {
+        "name": "package-one",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": false,
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+        },
+      },
+      "package-two": Object {
+        "name": "package-two",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": false,
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+        },
+      },
     },
   },
 }
@@ -2206,25 +2840,26 @@ Object {
     ],
   ],
   "covectorReturn": Object {
-    "package-one": Object {
-      "command": "publish
+    "commandsRan": Object {
+      "package-one": Object {
+        "command": "publish
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-one",
+          "pkg": "package-one",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-one\\",
   \\"version\\": \\"2.3.1\\",
   \\"license\\": \\"MIT\\",
@@ -2234,52 +2869,52 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": Object {
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-one/package.json",
+            },
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+            "versionPrerelease": null,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-one-v2.3.1",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
-    },
-    "package-two": Object {
-      "command": "publish
+      "package-two": Object {
+        "command": "publish
 ",
-      "pkg": Object {
-        "command": Array [
-          Object {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": Object {
-          "file": Object {
-            "content": "{
+        "pkg": Object {
+          "command": Array [
+            Object {
+              "command": "echo publish",
+              "dryRunCommand": undefined,
+              "pipe": true,
+            },
+          ],
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/package-two",
+          "pkg": "package-two",
+          "pkgFile": Object {
+            "file": Object {
+              "content": "{
   \\"name\\": \\"package-two\\",
   \\"version\\": \\"1.9.0\\",
   \\"license\\": \\"MIT\\",
@@ -2289,32 +2924,109 @@ Object {
   }
 }
 ",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": Object {
-            "license": "MIT",
+              "extname": ".json",
+              "filename": "package",
+              "path": "packages/package-two/package.json",
+            },
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+            "versionPrerelease": null,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": "package-two-v1.9.0",
         },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
+        "postcommand": false,
+        "precommand": false,
       },
-      "postcommand": false,
-      "precommand": false,
+    },
+    "pipeTemplate": Object {
+      "package-one": Object {
+        "name": "package-one",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": false,
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-one",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
+            },
+            "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
+          },
+        },
+      },
+      "package-two": Object {
+        "name": "package-two",
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": false,
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "name": "package-two",
+            "pkg": Object {
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
+            },
+            "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
+          },
+        },
+      },
     },
   },
 }

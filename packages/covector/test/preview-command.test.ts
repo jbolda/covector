@@ -4,14 +4,6 @@ import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-// vfile returns fs information that is flaky between machines, scrub it
-const scrubVfile = (covectored: any) => {
-  return Object.keys(covectored.commandsRan).reduce((c, pkg) => {
-    delete c[pkg].pkg.pkgFile.vfile;
-    return c;
-  }, covectored.commandsRan);
-};
-
 describe("integration test for preview command", () => {
   let restoreConsole: Function;
   beforeEach(() => {
@@ -32,7 +24,7 @@ describe("integration test for preview command", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
   });
 });
@@ -58,7 +50,7 @@ describe("integration test for preview command with dist tags", () => {
     expect({
       consoleLog: (console.log as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: scrubVfile(covectored),
+      covectorReturn: covectored,
     }).toMatchSnapshot();
   });
 });
