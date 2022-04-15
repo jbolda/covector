@@ -12,8 +12,8 @@ export const add = function* ({
   changeFolder = ".changes",
   yes,
 }: {
-  cwd: string;
-  changeFolder: string;
+  cwd?: string;
+  changeFolder?: string;
   yes: boolean;
 }): Generator<any, string, any> {
   const config: ConfigFile = yield configFile({ cwd });

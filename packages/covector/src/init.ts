@@ -17,8 +17,8 @@ export const init = function* init({
   changeFolder = ".changes",
   yes,
 }: {
-  cwd: string;
-  changeFolder: string;
+  cwd?: string;
+  changeFolder?: string;
   yes: boolean;
 }): Generator<string> {
   //@ts-ignore

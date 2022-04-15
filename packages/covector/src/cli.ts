@@ -1,27 +1,20 @@
 import yargs from "yargs";
-const { init } = require("./init");
-const { add } = require("./add");
+import { covector } from "./run";
 
-export function* cli(
-  argv: readonly string[],
-  covector: (arg0: { command: string; dryRun: boolean }) => any
-) {
-  const options = parseOptions(argv);
-  if (options.command === "init") {
-    //@ts-ignore
-    return yield init({ ...options, changeFolder: options.directory });
-  } else if (options.command === "add") {
-    //@ts-ignore
-    return yield add({ ...options, changeFolder: options.directory });
-  }
-  //@ts-ignore
-  return yield covector(options);
+export function* cli(argv: readonly string[]): Generator<any, any, any> {
+  const { command, directory, yes, dryRun } = parseOptions(argv);
+  return yield covector({
+    command,
+    changeFolder: directory,
+    yes,
+    dryRun,
+  });
 }
 
 function parseOptions(argv: readonly string[]): {
   command: string;
   dryRun: boolean;
-  yes: boolean | undefined;
+  yes?: boolean;
   directory?: string;
 } {
   let rawOptions = yargs
@@ -61,8 +54,7 @@ function parseOptions(argv: readonly string[]): {
     .parse(argv);
 
   return {
-    //@ts-ignore
-    command: rawOptions._[0],
+    command: String(rawOptions._[0]),
     dryRun: rawOptions["dry-run"],
     yes: rawOptions.yes,
     directory: rawOptions.directory,
