@@ -16,7 +16,7 @@
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
-    "@effection/process": "^2.0.4",
+    "@effection/process": "^2.1.0",
     "effection": "^2.0.4"
   },
   "devDependencies": {
