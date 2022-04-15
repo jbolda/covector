@@ -1,8 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { run as covector } from "./src";
+import { run as covector } from "../src";
 import { run } from "effection";
-import { packageListToArray } from "./src/utils";
 import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
@@ -12,64 +11,6 @@ jest.mock("@actions/github", () => ({
   getOctokit: jest.fn(),
   context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
 }));
-
-describe("packageListToArray", () => {
-  it("returns empty array on empty string", () => {
-    const list = "";
-    const pkgArray = packageListToArray(list);
-    expect(pkgArray.length).toBe(0);
-  });
-
-  it("splits on comma", () => {
-    const list = "package1,package2,package3";
-    const pkgArray = packageListToArray(list);
-    expect(pkgArray[0]).toBe("package1");
-    expect(pkgArray[1]).toBe("package2");
-    expect(pkgArray[2]).toBe("package3");
-  });
-
-  it("considers a single package", () => {
-    const list = "package17";
-    const pkgArray = packageListToArray(list);
-    expect(pkgArray[0]).toBe("package17");
-    expect(pkgArray[1]).toBe(undefined);
-  });
-});
-
-// doing this is an example showing how we can mock the github side effects
-describe("test mocks", () => {
-  it("mocks core getInput", () => {
-    jest
-      .spyOn(core, "getInput")
-      .mockImplementationOnce((arg) => `This returns ${arg}`);
-    const test = core.getInput("test");
-    expect(test).toBe("This returns test");
-  });
-
-  it("mocks github context", () => {
-    jest
-      .spyOn(github, "getOctokit")
-      //@ts-ignore
-      .mockImplementationOnce((arg) => ({
-        context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-      }));
-    const octokit = github.getOctokit("token");
-    expect(octokit).toEqual({
-      context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-    });
-  });
-
-  it("mocks octokit createRelease", () => {
-    jest.spyOn(github, "getOctokit").mockImplementationOnce((arg) => ({
-      //@ts-ignore
-      repos: { createRelease: (obj) => obj },
-    }));
-    const octokit = github.getOctokit("token");
-    //@ts-ignore
-    const releaseResponse = octokit.repos.createRelease({ body: "text" });
-    expect(releaseResponse).toEqual({ body: "text" });
-  });
-});
 
 describe("full e2e test", () => {
   let restoreConsole: Function;

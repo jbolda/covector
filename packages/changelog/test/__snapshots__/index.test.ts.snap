@@ -1,8 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`changelog inserts into an existing changelog 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [],
-}
-`;

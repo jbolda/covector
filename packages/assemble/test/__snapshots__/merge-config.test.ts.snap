@@ -1,0 +1,688 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`merge config filtered config merges publish 1`] = `
+Object {
+  "commands": Array [
+    Object {
+      "command": Array [
+        "npm publish",
+      ],
+      "dependencies": Array [
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": "javascript",
+      "path": "./packages/assemble1",
+      "pkg": "assemble1",
+      "pkgFile": Object {
+        "file": Object {
+          "content": "{
+  \\"name\\": \\"assemble1\\",
+  \\"version\\": \\"0.0.0\\"
+}
+",
+          "extname": ".json",
+          "filename": "package",
+          "path": "packages/assemble1/package.json",
+        },
+        "name": "assemble1",
+        "pkg": Object {
+          "name": "assemble1",
+          "version": "0.0.0",
+        },
+        "version": "0.0.0",
+        "versionMajor": 0,
+        "versionMinor": 0,
+        "versionPatch": 0,
+        "versionPrerelease": null,
+      },
+      "postcommand": null,
+      "precommand": null,
+      "releaseTag": "assemble1-v0.0.0",
+    },
+    Object {
+      "command": Array [
+        "cargo publish",
+      ],
+      "dependencies": Array [
+        "assemble1",
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": "cargo",
+      "path": "./packages/namespaced-assemble2",
+      "pkg": "@namespaced/assemble1",
+      "pkgFile": Object {
+        "file": Object {
+          "content": "{
+  \\"name\\": \\"@namedspaced/assemble2\\",
+  \\"version\\": \\"0.0.0\\"
+}
+",
+          "extname": ".json",
+          "filename": "package",
+          "path": "packages/namespaced-assemble2/package.json",
+        },
+        "name": "@namespaced/assemble1",
+        "pkg": Object {
+          "name": "@namedspaced/assemble2",
+          "version": "0.0.0",
+        },
+        "version": "0.0.0",
+        "versionMajor": 0,
+        "versionMinor": 0,
+        "versionPatch": 0,
+        "versionPrerelease": null,
+      },
+      "postcommand": null,
+      "precommand": null,
+      "releaseTag": "@namespaced/assemble1-v0.0.0",
+    },
+  ],
+  "pipeTemplate": Object {
+    "@namespaced/assemble1": Object {
+      "name": "@namespaced/assemble1",
+      "pipe": Object {
+        "pkg": Object {
+          "command": "cargo publish",
+          "dependencies": Array [
+            "assemble1",
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": "cargo",
+          "path": "./packages/namespaced-assemble2",
+          "pkg": "@namespaced/assemble1",
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": null,
+          "tag": "",
+        },
+        "pkgFile": Object {
+          "name": "@namespaced/assemble1",
+          "pkg": Object {
+            "name": "@namedspaced/assemble2",
+            "version": "0.0.0",
+          },
+          "version": "0.0.0",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 0,
+        },
+      },
+    },
+    "assemble1": Object {
+      "name": "assemble1",
+      "pipe": Object {
+        "pkg": Object {
+          "command": "npm publish",
+          "dependencies": Array [
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/assemble1",
+          "pkg": "assemble1",
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": null,
+          "tag": "",
+        },
+        "pkgFile": Object {
+          "name": "assemble1",
+          "pkg": Object {
+            "name": "assemble1",
+            "version": "0.0.0",
+          },
+          "version": "0.0.0",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 0,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`merge config filtered config merges version 1`] = `
+Object {
+  "commands": Array [],
+  "pipeTemplate": Object {},
+}
+`;
+
+exports[`merge config full config merges nested bumps 1`] = `
+Object {
+  "commands": Array [
+    Object {
+      "command": Array [
+        "true",
+      ],
+      "dependencies": Array [
+        "assemble1",
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": undefined,
+      "path": "./packages/assemble1",
+      "pkg": "assemble1",
+      "postcommand": null,
+      "precommand": null,
+      "type": "minor",
+    },
+    Object {
+      "command": Array [
+        "true",
+      ],
+      "dependencies": Array [
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": undefined,
+      "path": "./packages/assemble2",
+      "pkg": "assemble2",
+      "postcommand": null,
+      "precommand": null,
+      "type": "minor",
+    },
+    Object {
+      "command": Array [
+        "true",
+      ],
+      "dependencies": undefined,
+      "errorOnVersionRange": null,
+      "manager": undefined,
+      "path": undefined,
+      "pkg": "all",
+      "postcommand": null,
+      "precommand": null,
+      "type": "minor",
+    },
+  ],
+  "pipeTemplate": Object {
+    "all": Object {
+      "name": "all",
+      "pipe": Object {
+        "pkg": Object {
+          "command": true,
+          "dependencies": undefined,
+          "errorOnVersionRange": null,
+          "manager": undefined,
+          "path": undefined,
+          "pkg": "all",
+          "postcommand": null,
+          "precommand": null,
+        },
+        "release": Object {
+          "changes": Array [
+            Object {
+              "releases": Object {
+                "all": "minor",
+              },
+              "summary": "This is a test.",
+            },
+          ],
+          "type": "minor",
+        },
+      },
+    },
+    "assemble1": Object {
+      "name": "assemble1",
+      "pipe": Object {
+        "pkg": Object {
+          "command": true,
+          "dependencies": Array [
+            "assemble1",
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": undefined,
+          "path": "./packages/assemble1",
+          "pkg": "assemble1",
+          "postcommand": null,
+          "precommand": null,
+        },
+        "release": Object {
+          "changes": Array [
+            Object {
+              "releases": Object {
+                "assemble1": "patch",
+              },
+              "summary": "This is a test.",
+            },
+          ],
+          "type": "minor",
+        },
+      },
+    },
+    "assemble2": Object {
+      "name": "assemble2",
+      "pipe": Object {
+        "pkg": Object {
+          "command": true,
+          "dependencies": Array [
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": undefined,
+          "path": "./packages/assemble2",
+          "pkg": "assemble2",
+          "postcommand": null,
+          "precommand": null,
+        },
+        "release": Object {
+          "changes": Array [
+            Object {
+              "releases": Object {
+                "all": "minor",
+              },
+              "summary": "This is a test.",
+            },
+          ],
+          "type": "minor",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`merge config full config merges publish 1`] = `
+Object {
+  "commands": Array [
+    Object {
+      "command": Array [
+        "npm publish",
+      ],
+      "dependencies": Array [
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": "javascript",
+      "path": "./packages/assemble1",
+      "pkg": "assemble1",
+      "pkgFile": Object {
+        "file": Object {
+          "content": "{
+  \\"name\\": \\"assemble1\\",
+  \\"version\\": \\"0.0.0\\"
+}
+",
+          "extname": ".json",
+          "filename": "package",
+          "path": "packages/assemble1/package.json",
+        },
+        "name": "assemble1",
+        "pkg": Object {
+          "name": "assemble1",
+          "version": "0.0.0",
+        },
+        "version": "0.0.0",
+        "versionMajor": 0,
+        "versionMinor": 0,
+        "versionPatch": 0,
+        "versionPrerelease": null,
+      },
+      "postcommand": null,
+      "precommand": null,
+      "releaseTag": "assemble1-v0.0.0",
+    },
+    Object {
+      "command": Array [
+        "cargo publish",
+      ],
+      "dependencies": Array [
+        "assemble1",
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": "cargo",
+      "path": "./packages/namespaced-assemble2",
+      "pkg": "@namespaced/assemble1",
+      "pkgFile": Object {
+        "file": Object {
+          "content": "{
+  \\"name\\": \\"@namedspaced/assemble2\\",
+  \\"version\\": \\"0.0.0\\"
+}
+",
+          "extname": ".json",
+          "filename": "package",
+          "path": "packages/namespaced-assemble2/package.json",
+        },
+        "name": "@namespaced/assemble1",
+        "pkg": Object {
+          "name": "@namedspaced/assemble2",
+          "version": "0.0.0",
+        },
+        "version": "0.0.0",
+        "versionMajor": 0,
+        "versionMinor": 0,
+        "versionPatch": 0,
+        "versionPrerelease": null,
+      },
+      "postcommand": null,
+      "precommand": null,
+      "releaseTag": "@namespaced/assemble1-v0.0.0",
+    },
+    Object {
+      "command": Array [
+        "cargo publish",
+      ],
+      "dependencies": Array [
+        "assemble2",
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": "cargo",
+      "path": "./packages/namespaced-assemble2",
+      "pkg": "@namespaced/assemble2",
+      "pkgFile": Object {
+        "file": Object {
+          "content": "{
+  \\"name\\": \\"@namedspaced/assemble2\\",
+  \\"version\\": \\"0.0.0\\"
+}
+",
+          "extname": ".json",
+          "filename": "package",
+          "path": "packages/namespaced-assemble2/package.json",
+        },
+        "name": "@namespaced/assemble2",
+        "pkg": Object {
+          "name": "@namedspaced/assemble2",
+          "version": "0.0.0",
+        },
+        "version": "0.0.0",
+        "versionMajor": 0,
+        "versionMinor": 0,
+        "versionPatch": 0,
+        "versionPrerelease": null,
+      },
+      "postcommand": null,
+      "precommand": null,
+      "releaseTag": "@namespaced/assemble2-v0.0.0",
+    },
+  ],
+  "pipeTemplate": Object {
+    "@namespaced/assemble1": Object {
+      "name": "@namespaced/assemble1",
+      "pipe": Object {
+        "pkg": Object {
+          "command": "cargo publish",
+          "dependencies": Array [
+            "assemble1",
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": "cargo",
+          "path": "./packages/namespaced-assemble2",
+          "pkg": "@namespaced/assemble1",
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": null,
+          "tag": "",
+        },
+        "pkgFile": Object {
+          "name": "@namespaced/assemble1",
+          "pkg": Object {
+            "name": "@namedspaced/assemble2",
+            "version": "0.0.0",
+          },
+          "version": "0.0.0",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 0,
+        },
+      },
+    },
+    "@namespaced/assemble2": Object {
+      "name": "@namespaced/assemble2",
+      "pipe": Object {
+        "pkg": Object {
+          "command": "cargo publish",
+          "dependencies": Array [
+            "assemble2",
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": "cargo",
+          "path": "./packages/namespaced-assemble2",
+          "pkg": "@namespaced/assemble2",
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": null,
+          "tag": "",
+        },
+        "pkgFile": Object {
+          "name": "@namespaced/assemble2",
+          "pkg": Object {
+            "name": "@namedspaced/assemble2",
+            "version": "0.0.0",
+          },
+          "version": "0.0.0",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 0,
+        },
+      },
+    },
+    "assemble1": Object {
+      "name": "assemble1",
+      "pipe": Object {
+        "pkg": Object {
+          "command": "npm publish",
+          "dependencies": Array [
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/assemble1",
+          "pkg": "assemble1",
+          "postcommand": null,
+          "precommand": null,
+          "releaseTag": null,
+          "tag": "",
+        },
+        "pkgFile": Object {
+          "name": "assemble1",
+          "pkg": Object {
+            "name": "assemble1",
+            "version": "0.0.0",
+          },
+          "version": "0.0.0",
+          "versionMajor": 0,
+          "versionMinor": 0,
+          "versionPatch": 0,
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`merge config full config merges version 1`] = `
+Object {
+  "commands": Array [
+    Object {
+      "command": Array [
+        "cargo version patch",
+      ],
+      "dependencies": Array [
+        "assemble2",
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": "cargo",
+      "path": "./packages/namespaced-assemble2",
+      "pkg": "@namespaced/assemble2",
+      "postcommand": null,
+      "precommand": null,
+      "type": "patch",
+    },
+    Object {
+      "command": Array [
+        "lerna version minor --no-git-tag-version --no-push",
+      ],
+      "dependencies": Array [
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": "javascript",
+      "path": "./packages/assemble1",
+      "pkg": "assemble1",
+      "postcommand": null,
+      "precommand": null,
+      "type": "minor",
+    },
+    Object {
+      "command": Array [
+        "lerna version major",
+      ],
+      "dependencies": Array [
+        "all",
+      ],
+      "errorOnVersionRange": null,
+      "manager": undefined,
+      "path": "./packages/assemble2",
+      "pkg": "assemble2",
+      "postcommand": null,
+      "precommand": null,
+      "type": "major",
+    },
+  ],
+  "pipeTemplate": Object {
+    "@namespaced/assemble2": Object {
+      "name": "@namespaced/assemble2",
+      "pipe": Object {
+        "pkg": Object {
+          "command": "cargo version \${ release.type }",
+          "dependencies": Array [
+            "assemble2",
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": "cargo",
+          "path": "./packages/namespaced-assemble2",
+          "pkg": "@namespaced/assemble2",
+          "postcommand": null,
+          "precommand": null,
+        },
+        "release": Object {
+          "changes": Array [
+            Object {
+              "releases": Object {
+                "@namespaced/assemble2": "patch",
+                "assemble1": "patch",
+              },
+              "summary": "This is a namespaced test.",
+            },
+          ],
+          "type": "patch",
+        },
+      },
+    },
+    "assemble1": Object {
+      "name": "assemble1",
+      "pipe": Object {
+        "pkg": Object {
+          "command": "lerna version \${ release.type } --no-git-tag-version --no-push",
+          "dependencies": Array [
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": "javascript",
+          "path": "./packages/assemble1",
+          "pkg": "assemble1",
+          "postcommand": null,
+          "precommand": null,
+        },
+        "release": Object {
+          "changes": Array [
+            Object {
+              "releases": Object {
+                "assemble1": "patch",
+                "assemble2": "patch",
+              },
+              "summary": "This is a a double patch test.",
+            },
+            Object {
+              "releases": Object {
+                "assemble1": "minor",
+                "assemble2": "patch",
+              },
+              "summary": "This is a minor/patch test.",
+            },
+            Object {
+              "releases": Object {
+                "assemble1": "patch",
+                "assemble2": "major",
+              },
+              "summary": "This is a patch/major test.",
+            },
+            Object {
+              "releases": Object {
+                "@namespaced/assemble2": "patch",
+                "assemble1": "patch",
+              },
+              "summary": "This is another double patch test.",
+            },
+          ],
+          "type": "minor",
+        },
+      },
+    },
+    "assemble2": Object {
+      "name": "assemble2",
+      "pipe": Object {
+        "pkg": Object {
+          "command": "lerna version \${ release.type }",
+          "dependencies": Array [
+            "all",
+          ],
+          "errorOnVersionRange": null,
+          "manager": undefined,
+          "path": "./packages/assemble2",
+          "pkg": "assemble2",
+          "postcommand": null,
+          "precommand": null,
+        },
+        "release": Object {
+          "changes": Array [
+            Object {
+              "releases": Object {
+                "assemble1": "patch",
+                "assemble2": "patch",
+              },
+              "summary": "This is the copy of the double patch test.",
+            },
+            Object {
+              "releases": Object {
+                "assemble1": "minor",
+                "assemble2": "patch",
+              },
+              "summary": "This is the copy of the minor patch test.",
+            },
+            Object {
+              "releases": Object {
+                "assemble1": "patch",
+                "assemble2": "major",
+              },
+              "summary": "This is the copy of the patch major test.",
+            },
+          ],
+          "type": "major",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`merge config full config merges version without command 1`] = `
+Object {
+  "commands": Array [],
+  "pipeTemplate": Object {},
+}
+`;
