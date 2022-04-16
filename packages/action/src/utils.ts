@@ -1,6 +1,5 @@
 import fs from "fs";
 import type { ConfigFile, FunctionPipe } from "../../types/src";
-import * as core from "@actions/core";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
