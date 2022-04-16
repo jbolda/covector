@@ -33,7 +33,7 @@ describe("test mocks", () => {
   it("mocks octokit createRelease", () => {
     //@ts-expect-error not all things are mocked despite TS expecting to be
     jest.spyOn(github, "getOctokit").mockImplementationOnce((arg) => ({
-      repos: { createRelease: (obj) => obj },
+      repos: { createRelease: (obj: any) => obj },
     }));
     const octokit = github.getOctokit("token");
     //@ts-ignore
