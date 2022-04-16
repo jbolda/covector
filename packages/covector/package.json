@@ -27,7 +27,7 @@
     "effection": "^2.0.4",
     "globby": "^11.0.1",
     "inquirer": "^7.3.3",
-    "yargs": "^15.3.1"
+    "yargs": "^17.4.1"
   },
   "devDependencies": {
     "@covector/types": "^0.0.0",
