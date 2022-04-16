@@ -31,8 +31,8 @@ describe("test mocks", () => {
   });
 
   it("mocks octokit createRelease", () => {
+    //@ts-expect-error not all things are mocked despite TS expecting to be
     jest.spyOn(github, "getOctokit").mockImplementationOnce((arg) => ({
-      //@ts-ignore
       repos: { createRelease: (obj) => obj },
     }));
     const octokit = github.getOctokit("token");
