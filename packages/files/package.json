@@ -20,7 +20,7 @@
     "@tauri-apps/toml": "^2.2.4",
     "globby": "^11.0.0",
     "js-yaml": "^4.0.0",
-    "semver": "^7.3.2"
+    "semver": "^7.3.7"
   },
   "devDependencies": {
     "@covector/types": "^0.0.0",
