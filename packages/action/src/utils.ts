@@ -1,3 +1,4 @@
+import * as github from "@actions/github";
 import fs from "fs";
 import type { ConfigFile, FunctionPipe } from "../../types/src";
 
