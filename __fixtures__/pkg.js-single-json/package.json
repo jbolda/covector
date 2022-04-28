@@ -2,5 +2,6 @@
   "private": true,
   "name": "js-single-json-fixture",
   "description": "A single package at the root. No monorepo setup.",
+  "repository": "https://www.github.com/jbolda/covector.git",
   "version": "0.5.9"
 }

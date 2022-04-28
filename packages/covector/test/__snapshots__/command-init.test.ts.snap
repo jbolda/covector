@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`integration test for init command runs 1`] = `
+"? What is the url to your github repo? (https://www.github.com/jbolda/covector)
+? What is the url to your github repo? https://www.github.com/jbolda/covector/
+? should we include github action workflows? (Y/n)
+? should we include github action workflows? Yes
+? What is the name of your default branch? (main)
+? What is the name of your default branch? main
+Creating the .changes directory.
+Writing out the config file.
+Writing out a readme to serve as your guide.
+Creating the .github/workflows directory.
+Writing out covector-status.yml to give you a covector update on PR.
+Writing out covector-version-or-publish.yml to version and publish your packages.
+"
+`;
