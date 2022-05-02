@@ -1,4 +1,4 @@
-import { spawn } from "effection";
+import { Operation, spawn } from "effection";
 import { exec, Process } from "@effection/process";
 import stripAnsi from "strip-ansi";
 
@@ -19,7 +19,7 @@ export function* runCommand(
   let stderr = "";
   yield spawn(
     runCommand.stdout.forEach((chunk) => {
-      stdout += respondToQuestion({ chunk, runCommand }, responses);
+      stdout += stripAnsi(chunk.toString());
     })
   );
   yield spawn(
@@ -27,58 +27,54 @@ export function* runCommand(
       stderr += chunk;
     })
   );
+  yield converse(responses, runCommand.stdin, runCommand.stdout);
 
   let status = yield runCommand.join();
 
   return { stdout, stderr, status };
 }
 
-const respondToQuestion = (
-  context: {
-    chunk: Buffer;
-    runCommand: Process;
-  },
-  responses: Responses
-) => {
-  let { chunk, runCommand } = context;
-  const cleanChunk = stripAnsi(chunk.toString()).trim();
-  const finalChunk = cleanChunk !== "" ? `${cleanChunk}\n` : cleanChunk;
-
-  let question = "";
-  let respond = false;
-  const outLast = cleanChunk.split("\n").length - 1;
-  const outSecondLast = cleanChunk.split("\n").length - 2;
-  if (cleanChunk.split("\n")[outLast].startsWith("?")) {
-    question = cleanChunk.split("\n")[outLast];
-    respond = true;
-  } else if (
-    outSecondLast > 0 &&
-    cleanChunk.split("\n")[outSecondLast].startsWith("?")
-  ) {
-    question = cleanChunk.split("\n")[outSecondLast];
-    respond = true;
-  }
-
-  if (respond) {
-    const response = decideResponse(responses, question);
-    if (response) runCommand.stdin.send(response);
-  }
-
-  return finalChunk;
-};
-
 const pressEnter = String.fromCharCode(13);
-const decideResponse = (responses: Responses, question: string) => {
-  let respondWith: string | undefined;
-  responses.forEach((response) => {
-    const [q, a] = response;
-    if (question.includes(q) && !respondWith) {
-      if (a === "pressEnter") {
-        respondWith = pressEnter;
-      } else {
-        respondWith = a;
+function* converse(responses: Responses, stdin: any, stdout: any) {
+  // this should work, but it still seems to hang?
+  //   for (let [question, answer] of responses) {
+  //     yield stdout.lines().grep(question);
+  //     if (answer === "pressEnter") {
+  //       stdin.send(pressEnter);
+  //     } else {
+  //       stdin.send(answer);
+  //       // seems that some responses maybe require input
+  //       // and then pressing Enter to finish the input
+  //       stdin.send(pressEnter);
+  //     }
+  //   }
+
+  // until 👆 is working, going to just loop through all responses
+  // on every line that appears to be a question and send that answer
+  yield stdout.lines().forEach((chunk: string) => {
+    // it seems to log out all questions at once sometimes?
+    // other times it only does the first two questions?
+    // console.log("======");
+    // console.log(chunk.toString().startsWith("?"), chunk);
+    // console.log("-----");
+    // console.log(chunk.toString().trim().startsWith("?"), chunk.trim());
+    // console.log("????????");
+    // console.log(stripAnsi(chunk).startsWith("?"), stripAnsi(chunk));
+    // seems with all the `pressEnter`, we get some questions
+    //  that start with a new line
+    if (stripAnsi(chunk).startsWith("?")) {
+      for (let [question, answer] of responses) {
+        if (stripAnsi(chunk).includes(question)) {
+          if (answer === "pressEnter") {
+            stdin.send(pressEnter);
+          } else {
+            stdin.send(answer);
+            // seems that some responses maybe require input
+            // and then pressing Enter to finish the input
+            stdin.send(pressEnter);
+          }
+        }
       }
     }
   });
-  return respondWith;
-};
+}

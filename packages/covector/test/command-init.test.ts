@@ -11,8 +11,11 @@ describe("integration test for init command", () => {
       command,
       fullIntegration,
       [
+        // ? What is the url to your github repo? boop/
         ["What is the url to your github repo?", "pressEnter"],
-        ["should we include github action workflows?", "Y"],
+        // ? should we include github action workflows? Yes
+        ["should we include github action workflows?", "Y"], // "pressEnter"], //"Y"],
+        // ? What is the name of your default branch? main
         ["What is the name of your default branch?", "pressEnter"],
       ]
     );
