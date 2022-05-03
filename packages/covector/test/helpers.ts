@@ -7,7 +7,7 @@ type Responses = [q: string, a: string][];
 export function* runCommand(
   command: string,
   cwd: string,
-  responses: Responses
+  responses: Responses = []
 ): Generator<
   any,
   { stdout: string; stderr: string; status: { code: number } },
