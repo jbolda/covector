@@ -5,7 +5,7 @@ import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 describe("integration test for init command", () => {
-  const command = `node ${__dirname}/../bin/covector.js init`;
+  const command = `node "${__dirname}/../bin/covector.js init"`;
 
   it("runs on a workspace", function* () {
     const fullIntegration = f.copy("pkg.js-yarn-workspace");
