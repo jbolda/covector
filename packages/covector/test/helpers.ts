@@ -20,13 +20,15 @@ export function* runCommand(
   let stderr = "";
   yield spawn(
     runCommand.stdout.forEach((chunk) => {
-      stdout += stripAnsi(chunk.toString());
+      const stripped = stripAnsi(chunk.toString()).trim();
+      stdout += stripped.length > 0 ? stripped + `\n` : "";
       if (!elegantlyRespond) runCommand.stdin.send(pressEnter);
     })
   );
   yield spawn(
     runCommand.stderr.forEach((chunk) => {
-      stderr += chunk;
+      const stripped = stripAnsi(chunk.toString()).trim();
+      stderr += stripped.length > 0 ? stripped + `\n` : "";
     })
   );
 
