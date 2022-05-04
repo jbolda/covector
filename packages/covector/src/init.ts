@@ -23,7 +23,7 @@ export const init = function* init({
     [k: string]: { path: string; manager: string; dependencies?: string[] };
   } = {};
   let pkgManagers: { [k: string]: boolean } = {};
-  let gitURL = "";
+  let gitURL: boolean | string = false;
   const pkgFiles: PackageFile[] = yield all(
     pkgs.map((pkg: string) => readPkgFile({ file: pkg, nickname: pkg, cwd }))
   );
@@ -46,7 +46,7 @@ export const init = function* init({
       };
     }
 
-    if (gitURL === "") {
+    if (!gitURL) {
       //@ts-expect-error respository isn't in the type
       const repoURL = pkgFile?.pkg?.repository;
       if (repoURL) {
@@ -79,7 +79,7 @@ export const init = function* init({
         name: "git url",
         message: "What is the url to your github repo?",
         when: !yes,
-        default: gitURL,
+        ...(!gitURL ? {} : { default: gitURL }),
         filter: (userInput, answers) => {
           if (userInput.endsWith("/")) {
             return userInput;
