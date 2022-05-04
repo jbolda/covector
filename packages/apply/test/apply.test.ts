@@ -49,6 +49,7 @@ describe("package file apply bump (snapshot)", () => {
         '  "private": true,\n' +
         '  "name": "js-single-json-fixture",\n' +
         '  "description": "A single package at the root. No monorepo setup.",\n' +
+        '  "repository": "https://www.github.com/jbolda/covector.git",\n' +
         '  "version": "0.6.0"\n' +
         "}\n"
     );
@@ -647,6 +648,7 @@ describe("package file applies preview bump", () => {
         '  "private": true,\n' +
         '  "name": "js-single-json-fixture",\n' +
         '  "description": "A single package at the root. No monorepo setup.",\n' +
+        '  "repository": "https://www.github.com/jbolda/covector.git",\n' +
         '  "version": "0.5.9-branch-name.12345"\n' +
         "}\n"
     );
