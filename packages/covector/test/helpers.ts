@@ -1,6 +1,16 @@
 import { Operation, spawn, createStream } from "effection";
 import { exec, Process } from "@effection/process";
 import stripAnsi from "strip-ansi";
+import path from "path";
+
+// some fanciness to get the path resolved for Windows
+// without going through the absolute dir which causes issues
+// with command line compat and complicates things further
+export const command = (command: string, cwd: string) =>
+  `node "${path
+    .relative(cwd, path.join(__dirname, "./../bin/covector.js"))
+    .split(path.sep)
+    .join("/")}" ${command}`;
 
 type Responses = [q: string, a: string][];
 
