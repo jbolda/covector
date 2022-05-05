@@ -7,6 +7,7 @@ module.exports = {
       tsconfig: "tsconfig.base.json",
     },
   },
+  globalSetup: "./.scripts/build.js",
   modulePaths: ["<rootDir>/packages/"],
   moduleNameMapper: {
     "^covector/(.*)$": "<rootDir>/packages/covector/$1",
