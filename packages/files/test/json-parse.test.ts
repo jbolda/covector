@@ -1,5 +1,6 @@
+import { describe, expect } from "vitest";
+import { it } from "../../../suite";
 import { readPkgFile } from "../src";
-import { it } from "@effection/jest";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
