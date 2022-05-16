@@ -14,6 +14,7 @@
     "declaration": true,
     "declarationMap": true,
     "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
     "paths": {
       "@covector/types": ["packages/types/src"],
       "covector": ["packages/covector/src"],

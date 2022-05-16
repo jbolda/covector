@@ -13,6 +13,8 @@
     "wipe": "npm run clean -ws && rimraf node_modules dist tsconfig.tsbuildinfo && npm i",
     "build:action": "npm run pkg -w action",
     "test": "jest",
+    "test-new-new": "vitest",
+    "coverage": "vitest run --coverage",
     "pretty": "prettier --write --ignore-path .gitignore \"!packages/action/dist/index.js\" \"packages/**/*.{js,ts}\" \"__fixtures__/**/*.{json,js,ts,yml,yaml}\""
   },
   "workspaces": [
@@ -26,7 +28,10 @@
     "jest-mock-console": "^1.2.3",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
-    "ts-jest": "^27.1.4"
+    "ts-jest": "^27.1.4",
+    "vite": "^2.9.9",
+    "vite-plugin-checker": "^0.4.6",
+    "vitest": "^0.12.6"
   },
   "volta": {
     "node": "14.19.1",
