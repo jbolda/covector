@@ -204,7 +204,7 @@ export const sh = function* (
   if (command.includes("|") && !options.shell) {
     child = yield exec(command, {
       ...options,
-      shell: true,
+      shell: process.platform !== "win32" ? true : process.env.shell,
     });
   } else {
     child = yield exec(command, options);
