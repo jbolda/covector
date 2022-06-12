@@ -4,13 +4,10 @@ import { default as fsDefault, Dir } from "fs";
 // this is compatible with node@12+
 const fs = fsDefault.promises;
 import path from "path";
-// @ts-ignore
-import { readPkgFile, PackageFile } from "@covector/files";
+import { all } from "effection";
+import { readPkgFile } from "@covector/files";
+import type { PackageFile } from "@covector/types";
 const covectorPackageFile = require("../package.json");
-
-// for future typescripting reference
-// most of the @ts-ignore have to do with Dir/FileHandle vs string
-// and not considering yield correctly?
 
 export const init = function* init({
   cwd = process.cwd(),
@@ -20,8 +17,61 @@ export const init = function* init({
   cwd?: string;
   changeFolder?: string;
   yes: boolean;
-}): Generator<string> {
-  //@ts-ignore
+}): Generator<any, any, any> {
+  const pkgs: string[] = yield packageFiles({ cwd });
+  let packages: {
+    [k: string]: { path: string; manager: string; dependencies?: string[] };
+  } = {};
+  let pkgManagers: { [k: string]: boolean } = {};
+  let gitURL: boolean | string = false;
+  const pkgFiles: PackageFile[] = yield all(
+    pkgs.map((pkg: string) => readPkgFile({ file: pkg, nickname: pkg, cwd }))
+  );
+  // console.dir(pkgFiles);
+  for (let pkgFile of pkgFiles) {
+    //@ts-expect-error workspaces isn't on the type, but we are checking anyways
+    if (!pkgFile?.pkg?.workspaces) {
+      const manager: string = yield derivePkgManager({
+        path: path.dirname(`./${pkgFile.name}`),
+        pkgFile,
+      });
+      pkgManagers[manager] = true;
+      const dependencies = buildDependencyGraph({ pkgFile, pkgFiles });
+
+      //@ts-expect-error pkgFile.pkg.package isn't normalized in our types (mostly from rust Cargo.toml)
+      packages[pkgFile?.pkg?.name || pkgFile?.pkg?.package?.name] = {
+        path: path.dirname(`./${pkgFile.name}`),
+        manager,
+        ...(dependencies.length > 0 ? { dependencies } : {}),
+      };
+    }
+
+    if (!gitURL) {
+      //@ts-expect-error respository isn't in the type
+      const repoURL = pkgFile?.pkg?.repository;
+      if (repoURL) {
+        const tryURL =
+          typeof repoURL === "string"
+            ? repoURL.slice(
+                0,
+                repoURL.includes(".git", repoURL.length - 5)
+                  ? repoURL.length - 4
+                  : repoURL.length
+              )
+            : "";
+        if (tryURL !== "") {
+          try {
+            const parseURL = new URL(tryURL);
+            // if we parse fine, let's try using it
+            gitURL = tryURL;
+          } catch (error) {
+            // issue with the url, just toss it
+          }
+        }
+      }
+    }
+  }
+
   const answers: { [k: string]: string } = yield inquirer
     .prompt([
       {
@@ -29,6 +79,7 @@ export const init = function* init({
         name: "git url",
         message: "What is the url to your github repo?",
         when: !yes,
+        ...(!gitURL ? {} : { default: gitURL }),
         filter: (userInput, answers) => {
           if (userInput.endsWith("/")) {
             return userInput;
@@ -60,48 +111,12 @@ export const init = function* init({
     });
 
   try {
-    //@ts-ignore
     const testOpen: Dir = yield fs.opendir(path.posix.join(cwd, changeFolder));
     console.log(`The ${changeFolder} folder exists, skipping creation.`);
-    //@ts-ignore
     yield testOpen.close();
   } catch (e) {
     console.log(`Creating the ${changeFolder} directory.`);
-    //@ts-ignore
     yield fs.mkdir(path.posix.join(cwd, changeFolder));
-  }
-
-  //@ts-ignore
-  const pkgs: string[] = yield packageFiles({ cwd });
-  let packages: {
-    [k: string]: { path: string; manager: string; dependencies?: string[] };
-  } = {};
-  let pkgManagers: { [k: string]: boolean } = {};
-  //@ts-ignore
-  const pkgFiles: PackageFile[] = yield Promise.all(
-    pkgs.map((pkg: string) =>
-      readPkgFile({ file: path.posix.join(cwd, `${pkg}`), nickname: pkg })
-    )
-  );
-  for (let pkgFile of pkgFiles) {
-    //@ts-ignore
-    if (!pkgFile.pkg.workspaces) {
-      //@ts-ignore
-      const manager: string = yield derivePkgManager({
-        path: path.dirname(`./${pkgFile.name}`),
-        //@ts-ignore
-        pkgFile,
-      });
-      pkgManagers[manager] = true;
-      const dependencies = buildDependencyGraph({ pkgFile, pkgFiles });
-
-      //@ts-ignore
-      packages[pkgFile?.pkg?.name || pkgFile?.pkg?.package?.name] = {
-        path: path.dirname(`./${pkgFile.name}`),
-        manager,
-        ...(dependencies.length > 0 ? { dependencies } : {}),
-      };
-    }
   }
 
   const javascript = {
@@ -142,7 +157,6 @@ export const init = function* init({
 
   // .changes/config.json
   try {
-    //@ts-ignore
     const testOpen = yield fs.open(
       path.posix.join(cwd, changeFolder, "config.json"),
       "r"
@@ -150,11 +164,9 @@ export const init = function* init({
     console.log(
       `The config.json exists in ${changeFolder}, skipping creation.`
     );
-    //@ts-ignore
     yield testOpen.close();
   } catch (e) {
     console.log("Writing out the config file.");
-    //@ts-ignore
     yield fs.writeFile(
       path.posix.join(cwd, changeFolder, "config.json"),
       JSON.stringify(config, null, 2)
@@ -163,17 +175,14 @@ export const init = function* init({
 
   // .changes/readme.md
   try {
-    //@ts-ignore
     const testOpen = yield fs.open(
       path.posix.join(cwd, changeFolder, "readme.md"),
       "r"
     );
     console.log(`The readme.md exists in ${changeFolder}, skipping creation.`);
-    //@ts-ignore
     yield testOpen.close();
   } catch (e) {
     console.log("Writing out a readme to serve as your guide.");
-    //@ts-ignore
     yield fs.writeFile(path.posix.join(cwd, changeFolder, "readme.md"), readme);
   }
 
@@ -182,16 +191,13 @@ export const init = function* init({
     let covectorVersion: string = `${covectorVersionSplit[0]}.${covectorVersionSplit[1]}`;
 
     try {
-      //@ts-ignore
       const testOpen: Dir = yield fs.opendir(
         path.posix.join(cwd, "./.github/workflows/")
       );
       console.log(`The .github/workflows folder exists, skipping creation.`);
-      //@ts-ignore
       yield testOpen.close();
     } catch (e) {
       console.log(`Creating the .github/workflows directory.`);
-      //@ts-ignore
       yield fs.mkdir(path.posix.join(cwd, "./.github/workflows/"), {
         recursive: true,
       });
@@ -199,7 +205,6 @@ export const init = function* init({
 
     // github status
     try {
-      //@ts-ignore
       const testOpen = yield fs.open(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
         "r"
@@ -207,13 +212,11 @@ export const init = function* init({
       console.log(
         `The status workflow exists in ./.github/workflows, skipping creation.`
       );
-      //@ts-ignore
       yield testOpen.close();
     } catch (e) {
       console.log(
         "Writing out covector-status.yml to give you a covector update on PR."
       );
-      //@ts-ignore
       yield fs.writeFile(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
         githubStatusWorkflow({ version: covectorVersion })
@@ -222,7 +225,6 @@ export const init = function* init({
 
     // github version and publish
     try {
-      //@ts-ignore
       const testOpen = yield fs.open(
         path.posix.join(
           cwd,
@@ -235,13 +237,11 @@ export const init = function* init({
       console.log(
         `The version/publish workflow exists in ./.github/workflows, skipping creation.`
       );
-      //@ts-ignore
       yield testOpen.close();
     } catch (e) {
       console.log(
         "Writing out covector-version-or-publish.yml to version and publish your packages."
       );
-      //@ts-ignore
       yield fs.writeFile(
         path.posix.join(
           cwd,
@@ -276,7 +276,7 @@ const derivePkgManager = async ({
   pkgFile,
 }: {
   path: string;
-  pkgFile: { name: string };
+  pkgFile: PackageFile;
 }) => {
   const actionFile = await globby(["action.yml"], {
     cwd: path,
@@ -285,7 +285,7 @@ const derivePkgManager = async ({
   if (actionFile.length > 0) {
     return "github action";
   } else {
-    return pkgFile.name.endsWith("Cargo.toml") ? "rust" : "javascript";
+    return pkgFile?.name?.endsWith("Cargo.toml") ? "rust" : "javascript";
   }
 };
 
