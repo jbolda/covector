@@ -170,19 +170,14 @@ export function* run(): Generator<any, any, any> {
       }
     } else if (command === "preview") {
       const configuredLabel = core.getInput("label");
-      const previewLabel = github?.context?.payload?.pull_request?.labels?.filter(
-        ({ name }: { name: String }) => name === configuredLabel
-      ).length;
+      const previewLabel =
+        github?.context?.payload?.pull_request?.labels?.filter(
+          ({ name }: { name: String }) => name === configuredLabel
+        ).length;
       const previewVersion = core.getInput("previewVersion");
       const versionIdentifier = core.getInput("identifier");
 
-      if (github.context.eventName !== "pull_request") {
-        throw new Error(
-          `The 'preview' command for the covector action is only meant to run on pull requests.`
-        );
-      }
-
-      if (github.context.eventName !== "pull_request") {
+      if (github?.context?.eventName !== "pull_request") {
         throw new Error(
           `The 'preview' command for the covector action is only meant to run on pull requests.`
         );
@@ -249,10 +244,8 @@ export function* run(): Generator<any, any, any> {
             //@ts-ignore
             (pub: Array<string>, pkg: Array<any>) => {
               if (pkg[1].published) {
-                let {
-                  name: pkgName,
-                  version: pkgVersion,
-                }: any = pkg[1].pkg.pkgFile.pkg;
+                let { name: pkgName, version: pkgVersion }: any =
+                  pkg[1].pkg.pkgFile.pkg;
                 return pub.concat(`${pkgName}@${pkgVersion}`);
               }
             },
@@ -277,7 +270,7 @@ export function* run(): Generator<any, any, any> {
             });
 
             const covectorComments = data.filter((comment: any) =>
-              comment.body.includes("<!-- covector comment -->")
+              comment?.body.includes("<!-- covector comment -->")
             );
 
             let prComment = () => {
@@ -328,6 +321,8 @@ export function* run(): Generator<any, any, any> {
           core.setOutput("successfulPublish", successfulPublish);
           core.setOutput("change", covectored.commandsRan);
         }
+
+        return covectored;
       }
     } else {
       throw new Error(
@@ -336,5 +331,6 @@ export function* run(): Generator<any, any, any> {
     }
   } catch (error: any) {
     core.setFailed(error.message);
+    throw error;
   }
 }

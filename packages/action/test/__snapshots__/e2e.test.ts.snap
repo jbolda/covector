@@ -1,5 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`full e2e test of preview input 1`] = `Array []`;
+
+exports[`full e2e test of preview input 2`] = `
+Object {
+  "covectoredAction": undefined,
+}
+`;
+
 exports[`full e2e test of publish github release creation of all packages 1`] = `
 Object {
   "covectoredAction": Object {
