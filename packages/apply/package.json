@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@covector/files": "0.5.1",
-    "effection": "^2.0.4",
+    "effection": "^2.0.6",
     "lodash": "^4.17.21",
     "semver": "^7.3.7"
   },
