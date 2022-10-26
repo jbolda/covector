@@ -16,8 +16,8 @@
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
-    "@effection/process": "^2.0.4",
-    "effection": "^2.0.4",
+    "@effection/process": "^2.1.2",
+    "effection": "^2.0.6",
     "strip-ansi": "6.0.1"
   },
   "devDependencies": {
