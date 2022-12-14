@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: volta-cli/action@v4
       - run: npm ci
       - run: npm run build # ts-jest doesn't pick up project references: https://github.com/kulshekhar/ts-jest/issues/1648
