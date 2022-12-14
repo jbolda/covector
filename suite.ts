@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion,@typescript-eslint/no-explicit-any */
 import {
   Effection,
   Resource,
@@ -8,13 +7,24 @@ import {
   race,
   run,
 } from "effection";
-
 import * as vitestGlobals from "vitest";
-import type { TestFunction, RuntimeContext, TestContext } from "vitest";
+import type {
+  Task as VitestTask,
+  TestFunction,
+  TestContext,
+  Suite,
+  File,
+} from "vitest";
 import { assert } from "assert-ts";
 
+export interface TestFn {
+  (this: TestContext, world: Task, scope: Task): ReturnType<
+    Resource<void>["init"]
+  >;
+}
+
 export interface ItFn {
-  (title: string, fn: TestFunction, timeout?: number): void;
+  (title: string, fn: TestFn, timeout?: number): void;
 }
 
 export interface It extends ItFn {
@@ -32,7 +42,7 @@ const scopes = {} as {
 async function withinScope(
   name: keyof typeof scopes,
   fn: (task: Task) => Promise<void>
-) {
+): Promise<void> {
   let scope = scopes[name];
   assert(!!scope, `critical: test scope '${name}' was not initialized`);
   if (scope.state === "errored" || scope.state === "erroring") {
@@ -44,30 +54,30 @@ async function withinScope(
   }
 }
 
-function runInEachScope(fn: TestFunction, name: string): TestFunction {
-  return async function (this: TestContext | undefined) {
+function runInAllScope(fn: TestFunction, name: string): TestFn {
+  return async function (context: TestContext) {
+    await withinScope("all", async (all) => {
+      await all
+        .run({
+          name,
+          init: fn.bind(context),
+        })
+        .catchHalt();
+    });
+  };
+}
+
+function runInEachScope(fn: TestFunction, name: string) {
+  return async function (this: VitestTask) {
     await withinScope("all", async () => {
       await withinScope("each", async (each) => {
         await each
           .run({
             name,
-            init: fn.bind(this ?? {}),
+            init: fn.bind(this),
           })
           .catchHalt();
       });
-    });
-  };
-}
-
-function runInAllScope(fn: TestFunction, name: string): TestFunction {
-  return async function (this: RuntimeContext | undefined) {
-    await withinScope("all", async (all) => {
-      await all
-        .run({
-          name,
-          init: fn.bind(this ?? {}),
-        })
-        .catchHalt();
     });
   };
 }
@@ -95,19 +105,18 @@ vitestGlobals.afterEach(async () => {
   }
 });
 
-export function beforeAll(fn: TestFunction, timeout?: number): void {
-  // tserror: Type 'Suite' is missing the following properties from type 'TestContext': meta, expect
+export function beforeAll(fn: VitestTask, timeout?: number): void {
   return vitestGlobals.beforeAll(runInAllScope(fn, "beforeAll"), timeout);
 }
 
-export function beforeEach(fn: TestFunction, timeout?: number): void {
+export function beforeEach(fn: VitestTask, timeout?: number): void {
   return vitestGlobals.beforeEach(runInEachScope(fn, "beforeEach"), timeout);
 }
 
 export const describe = vitestGlobals.describe;
 
 export const it: It = Object.assign(
-  function it(name: string, fn: TestFunction, timeout?: number) {
+  function it(name: string, fn: TestFn, timeout?: number) {
     return vitestGlobals.it(
       name,
       runInEachScope(fn, `it(${JSON.stringify(name)})`),
@@ -115,14 +124,14 @@ export const it: It = Object.assign(
     );
   },
   {
-    only(name: string, fn: TestFunction, timeout?: number): void {
+    only(name: string, fn: TestFn, timeout?: number): void {
       return vitestGlobals.it.only(
         name,
         runInEachScope(fn, `it(${JSON.stringify(name)})`),
         timeout
       );
     },
-    skip(name: string, fn: TestFunction, timeout?: number): void {
+    skip(name: string, fn: TestFn, timeout?: number): void {
       return vitestGlobals.it.skip(
         name,
         runInEachScope(fn, `it(${JSON.stringify(name)})`),
@@ -132,14 +141,11 @@ export const it: It = Object.assign(
     todo(name: string): void {
       return vitestGlobals.it.todo(name);
     },
-    eventually(name: string, fn: TestFunction, testTimeout?: number) {
-      let limit = testTimeout ?? 10000; //getState().testTimeout;
+    eventually(name: string, fn: TestFn, testTimeout?: number) {
+      let limit = testTimeout ?? 10000; //getState().testTimeout; TODO
 
       return it(
         name,
-        // tserror: Argument of type '(scope: any, current: any) =>
-        // Generator<Operation<void>, void, unknown>'
-        // is not assignable to parameter of type 'TestFunction<{}>'.
         function* (scope, current) {
           let operation = fn.bind(this) as (
             scope: Task,
@@ -171,9 +177,7 @@ export const it: It = Object.assign(
   }
 );
 
-export function captureError(
-  op: Operation<any>
-): Operation<any> | Operation<Error> {
+export function captureError(op: Operation<any>): Operation<any | Error> {
   return function* () {
     try {
       yield op;
