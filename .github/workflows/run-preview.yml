@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      - uses: volta-cli/action@v1
+      - uses: volta-cli/action@v4
       - run: npm ci --ignore-scripts
       - run: npm run build
       - run: npm run pkg -w action

@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: volta-cli/action@v1
+      - uses: volta-cli/action@v4
       - run: npm ci
       - run: npm run build # ts-jest doesn't pick up project references: https://github.com/kulshekhar/ts-jest/issues/1648
       - run: npm test -- --ci # runs it in CI mode which fails on snapshot changes
