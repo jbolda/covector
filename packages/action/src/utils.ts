@@ -1,5 +1,10 @@
 import fs from "fs";
 import type { ConfigFile, FunctionPipe } from "../../types/src";
+import { Octokit } from '@octokit/core';
+
+declare const GitHub: typeof Octokit & import("@octokit/plugin-rest-endpoint-methods/dist-types/types").Api & {
+  paginate: import("@octokit/plugin-paginate-rest").PaginateInterface;
+}
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -89,9 +94,8 @@ type GithubRelease = {
   tag_name: string;
   draft: boolean;
   prerelease: boolean;
-};
-type GithubReleaseResponse = {
-  data: GithubRelease;
+  url: string;
+  upload_url: string;
 };
 type GithubReleaseResponses = {
   data: GithubRelease[];
@@ -106,7 +110,7 @@ export const createReleases = curry(
       repo,
     }: {
       core: Methods;
-      octokit: MoreMethods;
+      octokit: typeof GitHub;
       owner: string;
       repo: string;
     },
@@ -128,7 +132,7 @@ export const createReleases = curry(
 
     const releaseTag = pipe.releaseTag;
     core.debug(`creating release with tag ${releaseTag}`);
-    const existingRelease = await octokit.repos
+    const existingRelease = await octokit.rest.repos
       .listReleases({
         owner,
         repo,
@@ -141,27 +145,27 @@ export const createReleases = curry(
       })
       .catch((error: Error) => null);
 
-    let releaseResponse;
+    let releaseResponse: GithubRelease;
     if (existingRelease && existingRelease.draft) {
       console.log(
         `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
       );
-      releaseResponse = await octokit.repos
+      releaseResponse = await octokit.rest.repos
         .updateRelease({
           owner,
           repo,
           release_id: existingRelease.id,
           body: `${
             existingRelease.body ? `${existingRelease.body}\n` : ""
-          }${commandText(pipe.pkgCommandsRan)}`,
+            }${commandText(pipe.pkgCommandsRan)}`,
           draft: false,
         })
-        .then((response: GithubReleaseResponse) => response.data);
+        .then((response) => response.data);
     } else {
       console.log(
         `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
       );
-      releaseResponse = await octokit.repos
+      releaseResponse = await octokit.rest.repos
         .createRelease({
           owner,
           repo,
@@ -170,7 +174,7 @@ export const createReleases = curry(
           body: commandText(pipe.pkgCommandsRan),
           draft: core.getInput("draftRelease") === "true" ? true : false,
         })
-        .then((response: GithubReleaseResponse) => response.data);
+        .then((response) => response.data);
     }
     // keeping this one since this was originally used
     // considered deprecated and will remove in v1
@@ -205,15 +209,16 @@ export const createReleases = curry(
           console.log(
             `uploading asset ${asset.name} for ${pipe.pkg}@${pipe.pkgFile.version}`
           );
-          const uploadedAsset = await octokit.repos
+          const uploadedAsset = await octokit.rest.repos
             .uploadReleaseAsset({
               owner,
               repo,
               release_id: releaseResponse.id,
               name: asset.name,
+              // @ts-ignore error TS2322: Type 'Buffer' is not assignable to type 'string'.
               data: fs.readFileSync(asset.path),
             })
-            .then((response: GithubReleaseResponse) => response.data);
+            .then((response) => response.data);
           core.startGroup(`asset uploaded to release for ${pipe.pkg}`);
           console.log("release created: ", uploadedAsset);
           core.endGroup();
