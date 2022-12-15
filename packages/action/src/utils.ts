@@ -110,7 +110,7 @@ export const createReleases = curry(
       octokit: MoreMethods;
       owner: string;
       repo: string;
-        targetCommitish: string;
+      targetCommitish: string;
     },
     pipe: FunctionPipe
   ): Promise<void> => {
@@ -153,8 +153,9 @@ export const createReleases = curry(
           owner,
           repo,
           release_id: existingRelease.id,
-          body: `${existingRelease.body ? `${existingRelease.body}\n` : ""
-            }${commandText(pipe.pkgCommandsRan)}`,
+          body: `${
+            existingRelease.body ? `${existingRelease.body}\n` : ""
+          }${commandText(pipe.pkgCommandsRan)}`,
           draft: false,
         })
         .then((response: GithubReleaseResponse) => response.data);

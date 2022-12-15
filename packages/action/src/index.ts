@@ -56,7 +56,7 @@ export function* run(): Generator<any, any, any> {
       core.setOutput(
         `willPublish`,
         covectored.response === "No changes." &&
-        covectored.pkgReadyToPublish.length > 0
+          covectored.pkgReadyToPublish.length > 0
       );
       if (covectored?.pkgReadyToPublish?.length > 0) {
         covectored.pkgReadyToPublish.forEach((pkg) => {
@@ -109,7 +109,8 @@ export function* run(): Generator<any, any, any> {
 
       let covectored: CovectorPublish;
       core.debug(
-        `createRelease is ${core.getInput("createRelease")} ${token ? "with" : "without"
+        `createRelease is ${core.getInput("createRelease")} ${
+          token ? "with" : "without"
         } a token.`
       );
       if (core.getInput("createRelease") === "true" && token) {
