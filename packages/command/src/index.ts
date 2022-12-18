@@ -206,6 +206,11 @@ export const sh = function* (
       ...options,
       shell: process.platform !== "win32" ? true : process.env.shell,
     });
+  } else if (options.shell) {
+    child = yield exec(command, {
+      ...options,
+      shell: options.shell,
+    });
   } else {
     child = yield exec(command, options);
   }
