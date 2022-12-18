@@ -133,7 +133,7 @@ Usage:
           )
         );
         // pwsh doesn't handle pipes with echo
-        expect(out).toContain(
+        expect(out.toString()).toContain(
           "spawn echo this thing | echo but actually this ENOENT"
         );
       });
