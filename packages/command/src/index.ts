@@ -209,7 +209,10 @@ export const sh = function* (
   } else if (options.shell) {
     child = yield exec(command, {
       ...options,
-      shell: options.shell,
+      shell:
+        process.platform == "win32" && options.shell === true
+          ? "bash"
+          : options.shell,
     });
   } else {
     child = yield exec(command, options);
