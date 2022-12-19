@@ -55,7 +55,7 @@ Usage:
 
       it("defines pwsh as shell", function* () {
         const out = yield sh("echo this thing", { shell: "pwsh" }, false);
-        expect(out).toBe("\nthis\nthing");
+        expect(out).toBe("this\r\nthing");
       });
     }
   });
@@ -133,7 +133,7 @@ Usage:
           )
         );
         // pwsh doesn't handle pipes with echo
-        expect(out.toString()).toContain(
+        expect(out.message).toBe(
           "spawn echo this thing | echo but actually this ENOENT"
         );
       });
