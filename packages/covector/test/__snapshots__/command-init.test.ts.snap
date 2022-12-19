@@ -22,7 +22,7 @@ exports[`integration test for init command sets gitSiteUrl default to repo url 1
 ? should we include github action workflows? (Y/n)
 ? should we include github action workflows? Yes
 ? What is the name of your default branch? (main)
-? What is the name of your default branch? (main) Y
+? What is the name of your default branch? Y
 ? What is the name of your default branch? Y
 Creating the .changes directory.
 Writing out the config file.

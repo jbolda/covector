@@ -18,7 +18,7 @@
   "dependencies": {
     "@iarna/toml": "^2.2.5",
     "@tauri-apps/toml": "^2.2.4",
-    "globby": "^11.0.0",
+    "globby": "^11.1.0",
     "js-yaml": "^4.0.0",
     "semver": "^7.3.7"
   },
