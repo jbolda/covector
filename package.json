@@ -19,7 +19,7 @@
     "packages/*"
   ],
   "devDependencies": {
-    "@effection/jest": "^2.0.2",
+    "@effection/jest": "^2.0.4",
     "@types/jest": "^27.4.1",
     "@types/node": "^14.18.13",
     "jest": "^27.5.1",
