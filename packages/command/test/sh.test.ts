@@ -63,12 +63,20 @@ Usage:
   if (process.platform !== "win32") {
     describe("pipe commands when !win32", () => {
       it("considers piped commands, opted in", function* () {
-        const out = yield sh("echo this thing", { shell: true }, false);
+        const out = yield sh(
+          "echo this thing | echo but actually this",
+          { shell: true },
+          false
+        );
         expect(out).toBe("but actually this");
       });
 
       it("considers piped commands, uses fallback to shell", function* () {
-        const out = yield sh("echo this thing", {}, false);
+        const out = yield sh(
+          "echo this thing | echo but actually this",
+          {},
+          false
+        );
         expect(out).toBe("but actually this");
       });
     });
