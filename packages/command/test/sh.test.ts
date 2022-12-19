@@ -139,24 +139,4 @@ Usage:
       });
     });
   }
-
-  describe("commands cross platform", () => {
-    it("considers piped commands without quotes", function* () {
-      const out = yield sh(
-        "echo this thing | echo but actually this",
-        {},
-        false
-      );
-      expect(out).toBe("but actually this");
-    });
-
-    it("considers piped commands with quotes", function* () {
-      const out = yield sh(
-        "echo 'this thing' | echo 'but actually this'",
-        {},
-        false
-      );
-      expect(out).toBe("but actually this");
-    });
-  });
 });
