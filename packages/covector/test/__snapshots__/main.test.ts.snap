@@ -1821,10 +1821,7 @@ Object {
       "tauri-api [prepublish]: echo premode for tauri-api",
     ],
     Array [
-      "premode",
-    ],
-    Array [
-      "for tauri-api",
+      "premode for tauri-api",
     ],
     Array [
       "tauri-utils [prepublish]: echo premode for tauri-utils",
@@ -1932,10 +1929,7 @@ tauri-utils",
       "tauri-api [postpublish]: echo postmode for tauri-api",
     ],
     Array [
-      "postmode",
-    ],
-    Array [
-      "for tauri-api",
+      "postmode for tauri-api",
     ],
     Array [
       "tauri-utils [postpublish]: echo postmode for tauri-utils",
