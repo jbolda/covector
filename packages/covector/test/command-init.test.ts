@@ -5,20 +5,20 @@ import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 describe("integration test for init command", () => {
-  it.skip("runs on a workspace", function* () {
+  it("runs on a workspace", function* () {
     const fullIntegration = f.copy("pkg.js-yarn-workspace");
     const { stdout, stderr, status } = yield runCommand(
       command("init", fullIntegration),
       fullIntegration,
       [
-        [/\? What is the url to your github repo\? \(.+\)/, "pressEnter"],
+        [/\? What is the url to your github repo\?/, "pressEnter"],
         [/\? should we include github action workflows\? \(Y\/n\)/, "Y"],
         [/\? What is the name of your default branch\? \(main\)/, "pressEnter"],
       ]
     );
 
     expect(stderr).toBe("");
-    // expect(stdout).toMatchSnapshot();
+    expect(stdout.replaceAll("\n", "")).toMatchSnapshot();
     expect(status.code).toBe(0);
 
     // let's do a check to confirm it sets the config file correctly

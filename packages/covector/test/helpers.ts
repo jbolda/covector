@@ -23,8 +23,9 @@ export function* runCommand(
   { stdout: string; stderr: string; status: { code: number } },
   any
 > {
+  const debug = false;
   const runCommand: Process = yield exec(command, { cwd });
-  const elegantlyRespond = !(typeof responses === "string");
+  const elegantlyRespond = responses.length > 0;
 
   let stdoutBuffer = Buffer.from("");
   let stderrBuffer = Buffer.from("");
@@ -41,6 +42,7 @@ export function* runCommand(
           .filter((message) => message.length > 0)
           .pop();
 
+        if (debug) console.log(lastMessage);
         tryResponse({ responses, runCommand, lastMessage });
       } else {
         runCommand.stdin.send(pressEnter);
