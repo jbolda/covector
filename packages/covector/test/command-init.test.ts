@@ -40,7 +40,7 @@ describe("integration test for init command", () => {
     );
 
     expect(stderr).toBe("");
-    expect(stdout).toMatchSnapshot();
+    expect(stdout.replaceAll("\n", "")).toMatchSnapshot();
     expect(status.code).toBe(0);
 
     // let's do a check to confirm it sets the config file correctly
