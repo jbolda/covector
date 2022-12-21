@@ -20,7 +20,12 @@ export function* runCommand(
   responses: Responses = []
 ): Generator<
   any,
-  { stdout: string; stderr: string; status: { code: number } },
+  {
+    stdout: string;
+    stderr: string;
+    status: { code: number };
+    responded: string;
+  },
   any
 > {
   const debug = false;
@@ -29,6 +34,7 @@ export function* runCommand(
 
   let stdoutBuffer = Buffer.from("");
   let stderrBuffer = Buffer.from("");
+  let responded = "";
 
   yield spawn(
     runCommand.stdout.forEach(function* (chunk) {
@@ -43,7 +49,7 @@ export function* runCommand(
           .pop();
 
         if (debug) console.log(lastMessage);
-        tryResponse({ responses, runCommand, lastMessage });
+        responded += tryResponse({ responses, runCommand, lastMessage });
       } else {
         runCommand.stdin.send(pressEnter);
       }
@@ -61,7 +67,7 @@ export function* runCommand(
   const stdout = stripAnsi(stdoutBuffer.toString("utf-8").trim());
   const stderr = stripAnsi(stderrBuffer.toString("utf-8").trim());
 
-  return { stdout, stderr, status };
+  return { stdout, stderr, status, responded };
 }
 
 const pressEnter = String.fromCharCode(13);
@@ -87,6 +93,8 @@ const tryResponse = ({
         // and then pressing Enter to finish the input
         runCommand.stdin.send(pressEnter);
       }
+      return lastMessage;
     }
   }
+  return "";
 };

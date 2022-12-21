@@ -7,7 +7,7 @@ const f = fixtures(__dirname);
 describe("integration test for init command", () => {
   it("runs on a workspace", function* () {
     const fullIntegration = f.copy("pkg.js-yarn-workspace");
-    const { stdout, stderr, status } = yield runCommand(
+    const { stdout, stderr, status, responded } = yield runCommand(
       command("init", fullIntegration),
       fullIntegration,
       [
@@ -18,7 +18,7 @@ describe("integration test for init command", () => {
     );
 
     expect(stderr).toBe("");
-    expect(stdout.replaceAll("\n", "").replaceAll("\r", "")).toMatchSnapshot();
+    expect(responded).toMatchSnapshot();
     expect(status.code).toBe(0);
 
     // let's do a check to confirm it sets the config file correctly
