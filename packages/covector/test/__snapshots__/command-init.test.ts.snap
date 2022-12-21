@@ -2,7 +2,6 @@
 
 exports[`integration test for init command runs on a workspace 1`] = `
 "? What is the url to your github repo?
-? What is the url to your github repo?
 ? should we include github action workflows? (Y/n)
 ? What is the name of your default branch? (main)
 "

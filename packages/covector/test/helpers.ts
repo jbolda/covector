@@ -19,10 +19,10 @@ export function* runCommand(
   cwd: string,
   responses: Responses = []
 ): Operation<{
-    stdout: string;
-    stderr: string;
-    status: { code: number };
-    responded: string;
+  stdout: string;
+  stderr: string;
+  status: { code: number };
+  responded: string;
 }> {
   let stdoutBuffer = Buffer.from("");
   let stderrBuffer = Buffer.from("");
@@ -30,42 +30,42 @@ export function* runCommand(
   let stderr = "";
   let responded = "";
   try {
-  const debug = false;
-  const runCommand: Process = yield exec(command, { cwd });
-  const elegantlyRespond = responses.length > 0;
+    const debug = false;
+    const runCommand: Process = yield exec(command, { cwd });
+    const elegantlyRespond = responses.length > 0;
 
-  yield spawn(
-    runCommand.stdout.forEach(function* (chunk) {
-      stdoutBuffer = Buffer.concat([stdoutBuffer, chunk]);
-      if (elegantlyRespond) {
-        const lastMessage = chunk
-          .toString("utf-8")
-          .trim()
-          .split("\n")
-          .map((ansied) => stripAnsi(ansied))
-          .filter((message) => message.length > 0)
-          .pop();
+    yield spawn(
+      runCommand.stdout.forEach(function* (chunk) {
+        stdoutBuffer = Buffer.concat([stdoutBuffer, chunk]);
+        if (elegantlyRespond) {
+          const lastMessage = chunk
+            .toString("utf-8")
+            .trim()
+            .split("\n")
+            .map((ansied) => stripAnsi(ansied))
+            .filter((message) => message.length > 0)
+            .pop();
 
-        if (debug) console.log(lastMessage);
-        responded += tryResponse({ responses, runCommand, lastMessage });
-      } else {
-        runCommand.stdin.send(pressEnter);
-      }
-    })
-  );
+          if (debug) console.log(lastMessage);
+          responded += tryResponse({ responses, runCommand, lastMessage });
+        } else {
+          runCommand.stdin.send(pressEnter);
+        }
+      })
+    );
 
-  yield spawn(
-    runCommand.stderr.forEach((chunk) => {
-      stderrBuffer = Buffer.concat([stderrBuffer, chunk]);
-    })
-  );
+    yield spawn(
+      runCommand.stderr.forEach((chunk) => {
+        stderrBuffer = Buffer.concat([stderrBuffer, chunk]);
+      })
+    );
 
-  let status = yield withTimeout(24900, runCommand.join());
+    let status = yield withTimeout(24900, runCommand.join());
 
     stdout = stripAnsi(stdoutBuffer.toString("utf-8").trim());
     stderr = stripAnsi(stderrBuffer.toString("utf-8").trim());
 
-  return { stdout, stderr, status, responded };
+    return { stdout, stderr, status, responded };
   } catch (error: any) {
     if (error && error?.name === "TimeoutError") {
       throw new MainError({
@@ -95,10 +95,7 @@ const tryResponse = ({
         runCommand.stdin.send(pressEnter);
       } else {
         // console.log(`sending ${answer} to ${lastMessage}`);
-        runCommand.stdin.send(answer);
-        // seems that some responses maybe require input
-        // and then pressing Enter to finish the input
-        runCommand.stdin.send(pressEnter);
+        runCommand.stdin.send(answer + pressEnter);
       }
       return lastMessage.trim() + "\n";
     }
