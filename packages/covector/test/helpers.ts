@@ -93,7 +93,7 @@ const tryResponse = ({
         // and then pressing Enter to finish the input
         runCommand.stdin.send(pressEnter);
       }
-      return lastMessage;
+      return lastMessage.trim() + "\n";
     }
   }
   return "";
