@@ -40,9 +40,8 @@ export function* runCommand(
         if (elegantlyRespond) {
           const lastMessage = chunk
             .toString("utf-8")
-            .trim()
             .split("\n")
-            .map((ansied) => stripAnsi(ansied))
+            .map((ansied) => stripAnsi(ansied).trim())
             .filter((message) => message.length > 0)
             .pop();
 
