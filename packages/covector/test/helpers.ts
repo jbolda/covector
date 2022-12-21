@@ -1,4 +1,4 @@
-import { spawn, withTimeout } from "effection";
+import { spawn, withTimeout, Operation, MainError } from "effection";
 import { exec, Process } from "@effection/process";
 import stripAnsi from "strip-ansi";
 import path from "path";
@@ -18,23 +18,21 @@ export function* runCommand(
   command: string,
   cwd: string,
   responses: Responses = []
-): Generator<
-  any,
-  {
+): Operation<{
     stdout: string;
     stderr: string;
     status: { code: number };
     responded: string;
-  },
-  any
-> {
+}> {
+  let stdoutBuffer = Buffer.from("");
+  let stderrBuffer = Buffer.from("");
+  let stdout = "";
+  let stderr = "";
+  let responded = "";
+  try {
   const debug = false;
   const runCommand: Process = yield exec(command, { cwd });
   const elegantlyRespond = responses.length > 0;
-
-  let stdoutBuffer = Buffer.from("");
-  let stderrBuffer = Buffer.from("");
-  let responded = "";
 
   yield spawn(
     runCommand.stdout.forEach(function* (chunk) {
@@ -64,10 +62,19 @@ export function* runCommand(
 
   let status = yield withTimeout(24900, runCommand.join());
 
-  const stdout = stripAnsi(stdoutBuffer.toString("utf-8").trim());
-  const stderr = stripAnsi(stderrBuffer.toString("utf-8").trim());
+    stdout = stripAnsi(stdoutBuffer.toString("utf-8").trim());
+    stderr = stripAnsi(stderrBuffer.toString("utf-8").trim());
 
   return { stdout, stderr, status, responded };
+  } catch (error: any) {
+    if (error && error?.name === "TimeoutError") {
+      throw new MainError({
+        message: `\nResponded:\n${responded}\n${error.message}`,
+      });
+    } else {
+      throw error;
+    }
+  }
 }
 
 const pressEnter = String.fromCharCode(13);
