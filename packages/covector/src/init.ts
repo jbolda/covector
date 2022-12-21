@@ -360,7 +360,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # required for use of git history
       - name: covector status
@@ -395,12 +395,12 @@ jobs:
       successfulPublish: \${{ steps.covector.outputs.successfulPublish }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 # required for use of git history${
             pkgManagers.javascript
               ? `
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: 14
           registry-url: 'https://registry.npmjs.org'`

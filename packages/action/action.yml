@@ -56,7 +56,7 @@ outputs:
   releaseId: 
     description: The ID of the created release. Only present when `createRelease` is set to true.
 runs:
-  using: "node12"
+  using: "node16"
   main: "dist/index.js"
 branding:
   icon: "sliders"

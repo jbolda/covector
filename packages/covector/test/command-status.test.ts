@@ -14,7 +14,7 @@ describe("integration test for init command", () => {
     expect(stderr).toBe("");
     expect(stdout).toBe(
       "There are no changes.\n" +
-        "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0\n"
+        "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0"
     );
     expect(status.code).toBe(0);
   }, 10000);
