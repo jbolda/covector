@@ -139,13 +139,13 @@ function* readAll({
     Object.keys(files).map((pkg) =>
       !config.packages[pkg].path
         ? function* () {
-            return { name: pkg };
-          }
+          return { name: pkg };
+        }
         : readPkgFile({
-            cwd,
-            pkgConfig: config.packages[pkg],
-            nickname: pkg,
-          })
+          cwd,
+          pkgConfig: config.packages[pkg],
+          nickname: pkg,
+        })
     )
   );
 
@@ -340,14 +340,14 @@ const bumpMain = ({
     previewVersion && previewVersion !== ""
       ? semver.valid(`${preVersionCleaned}-${previewVersion}`)
       : // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-        semver.inc(prevVersion, bumpType, prereleaseIdentifier);
+      semver.inc(prevVersion, bumpType, prereleaseIdentifier);
   if (version) {
     pkg = setPackageFileVersion({ pkg, version });
     if (errorOnVersionRange && semver.satisfies(version, errorOnVersionRange)) {
       throw new Error(
         `${pkg.name} will be bumped to ${version}. ` +
-          `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
-          `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
+        `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
+        `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
       );
     }
   }
@@ -385,14 +385,17 @@ const bumpDeps = ({
                 previewVersion && previewVersion !== ""
                   ? semver.valid(`${preVersionCleaned}-${previewVersion}`)
                   : incConsideringPartials(
-                      dep,
-                      prevVersion,
-                      // @ts-ignore TODO deal with ReleaseType
-                      bumpType,
-                      prereleaseIdentifier
-                    );
-              if (version)
-                pkg = setPackageFileVersion({ pkg, version, property, dep });
+                    dep,
+                    prevVersion,
+                    // @ts-ignore TODO deal with ReleaseType
+                    bumpType,
+                    prereleaseIdentifier
+                  );
+              if (version) {
+                const versionRequirementMatch = /[\^=~]/.exec(prevVersion)
+                const versionRequirement = versionRequirementMatch ? versionRequirementMatch[0] : ''
+                pkg = setPackageFileVersion({ pkg, version: `${versionRequirement}${version}`, property, dep });
+              }
             }
           });
         }
@@ -415,7 +418,7 @@ const incConsideringPartials = (
     if (prereleaseIdentifier !== null) {
       console.warn(
         `bump for ${dependency} skipped as ${version} is a range, and does not specifically include prereleases. ` +
-          `Please pin to a major.minor.patch for a prerelease bump.`
+        `Please pin to a major.minor.patch for a prerelease bump.`
       );
       return null;
     }
