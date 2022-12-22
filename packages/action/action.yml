@@ -36,6 +36,8 @@ inputs:
     description: Identifier for prerelease version template
     required: false
     default: branch
+  releaseCommitish:
+    description: "Any branch or commit SHA the release's Git tag is created from. Default: SHA of current commit"
 outputs:
   status:
     description: Returns either "No changes." or a dynamic list of packages changed.
@@ -53,7 +55,7 @@ outputs:
     description: The URL users can navigate to in order to view the release.
   releaseUploadUrl:
     description: The URL for uploading assets to the release, which could be used by GitHub Actions for additional uses.
-  releaseId: 
+  releaseId:
     description: The ID of the created release. Only present when `createRelease` is set to true.
 runs:
   using: "node16"
