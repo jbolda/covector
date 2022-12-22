@@ -1,6 +1,6 @@
 import fs from "fs";
 import type { ConfigFile, FunctionPipe } from "../../types/src";
-import type { Github } from "@octokit/types/dist-node";
+import type { GitHub } from "@actions/github/lib/utils";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -107,7 +107,7 @@ export const createReleases = curry(
       targetCommitish,
     }: {
       core: Methods;
-      octokit: Github;
+      octokit: InstanceType<typeof GitHub>;
       owner: string;
       repo: string;
       targetCommitish: string;
