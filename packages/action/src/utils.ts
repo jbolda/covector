@@ -108,11 +108,13 @@ export const createReleases = curry(
       octokit,
       owner,
       repo,
+      targetCommitish,
     }: {
       core: Methods;
       octokit: typeof GitHub;
       owner: string;
       repo: string;
+      targetCommitish: string;
     },
     pipe: FunctionPipe
   ): Promise<void> => {
@@ -173,6 +175,7 @@ export const createReleases = curry(
           name: `${pipe.pkg} v${pipe.pkgFile.version}`,
           body: commandText(pipe.pkgCommandsRan),
           draft: core.getInput("draftRelease") === "true" ? true : false,
+          target_commitish: targetCommitish,
         })
         .then((response) => response.data);
     }

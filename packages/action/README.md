@@ -14,17 +14,18 @@ To use, add this action to your github workflow.
 
 See the [action.yml](./action.yml) for inputs to specify or see below.
 
-| input          | description                                                        | required |
-| -------------- | ------------------------------------------------------------------ | -------- |
-| command        | covector cli command to run                                        | true     |
-| token          | Github Token or PAT for creating releases / posting messages       | false    |
-| cwd            | The directory to run covector within, defaults to `process.cwd()`. | false    |
-| createRelease  | Opt-in to create a release on publish                              | false    |
-| draftRelease   | When creating a release, set it as a draft.                        | false    |
-| filterPackages | A comma separated list (no spaces) of packages to run commands on. | false    |
-| label          | "the Github pull request label that triggers preview packages"     | false    |
-| previewVersion | Template for how the preview packages should be versioned          | false    |
-| identifier     | Identifier for prerelease version template                         | false    |
+| input            | description                                                        | required |
+| ---------------- | ------------------------------------------------------------------ | -------- |
+| command          | covector cli command to run                                        | true     |
+| token            | Github Token or PAT for creating releases / posting messages       | false    |
+| cwd              | The directory to run covector within, defaults to `process.cwd()`. | false    |
+| createRelease    | Opt-in to create a release on publish                              | false    |
+| draftRelease     | When creating a release, set it as a draft.                        | false    |
+| filterPackages   | A comma separated list (no spaces) of packages to run commands on. | false    |
+| label            | "the Github pull request label that triggers preview packages"     | false    |
+| previewVersion   | Template for how the preview packages should be versioned          | false    |
+| identifier       | Identifier for prerelease version template                         | false    |
+| releaseCommitish | Any branch or commit SHA the release's Git tag is created from     | false    |
 
 Note that command can also use `version-or-publish` which is an input command unique to this action. It will dynamically determine if it needs to run `version` or `publish`. If there are no changes, we assume that `version` was run last, and the changes were deleted. With that assumption, we run `publish` if there are `No changes.` and `version` if there are changes.
 

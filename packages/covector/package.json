@@ -25,9 +25,9 @@
     "@covector/command": "0.5.1",
     "@covector/files": "0.5.1",
     "effection": "^2.0.6",
-    "globby": "^11.0.1",
-    "inquirer": "^8.2.2",
-    "yargs": "^17.4.1"
+    "globby": "^11.1.0",
+    "inquirer": "^8.2.3",
+    "yargs": "^17.6.2"
   },
   "devDependencies": {
     "@covector/types": "^0.0.0",
