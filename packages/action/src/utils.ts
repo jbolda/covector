@@ -82,21 +82,6 @@ function curry(func: Function): Function {
   };
 }
 
-export type Methods = { [k: string]: Function };
-export type MoreMethods = { [k: string]: Methods };
-
-type GithubRelease = {
-  id: number;
-  tag_name: string;
-  draft: boolean;
-  prerelease: boolean;
-  url: string;
-  upload_url: string;
-};
-type GithubReleaseResponses = {
-  data: GithubRelease[];
-};
-
 export const createReleases = curry(
   async (
     {
@@ -106,7 +91,7 @@ export const createReleases = curry(
       repo,
       targetCommitish,
     }: {
-      core: Methods;
+      core: { [k: string]: Function };
       octokit: InstanceType<typeof GitHub>;
       owner: string;
       repo: string;
@@ -135,15 +120,15 @@ export const createReleases = curry(
         owner,
         repo,
       })
-      .then((releases: GithubReleaseResponses) => {
+      .then((releases) => {
         const release = releases.data.find(
-          (r: GithubRelease) => r.draft && r.tag_name === releaseTag
+          (r) => r.draft && r.tag_name === releaseTag
         );
         return release ? release : null;
       })
       .catch((error: Error) => null);
 
-    let releaseResponse: GithubRelease;
+    let releaseResponse;
     if (existingRelease && existingRelease.draft) {
       console.log(
         `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
