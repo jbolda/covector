@@ -1,10 +1,6 @@
 import fs from "fs";
 import type { ConfigFile, FunctionPipe } from "../../types/src";
-import { Octokit } from '@octokit/core';
-
-declare const GitHub: typeof Octokit & import("@octokit/plugin-rest-endpoint-methods/dist-types/types").Api & {
-  paginate: import("@octokit/plugin-paginate-rest").PaginateInterface;
-}
+import type { Github } from "@octokit/types/dist-node";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -111,7 +107,7 @@ export const createReleases = curry(
       targetCommitish,
     }: {
       core: Methods;
-      octokit: typeof GitHub;
+      octokit: Github;
       owner: string;
       repo: string;
       targetCommitish: string;
@@ -159,7 +155,7 @@ export const createReleases = curry(
           release_id: existingRelease.id,
           body: `${
             existingRelease.body ? `${existingRelease.body}\n` : ""
-            }${commandText(pipe.pkgCommandsRan)}`,
+          }${commandText(pipe.pkgCommandsRan)}`,
           draft: false,
         })
         .then((response) => response.data);
@@ -218,8 +214,7 @@ export const createReleases = curry(
               repo,
               release_id: releaseResponse.id,
               name: asset.name,
-              // @ts-ignore error TS2322: Type 'Buffer' is not assignable to type 'string'.
-              data: fs.readFileSync(asset.path),
+              data: fs.readFileSync(asset.path, { encoding: "utf-8" }),
             })
             .then((response) => response.data);
           core.startGroup(`asset uploaded to release for ${pipe.pkg}`);
