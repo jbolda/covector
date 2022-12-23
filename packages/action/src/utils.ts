@@ -199,7 +199,11 @@ export const createReleases = curry(
               repo,
               release_id: releaseResponse.id,
               name: asset.name,
-              data: fs.readFileSync(asset.path, { encoding: "utf-8" }),
+              // this type seems to be set incorrectly upstream as their API expects a Buffer
+              // per https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset
+              // or we need to somehow pass in the expected body type but... let's just ignore it
+              // @ts-expect-error error TS2322: Type 'Buffer' is not assignable to type 'string'.
+              data: fs.readFileSync(asset.path),
             })
             .then((response) => response.data);
           core.startGroup(`asset uploaded to release for ${pipe.pkg}`);
