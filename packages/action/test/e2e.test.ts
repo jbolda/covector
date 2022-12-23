@@ -72,19 +72,21 @@ describe("full e2e test", () => {
       // @ts-ignore
       .mockImplementation((token: string) => ({
         context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-        repos: {
-          listReleases: jest.fn().mockResolvedValue({
-            data: [],
-          }),
-          updateRelease: jest
-            .fn()
-            .mockImplementation((input) => Promise.resolve({ data: input })),
-          createRelease: jest
-            .fn()
-            .mockImplementation((input) => Promise.resolve({ data: input })),
-          uploadReleaseAsset: jest
-            .fn()
-            .mockImplementation((input) => Promise.resolve({ data: input })),
+        rest: {
+          repos: {
+            listReleases: jest.fn().mockResolvedValue({
+              data: [],
+            }),
+            updateRelease: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+            createRelease: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+            uploadReleaseAsset: jest
+              .fn()
+              .mockImplementation((input) => Promise.resolve({ data: input })),
+          },
         },
       }));
 
@@ -170,32 +172,40 @@ describe("full e2e test", () => {
         // @ts-ignore
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-          repos: {
-            listReleases: jest.fn().mockResolvedValue({
-              data: [
-                {
-                  draft: true,
-                  body: "some stuff",
-                  id: 15,
-                  tag_name: "package-one-v2.3.1",
-                },
-                {
-                  draft: true,
-                  body: "other stuff",
-                  id: 22,
-                  tag_name: "package-two-v1.9.0",
-                },
-              ],
-            }) as jest.MockedFunction<any>,
-            updateRelease: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            createRelease: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            uploadReleaseAsset: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
+          rest: {
+            repos: {
+              listReleases: jest.fn().mockResolvedValue({
+                data: [
+                  {
+                    draft: true,
+                    body: "some stuff",
+                    id: 15,
+                    tag_name: "package-one-v2.3.1",
+                  },
+                  {
+                    draft: true,
+                    body: "other stuff",
+                    id: 22,
+                    tag_name: "package-two-v1.9.0",
+                  },
+                ],
+              }) as jest.MockedFunction<any>,
+              updateRelease: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+              createRelease: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+              uploadReleaseAsset: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+            },
           },
         }));
 
@@ -207,7 +217,7 @@ describe("full e2e test", () => {
         createRelease,
         updateRelease,
         // @ts-ignore
-      } = github.getOctokit.mock.results[0].value.repos;
+      } = github.getOctokit.mock.results[0].value.rest.repos;
       expect(listReleases).toHaveBeenCalledWith({
         owner: "genericOwner",
         repo: "genericRepo",
@@ -252,32 +262,40 @@ describe("full e2e test", () => {
         // @ts-ignore
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-          repos: {
-            listReleases: jest.fn().mockResolvedValue({
-              data: [
-                {
-                  draft: false,
-                  body: "some stuff",
-                  id: 15,
-                  tag_name: "package-one-v2.3.0",
-                },
-                {
-                  draft: false,
-                  body: "other stuff",
-                  id: 22,
-                  tag_name: "package-two-v1.8.7",
-                },
-              ],
-            }) as jest.MockedFunction<any>,
-            updateRelease: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            createRelease: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            uploadReleaseAsset: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
+          rest: {
+            repos: {
+              listReleases: jest.fn().mockResolvedValue({
+                data: [
+                  {
+                    draft: false,
+                    body: "some stuff",
+                    id: 15,
+                    tag_name: "package-one-v2.3.0",
+                  },
+                  {
+                    draft: false,
+                    body: "other stuff",
+                    id: 22,
+                    tag_name: "package-two-v1.8.7",
+                  },
+                ],
+              }) as jest.MockedFunction<any>,
+              updateRelease: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+              createRelease: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+              uploadReleaseAsset: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+            },
           },
         }));
 
@@ -289,7 +307,7 @@ describe("full e2e test", () => {
         createRelease,
         updateRelease,
         // @ts-ignore
-      } = github.getOctokit.mock.results[0].value.repos;
+      } = github.getOctokit.mock.results[0].value.rest.repos;
 
       expect(listReleases).toHaveBeenCalledWith({
         owner: "genericOwner",
@@ -337,26 +355,34 @@ describe("full e2e test", () => {
         // @ts-ignore
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-          repos: {
-            listReleases: jest.fn().mockResolvedValue({
-              data: [
-                {
-                  draft: true,
-                  body: "some stuff",
-                  id: 15,
-                  tag_name: "v2.3.1",
-                },
-              ],
-            }) as jest.MockedFunction<any>,
-            updateRelease: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            createRelease: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            uploadReleaseAsset: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
+          rest: {
+            repos: {
+              listReleases: jest.fn().mockResolvedValue({
+                data: [
+                  {
+                    draft: true,
+                    body: "some stuff",
+                    id: 15,
+                    tag_name: "v2.3.1",
+                  },
+                ],
+              }) as jest.MockedFunction<any>,
+              updateRelease: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+              createRelease: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+              uploadReleaseAsset: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+            },
           },
         }));
 
@@ -368,7 +394,7 @@ describe("full e2e test", () => {
         createRelease,
         updateRelease,
         // @ts-ignore
-      } = github.getOctokit.mock.results[0].value.repos;
+      } = github.getOctokit.mock.results[0].value.rest.repos;
       expect(listReleases).toHaveBeenCalledWith({
         owner: "genericOwner",
         repo: "genericRepo",
@@ -407,19 +433,27 @@ describe("full e2e test", () => {
         // @ts-ignore
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-          repos: {
-            listReleases: jest.fn().mockResolvedValue({
-              data: [],
-            }) as jest.MockedFunction<any>,
-            updateRelease: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            createRelease: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            uploadReleaseAsset: jest
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
+          rest: {
+            repos: {
+              listReleases: jest.fn().mockResolvedValue({
+                data: [],
+              }) as jest.MockedFunction<any>,
+              updateRelease: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+              createRelease: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+              uploadReleaseAsset: jest
+                .fn()
+                .mockImplementation((input) =>
+                  Promise.resolve({ data: input })
+                ),
+            },
           },
         }));
 
@@ -431,7 +465,7 @@ describe("full e2e test", () => {
         createRelease,
         updateRelease,
         // @ts-ignore
-      } = github.getOctokit.mock.results[0].value.repos;
+      } = github.getOctokit.mock.results[0].value.rest.repos;
 
       expect(listReleases).toHaveBeenCalledWith({
         owner: "genericOwner",

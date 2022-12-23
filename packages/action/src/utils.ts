@@ -1,5 +1,6 @@
 import fs from "fs";
 import type { ConfigFile, FunctionPipe } from "../../types/src";
+import type { GitHub } from "@actions/github/lib/utils";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -81,22 +82,6 @@ function curry(func: Function): Function {
   };
 }
 
-export type Methods = { [k: string]: Function };
-export type MoreMethods = { [k: string]: Methods };
-
-type GithubRelease = {
-  id: number;
-  tag_name: string;
-  draft: boolean;
-  prerelease: boolean;
-};
-type GithubReleaseResponse = {
-  data: GithubRelease;
-};
-type GithubReleaseResponses = {
-  data: GithubRelease[];
-};
-
 export const createReleases = curry(
   async (
     {
@@ -106,8 +91,8 @@ export const createReleases = curry(
       repo,
       targetCommitish,
     }: {
-      core: Methods;
-      octokit: MoreMethods;
+      core: { [k: string]: Function };
+      octokit: InstanceType<typeof GitHub>;
       owner: string;
       repo: string;
       targetCommitish: string;
@@ -130,14 +115,14 @@ export const createReleases = curry(
 
     const releaseTag = pipe.releaseTag;
     core.debug(`creating release with tag ${releaseTag}`);
-    const existingRelease = await octokit.repos
+    const existingRelease = await octokit.rest.repos
       .listReleases({
         owner,
         repo,
       })
-      .then((releases: GithubReleaseResponses) => {
+      .then((releases) => {
         const release = releases.data.find(
-          (r: GithubRelease) => r.draft && r.tag_name === releaseTag
+          (r) => r.draft && r.tag_name === releaseTag
         );
         return release ? release : null;
       })
@@ -148,7 +133,7 @@ export const createReleases = curry(
       console.log(
         `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
       );
-      releaseResponse = await octokit.repos
+      releaseResponse = await octokit.rest.repos
         .updateRelease({
           owner,
           repo,
@@ -158,12 +143,12 @@ export const createReleases = curry(
           }${commandText(pipe.pkgCommandsRan)}`,
           draft: false,
         })
-        .then((response: GithubReleaseResponse) => response.data);
+        .then((response) => response.data);
     } else {
       console.log(
         `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
       );
-      releaseResponse = await octokit.repos
+      releaseResponse = await octokit.rest.repos
         .createRelease({
           owner,
           repo,
@@ -173,7 +158,7 @@ export const createReleases = curry(
           draft: core.getInput("draftRelease") === "true" ? true : false,
           target_commitish: targetCommitish,
         })
-        .then((response: GithubReleaseResponse) => response.data);
+        .then((response) => response.data);
     }
     // keeping this one since this was originally used
     // considered deprecated and will remove in v1
@@ -208,15 +193,19 @@ export const createReleases = curry(
           console.log(
             `uploading asset ${asset.name} for ${pipe.pkg}@${pipe.pkgFile.version}`
           );
-          const uploadedAsset = await octokit.repos
+          const uploadedAsset = await octokit.rest.repos
             .uploadReleaseAsset({
               owner,
               repo,
               release_id: releaseResponse.id,
               name: asset.name,
+              // this type seems to be set incorrectly upstream as their API expects a Buffer
+              // per https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset
+              // or we need to somehow pass in the expected body type but... let's just ignore it
+              // @ts-expect-error error TS2322: Type 'Buffer' is not assignable to type 'string'.
               data: fs.readFileSync(asset.path),
             })
-            .then((response: GithubReleaseResponse) => response.data);
+            .then((response) => response.data);
           core.startGroup(`asset uploaded to release for ${pipe.pkg}`);
           console.log("release created: ", uploadedAsset);
           core.endGroup();

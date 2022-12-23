@@ -23,7 +23,8 @@ export function* run(): Generator<any, any, any> {
         ? process.env.GITHUB_TOKEN || ""
         : core.getInput("token");
     const inputCommand = core.getInput("command");
-    const releaseCommitish = core.getInput('releaseCommitish') || github.context.sha;
+    const releaseCommitish =
+      core.getInput("releaseCommitish") || github.context.sha;
 
     if (!inputCommand) {
       throw new Error("Must specify command for action. See README.");
@@ -56,7 +57,7 @@ export function* run(): Generator<any, any, any> {
       core.setOutput(
         `willPublish`,
         covectored.response === "No changes." &&
-        covectored.pkgReadyToPublish.length > 0
+          covectored.pkgReadyToPublish.length > 0
       );
       if (covectored?.pkgReadyToPublish?.length > 0) {
         covectored.pkgReadyToPublish.forEach((pkg) => {
@@ -109,7 +110,8 @@ export function* run(): Generator<any, any, any> {
 
       let covectored: CovectorPublish;
       core.debug(
-        `createRelease is ${core.getInput("createRelease")} ${token ? "with" : "without"
+        `createRelease is ${core.getInput("createRelease")} ${
+          token ? "with" : "without"
         } a token.`
       );
       if (core.getInput("createRelease") === "true" && token) {
@@ -121,7 +123,13 @@ export function* run(): Generator<any, any, any> {
           filterPackages,
           cwd,
           modifyConfig: injectPublishFunctions([
-            createReleases({ core, octokit, owner, repo, targetCommitish: releaseCommitish }),
+            createReleases({
+              core,
+              octokit,
+              owner,
+              repo,
+              targetCommitish: releaseCommitish,
+            }),
           ]),
         });
       } else {
@@ -170,9 +178,10 @@ export function* run(): Generator<any, any, any> {
       }
     } else if (command === "preview") {
       const configuredLabel = core.getInput("label");
-      const previewLabel = github?.context?.payload?.pull_request?.labels?.filter(
-        ({ name }: { name: String }) => name === configuredLabel
-      ).length;
+      const previewLabel =
+        github?.context?.payload?.pull_request?.labels?.filter(
+          ({ name }: { name: String }) => name === configuredLabel
+        ).length;
       const previewVersion = core.getInput("previewVersion");
       const versionIdentifier = core.getInput("identifier");
 
@@ -249,10 +258,8 @@ export function* run(): Generator<any, any, any> {
             //@ts-ignore
             (pub: Array<string>, pkg: Array<any>) => {
               if (pkg[1].published) {
-                let {
-                  name: pkgName,
-                  version: pkgVersion,
-                }: any = pkg[1].pkg.pkgFile.pkg;
+                let { name: pkgName, version: pkgVersion }: any =
+                  pkg[1].pkg.pkgFile.pkg;
                 return pub.concat(`${pkgName}@${pkgVersion}`);
               }
             },
