@@ -170,13 +170,21 @@ Object {
 exports[`package file apply bump (snapshot) fails bump single js json that satisfies range 1`] = `
 Object {
   "consoleDir": Array [],
-  "consoleLog": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping js-single-json-fixture with minor",
+    ],
+  ],
 }
 `;
 
 exports[`package file apply bump (snapshot) fails bumps single rust toml that satisfies range 1`] = `
 Object {
   "consoleDir": Array [],
-  "consoleLog": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust-single-fixture with minor",
+    ],
+  ],
 }
 `;

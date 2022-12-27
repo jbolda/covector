@@ -1,6 +1,6 @@
 import { apply } from "../src";
 import { loadFile } from "@covector/files";
-import { it } from "@effection/jest";
+import { it, captureError } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
@@ -166,9 +166,13 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    const applied = apply({ commands, config, cwd: jsonFolder });
-    expect(applied.return).toThrow();
+    const applied = yield captureError(
+      //@ts-ignore
+      apply({ commands, config, cwd: jsonFolder })
+    );
+    expect(applied.message).toBe(
+      "js-single-json-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+    );
     expect({
       //@ts-ignore
       consoleLog: console.log.mock.calls,
@@ -201,9 +205,13 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    const applied = apply({ commands, config, cwd: rustFolder });
-    expect(applied.return).toThrow();
+    const applied = yield captureError(
+      //@ts-ignore
+      apply({ commands, config, cwd: rustFolder })
+    );
+    expect(applied.message).toBe(
+      "rust-single-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+    );
     expect({
       //@ts-ignore
       consoleLog: console.log.mock.calls,
