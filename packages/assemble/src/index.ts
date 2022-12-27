@@ -232,6 +232,7 @@ export const assemble = function* ({
     plan.releases = mergeReleases(changes, config || {});
   }
 
+  // check that plan only includes pkgs that exist
   if (config && Object.keys(config).length > 0) {
     for (let pkg of Object.keys(plan.releases)) {
       if (!config.packages[pkg]) {
