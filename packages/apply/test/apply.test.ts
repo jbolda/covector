@@ -28,7 +28,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "js-single-json-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -72,7 +72,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "rust-single-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -110,7 +110,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "test_app",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -152,7 +152,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "js-single-json-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
         errorOnVersionRange: ">= 0.6.0",
       },
     ];
@@ -191,7 +191,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "rust-single-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
         errorOnVersionRange: ">= 0.6.0",
       },
     ];
@@ -230,7 +230,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -238,7 +238,7 @@ describe("package file apply bump (snapshot)", () => {
         path: undefined,
         pkg: "yarn-workspace-base-pkg-b",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a"],
+        parents: { "yarn-workspace-base-pkg-a": "null" },
       },
       {
         dependencies: undefined,
@@ -246,7 +246,10 @@ describe("package file apply bump (snapshot)", () => {
         path: undefined,
         pkg: "all",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
+        parents: {
+          "yarn-workspace-base-pkg-a": "null",
+          "yarn-workspace-base-pkg-b": "null",
+        },
       },
     ];
 
@@ -311,7 +314,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -319,7 +322,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -372,7 +375,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -380,7 +383,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -434,7 +437,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -442,7 +445,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -496,7 +499,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "patch",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -504,7 +507,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "patch",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -557,7 +560,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -565,7 +568,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -628,7 +631,7 @@ describe("package file applies preview bump", () => {
         path: "./",
         pkg: "js-single-json-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -679,7 +682,7 @@ describe("package file applies preview bump", () => {
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -687,7 +690,7 @@ describe("package file applies preview bump", () => {
         path: undefined,
         pkg: "yarn-workspace-base-pkg-b",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a"],
+        parents: { "yarn-workspace-base-pkg-a": "null" },
       },
       {
         dependencies: undefined,
@@ -695,7 +698,10 @@ describe("package file applies preview bump", () => {
         path: undefined,
         pkg: "all",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
+        parents: {
+          "yarn-workspace-base-pkg-a": "null",
+          "yarn-workspace-base-pkg-b": "null",
+        },
       },
     ];
 
@@ -777,7 +783,7 @@ describe("package file applies preview bump to pre-release", () => {
         path: "./",
         pkg: "js-single-prerelease-json-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -827,7 +833,7 @@ describe("package file applies preview bump to pre-release", () => {
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -835,7 +841,7 @@ describe("package file applies preview bump to pre-release", () => {
         path: undefined,
         pkg: "yarn-workspace-base-pkg-b",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a"],
+        parents: { "yarn-workspace-base-pkg-a": "null" },
       },
       {
         dependencies: undefined,
@@ -843,7 +849,10 @@ describe("package file applies preview bump to pre-release", () => {
         path: undefined,
         pkg: "all",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
+        parents: {
+          "yarn-workspace-base-pkg-a": "null",
+          "yarn-workspace-base-pkg-b": "null",
+        },
       },
     ];
 

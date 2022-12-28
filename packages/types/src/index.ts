@@ -139,7 +139,7 @@ export type Change = {
 export type Release = {
   type: CommonBumps;
   changes: Change[];
-  parents?: string[];
+  parents?: Parents;
 };
 
 export type PkgVersion = {
@@ -147,7 +147,7 @@ export type PkgVersion = {
   path?: string;
   packageFileName?: string;
   type?: string;
-  parents?: string[];
+  parents?: Parents;
   precommand?: (string | any)[] | null;
   command?: (string | any)[] | null;
   postcommand?: (string | any)[] | null;
@@ -184,16 +184,27 @@ export type PipePublishTemplate = {
   pkgFile?: PackageFile;
 };
 
-/* @covector/assemble */
+/* @covector/apply */
 export type ChangeParsed = {
   releases: { [k: string]: string };
   summary: string;
   meta: { dependencies: string };
 };
 
+export type Changed = Record<
+  string,
+  {
+    parents: Parents;
+    type: CommonBumps;
+    changes?: ChangeParsed[];
+  }
+>;
+
+type Parents = Record<string, string>;
+
 export type Releases = {
   [k: string]: {
-    parents: string[];
+    parents: Parents;
     type: CommonBumps;
     dependencies?: string[];
     changes?: ChangeParsed[];
@@ -207,7 +218,7 @@ export type PackageCommand = {
   manager?: string;
   path: string;
   type: CommonBumps;
-  parents: string[];
+  parents: Parents;
 };
 
 /* covector */

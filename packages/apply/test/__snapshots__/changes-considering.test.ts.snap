@@ -8,10 +8,10 @@ Object {
       "all": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [
-          "yarn-workspace-base-pkg-a",
-          "yarn-workspace-base-pkg-b",
-        ],
+        "parents": Object {
+          "yarn-workspace-base-pkg-a": "null",
+          "yarn-workspace-base-pkg-b": "null",
+        },
         "path": undefined,
         "pkg": "all",
         "type": "minor",
@@ -19,7 +19,7 @@ Object {
       "yarn-workspace-base-pkg-a": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [],
+        "parents": Object {},
         "path": undefined,
         "pkg": "all",
         "type": "patch",
@@ -27,9 +27,9 @@ Object {
       "yarn-workspace-base-pkg-b": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [
-          "yarn-workspace-base-pkg-a",
-        ],
+        "parents": Object {
+          "yarn-workspace-base-pkg-a": "null",
+        },
         "path": undefined,
         "pkg": "all",
         "type": "patch",
@@ -49,10 +49,10 @@ Object {
       "all": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [
-          "yarn-workspace-base-pkg-a",
-          "yarn-workspace-base-pkg-b",
-        ],
+        "parents": Object {
+          "yarn-workspace-base-pkg-a": "null",
+          "yarn-workspace-base-pkg-b": "null",
+        },
         "path": undefined,
         "pkg": "all",
         "type": "minor",
@@ -60,7 +60,7 @@ Object {
       "yarn-workspace-base-pkg-a": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [],
+        "parents": Object {},
         "path": undefined,
         "pkg": "all",
         "type": "patch",
@@ -68,9 +68,9 @@ Object {
       "yarn-workspace-base-pkg-b": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [
-          "yarn-workspace-base-pkg-a",
-        ],
+        "parents": Object {
+          "yarn-workspace-base-pkg-a": "null",
+        },
         "path": undefined,
         "pkg": "all",
         "type": "patch",

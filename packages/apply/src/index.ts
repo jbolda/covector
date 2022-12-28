@@ -13,6 +13,7 @@ import type {
   PackageFile,
   ConfigFile,
   CommonBumps,
+  Changed,
   ChangeParsed,
   Releases,
   PackageCommand,
@@ -113,7 +114,7 @@ function* readAll({
   config,
   cwd = process.cwd(),
 }: {
-  changes: { [k: string]: { parents: string[] } };
+  changes: Record<string, { parents: Record<string, string> }>;
   config: ConfigFile;
   cwd: string;
 }): Operation<{ [k: string]: PackageFile }> {
@@ -122,11 +123,14 @@ function* readAll({
     pkg: { name: "", version: "" },
   };
   let files = Object.keys(changes).reduce(
-    (fileList: { [k: string]: PackageFile }, change) => {
+    (fileList: Record<string, PackageFile>, change) => {
       fileList[change] = { ...templateShell };
-      if (changes[change].parents && changes[change].parents.length > 0)
-        changes[change].parents.forEach(
-          (parent) => (fileList[parent] = { ...templateShell })
+      if (
+        changes[change].parents &&
+        Object.entries(changes[change].parents).length > 0
+      )
+        Object.entries(changes[change].parents).forEach(
+          ([parent, _]) => (fileList[parent] = { ...templateShell })
         );
       return fileList;
     },
@@ -168,14 +172,14 @@ const writeAll = function* ({
 
 const resolveParents = ({ config }: { config: ConfigFile }) => {
   return Object.keys(config.packages).reduce(
-    (parents: { [k: string]: string[] }, pkg) => {
-      parents[pkg] = [];
+    (parents: Record<string, Record<string, string>>, pkg) => {
+      parents[pkg] = {};
       Object.keys(config.packages).forEach((parent) => {
         if (
           !!config.packages[parent].dependencies &&
           config.packages[parent].dependencies!.includes(pkg)
         )
-          parents[pkg].push(parent);
+          parents[pkg][parent] = "null";
       });
       return parents;
     },
@@ -183,13 +187,6 @@ const resolveParents = ({ config }: { config: ConfigFile }) => {
   );
 };
 
-type Changed = {
-  [k: string]: {
-    parents: string[];
-    type: CommonBumps;
-    changes?: ChangeParsed[];
-  };
-};
 export const changesConsideringParents = ({
   assembledChanges,
   config,
@@ -213,8 +210,10 @@ export const changesConsideringParents = ({
     {}
   );
 
+  const releases = parentBump(changes, parents, prereleaseIdentifier);
+
   return {
-    releases: parentBump(changes, parents, prereleaseIdentifier),
+    releases,
     changes: assembledChanges.changes,
   };
 };
@@ -227,13 +226,11 @@ const parentBump = (
   let changes = { ...initialChanges };
   let recurse = false;
   Object.keys(initialChanges).forEach((main) => {
-    if (changes[main].parents.length > 0) {
-      changes[main].parents.forEach((pkg) => {
+    if (Object.keys(changes[main].parents).length > 0) {
+      Object.entries(changes[main].parents).forEach(([pkg, prevVersion]) => {
+        const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
         // pkg is the parent and main is the child
-        if (!!changes[pkg]) {
-          // if a change is planned on the parent
-          // we don't need to plan a release
-        } else {
+        if (!changes[pkg]) {
           // if the parent doesn't have a release
           // add one to adopt the next version of it's child
           changes[pkg] = {
@@ -242,15 +239,18 @@ const parentBump = (
             // or it will do a prepatch if it isn't a prerelease
             type: !prereleaseIdentifier ? "patch" : "prerelease",
           };
-          if (changes[pkg].changes) {
-            changes[pkg].changes!.forEach((parentChange) => {
-              parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
-            });
-          }
-          changes[pkg].parents = parents[pkg];
-          // we also need to presume recursion to update the parents' parents
-          recurse = true;
         }
+        if (changes[pkg].changes) {
+          // what is meta doing here?
+          // this ends up overwriting if there are multiple bumps so that feels odd
+          changes[pkg].changes!.forEach((parentChange) => {
+            parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
+          });
+        }
+        changes[pkg].parents = parents[pkg];
+        console.info(JSON.stringify(changes[pkg], null, 2));
+        // we also need to presume recursion to update the parents' parents
+        if (parents[pkg].length > 0) recurse = true;
       });
     }
   });
