@@ -50,6 +50,20 @@ Object {
 }
 `;
 
+exports[`package file apply bump (snapshot) bump multi rust toml as patch with object dep missing patch 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with patch",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with patch",
+    ],
+  ],
+}
+`;
+
 exports[`package file apply bump (snapshot) bumps multi js json 1`] = `
 Object {
   "consoleDir": Array [],
@@ -59,6 +73,9 @@ Object {
     ],
     Array [
       "bumping yarn-workspace-base-pkg-b with minor",
+    ],
+    Array [
+      "bumping all with minor",
     ],
   ],
 }
@@ -87,20 +104,6 @@ Object {
     ],
     Array [
       "bumping rust_pkg_b_fixture with minor",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump (snapshot) bumps multi rust toml as patch with object dep missing patch 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping rust_pkg_a_fixture with patch",
-    ],
-    Array [
-      "bumping rust_pkg_b_fixture with patch",
     ],
   ],
 }

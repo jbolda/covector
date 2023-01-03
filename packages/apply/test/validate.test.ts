@@ -1,8 +1,10 @@
 import { validateApply } from "../src";
 import { run } from "effection";
-import { it } from "@effection/jest";
+import { captureError, it } from "@effection/jest";
 import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";
+import { PackageCommand, PackageFile } from "@covector/types";
+import { readAllPkgFiles } from "@covector/files";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -300,16 +302,36 @@ describe("validate apply", () => {
   it("bumps multi rust toml as minor with object dep without version number", function* () {
     let restoreConsole = mockConsole(["error"]);
 
-    const rustFolder = f.copy("pkg.rust-multi-object-path-dep-only");
+    const rustFolder: string = f.copy("pkg.rust-multi-object-path-dep-only");
 
-    const commands = [
+    const config = {
+      packages: {
+        rust_pkg_a_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+          deps: {},
+        },
+        rust_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+          deps: {},
+        },
+      },
+    };
+    const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+      //@ts-expect-error
+      config,
+      cwd: rustFolder,
+    });
+
+    const commands: PackageCommand[] = [
       {
         dependencies: ["rust_pkg_b_fixture"],
         manager: "rust",
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -317,33 +339,20 @@ describe("validate apply", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
-    const config = {
-      packages: {
-        rust_pkg_a_fixture: {
-          path: "./pkg-a/",
-          manager: "rust",
-        },
-        rust_pkg_b_fixture: {
-          path: "./pkg-b/",
-          manager: "rust",
-        },
-      },
-    };
-
-    expect.assertions(2);
-    try {
-      //@ts-ignore
-      yield validateApply({ commands, config, cwd: rustFolder });
-    } catch (e: any) {
-      expect(e.message).toMatch(
-        "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
-          "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
-      );
-    }
+    const errored = yield captureError(
+      validateApply({
+        commands,
+        allPackages,
+      })
+    );
+    expect(errored.message).toMatch(
+      "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
+        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
+    );
 
     expect({
       //@ts-ignore

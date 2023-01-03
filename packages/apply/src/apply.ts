@@ -18,14 +18,14 @@ import type {
 
 export function* apply({
   commands,
-  config,
+  allPackages,
   cwd = process.cwd(),
   bump = true,
   previewVersion = "",
   prereleaseIdentifier,
 }: {
   commands: PackageCommand[];
-  config: ConfigFile;
+  allPackages: Record<string, PackageFile>;
   cwd: string;
   bump: boolean;
   previewVersion: string;
@@ -39,7 +39,6 @@ export function* apply({
     {}
   );
 
-  let allPackages = yield readAll({ changes, config, cwd });
   const bumps = bumpAll({
     changes,
     allPackages,
@@ -66,13 +65,11 @@ export function* apply({
 
 export function* validateApply({
   commands,
-  config,
-  cwd = process.cwd(),
+  allPackages,
   prereleaseIdentifier,
 }: {
   commands: PackageCommand[];
-  config: ConfigFile;
-  cwd: string;
+  allPackages: Record<string, PackageFile>;
   prereleaseIdentifier?: string;
 }): Operation<true | Error> {
   const changes = commands.reduce(
@@ -82,7 +79,6 @@ export function* validateApply({
     },
     {}
   );
-  let allPackages = yield readAll({ changes, config, cwd });
 
   const bumps = bumpAll({
     changes,
@@ -104,55 +100,6 @@ export function* validateApply({
   } catch (e) {
     throw e;
   }
-}
-
-function* readAll({
-  changes,
-  config,
-  cwd = process.cwd(),
-}: {
-  changes: Record<string, { parents: Record<string, string> }>;
-  config: ConfigFile;
-  cwd: string;
-}): Operation<{ [k: string]: PackageFile }> {
-  let templateShell: PackageFile = {
-    version: "",
-    pkg: { name: "", version: "" },
-  };
-  let files = Object.keys(changes).reduce(
-    (fileList: Record<string, PackageFile>, change) => {
-      fileList[change] = { ...templateShell };
-      if (
-        changes[change].parents &&
-        Object.entries(changes[change].parents).length > 0
-      )
-        Object.entries(changes[change].parents).forEach(
-          ([parent, _]) => (fileList[parent] = { ...templateShell })
-        );
-      return fileList;
-    },
-    {}
-  );
-
-  const pkgs: string[] = Object.keys(files);
-  const pkgFiles = yield all(
-    Object.keys(files).map((pkg) =>
-      !config.packages[pkg].path
-        ? function* () {
-            return { name: pkg };
-          }
-        : readPkgFile({
-            cwd,
-            pkgConfig: config.packages[pkg],
-            nickname: pkg,
-          })
-    )
-  );
-
-  return pkgs.reduce((list, pkg, index) => {
-    list[pkg] = pkgFiles[index];
-    return list;
-  }, files);
 }
 
 const writeAll = function* ({
@@ -184,9 +131,8 @@ const bumpAll = ({
   let packageFiles = { ...allPackages };
 
   // loop through all packages and bump the main version for each
-  //
   for (let pkg of Object.keys(changes)) {
-    if (!packageFiles[pkg].file || changes[pkg].type === "noop") continue;
+    if (!packageFiles[pkg]?.file || changes[pkg].type === "noop") continue;
 
     if (logs && !previewVersion) {
       console.log(`bumping ${pkg} with ${changes[pkg].type}`);
