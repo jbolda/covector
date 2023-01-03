@@ -8,6 +8,7 @@ import {
   readPreFile,
   changeFiles,
   loadChangeFiles,
+  readAllPkgFiles,
 } from "@covector/files";
 import {
   assemble,
@@ -16,7 +17,13 @@ import {
 } from "@covector/assemble";
 import { apply, changesConsideringParents } from "@covector/apply";
 
-import type { CommandsRan, Covector, PkgPublish } from "@covector/types";
+import type {
+  CommandsRan,
+  Covector,
+  PackageFile,
+  PkgPublish,
+  PkgVersion,
+} from "@covector/types";
 
 export function* preview({
   command,
@@ -53,23 +60,29 @@ export function* preview({
     config,
     preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
+  const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+    config,
+    cwd,
+  });
 
   yield raceTime({ t: config.timeout });
 
   const versionChanges = changesConsideringParents({
     assembledChanges,
     config,
+    allPackages,
     prereleaseIdentifier,
   });
 
-  const { commands: versionCommands } = yield mergeChangesToConfig({
-    assembledChanges: versionChanges,
-    config,
-    command: "version",
-    dryRun,
-    filterPackages,
-    cwd,
-  });
+  const { commands: versionCommands }: { commands: PkgVersion[] } =
+    yield mergeChangesToConfig({
+      assembledChanges: versionChanges,
+      config,
+      command: "version",
+      dryRun,
+      filterPackages,
+      cwd,
+    });
 
   let pkgCommandsRan: CommandsRan = Object.keys(config.packages).reduce(
     (
@@ -104,8 +117,8 @@ export function* preview({
   });
 
   const applied = yield apply({
+    //@ts-ignore
     commands: versionCommands,
-    config,
     cwd,
     bump: !dryRun,
     previewVersion,

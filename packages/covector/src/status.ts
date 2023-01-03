@@ -4,6 +4,7 @@ import {
   readPreFile,
   changeFiles,
   loadChangeFiles,
+  readAllPkgFiles,
 } from "@covector/files";
 import {
   assemble,
@@ -12,7 +13,12 @@ import {
 } from "@covector/assemble";
 import { changesConsideringParents, validateApply } from "@covector/apply";
 
-import type { CovectorStatus, Covector, PkgPublish } from "@covector/types";
+import type {
+  CovectorStatus,
+  Covector,
+  PkgPublish,
+  PackageFile,
+} from "@covector/types";
 
 export function* status({
   command,
@@ -108,9 +114,15 @@ export function* status({
       console.dir(assembledChanges.releases[release].changes);
     });
 
+    const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+      config,
+      cwd,
+    });
+
     const changes = changesConsideringParents({
       assembledChanges,
       config,
+      allPackages,
       prereleaseIdentifier,
     });
 
@@ -125,8 +137,7 @@ export function* status({
 
     const applied = yield validateApply({
       commands,
-      config,
-      cwd,
+      allPackages,
       prereleaseIdentifier,
     });
 
