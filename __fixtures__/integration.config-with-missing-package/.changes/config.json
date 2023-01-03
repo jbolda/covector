@@ -1,0 +1,13 @@
+{
+  "packages": {
+    "package-one": {
+      "path": "./packages/package-one"
+    },
+    "package-two": {
+      "path": "./packages/package-two"
+    },
+    "bloody-hell": {
+      "path": "./packages/who-knows"
+    }
+  }
+}
