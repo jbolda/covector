@@ -1,5 +1,6 @@
 import {
   readPkgFile,
+  readAllPkgFiles,
   readPreFile,
   configFile,
   changeFiles,
@@ -26,6 +27,17 @@ describe("general file test", () => {
     const configFolder = f.copy("config.simple");
     const configArray = yield configFile({ cwd: configFolder });
     expect((configArray as any).stuff).toBe("here");
+  });
+
+  it("reads all package files in config", function* () {
+    const configFolder = f.copy("integration.js-with-subcommands");
+    const config = yield configFile({ cwd: configFolder });
+    const allPackages = yield readAllPkgFiles({ config, cwd: configFolder });
+    expect(allPackages["package-one"].name).toBe("package-one");
+    expect(allPackages["package-one"].version).toBe("2.3.1");
+
+    expect(allPackages["package-two"].name).toBe("package-two");
+    expect(allPackages["package-two"].version).toBe("1.9.0");
   });
 
   describe("parses pre", () => {

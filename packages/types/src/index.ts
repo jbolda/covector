@@ -24,8 +24,17 @@ export interface PkgMinimum {
   versionMajor?: number;
   versionMinor?: number;
   versionPatch?: number;
+  deps: DepsKeyed;
   versionPrerelease?: readonly (string | number)[] | null;
 }
+
+export type DepsKeyed = Record<
+  string,
+  {
+    type: "dependencies" | "devDependencies" | "dev-dependencies";
+    version: string;
+  }[]
+>;
 
 export interface PackageFile extends PkgMinimum {
   file?: File;
@@ -200,7 +209,7 @@ export type Changed = Record<
   }
 >;
 
-type Parents = Record<string, string>;
+type Parents = Record<string, DepsKeyed>;
 
 export type Releases = {
   [k: string]: {
