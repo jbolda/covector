@@ -26,6 +26,7 @@ publish
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -89,6 +90,7 @@ publish
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -158,6 +160,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -202,6 +205,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -251,6 +255,7 @@ publish
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -312,6 +317,7 @@ publish
           "path": "./packages/package-three",
           "pkg": "package-three",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-three\\",
@@ -373,6 +379,7 @@ publish
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -440,6 +447,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "license": "MIT",
@@ -483,6 +491,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-three",
             "pkg": Object {
               "license": "MIT",
@@ -526,6 +535,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "license": "MIT",
@@ -574,6 +584,7 @@ publish
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -637,6 +648,7 @@ publish
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -706,6 +718,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -750,6 +763,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -799,6 +813,7 @@ publish
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -860,6 +875,7 @@ publish
           "path": "./packages/package-three",
           "pkg": "package-three",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-three\\",
@@ -921,6 +937,7 @@ publish
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -988,6 +1005,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "license": "MIT",
@@ -1031,6 +1049,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-three",
             "pkg": Object {
               "license": "MIT",
@@ -1074,6 +1093,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "license": "MIT",
@@ -1183,6 +1203,7 @@ publish
         \\"versionMinor\\": 3,
         \\"versionPatch\\": 1,
         \\"versionPrerelease\\": null,
+        \\"deps\\": {},
         \\"pkg\\": {
           \\"name\\": \\"package-one\\",
           \\"description\\": \\"shrugs\\",
@@ -1229,6 +1250,7 @@ publish
         \\"versionMinor\\": 9,
         \\"versionPatch\\": 0,
         \\"versionPrerelease\\": null,
+        \\"deps\\": {},
         \\"pkg\\": {
           \\"name\\": \\"package-two\\",
           \\"description\\": \\"shrugs\\",
@@ -1288,6 +1310,7 @@ publish
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -1351,6 +1374,7 @@ publish
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -1420,6 +1444,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -1464,6 +1489,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -1512,6 +1538,7 @@ publish
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -1574,6 +1601,7 @@ publish
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -1640,6 +1668,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -1681,6 +1710,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
