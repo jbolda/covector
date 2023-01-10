@@ -27,7 +27,7 @@ const allPackagesWithoutRead = ({ config }: { config: ConfigFile }) =>
       return pkgs;
     }, {});
 
-describe.only("package file apply bump (snapshot)", () => {
+describe("package file apply bump (snapshot)", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
     restoreConsole = mockConsole(["log", "dir"]);
@@ -696,11 +696,14 @@ describe("package file applies preview bump", () => {
       },
     };
 
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
     yield apply({
       //@ts-expect-error
       commands,
       config,
       cwd: jsonFolder,
+      allPackages,
       previewVersion: "branch-name.12345",
     });
     const modifiedFile = yield loadFile("package.json", jsonFolder);
@@ -773,7 +776,8 @@ describe("package file applies preview bump", () => {
     };
 
     //@ts-expect-error
-    const allPackages = allPackagesWithoutRead({ config });
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
     yield apply({
       //@ts-expect-error
       commands,
@@ -849,10 +853,13 @@ describe("package file applies preview bump to pre-release", () => {
       },
     };
 
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
     yield apply({
       //@ts-expect-error
       commands,
       config,
+      allPackages,
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
@@ -923,10 +930,14 @@ describe("package file applies preview bump to pre-release", () => {
       },
     };
 
+    //@ts-expect-error
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
     yield apply({
       //@ts-expect-error
       commands,
       config,
+      allPackages,
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });

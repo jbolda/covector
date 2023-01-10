@@ -10,6 +10,9 @@ Object {
     Array [
       "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
     ],
+    Array [
+      "bumping all with branch-name.12345 identifier to publish a preview",
+    ],
   ],
 }
 `;
@@ -34,6 +37,9 @@ Object {
     ],
     Array [
       "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
+    ],
+    Array [
+      "bumping all with branch-name.12345 identifier to publish a preview",
     ],
   ],
 }

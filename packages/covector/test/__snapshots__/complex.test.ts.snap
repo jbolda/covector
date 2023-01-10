@@ -52,6 +52,7 @@ Multi-binding collection of libraries and templates for building Tauri apps
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -116,6 +117,7 @@ this command is not piped, it is run from scripts for pk2
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -181,6 +183,7 @@ this command is not piped, it is run from scripts for pk2
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -222,6 +225,7 @@ this command is not piped, it is run from scripts for pk2
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -276,6 +280,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "package-one",
           "pkg": Object {
             "description": "shrugs",
@@ -318,6 +323,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "package-two",
           "pkg": Object {
             "description": "shrugs",
@@ -355,6 +361,7 @@ Object {
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -406,6 +413,7 @@ Object {
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -476,6 +484,7 @@ Object {
             "path": "./packages/package-one",
             "pkg": "package-one",
             "pkgFile": Object {
+              "deps": Object {},
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-one\\",
@@ -536,6 +545,7 @@ Object {
             "path": "./packages/package-two",
             "pkg": "package-two",
             "pkgFile": Object {
+              "deps": Object {},
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-two\\",
@@ -601,6 +611,7 @@ Object {
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -661,6 +672,7 @@ Object {
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -726,6 +738,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -767,6 +780,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -830,6 +844,7 @@ publish
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -892,6 +907,7 @@ publish
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -958,6 +974,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -999,6 +1016,7 @@ publish
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -1053,6 +1071,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "package-one",
           "pkg": Object {
             "description": "shrugs",
@@ -1095,6 +1114,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "package-two",
           "pkg": Object {
             "description": "shrugs",
@@ -1132,6 +1152,7 @@ Object {
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -1183,6 +1204,7 @@ Object {
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -1253,6 +1275,7 @@ Object {
             "path": "./packages/package-one",
             "pkg": "package-one",
             "pkgFile": Object {
+              "deps": Object {},
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-one\\",
@@ -1314,6 +1337,7 @@ Object {
             "path": "./packages/package-two",
             "pkg": "package-two",
             "pkgFile": Object {
+              "deps": Object {},
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-two\\",
@@ -1380,6 +1404,7 @@ Object {
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -1441,6 +1466,7 @@ Object {
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -1507,6 +1533,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -1548,6 +1575,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -1663,6 +1691,7 @@ Multi-binding collection of libraries and templates for building Tauri apps
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -1735,6 +1764,7 @@ this command is not piped, it is run from scripts for pk2
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -1810,6 +1840,7 @@ this command is not piped, it is run from scripts for pk2
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -1861,6 +1892,7 @@ this command is not piped, it is run from scripts for pk2
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -1925,6 +1957,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "package-one",
           "pkg": Object {
             "description": "shrugs",
@@ -1977,6 +2010,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "package-two",
           "pkg": Object {
             "description": "shrugs",
@@ -2022,6 +2056,7 @@ Object {
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -2081,6 +2116,7 @@ Object {
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -2177,6 +2213,7 @@ Object {
             "path": "./packages/package-one",
             "pkg": "package-one",
             "pkgFile": Object {
+              "deps": Object {},
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-one\\",
@@ -2245,6 +2282,7 @@ Object {
             "path": "./packages/package-two",
             "pkg": "package-two",
             "pkgFile": Object {
+              "deps": Object {},
               "file": Object {
                 "content": "{
   \\"name\\": \\"package-two\\",
@@ -2318,6 +2356,7 @@ Object {
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -2386,6 +2425,7 @@ Object {
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -2461,6 +2501,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "description": "shrugs",
@@ -2512,6 +2553,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "description": "shrugs",
@@ -2648,6 +2690,7 @@ Object {
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -2703,6 +2746,7 @@ Object {
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -2763,6 +2807,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "license": "MIT",
@@ -2800,6 +2845,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "license": "MIT",
@@ -2858,6 +2904,7 @@ Object {
           "path": "./packages/package-one",
           "pkg": "package-one",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-one\\",
@@ -2913,6 +2960,7 @@ Object {
           "path": "./packages/package-two",
           "pkg": "package-two",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-two\\",
@@ -2973,6 +3021,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
             "pkg": Object {
               "license": "MIT",
@@ -3010,6 +3059,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
             "pkg": Object {
               "license": "MIT",
