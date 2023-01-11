@@ -119,6 +119,7 @@ export function* preview({
   const applied = yield apply({
     //@ts-ignore
     commands: versionCommands,
+    allPackages,
     cwd,
     bump: !dryRun,
     previewVersion,

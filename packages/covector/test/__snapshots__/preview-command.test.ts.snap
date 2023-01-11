@@ -66,6 +66,14 @@ Object {
           "path": "./package-a",
           "pkg": "package-a",
           "pkgFile": Object {
+            "deps": Object {
+              "package-b": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.0.1-branch-name.12345",
+                },
+              ],
+            },
             "file": Object {
               "content": "{
   \\"name\\": \\"package-a\\",
@@ -120,6 +128,7 @@ Object {
           "path": "./package-b",
           "pkg": "package-b",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-b\\",
@@ -172,6 +181,14 @@ Object {
           "path": "./package-c",
           "pkg": "package-c",
           "pkgFile": Object {
+            "deps": Object {
+              "package-b": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.0.1-branch-name.12345",
+                },
+              ],
+            },
             "file": Object {
               "content": "[package]
 name = \\"package-c\\"
@@ -229,6 +246,14 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-a",
         "pkg": "package-a",
         "pkgFile": Object {
+          "deps": Object {
+            "package-b": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.0.1-branch-name.12345",
+              },
+            ],
+          },
           "file": Object {
             "content": "{
   \\"name\\": \\"package-a\\",
@@ -277,6 +302,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-b",
         "pkg": "package-b",
         "pkgFile": Object {
+          "deps": Object {},
           "file": Object {
             "content": "{
   \\"name\\": \\"package-b\\",
@@ -323,6 +349,14 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-c",
         "pkg": "package-c",
         "pkgFile": Object {
+          "deps": Object {
+            "package-b": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.0.1-branch-name.12345",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"package-c\\"
@@ -433,6 +467,14 @@ Object {
           "path": "./package-a",
           "pkg": "package-a",
           "pkgFile": Object {
+            "deps": Object {
+              "package-b": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.0.1-branch-name.12345",
+                },
+              ],
+            },
             "file": Object {
               "content": "{
   \\"name\\": \\"package-a\\",
@@ -487,6 +529,7 @@ Object {
           "path": "./package-b",
           "pkg": "package-b",
           "pkgFile": Object {
+            "deps": Object {},
             "file": Object {
               "content": "{
   \\"name\\": \\"package-b\\",
@@ -539,6 +582,14 @@ Object {
           "path": "./package-c",
           "pkg": "package-c",
           "pkgFile": Object {
+            "deps": Object {
+              "package-b": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.0.1-branch-name.12345",
+                },
+              ],
+            },
             "file": Object {
               "content": "[package]
 name = \\"package-c\\"
@@ -596,6 +647,14 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-a",
         "pkg": "package-a",
         "pkgFile": Object {
+          "deps": Object {
+            "package-b": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.0.1-branch-name.12345",
+              },
+            ],
+          },
           "file": Object {
             "content": "{
   \\"name\\": \\"package-a\\",
@@ -644,6 +703,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-b",
         "pkg": "package-b",
         "pkgFile": Object {
+          "deps": Object {},
           "file": Object {
             "content": "{
   \\"name\\": \\"package-b\\",
@@ -690,6 +750,14 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-c",
         "pkg": "package-c",
         "pkgFile": Object {
+          "deps": Object {
+            "package-b": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.0.1-branch-name.12345",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"package-c\\"
