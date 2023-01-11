@@ -120,6 +120,7 @@ export function* version({
     //@ts-ignore
     commands,
     config,
+    allPackages,
     cwd,
     bump: !dryRun,
     prereleaseIdentifier,
