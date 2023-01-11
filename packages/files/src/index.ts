@@ -125,8 +125,17 @@ const keyDeps = (parsed: any): DepsKeyed => {
         Object.entries(parsed[depType]).forEach(
           ([dep, version]: [string, any]) => {
             if (!deps?.[dep]) deps[dep] = [];
-            if (typeof version === "string")
-              deps[dep].push({ type: depType, version });
+            if (typeof version === "string") {
+              deps[dep].push({
+                type: depType,
+                version,
+              });
+            } else if (typeof version === "object" && version.version) {
+              deps[dep].push({
+                type: depType,
+                version: version.version,
+              });
+            }
           }
         );
       }
