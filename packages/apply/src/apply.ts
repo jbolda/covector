@@ -1,6 +1,5 @@
 import { all, Operation } from "effection";
 import {
-  readPkgFile,
   writePkgFile,
   getPackageFileVersion,
   setPackageFileVersion,
@@ -10,7 +9,6 @@ import semver from "semver";
 
 import type {
   PackageFile,
-  ConfigFile,
   CommonBumps,
   Releases,
   PackageCommand,
@@ -171,7 +169,9 @@ const bumpAll = ({
     }
   }
 
-  return Object.keys(packageFiles).map((pkg) => packageFiles[pkg]);
+  return Object.keys(packageFiles)
+    .filter((pkg) => changes?.[pkg])
+    .map((pkg) => packageFiles[pkg]);
 };
 
 const bumpMain = ({
