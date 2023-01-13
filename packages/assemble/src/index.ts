@@ -22,7 +22,7 @@ import type {
   PipePublishTemplate,
 } from "@covector/types";
 
-const parseChange = function* ({
+export const parseChange = function* ({
   cwd,
   file,
 }: {
