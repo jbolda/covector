@@ -177,31 +177,32 @@ const applyChanges = ({
       } else {
         addition = assembledChanges.releases[
           change.changes.name
-        ].changes.reduce(
-          (finalString, release) =>
-            !release.meta || (!!release.meta && !release.meta.commits)
-              ? `${finalString}\n- ${release.summary}`
-              : `${finalString}\n- ${release.summary}\n${
-                  !release.meta.dependencies
-                    ? ""
-                    : `  - ${release.meta.dependencies}\n`
-                }${release.meta
-                  .commits!.map(
-                    (commit) =>
-                      `  - [${commit.hashShort}](${gitSiteUrl}commit/${
-                        commit.hashLong
-                      }) ${commit.commitSubject.replace(
-                        /(#[0-9]+)/g,
-                        (match) =>
-                          `[${match}](${gitSiteUrl}pull/${match.substr(
-                            1,
-                            999999
-                          )})`
-                      )} on ${commit.date}`
-                  )
-                  .join("\n")}`,
-          `## [${change.changes.version}]`
-        );
+        ].changes.reduce((finalString, release) => {
+          if (!release.meta || (!!release.meta && !release.meta.commits)) {
+            return `${finalString}\n- ${release.summary}`;
+          } else {
+            if (release.meta.commits) {
+              return `${finalString}\n- ${release.summary}\n${
+                !release.meta.dependencies
+                  ? ""
+                  : `  - ${release.meta.dependencies}\n`
+              }${release.meta.commits
+                .map(
+                  (commit) =>
+                    `  - [${commit.hashShort}](${gitSiteUrl}commit/${
+                      commit.hashLong
+                    }) ${commit.commitSubject.replace(
+                      /(#[0-9]+)/g,
+                      (match) =>
+                        `[${match}](${gitSiteUrl}pull/${match.slice(1)})`
+                    )} on ${commit.date}`
+                )
+                .join("\n")}`;
+            } else {
+              return finalString;
+            }
+          }
+        }, `## [${change.changes.version}]`);
       }
       const parsedAddition = processor.parse(addition);
       const changelogFirstElement = changelog.children.shift();
