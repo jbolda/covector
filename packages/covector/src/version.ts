@@ -6,6 +6,7 @@ import {
   loadChangeFiles,
   changeFilesRemove,
   writePreFile,
+  readAllPkgFiles,
 } from "@covector/files";
 import { assemble, mergeChangesToConfig } from "@covector/assemble";
 import { fillChangelogs } from "@covector/changelog";
@@ -16,7 +17,9 @@ import type {
   CovectorVersion,
   Covector,
   PkgVersion,
+  PackageFile,
 } from "@covector/types";
+import { Operation } from "effection";
 
 export function* version({
   command,
@@ -30,7 +33,7 @@ export function* version({
   cwd?: string;
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
-}): Generator<any, Covector, any> {
+}): Operation<Covector> {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? null : pre.tag;
@@ -49,11 +52,16 @@ export function* version({
     config,
     preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
+  const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+    config,
+    cwd,
+  });
 
   yield raceTime({ t: config.timeout });
   const changes = changesConsideringParents({
     assembledChanges,
     config,
+    allPackages,
     prereleaseIdentifier,
   });
 
@@ -112,6 +120,7 @@ export function* version({
     //@ts-ignore
     commands,
     config,
+    allPackages,
     cwd,
     bump: !dryRun,
     prereleaseIdentifier,

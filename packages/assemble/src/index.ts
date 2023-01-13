@@ -531,6 +531,7 @@ export const mergeIntoConfig = function* ({
       versionMajor: extraPublishParams.pkgFile.versionMajor,
       versionMinor: extraPublishParams.pkgFile.versionMinor,
       versionPatch: extraPublishParams.pkgFile.versionPatch,
+      deps: extraPublishParams.pkgFile.deps,
       pkg: extraPublishParams.pkgFile.pkg,
     };
 

@@ -2,7 +2,7 @@ import { default as fsDefault, PathLike, statSync } from "fs";
 // this is compatible with node@12+
 const fs = fsDefault.promises;
 
-import { all } from "effection";
+import { all, Operation } from "effection";
 import globby from "globby";
 import path from "path";
 import TOML from "@tauri-apps/toml";
@@ -15,6 +15,7 @@ import type {
   PackageFile,
   PreFile,
   ConfigFile,
+  DepsKeyed,
 } from "@covector/types";
 
 export function* loadFile(
@@ -60,6 +61,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
         versionMinor: semver.minor(version),
         versionPatch: semver.patch(version),
         versionPrerelease: semver.prerelease(version),
+        deps: keyDeps(parsedTOML),
         // @ts-ignore
         pkg: parsedTOML,
       };
@@ -71,6 +73,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
         versionMinor: semver.minor(parsedJSON.version),
         versionPatch: semver.patch(parsedJSON.version),
         versionPrerelease: semver.prerelease(parsedJSON.version),
+        deps: keyDeps(parsedJSON),
         pkg: parsedJSON,
       };
     case ".yml":
@@ -93,6 +96,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
         versionMajor: semver.major(verifiedYAML.version),
         versionMinor: semver.minor(verifiedYAML.version),
         versionPatch: semver.patch(verifiedYAML.version),
+        deps: keyDeps(parsedYAML),
         pkg: verifiedYAML,
       };
     default:
@@ -106,9 +110,38 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
         versionMajor: semver.major(stringVersion),
         versionMinor: semver.minor(stringVersion),
         versionPatch: semver.patch(stringVersion),
+        deps: {},
         pkg: { name: "", version: stringVersion },
       };
   }
+};
+
+const keyDeps = (parsed: any): DepsKeyed => {
+  let deps: DepsKeyed = {};
+
+  ["dependencies", "devDependencies", "dev-dependencies"].forEach(
+    (depType: any) => {
+      if (parsed[depType] && typeof parsed[depType] === "object") {
+        Object.entries(parsed[depType]).forEach(
+          ([dep, version]: [string, any]) => {
+            if (!deps?.[dep]) deps[dep] = [];
+            if (typeof version === "string") {
+              deps[dep].push({
+                type: depType,
+                version,
+              });
+            } else if (typeof version === "object" && version.version) {
+              deps[dep].push({
+                type: depType,
+                version: version.version,
+              });
+            }
+          }
+        );
+      }
+    }
+  );
+  return deps;
 };
 
 const stringifyPkg = ({
@@ -132,6 +165,30 @@ const stringifyPkg = ({
   }
 };
 
+export function* readAllPkgFiles({
+  config,
+  cwd,
+}: {
+  config: ConfigFile;
+  cwd?: string;
+}): Operation<Record<string, PackageFile>> {
+  const pkgArray = Object.entries(config.packages);
+  const readPkgs = pkgArray.map(([name, pkg]) =>
+    readPkgFile({ cwd, pkgConfig: pkg, nickname: name })
+  );
+  const pkgFilesArray: PackageFile[] = yield all(readPkgs);
+
+  return pkgFilesArray.reduce(
+    (pkgs: Record<string, PackageFile>, pkg: PackageFile) => {
+      if (pkg?.name) {
+        pkgs[pkg.name] = pkg;
+      }
+      return pkgs;
+    },
+    {}
+  );
+}
+
 export function* readPkgFile({
   cwd = process.cwd(),
   file,
@@ -142,7 +199,7 @@ export function* readPkgFile({
   file?: string; // TODO, deprecate this
   pkgConfig?: { manager?: string; path?: string; packageFileName?: string };
   nickname: string;
-}): Generator<any, PackageFile, any> {
+}): Operation<PackageFile> {
   if (file) {
     const inputFile = yield loadFile(file, cwd);
     const parsed = parsePkg(inputFile);

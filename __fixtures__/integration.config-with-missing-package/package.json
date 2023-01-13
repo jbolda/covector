@@ -1,0 +1,9 @@
+{
+  "name": "workspace",
+  "description": "This is React. Trust.",
+  "version": "0.0.0",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ]
+}

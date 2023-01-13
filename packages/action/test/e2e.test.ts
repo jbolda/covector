@@ -15,7 +15,7 @@ jest.mock("@actions/github", () => ({
 describe("full e2e test", () => {
   let restoreConsole: Function;
   beforeEach(() => {
-    restoreConsole = mockConsole(["log", "dir", "info", "error"]);
+    restoreConsole = mockConsole(["log", "info", "error"]);
     jest.clearAllMocks();
   });
   afterEach(() => {
@@ -28,7 +28,7 @@ describe("full e2e test", () => {
 
       const input: { [k: string]: string } = {
         command: "status",
-        cwd: cwd,
+        cwd,
         createRelease: "false",
         draftRelease: "false",
         token: "randomsequenceofcharactersforsecurity",
@@ -49,7 +49,7 @@ describe("full e2e test", () => {
 
       const input: { [k: string]: string } = {
         command: "version",
-        cwd: cwd,
+        cwd,
         createRelease: "false",
         draftRelease: "false",
         token: "randomsequenceofcharactersforsecurity",
@@ -95,7 +95,7 @@ describe("full e2e test", () => {
 
       const input: { [k: string]: string } = {
         command: "publish",
-        cwd: cwd,
+        cwd,
         createRelease: "true",
         draftRelease: "false",
         token: "randomsequenceofcharactersforsecurity",
@@ -128,7 +128,7 @@ describe("full e2e test", () => {
 
       const input: { [k: string]: string } = {
         command: "publish",
-        cwd: cwd,
+        cwd,
         createRelease: "false",
         draftRelease: "false",
         token: "randomsequenceofcharactersforsecurity",
@@ -160,7 +160,7 @@ describe("full e2e test", () => {
 
       const input: { [k: string]: string } = {
         command: "publish",
-        cwd: cwd,
+        cwd,
         createRelease: "true",
         draftRelease: "false",
         token: "randomsequenceofcharactersforsecurity",
@@ -250,7 +250,7 @@ describe("full e2e test", () => {
 
       const input: { [k: string]: string } = {
         command: "publish",
-        cwd: cwd,
+        cwd,
         createRelease: "true",
         draftRelease: "false",
         token: "randomsequenceofcharactersforsecurity",
@@ -343,7 +343,7 @@ describe("full e2e test", () => {
 
       const input: { [k: string]: string } = {
         command: "publish",
-        cwd: cwd,
+        cwd,
         createRelease: "true",
         draftRelease: "false",
         token: "randomsequenceofcharactersforsecurity",
@@ -421,7 +421,7 @@ describe("full e2e test", () => {
 
       const input: { [k: string]: string } = {
         command: "publish",
-        cwd: cwd,
+        cwd,
         createRelease: "true",
         draftRelease: "false",
         token: "randomsequenceofcharactersforsecurity",

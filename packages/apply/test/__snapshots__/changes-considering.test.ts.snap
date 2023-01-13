@@ -8,10 +8,10 @@ Object {
       "all": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [
-          "yarn-workspace-base-pkg-a",
-          "yarn-workspace-base-pkg-b",
-        ],
+        "parents": Object {
+          "yarn-workspace-base-pkg-a": Object {},
+          "yarn-workspace-base-pkg-b": Object {},
+        },
         "path": undefined,
         "pkg": "all",
         "type": "minor",
@@ -19,7 +19,7 @@ Object {
       "yarn-workspace-base-pkg-a": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [],
+        "parents": Object {},
         "path": undefined,
         "pkg": "all",
         "type": "patch",
@@ -27,9 +27,9 @@ Object {
       "yarn-workspace-base-pkg-b": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [
-          "yarn-workspace-base-pkg-a",
-        ],
+        "parents": Object {
+          "yarn-workspace-base-pkg-a": Object {},
+        },
         "path": undefined,
         "pkg": "all",
         "type": "patch",
@@ -49,10 +49,10 @@ Object {
       "all": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [
-          "yarn-workspace-base-pkg-a",
-          "yarn-workspace-base-pkg-b",
-        ],
+        "parents": Object {
+          "yarn-workspace-base-pkg-a": Object {},
+          "yarn-workspace-base-pkg-b": Object {},
+        },
         "path": undefined,
         "pkg": "all",
         "type": "minor",
@@ -60,7 +60,7 @@ Object {
       "yarn-workspace-base-pkg-a": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [],
+        "parents": Object {},
         "path": undefined,
         "pkg": "all",
         "type": "patch",
@@ -68,9 +68,9 @@ Object {
       "yarn-workspace-base-pkg-b": Object {
         "dependencies": undefined,
         "manager": "javascript",
-        "parents": Array [
-          "yarn-workspace-base-pkg-a",
-        ],
+        "parents": Object {
+          "yarn-workspace-base-pkg-a": Object {},
+        },
         "path": undefined,
         "pkg": "all",
         "type": "patch",
@@ -100,9 +100,22 @@ Object {
             "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
           },
         ],
-        "parents": Array [
-          "pkg-overall",
-        ],
+        "parents": Object {
+          "pkg-overall": Object {
+            "pkg-a": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+            "pkg-b": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+        },
         "type": "patch",
       },
       "pkg-b": Object {
@@ -115,9 +128,22 @@ Object {
             "summary": "The pkg-b doesn't have a dep bump, but can dep bump pkg-a and pkg-overall with a patch.",
           },
         ],
-        "parents": Array [
-          "pkg-overall",
-        ],
+        "parents": Object {
+          "pkg-overall": Object {
+            "pkg-a": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+            "pkg-b": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+        },
         "type": "minor",
       },
       "pkg-c": Object {
@@ -131,9 +157,16 @@ Object {
             "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
           },
         ],
-        "parents": Array [
-          "pkg-a",
-        ],
+        "parents": Object {
+          "pkg-a": Object {
+            "pkg-c": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+        },
         "type": "patch",
       },
       "pkg-d": Object {
@@ -147,10 +180,24 @@ Object {
             "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
           },
         ],
-        "parents": Array [
-          "pkg-c",
-          "pkg-four",
-        ],
+        "parents": Object {
+          "pkg-c": Object {
+            "pkg-d": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+          "pkg-four": Object {
+            "pkg-d": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+        },
         "type": "major",
       },
       "pkg-four": Object {
@@ -166,16 +213,26 @@ Object {
             "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
           },
         ],
-        "parents": Array [
-          "pkg-three",
-        ],
+        "parents": Object {
+          "pkg-three": Object {
+            "pkg-four": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+        },
         "type": "patch",
       },
       "pkg-one": Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-two.",
+              "dependencies": "Bumped due to a bump in pkg-d.
+    - Bumped due to a bump in pkg-four.
+    - Bumped due to a bump in pkg-three.
+    - Bumped due to a bump in pkg-two.",
             },
             "releases": Object {
               "pkg-c": "patch",
@@ -184,7 +241,7 @@ Object {
             "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
           },
         ],
-        "parents": Array [],
+        "parents": Object {},
         "type": "patch",
       },
       "pkg-overall": Object {
@@ -199,14 +256,15 @@ Object {
             "summary": "The pkg-b doesn't have a dep bump, but can dep bump pkg-a and pkg-overall with a patch.",
           },
         ],
-        "parents": Array [],
+        "parents": Object {},
         "type": "patch",
       },
       "pkg-three": Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-four.",
+              "dependencies": "Bumped due to a bump in pkg-d.
+    - Bumped due to a bump in pkg-four.",
             },
             "releases": Object {
               "pkg-c": "patch",
@@ -215,16 +273,25 @@ Object {
             "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
           },
         ],
-        "parents": Array [
-          "pkg-two",
-        ],
+        "parents": Object {
+          "pkg-two": Object {
+            "pkg-three": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+        },
         "type": "patch",
       },
       "pkg-two": Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-three.",
+              "dependencies": "Bumped due to a bump in pkg-d.
+    - Bumped due to a bump in pkg-four.
+    - Bumped due to a bump in pkg-three.",
             },
             "releases": Object {
               "pkg-c": "patch",
@@ -233,9 +300,16 @@ Object {
             "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
           },
         ],
-        "parents": Array [
-          "pkg-one",
-        ],
+        "parents": Object {
+          "pkg-one": Object {
+            "pkg-two": Array [
+              Object {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+        },
         "type": "patch",
       },
     },

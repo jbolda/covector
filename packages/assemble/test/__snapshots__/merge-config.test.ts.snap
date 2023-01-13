@@ -15,6 +15,7 @@ Object {
       "path": "./packages/assemble1",
       "pkg": "assemble1",
       "pkgFile": Object {
+        "deps": Object {},
         "file": Object {
           "content": "{
   \\"name\\": \\"assemble1\\",
@@ -53,6 +54,7 @@ Object {
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble1",
       "pkgFile": Object {
+        "deps": Object {},
         "file": Object {
           "content": "{
   \\"name\\": \\"@namedspaced/assemble2\\",
@@ -99,6 +101,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "@namespaced/assemble1",
           "pkg": Object {
             "name": "@namedspaced/assemble2",
@@ -129,6 +132,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "assemble1",
           "pkg": Object {
             "name": "assemble1",
@@ -303,6 +307,7 @@ Object {
       "path": "./packages/assemble1",
       "pkg": "assemble1",
       "pkgFile": Object {
+        "deps": Object {},
         "file": Object {
           "content": "{
   \\"name\\": \\"assemble1\\",
@@ -341,6 +346,7 @@ Object {
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble1",
       "pkgFile": Object {
+        "deps": Object {},
         "file": Object {
           "content": "{
   \\"name\\": \\"@namedspaced/assemble2\\",
@@ -379,6 +385,7 @@ Object {
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble2",
       "pkgFile": Object {
+        "deps": Object {},
         "file": Object {
           "content": "{
   \\"name\\": \\"@namedspaced/assemble2\\",
@@ -425,6 +432,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "@namespaced/assemble1",
           "pkg": Object {
             "name": "@namedspaced/assemble2",
@@ -456,6 +464,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "@namespaced/assemble2",
           "pkg": Object {
             "name": "@namedspaced/assemble2",
@@ -486,6 +495,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "deps": Object {},
           "name": "assemble1",
           "pkg": Object {
             "name": "assemble1",

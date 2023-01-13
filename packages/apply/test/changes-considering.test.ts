@@ -1,6 +1,26 @@
 import { changesConsideringParents } from "../src";
 import { it } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
+import { ConfigFile } from "@covector/types";
+
+const allPackagesWithoutRead = ({ config }: { config: ConfigFile }) =>
+  Object.entries(config.packages)
+    .map(([pkgName, configInfo]) => ({
+      name: pkgName,
+      version: "none",
+      // @ts-expect-error
+      deps: configInfo.dependencies.reduce((deps, dep) => {
+        //@ts-ignore
+        deps[dep] = [{ type: "dependencies", version: "none" }];
+        return deps;
+      }, {}),
+    }))
+    //@ts-ignore
+    .reduce((pkgs, pkg: Record<string, string>) => {
+      //@ts-ignore
+      pkgs[pkg.name] = pkg;
+      return pkgs;
+    }, {});
 
 describe("list changes considering parents", () => {
   let restoreConsole: RestoreConsole;
@@ -139,6 +159,7 @@ describe("list changes considering parents", () => {
     };
 
     const config = {
+      changeFolder: ".changes",
       packages: {
         "pkg-overall": {
           path: "./packages/pkg-overall/",
@@ -188,8 +209,16 @@ describe("list changes considering parents", () => {
       },
     };
 
-    //@ts-ignore
-    const changes = changesConsideringParents({ assembledChanges, config });
+    const allPackages = allPackagesWithoutRead({ config });
+
+    const changes = changesConsideringParents({
+      //@ts-ignore
+      assembledChanges,
+      //@ts-ignore
+      config,
+      //@ts-ignore
+      allPackages,
+    });
     // console.error(changes)
 
     // these are directly defined in the change files

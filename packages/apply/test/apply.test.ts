@@ -1,13 +1,31 @@
 import { apply } from "../src";
-import { loadFile } from "@covector/files";
+import { loadFile, readAllPkgFiles } from "@covector/files";
 import { it, captureError } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
+import { ConfigFile } from "@covector/types";
 const f = fixtures(__dirname);
 
 const configDefaults = {
   changeFolder: ".changes",
 };
+
+const allPackagesWithoutRead = ({ config }: { config: ConfigFile }) =>
+  Object.entries(config.packages)
+    .map(([pkgName, configInfo]) => ({
+      name: pkgName,
+      version: "none",
+      deps: !configInfo.dependencies
+        ? undefined
+        : configInfo.dependencies.reduce((deps: Record<string, any>, dep) => {
+            deps[dep] = [{ type: "dependencies", version: "none" }];
+            return deps;
+          }, {}),
+    }))
+    .reduce((pkgs: Record<string, any>, pkg: Record<string, any>) => {
+      pkgs[pkg.name] = pkg;
+      return pkgs;
+    }, {});
 
 describe("package file apply bump (snapshot)", () => {
   let restoreConsole: RestoreConsole;
@@ -28,11 +46,12 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "js-single-json-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         "js-single-json-fixture": {
           path: "./",
@@ -41,8 +60,10 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: jsonFolder });
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: jsonFolder });
     const modifiedFile = yield loadFile("package.json", jsonFolder);
     expect(modifiedFile.content).toBe(
       "{\n" +
@@ -55,9 +76,9 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -72,11 +93,12 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "rust-single-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         "rust-single-fixture": {
           path: "./",
@@ -85,23 +107,25 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    const allPackages = yield readAllPkgFiles({ config, cwd: rustFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: rustFolder });
     const modifiedFile = yield loadFile("Cargo.toml", rustFolder);
     expect(modifiedFile.content).toBe(
       '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n'
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
 
   it("bumps single yaml toml", function* () {
-    const rustFolder = f.copy("pkg.dart-flutter-single");
+    const flutterFolder = f.copy("pkg.dart-flutter-single");
 
     const commands = [
       {
@@ -110,11 +134,12 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "test_app",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         test_app: {
           path: "./",
@@ -123,9 +148,11 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
-    const modifiedFile = yield loadFile("pubspec.yaml", rustFolder);
+    const allPackages = yield readAllPkgFiles({ config, cwd: flutterFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: flutterFolder });
+    const modifiedFile = yield loadFile("pubspec.yaml", flutterFolder);
     expect(modifiedFile.content).toBe(
       "name: test_app\ndescription: a great one\nhomepage: https://github.com/\nversion: 0.4.0\n" +
         "environment:\n  sdk: '>=2.10.0 <3.0.0'\n" +
@@ -135,9 +162,9 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -152,12 +179,13 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "js-single-json-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
         errorOnVersionRange: ">= 0.6.0",
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         "js-single-json-fixture": {
           path: "./",
@@ -166,17 +194,18 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
     const applied = yield captureError(
-      //@ts-ignore
-      apply({ commands, config, cwd: jsonFolder })
+      //@ts-expect-error
+      apply({ commands, config, allPackages, cwd: jsonFolder })
     );
     expect(applied.message).toBe(
       "js-single-json-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
     );
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -191,12 +220,13 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "rust-single-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
         errorOnVersionRange: ">= 0.6.0",
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         "rust-single-fixture": {
           path: "./",
@@ -205,17 +235,19 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
+    const allPackages = yield readAllPkgFiles({ config, cwd: rustFolder });
+
     const applied = yield captureError(
-      //@ts-ignore
-      apply({ commands, config, cwd: rustFolder })
+      //@ts-expect-error
+      apply({ commands, config, allPackages, cwd: rustFolder })
     );
     expect(applied.message).toBe(
       "rust-single-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
     );
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -230,7 +262,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -238,7 +270,7 @@ describe("package file apply bump (snapshot)", () => {
         path: undefined,
         pkg: "yarn-workspace-base-pkg-b",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a"],
+        parents: { "yarn-workspace-base-pkg-a": "null" },
       },
       {
         dependencies: undefined,
@@ -246,11 +278,15 @@ describe("package file apply bump (snapshot)", () => {
         path: undefined,
         pkg: "all",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
+        parents: {
+          "yarn-workspace-base-pkg-a": "null",
+          "yarn-workspace-base-pkg-b": "null",
+        },
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         "yarn-workspace-base-pkg-a": {
           path: "./packages/pkg-a/",
@@ -266,8 +302,11 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: jsonFolder });
+    //@ts-expect-error
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: jsonFolder });
     const modifiedPkgAFile = yield loadFile(
       "packages/pkg-a/package.json",
       jsonFolder
@@ -294,9 +333,9 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -311,7 +350,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -319,11 +358,12 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         rust_pkg_a_fixture: {
           path: "./pkg-a/",
@@ -336,8 +376,10 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    const allPackages = yield readAllPkgFiles({ config, cwd: rustFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: rustFolder });
 
     const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
     expect(modifiedAPKGFile.content).toBe(
@@ -355,9 +397,9 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -372,7 +414,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -380,11 +422,12 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         rust_pkg_a_fixture: {
           path: "./pkg-a/",
@@ -397,8 +440,10 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    const allPackages = yield readAllPkgFiles({ config, cwd: rustFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: rustFolder });
 
     const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
     expect(modifiedAPKGFile.content).toBe(
@@ -410,16 +455,15 @@ describe("package file apply bump (snapshot)", () => {
         'rust_pkg_b_fixture = { version = "0.9.0", path = "../rust_pkg_b_fixture" }\n'
     );
 
-    //@ts-ignore
     const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
     expect(modifiedBPKGFile.content).toBe(
       "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -434,7 +478,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -442,11 +486,12 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         rust_pkg_a_fixture: {
           path: "./pkg-a/",
@@ -459,8 +504,10 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    const allPackages = yield readAllPkgFiles({ config, cwd: rustFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: rustFolder });
 
     const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
     expect(modifiedAPKGFile.content).toBe(
@@ -472,21 +519,20 @@ describe("package file apply bump (snapshot)", () => {
         'rust_pkg_b_fixture = "0.9"\n'
     );
 
-    //@ts-ignore
     const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
     expect(modifiedBPKGFile.content).toBe(
       "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
 
-  it("bumps multi rust toml as patch with object dep missing patch", function* () {
+  it("bump multi rust toml as patch with object dep missing patch", function* () {
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -496,7 +542,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "patch",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -504,25 +550,30 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "patch",
-        parents: [],
+        parents: {},
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         rust_pkg_a_fixture: {
+          // version: 0.5.0 with 0.8 dep on pkg-b
           path: "./pkg-a/",
           manager: "rust",
         },
         rust_pkg_b_fixture: {
+          // version: 0.8.8
           path: "./pkg-b/",
           manager: "rust",
         },
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    const allPackages = yield readAllPkgFiles({ config, cwd: rustFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: rustFolder });
 
     const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
     expect(modifiedAPKGFile.content).toBe(
@@ -540,9 +591,9 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -557,7 +608,7 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-a/",
         pkg: "rust_pkg_a_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -565,11 +616,12 @@ describe("package file apply bump (snapshot)", () => {
         path: "./pkg-b/",
         pkg: "rust_pkg_b_fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         rust_pkg_a_fixture: {
           path: "./pkg-a/",
@@ -582,8 +634,10 @@ describe("package file apply bump (snapshot)", () => {
       },
     };
 
-    //@ts-ignore
-    yield apply({ commands, config, cwd: rustFolder });
+    const allPackages = yield readAllPkgFiles({ config, cwd: rustFolder });
+
+    //@ts-expect-error
+    yield apply({ commands, config, allPackages, cwd: rustFolder });
 
     const modifiedAPKGFile = yield loadFile("pkg-a/Cargo.toml", rustFolder);
     expect(modifiedAPKGFile.content).toBe(
@@ -601,9 +655,9 @@ describe("package file apply bump (snapshot)", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -628,7 +682,7 @@ describe("package file applies preview bump", () => {
         path: "./",
         pkg: "js-single-json-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -642,12 +696,14 @@ describe("package file applies preview bump", () => {
       },
     };
 
-    //@ts-ignore
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
     yield apply({
-      //@ts-ignore
+      //@ts-expect-error
       commands,
       config,
       cwd: jsonFolder,
+      allPackages,
       previewVersion: "branch-name.12345",
     });
     const modifiedFile = yield loadFile("package.json", jsonFolder);
@@ -662,9 +718,9 @@ describe("package file applies preview bump", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -679,7 +735,7 @@ describe("package file applies preview bump", () => {
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -687,7 +743,7 @@ describe("package file applies preview bump", () => {
         path: undefined,
         pkg: "yarn-workspace-base-pkg-b",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a"],
+        parents: { "yarn-workspace-base-pkg-a": "null" },
       },
       {
         dependencies: undefined,
@@ -695,11 +751,15 @@ describe("package file applies preview bump", () => {
         path: undefined,
         pkg: "all",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
+        parents: {
+          "yarn-workspace-base-pkg-a": "null",
+          "yarn-workspace-base-pkg-b": "null",
+        },
       },
     ];
 
     const config = {
+      ...configDefaults,
       packages: {
         "yarn-workspace-base-pkg-a": {
           path: "./packages/pkg-a/",
@@ -715,12 +775,14 @@ describe("package file applies preview bump", () => {
       },
     };
 
-    //@ts-ignore
+    //@ts-expect-error
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
     yield apply({
-      //@ts-ignore
+      //@ts-expect-error
       commands,
-      //@ts-ignore
       config,
+      allPackages,
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
@@ -750,9 +812,9 @@ describe("package file applies preview bump", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -777,7 +839,7 @@ describe("package file applies preview bump to pre-release", () => {
         path: "./",
         pkg: "js-single-prerelease-json-fixture",
         type: "minor",
-        parents: [],
+        parents: {},
       },
     ];
 
@@ -791,11 +853,13 @@ describe("package file applies preview bump to pre-release", () => {
       },
     };
 
-    //@ts-ignore
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
     yield apply({
-      //@ts-ignore
+      //@ts-expect-error
       commands,
       config,
+      allPackages,
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
@@ -810,9 +874,9 @@ describe("package file applies preview bump to pre-release", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });
@@ -827,7 +891,7 @@ describe("package file applies preview bump to pre-release", () => {
         path: "./",
         pkg: "yarn-workspace-base-pkg-a",
         type: "minor",
-        parents: [],
+        parents: {},
       },
       {
         dependencies: undefined,
@@ -835,7 +899,7 @@ describe("package file applies preview bump to pre-release", () => {
         path: undefined,
         pkg: "yarn-workspace-base-pkg-b",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a"],
+        parents: { "yarn-workspace-base-pkg-a": "null" },
       },
       {
         dependencies: undefined,
@@ -843,7 +907,10 @@ describe("package file applies preview bump to pre-release", () => {
         path: undefined,
         pkg: "all",
         type: "minor",
-        parents: ["yarn-workspace-base-pkg-a", "yarn-workspace-base-pkg-b"],
+        parents: {
+          "yarn-workspace-base-pkg-a": "null",
+          "yarn-workspace-base-pkg-b": "null",
+        },
       },
     ];
 
@@ -863,12 +930,14 @@ describe("package file applies preview bump to pre-release", () => {
       },
     };
 
-    //@ts-ignore
+    //@ts-expect-error
+    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
     yield apply({
-      //@ts-ignore
+      //@ts-expect-error
       commands,
-      //@ts-ignore
       config,
+      allPackages,
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
@@ -898,9 +967,9 @@ describe("package file applies preview bump to pre-release", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
     }).toMatchSnapshot();
   });

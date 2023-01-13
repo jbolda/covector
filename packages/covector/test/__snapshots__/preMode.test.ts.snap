@@ -43,9 +43,376 @@ Summary about the changes in tauri
               "summary": "Summary about the changes in tauri",
             },
           ],
-          "parents": Array [
-            "tauri.js",
-          ],
+          "parents": Object {
+            "tauri.js": Object {
+              "@babel/core": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.2",
+                },
+              ],
+              "@babel/preset-env": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.2",
+                },
+              ],
+              "@babel/preset-typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.1",
+                },
+              ],
+              "@tauri-apps/tauri-inliner": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.14.1",
+                },
+              ],
+              "@tauri-apps/toml": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.2.4",
+                },
+              ],
+              "@types/cross-spawn": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "6.0.2",
+                },
+              ],
+              "@types/fs-extra": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "9.0.1",
+                },
+              ],
+              "@types/http-proxy": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.17.4",
+                },
+              ],
+              "@types/imagemin": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.0.0",
+                },
+              ],
+              "@types/imagemin-optipng": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "5.2.0",
+                },
+              ],
+              "@types/jsdom": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "16.2.3",
+                },
+              ],
+              "@types/lodash": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.14.155",
+                },
+              ],
+              "@types/ms": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.7.31",
+                },
+              ],
+              "@types/sharp": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.25.0",
+                },
+              ],
+              "@types/webpack-merge": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.1.5",
+                },
+              ],
+              "@typescript-eslint/eslint-plugin": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.1.0",
+                },
+              ],
+              "@typescript-eslint/parser": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.1.0",
+                },
+              ],
+              "babel-jest": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "26.0.1",
+                },
+              ],
+              "chalk": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.0.0",
+                },
+              ],
+              "chokidar": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.4.0",
+                },
+              ],
+              "cross-spawn": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.3",
+                },
+              ],
+              "dotenv": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "8.2.0",
+                },
+              ],
+              "eslint": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.1.0",
+                },
+              ],
+              "eslint-config-standard-with-typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "18.0.2",
+                },
+              ],
+              "eslint-plugin-import": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "2.20.2",
+                },
+              ],
+              "eslint-plugin-lodash-template": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.18.0",
+                },
+              ],
+              "eslint-plugin-node": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "11.1.0",
+                },
+              ],
+              "eslint-plugin-promise": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.2.1",
+                },
+              ],
+              "eslint-plugin-security": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.4.0",
+                },
+              ],
+              "eslint-plugin-standard": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.0.1",
+                },
+              ],
+              "fast-glob": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.2.2",
+                },
+              ],
+              "fs-extra": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "9.0.1",
+                },
+              ],
+              "http-proxy": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.18.1",
+                },
+              ],
+              "husky": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.2.5",
+                },
+              ],
+              "imagemin": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.1",
+                },
+              ],
+              "imagemin-optipng": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "8.0.0",
+                },
+              ],
+              "imagemin-pngquant": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "9.0.0",
+                },
+              ],
+              "imagemin-zopfli": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.0",
+                },
+              ],
+              "is-png": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.0.0",
+                },
+              ],
+              "is-running": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "2.1.0",
+                },
+              ],
+              "isbinaryfile": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.0.6",
+                },
+              ],
+              "jest": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "26.0.1",
+                },
+              ],
+              "jest-mock-process": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.4.0",
+                },
+              ],
+              "jsdom": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "16.2.2",
+                },
+              ],
+              "lint-staged": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "10.2.8",
+                },
+              ],
+              "lockfile-lint": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.3.6",
+                },
+              ],
+              "lodash": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.17.19",
+                },
+              ],
+              "minimist": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.2.5",
+                },
+              ],
+              "ms": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.1.2",
+                },
+              ],
+              "png2icons": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.0.1",
+                },
+              ],
+              "promise": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "8.1.0",
+                },
+              ],
+              "raw-loader": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.0.1",
+                },
+              ],
+              "read-chunk": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.2.0",
+                },
+              ],
+              "sharp": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.25.3",
+                },
+              ],
+              "ts-loader": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.0.5",
+                },
+              ],
+              "typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.9.3",
+                },
+              ],
+              "webpack": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.43.0",
+                },
+              ],
+              "webpack-cli": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.3.11",
+                },
+              ],
+              "webpack-merge": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.2.2",
+                },
+              ],
+              "webpack-node-externals": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.7.2",
+                },
+              ],
+              "webpack-shell-plugin": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5.0",
+                },
+              ],
+            },
+          },
           "type": "preminor",
         },
       },
@@ -84,7 +451,7 @@ Summary about the changes in tauri-updater
               "summary": "Summary about the changes in tauri-updater",
             },
           ],
-          "parents": Array [],
+          "parents": Object {},
           "type": "prepatch",
         },
       },
@@ -126,7 +493,7 @@ Summary about the changes in tauri
               "summary": "Summary about the changes in tauri",
             },
           ],
-          "parents": Array [],
+          "parents": Object {},
           "type": "prerelease",
         },
       },
@@ -145,9 +512,376 @@ Summary about the changes in tauri
           ],
           "errorOnVersionRange": null,
           "manager": "rust",
-          "parents": Array [
-            "tauri.js",
-          ],
+          "parents": Object {
+            "tauri.js": Object {
+              "@babel/core": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.2",
+                },
+              ],
+              "@babel/preset-env": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.2",
+                },
+              ],
+              "@babel/preset-typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.1",
+                },
+              ],
+              "@tauri-apps/tauri-inliner": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.14.1",
+                },
+              ],
+              "@tauri-apps/toml": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.2.4",
+                },
+              ],
+              "@types/cross-spawn": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "6.0.2",
+                },
+              ],
+              "@types/fs-extra": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "9.0.1",
+                },
+              ],
+              "@types/http-proxy": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.17.4",
+                },
+              ],
+              "@types/imagemin": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.0.0",
+                },
+              ],
+              "@types/imagemin-optipng": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "5.2.0",
+                },
+              ],
+              "@types/jsdom": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "16.2.3",
+                },
+              ],
+              "@types/lodash": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.14.155",
+                },
+              ],
+              "@types/ms": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.7.31",
+                },
+              ],
+              "@types/sharp": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.25.0",
+                },
+              ],
+              "@types/webpack-merge": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.1.5",
+                },
+              ],
+              "@typescript-eslint/eslint-plugin": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.1.0",
+                },
+              ],
+              "@typescript-eslint/parser": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.1.0",
+                },
+              ],
+              "babel-jest": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "26.0.1",
+                },
+              ],
+              "chalk": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.0.0",
+                },
+              ],
+              "chokidar": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.4.0",
+                },
+              ],
+              "cross-spawn": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.3",
+                },
+              ],
+              "dotenv": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "8.2.0",
+                },
+              ],
+              "eslint": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.1.0",
+                },
+              ],
+              "eslint-config-standard-with-typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "18.0.2",
+                },
+              ],
+              "eslint-plugin-import": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "2.20.2",
+                },
+              ],
+              "eslint-plugin-lodash-template": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.18.0",
+                },
+              ],
+              "eslint-plugin-node": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "11.1.0",
+                },
+              ],
+              "eslint-plugin-promise": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.2.1",
+                },
+              ],
+              "eslint-plugin-security": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.4.0",
+                },
+              ],
+              "eslint-plugin-standard": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.0.1",
+                },
+              ],
+              "fast-glob": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.2.2",
+                },
+              ],
+              "fs-extra": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "9.0.1",
+                },
+              ],
+              "http-proxy": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.18.1",
+                },
+              ],
+              "husky": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.2.5",
+                },
+              ],
+              "imagemin": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.1",
+                },
+              ],
+              "imagemin-optipng": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "8.0.0",
+                },
+              ],
+              "imagemin-pngquant": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "9.0.0",
+                },
+              ],
+              "imagemin-zopfli": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.0",
+                },
+              ],
+              "is-png": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.0.0",
+                },
+              ],
+              "is-running": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "2.1.0",
+                },
+              ],
+              "isbinaryfile": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.0.6",
+                },
+              ],
+              "jest": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "26.0.1",
+                },
+              ],
+              "jest-mock-process": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.4.0",
+                },
+              ],
+              "jsdom": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "16.2.2",
+                },
+              ],
+              "lint-staged": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "10.2.8",
+                },
+              ],
+              "lockfile-lint": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.3.6",
+                },
+              ],
+              "lodash": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.17.19",
+                },
+              ],
+              "minimist": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.2.5",
+                },
+              ],
+              "ms": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.1.2",
+                },
+              ],
+              "png2icons": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.0.1",
+                },
+              ],
+              "promise": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "8.1.0",
+                },
+              ],
+              "raw-loader": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.0.1",
+                },
+              ],
+              "read-chunk": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.2.0",
+                },
+              ],
+              "sharp": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.25.3",
+                },
+              ],
+              "ts-loader": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.0.5",
+                },
+              ],
+              "typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.9.3",
+                },
+              ],
+              "webpack": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.43.0",
+                },
+              ],
+              "webpack-cli": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.3.11",
+                },
+              ],
+              "webpack-merge": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.2.2",
+                },
+              ],
+              "webpack-node-externals": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.7.2",
+                },
+              ],
+              "webpack-shell-plugin": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5.0",
+                },
+              ],
+            },
+          },
           "path": "./tauri",
           "pkg": "tauri",
           "postcommand": null,
@@ -161,7 +895,7 @@ Summary about the changes in tauri
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "rust",
-          "parents": Array [],
+          "parents": Object {},
           "path": "./tauri-updater",
           "pkg": "tauri-updater",
           "postcommand": null,
@@ -177,7 +911,7 @@ Summary about the changes in tauri
           ],
           "errorOnVersionRange": null,
           "manager": "javascript",
-          "parents": Array [],
+          "parents": Object {},
           "path": "./cli/tauri.js",
           "pkg": "tauri.js",
           "postcommand": null,
@@ -196,10 +930,10 @@ Summary about the changes in tauri
       "bumping tauri.js with prerelease",
     ],
     Array [
-      "tauri planned to be bumped to 0.6.0-beta.0",
+      "tauri.js planned to be bumped to 0.6.3-beta.0",
     ],
     Array [
-      "tauri.js planned to be bumped to 0.6.3-beta.0",
+      "tauri planned to be bumped to 0.6.0-beta.0",
     ],
     Array [
       "tauri-updater planned to be bumped to 0.4.3-beta.0",
@@ -220,6 +954,119 @@ Summary about the changes in tauri
       Object {
         "tauri": Object {
           "applied": Object {
+            "deps": Object {
+              "anyhow": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.0.31",
+                },
+              ],
+              "base64": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.12.1",
+                },
+              ],
+              "envmnt": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.8.2",
+                },
+              ],
+              "lazy_static": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.4.0",
+                },
+              ],
+              "phf": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.8.0",
+                },
+              ],
+              "proptest": Array [
+                Object {
+                  "type": "dev-dependencies",
+                  "version": "0.9.6",
+                },
+              ],
+              "serde": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.0",
+                },
+                Object {
+                  "type": "dev-dependencies",
+                  "version": "1.0",
+                },
+              ],
+              "serde_json": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.0",
+                },
+                Object {
+                  "type": "dev-dependencies",
+                  "version": "1.0",
+                },
+              ],
+              "tauri": Array [],
+              "tauri-api": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5",
+                },
+              ],
+              "tauri_includedir": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5.0",
+                },
+              ],
+              "thiserror": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.0.19",
+                },
+              ],
+              "threadpool": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.8",
+                },
+              ],
+              "tiny_http": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.7",
+                },
+              ],
+              "uuid": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.8.1",
+                },
+              ],
+              "web-view": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "=0.6.2",
+                },
+              ],
+              "webbrowser": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5.2",
+                },
+              ],
+              "webview-sys": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "=0.5.0",
+                },
+              ],
+            },
             "file": Object {
               "content": "[package]
 name = \\"tauri\\"
@@ -437,6 +1284,62 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
         },
         "tauri-updater": Object {
           "applied": Object {
+            "deps": Object {
+              "anyhow": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.0.31",
+                },
+              ],
+              "attohttpc": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.10.1",
+                },
+              ],
+              "serde": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.0",
+                },
+              ],
+              "serde_json": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.0",
+                },
+              ],
+              "tauri-api": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5",
+                },
+              ],
+              "tauri-utils": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5",
+                },
+              ],
+              "tempdir": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.3",
+                },
+              ],
+              "thiserror": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.0.19",
+                },
+              ],
+              "zip": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5.3",
+                },
+              ],
+            },
             "file": Object {
               "content": "[package]
 name = \\"tauri-updater\\"
@@ -529,6 +1432,374 @@ thiserror = \\"1.0.19\\"
         },
         "tauri.js": Object {
           "applied": Object {
+            "deps": Object {
+              "@babel/core": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.2",
+                },
+              ],
+              "@babel/preset-env": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.2",
+                },
+              ],
+              "@babel/preset-typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.10.1",
+                },
+              ],
+              "@tauri-apps/tauri-inliner": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.14.1",
+                },
+              ],
+              "@tauri-apps/toml": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.2.4",
+                },
+              ],
+              "@types/cross-spawn": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "6.0.2",
+                },
+              ],
+              "@types/fs-extra": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "9.0.1",
+                },
+              ],
+              "@types/http-proxy": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.17.4",
+                },
+              ],
+              "@types/imagemin": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.0.0",
+                },
+              ],
+              "@types/imagemin-optipng": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "5.2.0",
+                },
+              ],
+              "@types/jsdom": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "16.2.3",
+                },
+              ],
+              "@types/lodash": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.14.155",
+                },
+              ],
+              "@types/ms": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.7.31",
+                },
+              ],
+              "@types/sharp": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.25.0",
+                },
+              ],
+              "@types/webpack-merge": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.1.5",
+                },
+              ],
+              "@typescript-eslint/eslint-plugin": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.1.0",
+                },
+              ],
+              "@typescript-eslint/parser": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.1.0",
+                },
+              ],
+              "babel-jest": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "26.0.1",
+                },
+              ],
+              "chalk": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.0.0",
+                },
+              ],
+              "chokidar": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.4.0",
+                },
+              ],
+              "cross-spawn": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.3",
+                },
+              ],
+              "dotenv": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "8.2.0",
+                },
+              ],
+              "eslint": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.1.0",
+                },
+              ],
+              "eslint-config-standard-with-typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "18.0.2",
+                },
+              ],
+              "eslint-plugin-import": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "2.20.2",
+                },
+              ],
+              "eslint-plugin-lodash-template": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "0.18.0",
+                },
+              ],
+              "eslint-plugin-node": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "11.1.0",
+                },
+              ],
+              "eslint-plugin-promise": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.2.1",
+                },
+              ],
+              "eslint-plugin-security": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.4.0",
+                },
+              ],
+              "eslint-plugin-standard": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.0.1",
+                },
+              ],
+              "fast-glob": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.2.2",
+                },
+              ],
+              "fs-extra": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "9.0.1",
+                },
+              ],
+              "http-proxy": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.18.1",
+                },
+              ],
+              "husky": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.2.5",
+                },
+              ],
+              "imagemin": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.1",
+                },
+              ],
+              "imagemin-optipng": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "8.0.0",
+                },
+              ],
+              "imagemin-pngquant": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "9.0.0",
+                },
+              ],
+              "imagemin-zopfli": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "7.0.0",
+                },
+              ],
+              "is-png": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.0.0",
+                },
+              ],
+              "is-running": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "2.1.0",
+                },
+              ],
+              "isbinaryfile": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.0.6",
+                },
+              ],
+              "jest": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "26.0.1",
+                },
+              ],
+              "jest-mock-process": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.4.0",
+                },
+              ],
+              "jsdom": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "16.2.2",
+                },
+              ],
+              "lint-staged": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "10.2.8",
+                },
+              ],
+              "lockfile-lint": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.3.6",
+                },
+              ],
+              "lodash": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.17.19",
+                },
+              ],
+              "minimist": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "1.2.5",
+                },
+              ],
+              "ms": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.1.2",
+                },
+              ],
+              "png2icons": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "2.0.1",
+                },
+              ],
+              "promise": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "8.1.0",
+                },
+              ],
+              "raw-loader": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.0.1",
+                },
+              ],
+              "read-chunk": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "3.2.0",
+                },
+              ],
+              "sharp": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.25.3",
+                },
+              ],
+              "ts-loader": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "7.0.5",
+                },
+              ],
+              "typescript": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.9.3",
+                },
+              ],
+              "webpack": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "4.43.0",
+                },
+              ],
+              "webpack-cli": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "3.3.11",
+                },
+              ],
+              "webpack-merge": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "4.2.2",
+                },
+              ],
+              "webpack-node-externals": Array [
+                Object {
+                  "type": "devDependencies",
+                  "version": "1.7.2",
+                },
+              ],
+              "webpack-shell-plugin": Array [
+                Object {
+                  "type": "dependencies",
+                  "version": "0.5.0",
+                },
+              ],
+            },
             "file": Object {
               "content": "{
   \\"name\\": \\"tauri\\",
@@ -773,6 +2044,119 @@ thiserror = \\"1.0.19\\"
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "deps": Object {
+            "anyhow": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.31",
+              },
+            ],
+            "base64": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.12.1",
+              },
+            ],
+            "envmnt": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.2",
+              },
+            ],
+            "lazy_static": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "phf": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.0",
+              },
+            ],
+            "proptest": Array [
+              Object {
+                "type": "dev-dependencies",
+                "version": "0.9.6",
+              },
+            ],
+            "serde": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+              Object {
+                "type": "dev-dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_json": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+              Object {
+                "type": "dev-dependencies",
+                "version": "1.0",
+              },
+            ],
+            "tauri": Array [],
+            "tauri-api": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tauri_includedir": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.0",
+              },
+            ],
+            "thiserror": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.19",
+              },
+            ],
+            "threadpool": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.8",
+              },
+            ],
+            "tiny_http": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.7",
+              },
+            ],
+            "uuid": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.1",
+              },
+            ],
+            "web-view": Array [
+              Object {
+                "type": "dependencies",
+                "version": "=0.6.2",
+              },
+            ],
+            "webbrowser": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.2",
+              },
+            ],
+            "webview-sys": Array [
+              Object {
+                "type": "dependencies",
+                "version": "=0.5.0",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"tauri\\"
@@ -990,6 +2374,62 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
       },
       "tauri-updater": Object {
         "applied": Object {
+          "deps": Object {
+            "anyhow": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.31",
+              },
+            ],
+            "attohttpc": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.10.1",
+              },
+            ],
+            "serde": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_json": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+            ],
+            "tauri-api": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tauri-utils": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tempdir": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.3",
+              },
+            ],
+            "thiserror": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.19",
+              },
+            ],
+            "zip": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.3",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"tauri-updater\\"
@@ -1082,6 +2522,374 @@ thiserror = \\"1.0.19\\"
       },
       "tauri.js": Object {
         "applied": Object {
+          "deps": Object {
+            "@babel/core": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.2",
+              },
+            ],
+            "@babel/preset-env": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.2",
+              },
+            ],
+            "@babel/preset-typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.1",
+              },
+            ],
+            "@tauri-apps/tauri-inliner": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.14.1",
+              },
+            ],
+            "@tauri-apps/toml": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.2.4",
+              },
+            ],
+            "@types/cross-spawn": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "6.0.2",
+              },
+            ],
+            "@types/fs-extra": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "9.0.1",
+              },
+            ],
+            "@types/http-proxy": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.17.4",
+              },
+            ],
+            "@types/imagemin": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.0.0",
+              },
+            ],
+            "@types/imagemin-optipng": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "5.2.0",
+              },
+            ],
+            "@types/jsdom": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "16.2.3",
+              },
+            ],
+            "@types/lodash": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.14.155",
+              },
+            ],
+            "@types/ms": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.7.31",
+              },
+            ],
+            "@types/sharp": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.25.0",
+              },
+            ],
+            "@types/webpack-merge": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.1.5",
+              },
+            ],
+            "@typescript-eslint/eslint-plugin": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.1.0",
+              },
+            ],
+            "@typescript-eslint/parser": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.1.0",
+              },
+            ],
+            "babel-jest": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "26.0.1",
+              },
+            ],
+            "chalk": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.0.0",
+              },
+            ],
+            "chokidar": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.4.0",
+              },
+            ],
+            "cross-spawn": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.3",
+              },
+            ],
+            "dotenv": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "8.2.0",
+              },
+            ],
+            "eslint": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.1.0",
+              },
+            ],
+            "eslint-config-standard-with-typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "18.0.2",
+              },
+            ],
+            "eslint-plugin-import": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "2.20.2",
+              },
+            ],
+            "eslint-plugin-lodash-template": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.18.0",
+              },
+            ],
+            "eslint-plugin-node": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "11.1.0",
+              },
+            ],
+            "eslint-plugin-promise": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.2.1",
+              },
+            ],
+            "eslint-plugin-security": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "eslint-plugin-standard": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.0.1",
+              },
+            ],
+            "fast-glob": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.2.2",
+              },
+            ],
+            "fs-extra": Array [
+              Object {
+                "type": "dependencies",
+                "version": "9.0.1",
+              },
+            ],
+            "http-proxy": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.18.1",
+              },
+            ],
+            "husky": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.2.5",
+              },
+            ],
+            "imagemin": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.1",
+              },
+            ],
+            "imagemin-optipng": Array [
+              Object {
+                "type": "dependencies",
+                "version": "8.0.0",
+              },
+            ],
+            "imagemin-pngquant": Array [
+              Object {
+                "type": "dependencies",
+                "version": "9.0.0",
+              },
+            ],
+            "imagemin-zopfli": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.0",
+              },
+            ],
+            "is-png": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.0",
+              },
+            ],
+            "is-running": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "2.1.0",
+              },
+            ],
+            "isbinaryfile": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.0.6",
+              },
+            ],
+            "jest": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "26.0.1",
+              },
+            ],
+            "jest-mock-process": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "jsdom": Array [
+              Object {
+                "type": "dependencies",
+                "version": "16.2.2",
+              },
+            ],
+            "lint-staged": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "10.2.8",
+              },
+            ],
+            "lockfile-lint": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.3.6",
+              },
+            ],
+            "lodash": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.17.19",
+              },
+            ],
+            "minimist": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.2.5",
+              },
+            ],
+            "ms": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.1.2",
+              },
+            ],
+            "png2icons": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.1",
+              },
+            ],
+            "promise": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "8.1.0",
+              },
+            ],
+            "raw-loader": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.0.1",
+              },
+            ],
+            "read-chunk": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.2.0",
+              },
+            ],
+            "sharp": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.25.3",
+              },
+            ],
+            "ts-loader": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.0.5",
+              },
+            ],
+            "typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.9.3",
+              },
+            ],
+            "webpack": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.43.0",
+              },
+            ],
+            "webpack-cli": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.3.11",
+              },
+            ],
+            "webpack-merge": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.2.2",
+              },
+            ],
+            "webpack-node-externals": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.7.2",
+              },
+            ],
+            "webpack-shell-plugin": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.0",
+              },
+            ],
+          },
           "file": Object {
             "content": "{
   \\"name\\": \\"tauri\\",
@@ -1356,9 +3164,376 @@ Summary about the changes in tauri
                 "summary": "Summary about the changes in tauri",
               },
             ],
-            "parents": Array [
-              "tauri.js",
-            ],
+            "parents": Object {
+              "tauri.js": Object {
+                "@babel/core": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.2",
+                  },
+                ],
+                "@babel/preset-env": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.2",
+                  },
+                ],
+                "@babel/preset-typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.1",
+                  },
+                ],
+                "@tauri-apps/tauri-inliner": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.14.1",
+                  },
+                ],
+                "@tauri-apps/toml": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.2.4",
+                  },
+                ],
+                "@types/cross-spawn": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "6.0.2",
+                  },
+                ],
+                "@types/fs-extra": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "9.0.1",
+                  },
+                ],
+                "@types/http-proxy": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.17.4",
+                  },
+                ],
+                "@types/imagemin": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.0.0",
+                  },
+                ],
+                "@types/imagemin-optipng": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "5.2.0",
+                  },
+                ],
+                "@types/jsdom": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "16.2.3",
+                  },
+                ],
+                "@types/lodash": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.14.155",
+                  },
+                ],
+                "@types/ms": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.7.31",
+                  },
+                ],
+                "@types/sharp": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.25.0",
+                  },
+                ],
+                "@types/webpack-merge": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.1.5",
+                  },
+                ],
+                "@typescript-eslint/eslint-plugin": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.1.0",
+                  },
+                ],
+                "@typescript-eslint/parser": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.1.0",
+                  },
+                ],
+                "babel-jest": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "26.0.1",
+                  },
+                ],
+                "chalk": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.0.0",
+                  },
+                ],
+                "chokidar": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.4.0",
+                  },
+                ],
+                "cross-spawn": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.3",
+                  },
+                ],
+                "dotenv": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "8.2.0",
+                  },
+                ],
+                "eslint": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.1.0",
+                  },
+                ],
+                "eslint-config-standard-with-typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "18.0.2",
+                  },
+                ],
+                "eslint-plugin-import": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "2.20.2",
+                  },
+                ],
+                "eslint-plugin-lodash-template": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.18.0",
+                  },
+                ],
+                "eslint-plugin-node": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "11.1.0",
+                  },
+                ],
+                "eslint-plugin-promise": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.2.1",
+                  },
+                ],
+                "eslint-plugin-security": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "eslint-plugin-standard": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.0.1",
+                  },
+                ],
+                "fast-glob": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.2.2",
+                  },
+                ],
+                "fs-extra": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "9.0.1",
+                  },
+                ],
+                "http-proxy": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.18.1",
+                  },
+                ],
+                "husky": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.2.5",
+                  },
+                ],
+                "imagemin": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.1",
+                  },
+                ],
+                "imagemin-optipng": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "8.0.0",
+                  },
+                ],
+                "imagemin-pngquant": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "9.0.0",
+                  },
+                ],
+                "imagemin-zopfli": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.0",
+                  },
+                ],
+                "is-png": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.0.0",
+                  },
+                ],
+                "is-running": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "2.1.0",
+                  },
+                ],
+                "isbinaryfile": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.0.6",
+                  },
+                ],
+                "jest": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "26.0.1",
+                  },
+                ],
+                "jest-mock-process": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "jsdom": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "16.2.2",
+                  },
+                ],
+                "lint-staged": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "10.2.8",
+                  },
+                ],
+                "lockfile-lint": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.3.6",
+                  },
+                ],
+                "lodash": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.17.19",
+                  },
+                ],
+                "minimist": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.2.5",
+                  },
+                ],
+                "ms": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.1.2",
+                  },
+                ],
+                "png2icons": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.0.1",
+                  },
+                ],
+                "promise": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "8.1.0",
+                  },
+                ],
+                "raw-loader": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.0.1",
+                  },
+                ],
+                "read-chunk": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.2.0",
+                  },
+                ],
+                "sharp": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.25.3",
+                  },
+                ],
+                "ts-loader": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.0.5",
+                  },
+                ],
+                "typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.9.3",
+                  },
+                ],
+                "webpack": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.43.0",
+                  },
+                ],
+                "webpack-cli": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.3.11",
+                  },
+                ],
+                "webpack-merge": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.2.2",
+                  },
+                ],
+                "webpack-node-externals": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.7.2",
+                  },
+                ],
+                "webpack-shell-plugin": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.5.0",
+                  },
+                ],
+              },
+            },
             "type": "preminor",
           },
         },
@@ -1396,7 +3571,7 @@ Summary about the changes in tauri-updater
                 "summary": "Summary about the changes in tauri-updater",
               },
             ],
-            "parents": Array [],
+            "parents": Object {},
             "type": "prepatch",
           },
         },
@@ -1437,7 +3612,7 @@ Summary about the changes in tauri
                 "summary": "Summary about the changes in tauri",
               },
             ],
-            "parents": Array [],
+            "parents": Object {},
             "type": "prerelease",
           },
         },
@@ -1474,6 +3649,119 @@ Object {
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "deps": Object {
+            "anyhow": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.31",
+              },
+            ],
+            "base64": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.12.1",
+              },
+            ],
+            "envmnt": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.2",
+              },
+            ],
+            "lazy_static": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "phf": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.0",
+              },
+            ],
+            "proptest": Array [
+              Object {
+                "type": "dev-dependencies",
+                "version": "0.9.6",
+              },
+            ],
+            "serde": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+              Object {
+                "type": "dev-dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_json": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+              Object {
+                "type": "dev-dependencies",
+                "version": "1.0",
+              },
+            ],
+            "tauri": Array [],
+            "tauri-api": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tauri_includedir": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.0",
+              },
+            ],
+            "thiserror": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.19",
+              },
+            ],
+            "threadpool": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.8",
+              },
+            ],
+            "tiny_http": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.7",
+              },
+            ],
+            "uuid": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.1",
+              },
+            ],
+            "web-view": Array [
+              Object {
+                "type": "dependencies",
+                "version": "=0.6.2",
+              },
+            ],
+            "webbrowser": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.2",
+              },
+            ],
+            "webview-sys": Array [
+              Object {
+                "type": "dependencies",
+                "version": "=0.5.0",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"tauri\\"
@@ -1691,6 +3979,62 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
       },
       "tauri-updater": Object {
         "applied": Object {
+          "deps": Object {
+            "anyhow": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.31",
+              },
+            ],
+            "attohttpc": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.10.1",
+              },
+            ],
+            "serde": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_json": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+            ],
+            "tauri-api": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tauri-utils": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tempdir": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.3",
+              },
+            ],
+            "thiserror": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.19",
+              },
+            ],
+            "zip": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.3",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"tauri-updater\\"
@@ -1783,6 +4127,374 @@ thiserror = \\"1.0.19\\"
       },
       "tauri.js": Object {
         "applied": Object {
+          "deps": Object {
+            "@babel/core": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.2",
+              },
+            ],
+            "@babel/preset-env": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.2",
+              },
+            ],
+            "@babel/preset-typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.1",
+              },
+            ],
+            "@tauri-apps/tauri-inliner": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.14.1",
+              },
+            ],
+            "@tauri-apps/toml": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.2.4",
+              },
+            ],
+            "@types/cross-spawn": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "6.0.2",
+              },
+            ],
+            "@types/fs-extra": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "9.0.1",
+              },
+            ],
+            "@types/http-proxy": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.17.4",
+              },
+            ],
+            "@types/imagemin": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.0.0",
+              },
+            ],
+            "@types/imagemin-optipng": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "5.2.0",
+              },
+            ],
+            "@types/jsdom": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "16.2.3",
+              },
+            ],
+            "@types/lodash": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.14.155",
+              },
+            ],
+            "@types/ms": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.7.31",
+              },
+            ],
+            "@types/sharp": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.25.0",
+              },
+            ],
+            "@types/webpack-merge": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.1.5",
+              },
+            ],
+            "@typescript-eslint/eslint-plugin": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.1.0",
+              },
+            ],
+            "@typescript-eslint/parser": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.1.0",
+              },
+            ],
+            "babel-jest": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "26.0.1",
+              },
+            ],
+            "chalk": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.0.0",
+              },
+            ],
+            "chokidar": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.4.0",
+              },
+            ],
+            "cross-spawn": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.3",
+              },
+            ],
+            "dotenv": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "8.2.0",
+              },
+            ],
+            "eslint": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.1.0",
+              },
+            ],
+            "eslint-config-standard-with-typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "18.0.2",
+              },
+            ],
+            "eslint-plugin-import": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "2.20.2",
+              },
+            ],
+            "eslint-plugin-lodash-template": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.18.0",
+              },
+            ],
+            "eslint-plugin-node": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "11.1.0",
+              },
+            ],
+            "eslint-plugin-promise": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.2.1",
+              },
+            ],
+            "eslint-plugin-security": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "eslint-plugin-standard": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.0.1",
+              },
+            ],
+            "fast-glob": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.2.2",
+              },
+            ],
+            "fs-extra": Array [
+              Object {
+                "type": "dependencies",
+                "version": "9.0.1",
+              },
+            ],
+            "http-proxy": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.18.1",
+              },
+            ],
+            "husky": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.2.5",
+              },
+            ],
+            "imagemin": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.1",
+              },
+            ],
+            "imagemin-optipng": Array [
+              Object {
+                "type": "dependencies",
+                "version": "8.0.0",
+              },
+            ],
+            "imagemin-pngquant": Array [
+              Object {
+                "type": "dependencies",
+                "version": "9.0.0",
+              },
+            ],
+            "imagemin-zopfli": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.0",
+              },
+            ],
+            "is-png": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.0",
+              },
+            ],
+            "is-running": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "2.1.0",
+              },
+            ],
+            "isbinaryfile": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.0.6",
+              },
+            ],
+            "jest": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "26.0.1",
+              },
+            ],
+            "jest-mock-process": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "jsdom": Array [
+              Object {
+                "type": "dependencies",
+                "version": "16.2.2",
+              },
+            ],
+            "lint-staged": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "10.2.8",
+              },
+            ],
+            "lockfile-lint": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.3.6",
+              },
+            ],
+            "lodash": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.17.19",
+              },
+            ],
+            "minimist": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.2.5",
+              },
+            ],
+            "ms": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.1.2",
+              },
+            ],
+            "png2icons": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.1",
+              },
+            ],
+            "promise": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "8.1.0",
+              },
+            ],
+            "raw-loader": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.0.1",
+              },
+            ],
+            "read-chunk": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.2.0",
+              },
+            ],
+            "sharp": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.25.3",
+              },
+            ],
+            "ts-loader": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.0.5",
+              },
+            ],
+            "typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.9.3",
+              },
+            ],
+            "webpack": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.43.0",
+              },
+            ],
+            "webpack-cli": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.3.11",
+              },
+            ],
+            "webpack-merge": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.2.2",
+              },
+            ],
+            "webpack-node-externals": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.7.2",
+              },
+            ],
+            "webpack-shell-plugin": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.0",
+              },
+            ],
+          },
           "file": Object {
             "content": "{
   \\"name\\": \\"tauri\\",
@@ -2057,9 +4769,376 @@ Summary about the changes in tauri
                 "summary": "Summary about the changes in tauri",
               },
             ],
-            "parents": Array [
-              "tauri.js",
-            ],
+            "parents": Object {
+              "tauri.js": Object {
+                "@babel/core": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.2",
+                  },
+                ],
+                "@babel/preset-env": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.2",
+                  },
+                ],
+                "@babel/preset-typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.1",
+                  },
+                ],
+                "@tauri-apps/tauri-inliner": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.14.1",
+                  },
+                ],
+                "@tauri-apps/toml": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.2.4",
+                  },
+                ],
+                "@types/cross-spawn": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "6.0.2",
+                  },
+                ],
+                "@types/fs-extra": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "9.0.1",
+                  },
+                ],
+                "@types/http-proxy": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.17.4",
+                  },
+                ],
+                "@types/imagemin": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.0.0",
+                  },
+                ],
+                "@types/imagemin-optipng": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "5.2.0",
+                  },
+                ],
+                "@types/jsdom": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "16.2.3",
+                  },
+                ],
+                "@types/lodash": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.14.155",
+                  },
+                ],
+                "@types/ms": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.7.31",
+                  },
+                ],
+                "@types/sharp": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.25.0",
+                  },
+                ],
+                "@types/webpack-merge": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.1.5",
+                  },
+                ],
+                "@typescript-eslint/eslint-plugin": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.1.0",
+                  },
+                ],
+                "@typescript-eslint/parser": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.1.0",
+                  },
+                ],
+                "babel-jest": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "26.0.1",
+                  },
+                ],
+                "chalk": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.0.0",
+                  },
+                ],
+                "chokidar": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.4.0",
+                  },
+                ],
+                "cross-spawn": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.3",
+                  },
+                ],
+                "dotenv": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "8.2.0",
+                  },
+                ],
+                "eslint": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.1.0",
+                  },
+                ],
+                "eslint-config-standard-with-typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "18.0.2",
+                  },
+                ],
+                "eslint-plugin-import": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "2.20.2",
+                  },
+                ],
+                "eslint-plugin-lodash-template": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.18.0",
+                  },
+                ],
+                "eslint-plugin-node": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "11.1.0",
+                  },
+                ],
+                "eslint-plugin-promise": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.2.1",
+                  },
+                ],
+                "eslint-plugin-security": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "eslint-plugin-standard": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.0.1",
+                  },
+                ],
+                "fast-glob": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.2.2",
+                  },
+                ],
+                "fs-extra": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "9.0.1",
+                  },
+                ],
+                "http-proxy": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.18.1",
+                  },
+                ],
+                "husky": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.2.5",
+                  },
+                ],
+                "imagemin": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.1",
+                  },
+                ],
+                "imagemin-optipng": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "8.0.0",
+                  },
+                ],
+                "imagemin-pngquant": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "9.0.0",
+                  },
+                ],
+                "imagemin-zopfli": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.0",
+                  },
+                ],
+                "is-png": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.0.0",
+                  },
+                ],
+                "is-running": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "2.1.0",
+                  },
+                ],
+                "isbinaryfile": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.0.6",
+                  },
+                ],
+                "jest": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "26.0.1",
+                  },
+                ],
+                "jest-mock-process": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "jsdom": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "16.2.2",
+                  },
+                ],
+                "lint-staged": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "10.2.8",
+                  },
+                ],
+                "lockfile-lint": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.3.6",
+                  },
+                ],
+                "lodash": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.17.19",
+                  },
+                ],
+                "minimist": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.2.5",
+                  },
+                ],
+                "ms": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.1.2",
+                  },
+                ],
+                "png2icons": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.0.1",
+                  },
+                ],
+                "promise": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "8.1.0",
+                  },
+                ],
+                "raw-loader": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.0.1",
+                  },
+                ],
+                "read-chunk": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.2.0",
+                  },
+                ],
+                "sharp": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.25.3",
+                  },
+                ],
+                "ts-loader": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.0.5",
+                  },
+                ],
+                "typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.9.3",
+                  },
+                ],
+                "webpack": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.43.0",
+                  },
+                ],
+                "webpack-cli": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.3.11",
+                  },
+                ],
+                "webpack-merge": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.2.2",
+                  },
+                ],
+                "webpack-node-externals": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.7.2",
+                  },
+                ],
+                "webpack-shell-plugin": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.5.0",
+                  },
+                ],
+              },
+            },
             "type": "preminor",
           },
         },
@@ -2097,7 +5176,7 @@ Summary about the changes in tauri-updater
                 "summary": "Summary about the changes in tauri-updater",
               },
             ],
-            "parents": Array [],
+            "parents": Object {},
             "type": "prepatch",
           },
         },
@@ -2138,7 +5217,7 @@ Summary about the changes in tauri
                 "summary": "Summary about the changes in tauri",
               },
             ],
-            "parents": Array [],
+            "parents": Object {},
             "type": "prerelease",
           },
         },
@@ -2187,6 +5266,119 @@ Object {
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "deps": Object {
+            "anyhow": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.31",
+              },
+            ],
+            "base64": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.12.1",
+              },
+            ],
+            "envmnt": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.2",
+              },
+            ],
+            "lazy_static": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "phf": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.0",
+              },
+            ],
+            "proptest": Array [
+              Object {
+                "type": "dev-dependencies",
+                "version": "0.9.6",
+              },
+            ],
+            "serde": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+              Object {
+                "type": "dev-dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_json": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+              Object {
+                "type": "dev-dependencies",
+                "version": "1.0",
+              },
+            ],
+            "tauri": Array [],
+            "tauri-api": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tauri_includedir": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.0",
+              },
+            ],
+            "thiserror": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.19",
+              },
+            ],
+            "threadpool": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.8",
+              },
+            ],
+            "tiny_http": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.7",
+              },
+            ],
+            "uuid": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.1",
+              },
+            ],
+            "web-view": Array [
+              Object {
+                "type": "dependencies",
+                "version": "=0.6.2",
+              },
+            ],
+            "webbrowser": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.2",
+              },
+            ],
+            "webview-sys": Array [
+              Object {
+                "type": "dependencies",
+                "version": "=0.5.0",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"tauri\\"
@@ -2404,6 +5596,62 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
       },
       "tauri-updater": Object {
         "applied": Object {
+          "deps": Object {
+            "anyhow": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.31",
+              },
+            ],
+            "attohttpc": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.10.1",
+              },
+            ],
+            "serde": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_json": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+            ],
+            "tauri-api": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tauri-utils": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tempdir": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.3",
+              },
+            ],
+            "thiserror": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.19",
+              },
+            ],
+            "zip": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.3",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"tauri-updater\\"
@@ -2496,6 +5744,374 @@ thiserror = \\"1.0.19\\"
       },
       "tauri.js": Object {
         "applied": Object {
+          "deps": Object {
+            "@babel/core": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.2",
+              },
+            ],
+            "@babel/preset-env": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.2",
+              },
+            ],
+            "@babel/preset-typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.1",
+              },
+            ],
+            "@tauri-apps/tauri-inliner": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.14.1",
+              },
+            ],
+            "@tauri-apps/toml": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.2.4",
+              },
+            ],
+            "@types/cross-spawn": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "6.0.2",
+              },
+            ],
+            "@types/fs-extra": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "9.0.1",
+              },
+            ],
+            "@types/http-proxy": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.17.4",
+              },
+            ],
+            "@types/imagemin": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.0.0",
+              },
+            ],
+            "@types/imagemin-optipng": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "5.2.0",
+              },
+            ],
+            "@types/jsdom": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "16.2.3",
+              },
+            ],
+            "@types/lodash": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.14.155",
+              },
+            ],
+            "@types/ms": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.7.31",
+              },
+            ],
+            "@types/sharp": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.25.0",
+              },
+            ],
+            "@types/webpack-merge": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.1.5",
+              },
+            ],
+            "@typescript-eslint/eslint-plugin": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.1.0",
+              },
+            ],
+            "@typescript-eslint/parser": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.1.0",
+              },
+            ],
+            "babel-jest": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "26.0.1",
+              },
+            ],
+            "chalk": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.0.0",
+              },
+            ],
+            "chokidar": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.4.0",
+              },
+            ],
+            "cross-spawn": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.3",
+              },
+            ],
+            "dotenv": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "8.2.0",
+              },
+            ],
+            "eslint": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.1.0",
+              },
+            ],
+            "eslint-config-standard-with-typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "18.0.2",
+              },
+            ],
+            "eslint-plugin-import": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "2.20.2",
+              },
+            ],
+            "eslint-plugin-lodash-template": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.18.0",
+              },
+            ],
+            "eslint-plugin-node": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "11.1.0",
+              },
+            ],
+            "eslint-plugin-promise": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.2.1",
+              },
+            ],
+            "eslint-plugin-security": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "eslint-plugin-standard": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.0.1",
+              },
+            ],
+            "fast-glob": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.2.2",
+              },
+            ],
+            "fs-extra": Array [
+              Object {
+                "type": "dependencies",
+                "version": "9.0.1",
+              },
+            ],
+            "http-proxy": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.18.1",
+              },
+            ],
+            "husky": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.2.5",
+              },
+            ],
+            "imagemin": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.1",
+              },
+            ],
+            "imagemin-optipng": Array [
+              Object {
+                "type": "dependencies",
+                "version": "8.0.0",
+              },
+            ],
+            "imagemin-pngquant": Array [
+              Object {
+                "type": "dependencies",
+                "version": "9.0.0",
+              },
+            ],
+            "imagemin-zopfli": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.0",
+              },
+            ],
+            "is-png": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.0",
+              },
+            ],
+            "is-running": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "2.1.0",
+              },
+            ],
+            "isbinaryfile": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.0.6",
+              },
+            ],
+            "jest": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "26.0.1",
+              },
+            ],
+            "jest-mock-process": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "jsdom": Array [
+              Object {
+                "type": "dependencies",
+                "version": "16.2.2",
+              },
+            ],
+            "lint-staged": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "10.2.8",
+              },
+            ],
+            "lockfile-lint": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.3.6",
+              },
+            ],
+            "lodash": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.17.19",
+              },
+            ],
+            "minimist": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.2.5",
+              },
+            ],
+            "ms": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.1.2",
+              },
+            ],
+            "png2icons": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.1",
+              },
+            ],
+            "promise": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "8.1.0",
+              },
+            ],
+            "raw-loader": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.0.1",
+              },
+            ],
+            "read-chunk": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.2.0",
+              },
+            ],
+            "sharp": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.25.3",
+              },
+            ],
+            "ts-loader": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.0.5",
+              },
+            ],
+            "typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.9.3",
+              },
+            ],
+            "webpack": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.43.0",
+              },
+            ],
+            "webpack-cli": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.3.11",
+              },
+            ],
+            "webpack-merge": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.2.2",
+              },
+            ],
+            "webpack-node-externals": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.7.2",
+              },
+            ],
+            "webpack-shell-plugin": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.0",
+              },
+            ],
+          },
           "file": Object {
             "content": "{
   \\"name\\": \\"tauri\\",
@@ -2770,9 +6386,376 @@ Summary about the changes in tauri
                 "summary": "Summary about the changes in tauri",
               },
             ],
-            "parents": Array [
-              "tauri.js",
-            ],
+            "parents": Object {
+              "tauri.js": Object {
+                "@babel/core": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.2",
+                  },
+                ],
+                "@babel/preset-env": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.2",
+                  },
+                ],
+                "@babel/preset-typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.1",
+                  },
+                ],
+                "@tauri-apps/tauri-inliner": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.14.1",
+                  },
+                ],
+                "@tauri-apps/toml": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.2.4",
+                  },
+                ],
+                "@types/cross-spawn": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "6.0.2",
+                  },
+                ],
+                "@types/fs-extra": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "9.0.1",
+                  },
+                ],
+                "@types/http-proxy": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.17.4",
+                  },
+                ],
+                "@types/imagemin": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.0.0",
+                  },
+                ],
+                "@types/imagemin-optipng": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "5.2.0",
+                  },
+                ],
+                "@types/jsdom": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "16.2.3",
+                  },
+                ],
+                "@types/lodash": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.14.155",
+                  },
+                ],
+                "@types/ms": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.7.31",
+                  },
+                ],
+                "@types/sharp": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.25.0",
+                  },
+                ],
+                "@types/webpack-merge": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.1.5",
+                  },
+                ],
+                "@typescript-eslint/eslint-plugin": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.1.0",
+                  },
+                ],
+                "@typescript-eslint/parser": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.1.0",
+                  },
+                ],
+                "babel-jest": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "26.0.1",
+                  },
+                ],
+                "chalk": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.0.0",
+                  },
+                ],
+                "chokidar": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.4.0",
+                  },
+                ],
+                "cross-spawn": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.3",
+                  },
+                ],
+                "dotenv": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "8.2.0",
+                  },
+                ],
+                "eslint": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.1.0",
+                  },
+                ],
+                "eslint-config-standard-with-typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "18.0.2",
+                  },
+                ],
+                "eslint-plugin-import": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "2.20.2",
+                  },
+                ],
+                "eslint-plugin-lodash-template": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.18.0",
+                  },
+                ],
+                "eslint-plugin-node": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "11.1.0",
+                  },
+                ],
+                "eslint-plugin-promise": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.2.1",
+                  },
+                ],
+                "eslint-plugin-security": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "eslint-plugin-standard": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.0.1",
+                  },
+                ],
+                "fast-glob": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.2.2",
+                  },
+                ],
+                "fs-extra": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "9.0.1",
+                  },
+                ],
+                "http-proxy": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.18.1",
+                  },
+                ],
+                "husky": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.2.5",
+                  },
+                ],
+                "imagemin": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.1",
+                  },
+                ],
+                "imagemin-optipng": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "8.0.0",
+                  },
+                ],
+                "imagemin-pngquant": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "9.0.0",
+                  },
+                ],
+                "imagemin-zopfli": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.0",
+                  },
+                ],
+                "is-png": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.0.0",
+                  },
+                ],
+                "is-running": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "2.1.0",
+                  },
+                ],
+                "isbinaryfile": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.0.6",
+                  },
+                ],
+                "jest": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "26.0.1",
+                  },
+                ],
+                "jest-mock-process": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "jsdom": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "16.2.2",
+                  },
+                ],
+                "lint-staged": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "10.2.8",
+                  },
+                ],
+                "lockfile-lint": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.3.6",
+                  },
+                ],
+                "lodash": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.17.19",
+                  },
+                ],
+                "minimist": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.2.5",
+                  },
+                ],
+                "ms": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.1.2",
+                  },
+                ],
+                "png2icons": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.0.1",
+                  },
+                ],
+                "promise": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "8.1.0",
+                  },
+                ],
+                "raw-loader": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.0.1",
+                  },
+                ],
+                "read-chunk": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.2.0",
+                  },
+                ],
+                "sharp": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.25.3",
+                  },
+                ],
+                "ts-loader": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.0.5",
+                  },
+                ],
+                "typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.9.3",
+                  },
+                ],
+                "webpack": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.43.0",
+                  },
+                ],
+                "webpack-cli": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.3.11",
+                  },
+                ],
+                "webpack-merge": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.2.2",
+                  },
+                ],
+                "webpack-node-externals": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.7.2",
+                  },
+                ],
+                "webpack-shell-plugin": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.5.0",
+                  },
+                ],
+              },
+            },
             "type": "preminor",
           },
         },
@@ -2810,7 +6793,7 @@ Summary about the changes in tauri-updater
                 "summary": "Summary about the changes in tauri-updater",
               },
             ],
-            "parents": Array [],
+            "parents": Object {},
             "type": "prepatch",
           },
         },
@@ -2851,7 +6834,7 @@ Summary about the changes in tauri
                 "summary": "Summary about the changes in tauri",
               },
             ],
-            "parents": Array [],
+            "parents": Object {},
             "type": "prerelease",
           },
         },
@@ -2862,6 +6845,119 @@ Summary about the changes in tauri
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "deps": Object {
+            "anyhow": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.31",
+              },
+            ],
+            "base64": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.12.1",
+              },
+            ],
+            "envmnt": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.2",
+              },
+            ],
+            "lazy_static": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "phf": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.0",
+              },
+            ],
+            "proptest": Array [
+              Object {
+                "type": "dev-dependencies",
+                "version": "0.9.6",
+              },
+            ],
+            "serde": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+              Object {
+                "type": "dev-dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_json": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+              Object {
+                "type": "dev-dependencies",
+                "version": "1.0",
+              },
+            ],
+            "tauri": Array [],
+            "tauri-api": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tauri_includedir": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.0",
+              },
+            ],
+            "thiserror": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.19",
+              },
+            ],
+            "threadpool": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.8",
+              },
+            ],
+            "tiny_http": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.7",
+              },
+            ],
+            "uuid": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.8.1",
+              },
+            ],
+            "web-view": Array [
+              Object {
+                "type": "dependencies",
+                "version": "=0.6.2",
+              },
+            ],
+            "webbrowser": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.2",
+              },
+            ],
+            "webview-sys": Array [
+              Object {
+                "type": "dependencies",
+                "version": "=0.5.0",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"tauri\\"
@@ -3067,6 +7163,140 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"
       },
       "tauri-api": Object {
         "applied": Object {
+          "deps": Object {
+            "anyhow": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.31",
+              },
+            ],
+            "attohttpc": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.13.0",
+              },
+            ],
+            "dirs": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.2",
+              },
+            ],
+            "either": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.5.3",
+              },
+            ],
+            "flate2": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1",
+              },
+            ],
+            "http": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.2",
+              },
+            ],
+            "ignore": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.4.16",
+              },
+            ],
+            "nfd": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.0.4",
+              },
+            ],
+            "quickcheck": Array [
+              Object {
+                "type": "dev-dependencies",
+                "version": "0.9.2",
+              },
+            ],
+            "quickcheck_macros": Array [
+              Object {
+                "type": "dev-dependencies",
+                "version": "0.9.1",
+              },
+            ],
+            "rand": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.7",
+              },
+            ],
+            "semver": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.10",
+              },
+            ],
+            "serde": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_json": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0",
+              },
+            ],
+            "serde_repr": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.1",
+              },
+            ],
+            "tar": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.4",
+              },
+            ],
+            "tauri-utils": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5",
+              },
+            ],
+            "tempdir": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.3",
+              },
+            ],
+            "tempfile": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3",
+              },
+            ],
+            "thiserror": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.19",
+              },
+            ],
+            "totems": Array [
+              Object {
+                "type": "dev-dependencies",
+                "version": "0.2.7",
+              },
+            ],
+            "zip": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.5",
+              },
+            ],
+          },
           "file": Object {
             "content": "[package]
 name = \\"tauri-api\\"
@@ -3201,6 +7431,374 @@ totems = \\"0.2.7\\"",
       },
       "tauri.js": Object {
         "applied": Object {
+          "deps": Object {
+            "@babel/core": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.2",
+              },
+            ],
+            "@babel/preset-env": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.2",
+              },
+            ],
+            "@babel/preset-typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.10.1",
+              },
+            ],
+            "@tauri-apps/tauri-inliner": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.14.1",
+              },
+            ],
+            "@tauri-apps/toml": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.2.4",
+              },
+            ],
+            "@types/cross-spawn": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "6.0.2",
+              },
+            ],
+            "@types/fs-extra": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "9.0.1",
+              },
+            ],
+            "@types/http-proxy": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.17.4",
+              },
+            ],
+            "@types/imagemin": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.0.0",
+              },
+            ],
+            "@types/imagemin-optipng": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "5.2.0",
+              },
+            ],
+            "@types/jsdom": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "16.2.3",
+              },
+            ],
+            "@types/lodash": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.14.155",
+              },
+            ],
+            "@types/ms": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.7.31",
+              },
+            ],
+            "@types/sharp": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.25.0",
+              },
+            ],
+            "@types/webpack-merge": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.1.5",
+              },
+            ],
+            "@typescript-eslint/eslint-plugin": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.1.0",
+              },
+            ],
+            "@typescript-eslint/parser": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.1.0",
+              },
+            ],
+            "babel-jest": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "26.0.1",
+              },
+            ],
+            "chalk": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.0.0",
+              },
+            ],
+            "chokidar": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.4.0",
+              },
+            ],
+            "cross-spawn": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.3",
+              },
+            ],
+            "dotenv": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "8.2.0",
+              },
+            ],
+            "eslint": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.1.0",
+              },
+            ],
+            "eslint-config-standard-with-typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "18.0.2",
+              },
+            ],
+            "eslint-plugin-import": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "2.20.2",
+              },
+            ],
+            "eslint-plugin-lodash-template": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "0.18.0",
+              },
+            ],
+            "eslint-plugin-node": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "11.1.0",
+              },
+            ],
+            "eslint-plugin-promise": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.2.1",
+              },
+            ],
+            "eslint-plugin-security": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "eslint-plugin-standard": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.0.1",
+              },
+            ],
+            "fast-glob": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.2.2",
+              },
+            ],
+            "fs-extra": Array [
+              Object {
+                "type": "dependencies",
+                "version": "9.0.1",
+              },
+            ],
+            "http-proxy": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.18.1",
+              },
+            ],
+            "husky": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.2.5",
+              },
+            ],
+            "imagemin": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.1",
+              },
+            ],
+            "imagemin-optipng": Array [
+              Object {
+                "type": "dependencies",
+                "version": "8.0.0",
+              },
+            ],
+            "imagemin-pngquant": Array [
+              Object {
+                "type": "dependencies",
+                "version": "9.0.0",
+              },
+            ],
+            "imagemin-zopfli": Array [
+              Object {
+                "type": "dependencies",
+                "version": "7.0.0",
+              },
+            ],
+            "is-png": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.0",
+              },
+            ],
+            "is-running": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "2.1.0",
+              },
+            ],
+            "isbinaryfile": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.0.6",
+              },
+            ],
+            "jest": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "26.0.1",
+              },
+            ],
+            "jest-mock-process": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.4.0",
+              },
+            ],
+            "jsdom": Array [
+              Object {
+                "type": "dependencies",
+                "version": "16.2.2",
+              },
+            ],
+            "lint-staged": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "10.2.8",
+              },
+            ],
+            "lockfile-lint": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.3.6",
+              },
+            ],
+            "lodash": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.17.19",
+              },
+            ],
+            "minimist": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.2.5",
+              },
+            ],
+            "ms": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.1.2",
+              },
+            ],
+            "png2icons": Array [
+              Object {
+                "type": "dependencies",
+                "version": "2.0.1",
+              },
+            ],
+            "promise": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "8.1.0",
+              },
+            ],
+            "raw-loader": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.0.1",
+              },
+            ],
+            "read-chunk": Array [
+              Object {
+                "type": "dependencies",
+                "version": "3.2.0",
+              },
+            ],
+            "sharp": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.25.3",
+              },
+            ],
+            "ts-loader": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "7.0.5",
+              },
+            ],
+            "typescript": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.9.3",
+              },
+            ],
+            "webpack": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "4.43.0",
+              },
+            ],
+            "webpack-cli": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "3.3.11",
+              },
+            ],
+            "webpack-merge": Array [
+              Object {
+                "type": "dependencies",
+                "version": "4.2.2",
+              },
+            ],
+            "webpack-node-externals": Array [
+              Object {
+                "type": "devDependencies",
+                "version": "1.7.2",
+              },
+            ],
+            "webpack-shell-plugin": Array [
+              Object {
+                "type": "dependencies",
+                "version": "0.5.0",
+              },
+            ],
+          },
           "file": Object {
             "content": "{
   \\"name\\": \\"tauri\\",
@@ -3476,9 +8074,376 @@ Boop again.
                 "summary": "Boop again.",
               },
             ],
-            "parents": Array [
-              "tauri.js",
-            ],
+            "parents": Object {
+              "tauri.js": Object {
+                "@babel/core": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.2",
+                  },
+                ],
+                "@babel/preset-env": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.2",
+                  },
+                ],
+                "@babel/preset-typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.10.1",
+                  },
+                ],
+                "@tauri-apps/tauri-inliner": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.14.1",
+                  },
+                ],
+                "@tauri-apps/toml": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.2.4",
+                  },
+                ],
+                "@types/cross-spawn": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "6.0.2",
+                  },
+                ],
+                "@types/fs-extra": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "9.0.1",
+                  },
+                ],
+                "@types/http-proxy": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.17.4",
+                  },
+                ],
+                "@types/imagemin": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.0.0",
+                  },
+                ],
+                "@types/imagemin-optipng": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "5.2.0",
+                  },
+                ],
+                "@types/jsdom": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "16.2.3",
+                  },
+                ],
+                "@types/lodash": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.14.155",
+                  },
+                ],
+                "@types/ms": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.7.31",
+                  },
+                ],
+                "@types/sharp": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.25.0",
+                  },
+                ],
+                "@types/webpack-merge": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.1.5",
+                  },
+                ],
+                "@typescript-eslint/eslint-plugin": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.1.0",
+                  },
+                ],
+                "@typescript-eslint/parser": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.1.0",
+                  },
+                ],
+                "babel-jest": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "26.0.1",
+                  },
+                ],
+                "chalk": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.0.0",
+                  },
+                ],
+                "chokidar": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.4.0",
+                  },
+                ],
+                "cross-spawn": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.3",
+                  },
+                ],
+                "dotenv": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "8.2.0",
+                  },
+                ],
+                "eslint": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.1.0",
+                  },
+                ],
+                "eslint-config-standard-with-typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "18.0.2",
+                  },
+                ],
+                "eslint-plugin-import": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "2.20.2",
+                  },
+                ],
+                "eslint-plugin-lodash-template": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "0.18.0",
+                  },
+                ],
+                "eslint-plugin-node": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "11.1.0",
+                  },
+                ],
+                "eslint-plugin-promise": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.2.1",
+                  },
+                ],
+                "eslint-plugin-security": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "eslint-plugin-standard": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.0.1",
+                  },
+                ],
+                "fast-glob": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.2.2",
+                  },
+                ],
+                "fs-extra": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "9.0.1",
+                  },
+                ],
+                "http-proxy": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.18.1",
+                  },
+                ],
+                "husky": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.2.5",
+                  },
+                ],
+                "imagemin": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.1",
+                  },
+                ],
+                "imagemin-optipng": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "8.0.0",
+                  },
+                ],
+                "imagemin-pngquant": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "9.0.0",
+                  },
+                ],
+                "imagemin-zopfli": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "7.0.0",
+                  },
+                ],
+                "is-png": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.0.0",
+                  },
+                ],
+                "is-running": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "2.1.0",
+                  },
+                ],
+                "isbinaryfile": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.0.6",
+                  },
+                ],
+                "jest": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "26.0.1",
+                  },
+                ],
+                "jest-mock-process": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "jsdom": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "16.2.2",
+                  },
+                ],
+                "lint-staged": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "10.2.8",
+                  },
+                ],
+                "lockfile-lint": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.3.6",
+                  },
+                ],
+                "lodash": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.17.19",
+                  },
+                ],
+                "minimist": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.2.5",
+                  },
+                ],
+                "ms": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.1.2",
+                  },
+                ],
+                "png2icons": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "2.0.1",
+                  },
+                ],
+                "promise": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "8.1.0",
+                  },
+                ],
+                "raw-loader": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.0.1",
+                  },
+                ],
+                "read-chunk": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "3.2.0",
+                  },
+                ],
+                "sharp": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.25.3",
+                  },
+                ],
+                "ts-loader": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "7.0.5",
+                  },
+                ],
+                "typescript": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.9.3",
+                  },
+                ],
+                "webpack": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "4.43.0",
+                  },
+                ],
+                "webpack-cli": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "3.3.11",
+                  },
+                ],
+                "webpack-merge": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "4.2.2",
+                  },
+                ],
+                "webpack-node-externals": Array [
+                  Object {
+                    "type": "devDependencies",
+                    "version": "1.7.2",
+                  },
+                ],
+                "webpack-shell-plugin": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.5.0",
+                  },
+                ],
+              },
+            },
             "type": "prerelease",
           },
         },
@@ -3518,9 +8483,121 @@ Boop again.
                 "summary": "Boop again.",
               },
             ],
-            "parents": Array [
-              "tauri",
-            ],
+            "parents": Object {
+              "tauri": Object {
+                "anyhow": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.0.31",
+                  },
+                ],
+                "base64": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.12.1",
+                  },
+                ],
+                "envmnt": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.8.2",
+                  },
+                ],
+                "lazy_static": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.4.0",
+                  },
+                ],
+                "phf": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.8.0",
+                  },
+                ],
+                "proptest": Array [
+                  Object {
+                    "type": "dev-dependencies",
+                    "version": "0.9.6",
+                  },
+                ],
+                "serde": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.0",
+                  },
+                  Object {
+                    "type": "dev-dependencies",
+                    "version": "1.0",
+                  },
+                ],
+                "serde_json": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.0",
+                  },
+                  Object {
+                    "type": "dev-dependencies",
+                    "version": "1.0",
+                  },
+                ],
+                "tauri": Array [],
+                "tauri-api": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.5",
+                  },
+                ],
+                "tauri_includedir": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.5.0",
+                  },
+                ],
+                "thiserror": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.0.19",
+                  },
+                ],
+                "threadpool": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "1.8",
+                  },
+                ],
+                "tiny_http": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.7",
+                  },
+                ],
+                "uuid": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.8.1",
+                  },
+                ],
+                "web-view": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "=0.6.2",
+                  },
+                ],
+                "webbrowser": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "0.5.2",
+                  },
+                ],
+                "webview-sys": Array [
+                  Object {
+                    "type": "dependencies",
+                    "version": "=0.5.0",
+                  },
+                ],
+              },
+            },
             "type": "prepatch",
           },
         },
@@ -3550,7 +8627,8 @@ Boop again.
 
 Boop again.
 ",
-                  "dependencies": "Bumped due to a bump in tauri.",
+                  "dependencies": "Bumped due to a bump in tauri-api.
+    - Bumped due to a bump in tauri.",
                   "extname": ".md",
                   "filename": "third-change",
                   "path": ".changes/third-change.md",
@@ -3561,7 +8639,7 @@ Boop again.
                 "summary": "Boop again.",
               },
             ],
-            "parents": Array [],
+            "parents": Object {},
             "type": "prerelease",
           },
         },

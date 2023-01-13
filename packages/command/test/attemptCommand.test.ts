@@ -19,7 +19,7 @@ describe("attemptCommand", () => {
       commands: [
         {
           name: "pkg-nickname",
-          pkgFile: { version: "0.5.6" },
+          pkgFile: { version: "0.5.6", deps: {} },
           //@ts-ignore
           command: async () => console.log("boop"),
         },
@@ -63,7 +63,7 @@ describe("attemptCommand", () => {
       commands: [
         {
           pkg: "pkg-nickname",
-          pkgFile: { version: "0.5.6" },
+          pkgFile: { version: "0.5.6", deps: {} },
           //@ts-ignore
           command: async (pkg: any) =>
             console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
@@ -83,7 +83,7 @@ describe("attemptCommand", () => {
       commands: [
         {
           pkg: "pkg-nickname",
-          pkgFile: { version: "0.5.6" },
+          pkgFile: { version: "0.5.6", deps: {} },
           manager: "none",
           //@ts-ignore
           command: [
