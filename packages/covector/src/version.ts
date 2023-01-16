@@ -80,8 +80,8 @@ export function* version({
     cwd,
   });
   if (dryRun) {
-    console.log("==== commands ready to run ===");
-    console.log(commands);
+    // console.log("==== commands ready to run ===");
+    // console.log(commands);
   }
 
   let pkgCommandsRan: CommandsRan = Object.keys(config.packages).reduce(
@@ -162,7 +162,6 @@ export function* version({
     pkgCommandsRan,
     dryRun,
   });
-  console.dir({ applied, pkgCommandsRan }, { depth: 6 });
 
   if (command === "version" && !dryRun) {
     if (pre) {
@@ -174,8 +173,8 @@ export function* version({
   }
 
   if (dryRun) {
-    console.log("==== result ===");
-    console.dir(pkgCommandsRan);
+    // console.log("==== result ===");
+    // console.dir(pkgCommandsRan);
   }
 
   return <CovectorVersion>{ commandsRan: pkgCommandsRan, pipeTemplate };

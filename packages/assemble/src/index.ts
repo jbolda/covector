@@ -402,10 +402,10 @@ export const mergeChangesToConfig = function* ({
   }
 
   if (dryRun) {
-    console.log("==== data piped into commands ===");
-    Object.keys(pipeOutput).forEach((pkg) =>
-      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
-    );
+    // console.log("==== data piped into commands ===");
+    // Object.keys(pipeOutput).forEach((pkg) =>
+    //   console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
+    // );
   }
 
   return { commands, pipeTemplate: pipeOutput };
@@ -600,10 +600,10 @@ export const mergeIntoConfig = function* ({
   }
 
   if (dryRun) {
-    console.log("==== data piped into commands ===");
-    Object.keys(pipeOutput).forEach((pkg) =>
-      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
-    );
+    // console.log("==== data piped into commands ===");
+    // Object.keys(pipeOutput).forEach((pkg) =>
+    //   console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
+    // );
   }
 
   return { commands, pipeTemplate: pipeOutput };
