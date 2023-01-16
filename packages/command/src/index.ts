@@ -1,4 +1,4 @@
-import { spawn, timeout } from "effection";
+import { spawn, timeout, Operation } from "effection";
 import { exec } from "@effection/process";
 import path from "path";
 
@@ -23,7 +23,7 @@ export const attemptCommands = function* ({
   commandPrefix?: string;
   pkgCommandsRan?: object;
   dryRun: boolean;
-}): Generator<any, { [k: string]: { [c: string]: string | boolean } }, string> {
+}): Operation<{ [k: string]: { [c: string]: string | boolean } }> {
   let _pkgCommandsRan: { [k: string]: { [c: string]: string | boolean } } = {
     ...pkgCommandsRan,
   };
@@ -137,7 +137,7 @@ export const confirmCommandsToRun = function* ({
   cwd: string;
   commands: PkgPublish[];
   command: string;
-}): Generator<any, PkgPublish[], any> {
+}): Operation<PkgPublish[]> {
   let subPublishCommand = command.slice(7, 999);
   let commandsToRun: PkgPublish[] = [];
   for (let pkg of commands) {
@@ -180,11 +180,11 @@ export const runCommand = function* ({
   cwd: string;
   pkgPath: string;
   log: false | string;
-}): Generator<any, string, any> {
+}): Operation<string> {
   if (log !== false) console.log(log);
   yield raceTime();
 
-  return yield* sh(
+  return yield sh(
     command,
     {
       cwd: path.join(cwd, pkgPath),
@@ -198,7 +198,7 @@ export const sh = function* (
   command: string,
   options: { [k: string]: any },
   log: false | string
-): Generator<any, string, any> {
+): Operation<string> {
   let out = "";
   let child;
   if (command.includes("|") && !options.shell) {
