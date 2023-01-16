@@ -61,11 +61,11 @@ export const parseChange = function* ({
     try {
       const gitInfo = yield runCommand({
         cwd,
-        pkgPath: "",
+        pkgPath: ".",
         command: `git log --reverse --format="%h %H %as %s" ${file.path}`,
         log: false,
       });
-      console.dir({ gitInfo });
+      console.dir({ gitInfo, file });
       const commits = gitInfo.split("\n").map((commit: string) => {
         const [hashShort, hashLong, date, ...rest] = commit.split(" ");
         console.dir({ commit, hashShort, hashLong, date, rest });
