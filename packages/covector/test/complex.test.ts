@@ -10,7 +10,7 @@ const f = fixtures(__dirname);
 describe("integration test for complex commands", () => {
   it("runs version for prod", function* () {
     jest.setTimeout(7000);
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = (yield covector({
       command: "version",
@@ -85,7 +85,7 @@ describe("integration test for complex commands", () => {
   }, 10000);
 
   it("runs version in --dry-run mode", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = (yield covector({
       command: "version",
@@ -96,6 +96,7 @@ describe("integration test for complex commands", () => {
       throw new Error("We are expecting an object here.");
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
@@ -116,7 +117,7 @@ describe("integration test for complex commands", () => {
   });
 
   it("runs publish in --dry-run mode", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = yield covector({
       command: "publish",
@@ -125,6 +126,7 @@ describe("integration test for complex commands", () => {
     });
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
@@ -132,7 +134,7 @@ describe("integration test for complex commands", () => {
   });
 
   it("runs test in --dry-run mode", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = yield covector({
       command: "test",
@@ -141,6 +143,7 @@ describe("integration test for complex commands", () => {
     });
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
@@ -148,7 +151,7 @@ describe("integration test for complex commands", () => {
   });
 
   it("runs build in --dry-run mode", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = yield covector({
       command: "build",
@@ -157,6 +160,7 @@ describe("integration test for complex commands", () => {
     });
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();

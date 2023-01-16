@@ -251,97 +251,107 @@ this command is not piped, it is run from scripts for pk2
 
 exports[`integration test for complex commands runs build in --dry-run mode 1`] = `
 Object {
-  "consoleInfo": Array [],
-  "consoleLog": Array [
+  "consoleDir": Array [
     Array [
       "==== data piped into commands ===",
     ],
     Array [
-      "package-one",
-      "pipe",
       Object {
-        "pkg": Object {
-          "changelog": "## \\\\[2.3.1]
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
 
 - Added some cool things.
 ",
-          "command": Object {
-            "command": "npm run build",
-            "pipe": true,
+            "command": Object {
+              "command": "npm run build",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
           },
-          "dependencies": undefined,
-          "errorOnVersionRange": null,
-          "manager": "javascript",
-          "path": "./packages/package-one",
-          "pkg": "package-one",
-          "postcommand": null,
-          "precommand": null,
-          "releaseTag": null,
-          "tag": "",
-        },
-        "pkgFile": Object {
-          "deps": Object {},
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+          "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
         },
+        "pkg": "package-one",
+      },
+      Object {
+        "depth": 5,
       },
     ],
     Array [
-      "package-two",
-      "pipe",
       Object {
-        "pkg": Object {
-          "changelog": "## \\\\[1.9.0]
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 ",
-          "command": Object {
-            "command": "npm run build",
-            "pipe": true,
+            "command": Object {
+              "command": "npm run build",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
           },
-          "dependencies": undefined,
-          "errorOnVersionRange": null,
-          "manager": "javascript",
-          "path": "./packages/package-two",
-          "pkg": "package-two",
-          "postcommand": null,
-          "precommand": null,
-          "releaseTag": null,
-          "tag": "",
-        },
-        "pkgFile": Object {
-          "deps": Object {},
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+          "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
         },
+        "pkg": "package-two",
+      },
+      Object {
+        "depth": 5,
       },
     ],
+  ],
+  "consoleInfo": Array [],
+  "consoleLog": Array [
     Array [
       "==== commands ready to run ===",
     ],
@@ -1042,97 +1052,107 @@ publish
 
 exports[`integration test for complex commands runs publish in --dry-run mode 1`] = `
 Object {
-  "consoleInfo": Array [],
-  "consoleLog": Array [
+  "consoleDir": Array [
     Array [
       "==== data piped into commands ===",
     ],
     Array [
-      "package-one",
-      "pipe",
       Object {
-        "pkg": Object {
-          "changelog": "## \\\\[2.3.1]
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
 
 - Added some cool things.
 ",
-          "command": Object {
-            "command": "echo publish",
-            "pipe": true,
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
           },
-          "dependencies": undefined,
-          "errorOnVersionRange": null,
-          "manager": "javascript",
-          "path": "./packages/package-one",
-          "pkg": "package-one",
-          "postcommand": null,
-          "precommand": null,
-          "releaseTag": null,
-          "tag": "",
-        },
-        "pkgFile": Object {
-          "deps": Object {},
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+          "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
         },
+        "pkg": "package-one",
+      },
+      Object {
+        "depth": 5,
       },
     ],
     Array [
-      "package-two",
-      "pipe",
       Object {
-        "pkg": Object {
-          "changelog": "## \\\\[1.9.0]
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 ",
-          "command": Object {
-            "command": "echo publish",
-            "pipe": true,
+            "command": Object {
+              "command": "echo publish",
+              "pipe": true,
+            },
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
           },
-          "dependencies": undefined,
-          "errorOnVersionRange": null,
-          "manager": "javascript",
-          "path": "./packages/package-two",
-          "pkg": "package-two",
-          "postcommand": null,
-          "precommand": null,
-          "releaseTag": null,
-          "tag": "",
-        },
-        "pkgFile": Object {
-          "deps": Object {},
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+          "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
         },
+        "pkg": "package-two",
+      },
+      Object {
+        "depth": 5,
       },
     ],
+  ],
+  "consoleInfo": Array [],
+  "consoleLog": Array [
     Array [
       "==== commands ready to run ===",
     ],
@@ -1918,117 +1938,127 @@ this command is not piped, it is run from scripts for pk2
 
 exports[`integration test for complex commands runs test in --dry-run mode 1`] = `
 Object {
-  "consoleInfo": Array [],
-  "consoleLog": Array [
+  "consoleDir": Array [
     Array [
       "==== data piped into commands ===",
     ],
     Array [
-      "package-one",
-      "pipe",
       Object {
-        "pkg": Object {
-          "changelog": "## \\\\[2.3.1]
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[2.3.1]
 
 - Added some cool things.
 ",
-          "command": Array [
-            Object {
-              "command": "npm run build",
-              "pipe": true,
-            },
-            Object {
-              "command": "npm test",
-              "dryRunCommand": false,
-            },
-            Object {
-              "command": "echo boop",
-              "dryRunCommand": "echo deboop",
-            },
-          ],
-          "dependencies": undefined,
-          "errorOnVersionRange": null,
-          "manager": "javascript",
-          "path": "./packages/package-one",
-          "pkg": "package-one",
-          "postcommand": null,
-          "precommand": null,
-          "releaseTag": null,
-          "tag": "",
-        },
-        "pkgFile": Object {
-          "deps": Object {},
-          "name": "package-one",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+            "command": Array [
+              Object {
+                "command": "npm run build",
+                "pipe": true,
+              },
+              Object {
+                "command": "npm test",
+                "dryRunCommand": false,
+              },
+              Object {
+                "command": "echo boop",
+                "dryRunCommand": "echo deboop",
+              },
+            ],
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-one",
+            "pkg": "package-one",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "deps": Object {},
             "name": "package-one",
-            "scripts": Object {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-one",
+              "scripts": Object {
+                "build": "npm info tauri@0.8.0 description",
+                "test": "npm info covector@0.1.0 license",
+              },
+              "version": "2.3.1",
             },
             "version": "2.3.1",
+            "versionMajor": 2,
+            "versionMinor": 3,
+            "versionPatch": 1,
           },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
         },
+        "pkg": "package-one",
+      },
+      Object {
+        "depth": 5,
       },
     ],
     Array [
-      "package-two",
-      "pipe",
       Object {
-        "pkg": Object {
-          "changelog": "## \\\\[1.9.0]
+        "pipe": Object {
+          "pkg": Object {
+            "changelog": "## \\\\[1.9.0]
 
 - Added some even cooler things.
 ",
-          "command": Array [
-            Object {
-              "command": "npm run build",
-              "pipe": true,
-            },
-            Object {
-              "command": "npm test",
-              "dryRunCommand": false,
-            },
-            Object {
-              "command": "echo boop",
-              "dryRunCommand": "echo deboop",
-            },
-          ],
-          "dependencies": undefined,
-          "errorOnVersionRange": null,
-          "manager": "javascript",
-          "path": "./packages/package-two",
-          "pkg": "package-two",
-          "postcommand": null,
-          "precommand": null,
-          "releaseTag": null,
-          "tag": "",
-        },
-        "pkgFile": Object {
-          "deps": Object {},
-          "name": "package-two",
-          "pkg": Object {
-            "description": "shrugs",
-            "license": "MIT",
+            "command": Array [
+              Object {
+                "command": "npm run build",
+                "pipe": true,
+              },
+              Object {
+                "command": "npm test",
+                "dryRunCommand": false,
+              },
+              Object {
+                "command": "echo boop",
+                "dryRunCommand": "echo deboop",
+              },
+            ],
+            "dependencies": undefined,
+            "errorOnVersionRange": null,
+            "manager": "javascript",
+            "path": "./packages/package-two",
+            "pkg": "package-two",
+            "postcommand": null,
+            "precommand": null,
+            "releaseTag": null,
+            "tag": "",
+          },
+          "pkgFile": Object {
+            "deps": Object {},
             "name": "package-two",
-            "scripts": Object {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
+            "pkg": Object {
+              "description": "shrugs",
+              "license": "MIT",
+              "name": "package-two",
+              "scripts": Object {
+                "build": "echo this command is not piped, it is run from scripts for pk2",
+                "test": "echo this command is not piped, it is run from the test script",
+              },
+              "version": "1.9.0",
             },
             "version": "1.9.0",
+            "versionMajor": 1,
+            "versionMinor": 9,
+            "versionPatch": 0,
           },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
         },
+        "pkg": "package-two",
+      },
+      Object {
+        "depth": 5,
       },
     ],
+  ],
+  "consoleInfo": Array [],
+  "consoleLog": Array [
     Array [
       "==== commands ready to run ===",
     ],
@@ -2603,16 +2633,9 @@ Object {
 
 exports[`integration test for complex commands runs version in --dry-run mode 1`] = `
 Object {
-  "consoleInfo": Array [],
-  "consoleLog": Array [
+  "consoleDir": Array [
     Array [
       "==== data piped into commands ===",
-    ],
-    Array [
-      "==== commands ready to run ===",
-    ],
-    Array [
-      Array [],
     ],
     Array [
       "==== result ===",
@@ -2632,6 +2655,15 @@ Object {
           "precommand": false,
         },
       },
+    ],
+  ],
+  "consoleInfo": Array [],
+  "consoleLog": Array [
+    Array [
+      "==== commands ready to run ===",
+    ],
+    Array [
+      Array [],
     ],
   ],
   "covectorReturn": Object {
