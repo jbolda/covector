@@ -82,6 +82,7 @@ export const parseChange = function* ({
         commits,
       };
     } catch (e) {
+      console.error(e);
       changeset.meta = {
         ...file,
       };
