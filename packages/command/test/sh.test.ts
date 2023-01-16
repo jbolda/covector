@@ -14,7 +14,7 @@ describe("sh", () => {
   });
 
   it("handle base command", function* () {
-    const out = yield sh("npm help", {}, false);
+    const { out } = yield sh("npm help", {}, false);
     expect(out.substring(0, 23)).toEqual(
       `npm <command>
 
@@ -25,36 +25,36 @@ Usage:
   });
 
   it("handle single command", function* () {
-    const out = yield sh("echo 'this thing'", {}, false);
+    const { out } = yield sh("echo 'this thing'", {}, false);
     expect(out).toBe("this thing");
   });
 
   describe("shell defined", () => {
     it("shell opted in", function* () {
-      const out = yield sh("echo this thing", { shell: true }, false);
+      const { out } = yield sh("echo this thing", { shell: true }, false);
       expect(out).toBe("this thing");
     });
 
     it("defines bash as shell", function* () {
-      const out = yield sh("echo this thing", { shell: "bash" }, false);
+      const { out } = yield sh("echo this thing", { shell: "bash" }, false);
       expect(out).toBe("this thing");
     });
 
     if (process.platform !== "win32") {
       it("defines sh as shell", function* () {
-        const out = yield sh("echo this thing", { shell: "sh" }, false);
+        const { out } = yield sh("echo this thing", { shell: "sh" }, false);
         expect(out).toBe("this thing");
       });
     }
 
     if (process.platform === "win32") {
       it("defines cmd as shell", function* () {
-        const out = yield sh("echo this thing", { shell: "cmd" }, false);
+        const { out } = yield sh("echo this thing", { shell: "cmd" }, false);
         expect(out).toBe("this thing");
       });
 
       it("defines pwsh as shell", function* () {
-        const out = yield sh("echo this thing", { shell: "pwsh" }, false);
+        const { out } = yield sh("echo this thing", { shell: "pwsh" }, false);
         expect(out).toBe("this\r\nthing");
       });
     }
@@ -63,7 +63,7 @@ Usage:
   if (process.platform !== "win32") {
     describe("pipe commands when !win32", () => {
       it("considers piped commands, opted in", function* () {
-        const out = yield sh(
+        const { out } = yield sh(
           "echo this thing | echo but actually this",
           { shell: true },
           false
@@ -72,7 +72,7 @@ Usage:
       });
 
       it("considers piped commands, uses fallback to shell", function* () {
-        const out = yield sh(
+        const { out } = yield sh(
           "echo this thing | echo but actually this",
           {},
           false
@@ -86,7 +86,7 @@ Usage:
     describe("pipe commands when win32", () => {
       // will use whatever shell at process.env.shell
       it("considers piped commands, opted in", function* () {
-        const out = yield sh(
+        const { out } = yield sh(
           "echo this thing | echo but actually this",
           { shell: true },
           false
@@ -97,7 +97,7 @@ Usage:
       });
 
       it("considers piped commands, uses fallback to shell", function* () {
-        const out = yield sh(
+        const { out } = yield sh(
           "echo this thing | echo but actually this",
           {},
           false
@@ -113,7 +113,7 @@ Usage:
       });
 
       it("considers piped commands, defines cmd as shell", function* () {
-        const out = yield sh(
+        const { out } = yield sh(
           "echo this thing | echo but actually this",
           { shell: "cmd" },
           false
@@ -123,7 +123,7 @@ Usage:
       });
 
       it("considers piped commands, defines bash as shell", function* () {
-        const out = yield sh(
+        const { out } = yield sh(
           "echo this thing | echo but actually this",
           { shell: "bash" },
           false
@@ -133,7 +133,7 @@ Usage:
       });
 
       it("considers piped commands, defines pwsh as shell", function* () {
-        const out = yield captureError(
+        const result = yield captureError(
           sh(
             "echo this thing | echo but actually this",
             { shell: "pwsh" },
@@ -141,7 +141,7 @@ Usage:
           )
         );
         // pwsh doesn't handle pipes with echo
-        expect(out.message).toBe(
+        expect(result.message).toBe(
           "spawn echo this thing | echo but actually this ENOENT"
         );
       });
