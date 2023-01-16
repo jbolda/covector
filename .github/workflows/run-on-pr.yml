@@ -24,6 +24,7 @@ jobs:
         run: echo "$COVECTOR_CONTEXT"
       - name: version dry run directly
         run: node ./packages/covector/bin/covector.js version --dry-run
+      - run: git log --reverse --format="%h %H %as %s" .changes/upgrade-to-effection-v2.md
 
   preview:
     runs-on: ubuntu-latest
