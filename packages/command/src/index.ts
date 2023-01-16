@@ -203,6 +203,9 @@ export const sh = function* (
   let out = "";
   let stdout = "";
   let stderr = "";
+  if (command.includes("effection-v2.md")) {
+    console.dir({ command, options, log });
+  }
 
   let child;
   if (command.includes("|") && !options.shell) {
@@ -214,7 +217,7 @@ export const sh = function* (
     child = yield exec(command, {
       ...options,
       shell:
-        process.platform == "win32" && options.shell === true
+        process.platform === "win32" && options.shell === true
           ? "bash"
           : options.shell,
     });
@@ -224,6 +227,10 @@ export const sh = function* (
 
   yield spawn(
     child.stderr.forEach((chunk: Buffer) => {
+      if (command.includes("effection-v2.md")) {
+        console.log(chunk.toString().trim());
+      }
+
       out += chunk.toString();
       stderr += chunk.toString();
       if (log !== false) console.error(chunk.toString().trim());
@@ -232,6 +239,10 @@ export const sh = function* (
 
   yield spawn(
     child.stdout.forEach((chunk: Buffer) => {
+      if (command.includes("effection-v2.md")) {
+        console.log(chunk.toString().trim());
+      }
+
       out += chunk.toString();
       stdout += chunk.toString();
       if (log !== false) console.log(chunk.toString().trim());
