@@ -264,7 +264,7 @@ const changesParsed = function* ({
   files: File[];
 }): Operation<Change[]> {
   const allFiles = files.map((file) => parseChange({ cwd, file }));
-  return all(allFiles);
+  return yield all(allFiles);
 };
 
 const changeDiff = ({
