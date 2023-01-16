@@ -404,7 +404,7 @@ export const mergeChangesToConfig = function* ({
   if (dryRun) {
     console.log("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
-      console.log(pkg, "pipe", pipeOutput[pkg].pipe)
+      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
     );
   }
 
@@ -602,7 +602,7 @@ export const mergeIntoConfig = function* ({
   if (dryRun) {
     console.log("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
-      console.log(pkg, "pipe", pipeOutput[pkg].pipe)
+      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
     );
   }
 
