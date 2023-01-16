@@ -1,4 +1,4 @@
-import { all } from "effection";
+import { all, Operation } from "effection";
 import unified from "unified";
 import { Root, YAML as Frontmatter, Content } from "mdast";
 import parse from "remark-parse";
@@ -28,7 +28,7 @@ export const parseChange = function* ({
 }: {
   cwd?: string;
   file: File;
-}): Generator<any, Changeset, any> {
+}): Operation<Changeset> {
   const processor = unified()
     .use(parse)
     .use(frontmatter, ["yaml"])
@@ -67,6 +67,7 @@ export const parseChange = function* ({
       });
       const commits = gitInfo.split("\n").map((commit: string) => {
         const [hashShort, hashLong, date, ...rest] = commit.split(" ");
+        console.dir({ commit, hashShort, hashLong, date, rest });
         return {
           hashShort,
           hashLong,
@@ -261,9 +262,9 @@ const changesParsed = function* ({
 }: {
   cwd?: string;
   files: File[];
-}): Generator<any, Change[], any> {
+}): Operation<Change[]> {
   const allFiles = files.map((file) => parseChange({ cwd, file }));
-  return yield all(allFiles);
+  return all(allFiles);
 };
 
 const changeDiff = ({
