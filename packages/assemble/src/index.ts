@@ -65,7 +65,9 @@ export const parseChange = function* ({
         command: `git log --reverse --format="%h %H %as %s" ${file.path}`,
         log: false,
       });
+      console.dir({ gitInfo, filePath: file.path });
       const commits = gitInfo.split(/\n/).map((commit: string) => {
+        console.dir(commit);
         const [hashShort, hashLong, date, ...rest] = commit.split(" ");
         return {
           hashShort,
