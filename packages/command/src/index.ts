@@ -1,4 +1,4 @@
-import { spawn, timeout, Operation } from "effection";
+import { spawn, timeout, Operation, MainError } from "effection";
 import { exec } from "@effection/process";
 import path from "path";
 
@@ -182,7 +182,18 @@ export const runCommand = function* ({
   log: false | string;
 }): Operation<string> {
   if (log !== false) console.log(log);
-  yield raceTime();
+
+  const timeoutPeriod = 1200000;
+  try {
+    yield spawn(timeout(timeoutPeriod));
+  } catch (e) {
+    throw new MainError({
+      message: `timeout waiting ${
+        timeoutPeriod / 1000
+      }s for command: ${command}`,
+      exitCode: 1,
+    });
+  }
 
   const ran = yield sh(
     command,
@@ -191,6 +202,7 @@ export const runCommand = function* ({
     },
     log
   );
+
   return ran.out;
 };
 
@@ -202,9 +214,6 @@ export const sh = function* (
   let out = "";
   let stdout = "";
   let stderr = "";
-  if (command.includes("effection-v2.md")) {
-    console.dir({ command, options, log });
-  }
 
   let child;
   if (command.includes("|") && !options.shell) {
@@ -226,10 +235,6 @@ export const sh = function* (
 
   yield spawn(
     child.stderr.forEach((chunk: Buffer) => {
-      if (command.includes("effection-v2.md")) {
-        console.log(chunk.toString().trim());
-      }
-
       out += chunk.toString();
       stderr += chunk.toString();
       if (log !== false) console.error(chunk.toString().trim());
@@ -238,10 +243,6 @@ export const sh = function* (
 
   yield spawn(
     child.stdout.forEach((chunk: Buffer) => {
-      if (command.includes("effection-v2.md")) {
-        console.log(chunk.toString().trim());
-      }
-
       out += chunk.toString();
       stdout += chunk.toString();
       if (log !== false) console.log(chunk.toString().trim());
