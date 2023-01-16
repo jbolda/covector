@@ -25,7 +25,7 @@ describe("integration test in --dry-run mode", () => {
   });
 
   it("runs version for js and rust", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = (yield covector({
       command: "version",
@@ -36,6 +36,7 @@ describe("integration test in --dry-run mode", () => {
       throw new Error("We are expecting an object here.");
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
@@ -56,7 +57,7 @@ describe("integration test in --dry-run mode", () => {
   });
 
   it("runs publish for js and rust", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield covector({
       command: "publish",
@@ -65,6 +66,7 @@ describe("integration test in --dry-run mode", () => {
     });
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
@@ -72,7 +74,7 @@ describe("integration test in --dry-run mode", () => {
   });
 
   it("runs test for js and rust", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield covector({
       command: "test",
@@ -81,6 +83,7 @@ describe("integration test in --dry-run mode", () => {
     });
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
@@ -88,7 +91,7 @@ describe("integration test in --dry-run mode", () => {
   });
 
   it("runs build for js and rust", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield covector({
       command: "build",
@@ -97,6 +100,7 @@ describe("integration test in --dry-run mode", () => {
     });
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
