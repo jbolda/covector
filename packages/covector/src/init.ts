@@ -27,7 +27,7 @@ export const init = function* init({
   const pkgFiles: PackageFile[] = yield all(
     pkgs.map((pkg: string) => readPkgFile({ file: pkg, nickname: pkg, cwd }))
   );
-  // console.dir(pkgFiles);
+
   for (let pkgFile of pkgFiles) {
     //@ts-expect-error workspaces isn't on the type, but we are checking anyways
     if (!pkgFile?.pkg?.workspaces) {

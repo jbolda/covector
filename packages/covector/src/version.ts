@@ -80,8 +80,8 @@ export function* version({
     cwd,
   });
   if (dryRun) {
-    // console.log("==== commands ready to run ===");
-    // console.log(commands);
+    console.log("==== commands ready to run ===");
+    console.log(commands);
   }
 
   let pkgCommandsRan: CommandsRan = Object.keys(config.packages).reduce(
@@ -173,7 +173,7 @@ export function* version({
   }
 
   if (dryRun) {
-    console.log("==== result ===");
+    console.dir("==== result ===");
     console.dir(pkgCommandsRan);
   }
 
