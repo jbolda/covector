@@ -65,9 +65,7 @@ export const parseChange = function* ({
         command: `git log --reverse --format="%h %H %as %s" ${file.path}`,
         log: false,
       });
-      console.dir({ gitInfo, filePath: file.path });
-      const commits = gitInfo.split(/\n/).map((commit: string) => {
-        console.dir(commit);
+      const commits = gitInfo.split("\n").map((commit: string) => {
         const [hashShort, hashLong, date, ...rest] = commit.split(" ");
         return {
           hashShort,
@@ -404,10 +402,10 @@ export const mergeChangesToConfig = function* ({
   }
 
   if (dryRun) {
-    // console.log("==== data piped into commands ===");
-    // Object.keys(pipeOutput).forEach((pkg) =>
-    //   console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
-    // );
+    console.log("==== data piped into commands ===");
+    Object.keys(pipeOutput).forEach((pkg) =>
+      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
+    );
   }
 
   return { commands, pipeTemplate: pipeOutput };
@@ -602,10 +600,10 @@ export const mergeIntoConfig = function* ({
   }
 
   if (dryRun) {
-    // console.log("==== data piped into commands ===");
-    // Object.keys(pipeOutput).forEach((pkg) =>
-    //   console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
-    // );
+    console.log("==== data piped into commands ===");
+    Object.keys(pipeOutput).forEach((pkg) =>
+      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
+    );
   }
 
   return { commands, pipeTemplate: pipeOutput };
