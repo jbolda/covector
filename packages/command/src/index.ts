@@ -188,7 +188,6 @@ export const runCommand = function* ({
     command,
     {
       cwd: path.join(cwd, pkgPath),
-      encoding: "utf-8",
     },
     log
   );
