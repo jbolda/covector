@@ -184,14 +184,15 @@ export const runCommand = function* ({
   if (log !== false) console.log(log);
   yield raceTime();
 
-  return yield sh(
+  const ran = yield sh(
     command,
     {
       cwd: path.join(cwd, pkgPath),
-      encoding: "utf8",
+      encoding: "utf-8",
     },
     log
   );
+  return ran.out;
 };
 
 export const sh = function* (
@@ -200,6 +201,9 @@ export const sh = function* (
   log: false | string
 ): Operation<string> {
   let out = "";
+  let stdout = "";
+  let stderr = "";
+
   let child;
   if (command.includes("|") && !options.shell) {
     child = yield exec(command, {
@@ -219,21 +223,23 @@ export const sh = function* (
   }
 
   yield spawn(
-    child.stdout.forEach((text: String) => {
-      out += text.toString();
-      if (log !== false) console.log(text.toString().trim());
+    child.stderr.forEach((chunk: Buffer) => {
+      out += chunk.toString();
+      stderr += chunk.toString();
+      if (log !== false) console.error(chunk.toString().trim());
     })
   );
 
   yield spawn(
-    child.stderr.forEach((text: String) => {
-      out += text.toString();
-      if (log !== false) console.error(text.toString().trim());
+    child.stdout.forEach((chunk: Buffer) => {
+      out += chunk.toString();
+      stdout += chunk.toString();
+      if (log !== false) console.log(chunk.toString().trim());
     })
   );
 
-  yield child.expect();
-  return out.trim();
+  const result = yield child.expect();
+  return { result, stdout, stderr, out: out.trim() };
 };
 
 export const raceTime = function* ({
