@@ -210,7 +210,7 @@ export const sh = function* (
   command: string,
   options: { [k: string]: any },
   log: false | string
-): Operation<string> {
+): Operation<{ result: Number; stdout: string; stderr: string; out: string }> {
   let out = "";
   let stdout = "";
   let stderr = "";
