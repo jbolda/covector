@@ -162,6 +162,7 @@ export function* version({
     pkgCommandsRan,
     dryRun,
   });
+  console.dir({ applied, pkgCommandsRan }, { depth: 6 });
 
   if (command === "version" && !dryRun) {
     if (pre) {
