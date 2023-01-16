@@ -1,4 +1,4 @@
-import { all, Operation } from "effection";
+import { Operation } from "effection";
 import unified from "unified";
 import { Root, YAML as Frontmatter, Content } from "mdast";
 import parse from "remark-parse";
@@ -82,9 +82,9 @@ export const parseChange = function* ({
         commits,
       };
     } catch (e) {
-      console.error(e);
       changeset.meta = {
         ...file,
+        commits: [],
       };
     }
   }
@@ -265,8 +265,14 @@ const changesParsed = function* ({
   cwd?: string;
   files: File[];
 }): Operation<Change[]> {
-  const allFiles = files.map((file) => parseChange({ cwd, file }));
-  return yield all(allFiles);
+  const allChangesParsed = [];
+
+  for (let file of files) {
+    const parsed = yield parseChange({ cwd, file });
+    allChangesParsed.push(parsed);
+  }
+
+  return allChangesParsed;
 };
 
 const changeDiff = ({
