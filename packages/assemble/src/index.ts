@@ -62,7 +62,7 @@ export const parseChange = function* ({
       const gitInfo = yield runCommand({
         cwd,
         pkgPath: ".",
-        command: `git log --reverse --format="%h %H %as %s" ${file.path}`,
+        command: `git --no-pager log --reverse --format="%h %H %as %s" ${file.path}`,
         log: false,
       });
       console.dir({ gitInfo, file });
