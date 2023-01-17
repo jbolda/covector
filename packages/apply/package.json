@@ -1,6 +1,6 @@
 {
   "name": "@covector/apply",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
@@ -16,7 +16,7 @@
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
-    "@covector/files": "0.5.1",
+    "@covector/files": "0.6.0",
     "effection": "^2.0.6",
     "lodash": "^4.17.21",
     "semver": "^7.3.7"

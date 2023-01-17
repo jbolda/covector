@@ -1,5 +1,21 @@
 # Changelog
 
+## \[0.7.0]
+
+- The dependency bumps will now use the next version of the package as derived from the existing change files. Previously, it presumed that a applying a dependency bump was sufficient which worked most of the time, but ignored some edge cases.
+  - [aa7ea83](https://www.github.com/jbolda/covector/commit/aa7ea83b1463219643cb3098cc6bb7f5c6458374) dep bumps use main version directly vs presuming increment is correct ([#256](https://www.github.com/jbolda/covector/pull/256)) on 2022-12-27
+- Update multiple devDeps, semver, yargs, inquirer, and packages in our action. This is primarily internal upgrades and don't affect external APIs.
+  - [18ff898](https://www.github.com/jbolda/covector/commit/18ff898a64a0f3677c55d994d22177189700204a) dep update ([#240](https://www.github.com/jbolda/covector/pull/240)) on 2022-04-16
+- Apply parent bumps dependent on the how the dependency is specified. For a range bump, we don't assume that that requires a bump from a child. If a bump is expected, then a change file specific to the change is more explicit.
+  - [ba6e7f1](https://www.github.com/jbolda/covector/commit/ba6e7f1c9ead622844ff1c040fffb67b925f0bcf) skip bump for range ([#257](https://www.github.com/jbolda/covector/pull/257)) on 2023-01-12
+- This fixes the bug where we would look the range requirement on dependencies.
+  - [763ee33](https://www.github.com/jbolda/covector/commit/763ee33420f88a58161013b3cb7d3eea5ababea8) feat: keep dependency version requirement ([#252](https://www.github.com/jbolda/covector/pull/252)) on 2022-12-21
+- Remove the `to-vfile` package as a dependency. This allows us to focus our file reference to our specific needs, and one less dependency to maintain. With this change, we also converted a handful of promises into generators for better compatibility and control with effection.
+  - [1b33933](https://www.github.com/jbolda/covector/commit/1b33933be25094900f647527a82ddba0a08778fe) Remove vfile ([#234](https://www.github.com/jbolda/covector/pull/234)) on 2022-04-10
+- Upgrade to `effection` v2. This is primarily an internal improvement, but will enable future features such as fetching from an endpoint to check if a version of a package was published. It also brings an updated dependency to gracefully shutdown windows processes.
+  - [a0acf81](https://www.github.com/jbolda/covector/commit/a0acf81b2235ac142233d9c0e416d5e07af3cbb3) Effection v2 ([#227](https://www.github.com/jbolda/covector/pull/227)) on 2022-03-19
+  - [a346221](https://www.github.com/jbolda/covector/commit/a346221102075e647693851fd1019d66641f8014) bump effection to latest on v2 ([#246](https://www.github.com/jbolda/covector/pull/246)) on 2022-10-26
+
 ## \[0.6.1]
 
 - Include a copy of the license in each package.

@@ -1,5 +1,21 @@
 # Changelog
 
+## \[0.8.0]
+
+- Run the Github Action with Node v16. The previous version, Node v12, will no longer be supported.
+  - [d40c111](https://www.github.com/jbolda/covector/commit/d40c1115f4b6896d91f52b02df8fbfca87285434) chore(action): Use Node.js 16.x ([#249](https://www.github.com/jbolda/covector/pull/249)) on 2022-12-19
+- Update `@actions/core` and `@actions/github` to remove deprecation warnings.
+  - [3783b53](https://www.github.com/jbolda/covector/commit/3783b53def27bd1c239549f813a6dc37a23f1a71) chore(action): Update actions/core and actions/github dependencies ([#248](https://www.github.com/jbolda/covector/pull/248)) on 2022-12-21
+- Update multiple devDeps, semver, yargs, inquirer, and packages in our action. This is primarily internal upgrades and don't affect external APIs.
+  - [18ff898](https://www.github.com/jbolda/covector/commit/18ff898a64a0f3677c55d994d22177189700204a) dep update ([#240](https://www.github.com/jbolda/covector/pull/240)) on 2022-04-16
+- Remove the `to-vfile` package as a dependency. This allows us to focus our file reference to our specific needs, and one less dependency to maintain. With this change, we also converted a handful of promises into generators for better compatibility and control with effection.
+  - [1b33933](https://www.github.com/jbolda/covector/commit/1b33933be25094900f647527a82ddba0a08778fe) Remove vfile ([#234](https://www.github.com/jbolda/covector/pull/234)) on 2022-04-10
+- Set the `target_commitish` field on created releases.
+  - [8f4bad1](https://www.github.com/jbolda/covector/commit/8f4bad1ec6909eb9a46f5c5c05e3c7c36c4de9df) feat: set target_commitish for the release, closes [#250](https://www.github.com/jbolda/covector/pull/250) ([#251](https://www.github.com/jbolda/covector/pull/251)) on 2022-12-22
+- Upgrade to `effection` v2. This is primarily an internal improvement, but will enable future features such as fetching from an endpoint to check if a version of a package was published. It also brings an updated dependency to gracefully shutdown windows processes.
+  - [a0acf81](https://www.github.com/jbolda/covector/commit/a0acf81b2235ac142233d9c0e416d5e07af3cbb3) Effection v2 ([#227](https://www.github.com/jbolda/covector/pull/227)) on 2022-03-19
+  - [a346221](https://www.github.com/jbolda/covector/commit/a346221102075e647693851fd1019d66641f8014) bump effection to latest on v2 ([#246](https://www.github.com/jbolda/covector/pull/246)) on 2022-10-26
+
 ## \[0.7.0]
 
 - The action created a release for any `publish` keys in `pkgManger`, but didn't do it for anything specified in `packages`. This meant that if you elected not to use `pkgManager`, it would not create a release. This has been fixed and it will now create a release. We also added some debug output to improve the debugging experience.

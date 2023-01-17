@@ -1,5 +1,19 @@
 # Changelog
 
+## \[0.9.0]
+
+- Package file objects now include the dependencies keyed by the name with an array including the dependency type. This information is now passed to the commands pipeline.
+  - [ba6e7f1](https://www.github.com/jbolda/covector/commit/ba6e7f1c9ead622844ff1c040fffb67b925f0bcf) skip bump for range ([#257](https://www.github.com/jbolda/covector/pull/257)) on 2023-01-12
+- Update multiple devDeps, semver, yargs, inquirer, and packages in our action. This is primarily internal upgrades and don't affect external APIs.
+  - [18ff898](https://www.github.com/jbolda/covector/commit/18ff898a64a0f3677c55d994d22177189700204a) dep update ([#240](https://www.github.com/jbolda/covector/pull/240)) on 2022-04-16
+- When collecting `git log` metadata for change files, running it in parallel caused occasional no-op which increasingly became more flaky with more files. Adjust this to run it serially which should be a neglible difference.
+  - [bf94c90](https://www.github.com/jbolda/covector/commit/bf94c905e05ea8402c596564eea1fa8bcb8d975b) undefined commits in changelog, `git log` needs to be run serially ([#261](https://www.github.com/jbolda/covector/pull/261)) on 2023-01-16
+- Remove the `to-vfile` package as a dependency. This allows us to focus our file reference to our specific needs, and one less dependency to maintain. With this change, we also converted a handful of promises into generators for better compatibility and control with effection.
+  - [1b33933](https://www.github.com/jbolda/covector/commit/1b33933be25094900f647527a82ddba0a08778fe) Remove vfile ([#234](https://www.github.com/jbolda/covector/pull/234)) on 2022-04-10
+- Upgrade to `effection` v2. This is primarily an internal improvement, but will enable future features such as fetching from an endpoint to check if a version of a package was published. It also brings an updated dependency to gracefully shutdown windows processes.
+  - [a0acf81](https://www.github.com/jbolda/covector/commit/a0acf81b2235ac142233d9c0e416d5e07af3cbb3) Effection v2 ([#227](https://www.github.com/jbolda/covector/pull/227)) on 2022-03-19
+  - [a346221](https://www.github.com/jbolda/covector/commit/a346221102075e647693851fd1019d66641f8014) bump effection to latest on v2 ([#246](https://www.github.com/jbolda/covector/pull/246)) on 2022-10-26
+
 ## \[0.8.2]
 
 - Include a copy of the license in each package.

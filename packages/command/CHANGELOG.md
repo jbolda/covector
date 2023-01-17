@@ -1,5 +1,17 @@
 # Changelog
 
+## \[0.6.0]
+
+- Update multiple devDeps, semver, yargs, inquirer, and packages in our action. This is primarily internal upgrades and don't affect external APIs.
+  - [18ff898](https://www.github.com/jbolda/covector/commit/18ff898a64a0f3677c55d994d22177189700204a) dep update ([#240](https://www.github.com/jbolda/covector/pull/240)) on 2022-04-16
+- Remove `execa` as the command runner. We still attempt to handle of some the backward compatibility that can eventually be deprecated (such as the pipe defaulting to using a shell), but it enables more control over how the runner executes commands (or fails the commands).
+  - [691d81f](https://www.github.com/jbolda/covector/commit/691d81f5d4990d3aeb5aa37d46b738e1a0e96601) effection for exec of shell ([#239](https://www.github.com/jbolda/covector/pull/239)) on 2022-12-19
+- The exported sh function returns an object instead of a string exposing more detailed information about the command.
+  - [bf94c90](https://www.github.com/jbolda/covector/commit/bf94c905e05ea8402c596564eea1fa8bcb8d975b) undefined commits in changelog, `git log` needs to be run serially ([#261](https://www.github.com/jbolda/covector/pull/261)) on 2023-01-16
+- Upgrade to `effection` v2. This is primarily an internal improvement, but will enable future features such as fetching from an endpoint to check if a version of a package was published. It also brings an updated dependency to gracefully shutdown windows processes.
+  - [a0acf81](https://www.github.com/jbolda/covector/commit/a0acf81b2235ac142233d9c0e416d5e07af3cbb3) Effection v2 ([#227](https://www.github.com/jbolda/covector/pull/227)) on 2022-03-19
+  - [a346221](https://www.github.com/jbolda/covector/commit/a346221102075e647693851fd1019d66641f8014) bump effection to latest on v2 ([#246](https://www.github.com/jbolda/covector/pull/246)) on 2022-10-26
+
 ## \[0.5.1]
 
 - Include a copy of the license in each package.
