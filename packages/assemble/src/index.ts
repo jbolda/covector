@@ -65,7 +65,7 @@ export const parseChange = function* ({
         command: `git --no-pager log --reverse --format="%h %H %as %s" ${file.path}`,
         log: false,
       });
-      const commits = gitInfo.split("\n").map((commit: string) => {
+      const commits = gitInfo.split(/\n/).map((commit: string) => {
         const [hashShort, hashLong, date, ...rest] = commit.split(" ");
         return {
           hashShort,
@@ -82,7 +82,6 @@ export const parseChange = function* ({
     } catch (e) {
       changeset.meta = {
         ...file,
-        commits: [],
       };
     }
   }

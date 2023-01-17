@@ -15,7 +15,7 @@ jest.mock("@actions/github", () => ({
 describe("full e2e test", () => {
   let restoreConsole: Function;
   beforeEach(() => {
-    restoreConsole = mockConsole(["log", "info", "error"]);
+    restoreConsole = mockConsole(["log", "dir", "info", "error"]);
     jest.clearAllMocks();
   });
   afterEach(() => {

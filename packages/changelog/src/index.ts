@@ -178,7 +178,6 @@ const applyChanges = ({
         addition = assembledChanges.releases[
           change.changes.name
         ].changes.reduce((finalString, release) => {
-          console.dir({ release }, { depth: 6 });
           if (!release.meta || (!!release.meta && !release.meta.commits)) {
             return `${finalString}\n- ${release.summary}`;
           } else if (release.meta.commits) {

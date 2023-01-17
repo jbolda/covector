@@ -7,7 +7,6 @@ Object {
       Array [
         Object {
           "meta": Object {
-            "commits": Array [],
             "content": "---
 \\"tauri\\": minor
 ---
@@ -32,7 +31,6 @@ Summary about the changes in tauri
       Array [
         Object {
           "meta": Object {
-            "commits": Array [],
             "content": "---
 \\"tauri-updater\\": patch
 ---
@@ -75,7 +73,6 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri\\": minor
 ---
@@ -488,7 +485,6 @@ Summary about the changes in tauri
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri-updater\\": patch
 ---
@@ -534,7 +530,6 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri\\": minor
 ---
@@ -13930,7 +13925,6 @@ Object {
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri\\": minor
 ---
@@ -14343,7 +14337,6 @@ Summary about the changes in tauri
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri-updater\\": patch
 ---
@@ -14389,7 +14382,6 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri\\": minor
 ---
@@ -14415,82 +14407,6 @@ Summary about the changes in tauri
       },
       Object {
         "depth": 5,
-      },
-    ],
-    Array [
-      Object {
-        "release": Object {
-          "meta": Object {
-            "commits": Array [],
-            "content": "---
-\\"tauri\\": minor
----
-
-Summary about the changes in tauri
-",
-            "dependencies": "Bumped due to a bump in tauri.",
-            "extname": ".md",
-            "filename": "first-change",
-            "path": ".changes/first-change.md",
-          },
-          "releases": Object {
-            "tauri": "minor",
-          },
-          "summary": "Summary about the changes in tauri",
-        },
-      },
-      Object {
-        "depth": 6,
-      },
-    ],
-    Array [
-      Object {
-        "release": Object {
-          "meta": Object {
-            "commits": Array [],
-            "content": "---
-\\"tauri\\": minor
----
-
-Summary about the changes in tauri
-",
-            "extname": ".md",
-            "filename": "first-change",
-            "path": ".changes/first-change.md",
-          },
-          "releases": Object {
-            "tauri": "minor",
-          },
-          "summary": "Summary about the changes in tauri",
-        },
-      },
-      Object {
-        "depth": 6,
-      },
-    ],
-    Array [
-      Object {
-        "release": Object {
-          "meta": Object {
-            "commits": Array [],
-            "content": "---
-\\"tauri-updater\\": patch
----
-
-Summary about the changes in tauri-updater
-",
-            "extname": ".md",
-            "filename": "second-change",
-            "path": ".changes/second-change.md",
-          },
-          "releases": Object {
-            "tauri-updater": "patch",
-          },
-          "summary": "Summary about the changes in tauri-updater",
-        },
-      },
-      Object {
-        "depth": 6,
       },
     ],
     Array [
@@ -14809,8 +14725,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
             "versionPrerelease": null,
           },
           "command": "## [0.6.0]
-- Summary about the changes in tauri
-",
+- Summary about the changes in tauri",
           "postcommand": false,
           "precommand": false,
         },
@@ -14961,8 +14876,7 @@ thiserror = \\"1.0.19\\"
             "versionPrerelease": null,
           },
           "command": "## [0.4.3]
-- Summary about the changes in tauri-updater
-",
+- Summary about the changes in tauri-updater",
           "postcommand": false,
           "precommand": false,
         },
@@ -15572,9 +15486,7 @@ thiserror = \\"1.0.19\\"
             "versionPrerelease": null,
           },
           "command": "## [0.6.3]
-- Summary about the changes in tauri
-  - Bumped due to a bump in tauri.
-",
+- Summary about the changes in tauri",
           "postcommand": false,
           "precommand": false,
         },
@@ -16346,8 +16258,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
           "versionPrerelease": null,
         },
         "command": "## [0.6.0]
-- Summary about the changes in tauri
-",
+- Summary about the changes in tauri",
         "postcommand": false,
         "precommand": false,
       },
@@ -16498,8 +16409,7 @@ thiserror = \\"1.0.19\\"
           "versionPrerelease": null,
         },
         "command": "## [0.4.3]
-- Summary about the changes in tauri-updater
-",
+- Summary about the changes in tauri-updater",
         "postcommand": false,
         "precommand": false,
       },
@@ -17109,9 +17019,7 @@ thiserror = \\"1.0.19\\"
           "versionPrerelease": null,
         },
         "command": "## [0.6.3]
-- Summary about the changes in tauri
-  - Bumped due to a bump in tauri.
-",
+- Summary about the changes in tauri",
         "postcommand": false,
         "precommand": false,
       },
@@ -17136,7 +17044,6 @@ thiserror = \\"1.0.19\\"
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri\\": minor
 ---
@@ -17544,7 +17451,6 @@ Summary about the changes in tauri
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri-updater\\": patch
 ---
@@ -17585,7 +17491,6 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "commits": Array [],
                   "content": "---
 \\"tauri\\": minor
 ---

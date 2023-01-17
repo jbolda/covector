@@ -1740,57 +1740,6 @@ Object {
 }
 `;
 
-exports[`full e2e test of version output 1`] = `
-Object {
-  "covectoredAction": undefined,
-}
-`;
-
-exports[`full e2e test of version output 2`] = `
-[MockFunction] {
-  "calls": Array [
-    Array [
-      "commandRan",
-      "version",
-    ],
-    Array [
-      "status",
-      "No changes.",
-    ],
-    Array [
-      "templatePipe",
-      Object {},
-    ],
-    Array [
-      "change",
-      "# Version Updates
-
-Merging this PR will release new versions of the following packages based on your change files.
-
-",
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-    Object {
-      "type": "return",
-      "value": undefined,
-    },
-  ],
-}
-`;
-
 exports[`full e2e test of version outputs for no change 1`] = `
 Object {
   "covectoredAction": undefined,

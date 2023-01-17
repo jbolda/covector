@@ -181,7 +181,7 @@ Boop again.
   });
 
   it("runs version in --dry-run mode for js and rust", function* () {
-    const restoreConsole = mockConsole(["log", "info"]);
+    const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
@@ -194,6 +194,7 @@ Boop again.
       throw new Error("We are expecting an object here.");
     expect({
       consoleLog: (console.log as any).mock.calls,
+      consoleDir: (console.dir as any).mock.calls,
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
