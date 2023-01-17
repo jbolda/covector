@@ -1,5 +1,27 @@
 # Changelog
 
+## \[0.8.0]
+
+- A new command `covector add` to make it easier to add a new change file.
+  - [0c2faba](https://www.github.com/jbolda/covector/commit/0c2faba52163e4f0ab098e221f6007da62a27bee) covector add ([#232](https://www.github.com/jbolda/covector/pull/232)) on 2022-03-26
+- Split up the main entrypoint for covector into more focused source files. Primarily an internal change. Closes #166.
+  - [7ea8a50](https://www.github.com/jbolda/covector/commit/7ea8a50d4620967f3d5c7ad9afb33f6d6fc45380) split up files tests ([#238](https://www.github.com/jbolda/covector/pull/238)) on 2022-04-14
+- Update multiple devDeps, semver, yargs, inquirer, and packages in our action. This is primarily internal upgrades and don't affect external APIs.
+  - [18ff898](https://www.github.com/jbolda/covector/commit/18ff898a64a0f3677c55d994d22177189700204a) dep update ([#240](https://www.github.com/jbolda/covector/pull/240)) on 2022-04-16
+- Updated the init script to create actions with `actions/checkout@v3` and `actions/setup-node@v3`.
+  - [691d81f](https://www.github.com/jbolda/covector/commit/691d81f5d4990d3aeb5aa37d46b738e1a0e96601) effection for exec of shell ([#239](https://www.github.com/jbolda/covector/pull/239)) on 2022-12-19
+- We have context about the repo when we run an `init`. We can use that context to guess on the "default" base url, and set it in the prompt.
+  - [d9dbd70](https://www.github.com/jbolda/covector/commit/d9dbd7003f2b44051c5d694f1ca6f6af705b94d4) `covector init` pulls url for config ([#241](https://www.github.com/jbolda/covector/pull/241)) on 2022-05-05
+- Bump inquirer and globby to highest CJS version.
+  - [84eb245](https://www.github.com/jbolda/covector/commit/84eb2451d0ad0c27c10caa9c516e5d9d61cf7ce0) bump inquirer and globby to highest CJS version ([#254](https://www.github.com/jbolda/covector/pull/254)) on 2022-12-19
+- Read all package files up front in rather than dependent on specific change files. This is clearer to manage, neglible performance difference, and enables dynamic bumps based on dependencies with ranges.
+  - [ba6e7f1](https://www.github.com/jbolda/covector/commit/ba6e7f1c9ead622844ff1c040fffb67b925f0bcf) skip bump for range ([#257](https://www.github.com/jbolda/covector/pull/257)) on 2023-01-12
+- Remove the `to-vfile` package as a dependency. This allows us to focus our file reference to our specific needs, and one less dependency to maintain. With this change, we also converted a handful of promises into generators for better compatibility and control with effection.
+  - [1b33933](https://www.github.com/jbolda/covector/commit/1b33933be25094900f647527a82ddba0a08778fe) Remove vfile ([#234](https://www.github.com/jbolda/covector/pull/234)) on 2022-04-10
+- Upgrade to `effection` v2. This is primarily an internal improvement, but will enable future features such as fetching from an endpoint to check if a version of a package was published. It also brings an updated dependency to gracefully shutdown windows processes.
+  - [a0acf81](https://www.github.com/jbolda/covector/commit/a0acf81b2235ac142233d9c0e416d5e07af3cbb3) Effection v2 ([#227](https://www.github.com/jbolda/covector/pull/227)) on 2022-03-19
+  - [a346221](https://www.github.com/jbolda/covector/commit/a346221102075e647693851fd1019d66641f8014) bump effection to latest on v2 ([#246](https://www.github.com/jbolda/covector/pull/246)) on 2022-10-26
+
 ## \[0.7.3]
 
 - Include a copy of the license in each package.
