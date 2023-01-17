@@ -111,7 +111,7 @@ export function* status({
     console.log("changes:");
     Object.keys(assembledChanges.releases).forEach((release) => {
       console.log(`${release} => ${assembledChanges.releases[release].type}`);
-      console.dir(assembledChanges.releases[release].changes);
+      console.dir(assembledChanges.releases[release].changes, { depth: 4 });
     });
 
     const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({

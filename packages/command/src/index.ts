@@ -1,4 +1,4 @@
-import { spawn, timeout } from "effection";
+import { spawn, timeout, Operation, MainError } from "effection";
 import { exec } from "@effection/process";
 import path from "path";
 
@@ -23,7 +23,7 @@ export const attemptCommands = function* ({
   commandPrefix?: string;
   pkgCommandsRan?: object;
   dryRun: boolean;
-}): Generator<any, { [k: string]: { [c: string]: string | boolean } }, string> {
+}): Operation<{ [k: string]: { [c: string]: string | boolean } }> {
   let _pkgCommandsRan: { [k: string]: { [c: string]: string | boolean } } = {
     ...pkgCommandsRan,
   };
@@ -137,7 +137,7 @@ export const confirmCommandsToRun = function* ({
   cwd: string;
   commands: PkgPublish[];
   command: string;
-}): Generator<any, PkgPublish[], any> {
+}): Operation<PkgPublish[]> {
   let subPublishCommand = command.slice(7, 999);
   let commandsToRun: PkgPublish[] = [];
   for (let pkg of commands) {
@@ -180,26 +180,41 @@ export const runCommand = function* ({
   cwd: string;
   pkgPath: string;
   log: false | string;
-}): Generator<any, string, any> {
+}): Operation<string> {
   if (log !== false) console.log(log);
-  yield raceTime();
 
-  return yield* sh(
+  const timeoutPeriod = 1200000;
+  try {
+    yield spawn(timeout(timeoutPeriod));
+  } catch (e) {
+    throw new MainError({
+      message: `timeout waiting ${
+        timeoutPeriod / 1000
+      }s for command: ${command}`,
+      exitCode: 1,
+    });
+  }
+
+  const ran = yield sh(
     command,
     {
       cwd: path.join(cwd, pkgPath),
-      encoding: "utf8",
     },
     log
   );
+
+  return ran.out;
 };
 
 export const sh = function* (
   command: string,
   options: { [k: string]: any },
   log: false | string
-): Generator<any, string, any> {
+): Operation<{ result: Number; stdout: string; stderr: string; out: string }> {
   let out = "";
+  let stdout = "";
+  let stderr = "";
+
   let child;
   if (command.includes("|") && !options.shell) {
     child = yield exec(command, {
@@ -210,7 +225,7 @@ export const sh = function* (
     child = yield exec(command, {
       ...options,
       shell:
-        process.platform == "win32" && options.shell === true
+        process.platform === "win32" && options.shell === true
           ? "bash"
           : options.shell,
     });
@@ -219,21 +234,23 @@ export const sh = function* (
   }
 
   yield spawn(
-    child.stdout.forEach((text: String) => {
-      out += text.toString();
-      if (log !== false) console.log(text.toString().trim());
+    child.stderr.forEach((chunk: Buffer) => {
+      out += chunk.toString();
+      stderr += chunk.toString();
+      if (log !== false) console.error(chunk.toString().trim());
     })
   );
 
   yield spawn(
-    child.stderr.forEach((text: String) => {
-      out += text.toString();
-      if (log !== false) console.error(text.toString().trim());
+    child.stdout.forEach((chunk: Buffer) => {
+      out += chunk.toString();
+      stdout += chunk.toString();
+      if (log !== false) console.log(chunk.toString().trim());
     })
   );
 
-  yield child.expect();
-  return out.trim();
+  const result = yield child.expect();
+  return { result, stdout, stderr, out: out.trim() };
 };
 
 export const raceTime = function* ({

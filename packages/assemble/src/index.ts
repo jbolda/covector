@@ -1,4 +1,4 @@
-import { all } from "effection";
+import { Operation } from "effection";
 import unified from "unified";
 import { Root, YAML as Frontmatter, Content } from "mdast";
 import parse from "remark-parse";
@@ -28,7 +28,7 @@ export const parseChange = function* ({
 }: {
   cwd?: string;
   file: File;
-}): Generator<any, Changeset, any> {
+}): Operation<Changeset> {
   const processor = unified()
     .use(parse)
     .use(frontmatter, ["yaml"])
@@ -59,10 +59,10 @@ export const parseChange = function* ({
 
   if (cwd) {
     try {
-      let gitInfo = yield runCommand({
+      const gitInfo = yield runCommand({
         cwd,
-        pkgPath: "",
-        command: `git log --reverse --format="%h %H %as %s" ${file.path}`,
+        pkgPath: ".",
+        command: `git --no-pager log --reverse --format="%h %H %as %s" ${file.path}`,
         log: false,
       });
       const commits = gitInfo.split(/\n/).map((commit: string) => {
@@ -261,9 +261,15 @@ const changesParsed = function* ({
 }: {
   cwd?: string;
   files: File[];
-}): Generator<any, Change[], any> {
-  const allFiles = files.map((file) => parseChange({ cwd, file }));
-  return yield all(allFiles);
+}): Operation<Change[]> {
+  const allChangesParsed = [];
+
+  for (let file of files) {
+    const parsed = yield parseChange({ cwd, file });
+    allChangesParsed.push(parsed);
+  }
+
+  return allChangesParsed;
 };
 
 const changeDiff = ({
@@ -402,9 +408,9 @@ export const mergeChangesToConfig = function* ({
   }
 
   if (dryRun) {
-    console.log("==== data piped into commands ===");
+    console.dir("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
-      console.log(pkg, "pipe", pipeOutput[pkg].pipe)
+      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
     );
   }
 
@@ -600,9 +606,9 @@ export const mergeIntoConfig = function* ({
   }
 
   if (dryRun) {
-    console.log("==== data piped into commands ===");
+    console.dir("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
-      console.log(pkg, "pipe", pipeOutput[pkg].pipe)
+      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
     );
   }
 

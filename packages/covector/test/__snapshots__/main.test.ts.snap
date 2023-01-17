@@ -224,6 +224,9 @@ Summary about the changes in tauri
           "summary": "Summary about the changes in tauri",
         },
       ],
+      Object {
+        "depth": 4,
+      },
     ],
     Array [
       Array [
@@ -245,6 +248,9 @@ Summary about the changes in tauri-updater
           "summary": "Summary about the changes in tauri-updater",
         },
       ],
+      Object {
+        "depth": 4,
+      },
     ],
   ],
   "consoleLog": Array [

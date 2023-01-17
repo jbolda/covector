@@ -173,8 +173,8 @@ export function* version({
   }
 
   if (dryRun) {
-    console.log("==== result ===");
-    console.log(pkgCommandsRan);
+    console.dir("==== result ===");
+    console.dir(pkgCommandsRan);
   }
 
   return <CovectorVersion>{ commandsRan: pkgCommandsRan, pipeTemplate };

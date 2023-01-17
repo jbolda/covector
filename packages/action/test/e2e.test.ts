@@ -15,7 +15,7 @@ jest.mock("@actions/github", () => ({
 describe("full e2e test", () => {
   let restoreConsole: Function;
   beforeEach(() => {
-    restoreConsole = mockConsole(["log", "info", "error"]);
+    restoreConsole = mockConsole(["log", "dir", "info", "error"]);
     jest.clearAllMocks();
   });
   afterEach(() => {
@@ -44,7 +44,7 @@ describe("full e2e test", () => {
   });
 
   describe("of version", () => {
-    it("output", async () => {
+    it("outputs for no change", async () => {
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -60,6 +60,30 @@ describe("full e2e test", () => {
       const covectoredAction = await run(covector());
       expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
+      expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
+      // to cover template pipe
+      expect(core.setOutput).toMatchSnapshot();
+    });
+
+    it("outputs with changes", async () => {
+      const cwd: string = f.copy("integration.js-and-rust-with-changes");
+
+      const input: { [k: string]: string } = {
+        command: "version",
+        cwd,
+        createRelease: "false",
+        draftRelease: "false",
+        token: "randomsequenceofcharactersforsecurity",
+      };
+
+      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+
+      const covectoredAction = await run(covector());
+      expect({ covectoredAction }).toMatchSnapshot();
+      expect(core.setOutput).toHaveBeenCalledWith(
+        "status",
+        "There are 2 changes which include tauri with minor, tauri-updater with patch"
+      );
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
       // to cover template pipe
       expect(core.setOutput).toMatchSnapshot();

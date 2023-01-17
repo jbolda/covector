@@ -180,27 +180,24 @@ const applyChanges = ({
         ].changes.reduce((finalString, release) => {
           if (!release.meta || (!!release.meta && !release.meta.commits)) {
             return `${finalString}\n- ${release.summary}`;
+          } else if (release.meta.commits) {
+            return `${finalString}\n- ${release.summary}\n${
+              !release.meta.dependencies
+                ? ""
+                : `  - ${release.meta.dependencies}\n`
+            }${release.meta.commits
+              .map(
+                (commit) =>
+                  `  - [${commit.hashShort}](${gitSiteUrl}commit/${
+                    commit.hashLong
+                  }) ${commit.commitSubject.replace(
+                    /(#[0-9]+)/g,
+                    (match) => `[${match}](${gitSiteUrl}pull/${match.slice(1)})`
+                  )} on ${commit.date}`
+              )
+              .join("\n")}`;
           } else {
-            if (release.meta.commits) {
-              return `${finalString}\n- ${release.summary}\n${
-                !release.meta.dependencies
-                  ? ""
-                  : `  - ${release.meta.dependencies}\n`
-              }${release.meta.commits
-                .map(
-                  (commit) =>
-                    `  - [${commit.hashShort}](${gitSiteUrl}commit/${
-                      commit.hashLong
-                    }) ${commit.commitSubject.replace(
-                      /(#[0-9]+)/g,
-                      (match) =>
-                        `[${match}](${gitSiteUrl}pull/${match.slice(1)})`
-                    )} on ${commit.date}`
-                )
-                .join("\n")}`;
-            } else {
-              return finalString;
-            }
+            return finalString;
           }
         }, `## [${change.changes.version}]`);
       }

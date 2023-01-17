@@ -1740,13 +1740,13 @@ Object {
 }
 `;
 
-exports[`full e2e test of version output 1`] = `
+exports[`full e2e test of version outputs for no change 1`] = `
 Object {
   "covectoredAction": undefined,
 }
 `;
 
-exports[`full e2e test of version output 2`] = `
+exports[`full e2e test of version outputs for no change 2`] = `
 [MockFunction] {
   "calls": Array [
     Array [
@@ -1767,6 +1767,567 @@ exports[`full e2e test of version output 2`] = `
 
 Merging this PR will release new versions of the following packages based on your change files.
 
+",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+    Object {
+      "type": "return",
+      "value": undefined,
+    },
+  ],
+}
+`;
+
+exports[`full e2e test of version outputs with changes 1`] = `
+Object {
+  "covectoredAction": undefined,
+}
+`;
+
+exports[`full e2e test of version outputs with changes 2`] = `
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "commandRan",
+      "version",
+    ],
+    Array [
+      "status",
+      "There are 2 changes which include tauri with minor, tauri-updater with patch",
+    ],
+    Array [
+      "templatePipe",
+      Object {
+        "tauri": Object {
+          "name": "tauri",
+          "pipe": Object {
+            "pkg": Object {
+              "command": true,
+              "dependencies": Array [
+                "tauri-api",
+              ],
+              "errorOnVersionRange": null,
+              "manager": "rust",
+              "path": "./tauri",
+              "pkg": "tauri",
+              "postcommand": null,
+              "precommand": null,
+            },
+            "release": Object {
+              "changes": Array [
+                Object {
+                  "meta": Object {
+                    "content": "---
+\\"tauri\\": minor
+---
+
+Summary about the changes in tauri
+",
+                    "extname": ".md",
+                    "filename": "first-change",
+                    "path": ".changes/first-change.md",
+                  },
+                  "releases": Object {
+                    "tauri": "minor",
+                  },
+                  "summary": "Summary about the changes in tauri",
+                },
+              ],
+              "parents": Object {
+                "tauri.js": Object {
+                  "@babel/core": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "7.10.2",
+                    },
+                  ],
+                  "@babel/preset-env": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "7.10.2",
+                    },
+                  ],
+                  "@babel/preset-typescript": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "7.10.1",
+                    },
+                  ],
+                  "@tauri-apps/tauri-inliner": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "1.14.1",
+                    },
+                  ],
+                  "@tauri-apps/toml": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "2.2.4",
+                    },
+                  ],
+                  "@types/cross-spawn": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "6.0.2",
+                    },
+                  ],
+                  "@types/fs-extra": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "9.0.1",
+                    },
+                  ],
+                  "@types/http-proxy": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "1.17.4",
+                    },
+                  ],
+                  "@types/imagemin": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "7.0.0",
+                    },
+                  ],
+                  "@types/imagemin-optipng": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "5.2.0",
+                    },
+                  ],
+                  "@types/jsdom": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "16.2.3",
+                    },
+                  ],
+                  "@types/lodash": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "4.14.155",
+                    },
+                  ],
+                  "@types/ms": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "0.7.31",
+                    },
+                  ],
+                  "@types/sharp": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "0.25.0",
+                    },
+                  ],
+                  "@types/webpack-merge": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "4.1.5",
+                    },
+                  ],
+                  "@typescript-eslint/eslint-plugin": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "3.1.0",
+                    },
+                  ],
+                  "@typescript-eslint/parser": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "3.1.0",
+                    },
+                  ],
+                  "babel-jest": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "26.0.1",
+                    },
+                  ],
+                  "chalk": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "4.0.0",
+                    },
+                  ],
+                  "chokidar": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "3.4.0",
+                    },
+                  ],
+                  "cross-spawn": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "7.0.3",
+                    },
+                  ],
+                  "dotenv": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "8.2.0",
+                    },
+                  ],
+                  "eslint": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "7.1.0",
+                    },
+                  ],
+                  "eslint-config-standard-with-typescript": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "18.0.2",
+                    },
+                  ],
+                  "eslint-plugin-import": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "2.20.2",
+                    },
+                  ],
+                  "eslint-plugin-lodash-template": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "0.18.0",
+                    },
+                  ],
+                  "eslint-plugin-node": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "11.1.0",
+                    },
+                  ],
+                  "eslint-plugin-promise": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "4.2.1",
+                    },
+                  ],
+                  "eslint-plugin-security": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "1.4.0",
+                    },
+                  ],
+                  "eslint-plugin-standard": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "4.0.1",
+                    },
+                  ],
+                  "fast-glob": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "3.2.2",
+                    },
+                  ],
+                  "fs-extra": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "9.0.1",
+                    },
+                  ],
+                  "http-proxy": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "1.18.1",
+                    },
+                  ],
+                  "husky": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "4.2.5",
+                    },
+                  ],
+                  "imagemin": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "7.0.1",
+                    },
+                  ],
+                  "imagemin-optipng": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "8.0.0",
+                    },
+                  ],
+                  "imagemin-pngquant": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "9.0.0",
+                    },
+                  ],
+                  "imagemin-zopfli": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "7.0.0",
+                    },
+                  ],
+                  "is-png": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "2.0.0",
+                    },
+                  ],
+                  "is-running": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "2.1.0",
+                    },
+                  ],
+                  "isbinaryfile": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "4.0.6",
+                    },
+                  ],
+                  "jest": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "26.0.1",
+                    },
+                  ],
+                  "jest-mock-process": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "1.4.0",
+                    },
+                  ],
+                  "jsdom": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "16.2.2",
+                    },
+                  ],
+                  "lint-staged": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "10.2.8",
+                    },
+                  ],
+                  "lockfile-lint": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "4.3.6",
+                    },
+                  ],
+                  "lodash": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "4.17.19",
+                    },
+                  ],
+                  "minimist": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "1.2.5",
+                    },
+                  ],
+                  "ms": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "2.1.2",
+                    },
+                  ],
+                  "png2icons": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "2.0.1",
+                    },
+                  ],
+                  "promise": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "8.1.0",
+                    },
+                  ],
+                  "raw-loader": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "4.0.1",
+                    },
+                  ],
+                  "read-chunk": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "3.2.0",
+                    },
+                  ],
+                  "sharp": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "0.25.3",
+                    },
+                  ],
+                  "ts-loader": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "7.0.5",
+                    },
+                  ],
+                  "typescript": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "3.9.3",
+                    },
+                  ],
+                  "webpack": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "4.43.0",
+                    },
+                  ],
+                  "webpack-cli": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "3.3.11",
+                    },
+                  ],
+                  "webpack-merge": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "4.2.2",
+                    },
+                  ],
+                  "webpack-node-externals": Array [
+                    Object {
+                      "type": "devDependencies",
+                      "version": "1.7.2",
+                    },
+                  ],
+                  "webpack-shell-plugin": Array [
+                    Object {
+                      "type": "dependencies",
+                      "version": "0.5.0",
+                    },
+                  ],
+                },
+              },
+              "type": "minor",
+            },
+          },
+        },
+        "tauri-updater": Object {
+          "name": "tauri-updater",
+          "pipe": Object {
+            "pkg": Object {
+              "command": true,
+              "dependencies": undefined,
+              "errorOnVersionRange": null,
+              "manager": "rust",
+              "path": "./tauri-updater",
+              "pkg": "tauri-updater",
+              "postcommand": null,
+              "precommand": null,
+            },
+            "release": Object {
+              "changes": Array [
+                Object {
+                  "meta": Object {
+                    "content": "---
+\\"tauri-updater\\": patch
+---
+
+Summary about the changes in tauri-updater
+",
+                    "extname": ".md",
+                    "filename": "second-change",
+                    "path": ".changes/second-change.md",
+                  },
+                  "releases": Object {
+                    "tauri-updater": "patch",
+                  },
+                  "summary": "Summary about the changes in tauri-updater",
+                },
+              ],
+              "parents": Object {},
+              "type": "patch",
+            },
+          },
+        },
+        "tauri.js": Object {
+          "name": "tauri.js",
+          "pipe": Object {
+            "pkg": Object {
+              "command": true,
+              "dependencies": Array [
+                "tauri",
+              ],
+              "errorOnVersionRange": null,
+              "manager": "javascript",
+              "path": "./cli/tauri.js",
+              "pkg": "tauri.js",
+              "postcommand": null,
+              "precommand": null,
+            },
+            "release": Object {
+              "changes": Array [
+                Object {
+                  "meta": Object {
+                    "content": "---
+\\"tauri\\": minor
+---
+
+Summary about the changes in tauri
+",
+                    "dependencies": "Bumped due to a bump in tauri.",
+                    "extname": ".md",
+                    "filename": "first-change",
+                    "path": ".changes/first-change.md",
+                  },
+                  "releases": Object {
+                    "tauri": "minor",
+                  },
+                  "summary": "Summary about the changes in tauri",
+                },
+              ],
+              "parents": Object {},
+              "type": "patch",
+            },
+          },
+        },
+      },
+    ],
+    Array [
+      "change",
+      "# Version Updates
+
+Merging this PR will release new versions of the following packages based on your change files.
+
+
+
+
+# tauri.js
+
+## [0.6.3]
+- Summary about the changes in tauri
+
+
+
+# tauri
+
+## [0.6.0]
+- Summary about the changes in tauri
+
+
+
+# tauri-updater
+
+## [0.4.3]
+- Summary about the changes in tauri-updater
 ",
     ],
   ],
