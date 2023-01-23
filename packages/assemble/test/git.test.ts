@@ -9,7 +9,8 @@ describe("git parsing", () => {
     //   to check the git command as that should still be in the history
     const file: File = {
       content: "---\nboop: patch\n---\n",
-      path: `./.changes/upgrade-to-effection-v2.md`,
+      // the `--` forces a path and won't throw an error on missing files
+      path: `-- ./.changes/upgrade-to-effection-v2.md`,
       filename: "upgrade-to-effection-v2.md",
       extname: "md",
     };
@@ -29,6 +30,12 @@ describe("git parsing", () => {
         date: "2022-10-26",
         hashLong: "a346221102075e647693851fd1019d66641f8014",
         hashShort: "a346221",
+      },
+      {
+        commitSubject: "publish new versions (#231)",
+        date: "2023-01-17",
+        hashLong: "b5375deed67cb47f75e29b5628c5c15ff4b99b78",
+        hashShort: "b5375de",
       },
     ]);
   });
