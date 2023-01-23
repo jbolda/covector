@@ -18,10 +18,7 @@ import type {
   DepsKeyed,
 } from "@covector/types";
 
-export function* loadFile(
-  file: PathLike,
-  cwd: string
-): Generator<any, File | void, any> {
+export function* loadFile(file: PathLike, cwd: string): Operation<File | void> {
   if (typeof file === "string") {
     const content = yield fs.readFile(path.join(cwd, file), {
       encoding: "utf-8",
@@ -39,7 +36,7 @@ export function* loadFile(
   }
 }
 
-export function* saveFile(file: File, cwd: string): Generator<any, File, any> {
+export function* saveFile(file: File, cwd: string): Operation<File> {
   if (typeof file.path !== "string")
     throw new Error(`Unable to handle saving of ${file}`);
   yield fs.writeFile(path.join(cwd, file.path), file.content, {
@@ -249,7 +246,7 @@ export function* writePkgFile({
 }: {
   packageFile: PackageFile;
   cwd: string;
-}): Generator<any, File, any> {
+}): Operation<File> {
   if (!packageFile.file)
     throw new Error(`no vfile present for ${packageFile.name}`);
   const fileNext = { ...packageFile.file };
@@ -267,7 +264,7 @@ export function* readPreFile({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Generator<any, PreFile | null, any> {
+}): Operation<PreFile | null> {
   try {
     const inputFile = yield loadFile(path.join(changeFolder, "pre.json"), cwd);
     const parsed = JSON.parse(inputFile.content);
@@ -431,7 +428,7 @@ export function* writePreFile({
 }: {
   preFile: PreFile;
   cwd: string;
-}): Generator<any, File, any> {
+}): Operation<File> {
   if (!preFile.file)
     throw new Error(`We could not find the pre.json to update.`);
   const { tag, changes } = preFile;
@@ -472,7 +469,7 @@ export function* configFile({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Generator<any, ConfigFile, any> {
+}): Operation<ConfigFile> {
   const inputFile = yield loadFile(path.join(changeFolder, "config.json"), cwd);
   const parsed = JSON.parse(inputFile.content);
   return {
@@ -538,30 +535,26 @@ export function* loadChangeFiles({
 }: {
   cwd: string;
   paths: string[];
-}): Generator<any, File[], any> {
+}): Operation<File[]> {
   const files = paths.map((file) => loadFile(file, cwd));
   return yield all(files);
 }
 
-// redo this into a generator
-export const changeFilesRemove = ({
+export function* changeFilesRemove({
   cwd,
   paths,
 }: {
   cwd: string;
   paths: string[];
-}) => {
-  return Promise.all(
-    paths.map(async (changeFilePath) => {
-      await fs.unlink(path.posix.join(cwd, changeFilePath));
+}): Operation<any> {
+  return yield all(
+    paths.map(function* (changeFilePath) {
+      yield fs.unlink(path.posix.join(cwd, changeFilePath));
+      console.info(`${changeFilePath} was deleted`);
       return changeFilePath;
     })
-  ).then((deletedPaths) => {
-    deletedPaths.forEach((changeFilePath) =>
-      console.info(`${changeFilePath} was deleted`)
-    );
-  });
-};
+  );
+}
 
 export function* readChangelog({
   cwd,
@@ -571,7 +564,7 @@ export function* readChangelog({
   cwd: string;
   packagePath?: string;
   create?: boolean;
-}): Generator<any, File, any> {
+}): Operation<File> {
   let file = null;
   try {
     file = yield loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
@@ -593,6 +586,6 @@ export function* writeChangelog({
 }: {
   changelog: File;
   cwd: string;
-}): Generator<any, void | Error, any> {
+}): Operation<void | Error> {
   return yield saveFile(changelog, cwd);
 }

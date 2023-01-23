@@ -322,7 +322,7 @@ export const mergeChangesToConfig = function* ({
   cwd: string;
   dryRun: boolean;
   filterPackages: string[];
-}): Generator<any, { commands: PkgVersion[]; pipeTemplate: any }, any> {
+}): Operation<{ commands: PkgVersion[]; pipeTemplate: any }> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce(
@@ -435,7 +435,7 @@ export const mergeIntoConfig = function* ({
   filterPackages: string[];
   changelogs?: { [k: string]: { name: string; changelog: string } };
   tag?: string;
-}): Generator<any, { commands: PkgPublish[]; pipeTemplate: any }, any> {
+}): Operation<{ commands: PkgPublish[]; pipeTemplate: any }> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
 

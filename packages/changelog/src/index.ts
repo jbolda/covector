@@ -1,4 +1,4 @@
-import { all } from "effection";
+import { all, Operation } from "effection";
 import { readChangelog, writeChangelog } from "@covector/files";
 import unified from "unified";
 import parse from "remark-parse";
@@ -26,14 +26,7 @@ export function* fillChangelogs({
   cwd: string;
   pkgCommandsRan?: { [k: string]: PkgCommandResponse };
   create?: boolean;
-}): Generator<
-  any,
-  | {
-      [k: string]: PkgCommandResponse;
-    }
-  | undefined,
-  any
-> {
+}): Operation<{ [k: string]: PkgCommandResponse } | undefined> {
   const changelogs = yield readAllChangelogs({
     applied: applied.reduce(
       (final: { name: string; version: string; changelog?: File }[], current) =>
@@ -79,7 +72,7 @@ export function* pullLastChangelog({
 }: {
   config: ConfigFile;
   cwd: string;
-}): Generator<any, { [k: string]: { pkg: string; changelog: string } }, any> {
+}): Operation<{ [k: string]: { pkg: string; changelog: string } }> {
   const changelogs = yield readAllChangelogs({
     applied: Object.keys(config.packages).map((pkg) => ({
       name: pkg,
@@ -132,7 +125,7 @@ function* readAllChangelogs({
   packages: ConfigFile["packages"];
   cwd: string;
   create?: boolean;
-}): Generator<any, Changelog[], any> {
+}): Operation<Changelog[]> {
   const prepChangelogs = applied.map((change) =>
     readChangelog({
       cwd,
@@ -271,7 +264,7 @@ function* writeAllChangelogs({
     addition: string;
   }[];
   cwd: string;
-}): Generator<any, any, any> {
+}): Operation<any> {
   return yield all(
     writtenChanges.map((changes) => {
       const { changelog } = changes.change;
