@@ -4,7 +4,7 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "getPublishedVersion": "npm view ${ pkg.pkg } version",
+      "getPublishedVersion": "npm view ${ pkg.pkg } version --silent",
       "prepublish": [{ "command": "npm pack", "dryRunCommand": true }],
       "publish": [
         {
