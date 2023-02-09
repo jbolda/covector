@@ -214,8 +214,7 @@ const bumpMain = ({
   let version =
     previewVersion && previewVersion !== ""
       ? semver.valid(`${preVersionCleaned}-${previewVersion}`)
-      : // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-        semver.inc(prevVersion, bumpType, prereleaseIdentifier);
+      : semver.inc(prevVersion, bumpType, prereleaseIdentifier);
 
   if (version) {
     pkg = setPackageFileVersion({ pkg, version });
@@ -247,9 +246,9 @@ const bumpDeps = ({
   if (pkg.pkg && pkg.file)
     ["dependencies", "devDependencies", "dev-dependencies"].forEach(
       (property) => {
-        // @ts-ignore
+        //@ts-expect-error
         if (pkg.pkg[property]) {
-          // @ts-ignore
+          //@ts-expect-error
           Object.keys(pkg.pkg[property]).forEach((existingDep) => {
             // if pkg is in dep list
             if (existingDep === dep) {

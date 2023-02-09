@@ -29,7 +29,6 @@ export const init = function* init({
   );
 
   for (let pkgFile of pkgFiles) {
-    //@ts-expect-error workspaces isn't on the type, but we are checking anyways
     if (!pkgFile?.pkg?.workspaces) {
       const manager: string = yield derivePkgManager({
         path: path.dirname(`./${pkgFile.name}`),
@@ -38,7 +37,6 @@ export const init = function* init({
       pkgManagers[manager] = true;
       const dependencies = buildDependencyGraph({ pkgFile, pkgFiles });
 
-      //@ts-expect-error pkgFile.pkg.package isn't normalized in our types (mostly from rust Cargo.toml)
       packages[pkgFile?.pkg?.name || pkgFile?.pkg?.package?.name] = {
         path: path.dirname(`./${pkgFile.name}`),
         manager,
@@ -47,7 +45,6 @@ export const init = function* init({
     }
 
     if (!gitURL) {
-      //@ts-expect-error respository isn't in the type
       const repoURL = pkgFile?.pkg?.repository;
       if (repoURL) {
         const tryURL =

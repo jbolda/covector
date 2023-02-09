@@ -8,14 +8,23 @@ export interface File {
   extname: string;
 }
 
+interface NestedVersion {
+  version?: string;
+  [key: string]: any;
+}
+export type PkgFileVersion = string | NestedVersion;
+
 // Pkg for toml has a `.packages` so we need to address this union
 // or otherwise normalize it, and it will be an issue as
 // we add other PackageFile types / sources
 export interface Pkg {
   name: string;
-  version: string;
-  dependencies?: { [k: string]: string };
-  devDependencies?: { [k: string]: string };
+  version?: string;
+  package?: NestedVersion;
+  dependencies?: Record<string, PkgFileVersion>;
+  devDependencies?: Record<string, PkgFileVersion>;
+  "dev-dependencies"?: Record<string, PkgFileVersion>;
+  [key: string]: any;
 }
 
 export interface PkgMinimum {
@@ -28,10 +37,11 @@ export interface PkgMinimum {
   versionPrerelease?: readonly (string | number)[] | null;
 }
 
+export type DepTypes = "dependencies" | "devDependencies" | "dev-dependencies";
 export type DepsKeyed = Record<
   string,
   {
-    type: "dependencies" | "devDependencies" | "dev-dependencies";
+    type: DepTypes;
     version: string;
   }[]
 >;
