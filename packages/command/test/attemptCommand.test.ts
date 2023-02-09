@@ -14,7 +14,6 @@ describe("attemptCommand", () => {
   });
 
   it("invokes a function", function* () {
-    //@ts-expect-error
     yield attemptCommands({
       commands: [
         {
@@ -85,7 +84,6 @@ describe("attemptCommand", () => {
           pkg: "pkg-nickname",
           pkgFile: { version: "0.5.6", deps: {} },
           manager: "none",
-          //@ts-expect-error
           command: [
             async (pkg: any) =>
               console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),

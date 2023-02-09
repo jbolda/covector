@@ -119,13 +119,11 @@ describe("reads changelog", () => {
       },
     };
 
-    //@ts-expect-error
     const changelogs = yield pullLastChangelog({
       config,
       cwd: projectFolder,
     });
 
-    //@ts-expect-error
     pkgCommandsRan = yield pipeChangelogToCommands({
       changelogs,
       pkgCommandsRan,
@@ -216,9 +214,7 @@ describe("reads changelog", () => {
       cwd: projectFolder,
     });
 
-    //@ts-expect-error
     pkgCommandsRan = yield pipeChangelogToCommands({
-      //@ts-expect-error
       changelogs,
       pkgCommandsRan,
     });

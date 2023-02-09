@@ -13,7 +13,6 @@ describe("parses toml", () => {
       nickname: "rust-single-fixture",
     });
     expect(cargoFile.name).toBe("rust-single-fixture");
-    //@ts-expect-error
     expect(cargoFile?.pkg?.package?.name).toBe("rust-single-fixture");
     expect(cargoFile.version).toBe("0.5.0");
   });
@@ -25,7 +24,6 @@ describe("parses toml", () => {
       nickname: "rust-single-fixture",
     });
     expect(cargoFile.name).toBe("rust-single-fixture");
-    //@ts-expect-error
     expect(cargoFile?.pkg?.package?.name).toBe("rust-single-fixture");
     expect(cargoFile.version).toBe("0.5.0");
   });
