@@ -254,12 +254,13 @@ export function* run(): Generator<any, any, any> {
         if (covectored.commandsRan) {
           let packagesPublished: any = Object.entries(
             covectored.commandsRan
-          ).reduce((pub: Array<string>, pkg: Array<any>) => {
+          ).reduce((pub: string[], pkg: any[]) => {
             if (pkg[1].published) {
               let { name: pkgName, version: pkgVersion }: any =
                 pkg[1].pkg.pkgFile.pkg;
               return pub.concat(`${pkgName}@${pkgVersion}`);
             }
+            return pub;
           }, []);
 
           if (token && github.context.payload.pull_request) {
