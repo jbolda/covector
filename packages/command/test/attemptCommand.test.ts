@@ -14,19 +14,19 @@ describe("attemptCommand", () => {
   });
 
   it("invokes a function", function* () {
-    //@ts-ignore
+    //@ts-expect-error
     yield attemptCommands({
       commands: [
         {
           name: "pkg-nickname",
           pkgFile: { version: "0.5.6", deps: {} },
-          //@ts-ignore
+          //@ts-expect-error
           command: async () => console.log("boop"),
         },
       ],
     });
 
-    //@ts-ignore
+    //@ts-expect-error
     expect(console.log.mock.calls).toEqual([["boop"]]);
   });
 
@@ -49,7 +49,7 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    //@ts-ignore
+    //@ts-expect-error
     expect(console.log.mock.calls).toEqual([
       ["boop"],
       ["booop"],
@@ -64,7 +64,7 @@ describe("attemptCommand", () => {
         {
           pkg: "pkg-nickname",
           pkgFile: { version: "0.5.6", deps: {} },
-          //@ts-ignore
+          //@ts-expect-error
           command: async (pkg: any) =>
             console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
         },
@@ -74,7 +74,7 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    //@ts-ignore
+    //@ts-expect-error
     expect(console.log.mock.calls).toEqual([["boop pkg-nickname@0.5.6"]]);
   });
 
@@ -85,7 +85,7 @@ describe("attemptCommand", () => {
           pkg: "pkg-nickname",
           pkgFile: { version: "0.5.6", deps: {} },
           manager: "none",
-          //@ts-ignore
+          //@ts-expect-error
           command: [
             async (pkg: any) =>
               console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
@@ -103,7 +103,7 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    //@ts-ignore
+    //@ts-expect-error
     expect(console.log.mock.calls).toEqual([
       ["boop pkg-nickname@0.5.6"],
       ["booop pkg-nickname@0.5.6"],

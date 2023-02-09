@@ -93,7 +93,7 @@ describe("full e2e test", () => {
   describe("of publish", () => {
     jest
       .spyOn(github, "getOctokit")
-      // @ts-ignore
+      //@ts-expect-error
       .mockImplementation((token: string) => ({
         context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
         rest: {
@@ -193,7 +193,7 @@ describe("full e2e test", () => {
       jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
       const octokit = jest
         .spyOn(github, "getOctokit")
-        // @ts-ignore
+        //@ts-expect-error
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
           rest: {
@@ -240,7 +240,7 @@ describe("full e2e test", () => {
         listReleases,
         createRelease,
         updateRelease,
-        // @ts-ignore
+        //@ts-expect-error
       } = github.getOctokit.mock.results[0].value.rest.repos;
       expect(listReleases).toHaveBeenCalledWith({
         owner: "genericOwner",
@@ -283,7 +283,7 @@ describe("full e2e test", () => {
       jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
       const octokit = jest
         .spyOn(github, "getOctokit")
-        // @ts-ignore
+        //@ts-expect-error
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
           rest: {
@@ -330,7 +330,7 @@ describe("full e2e test", () => {
         listReleases,
         createRelease,
         updateRelease,
-        // @ts-ignore
+        //@ts-expect-error
       } = github.getOctokit.mock.results[0].value.rest.repos;
 
       expect(listReleases).toHaveBeenCalledWith({
@@ -376,7 +376,7 @@ describe("full e2e test", () => {
       jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
       const octokit = jest
         .spyOn(github, "getOctokit")
-        // @ts-ignore
+        //@ts-expect-error
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
           rest: {
@@ -417,7 +417,7 @@ describe("full e2e test", () => {
         listReleases,
         createRelease,
         updateRelease,
-        // @ts-ignore
+        //@ts-expect-error
       } = github.getOctokit.mock.results[0].value.rest.repos;
       expect(listReleases).toHaveBeenCalledWith({
         owner: "genericOwner",
@@ -454,7 +454,7 @@ describe("full e2e test", () => {
       jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
       const octokit = jest
         .spyOn(github, "getOctokit")
-        // @ts-ignore
+        //@ts-expect-error
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
           rest: {
@@ -488,7 +488,7 @@ describe("full e2e test", () => {
         listReleases,
         createRelease,
         updateRelease,
-        // @ts-ignore
+        //@ts-expect-error
       } = github.getOctokit.mock.results[0].value.rest.repos;
 
       expect(listReleases).toHaveBeenCalledWith({

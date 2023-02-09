@@ -41,7 +41,7 @@ export const parseChange = function* ({
   let changeset: Changeset = {};
   const [parsedChanges, ...remaining]: (Frontmatter | Content)[] =
     processed.children;
-  //@ts-ignore
+  //@ts-expect-error
   const parsedYaml = yaml.load(parsedChanges.value as string);
   changeset.releases =
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
@@ -52,7 +52,7 @@ export const parseChange = function* ({
   changeset.summary = processor
     .stringify({
       type: "root",
-      //@ts-ignore
+      //@ts-expect-error
       children: remaining,
     })
     .trim();
@@ -286,9 +286,9 @@ const changeDiff = ({
     Object.keys(newMergedRelease).forEach((pkg: string) => {
       const nextBump = newMergedRelease[pkg]?.type || "noop";
       const oldBump = oldMergedRelease[pkg]?.type || "noop";
-      //@ts-ignore bumpMap could be undefined?
+      //@ts-expect-error bumpMap could be undefined?
       if (bumpMap.get(nextBump) < bumpMap.get(oldBump)) {
-        //@ts-ignore TODO template string doesn't play nice with the type
+        //@ts-expect-error TODO template string doesn't play nice with the type
         diffed[pkg].type = `pre${nextBump}`;
       } else {
         diffed[pkg].type = "prerelease";
@@ -299,7 +299,7 @@ const changeDiff = ({
     return Object.keys(allMergedRelease).reduce(
       (diffed: { [k: string]: Release }, pkg: string) => {
         diffed[pkg] = { ...allMergedRelease[pkg] };
-        //@ts-ignore TODO template string doesn't play nice with the type
+        //@ts-expect-error TODO template string doesn't play nice with the type
         diffed[pkg].type = `pre${allMergedRelease[pkg].type}`;
         return diffed;
       },
@@ -545,12 +545,12 @@ export const mergeIntoConfig = function* ({
     // add these after that they can use pkgFile
     extraPublishParams = {
       ...extraPublishParams,
-      //@ts-ignore no index type string
+      //@ts-expect-error no index type string
       ...(!pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
         ? {}
         : {
             [`getPublishedVersion${subPublishCommand}`]: template(
-              //@ts-ignore no index type string
+              //@ts-expect-error no index type string
               pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
             )(pipeToTemplate),
           }),
@@ -626,9 +626,9 @@ const mergeCommand = ({
   command: any;
   config: ConfigFile;
 }) => {
-  //@ts-ignore
+  //@ts-expect-error
   const managerCommand = config.pkgManagers?.[pkgManager]?.[command] ?? null;
-  //@ts-ignore
+  //@ts-expect-error
   const mergedCommand = config.packages?.[pkg]?.[command] ?? managerCommand;
 
   return mergedCommand;

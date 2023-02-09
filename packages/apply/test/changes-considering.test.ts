@@ -10,14 +10,12 @@ const allPackagesWithoutRead = ({ config }: { config: ConfigFile }) =>
       version: "none",
       // @ts-expect-error
       deps: configInfo.dependencies.reduce((deps, dep) => {
-        //@ts-ignore
         deps[dep] = [{ type: "dependencies", version: "none" }];
         return deps;
       }, {}),
     }))
-    //@ts-ignore
+    //@ts-expect-error
     .reduce((pkgs, pkg: Record<string, string>) => {
-      //@ts-ignore
       pkgs[pkg.name] = pkg;
       return pkgs;
     }, {});
@@ -60,13 +58,13 @@ describe("list changes considering parents", () => {
       },
     };
 
-    //@ts-ignore
+    //@ts-expect-error
     const changes = changesConsideringParents({ assembledChanges, config });
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
@@ -108,13 +106,13 @@ describe("list changes considering parents", () => {
       },
     };
 
-    //@ts-ignore
+    //@ts-expect-error
     const changes = changesConsideringParents({ assembledChanges, config });
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
@@ -212,11 +210,10 @@ describe("list changes considering parents", () => {
     const allPackages = allPackagesWithoutRead({ config });
 
     const changes = changesConsideringParents({
-      //@ts-ignore
+      //@ts-expect-error
       assembledChanges,
-      //@ts-ignore
       config,
-      //@ts-ignore
+      //@ts-expect-error
       allPackages,
     });
     // console.error(changes)
@@ -237,9 +234,9 @@ describe("list changes considering parents", () => {
     expect(changes.releases["pkg-one"].type).toBe("patch");
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleLog: console.log.mock.calls,
-      //@ts-ignore
+      //@ts-expect-error
       consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();

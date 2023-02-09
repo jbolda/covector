@@ -293,7 +293,7 @@ This doesn't bump much.
           testTextFour,
           testTextSpecialOne,
         ],
-        //@ts-ignore
+        //@ts-expect-error
         config: configSpecial,
       });
       expect(assembled).toMatchSnapshot();
@@ -310,7 +310,7 @@ This doesn't bump much.
             testTextFour,
             testTextSpecialOne,
           ],
-          //@ts-ignore
+          //@ts-expect-error
           config,
         });
       } catch (e: any) {
@@ -326,7 +326,7 @@ This doesn't bump much.
       try {
         yield assemble({
           files: [testTextSpecialTwo],
-          //@ts-ignore
+          //@ts-expect-error
           config: configSpecial,
         });
       } catch (e: any) {
@@ -340,7 +340,7 @@ This doesn't bump much.
     it("handles an only noop", function* () {
       const assembled = yield assemble({
         files: [testTextSpecialOne],
-        //@ts-ignore
+        //@ts-expect-error
         config: configSpecial,
       });
       expect(assembled).toMatchSnapshot();

@@ -76,7 +76,7 @@ export const add = function* ({
 
   const frontmatter = `---
 ${answers.packages
-  //@ts-ignore
+  //@ts-expect-error
   .map((pkg) => `"${pkg}": ${packageBumps[pkg].bump}`)
   .join("\n")}
 ---\n\n`;

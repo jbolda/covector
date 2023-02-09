@@ -68,7 +68,7 @@ describe("fills changelog", () => {
 
     yield fillChangelogs({
       applied,
-      //@ts-ignore
+      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -168,7 +168,7 @@ describe("fills changelog", () => {
 
     yield fillChangelogs({
       applied,
-      //@ts-ignore
+      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -239,7 +239,7 @@ describe("fills changelog", () => {
 
     yield fillChangelogs({
       applied,
-      //@ts-ignore
+      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -305,7 +305,7 @@ describe("fills changelog", () => {
 
     yield fillChangelogs({
       applied,
-      //@ts-ignore
+      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,

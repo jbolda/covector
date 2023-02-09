@@ -20,7 +20,7 @@ describe("test mocks", () => {
   it("mocks github context", () => {
     jest
       .spyOn(github, "getOctokit")
-      //@ts-ignore
+      //@ts-expect-error
       .mockImplementationOnce((arg) => ({
         context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
       }));
@@ -36,7 +36,7 @@ describe("test mocks", () => {
       repos: { createRelease: (obj: any) => obj },
     }));
     const octokit = github.getOctokit("token");
-    //@ts-ignore
+    //@ts-expect-error
     const releaseResponse = octokit.repos.createRelease({ body: "text" });
     expect(releaseResponse).toEqual({ body: "text" });
   });

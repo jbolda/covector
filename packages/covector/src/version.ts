@@ -117,7 +117,7 @@ export function* version({
   });
 
   const applied = yield apply({
-    //@ts-ignore
+    //@ts-expect-error
     commands,
     config,
     allPackages,
@@ -146,7 +146,7 @@ export function* version({
 
   pkgCommandsRan = yield fillChangelogs({
     applied,
-    //@ts-ignore
+    //@ts-expect-error
     assembledChanges: changes,
     config,
     cwd,

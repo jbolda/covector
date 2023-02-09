@@ -117,7 +117,7 @@ export function* preview({
   });
 
   const applied = yield apply({
-    //@ts-ignore
+    //@ts-expect-error
     commands: versionCommands,
     allPackages,
     cwd,
