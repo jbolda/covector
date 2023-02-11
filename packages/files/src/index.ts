@@ -290,7 +290,7 @@ export const getPackageFileVersion = ({
   dep,
 }: {
   pkg: PackageFile;
-  property?: keyof Pkg | DepTypes;
+  property?: keyof Pkg;
   dep?: string;
 }): string => {
   if (!!pkg?.file && "pkg" in pkg && !!pkg.pkg && property in pkg.pkg) {
@@ -309,15 +309,15 @@ export const getPackageFileVersion = ({
       case "dependencies":
       case "devDependencies":
       case "dev-dependencies":
-        if (pkg.pkg[property] === undefined) return "";
+        const currentPkgDeps = pkg.pkg[property];
+        if (currentPkgDeps === undefined) return "";
         if (typeof pkg.pkg[property] !== "object") return "";
         if (!dep) return "";
         if (!("dependencies" in pkg.pkg)) return "";
 
         if (pkg.pkg[property] && typeof pkg.pkg[property] === "object") {
           if (property in pkg.pkg) {
-            // @ts-expect-error type narrow doesn't seem to remove `undefined`
-            const depDefinition = pkg.pkg[property][dep];
+            const depDefinition = currentPkgDeps[dep];
 
             switch (typeof depDefinition) {
               case "string":
@@ -347,15 +347,15 @@ export const setPackageFileVersion = ({
 }: {
   pkg: PackageFile;
   version: string;
-  property?: string;
+  property?: keyof Pkg;
   dep?: string;
 }): PackageFile => {
   if (pkg.file && pkg.pkg) {
+    const currentPkg = pkg.pkg;
     if (property === "version") {
       if (pkg.file.extname === ".json") {
         pkg.pkg.version = version;
-      } else if (pkg.file.extname === ".toml") {
-        //@ts-expect-error
+      } else if (pkg.file.extname === ".toml" && pkg.pkg.package?.version) {
         pkg.pkg.package.version = version;
       } else {
         // covers yaml and generic
@@ -366,33 +366,27 @@ export const setPackageFileVersion = ({
       property === "devDependencies" ||
       property === "dev-dependencies"
     ) {
-      if (property === "dependencies") {
-        // same for every supported package file
-        if (!dep || !pkg.pkg.dependencies) return pkg;
-        if (typeof pkg.pkg.dependencies[dep] === "object") {
-          //@ts-expect-error TODO deal with nest toml
-          pkg.pkg.dependencies[dep].version = version;
-        } else {
-          pkg.pkg.dependencies[dep] = version;
-        }
-      } else if (property === "devDependencies") {
-        // same for every supported package file
-        if (!dep || !pkg.pkg.devDependencies) return pkg;
-        if (typeof pkg.pkg.devDependencies[dep] === "object") {
-          //@ts-expect-error TODO deal with nest toml
-          pkg.pkg.devDependencies[dep].version = version;
-        } else {
-          pkg.pkg.devDependencies[dep] = version;
-        }
-      } else if (property === "dev-dependencies") {
-        if (!dep || !pkg.pkg[property]) return pkg;
-        //@ts-expect-error
-        if (typeof pkg.pkg[property][dep] === "object") {
-          //@ts-expect-error TODO deal with nest toml
+      const currentPkg = pkg.pkg;
+      const currentProperty = currentPkg[property];
+      if (currentProperty === undefined)
+        // throw as this definitely shouldn't happen
+        throw new Error(
+          `Expected ${property} not found in package:\n${JSON.stringify(
+            pkg,
+            null,
+            2
+          )}`
+        );
+      if (!dep) return pkg;
+
+      const currentDepVersion = currentProperty[dep];
+      if (typeof currentDepVersion === "string") {
+        //@ts-expect-error TS struggles to type narrow, but we are confident it should be defined
+        pkg.pkg[property][dep] = version;
+      } else if (typeof currentDepVersion === "object") {
+        if ("version" in currentDepVersion) {
+          //@ts-expect-error TS struggles to type narrow, but we are confident it should be defined
           pkg.pkg[property][dep].version = version;
-        } else {
-          //@ts-expect-error
-          pkg.pkg[property][dep] = version;
         }
       }
     }

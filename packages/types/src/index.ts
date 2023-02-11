@@ -28,11 +28,11 @@ export interface Pkg {
 }
 
 export interface PkgMinimum {
-  version?: string;
-  pkg?: Pkg;
-  versionMajor?: number;
-  versionMinor?: number;
-  versionPatch?: number;
+  version: string;
+  pkg: Pkg;
+  versionMajor: number;
+  versionMinor: number;
+  versionPatch: number;
   deps: DepsKeyed;
   versionPrerelease?: readonly (string | number)[] | null;
 }
