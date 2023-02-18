@@ -201,7 +201,7 @@ const bumpMain = ({
       `${pkg.name} needs prereleaseIdentifier passed as a string`
     );
 
-  let next = semver.inc(pkg.version, bumpType, undefined, prereleaseIdentifier);
+  let next = semver.inc(pkg.version, bumpType, prereleaseIdentifier);
   if (next) {
     pkg.version = next;
     pkg.versionMajor = semver.major(next);

@@ -293,7 +293,7 @@ export const getPackageFileVersion = ({
   property?: keyof Pkg;
   dep?: string;
 }): string => {
-  if (!!pkg?.file && "pkg" in pkg && !!pkg.pkg && property in pkg.pkg) {
+  if (!!pkg?.file && "pkg" in pkg && !!pkg.pkg) {
     switch (property) {
       case "version":
         if (pkg.file.extname === ".json" && pkg.pkg.version) {

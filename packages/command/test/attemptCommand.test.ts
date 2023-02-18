@@ -4,6 +4,20 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+const fillWithDefaults = ({ version }: { version: string }) => {
+  const [versionMajor, versionMinor, versionPatch] = version
+    .split(".")
+    .map((v) => parseInt(v));
+  return {
+    version,
+    versionMajor,
+    versionMinor,
+    versionPatch,
+    pkg: { name: "none" },
+    deps: {},
+  };
+};
+
 describe("attemptCommand", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
@@ -18,7 +32,7 @@ describe("attemptCommand", () => {
       commands: [
         {
           name: "pkg-nickname",
-          pkgFile: { version: "0.5.6", deps: {} },
+          pkgFile: fillWithDefaults({ version: "0.5.6" }),
           //@ts-expect-error
           command: async () => console.log("boop"),
         },
@@ -62,7 +76,7 @@ describe("attemptCommand", () => {
       commands: [
         {
           pkg: "pkg-nickname",
-          pkgFile: { version: "0.5.6", deps: {} },
+          pkgFile: fillWithDefaults({ version: "0.5.6" }),
           //@ts-expect-error
           command: async (pkg: any) =>
             console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
@@ -82,7 +96,7 @@ describe("attemptCommand", () => {
       commands: [
         {
           pkg: "pkg-nickname",
-          pkgFile: { version: "0.5.6", deps: {} },
+          pkgFile: fillWithDefaults({ version: "0.5.6" }),
           manager: "none",
           command: [
             async (pkg: any) =>

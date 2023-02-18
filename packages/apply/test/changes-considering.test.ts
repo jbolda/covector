@@ -1,24 +1,31 @@
 import { changesConsideringParents } from "../src";
 import { it } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
-import { ConfigFile } from "@covector/types";
+import {
+  ConfigFile,
+  DepTypes,
+  PackageFile,
+  PackageConfig,
+} from "@covector/types";
 
 const allPackagesWithoutRead = ({ config }: { config: ConfigFile }) =>
   Object.entries(config.packages)
-    .map(([pkgName, configInfo]) => ({
-      name: pkgName,
-      version: "none",
-      // @ts-expect-error
-      deps: configInfo.dependencies.reduce((deps, dep) => {
-        deps[dep] = [{ type: "dependencies", version: "none" }];
-        return deps;
-      }, {}),
-    }))
-    //@ts-expect-error
-    .reduce((pkgs, pkg: Record<string, string>) => {
-      pkgs[pkg.name] = pkg;
+    .map(
+      ([pkgName, configInfo]: [pkgName: string, configInfo: PackageConfig]) => {
+        return {
+          name: pkgName,
+          version: "none",
+          deps: (configInfo.dependencies ?? []).reduce((deps, dep) => {
+            deps[dep] = [{ type: "dependencies", version: "none" }];
+            return deps;
+          }, {} as Record<string, { type: "dependencies"; version: "none" }[]>),
+        };
+      }
+    )
+    .reduce((pkgs, pkg: any) => {
+      if (pkg.name) pkgs[pkg.name] = pkg;
       return pkgs;
-    }, {});
+    }, {} as Record<string, PackageFile>);
 
 describe("list changes considering parents", () => {
   let restoreConsole: RestoreConsole;
@@ -213,7 +220,6 @@ describe("list changes considering parents", () => {
       //@ts-expect-error
       assembledChanges,
       config,
-      //@ts-expect-error
       allPackages,
     });
     // console.error(changes)

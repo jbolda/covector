@@ -57,6 +57,16 @@ export interface PreFile {
   changes: string[] | [];
 }
 
+export type PackageConfig = {
+  manager?: string;
+  path?: string;
+  dependencies?: string[];
+  packageFileName?: string;
+  version?: string;
+  publish?: string;
+  errorOnVersionRange?: string;
+};
+
 export type ConfigFile = {
   file?: File;
   changeFolder: PathLike;
@@ -69,15 +79,7 @@ export type ConfigFile = {
     };
   };
   packages: {
-    [k: string]: {
-      manager?: string;
-      path?: string;
-      dependencies?: string[];
-      packageFileName?: string;
-      version?: string;
-      publish?: string;
-      errorOnVersionRange?: string;
-    };
+    [k: string]: PackageConfig;
   };
   additionalBumpTypes?: string[];
 };
