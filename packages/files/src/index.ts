@@ -16,12 +16,11 @@ import type {
   PreFile,
   ConfigFile,
   DepsKeyed,
+  DepTypes,
+  Pkg,
 } from "@covector/types";
 
-export function* loadFile(
-  file: PathLike,
-  cwd: string
-): Generator<any, File | void, any> {
+export function* loadFile(file: PathLike, cwd: string): Operation<File | void> {
   if (typeof file === "string") {
     const content = yield fs.readFile(path.join(cwd, file), {
       encoding: "utf-8",
@@ -39,7 +38,7 @@ export function* loadFile(
   }
 }
 
-export function* saveFile(file: File, cwd: string): Generator<any, File, any> {
+export function* saveFile(file: File, cwd: string): Operation<File> {
   if (typeof file.path !== "string")
     throw new Error(`Unable to handle saving of ${file}`);
   yield fs.writeFile(path.join(cwd, file.path), file.content, {
@@ -52,8 +51,14 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
   if (!file.content) throw new Error(`${file.path} does not have any content`);
   switch (file.extname) {
     case ".toml":
-      const parsedTOML = TOML.parse(file.content);
-      // @ts-ignore
+      const parsedTOML = TOML.parse(file.content) as unknown as Pkg;
+      if (
+        !parsedTOML?.package?.version ||
+        (typeof parsedTOML?.package?.version === "string" &&
+          !semver.valid(parsedTOML?.package?.version))
+      ) {
+        throw new Error("not valid version");
+      }
       const { version } = parsedTOML.package;
       return {
         version: version,
@@ -62,7 +67,6 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
         versionPatch: semver.patch(version),
         versionPrerelease: semver.prerelease(version),
         deps: keyDeps(parsedTOML),
-        // @ts-ignore
         pkg: parsedTOML,
       };
     case ".json":
@@ -78,8 +82,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
       };
     case ".yml":
     case ".yaml":
-      const parsedYAML = yaml.load(file.content);
-      // type narrow:
+      const parsedYAML = yaml.load(file.content) as Pkg;
       if (
         typeof parsedYAML === "string" ||
         typeof parsedYAML === "number" ||
@@ -87,7 +90,6 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
         parsedYAML === undefined
       )
         throw new Error(`file improperly structured`);
-      //@ts-ignore version is not on object?
       if (parsedYAML && (!parsedYAML.name || !parsedYAML.version))
         throw new Error(`missing version`);
       const verifiedYAML = parsedYAML as { name: string; version: string };
@@ -116,31 +118,33 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
   }
 };
 
-const keyDeps = (parsed: any): DepsKeyed => {
-  let deps: DepsKeyed = {};
+const keyDeps = (parsed: Pkg): DepsKeyed => {
+  const deps: DepsKeyed = {};
+  const depTypes: DepTypes[] = [
+    "dependencies",
+    "devDependencies",
+    "dev-dependencies",
+  ];
 
-  ["dependencies", "devDependencies", "dev-dependencies"].forEach(
-    (depType: any) => {
-      if (parsed[depType] && typeof parsed[depType] === "object") {
-        Object.entries(parsed[depType]).forEach(
-          ([dep, version]: [string, any]) => {
-            if (!deps?.[dep]) deps[dep] = [];
-            if (typeof version === "string") {
-              deps[dep].push({
-                type: depType,
-                version,
-              });
-            } else if (typeof version === "object" && version.version) {
-              deps[dep].push({
-                type: depType,
-                version: version.version,
-              });
-            }
-          }
-        );
-      }
+  depTypes.forEach((depType: DepTypes) => {
+    let pkgFileDeps = parsed[depType];
+    if (pkgFileDeps && typeof pkgFileDeps === "object") {
+      Object.entries(pkgFileDeps).forEach(([dep, version]) => {
+        if (!deps?.[dep]) deps[dep] = [];
+        if (typeof version === "string") {
+          deps[dep].push({
+            type: depType,
+            version,
+          });
+        } else if (typeof version === "object" && version.version) {
+          deps[dep].push({
+            type: depType,
+            version: version.version,
+          });
+        }
+      });
     }
-  );
+  });
   return deps;
 };
 
@@ -249,7 +253,7 @@ export function* writePkgFile({
 }: {
   packageFile: PackageFile;
   cwd: string;
-}): Generator<any, File, any> {
+}): Operation<File> {
   if (!packageFile.file)
     throw new Error(`no vfile present for ${packageFile.name}`);
   const fileNext = { ...packageFile.file };
@@ -267,7 +271,7 @@ export function* readPreFile({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Generator<any, PreFile | null, any> {
+}): Operation<PreFile | null> {
   try {
     const inputFile = yield loadFile(path.join(changeFolder, "pre.json"), cwd);
     const parsed = JSON.parse(inputFile.content);
@@ -286,76 +290,50 @@ export const getPackageFileVersion = ({
   dep,
 }: {
   pkg: PackageFile;
-  property?: string;
+  property?: keyof Pkg;
   dep?: string;
 }): string => {
-  if (pkg.file && pkg.pkg) {
-    if (property === "version") {
-      if (pkg.file.extname === ".json") {
-        return pkg.pkg.version;
-      } else if (pkg.file.extname === ".toml") {
-        // @ts-ignore
-        return pkg.pkg.package.version;
-      } else {
-        // covers yaml and generic
-        return pkg.pkg.version;
-      }
-    } else if (property === "dependencies") {
-      // same for every supported package file
-      if (!dep || !pkg.pkg.dependencies) return "";
-      if (typeof pkg.pkg.dependencies[dep] === "object") {
-        //@ts-ignore
-        if (!pkg.pkg.dependencies[dep].version) {
-          throw new Error(
-            `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +
-              `This cannot be published. ` +
-              `Please pin it to a MAJOR.MINOR.PATCH reference.`
-          );
+  if (!!pkg?.file && "pkg" in pkg && !!pkg.pkg) {
+    switch (property) {
+      case "version":
+        if (pkg.file.extname === ".json" && pkg.pkg.version) {
+          return pkg.pkg.version;
+        } else if (pkg.file.extname === ".toml" && pkg?.pkg?.package?.version) {
+          return pkg.pkg.package.version;
+        } else if (!pkg.pkg.version) {
+          return "";
+        } else {
+          // covers yaml and generic
+          return pkg.pkg.version;
         }
-        //@ts-ignore
-        return pkg.pkg.dependencies[dep].version;
-      } else {
-        return pkg.pkg.dependencies[dep];
-      }
-    } else if (property === "devDependencies") {
-      // same for every supported package file
-      if (!dep || !pkg.pkg.devDependencies) return "";
-      if (typeof pkg.pkg.devDependencies[dep] === "object") {
-        //@ts-ignore
-        if (!pkg.pkg.devDependencies[dep].version) {
-          throw new Error(
-            `${pkg.name} has a devDependency on ${dep}, and ${dep} does not have a version number. ` +
-              `This cannot be published. ` +
-              `Please pin it to a MAJOR.MINOR.PATCH reference.`
-          );
+      case "dependencies":
+      case "devDependencies":
+      case "dev-dependencies":
+        const currentPkgDeps = pkg.pkg[property];
+        if (currentPkgDeps === undefined) return "";
+        if (typeof pkg.pkg[property] !== "object") return "";
+        if (!dep) return "";
+        if (!("dependencies" in pkg.pkg)) return "";
+
+        if (pkg.pkg[property] && typeof pkg.pkg[property] === "object") {
+          if (property in pkg.pkg) {
+            const depDefinition = currentPkgDeps[dep];
+
+            switch (typeof depDefinition) {
+              case "string":
+                return depDefinition;
+              case "object":
+                if (!depDefinition.version) {
+                  throw new Error(
+                    `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +
+                      `This cannot be published. ` +
+                      `Please pin it to a MAJOR.MINOR.PATCH reference.`
+                  );
+                }
+                return depDefinition.version;
+            }
+          }
         }
-        //@ts-ignore
-        return pkg.pkg.devDependencies[dep].version;
-      } else {
-        return pkg.pkg.devDependencies[dep];
-      }
-    } else if (property === "dev-dependencies") {
-      // same for every supported package file
-      //@ts-ignore
-      if (!dep || !pkg.pkg[property]) return "";
-      //@ts-ignore
-      if (typeof pkg.pkg[property][dep] === "object") {
-        //@ts-ignore
-        if (!pkg.pkg[property][dep].version) {
-          throw new Error(
-            `${pkg.name} has a devDependency on ${dep}, and ${dep} does not have a version number. ` +
-              `This cannot be published. ` +
-              `Please pin it to a MAJOR.MINOR.PATCH reference.`
-          );
-        }
-        //@ts-ignore
-        return pkg.pkg[property][dep].version;
-      } else {
-        //@ts-ignore
-        return pkg.pkg[property][dep];
-      }
-    } else {
-      return "";
     }
   }
   return "";
@@ -369,15 +347,15 @@ export const setPackageFileVersion = ({
 }: {
   pkg: PackageFile;
   version: string;
-  property?: string;
+  property?: keyof Pkg;
   dep?: string;
 }): PackageFile => {
   if (pkg.file && pkg.pkg) {
+    const currentPkg = pkg.pkg;
     if (property === "version") {
       if (pkg.file.extname === ".json") {
         pkg.pkg.version = version;
-      } else if (pkg.file.extname === ".toml") {
-        // @ts-ignore
+      } else if (pkg.file.extname === ".toml" && pkg.pkg.package?.version) {
         pkg.pkg.package.version = version;
       } else {
         // covers yaml and generic
@@ -388,36 +366,27 @@ export const setPackageFileVersion = ({
       property === "devDependencies" ||
       property === "dev-dependencies"
     ) {
-      if (property === "dependencies") {
-        // same for every supported package file
-        if (!dep || !pkg.pkg.dependencies) return pkg;
-        if (typeof pkg.pkg.dependencies[dep] === "object") {
-          // @ts-ignore TODO deal with nest toml
-          pkg.pkg.dependencies[dep].version = version;
-        } else {
-          pkg.pkg.dependencies[dep] = version;
-        }
-      } else if (property === "devDependencies") {
-        // same for every supported package file
-        if (!dep || !pkg.pkg.devDependencies) return pkg;
-        if (typeof pkg.pkg.devDependencies[dep] === "object") {
-          // @ts-ignore TODO deal with nest toml
-          pkg.pkg.devDependencies[dep].version = version;
-        } else {
-          pkg.pkg.devDependencies[dep] = version;
-        }
-      } else if (property === "dev-dependencies") {
-        // same for every supported package file
-        //@ts-ignore
-        if (!dep || !pkg.pkg[property]) return pkg;
-        //@ts-ignore
-        if (typeof pkg.pkg[property][dep] === "object") {
-          //@ts-ignore
-          // @ts-ignore TODO deal with nest toml
+      const currentPkg = pkg.pkg;
+      const currentProperty = currentPkg[property];
+      if (currentProperty === undefined)
+        // throw as this definitely shouldn't happen
+        throw new Error(
+          `Expected ${property} not found in package:\n${JSON.stringify(
+            pkg,
+            null,
+            2
+          )}`
+        );
+      if (!dep) return pkg;
+
+      const currentDepVersion = currentProperty[dep];
+      if (typeof currentDepVersion === "string") {
+        //@ts-expect-error TS struggles to type narrow, but we are confident it should be defined
+        pkg.pkg[property][dep] = version;
+      } else if (typeof currentDepVersion === "object") {
+        if ("version" in currentDepVersion) {
+          //@ts-expect-error TS struggles to type narrow, but we are confident it should be defined
           pkg.pkg[property][dep].version = version;
-        } else {
-          //@ts-ignore
-          pkg.pkg[property][dep] = version;
         }
       }
     }
@@ -431,7 +400,7 @@ export function* writePreFile({
 }: {
   preFile: PreFile;
   cwd: string;
-}): Generator<any, File, any> {
+}): Operation<File> {
   if (!preFile.file)
     throw new Error(`We could not find the pre.json to update.`);
   const { tag, changes } = preFile;
@@ -472,7 +441,7 @@ export function* configFile({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Generator<any, ConfigFile, any> {
+}): Operation<ConfigFile> {
   const inputFile = yield loadFile(path.join(changeFolder, "config.json"), cwd);
   const parsed = JSON.parse(inputFile.content);
   return {
@@ -538,30 +507,26 @@ export function* loadChangeFiles({
 }: {
   cwd: string;
   paths: string[];
-}): Generator<any, File[], any> {
+}): Operation<File[]> {
   const files = paths.map((file) => loadFile(file, cwd));
   return yield all(files);
 }
 
-// redo this into a generator
-export const changeFilesRemove = ({
+export function* changeFilesRemove({
   cwd,
   paths,
 }: {
   cwd: string;
   paths: string[];
-}) => {
-  return Promise.all(
-    paths.map(async (changeFilePath) => {
-      await fs.unlink(path.posix.join(cwd, changeFilePath));
+}): Operation<string> {
+  return yield all(
+    paths.map(function* (changeFilePath) {
+      yield fs.unlink(path.posix.join(cwd, changeFilePath));
+      console.info(`${changeFilePath} was deleted`);
       return changeFilePath;
     })
-  ).then((deletedPaths) => {
-    deletedPaths.forEach((changeFilePath) =>
-      console.info(`${changeFilePath} was deleted`)
-    );
-  });
-};
+  );
+}
 
 export function* readChangelog({
   cwd,
@@ -571,7 +536,7 @@ export function* readChangelog({
   cwd: string;
   packagePath?: string;
   create?: boolean;
-}): Generator<any, File, any> {
+}): Operation<File> {
   let file = null;
   try {
     file = yield loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
@@ -593,6 +558,6 @@ export function* writeChangelog({
 }: {
   changelog: File;
   cwd: string;
-}): Generator<any, void | Error, any> {
+}): Operation<void | Error> {
   return yield saveFile(changelog, cwd);
 }

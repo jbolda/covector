@@ -5,6 +5,7 @@ import {
   configFile,
   changeFiles,
   loadChangeFiles,
+  changeFilesRemove,
 } from "../src";
 import { it } from "@effection/jest";
 import mockConsole from "jest-mock-console";
@@ -81,5 +82,21 @@ describe("general file test", () => {
     const changesArray = yield changeFiles({ cwd: changesFolder });
     expect(changesArray).toMatchSnapshot();
     restoreConsole();
+  });
+
+  it("deletes files", function* () {
+    const restoreConsole = mockConsole(["info"]);
+    const changesFolder = f.copy("integration.general-file");
+    const changeFilesToDelete = [
+      "./.changes/first-change.md",
+      "./.changes/second-change.md",
+    ];
+
+    const filesRemoved = yield changeFilesRemove({
+      cwd: changesFolder,
+      paths: changeFilesToDelete,
+    });
+
+    expect(filesRemoved).toEqual(changeFilesToDelete);
   });
 });

@@ -12,6 +12,8 @@ import type {
   CommonBumps,
   Releases,
   PackageCommand,
+  DepTypes,
+  Pkg,
 } from "@covector/types";
 
 export function* apply({
@@ -199,7 +201,7 @@ const bumpMain = ({
       `${pkg.name} needs prereleaseIdentifier passed as a string`
     );
 
-  let next = semver.inc(pkg.version, bumpType, undefined, prereleaseIdentifier);
+  let next = semver.inc(pkg.version, bumpType, prereleaseIdentifier);
   if (next) {
     pkg.version = next;
     pkg.versionMajor = semver.major(next);
@@ -214,8 +216,7 @@ const bumpMain = ({
   let version =
     previewVersion && previewVersion !== ""
       ? semver.valid(`${preVersionCleaned}-${previewVersion}`)
-      : // @ts-ignore TODO bumpType should be narrowed to meet ReleaseType
-        semver.inc(prevVersion, bumpType, prereleaseIdentifier);
+      : semver.inc(prevVersion, bumpType, prereleaseIdentifier);
 
   if (version) {
     pkg = setPackageFileVersion({ pkg, version });
@@ -244,42 +245,48 @@ const bumpDeps = ({
 }) => {
   let pkg = { ...packageFile };
 
-  if (pkg.pkg && pkg.file)
-    ["dependencies", "devDependencies", "dev-dependencies"].forEach(
-      (property) => {
-        // @ts-ignore
-        if (pkg.pkg[property]) {
-          // @ts-ignore
-          Object.keys(pkg.pkg[property]).forEach((existingDep) => {
-            // if pkg is in dep list
-            if (existingDep === dep) {
-              const prevVersion = getPackageFileVersion({ pkg, property, dep });
+  if (pkg.pkg && pkg.file) {
+    const currentPkg = pkg.pkg;
+    const depTypes: DepTypes[] = [
+      "dependencies",
+      "devDependencies",
+      "dev-dependencies",
+    ];
+    depTypes.forEach((property: DepTypes) => {
+      if (property && property in currentPkg) {
+        const pkgProperties = Object.keys(
+          currentPkg[property] as object
+        ) as Array<keyof Pkg>;
+        pkgProperties.forEach((existingDep) => {
+          // if pkg is in dep list
+          if (existingDep === dep) {
+            const prevVersion = getPackageFileVersion({ pkg, property, dep });
 
-              const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
-              const versionRequirement = versionRequirementMatch
-                ? versionRequirementMatch[0]
-                : "";
+            const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
+            const versionRequirement = versionRequirementMatch
+              ? versionRequirementMatch[0]
+              : "";
 
-              const version = deriveVersionConsideringPartials({
-                dependency: dep,
-                prevVersion,
-                versionRequirement,
-                previewVersion,
-                packageFiles,
+            const version = deriveVersionConsideringPartials({
+              dependency: dep,
+              prevVersion,
+              versionRequirement,
+              previewVersion,
+              packageFiles,
+            });
+            if (version) {
+              pkg = setPackageFileVersion({
+                pkg,
+                version,
+                property,
+                dep,
               });
-              if (version) {
-                pkg = setPackageFileVersion({
-                  pkg,
-                  version,
-                  property,
-                  dep,
-                });
-              }
             }
-          });
-        }
+          }
+        });
       }
-    );
+    });
+  }
 
   return pkg;
 };

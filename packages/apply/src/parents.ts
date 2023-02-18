@@ -22,7 +22,7 @@ const resolveParents = ({
       Object.keys(config.packages).forEach((parent) => {
         if (
           !!config.packages[parent].dependencies &&
-          config.packages[parent].dependencies!.includes(pkg)
+          (config.packages[parent].dependencies ?? []).includes(pkg)
         ) {
           parents[pkg][parent] = !allPackages ? {} : allPackages?.[parent].deps;
         }

@@ -163,7 +163,7 @@ export function* run(): Generator<any, any, any> {
         core.setOutput("change", covectored.commandsRan);
         const payload = JSON.stringify(
           Object.keys(covectored.commandsRan).reduce((c, pkg) => {
-            //@ts-ignore
+            //@ts-expect-error
             delete c[pkg].pkg.pkgFile.vfile;
             return c;
           }, covectored.commandsRan),
@@ -254,17 +254,14 @@ export function* run(): Generator<any, any, any> {
         if (covectored.commandsRan) {
           let packagesPublished: any = Object.entries(
             covectored.commandsRan
-          ).reduce(
-            //@ts-ignore
-            (pub: Array<string>, pkg: Array<any>) => {
-              if (pkg[1].published) {
-                let { name: pkgName, version: pkgVersion }: any =
-                  pkg[1].pkg.pkgFile.pkg;
-                return pub.concat(`${pkgName}@${pkgVersion}`);
-              }
-            },
-            []
-          );
+          ).reduce((pub: string[], pkg: any[]) => {
+            if (pkg[1].published) {
+              let { name: pkgName, version: pkgVersion }: any =
+                pkg[1].pkg.pkgFile.pkg;
+              return pub.concat(`${pkgName}@${pkgVersion}`);
+            }
+            return pub;
+          }, []);
 
           if (token && github.context.payload.pull_request) {
             const octokit = github.getOctokit(token);

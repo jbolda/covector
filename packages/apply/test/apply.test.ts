@@ -3,29 +3,12 @@ import { loadFile, readAllPkgFiles } from "@covector/files";
 import { it, captureError } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
-import { ConfigFile } from "@covector/types";
+import { CommonBumps } from "@covector/types";
 const f = fixtures(__dirname);
 
 const configDefaults = {
   changeFolder: ".changes",
 };
-
-const allPackagesWithoutRead = ({ config }: { config: ConfigFile }) =>
-  Object.entries(config.packages)
-    .map(([pkgName, configInfo]) => ({
-      name: pkgName,
-      version: "none",
-      deps: !configInfo.dependencies
-        ? undefined
-        : configInfo.dependencies.reduce((deps: Record<string, any>, dep) => {
-            deps[dep] = [{ type: "dependencies", version: "none" }];
-            return deps;
-          }, {}),
-    }))
-    .reduce((pkgs: Record<string, any>, pkg: Record<string, any>) => {
-      pkgs[pkg.name] = pkg;
-      return pkgs;
-    }, {});
 
 describe("package file apply bump (snapshot)", () => {
   let restoreConsole: RestoreConsole;
@@ -92,7 +75,7 @@ describe("package file apply bump (snapshot)", () => {
         manager: "rust",
         path: "./",
         pkg: "rust-single-fixture",
-        type: "minor",
+        type: "minor" as CommonBumps,
         parents: {},
       },
     ];
@@ -110,7 +93,7 @@ describe("package file apply bump (snapshot)", () => {
     const allPackages = yield readAllPkgFiles({ config, cwd: rustFolder });
 
     //@ts-expect-error
-    yield apply({ commands, config, allPackages, cwd: rustFolder });
+    yield apply({ commands, allPackages, cwd: rustFolder });
     const modifiedFile = yield loadFile("Cargo.toml", rustFolder);
     expect(modifiedFile.content).toBe(
       '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n'

@@ -9,7 +9,6 @@ const f = fixtures(__dirname);
 
 describe("integration test for complex commands", () => {
   it("runs version for prod", function* () {
-    jest.setTimeout(7000);
     const restoreConsole = mockConsole(["log", "dir", "info"]);
     const fullIntegration = f.copy("integration.js-with-complex-commands");
     const covectored = (yield covector({
@@ -37,7 +36,7 @@ describe("integration test for complex commands", () => {
     expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");
 
     restoreConsole();
-  });
+  }, 15000);
 
   it("runs publish for prod", function* () {
     const restoreConsole = mockConsole(["log", "info"]);

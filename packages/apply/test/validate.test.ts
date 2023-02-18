@@ -38,7 +38,7 @@ describe("validate apply", () => {
     expect.assertions(1);
     expect(
       async () =>
-        //@ts-ignore
+        //@ts-expect-error
         await run(validateApply({ commands, config, cwd: jsonFolder }))
     ).not.toThrow();
   });
@@ -68,7 +68,7 @@ describe("validate apply", () => {
 
     expect.assertions(1);
     expect(
-      //@ts-ignore
+      //@ts-expect-error
       async () => await validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
@@ -121,7 +121,7 @@ describe("validate apply", () => {
 
     expect.assertions(1);
     expect(
-      //@ts-ignore
+      //@ts-expect-error
       async () => await validateApply({ commands, config, cwd: jsonFolder })
     ).not.toThrow();
   });
@@ -163,7 +163,7 @@ describe("validate apply", () => {
 
     expect.assertions(1);
     expect(
-      //@ts-ignore
+      //@ts-expect-error
       async () => await validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
@@ -205,7 +205,7 @@ describe("validate apply", () => {
 
     expect.assertions(1);
     expect(
-      //@ts-ignore
+      //@ts-expect-error
       async () => await validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
@@ -247,7 +247,7 @@ describe("validate apply", () => {
 
     expect.assertions(1);
     expect(
-      //@ts-ignore
+      //@ts-expect-error
       async () => await validateApply({ commands, config, cwd: rustFolder })
     ).not.toThrow();
   });
@@ -289,9 +289,8 @@ describe("validate apply", () => {
     };
 
     expect.assertions(1);
-    //@ts-ignore
     const validated = yield validateApply({
-      //@ts-ignore
+      //@ts-expect-error
       commands,
       config,
       cwd: rustFolder,
@@ -355,7 +354,7 @@ describe("validate apply", () => {
     );
 
     expect({
-      //@ts-ignore
+      //@ts-expect-error
       consoleError: console.error.mock.calls,
     }).toMatchSnapshot();
 

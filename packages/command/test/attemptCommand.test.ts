@@ -4,6 +4,20 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+const fillWithDefaults = ({ version }: { version: string }) => {
+  const [versionMajor, versionMinor, versionPatch] = version
+    .split(".")
+    .map((v) => parseInt(v));
+  return {
+    version,
+    versionMajor,
+    versionMinor,
+    versionPatch,
+    pkg: { name: "none" },
+    deps: {},
+  };
+};
+
 describe("attemptCommand", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
@@ -14,19 +28,18 @@ describe("attemptCommand", () => {
   });
 
   it("invokes a function", function* () {
-    //@ts-ignore
     yield attemptCommands({
       commands: [
         {
           name: "pkg-nickname",
-          pkgFile: { version: "0.5.6", deps: {} },
-          //@ts-ignore
+          pkgFile: fillWithDefaults({ version: "0.5.6" }),
+          //@ts-expect-error
           command: async () => console.log("boop"),
         },
       ],
     });
 
-    //@ts-ignore
+    //@ts-expect-error
     expect(console.log.mock.calls).toEqual([["boop"]]);
   });
 
@@ -49,7 +62,7 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    //@ts-ignore
+    //@ts-expect-error
     expect(console.log.mock.calls).toEqual([
       ["boop"],
       ["booop"],
@@ -63,8 +76,8 @@ describe("attemptCommand", () => {
       commands: [
         {
           pkg: "pkg-nickname",
-          pkgFile: { version: "0.5.6", deps: {} },
-          //@ts-ignore
+          pkgFile: fillWithDefaults({ version: "0.5.6" }),
+          //@ts-expect-error
           command: async (pkg: any) =>
             console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
         },
@@ -74,7 +87,7 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    //@ts-ignore
+    //@ts-expect-error
     expect(console.log.mock.calls).toEqual([["boop pkg-nickname@0.5.6"]]);
   });
 
@@ -83,9 +96,8 @@ describe("attemptCommand", () => {
       commands: [
         {
           pkg: "pkg-nickname",
-          pkgFile: { version: "0.5.6", deps: {} },
+          pkgFile: fillWithDefaults({ version: "0.5.6" }),
           manager: "none",
-          //@ts-ignore
           command: [
             async (pkg: any) =>
               console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
@@ -103,7 +115,7 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    //@ts-ignore
+    //@ts-expect-error
     expect(console.log.mock.calls).toEqual([
       ["boop pkg-nickname@0.5.6"],
       ["booop pkg-nickname@0.5.6"],

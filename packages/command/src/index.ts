@@ -30,18 +30,18 @@ export const attemptCommands = function* ({
   for (let pkg of commands) {
     const initialStdout =
       pkgCommandsRan &&
-      //@ts-ignore
+      //@ts-expect-error
       pkgCommandsRan[pkg.pkg] &&
-      //@ts-ignore
+      //@ts-expect-error
       pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] &&
-      //@ts-ignore
+      //@ts-expect-error
       typeof pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] === "string"
-        ? //@ts-ignore
+        ? //@ts-expect-error
           pkgCommandsRan[pkg.pkg][`${commandPrefix}command`]
         : false;
-    //@ts-ignore template literals issues
+    //@ts-expect-error template literals issues
     if (!pkg[`${commandPrefix}command`]) continue;
-    //@ts-ignore template literals issues
+    //@ts-expect-error template literals issues
     const c: string | Function | [] = pkg[`${commandPrefix}command`];
     const pubCommands: (NormalizedCommand | string | Function)[] =
       typeof c === "string" || typeof c === "function" || !Array.isArray(c)
@@ -141,7 +141,7 @@ export const confirmCommandsToRun = function* ({
   let subPublishCommand = command.slice(7, 999);
   let commandsToRun: PkgPublish[] = [];
   for (let pkg of commands) {
-    //@ts-ignore template literals issues
+    //@ts-expect-error template literals issues
     const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
     if (!!getPublishedVersion) {
       const version = yield runCommand({

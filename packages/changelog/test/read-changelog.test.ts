@@ -107,7 +107,7 @@ describe("reads changelog", () => {
 
     yield fillChangelogs({
       applied,
-      //@ts-ignore
+      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -119,13 +119,11 @@ describe("reads changelog", () => {
       },
     };
 
-    //@ts-ignore
     const changelogs = yield pullLastChangelog({
       config,
       cwd: projectFolder,
     });
 
-    //@ts-ignore
     pkgCommandsRan = yield pipeChangelogToCommands({
       changelogs,
       pkgCommandsRan,
@@ -199,7 +197,7 @@ describe("reads changelog", () => {
 
     yield fillChangelogs({
       applied,
-      //@ts-ignore
+      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -216,9 +214,7 @@ describe("reads changelog", () => {
       cwd: projectFolder,
     });
 
-    //@ts-ignore
     pkgCommandsRan = yield pipeChangelogToCommands({
-      //@ts-ignore
       changelogs,
       pkgCommandsRan,
     });
