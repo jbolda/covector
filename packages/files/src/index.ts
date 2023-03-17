@@ -52,14 +52,23 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
   switch (file.extname) {
     case ".toml":
       const parsedTOML = TOML.parse(file.content) as unknown as Pkg;
+      let version;
       if (
-        !parsedTOML?.package?.version ||
-        (typeof parsedTOML?.package?.version === "string" &&
-          !semver.valid(parsedTOML?.package?.version))
+        parsedTOML?.package?.version &&
+        typeof parsedTOML?.package?.version === "string"
       ) {
-        throw new Error("not valid version");
+        version = parsedTOML.package.version;
+      } else if (
+        parsedTOML?.workspace?.package?.version &&
+        typeof parsedTOML?.workspace?.package?.version === "string"
+      ) {
+        version = parsedTOML.workspace.package.version;
       }
-      const { version } = parsedTOML.package;
+
+      if (!version)
+        throw new Error(`package version is not set in ./${file.path}`);
+      if (!semver.valid(version))
+        throw new Error(`package version is not valid in ./${file.path}`);
       return {
         version: version,
         versionMajor: semver.major(version),
@@ -357,6 +366,11 @@ export const setPackageFileVersion = ({
         pkg.pkg.version = version;
       } else if (pkg.file.extname === ".toml" && pkg.pkg.package?.version) {
         pkg.pkg.package.version = version;
+      } else if (
+        pkg.file.extname === ".toml" &&
+        pkg.pkg.workspace?.package?.version
+      ) {
+        pkg.pkg.workspace.package.version = version;
       } else {
         // covers yaml and generic
         pkg.pkg.version = version;
