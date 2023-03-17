@@ -1,0 +1,8 @@
+[package]
+name = "rust_pkg_a_fixture"
+authors.workspace = true
+description.workspace = true
+version.workspace = true
+
+[dependencies]
+rust_pkg_b_fixture = "0.8.8"
