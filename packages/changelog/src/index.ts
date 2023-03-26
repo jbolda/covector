@@ -10,6 +10,7 @@ import type {
   Changelog,
   PkgCommandResponse,
   AssembledChanges,
+  Meta,
 } from "@covector/types";
 
 export function* fillChangelogs({
@@ -168,31 +169,68 @@ const applyChanges = ({
       if (!assembledChanges.releases[change.changes.name]) {
         addition = `## [${change.changes.version}]\nBumped due to dependency.`;
       } else {
-        addition = assembledChanges.releases[
-          change.changes.name
-        ].changes.reduce((finalString, release) => {
+        addition = `## [${change.changes.version}]`;
+
+        const renderRelease = (
+          release: {
+            summary: string;
+            meta?: Meta | undefined;
+          },
+          indentation: number,
+          indentFirstLine = false
+        ) => {
+          // indent the summary so it fits under the bullet point
+          const summary = release.summary.replace(
+            /\n/g,
+            `\n${"  ".repeat(indentFirstLine ? indentation + 2 : indentation)}`
+          );
+          const firstLinIndent = indentFirstLine
+            ? "  ".repeat(indentation)
+            : "";
+
           if (!release.meta || (!!release.meta && !release.meta.commits)) {
-            return `${finalString}\n- ${release.summary}`;
-          } else if (release.meta.commits) {
-            return `${finalString}\n- ${release.summary}\n${
-              !release.meta.dependencies
-                ? ""
-                : `  - ${release.meta.dependencies}\n`
-            }${release.meta.commits
-              .map(
-                (commit) =>
-                  `  - [${commit.hashShort}](${gitSiteUrl}commit/${
-                    commit.hashLong
-                  }) ${commit.commitSubject.replace(
-                    /(#[0-9]+)/g,
-                    (match) => `[${match}](${gitSiteUrl}pull/${match.slice(1)})`
-                  )} on ${commit.date}`
-              )
-              .join("\n")}`;
+            addition += `\n${firstLinIndent}- ${summary}`;
           } else {
-            return finalString;
+            const commit = release.meta.commits![0];
+
+            const commitLink = `[\`${commit.hashShort}\`](${gitSiteUrl}commit/${commit.hashLong})`;
+
+            const [, pr] = /(#[0-9]+)/g.exec(commit.commitSubject) ?? [];
+            const prLink = pr
+              ? `([${pr}](${gitSiteUrl}pull/${pr.slice(1)}))`
+              : "";
+
+            addition += `\n${firstLinIndent}- ${commitLink}${prLink} ${summary}`;
           }
-        }, `## [${change.changes.version}]`);
+        };
+
+        for (const release of assembledChanges.releases[
+          change.changes.name
+        ].changes.filter((c) => !c.meta?.dependencies)) {
+          renderRelease(release, 1);
+        }
+
+        const groupedDpesChanges: {
+          [k: string]: {
+            summary: string;
+            meta?: Meta | undefined;
+          }[];
+        } = {};
+
+        assembledChanges.releases[change.changes.name].changes
+          .filter((c) => c.meta?.dependencies)
+          .forEach((r) => {
+            r.meta!.dependencies.forEach((key) => {
+              if (!groupedDpesChanges[key]) groupedDpesChanges[key] = [];
+              groupedDpesChanges[key].push(r);
+            });
+          });
+
+        if (Object.keys(groupedDpesChanges).length !== 0) {
+          for (const pkg of Object.keys(groupedDpesChanges)) {
+            addition += `\n- Bumped due to a bump in \`${pkg}\``;
+          }
+        }
       }
       const parsedAddition = processor.parse(addition);
       const changelogFirstElement = changelog.children.shift();

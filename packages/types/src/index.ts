@@ -112,7 +112,7 @@ export type PkgCommandResponse = {
 };
 
 export type Meta = {
-  dependencies: { [k: string]: string }[];
+  dependencies: string[];
   commits?: {
     filename: string;
     hashShort: string;
@@ -209,7 +209,7 @@ export type PipePublishTemplate = {
 export type ChangeParsed = {
   releases: { [k: string]: string };
   summary: string;
-  meta: { dependencies: string };
+  meta: { dependencies: string[] };
 };
 
 export type Changed = Record<

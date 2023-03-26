@@ -2283,7 +2283,9 @@ Summary about the changes in tauri-updater
 
 Summary about the changes in tauri
 ",
-                    "dependencies": "Bumped due to a bump in tauri.",
+                    "dependencies": Array [
+                      "tauri",
+                    ],
                     "extname": ".md",
                     "filename": "first-change",
                     "path": ".changes/first-change.md",
@@ -2313,7 +2315,7 @@ Merging this PR will release new versions of the following packages based on you
 # tauri.js
 
 ## [0.6.3]
-- Summary about the changes in tauri
+- Bumped due to a bump in \`tauri\`
 
 
 

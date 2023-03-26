@@ -63,7 +63,8 @@ Array [
     "tauri-bundler [publish run from the cwd]: ls",
   ],
   Array [
-    "cli
+    ".changes
+cli
 tauri
 tauri-api
 tauri-updater
@@ -94,7 +95,8 @@ tauri-utils",
     "tauri-api [publish run from the cwd]: ls",
   ],
   Array [
-    "cli
+    ".changes
+cli
 tauri
 tauri-api
 tauri-updater
@@ -125,7 +127,8 @@ tauri-utils",
     "tauri-utils [publish run from the cwd]: ls",
   ],
   Array [
-    "cli
+    ".changes
+cli
 tauri
 tauri-api
 tauri-updater
@@ -2829,7 +2832,8 @@ Object {
       "tauri-bundler [publish run from the cwd]: ls",
     ],
     Array [
-      "cli
+      ".changes
+cli
 tauri
 tauri-api
 tauri-updater
@@ -2857,7 +2861,8 @@ tauri-utils",
       "tauri-api [publish run from the cwd]: ls",
     ],
     Array [
-      "cli
+      ".changes
+cli
 tauri
 tauri-api
 tauri-updater
@@ -2885,7 +2890,8 @@ tauri-utils",
       "tauri-utils [publish run from the cwd]: ls",
     ],
     Array [
-      "cli
+      ".changes
+cli
 tauri
 tauri-api
 tauri-updater
@@ -6125,7 +6131,7 @@ flutter:
           "versionPrerelease": null,
         },
         "command": "## [0.3.2]
-- Summary about the changes in test_app_two",
+- Bumped due to a bump in \`test_app_two\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -6325,7 +6331,9 @@ flutter:
 
 Summary about the changes in test_app_two
 ",
-                  "dependencies": "Bumped due to a bump in test_app_two.",
+                  "dependencies": Array [
+                    "test_app_two",
+                  ],
                   "extname": ".md",
                   "filename": "first-change",
                   "path": ".changes/first-change.md",
@@ -7880,7 +7888,7 @@ thiserror = \\"1.0.19\\"
           "versionPrerelease": null,
         },
         "command": "## [0.6.3]
-- Summary about the changes in tauri",
+- Bumped due to a bump in \`tauri\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -8358,7 +8366,9 @@ Summary about the changes in tauri-updater
 
 Summary about the changes in tauri
 ",
-                  "dependencies": "Bumped due to a bump in tauri.",
+                  "dependencies": Array [
+                    "tauri",
+                  ],
                   "extname": ".md",
                   "filename": "first-change",
                   "path": ".changes/first-change.md",
@@ -8454,7 +8464,8 @@ Array [
     "tauri-bundler [publish run from the cwd]: ls",
   ],
   Array [
-    "cli
+    ".changes
+cli
 tauri
 tauri-api
 tauri-updater
@@ -8488,7 +8499,8 @@ tauri-utils",
     "tauri-api [publish run from the cwd]: ls",
   ],
   Array [
-    "cli
+    ".changes
+cli
 tauri
 tauri-api
 tauri-updater
@@ -8522,7 +8534,8 @@ tauri-utils",
     "tauri-utils [publish run from the cwd]: ls",
   ],
   Array [
-    "cli
+    ".changes
+cli
 tauri
 tauri-api
 tauri-updater
