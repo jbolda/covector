@@ -63,8 +63,7 @@ Array [
     "tauri-bundler [publish run from the cwd]: ls",
   ],
   Array [
-    ".changes
-cli
+    "cli
 tauri
 tauri-api
 tauri-updater
@@ -95,8 +94,7 @@ tauri-utils",
     "tauri-api [publish run from the cwd]: ls",
   ],
   Array [
-    ".changes
-cli
+    "cli
 tauri
 tauri-api
 tauri-updater
@@ -127,8 +125,7 @@ tauri-utils",
     "tauri-utils [publish run from the cwd]: ls",
   ],
   Array [
-    ".changes
-cli
+    "cli
 tauri
 tauri-api
 tauri-updater
@@ -2832,8 +2829,7 @@ Object {
       "tauri-bundler [publish run from the cwd]: ls",
     ],
     Array [
-      ".changes
-cli
+      "cli
 tauri
 tauri-api
 tauri-updater
@@ -2861,8 +2857,7 @@ tauri-utils",
       "tauri-api [publish run from the cwd]: ls",
     ],
     Array [
-      ".changes
-cli
+      "cli
 tauri
 tauri-api
 tauri-updater
@@ -2890,8 +2885,7 @@ tauri-utils",
       "tauri-utils [publish run from the cwd]: ls",
     ],
     Array [
-      ".changes
-cli
+      "cli
 tauri
 tauri-api
 tauri-updater
@@ -8464,8 +8458,7 @@ Array [
     "tauri-bundler [publish run from the cwd]: ls",
   ],
   Array [
-    ".changes
-cli
+    "cli
 tauri
 tauri-api
 tauri-updater
@@ -8499,8 +8492,7 @@ tauri-utils",
     "tauri-api [publish run from the cwd]: ls",
   ],
   Array [
-    ".changes
-cli
+    "cli
 tauri
 tauri-api
 tauri-updater
@@ -8534,8 +8526,7 @@ tauri-utils",
     "tauri-utils [publish run from the cwd]: ls",
   ],
   Array [
-    ".changes
-cli
+    "cli
 tauri
 tauri-api
 tauri-updater
