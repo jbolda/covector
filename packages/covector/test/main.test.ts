@@ -179,7 +179,7 @@ describe("integration test in production mode", () => {
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
-  });
+  }, 6000); // increase timeout to 60s, windows seems to take forever
 
   it("runs publish for dart / flutter", function* () {
     const fullIntegration = f.copy("integration.dart-flutter-single");
@@ -327,7 +327,7 @@ describe("integration test in production mode", () => {
       modifyConfig,
     });
     expect((console.log as any).mock.calls).toMatchSnapshot();
-  });
+  }, 6000); // increase timeout to 60s, windows seems to take forever
 
   it("uses the action config modification", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
