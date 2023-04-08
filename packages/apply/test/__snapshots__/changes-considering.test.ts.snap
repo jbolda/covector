@@ -91,7 +91,9 @@ Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-c.",
+              "dependencies": Array [
+                "pkg-c",
+              ],
             },
             "releases": Object {
               "pkg-c": "patch",
@@ -204,7 +206,9 @@ Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-d.",
+              "dependencies": Array [
+                "pkg-d",
+              ],
             },
             "releases": Object {
               "pkg-c": "patch",
@@ -229,10 +233,12 @@ Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-d.
-    - Bumped due to a bump in pkg-four.
-    - Bumped due to a bump in pkg-three.
-    - Bumped due to a bump in pkg-two.",
+              "dependencies": Array [
+                "pkg-d",
+                "pkg-four",
+                "pkg-three",
+                "pkg-two",
+              ],
             },
             "releases": Object {
               "pkg-c": "patch",
@@ -248,7 +254,9 @@ Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-b.",
+              "dependencies": Array [
+                "pkg-b",
+              ],
             },
             "releases": Object {
               "pkg-b": "minor",
@@ -263,8 +271,10 @@ Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-d.
-    - Bumped due to a bump in pkg-four.",
+              "dependencies": Array [
+                "pkg-d",
+                "pkg-four",
+              ],
             },
             "releases": Object {
               "pkg-c": "patch",
@@ -289,9 +299,11 @@ Object {
         "changes": Array [
           Object {
             "meta": Object {
-              "dependencies": "Bumped due to a bump in pkg-d.
-    - Bumped due to a bump in pkg-four.
-    - Bumped due to a bump in pkg-three.",
+              "dependencies": Array [
+                "pkg-d",
+                "pkg-four",
+                "pkg-three",
+              ],
             },
             "releases": Object {
               "pkg-c": "patch",

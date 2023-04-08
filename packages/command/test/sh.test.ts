@@ -33,7 +33,7 @@ Usage:
     it("shell opted in", function* () {
       const { out } = yield sh("echo this thing", { shell: true }, false);
       expect(out).toBe("this thing");
-    });
+    }, 6000); // increase timeout to 60s, windows seems to take forever
 
     it("defines bash as shell", function* () {
       const { out } = yield sh("echo this thing", { shell: "bash" }, false);
@@ -144,7 +144,7 @@ Usage:
         expect(result.message).toBe(
           "spawn echo this thing | echo but actually this ENOENT"
         );
-      });
+      }, 6000); // increase timeout to 60s, windows seems to take forever
     });
   }
 });

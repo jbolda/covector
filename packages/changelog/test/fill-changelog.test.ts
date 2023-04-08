@@ -178,12 +178,9 @@ describe("fills changelog", () => {
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.5.6]\n\n" +
-        "- This is a test.\n" +
-        "  - [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#43](/pull/43) ([#719999](/pull/719999)) on 2020-07-06\n" +
-        "- This is another test.\n" +
-        "  - [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#23](/pull/23) ([#123](/pull/123)) on 2020-07-06\n" +
-        "- This is the last test.\n" +
-        "  - [3ca0504](/commit/3ca05042c51821d229209e18391535c266b6b200) feat: advanced commands, closes [#9](/pull/9) ([#8873](/pull/8873)) on 2020-07-06\n"
+        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#43](/pull/43)) This is a test.\n" +
+        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#23](/pull/23)) This is another test.\n"+
+        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#9](/pull/9)) This is the last test.\n"
     );
   });
 

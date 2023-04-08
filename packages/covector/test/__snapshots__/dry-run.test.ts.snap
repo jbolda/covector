@@ -536,7 +536,9 @@ Summary about the changes in tauri-updater
 
 Summary about the changes in tauri
 ",
-                  "dependencies": "Bumped due to a bump in tauri.",
+                  "dependencies": Array [
+                    "tauri",
+                  ],
                   "extname": ".md",
                   "filename": "first-change",
                   "path": ".changes/first-change.md",
@@ -14388,7 +14390,9 @@ Summary about the changes in tauri-updater
 
 Summary about the changes in tauri
 ",
-                  "dependencies": "Bumped due to a bump in tauri.",
+                  "dependencies": Array [
+                    "tauri",
+                  ],
                   "extname": ".md",
                   "filename": "first-change",
                   "path": ".changes/first-change.md",
@@ -15486,7 +15490,7 @@ thiserror = \\"1.0.19\\"
             "versionPrerelease": null,
           },
           "command": "## [0.6.3]
-- Summary about the changes in tauri",
+- Bumped due to a bump in \`tauri\`",
           "postcommand": false,
           "precommand": false,
         },
@@ -17019,7 +17023,7 @@ thiserror = \\"1.0.19\\"
           "versionPrerelease": null,
         },
         "command": "## [0.6.3]
-- Summary about the changes in tauri",
+- Bumped due to a bump in \`tauri\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -17497,7 +17501,9 @@ Summary about the changes in tauri-updater
 
 Summary about the changes in tauri
 ",
-                  "dependencies": "Bumped due to a bump in tauri.",
+                  "dependencies": Array [
+                    "tauri",
+                  ],
                   "extname": ".md",
                   "filename": "first-change",
                   "path": ".changes/first-change.md",

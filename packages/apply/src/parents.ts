@@ -112,12 +112,12 @@ const parentBump = ({
               // this ends up overwriting in cases multiple bumps,
               //   we should adjust this to accept multiple
               if (
-                parentChange.meta.dependencies === "" ||
-                !parentChange.meta.dependencies
+                !parentChange.meta.dependencies ||
+                parentChange.meta.dependencies.length === 0
               ) {
-                parentChange.meta.dependencies = `Bumped due to a bump in ${main}.`;
+                parentChange.meta.dependencies = [main];
               } else {
-                parentChange.meta.dependencies = `${parentChange.meta.dependencies}\n    - Bumped due to a bump in ${main}.`;
+                parentChange.meta.dependencies.push(main);
               }
             });
           }

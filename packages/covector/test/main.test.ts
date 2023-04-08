@@ -77,7 +77,7 @@ describe("integration test in production mode", () => {
     expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3]\n\n" +
-        "- Summary about the changes in tauri\n"
+        "- Bumped due to a bump in `tauri`\n"
     );
   });
 
@@ -130,7 +130,7 @@ describe("integration test in production mode", () => {
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.3.2]\n\n" +
-        "- Summary about the changes in test_app_two\n"
+        "- Bumped due to a bump in `test_app_two`\n"
     );
 
     const versionFile = yield loadFile(
@@ -179,7 +179,7 @@ describe("integration test in production mode", () => {
       consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
-  });
+  }, 6000); // increase timeout to 60s, windows seems to take forever
 
   it("runs publish for dart / flutter", function* () {
     const fullIntegration = f.copy("integration.dart-flutter-single");
@@ -327,7 +327,7 @@ describe("integration test in production mode", () => {
       modifyConfig,
     });
     expect((console.log as any).mock.calls).toMatchSnapshot();
-  });
+  }, 6000); // increase timeout to 60s, windows seems to take forever
 
   it("uses the action config modification", function* () {
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
