@@ -21,6 +21,7 @@ Summary about the changes in tauri
             "tauri": "minor",
           },
           "summary": "Summary about the changes in tauri",
+          "tag": undefined,
         },
       ],
       Object {
@@ -45,6 +46,7 @@ Summary about the changes in tauri-updater
             "tauri-updater": "patch",
           },
           "summary": "Summary about the changes in tauri-updater",
+          "tag": undefined,
         },
       ],
       Object {
@@ -87,6 +89,7 @@ Summary about the changes in tauri
                   "tauri": "minor",
                 },
                 "summary": "Summary about the changes in tauri",
+                "tag": undefined,
               },
             ],
             "parents": Object {
@@ -499,6 +502,7 @@ Summary about the changes in tauri-updater
                   "tauri-updater": "patch",
                 },
                 "summary": "Summary about the changes in tauri-updater",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -547,6 +551,7 @@ Summary about the changes in tauri
                   "tauri": "minor",
                 },
                 "summary": "Summary about the changes in tauri",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -13941,6 +13946,7 @@ Summary about the changes in tauri
                   "tauri": "minor",
                 },
                 "summary": "Summary about the changes in tauri",
+                "tag": undefined,
               },
             ],
             "parents": Object {
@@ -14353,6 +14359,7 @@ Summary about the changes in tauri-updater
                   "tauri-updater": "patch",
                 },
                 "summary": "Summary about the changes in tauri-updater",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -14401,6 +14408,7 @@ Summary about the changes in tauri
                   "tauri": "minor",
                 },
                 "summary": "Summary about the changes in tauri",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -15490,6 +15498,8 @@ thiserror = \\"1.0.19\\"
             "versionPrerelease": null,
           },
           "command": "## [0.6.3]
+### Dependencies bumps
+
 - Bumped due to a bump in \`tauri\`",
           "postcommand": false,
           "precommand": false,
@@ -17023,6 +17033,8 @@ thiserror = \\"1.0.19\\"
           "versionPrerelease": null,
         },
         "command": "## [0.6.3]
+### Dependencies bumps
+
 - Bumped due to a bump in \`tauri\`",
         "postcommand": false,
         "precommand": false,
@@ -17062,6 +17074,7 @@ Summary about the changes in tauri
                   "tauri": "minor",
                 },
                 "summary": "Summary about the changes in tauri",
+                "tag": undefined,
               },
             ],
             "parents": Object {
@@ -17469,6 +17482,7 @@ Summary about the changes in tauri-updater
                   "tauri-updater": "patch",
                 },
                 "summary": "Summary about the changes in tauri-updater",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -17512,6 +17526,7 @@ Summary about the changes in tauri
                   "tauri": "minor",
                 },
                 "summary": "Summary about the changes in tauri",
+                "tag": undefined,
               },
             ],
             "parents": Object {},

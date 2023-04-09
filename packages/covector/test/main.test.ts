@@ -77,6 +77,7 @@ describe("integration test in production mode", () => {
     expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3]\n\n" +
+        "### Dependencies bumps\n\n" +
         "- Bumped due to a bump in `tauri`\n"
     );
   });
@@ -130,6 +131,7 @@ describe("integration test in production mode", () => {
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.3.2]\n\n" +
+        "### Dependencies bumps\n\n" +
         "- Bumped due to a bump in `test_app_two`\n"
     );
 

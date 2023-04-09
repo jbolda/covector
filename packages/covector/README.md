@@ -69,6 +69,8 @@ Given a version number MAJOR.MINOR.PATCH, increment the:
 
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format, but will be discussed prior to usage (as extra steps will be necessary in consideration of merging and publishing).
 
+Additionally, a change may contain an optional tag (section) `major:breaking`, `minor:bug` or `patch:pref` but will be discussed later on.
+
 ## Power of Configuration
 
 Covector is driven by your configuration, and creates rather open ended use cases. The two to level properties are `packages` and `pkgManagers`. The `packages` is an object of your packages with the key being name of your package (or even a nickname!), a `path` to it's folder, the package `manager`, and an array of `dependencies` if applicable (which operates across languages too!).
@@ -144,3 +146,47 @@ During the versioning step, the change files will be recorded in this array and 
 When you are ready to release the stable version, remove the `pre.json` and all of your change files. Add a new change file announcing the stable version, and apply the bumps to the packages coming out of prerelease.
 
 Prereleases in general complicate considerations, and introduce many foot-guns. We expect to expand functionality here, but look to do it with guardrails and assistance to hopefully prevent issues.
+
+
+## Change Tags
+
+Each bump in a change file could optionally contain a tag (section) in the format of `<bump>:<tag>`, and will be used to group related changes under one tag in the final changelog:
+
+```md
+---
+"covector": minor:feat
+"@covector/apply": patch:fix
+"@covector/assemble": patch
+---
+
+Change summary goes here
+```
+
+By default the tags are rednered as is but a longer description could be provided in the config:
+
+```json
+{
+  "changeTags": {
+    "feat": "New Features",
+    "bug": "Bug Fixes",
+    "pref": "Prefromance Improvements",
+    "misc": "Miscellaneous"
+  },
+}
+```
+> Note: the order is important, tags will be rednered in the order they are defined in.
+
+By default untagged changes, will be rendered at the top before the tagged changes buy you can specify a default tag if needed:
+
+
+```json
+{
+  "changeTags": {
+    "feat": "New Features",
+    "bug": "Bug Fixes",
+    "pref": "Prefromance Improvements",
+    "misc": "Miscellaneous"
+  },
+  "defaultChangeTag": "misc",
+}
+```

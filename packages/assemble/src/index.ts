@@ -49,6 +49,16 @@ export const parseChange = function* ({
     throw new Error(
       `${file.path} didn't have any packages bumped. Please add a package bump.`
     );
+
+  for (const [k, v] of Object.entries(
+    changeset.releases as { [k: string]: CommonBumps }
+  )) {
+    const [bump, tag] = (v as string).split(":");
+    (changeset.releases as { [k: string]: CommonBumps })[k] =
+      bump as CommonBumps;
+    changeset.tag = tag;
+  }
+
   changeset.summary = processor
     .stringify({
       type: "root",
