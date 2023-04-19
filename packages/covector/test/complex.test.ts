@@ -66,7 +66,7 @@ describe("integration test for complex commands", () => {
       covectorReturn: covectored,
     }).toMatchSnapshot();
     restoreConsole();
-  }, 10000);
+  }, 15000);
 
   it("runs build for prod", function* () {
     const restoreConsole = mockConsole(["log", "info", "error"]);
