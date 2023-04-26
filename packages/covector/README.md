@@ -174,7 +174,7 @@ By default the tags are rednered as is but a longer description could be provide
   },
 }
 ```
-> Note: the order is important, tags will be rednered in the order they are defined in.
+> Note: the order is important, tags will be rendered in the order they are defined in.
 
 By default untagged changes, will be rendered at the top before the tagged changes buy you can specify a default tag if needed:
 
