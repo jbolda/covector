@@ -1844,6 +1844,7 @@ Summary about the changes in tauri
                     "tauri": "minor",
                   },
                   "summary": "Summary about the changes in tauri",
+                  "tag": undefined,
                 },
               ],
               "parents": Object {
@@ -2251,6 +2252,7 @@ Summary about the changes in tauri-updater
                     "tauri-updater": "patch",
                   },
                   "summary": "Summary about the changes in tauri-updater",
+                  "tag": undefined,
                 },
               ],
               "parents": Object {},
@@ -2294,6 +2296,7 @@ Summary about the changes in tauri
                     "tauri": "minor",
                   },
                   "summary": "Summary about the changes in tauri",
+                  "tag": undefined,
                 },
               ],
               "parents": Object {},
@@ -2315,7 +2318,9 @@ Merging this PR will release new versions of the following packages based on you
 # tauri.js
 
 ## [0.6.3]
-- Bumped due to a bump in \`tauri\`
+### Dependencies
+
+- Updated to latest \`tauri\`
 
 
 

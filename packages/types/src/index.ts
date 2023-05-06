@@ -82,6 +82,10 @@ export type ConfigFile = {
     [k: string]: PackageConfig;
   };
   additionalBumpTypes?: string[];
+  changeTags?: {
+    [k: string]: string;
+  };
+  defaultChangeTag?: string;
 };
 
 /* @covector/command */
@@ -128,6 +132,7 @@ export type AssembledChanges = {
       changes: {
         summary: string;
         meta?: Meta;
+        tag?: string;
       }[];
     };
   };
@@ -138,6 +143,7 @@ export type AssembledChanges = {
 /* @covector/assemble */
 export type Changeset = {
   releases?: { [k: string]: CommonBumps } | {};
+  tag?: string;
   summary?: string;
   meta?: {
     filename: string;
@@ -151,9 +157,13 @@ export type Changeset = {
 };
 
 export type CommonBumps = "major" | "minor" | "patch" | "prerelease" | "noop";
+export type CommonBumpsWithTag =
+  | `${Exclude<CommonBumps, "noop">}:${string}`
+  | "noop";
 
 export type Change = {
   releases: { [k: string]: CommonBumps };
+  tag?: string;
   meta: File;
 };
 
@@ -208,6 +218,7 @@ export type PipePublishTemplate = {
 /* @covector/apply */
 export type ChangeParsed = {
   releases: { [k: string]: string };
+  tag?: string;
   summary: string;
   meta: { dependencies: string[] };
 };

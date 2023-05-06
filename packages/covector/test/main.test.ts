@@ -77,7 +77,8 @@ describe("integration test in production mode", () => {
     expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3]\n\n" +
-        "- Bumped due to a bump in `tauri`\n"
+        "### Dependencies\n\n" +
+        "- Updated to latest `tauri`\n"
     );
   });
 
@@ -130,7 +131,8 @@ describe("integration test in production mode", () => {
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.3.2]\n\n" +
-        "- Bumped due to a bump in `test_app_two`\n"
+        "### Dependencies\n\n" +
+        "- Updated to latest `test_app_two`\n"
     );
 
     const versionFile = yield loadFile(

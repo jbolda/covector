@@ -222,6 +222,7 @@ Summary about the changes in tauri
             "tauri": "minor",
           },
           "summary": "Summary about the changes in tauri",
+          "tag": undefined,
         },
       ],
       Object {
@@ -246,6 +247,7 @@ Summary about the changes in tauri-updater
             "tauri-updater": "patch",
           },
           "summary": "Summary about the changes in tauri-updater",
+          "tag": undefined,
         },
       ],
       Object {
@@ -6125,7 +6127,9 @@ flutter:
           "versionPrerelease": null,
         },
         "command": "## [0.3.2]
-- Bumped due to a bump in \`test_app_two\`",
+### Dependencies
+
+- Updated to latest \`test_app_two\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -6336,6 +6340,7 @@ Summary about the changes in test_app_two
                   "test_app_two": "minor",
                 },
                 "summary": "Summary about the changes in test_app_two",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -6374,6 +6379,7 @@ Summary about the changes in test_app_three
                   "test_app_three": "patch",
                 },
                 "summary": "Summary about the changes in test_app_three",
+                "tag": undefined,
               },
             ],
             "parents": Object {
@@ -6441,6 +6447,7 @@ Summary about the changes in test_app_two
                   "test_app_two": "minor",
                 },
                 "summary": "Summary about the changes in test_app_two",
+                "tag": undefined,
               },
             ],
             "parents": Object {
@@ -6640,6 +6647,7 @@ Summary about the changes in test_app
                   "test_app": "minor",
                 },
                 "summary": "Summary about the changes in test_app",
+                "tag": undefined,
               },
               Object {
                 "meta": Object {
@@ -6657,6 +6665,7 @@ Summary about the changes again(!) in test_app
                   "test_app": "patch",
                 },
                 "summary": "Summary about the changes again(!) in test_app",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -6749,6 +6758,7 @@ Summary about the changes in general-pkg
                   "general-pkg": "minor",
                 },
                 "summary": "Summary about the changes in general-pkg",
+                "tag": undefined,
               },
               Object {
                 "meta": Object {
@@ -6766,6 +6776,7 @@ A general summary about the generally changes in general-pkg generally
                   "general-pkg": "patch",
                 },
                 "summary": "A general summary about the generally changes in general-pkg generally",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -7882,7 +7893,9 @@ thiserror = \\"1.0.19\\"
           "versionPrerelease": null,
         },
         "command": "## [0.6.3]
-- Bumped due to a bump in \`tauri\`",
+### Dependencies
+
+- Updated to latest \`tauri\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -7921,6 +7934,7 @@ Summary about the changes in tauri
                   "tauri": "minor",
                 },
                 "summary": "Summary about the changes in tauri",
+                "tag": undefined,
               },
             ],
             "parents": Object {
@@ -8328,6 +8342,7 @@ Summary about the changes in tauri-updater
                   "tauri-updater": "patch",
                 },
                 "summary": "Summary about the changes in tauri-updater",
+                "tag": undefined,
               },
             ],
             "parents": Object {},
@@ -8371,6 +8386,7 @@ Summary about the changes in tauri
                   "tauri": "minor",
                 },
                 "summary": "Summary about the changes in tauri",
+                "tag": undefined,
               },
             ],
             "parents": Object {},

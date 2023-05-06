@@ -64,7 +64,8 @@ describe("integration test with preMode `on`", () => {
     expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.0]\n\n" +
-        "- Bumped due to a bump in `tauri`\n"
+        "### Dependencies\n\n" +
+        "- Updated to latest `tauri`\n"
     );
   });
 
@@ -96,7 +97,8 @@ describe("integration test with preMode `on`", () => {
     expect(changelogTaurijsOne.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.0]\n\n" +
-        "- Bumped due to a bump in `tauri`\n"
+        "### Dependencies\n\n" +
+        "- Updated to latest `tauri`\n"
     );
 
     const preOne = yield loadFile(
@@ -139,7 +141,8 @@ Boop again.
     expect(changelogTauriCoreTwo.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.0-beta.1]\n\n" +
-        "- Bumped due to a bump in `tauri-api`\n" +
+        "### Dependencies\n\n" +
+        "- Updated to latest `tauri-api`\n" +
         "\n" +
         "## \\[0.6.0-beta.0]\n\n" +
         "- Summary about the changes in tauri\n"
@@ -154,11 +157,13 @@ Boop again.
     expect(changelogTaurijsTwo.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.1]\n\n" +
-        "- Bumped due to a bump in `tauri-api`\n" +
-        "- Bumped due to a bump in `tauri`\n" +
+        "### Dependencies\n\n" +
+        "- Updated to latest `tauri-api`\n" +
+        "- Updated to latest `tauri`\n" +
         "\n" +
         "## \\[0.6.3-beta.0]\n\n" +
-        "- Bumped due to a bump in `tauri`\n"
+        "### Dependencies\n\n" +
+        "- Updated to latest `tauri`\n"
     );
 
     const preTwo = yield loadFile(

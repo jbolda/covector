@@ -171,67 +171,122 @@ const applyChanges = ({
       } else {
         addition = `## [${change.changes.version}]`;
 
+        /**
+         *  Renders a change file in the format:
+         *
+         * - [`<commit-hash>`](<commit-url>)([#<pr-number>](<pr-url>)) change file summary
+         *
+         */
         const renderRelease = (
           release: {
             summary: string;
-            meta?: Meta | undefined;
+            meta?: Meta;
           },
-          indentation: number,
-          indentFirstLine = false
+          indentation: number = 4
         ) => {
-          // indent the summary so it fits under the bullet point
+          // indent the summary so it fits under the new bullet point we added
           const summary = release.summary.replace(
             /\n/g,
-            `\n${"  ".repeat(indentFirstLine ? indentation + 2 : indentation)}`
+            `\n${" ".repeat(indentation)}`
           );
-          const firstLinIndent = indentFirstLine
-            ? "  ".repeat(indentation)
-            : "";
 
           if (!release.meta || (!!release.meta && !release.meta.commits)) {
-            addition += `\n${firstLinIndent}- ${summary}`;
+            addition += `\n- ${summary}`;
           } else {
             const commit = release.meta.commits![0];
-
             const commitLink = `[\`${commit.hashShort}\`](${gitSiteUrl}commit/${commit.hashLong})`;
-
             const [, pr] = /(#[0-9]+)/g.exec(commit.commitSubject) ?? [];
             const prLink = pr
               ? `([${pr}](${gitSiteUrl}pull/${pr.slice(1)}))`
               : "";
 
-            addition += `\n${firstLinIndent}- ${commitLink}${prLink} ${summary}`;
+            addition += `\n- ${commitLink}${prLink} ${summary}`;
           }
         };
 
-        for (const release of assembledChanges.releases[
-          change.changes.name
-        ].changes.filter((c) => !c.meta?.dependencies)) {
-          renderRelease(release, 1);
-        }
+        const changeTags: { [k: string]: string } = {
+          // ensures there is a `deps` tag if `none` is defined
+          deps: "Dependencies",
+          ...(config.changeTags ?? {}),
+        };
 
-        const groupedDpesChanges: {
+        /**
+         * Untagged changes are changes that don't have a tag associated with and `config.defaultChangeTag` is not set.
+         * These will be rendered without a tag (section or category) at the beginning of a release changelog.
+         */
+        const untaggedChanges: {
+          summary: string;
+          meta?: Meta | undefined;
+          tag?: string | undefined;
+        }[] = [];
+        const groupedChangesByTag: {
           [k: string]: {
             summary: string;
             meta?: Meta | undefined;
+            tag?: string | undefined;
           }[];
         } = {};
 
+        // **IMPORTANT**: prefill the `groupedChangesByTag` with tags from config
+        // in the same order they were defined
+        Object.keys(changeTags).forEach((k) => (groupedChangesByTag[k] = []));
+
+        // fill `deps` tag
+        const dependecies = Object.keys(
+          assembledChanges.releases[change.changes.name].changes
+            .filter((c) => c.meta?.dependencies)
+            // reduce to an object of keys to avoid duplication of deps
+            .reduce((acc, c) => {
+              c.meta!.dependencies.forEach((dep) => (acc[dep] = 1));
+              return acc;
+            }, {} as { [k: string]: any })
+        ).map((dep) => ({ summary: `Updated to latest \`${dep}\`` }));
+        groupedChangesByTag.deps.push(...dependecies);
+
         assembledChanges.releases[change.changes.name].changes
-          .filter((c) => c.meta?.dependencies)
-          .forEach((r) => {
-            r.meta!.dependencies.forEach((key) => {
-              if (!groupedDpesChanges[key]) groupedDpesChanges[key] = [];
-              groupedDpesChanges[key].push(r);
-            });
+          .filter((c) => !c.meta?.dependencies)
+          .forEach((c) => {
+            // fallback to `defaultChangeTag` if it is set, otherwise mark this change as untagged
+            const key = c.tag ?? config.defaultChangeTag;
+            if (key) {
+              if (!groupedChangesByTag[key]) groupedChangesByTag[key] = [];
+              groupedChangesByTag[key].push(c);
+            } else {
+              untaggedChanges.push(c);
+            }
           });
 
-        if (Object.keys(groupedDpesChanges).length !== 0) {
-          for (const pkg of Object.keys(groupedDpesChanges)) {
-            addition += `\n- Bumped due to a bump in \`${pkg}\``;
+        // render untagged changes freely at the top
+        for (const release of untaggedChanges) {
+          renderRelease(release);
+        }
+
+        // render tagged changes as:
+        //
+        // ### <Long tag1 name>
+        //
+        // - `1534ae12`(#12) Change1 summary
+        // - `1534ae12`(#12) Change2 summary
+        //
+        // ### <Long tag2 name>
+        //
+        // - `1534ae12`(#12) Change1 summary
+        // - `1534ae12`(#12) Change2 summary
+        //
+        // ...etc
+        for (const [tag, change] of Object.entries(groupedChangesByTag)) {
+          if (change.length !== 0) {
+            // if the specified tag is not defined in config,
+            // fallback to the short tag specified in the change file
+            const longTag = changeTags[tag] ?? tag;
+            addition += `\n### ${longTag}\n`;
+            for (const release of change) {
+              renderRelease(release);
+            }
           }
         }
       }
+
       const parsedAddition = processor.parse(addition);
       const changelogFirstElement = changelog.children.shift();
       const changelogRemainingElements = changelog.children;
