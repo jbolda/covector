@@ -1,6 +1,12 @@
 {
   "gitSiteUrl": "https://www.github.com/jbolda/covector/",
   "additionalBumpTypes": ["housekeeping"],
+  "changeTags": {
+    "feat": "New Features",
+    "enhance": "Enhancements",
+    "bug": "Bug Fixes",
+    "deps": "Dependencies"
+  },
   "pkgManagers": {
     "javascript": {
       "version": true,
