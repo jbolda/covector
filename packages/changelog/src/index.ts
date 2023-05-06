@@ -180,7 +180,7 @@ const applyChanges = ({
         const renderRelease = (
           release: {
             summary: string;
-            meta?: Meta | undefined;
+            meta?: Meta;
           },
           indentation: number = 4
         ) => {
@@ -204,6 +204,12 @@ const applyChanges = ({
           }
         };
 
+        const changeTags: { [k: string]: string } = {
+          // ensures there is a `deps` tag if `none` is defined
+          deps: "Dependencies",
+          ...(config.changeTags ?? {}),
+        };
+
         /**
          * Untagged changes are changes that don't have a tag associated with and `config.defaultChangeTag` is not set.
          * These will be rendered without a tag (section or category) at the beginning of a release changelog.
@@ -223,9 +229,19 @@ const applyChanges = ({
 
         // **IMPORTANT**: prefill the `groupedChangesByTag` with tags from config
         // in the same order they were defined
-        Object.keys(config.changeTags ?? {}).forEach(
-          (k) => (groupedChangesByTag[k] = [])
-        );
+        Object.keys(changeTags).forEach((k) => (groupedChangesByTag[k] = []));
+
+        // fill `deps` tag
+        const dependecies = Object.keys(
+          assembledChanges.releases[change.changes.name].changes
+            .filter((c) => c.meta?.dependencies)
+            // reduce to an object of keys to avoid duplication of deps
+            .reduce((acc, c) => {
+              c.meta!.dependencies.forEach((dep) => (acc[dep] = 1));
+              return acc;
+            }, {} as { [k: string]: any })
+        ).map((dep) => ({ summary: `Updated to latest \`${dep}\`` }));
+        groupedChangesByTag.deps.push(...dependecies);
 
         assembledChanges.releases[change.changes.name].changes
           .filter((c) => !c.meta?.dependencies)
@@ -262,32 +278,11 @@ const applyChanges = ({
           if (change.length !== 0) {
             // if the specified tag is not defined in config,
             // fallback to the short tag specified in the change file
-            const longTag = config.changeTags?.[tag] ?? tag;
+            const longTag = changeTags[tag] ?? tag;
             addition += `\n### ${longTag}\n`;
             for (const release of change) {
               renderRelease(release);
             }
-          }
-        }
-
-        // group dependencies bumps and render them as:
-        //
-        // ### Dependencies bumps
-        //
-        // - Bumped due to a bump in `package-a`
-        // - Bumped due to a bump in `package-b`
-        const dependencies = Object.keys(
-          assembledChanges.releases[change.changes.name].changes
-            .filter((c) => c.meta?.dependencies)
-            .reduce((acc, c) => {
-              c.meta!.dependencies.forEach((dep) => (acc[dep] = 1));
-              return acc;
-            }, {} as { [k: string]: any })
-        );
-        if (dependencies.length !== 0) {
-          addition += `\n### Dependencies bumps\n`;
-          for (const dep of dependencies) {
-            addition += `\n- Bumped due to a bump in \`${dep}\``;
           }
         }
       }

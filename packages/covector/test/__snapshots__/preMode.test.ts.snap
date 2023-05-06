@@ -1600,9 +1600,9 @@ thiserror = \\"1.0.19\\"
             ],
           },
           "command": "## [0.6.3-beta.0]
-### Dependencies bumps
+### Dependencies
 
-- Bumped due to a bump in \`tauri\`",
+- Updated to latest \`tauri\`",
           "postcommand": false,
           "precommand": false,
         },
@@ -3144,9 +3144,9 @@ thiserror = \\"1.0.19\\"
           ],
         },
         "command": "## [0.6.3-beta.0]
-### Dependencies bumps
+### Dependencies
 
-- Bumped due to a bump in \`tauri\`",
+- Updated to latest \`tauri\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -4756,9 +4756,9 @@ thiserror = \\"1.0.19\\"
           ],
         },
         "command": "## [0.6.3-beta.0]
-### Dependencies bumps
+### Dependencies
 
-- Bumped due to a bump in \`tauri\`",
+- Updated to latest \`tauri\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -6380,9 +6380,9 @@ thiserror = \\"1.0.19\\"
           ],
         },
         "command": "## [0.6.3-beta.0]
-### Dependencies bumps
+### Dependencies
 
-- Bumped due to a bump in \`tauri\`",
+- Updated to latest \`tauri\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -7199,9 +7199,9 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"
           ],
         },
         "command": "## [0.6.0-beta.1]
-### Dependencies bumps
+### Dependencies
 
-- Bumped due to a bump in \`tauri-api\`",
+- Updated to latest \`tauri-api\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -8076,10 +8076,10 @@ totems = \\"0.2.7\\"",
           ],
         },
         "command": "## [0.6.3-beta.1]
-### Dependencies bumps
+### Dependencies
 
-- Bumped due to a bump in \`tauri-api\`
-- Bumped due to a bump in \`tauri\`",
+- Updated to latest \`tauri-api\`
+- Updated to latest \`tauri\`",
         "postcommand": false,
         "precommand": false,
       },

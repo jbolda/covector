@@ -2318,9 +2318,9 @@ Merging this PR will release new versions of the following packages based on you
 # tauri.js
 
 ## [0.6.3]
-### Dependencies bumps
+### Dependencies
 
-- Bumped due to a bump in \`tauri\`
+- Updated to latest \`tauri\`
 
 
 
