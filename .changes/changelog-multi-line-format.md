@@ -1,5 +1,6 @@
 ---
 "covector": minor:enchance
+"action": minor:enhance
 "@covector/changelog": minor:enhance
 "@covector/apply": minor:enhance
 "@covector/types": minor:enhance
