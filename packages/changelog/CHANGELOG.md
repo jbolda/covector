@@ -1,5 +1,19 @@
 # Changelog
 
+## \[0.8.0]
+
+### Dependencies
+
+- [`7b6201c`](https://www.github.com/jbolda/covector/commit/7b6201c2e7e0d9120610a2a882c0b4523f4ab6dc)([#264](https://www.github.com/jbolda/covector/pull/264)) Bump Typescript to v4.9, and deeply update types in the lower level functions to start.
+
+### New Features
+
+- [`0b33560`](https://www.github.com/jbolda/covector/commit/0b335606a4998f94ad88006ccc6cf0e7cb2538b1)([#244](https://www.github.com/jbolda/covector/pull/244)) Add changelog tags (section or category) to group different change files.
+
+### Enhancements
+
+- [`2ba699d`](https://www.github.com/jbolda/covector/commit/2ba699d8759d9526563a9665568c2779269ae7a5)([#243](https://www.github.com/jbolda/covector/pull/243)) Update the changelog format to fix multi-line change files and reduce commit noise.
+
 ## \[0.7.0]
 
 - The bullet point commit messages were occasionally returning undefined. Remove the ternary and more cleanly checking the logic.

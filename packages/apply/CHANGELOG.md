@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.8.0]
+
+### Dependencies
+
+- [`7b6201c`](https://www.github.com/jbolda/covector/commit/7b6201c2e7e0d9120610a2a882c0b4523f4ab6dc)([#264](https://www.github.com/jbolda/covector/pull/264)) Bump Typescript to v4.9, and deeply update types in the lower level functions to start.
+
+### Enhancements
+
+- [`2ba699d`](https://www.github.com/jbolda/covector/commit/2ba699d8759d9526563a9665568c2779269ae7a5)([#243](https://www.github.com/jbolda/covector/pull/243)) Update the changelog format to fix multi-line change files and reduce commit noise.
+
 ## \[0.7.0]
 
 - The dependency bumps will now use the next version of the package as derived from the existing change files. Previously, it presumed that a applying a dependency bump was sufficient which worked most of the time, but ignored some edge cases.
