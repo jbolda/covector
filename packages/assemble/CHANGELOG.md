@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.10.0]
+
+### Dependencies
+
+- [`7b6201c`](https://www.github.com/jbolda/covector/commit/7b6201c2e7e0d9120610a2a882c0b4523f4ab6dc)([#264](https://www.github.com/jbolda/covector/pull/264)) Bump Typescript to v4.9, and deeply update types in the lower level functions to start.
+
+### New Features
+
+- [`0b33560`](https://www.github.com/jbolda/covector/commit/0b335606a4998f94ad88006ccc6cf0e7cb2538b1)([#244](https://www.github.com/jbolda/covector/pull/244)) Add changelog tags (section or category) to group different change files.
+
 ## \[0.9.0]
 
 - Package file objects now include the dependencies keyed by the name with an array including the dependency type. This information is now passed to the commands pipeline.
