@@ -1,7 +1,7 @@
 ---
-"@covector/changelog": minor
-"@covector/apply": minor
-"@covector/types": minor
+"@covector/changelog": minor:enhance
+"@covector/apply": minor:enhance
+"@covector/types": minor:enhance
 ---
 
-Update the changelog format to fix multi-line change files and reduce commit noise. 
+Update the changelog format to fix multi-line change files and reduce commit noise.
