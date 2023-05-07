@@ -1,4 +1,6 @@
 ---
+"covector": minor:feat
+"action": minor:feat
 "@covector/changelog": minor:feat
 "@covector/assemble": minor:feat
 "@covector/types": minor:feat
