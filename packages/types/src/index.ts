@@ -24,7 +24,15 @@ export interface Pkg {
   dependencies?: Record<string, PkgFileVersion>;
   devDependencies?: Record<string, PkgFileVersion>;
   "dev-dependencies"?: Record<string, PkgFileVersion>;
+  "build-dependencies"?: Record<string, PkgFileVersion>;
+  target?: Record<string, PkgTarget>;
   [key: string]: any;
+}
+
+export interface PkgTarget {
+  dependencies?: Record<string, PkgFileVersion>;
+  "dev-dependencies"?: Record<string, PkgFileVersion>;
+  "build-dependencies"?: Record<string, PkgFileVersion>;
 }
 
 export interface PkgMinimum {
@@ -37,7 +45,7 @@ export interface PkgMinimum {
   versionPrerelease?: readonly (string | number)[] | null;
 }
 
-export type DepTypes = "dependencies" | "devDependencies" | "dev-dependencies";
+export type DepTypes = "dependencies" | "devDependencies" | "dev-dependencies" | "build-dependencies" | "target";
 export type DepsKeyed = Record<
   string,
   {

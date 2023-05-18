@@ -133,6 +133,7 @@ const keyDeps = (parsed: Pkg): DepsKeyed => {
     "dependencies",
     "devDependencies",
     "dev-dependencies",
+    "build-dependencies",
   ];
 
   depTypes.forEach((depType: DepTypes) => {
@@ -318,6 +319,7 @@ export const getPackageFileVersion = ({
       case "dependencies":
       case "devDependencies":
       case "dev-dependencies":
+      case "build-dependencies":
         const currentPkgDeps = pkg.pkg[property];
         if (currentPkgDeps === undefined) return "";
         if (typeof pkg.pkg[property] !== "object") return "";
@@ -378,7 +380,8 @@ export const setPackageFileVersion = ({
     } else if (
       property === "dependencies" ||
       property === "devDependencies" ||
-      property === "dev-dependencies"
+      property === "dev-dependencies" ||
+      property === "build-dependencies"
     ) {
       const currentPkg = pkg.pkg;
       const currentProperty = currentPkg[property];
