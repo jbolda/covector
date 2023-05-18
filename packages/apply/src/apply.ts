@@ -252,6 +252,8 @@ const bumpDeps = ({
       "devDependencies",
       "dev-dependencies",
     ];
+    const depPkg = packageFiles[dep];
+    const depName = depPkg.pkg.package?.name || depPkg.pkg.name || dep;
     depTypes.forEach((property: DepTypes) => {
       if (property && property in currentPkg) {
         const pkgProperties = Object.keys(
@@ -259,8 +261,8 @@ const bumpDeps = ({
         ) as Array<keyof Pkg>;
         pkgProperties.forEach((existingDep) => {
           // if pkg is in dep list
-          if (existingDep === dep) {
-            const prevVersion = getPackageFileVersion({ pkg, property, dep });
+          if (existingDep === depName) {
+            const prevVersion = getPackageFileVersion({ pkg, property, dep: depName });
 
             const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
             const versionRequirement = versionRequirementMatch
@@ -279,9 +281,10 @@ const bumpDeps = ({
                 pkg,
                 version,
                 property,
-                dep,
+                dep: depName,
               });
             }
+            console.log('doneeey')
           }
         });
       }
