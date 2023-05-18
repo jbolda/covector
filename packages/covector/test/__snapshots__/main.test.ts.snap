@@ -424,6 +424,12 @@ Object {
                   "version": "0.5.0",
                 },
               ],
+              "tauri_includedir_codegen": Array [
+                Object {
+                  "type": "build-dependencies",
+                  "version": "0.5.2",
+                },
+              ],
               "thiserror": Array [
                 Object {
                   "type": "dependencies",
@@ -1596,6 +1602,12 @@ thiserror = \\"1.0.19\\"",
                 Object {
                   "type": "dependencies",
                   "version": "0.5.0",
+                },
+              ],
+              "tauri_includedir_codegen": Array [
+                Object {
+                  "type": "build-dependencies",
+                  "version": "0.5.2",
                 },
               ],
               "thiserror": Array [
@@ -3010,6 +3022,12 @@ tauri-utils",
                 Object {
                   "type": "dependencies",
                   "version": "0.5.0",
+                },
+              ],
+              "tauri_includedir_codegen": Array [
+                Object {
+                  "type": "build-dependencies",
+                  "version": "0.5.2",
                 },
               ],
               "thiserror": Array [
@@ -4697,6 +4715,12 @@ thiserror = \\"1.0.19\\"",
                 Object {
                   "type": "dependencies",
                   "version": "0.5.0",
+                },
+              ],
+              "tauri_includedir_codegen": Array [
+                Object {
+                  "type": "build-dependencies",
+                  "version": "0.5.2",
                 },
               ],
               "thiserror": Array [
@@ -6891,6 +6915,12 @@ Object {
               Object {
                 "type": "dependencies",
                 "version": "0.5.0",
+              },
+            ],
+            "tauri_includedir_codegen": Array [
+              Object {
+                "type": "build-dependencies",
+                "version": "0.5.2",
               },
             ],
             "thiserror": Array [
