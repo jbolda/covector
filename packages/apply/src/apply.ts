@@ -284,7 +284,6 @@ const bumpDeps = ({
                 dep: depName,
               });
             }
-            console.log('doneeey')
           }
         });
       }
