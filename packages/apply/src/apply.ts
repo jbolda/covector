@@ -251,47 +251,104 @@ const bumpDeps = ({
       "dependencies",
       "devDependencies",
       "dev-dependencies",
+      "build-dependencies",
+      "target"
     ];
     const depPkg = packageFiles[dep];
     const depName = depPkg.pkg.package?.name || depPkg.pkg.name || dep;
     depTypes.forEach((property: DepTypes) => {
       if (property && property in currentPkg) {
-        const pkgProperties = Object.keys(
-          currentPkg[property] as object
-        ) as Array<keyof Pkg>;
-        pkgProperties.forEach((existingDep) => {
-          // if pkg is in dep list
-          if (existingDep === depName) {
-            const prevVersion = getPackageFileVersion({ pkg, property, dep: depName });
-
-            const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
-            const versionRequirement = versionRequirementMatch
-              ? versionRequirementMatch[0]
-              : "";
-
-            const version = deriveVersionConsideringPartials({
-              dependency: dep,
-              prevVersion,
-              versionRequirement,
-              previewVersion,
-              packageFiles,
+        if (property === 'target') {
+          const targets = currentPkg[property] as object
+          for (const target of Object.values(targets)) {
+            depTypes.forEach((property: DepTypes) => {
+              if (property && property in target) {
+                const version = getDepBumpVersion({
+                  pkg,
+                  currentPkg: target,
+                  property,
+                  depName,
+                  dep,
+                  previewVersion,
+                  packageFiles,
+                  getPreviousVersion: () => target[property][depName]?.version,
+                });
+                if (version) {
+                  target[property][depName].version = version;
+                }
+              }
             });
-            if (version) {
-              pkg = setPackageFileVersion({
-                pkg,
-                version,
-                property,
-                dep: depName,
-              });
-            }
           }
-        });
+        } else {
+          const version = getDepBumpVersion({
+            pkg,
+            currentPkg,
+            property,
+            depName,
+            dep,
+            previewVersion,
+            packageFiles,
+            getPreviousVersion: () => getPackageFileVersion({ pkg, property, dep: depName }),
+          });
+          if (version) {
+            pkg = setPackageFileVersion({
+              pkg,
+              version,
+              property,
+              dep: depName,
+            });
+          }
+        }
       }
     });
   }
 
   return pkg;
 };
+
+const getDepBumpVersion = ({
+  pkg,
+  currentPkg,
+  property,
+  depName,
+  dep,
+  previewVersion,
+  packageFiles,
+  getPreviousVersion,
+}: {
+  pkg: PackageFile;
+  currentPkg: any;
+  property: DepTypes;
+  depName: string;
+  dep: string;
+  previewVersion: string;
+  packageFiles: Record<string, PackageFile>;
+  getPreviousVersion: () => string;
+}) => {
+  const pkgProperties = Object.keys(
+    currentPkg[property] as object
+  ) as Array<keyof Pkg>;
+  for (const existingDep of pkgProperties) {
+    // if pkg is in dep list
+    if (existingDep === depName) {
+      const prevVersion = getPreviousVersion()
+      const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
+      const versionRequirement = versionRequirementMatch
+        ? versionRequirementMatch[0]
+        : "";
+
+      const version = deriveVersionConsideringPartials({
+        dependency: dep,
+        prevVersion,
+        versionRequirement,
+        previewVersion,
+        packageFiles,
+      });
+      return version;
+    }
+  }
+  return null;
+}
 
 const deriveVersionConsideringPartials = ({
   dependency,
