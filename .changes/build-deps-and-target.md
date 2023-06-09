@@ -1,5 +1,6 @@
 ---
-"@covector/apply": patch
+"covector": minor
+"@covector/apply": minor
 "@covector/files": patch
 ---
 
