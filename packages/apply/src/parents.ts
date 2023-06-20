@@ -1,5 +1,3 @@
-import { cloneDeep } from "lodash";
-
 import type {
   ConfigFile,
   Changed,
@@ -96,10 +94,13 @@ const parentBump = ({
           (!versionRequirementMatch || prevDepVersion === "none")
         ) {
           // if the parent doesn't have a release
-          // and it doesn't have the dependency as a range
-          // add one to adopt the next version of it's child
+          //   and it doesn't have the dependency as a range
+          //   add one to adopt the next version of it's child
+          //   but don't use the changes as we will refer to this dep
+          //   bump otherwise and pulling up the changelog is not needed
           changes[pkg] = {
-            ...cloneDeep(changes[main]),
+            changes: [],
+            parents: parents[pkg],
             // prerelease will do bump the X in `-beta.X` if it is already a prerelease
             // or it will do a prepatch if it isn't a prerelease
             type: !prereleaseIdentifier ? "patch" : "prerelease",
@@ -107,22 +108,19 @@ const parentBump = ({
           // we also need to presume recursion to update the parents' parents
           if (Object.values(parents[pkg]).length > 0) recurse = true;
 
-          if (changes[pkg].changes) {
-            changes[pkg].changes?.forEach((parentChange) => {
-              // this ends up overwriting in cases multiple bumps,
-              //   we should adjust this to accept multiple
-              if (
-                !parentChange.meta.dependencies ||
-                parentChange.meta.dependencies.length === 0
-              ) {
-                parentChange.meta.dependencies = [main];
-              } else {
-                parentChange.meta.dependencies.push(main);
-              }
-            });
-          }
+          changes[pkg].changes?.forEach((parentChange) => {
+            // this ends up overwriting in cases multiple bumps,
+            //   we should adjust this to accept multiple
+            if (
+              !parentChange.meta.dependencies ||
+              parentChange.meta.dependencies.length === 0
+            ) {
+              parentChange.meta.dependencies = [main];
+            } else {
+              parentChange.meta.dependencies.push(main);
+            }
+          });
         }
-        changes[pkg].parents = parents[pkg];
       });
     }
   });

@@ -195,6 +195,109 @@ describe("package file apply bump (snapshot)", () => {
         consoleDir: console.dir.mock.calls,
       }).toMatchSnapshot();
     });
+
+    it("bumps multi with parent as range", function* () {
+      const jsonFolder = f.copy("pkg.js-yarn-workspace");
+
+      const commands = [
+        {
+          dependencies: ["yarn-workspace-base-pkg-b"],
+          manager: "javascript",
+          path: "",
+          pkg: "yarn-workspace-base-pkg-a",
+          type: "patch" as CommonBumps,
+          parents: {},
+        },
+        {
+          dependencies: [],
+          manager: "javascript",
+          path: "",
+          pkg: "yarn-workspace-base-pkg-b",
+          type: "minor" as CommonBumps,
+          parents: [
+            {
+              "yarn-workspace-base-pkg-a": {
+                type: "dependencies",
+                version: "null",
+              },
+            },
+          ],
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          "yarn-workspace-base-pkg-a": {
+            path: "./packages/pkg-a/",
+            manager: "javascript",
+            dependencies: ["yarn-workspace-base-pkg-b"],
+          },
+          "yarn-workspace-base-pkg-b": {
+            path: "./packages/pkg-b/",
+            manager: "javascript",
+          },
+          "yarn-workspace-base-pkg-c": {
+            path: "./packages/pkg-b/",
+            manager: "javascript",
+            dependencies: ["yarn-workspace-base-pkg-b"],
+          },
+        },
+      };
+
+      const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+
+      // @ts-expect-error
+      yield apply({ commands, config, allPackages, cwd: jsonFolder });
+
+      const modifiedPkgBFile = yield loadFile(
+        "packages/pkg-b/package.json",
+        jsonFolder
+      );
+      expect(modifiedPkgBFile.content).toBe(
+        "{\n" +
+          '  "name": "yarn-workspace-base-pkg-b",\n' +
+          '  "version": "1.1.0"\n' +
+          "}\n"
+      );
+
+      // this is an exact version dep which will be patch bumped
+      const modifiedPkgAFile = yield loadFile(
+        "packages/pkg-a/package.json",
+        jsonFolder
+      );
+      expect(modifiedPkgAFile.content).toBe(
+        "{\n" +
+          '  "name": "yarn-workspace-base-pkg-a",\n' +
+          '  "version": "1.0.1",\n' +
+          '  "dependencies": {\n' +
+          '    "yarn-workspace-base-pkg-b": "1.1.0"\n' +
+          "  }\n" +
+          "}\n"
+      );
+
+      // this is a range dep which will not be patch bumped
+      const modifiedPkgCFile = yield loadFile(
+        "packages/pkg-c/package.json",
+        jsonFolder
+      );
+      expect(modifiedPkgCFile.content).toBe(
+        "{\n" +
+          '  "name": "yarn-workspace-base-pkg-c",\n' +
+          '  "version": "1.0.0",\n' +
+          '  "dependencies": {\n' +
+          '    "yarn-workspace-base-pkg-b": "^1.0.0"\n' +
+          "  }\n" +
+          "}\n"
+      );
+
+      expect({
+        //@ts-expect-error
+        consoleLog: console.log.mock.calls,
+        //@ts-expect-error
+        consoleDir: console.dir.mock.calls,
+      }).toMatchSnapshot();
+    });
   });
 
   describe("on rust", () => {

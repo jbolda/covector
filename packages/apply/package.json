@@ -18,12 +18,10 @@
   "dependencies": {
     "@covector/files": "0.6.1",
     "effection": "^2.0.6",
-    "lodash": "^4.17.21",
     "semver": "^7.3.8"
   },
   "devDependencies": {
     "@covector/types": "^0.0.0",
-    "@types/lodash": "^4.14.191",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5"
   },

@@ -17,21 +17,15 @@ Object {
         "type": "minor",
       },
       "yarn-workspace-base-pkg-a": Object {
-        "dependencies": undefined,
-        "manager": "javascript",
+        "changes": Array [],
         "parents": Object {},
-        "path": undefined,
-        "pkg": "all",
         "type": "patch",
       },
       "yarn-workspace-base-pkg-b": Object {
-        "dependencies": undefined,
-        "manager": "javascript",
+        "changes": Array [],
         "parents": Object {
           "yarn-workspace-base-pkg-a": Object {},
         },
-        "path": undefined,
-        "pkg": "all",
         "type": "patch",
       },
     },
@@ -66,13 +60,10 @@ Object {
         "type": "patch",
       },
       "yarn-workspace-base-pkg-b": Object {
-        "dependencies": undefined,
-        "manager": "javascript",
+        "changes": Array [],
         "parents": Object {
           "yarn-workspace-base-pkg-a": Object {},
         },
-        "path": undefined,
-        "pkg": "all",
         "type": "patch",
       },
     },
@@ -88,20 +79,7 @@ Object {
     "changes": undefined,
     "releases": Object {
       "pkg-a": Object {
-        "changes": Array [
-          Object {
-            "meta": Object {
-              "dependencies": Array [
-                "pkg-c",
-              ],
-            },
-            "releases": Object {
-              "pkg-c": "patch",
-              "pkg-d": "major",
-            },
-            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
-          },
-        ],
+        "changes": Array [],
         "parents": Object {
           "pkg-overall": Object {
             "pkg-a": Array [
@@ -203,20 +181,7 @@ Object {
         "type": "major",
       },
       "pkg-four": Object {
-        "changes": Array [
-          Object {
-            "meta": Object {
-              "dependencies": Array [
-                "pkg-d",
-              ],
-            },
-            "releases": Object {
-              "pkg-c": "patch",
-              "pkg-d": "major",
-            },
-            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
-          },
-        ],
+        "changes": Array [],
         "parents": Object {
           "pkg-three": Object {
             "pkg-four": Array [
@@ -230,59 +195,17 @@ Object {
         "type": "patch",
       },
       "pkg-one": Object {
-        "changes": Array [
-          Object {
-            "meta": Object {
-              "dependencies": Array [
-                "pkg-d",
-                "pkg-four",
-                "pkg-three",
-                "pkg-two",
-              ],
-            },
-            "releases": Object {
-              "pkg-c": "patch",
-              "pkg-d": "major",
-            },
-            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
-          },
-        ],
+        "changes": Array [],
         "parents": Object {},
         "type": "patch",
       },
       "pkg-overall": Object {
-        "changes": Array [
-          Object {
-            "meta": Object {
-              "dependencies": Array [
-                "pkg-b",
-              ],
-            },
-            "releases": Object {
-              "pkg-b": "minor",
-            },
-            "summary": "The pkg-b doesn't have a dep bump, but can dep bump pkg-a and pkg-overall with a patch.",
-          },
-        ],
+        "changes": Array [],
         "parents": Object {},
         "type": "patch",
       },
       "pkg-three": Object {
-        "changes": Array [
-          Object {
-            "meta": Object {
-              "dependencies": Array [
-                "pkg-d",
-                "pkg-four",
-              ],
-            },
-            "releases": Object {
-              "pkg-c": "patch",
-              "pkg-d": "major",
-            },
-            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
-          },
-        ],
+        "changes": Array [],
         "parents": Object {
           "pkg-two": Object {
             "pkg-three": Array [
@@ -296,22 +219,7 @@ Object {
         "type": "patch",
       },
       "pkg-two": Object {
-        "changes": Array [
-          Object {
-            "meta": Object {
-              "dependencies": Array [
-                "pkg-d",
-                "pkg-four",
-                "pkg-three",
-              ],
-            },
-            "releases": Object {
-              "pkg-c": "patch",
-              "pkg-d": "major",
-            },
-            "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
-          },
-        ],
+        "changes": Array [],
         "parents": Object {
           "pkg-one": Object {
             "pkg-two": Array [
@@ -327,6 +235,90 @@ Object {
     },
   },
   "consoleDir": Array [],
+  "consoleLog": Array [],
+}
+`;
+
+exports[`list changes considering parents skips roll up if range dep 1`] = `
+Object {
+  "changes": Object {
+    "changes": undefined,
+    "releases": Object {
+      "pkg-a": Object {
+        "changes": Array [
+          Object {
+            "meta": Object {},
+            "releases": Object {
+              "pkg-a": "patch",
+            },
+            "summary": "Roll up just a bit please.",
+          },
+        ],
+        "parents": Object {
+          "pkg-b": Object {
+            "pkg-a": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.0",
+              },
+            ],
+          },
+          "pkg-c": Object {
+            "pkg-a": Array [
+              Object {
+                "type": "dependencies",
+                "version": "^1.0.0",
+              },
+            ],
+          },
+        },
+        "type": "patch",
+      },
+      "pkg-b": Object {
+        "changes": Array [],
+        "parents": Object {},
+        "type": "patch",
+      },
+    },
+  },
+  "consoleDir": Array [
+    Array [
+      Object {
+        "pkg-a": Object {
+          "deps": Object {},
+          "name": "pkg-a",
+          "version": "none",
+        },
+        "pkg-b": Object {
+          "deps": Object {
+            "pkg-a": Array [
+              Object {
+                "type": "dependencies",
+                "version": "1.0.0",
+              },
+            ],
+          },
+          "name": "pkg-b",
+          "version": "none",
+        },
+        "pkg-c": Object {
+          "deps": Object {
+            "pkg-a": Array [
+              Object {
+                "type": "dependencies",
+                "version": "^1.0.0",
+              },
+            ],
+          },
+          "name": "pkg-c",
+          "version": "none",
+        },
+      },
+      Object {
+        "depth": 5,
+      },
+    ],
+  ],
   "consoleLog": Array [],
 }
 `;

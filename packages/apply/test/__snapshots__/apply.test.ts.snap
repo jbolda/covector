@@ -22,13 +22,10 @@ Object {
   "consoleDir": Array [],
   "consoleLog": Array [
     Array [
-      "bumping yarn-workspace-base-pkg-a with minor",
+      "bumping yarn-workspace-base-pkg-a with patch",
     ],
     Array [
       "bumping yarn-workspace-base-pkg-b with minor",
-    ],
-    Array [
-      "bumping all with minor",
     ],
   ],
 }
