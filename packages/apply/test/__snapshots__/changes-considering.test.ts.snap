@@ -17,12 +17,59 @@ Object {
         "type": "minor",
       },
       "yarn-workspace-base-pkg-a": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "all",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "all",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "yarn-workspace-base-pkg-b",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {},
         "type": "patch",
       },
       "yarn-workspace-base-pkg-b": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "all",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "all",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {
           "yarn-workspace-base-pkg-a": Object {},
         },
@@ -60,7 +107,26 @@ Object {
         "type": "patch",
       },
       "yarn-workspace-base-pkg-b": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "all",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "all",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {
           "yarn-workspace-base-pkg-a": Object {},
         },
@@ -79,7 +145,44 @@ Object {
     "changes": undefined,
     "releases": Object {
       "pkg-a": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-c",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-c",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-c",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-c",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {
           "pkg-overall": Object {
             "pkg-a": Array [
@@ -136,6 +239,42 @@ Object {
             },
             "summary": "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
           },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-d",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-d",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-d",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-d",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
         ],
         "parents": Object {
           "pkg-a": Object {
@@ -181,7 +320,44 @@ Object {
         "type": "major",
       },
       "pkg-four": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-d",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-d",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-d",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-d",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {
           "pkg-three": Object {
             "pkg-four": Array [
@@ -195,17 +371,119 @@ Object {
         "type": "patch",
       },
       "pkg-one": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-two",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {},
         "type": "patch",
       },
       "pkg-overall": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-b",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-b",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-a",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-b",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-a",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-b",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-a",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {},
         "type": "patch",
       },
       "pkg-three": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-four",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-four",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-four",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {
           "pkg-two": Object {
             "pkg-three": Array [
@@ -219,7 +497,26 @@ Object {
         "type": "patch",
       },
       "pkg-two": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-three",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-three",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {
           "pkg-one": Object {
             "pkg-two": Array [
@@ -275,7 +572,17 @@ Object {
         "type": "patch",
       },
       "pkg-b": Object {
-        "changes": Array [],
+        "changes": Array [
+          Object {
+            "meta": Object {
+              "dependencies": Array [
+                "pkg-a",
+              ],
+            },
+            "releases": Object {},
+            "summary": "",
+          },
+        ],
         "parents": Object {},
         "type": "patch",
       },

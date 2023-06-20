@@ -484,24 +484,12 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "content": "---
-\\"tauri\\": minor
----
-
-Summary about the changes in tauri
-",
                   "dependencies": Array [
                     "tauri",
                   ],
-                  "extname": ".md",
-                  "filename": "first-change",
-                  "path": ".changes/first-change.md",
                 },
-                "releases": Object {
-                  "tauri": "minor",
-                },
-                "summary": "Summary about the changes in tauri",
-                "tag": undefined,
+                "releases": Object {},
+                "summary": "",
               },
             ],
             "parents": Object {},
@@ -1608,7 +1596,7 @@ thiserror = \\"1.0.19\\"
           "command": "## [0.6.3-beta.0]
 ### Dependencies
 
-- Updated to latest \`tauri\`",
+- Upgraded to \`tauri@0.6.0-beta.0\`",
           "postcommand": false,
           "precommand": false,
         },
@@ -3158,7 +3146,7 @@ thiserror = \\"1.0.19\\"
         "command": "## [0.6.3-beta.0]
 ### Dependencies
 
-- Updated to latest \`tauri\`",
+- Upgraded to \`tauri@0.6.0-beta.0\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -3632,24 +3620,12 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "content": "---
-\\"tauri\\": minor
----
-
-Summary about the changes in tauri
-",
                   "dependencies": Array [
                     "tauri",
                   ],
-                  "extname": ".md",
-                  "filename": "first-change",
-                  "path": ".changes/first-change.md",
                 },
-                "releases": Object {
-                  "tauri": "minor",
-                },
-                "summary": "Summary about the changes in tauri",
-                "tag": undefined,
+                "releases": Object {},
+                "summary": "",
               },
             ],
             "parents": Object {},
@@ -4776,7 +4752,7 @@ thiserror = \\"1.0.19\\"
         "command": "## [0.6.3-beta.0]
 ### Dependencies
 
-- Updated to latest \`tauri\`",
+- Upgraded to \`tauri@0.6.0-beta.0\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -5250,24 +5226,12 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "content": "---
-\\"tauri\\": minor
----
-
-Summary about the changes in tauri
-",
                   "dependencies": Array [
                     "tauri",
                   ],
-                  "extname": ".md",
-                  "filename": "first-change",
-                  "path": ".changes/first-change.md",
                 },
-                "releases": Object {
-                  "tauri": "minor",
-                },
-                "summary": "Summary about the changes in tauri",
-                "tag": undefined,
+                "releases": Object {},
+                "summary": "",
               },
             ],
             "parents": Object {},
@@ -6406,7 +6370,7 @@ thiserror = \\"1.0.19\\"
         "command": "## [0.6.3-beta.0]
 ### Dependencies
 
-- Updated to latest \`tauri\`",
+- Upgraded to \`tauri@0.6.0-beta.0\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -6880,24 +6844,12 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "content": "---
-\\"tauri\\": minor
----
-
-Summary about the changes in tauri
-",
                   "dependencies": Array [
                     "tauri",
                   ],
-                  "extname": ".md",
-                  "filename": "first-change",
-                  "path": ".changes/first-change.md",
                 },
-                "releases": Object {
-                  "tauri": "minor",
-                },
-                "summary": "Summary about the changes in tauri",
-                "tag": undefined,
+                "releases": Object {},
+                "summary": "",
               },
             ],
             "parents": Object {},
@@ -7231,7 +7183,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"
         "command": "## [0.6.0-beta.1]
 ### Dependencies
 
-- Updated to latest \`tauri-api\`",
+- Upgraded to \`tauri-api@0.5.2-beta.0\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -8108,8 +8060,7 @@ totems = \\"0.2.7\\"",
         "command": "## [0.6.3-beta.1]
 ### Dependencies
 
-- Updated to latest \`tauri-api\`
-- Updated to latest \`tauri\`",
+- Upgraded to \`tauri@0.6.0-beta.1\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -8134,24 +8085,21 @@ totems = \\"0.2.7\\"",
             "changes": Array [
               Object {
                 "meta": Object {
-                  "content": "---
-\\"tauri-api\\": patch
----
-
-Boop again.
-",
                   "dependencies": Array [
                     "tauri-api",
                   ],
-                  "extname": ".md",
-                  "filename": "third-change",
-                  "path": ".changes/third-change.md",
                 },
-                "releases": Object {
-                  "tauri-api": "patch",
+                "releases": Object {},
+                "summary": "",
+              },
+              Object {
+                "meta": Object {
+                  "dependencies": Array [
+                    "tauri-api",
+                  ],
                 },
-                "summary": "Boop again.",
-                "tag": undefined,
+                "releases": Object {},
+                "summary": "",
               },
             ],
             "parents": Object {
@@ -8708,25 +8656,12 @@ Boop again.
             "changes": Array [
               Object {
                 "meta": Object {
-                  "content": "---
-\\"tauri-api\\": patch
----
-
-Boop again.
-",
                   "dependencies": Array [
-                    "tauri-api",
                     "tauri",
                   ],
-                  "extname": ".md",
-                  "filename": "third-change",
-                  "path": ".changes/third-change.md",
                 },
-                "releases": Object {
-                  "tauri-api": "patch",
-                },
-                "summary": "Boop again.",
-                "tag": undefined,
+                "releases": Object {},
+                "summary": "",
               },
             ],
             "parents": Object {},

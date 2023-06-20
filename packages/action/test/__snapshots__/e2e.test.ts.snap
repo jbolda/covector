@@ -2279,24 +2279,12 @@ Summary about the changes in tauri-updater
               "changes": Array [
                 Object {
                   "meta": Object {
-                    "content": "---
-\\"tauri\\": minor
----
-
-Summary about the changes in tauri
-",
                     "dependencies": Array [
                       "tauri",
                     ],
-                    "extname": ".md",
-                    "filename": "first-change",
-                    "path": ".changes/first-change.md",
                   },
-                  "releases": Object {
-                    "tauri": "minor",
-                  },
-                  "summary": "Summary about the changes in tauri",
-                  "tag": undefined,
+                  "releases": Object {},
+                  "summary": "",
                 },
               ],
               "parents": Object {},
@@ -2320,7 +2308,7 @@ Merging this PR will release new versions of the following packages based on you
 ## [0.6.3]
 ### Dependencies
 
-- Updated to latest \`tauri\`
+- Upgraded to \`tauri@0.6.0\`
 
 
 
