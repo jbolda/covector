@@ -161,15 +161,7 @@ export function* run(): Generator<any, any, any> {
         core.setOutput("successfulPublish", successfulPublish);
 
         core.setOutput("change", covectored.commandsRan);
-        const payload = JSON.stringify(
-          Object.keys(covectored.commandsRan).reduce((c, pkg) => {
-            //@ts-expect-error
-            delete c[pkg].pkg.pkgFile.vfile;
-            return c;
-          }, covectored.commandsRan),
-          undefined,
-          2
-        );
+        const payload = JSON.stringify(covectored.commandsRan, undefined, 2);
 
         core.startGroup(`covector publish output`);
         console.log(`The covector output: ${payload}`);
