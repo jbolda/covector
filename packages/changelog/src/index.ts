@@ -320,7 +320,7 @@ const pullChanges = ({
       const startNode = 1;
       const nextNode: number = changelogParsed.children
         .slice(startNode + 1)
-        .findIndex((node: any) => node.type === "heading");
+        .findIndex((node: any) => node.type === "heading" && node.depth === 2);
       const endNode =
         nextNode && nextNode > 0 ? nextNode + startNode + 1 : 9999;
       let changelogAST = {

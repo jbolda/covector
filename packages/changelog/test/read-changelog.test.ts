@@ -10,6 +10,7 @@ const f = fixtures(__dirname);
 
 const configDefaults = {
   changeFolder: ".changes",
+  changeTags: { feat: "Features", bug: "Bugs" },
 };
 
 describe("reads changelog", () => {
@@ -155,24 +156,28 @@ describe("reads changelog", () => {
                 "changelog-js-pkg-fixture": "patch",
               },
               summary: "This is a test.",
+              tag: "bug",
             },
             {
               releases: {
                 "changelog-js-pkg-fixture": "patch",
               },
               summary: "This is another test.",
+              tag: "bug",
             },
             {
               releases: {
                 "changelog-js-pkg-fixture": "minor",
               },
               summary: "This is the last test.",
+              tag: "feat",
             },
             {
               releases: {
                 "changelog-js-pkg-fixture": "minor",
               },
               summary: "This is the final test.",
+              tag: "feat",
             },
           ],
           type: "minor",
@@ -217,10 +222,12 @@ describe("reads changelog", () => {
     });
     expect(pkgCommandsRan[pkgName].command).toBe(
       "## \\[0.9.0]\n\n" +
-        "- This is a test.\n" +
-        "- This is another test.\n" +
+        "### Features\n\n" +
         "- This is the last test.\n" +
-        "- This is the final test.\n"
+        "- This is the final test.\n\n" +
+        "### Bugs\n\n" +
+        "- This is a test.\n" +
+        "- This is another test.\n"
     );
   });
 });
