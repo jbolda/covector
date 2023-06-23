@@ -277,18 +277,19 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       // this is a range dep which will not be patch bumped
-      const modifiedPkgCFile = yield loadFile(
-        "packages/pkg-c/package.json",
+      const modifiedPkgOneFile = yield loadFile(
+        "packages/pkg-one/package.json",
         jsonFolder
       );
-      expect(modifiedPkgCFile.content).toBe(
-        "{\n" +
-          '  "name": "yarn-workspace-base-pkg-c",\n' +
-          '  "version": "1.0.0",\n' +
-          '  "dependencies": {\n' +
-          '    "yarn-workspace-base-pkg-b": "^1.0.0"\n' +
-          "  }\n" +
-          "}\n"
+
+      expect(modifiedPkgOneFile.content).toEqual(
+        "{\r\n" +
+          '  "name": "yarn-workspace-base-pkg-one",\r\n' +
+          '  "version": "1.0.0",\r\n' +
+          '  "dependencies": {\r\n' +
+          '    "yarn-workspace-base-pkg-b": "^1.0.0"\r\n' +
+          "  }\r\n" +
+          "}\r\n"
       );
 
       expect({
