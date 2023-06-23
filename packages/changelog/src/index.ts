@@ -248,11 +248,14 @@ const applyChanges = ({
               c.meta!.dependencies.forEach((dep) => (acc[dep] = 1));
               return acc;
             }, {} as { [k: string]: any })
-        ).map((dep) => ({
-          summary: getVersionFromApplied(dep, applied)
-            ? `Upgraded to \`${dep}@${getVersionFromApplied(dep, applied)}\``
-            : `Updated to latest \`${dep}\``,
-        }));
+        ).map((dep) => {
+          const appliedVersion = getVersionFromApplied(dep, applied);
+          return {
+          	summary: appliedVersion 
+            	? `Upgraded to \`${dep}@${appliedVersion}\``
+            	: `Upgraded to latest \`${dep}\``,
+            }
+        });
         groupedChangesByTag.deps.push(...dependencies);
 
         assembledChanges.releases[change.changes.name].changes
