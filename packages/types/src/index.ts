@@ -45,7 +45,12 @@ export interface PkgMinimum {
   versionPrerelease?: readonly (string | number)[] | null;
 }
 
-export type DepTypes = "dependencies" | "devDependencies" | "dev-dependencies" | "build-dependencies" | "target";
+export type DepTypes =
+  | "dependencies"
+  | "devDependencies"
+  | "dev-dependencies"
+  | "build-dependencies"
+  | "target";
 export type DepsKeyed = Record<
   string,
   {
@@ -101,6 +106,7 @@ export type RunningCommand = {
   command?: string | Function;
   shouldRunCommand?: boolean;
   runFromRoot?: boolean;
+  retries?: number[];
 };
 
 export type NormalizedCommand = {
