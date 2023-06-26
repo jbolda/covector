@@ -1,5 +1,3 @@
-import { cloneDeep } from "lodash";
-
 import type {
   ConfigFile,
   Changed,
@@ -91,38 +89,34 @@ const parentBump = ({
             ?.version || "none";
         const versionRequirementMatch = /[\^=~]/.exec(prevDepVersion);
         // pkg is the parent and main is the child
-        if (
-          !changes[pkg] &&
-          (!versionRequirementMatch || prevDepVersion === "none")
-        ) {
+        if (!versionRequirementMatch || prevDepVersion === "none") {
           // if the parent doesn't have a release
-          // and it doesn't have the dependency as a range
-          // add one to adopt the next version of it's child
-          changes[pkg] = {
-            ...cloneDeep(changes[main]),
-            // prerelease will do bump the X in `-beta.X` if it is already a prerelease
-            // or it will do a prepatch if it isn't a prerelease
-            type: !prereleaseIdentifier ? "patch" : "prerelease",
-          };
-          // we also need to presume recursion to update the parents' parents
-          if (Object.values(parents[pkg]).length > 0) recurse = true;
-
-          if (changes[pkg].changes) {
-            changes[pkg].changes?.forEach((parentChange) => {
-              // this ends up overwriting in cases multiple bumps,
-              //   we should adjust this to accept multiple
-              if (
-                !parentChange.meta.dependencies ||
-                parentChange.meta.dependencies.length === 0
-              ) {
-                parentChange.meta.dependencies = [main];
-              } else {
-                parentChange.meta.dependencies.push(main);
-              }
+          //   and it doesn't have the dependency as a range
+          //   add one to adopt the next version of it's child
+          //   but don't use the changes as we will refer to this dep
+          //   bump otherwise and pulling up the changelog is not needed
+          if (!changes[pkg]) {
+            changes[pkg] = {
+              changes: [
+                { meta: { dependencies: [main] }, summary: "", releases: {} },
+              ],
+              parents: parents[pkg],
+              // prerelease will do bump the X in `-beta.X` if it is already a prerelease
+              // or it will do a prepatch if it isn't a prerelease
+              type: !prereleaseIdentifier ? "patch" : "prerelease",
+            };
+            // we also need to presume recursion to update the parents' parents
+            if (Object.values(parents[pkg]).length > 0) recurse = true;
+          } else {
+            // if we have have a release planned, add a skeleton so it shows
+            //  in the deps bump section
+            changes[pkg].changes?.push({
+              meta: { dependencies: [main] },
+              summary: "",
+              releases: {},
             });
           }
         }
-        changes[pkg].parents = parents[pkg];
       });
     }
   });

@@ -1,2 +1,11 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.ts text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+
 packages/action/dist/* binary
 **/package-lock.json binary

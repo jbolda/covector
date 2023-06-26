@@ -1,4 +1,4 @@
-import { all, Operation } from "effection";
+import { type Operation } from "effection";
 import {
   writePkgFile,
   getPackageFileVersion,
@@ -252,14 +252,14 @@ const bumpDeps = ({
       "devDependencies",
       "dev-dependencies",
       "build-dependencies",
-      "target"
+      "target",
     ];
     const depPkg = packageFiles[dep];
     const depName = depPkg.pkg.package?.name || depPkg.pkg.name || dep;
     depTypes.forEach((property: DepTypes) => {
       if (property && property in currentPkg) {
-        if (property === 'target') {
-          const targets = currentPkg[property] as object
+        if (property === "target") {
+          const targets = currentPkg[property] as object;
           for (const target of Object.values(targets)) {
             depTypes.forEach((property: DepTypes) => {
               if (property && property in target) {
@@ -288,7 +288,8 @@ const bumpDeps = ({
             dep,
             previewVersion,
             packageFiles,
-            getPreviousVersion: () => getPackageFileVersion({ pkg, property, dep: depName }),
+            getPreviousVersion: () =>
+              getPackageFileVersion({ pkg, property, dep: depName }),
           });
           if (version) {
             pkg = setPackageFileVersion({
@@ -325,13 +326,13 @@ const getDepBumpVersion = ({
   packageFiles: Record<string, PackageFile>;
   getPreviousVersion: () => string;
 }) => {
-  const pkgProperties = Object.keys(
-    currentPkg[property] as object
-  ) as Array<keyof Pkg>;
+  const pkgProperties = Object.keys(currentPkg[property] as object) as Array<
+    keyof Pkg
+  >;
   for (const existingDep of pkgProperties) {
     // if pkg is in dep list
     if (existingDep === depName) {
-      const prevVersion = getPreviousVersion()
+      const prevVersion = getPreviousVersion();
       const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
       const versionRequirement = versionRequirementMatch
         ? versionRequirementMatch[0]
@@ -348,7 +349,7 @@ const getDepBumpVersion = ({
     }
   }
   return null;
-}
+};
 
 const deriveVersionConsideringPartials = ({
   dependency,

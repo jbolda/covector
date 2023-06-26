@@ -65,7 +65,7 @@ describe("integration test with preMode `on`", () => {
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
-        "- Updated to latest `tauri`\n"
+        "- Upgraded to `tauri@0.6.0-beta.0`\n"
     );
   });
 
@@ -98,7 +98,7 @@ describe("integration test with preMode `on`", () => {
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
-        "- Updated to latest `tauri`\n"
+        "- Upgraded to `tauri@0.6.0-beta.0`\n"
     );
 
     const preOne = yield loadFile(
@@ -142,7 +142,7 @@ Boop again.
       "# Changelog\n\n" +
         "## \\[0.6.0-beta.1]\n\n" +
         "### Dependencies\n\n" +
-        "- Updated to latest `tauri-api`\n" +
+        "- Upgraded to `tauri-api@0.5.2-beta.0`\n" +
         "\n" +
         "## \\[0.6.0-beta.0]\n\n" +
         "- Summary about the changes in tauri\n"
@@ -158,12 +158,11 @@ Boop again.
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.1]\n\n" +
         "### Dependencies\n\n" +
-        "- Updated to latest `tauri-api`\n" +
-        "- Updated to latest `tauri`\n" +
+        "- Upgraded to `tauri@0.6.0-beta.1`\n" +
         "\n" +
         "## \\[0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
-        "- Updated to latest `tauri`\n"
+        "- Upgraded to `tauri@0.6.0-beta.0`\n"
     );
 
     const preTwo = yield loadFile(
