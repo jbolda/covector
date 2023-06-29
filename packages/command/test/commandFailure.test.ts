@@ -4,20 +4,6 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-const fillWithDefaults = ({ version }: { version: string }) => {
-  const [versionMajor, versionMinor, versionPatch] = version
-    .split(".")
-    .map((v) => parseInt(v));
-  return {
-    version,
-    versionMajor,
-    versionMinor,
-    versionPatch,
-    pkg: { name: "none" },
-    deps: {},
-  };
-};
-
 describe("attemptCommand fails", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
