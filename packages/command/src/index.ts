@@ -1,4 +1,4 @@
-import { spawn, timeout, Operation, MainError } from "effection";
+import { spawn, timeout, Operation, MainError, sleep } from "effection";
 import { exec } from "@effection/process";
 import path from "path";
 
@@ -60,6 +60,7 @@ export const attemptCommands = function* ({
       ) {
         runningCommand.command = pubCommand.command;
         runningCommand.shouldRunCommand = !dryRun;
+        runningCommand.retries = pubCommand.retries;
       } else if (typeof pubCommand === "object") {
         // dryRunCommand will either be a !string (false) or !undefined (true) or !true (false)
         if (pubCommand.dryRunCommand === true) {
@@ -71,6 +72,7 @@ export const attemptCommands = function* ({
         } else {
           runningCommand.command = pubCommand.command;
           runningCommand.shouldRunCommand = !dryRun;
+          runningCommand.retries = pubCommand.retries;
         }
       } else {
         runningCommand.command = pubCommand;
@@ -78,36 +80,46 @@ export const attemptCommands = function* ({
       }
 
       if (runningCommand.shouldRunCommand && runningCommand.command) {
-        if (typeof runningCommand.command === "function") {
+        let commandBackoff = (runningCommand?.retries ?? []).concat([0]);
+        for (let [index, attemptTimeout] of commandBackoff.entries()) {
           try {
-            const pipeToFunction = {
-              ...pkg,
-              pkgCommandsRan: {
-                ..._pkgCommandsRan[pkg.pkg],
-                [`${commandPrefix}command`]: stdout,
-              },
-            };
-            yield runningCommand.command(pipeToFunction);
+            if (typeof runningCommand.command === "function") {
+              const pipeToFunction = {
+                ...pkg,
+                pkgCommandsRan: {
+                  ..._pkgCommandsRan[pkg.pkg],
+                  [`${commandPrefix}command`]: stdout,
+                },
+              };
+              yield runningCommand.command(pipeToFunction);
 
-            if (typeof pubCommand === "object" && pubCommand.pipe) {
-              console.warn(`We cannot pipe the function command in ${pkg.pkg}`);
+              if (typeof pubCommand === "object" && pubCommand.pipe) {
+                console.warn(
+                  `We cannot pipe the function command in ${pkg.pkg}`
+                );
+              }
+            } else {
+              const ranCommand = yield runCommand({
+                command: runningCommand.command,
+                cwd,
+                pkg: pkg.pkg,
+                pkgPath:
+                  runningCommand.runFromRoot === true ? "" : pkg.path || "",
+                log: `${pkg.pkg} [${commandPrefix}${command}${
+                  runningCommand.runFromRoot === true ? " run from the cwd" : ""
+                }]: ${runningCommand.command}`,
+              });
+
+              if (typeof pubCommand === "object" && pubCommand.pipe) {
+                stdout = `${stdout}${ranCommand}\n`;
+              }
             }
+            // if nothing throws, continue out of the loop
+            break;
           } catch (e) {
             console.error(e);
-          }
-        } else {
-          const ranCommand = yield runCommand({
-            command: runningCommand.command,
-            cwd,
-            pkg: pkg.pkg,
-            pkgPath: runningCommand.runFromRoot === true ? "" : pkg.path || "",
-            log: `${pkg.pkg} [${commandPrefix}${command}${
-              runningCommand.runFromRoot === true ? " run from the cwd" : ""
-            }]: ${runningCommand.command}`,
-          });
-
-          if (typeof pubCommand === "object" && pubCommand.pipe) {
-            stdout = `${stdout}${ranCommand}\n`;
+            if (index + 1 >= commandBackoff.length) throw e;
+            yield sleep(attemptTimeout);
           }
         }
       } else {

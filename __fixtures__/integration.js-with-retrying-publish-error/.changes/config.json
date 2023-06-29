@@ -1,0 +1,14 @@
+{
+  "pkgManagers": {
+    "javascript": {
+      "version": true,
+      "publish": { "command": "npm publish", "retries": [2000, 2000] }
+    }
+  },
+  "packages": {
+    "tauri.js": {
+      "path": "./",
+      "manager": "javascript"
+    }
+  }
+}
