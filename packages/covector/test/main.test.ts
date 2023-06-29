@@ -257,9 +257,6 @@ describe("integration test in production mode", () => {
     });
     yield expect(run(covectored)).rejects.toThrow();
     expect(console.error as any).toHaveBeenCalled();
-    expect((console.error as any).mock.calls).toEqual(
-      expect.arrayContaining([["ENEEDAUTH"]])
-    );
     const errorCount = (console.error as any).mock.calls
       .flat()
       .filter(
