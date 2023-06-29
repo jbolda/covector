@@ -147,6 +147,39 @@ When you are ready to release the stable version, remove the `pre.json` and all 
 
 Prereleases in general complicate considerations, and introduce many foot-guns. We expect to expand functionality here, but look to do it with guardrails and assistance to hopefully prevent issues.
 
+## Command Options
+
+Each command may be specified as a string or an object. The following are equivalent.
+
+A command specified as a string.
+
+```json
+{
+  "packages": {
+    "covector": {
+      "path": "./packages/covector",
+      "publish": "echo publish"
+    }
+  }
+}
+```
+
+A command specified as an object.
+
+```json
+{
+  "packages": {
+    "covector": {
+      "path": "./packages/covector",
+      "publish": { "command": "echo publish" }
+    }
+  }
+}
+```
+
+The `command` is required. The follow are additional options you may specify.
+
+- `retries`: `number[]` - If the command fails, opt-in to retrying based on this timeout and frequency. Using `[2000, 2000]` would try two additional times with a 2 second delay between attempts. It would throw on the last attempt if they all fail.
 
 ## Change Tags
 
@@ -171,13 +204,13 @@ By default the tags are rednered as is but a longer description could be provide
     "bug": "Bug Fixes",
     "pref": "Prefromance Improvements",
     "misc": "Miscellaneous"
-  },
+  }
 }
 ```
+
 > Note: the order is important, tags will be rendered in the order they are defined in.
 
 By default, untagged changes will be rendered at the top before the tagged changes, but you can specify a default tag if needed.
-
 
 ```json
 {
@@ -187,6 +220,6 @@ By default, untagged changes will be rendered at the top before the tagged chang
     "pref": "Prefromance Improvements",
     "misc": "Miscellaneous"
   },
-  "defaultChangeTag": "misc",
+  "defaultChangeTag": "misc"
 }
 ```
