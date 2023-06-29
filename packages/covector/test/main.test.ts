@@ -84,7 +84,7 @@ describe("integration test in production mode", () => {
       "# Changelog\n\n" +
         "## \\[0.6.3]\n\n" +
         "### Dependencies\n\n" +
-        "- Updated to latest `tauri`\n"
+        "- Upgraded to `tauri@0.6.0`\n"
     );
   });
 
@@ -150,7 +150,8 @@ describe("integration test in production mode", () => {
       "# Changelog\n\n" +
         "## \\[0.3.2]\n\n" +
         "### Dependencies\n\n" +
-        "- Updated to latest `test_app_two`\n"
+        "- Upgraded to `test_app_two@0.2.0`\n" +
+        "- Upgraded to `test_app_three@3.8.98`\n"
     );
 
     const versionFile = yield loadFile(

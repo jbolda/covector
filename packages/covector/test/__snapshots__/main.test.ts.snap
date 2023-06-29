@@ -6160,7 +6160,8 @@ flutter:
         "command": "## [0.3.2]
 ### Dependencies
 
-- Updated to latest \`test_app_two\`",
+- Upgraded to \`test_app_two@0.2.0\`
+- Upgraded to \`test_app_three@3.8.98\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -6354,24 +6355,21 @@ flutter:
             "changes": Array [
               Object {
                 "meta": Object {
-                  "content": "---
-\\"test_app_two\\": minor
----
-
-Summary about the changes in test_app_two
-",
                   "dependencies": Array [
                     "test_app_two",
                   ],
-                  "extname": ".md",
-                  "filename": "first-change",
-                  "path": ".changes/first-change.md",
                 },
-                "releases": Object {
-                  "test_app_two": "minor",
+                "releases": Object {},
+                "summary": "",
+              },
+              Object {
+                "meta": Object {
+                  "dependencies": Array [
+                    "test_app_three",
+                  ],
                 },
-                "summary": "Summary about the changes in test_app_two",
-                "tag": undefined,
+                "releases": Object {},
+                "summary": "",
               },
             ],
             "parents": Object {},
@@ -7908,7 +7906,7 @@ thiserror = \\"1.0.19\\"
         "command": "## [0.6.3]
 ### Dependencies
 
-- Updated to latest \`tauri\`",
+- Upgraded to \`tauri@0.6.0\`",
         "postcommand": false,
         "precommand": false,
       },
@@ -8382,24 +8380,12 @@ Summary about the changes in tauri-updater
             "changes": Array [
               Object {
                 "meta": Object {
-                  "content": "---
-\\"tauri\\": minor
----
-
-Summary about the changes in tauri
-",
                   "dependencies": Array [
                     "tauri",
                   ],
-                  "extname": ".md",
-                  "filename": "first-change",
-                  "path": ".changes/first-change.md",
                 },
-                "releases": Object {
-                  "tauri": "minor",
-                },
-                "summary": "Summary about the changes in tauri",
-                "tag": undefined,
+                "releases": Object {},
+                "summary": "",
               },
             ],
             "parents": Object {},

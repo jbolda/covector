@@ -1,76 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`package file applies preview bump bumps multi js json 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-    ],
-    Array [
-      "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-    ],
-    Array [
-      "bumping all with branch-name.12345 identifier to publish a preview",
-    ],
-  ],
-}
-`;
-
-exports[`package file applies preview bump bumps single js json 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping js-single-json-fixture with branch-name.12345 identifier to publish a preview",
-    ],
-  ],
-}
-`;
-
-exports[`package file applies preview bump to pre-release bumps multi js json without pre-release 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-    ],
-    Array [
-      "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-    ],
-    Array [
-      "bumping all with branch-name.12345 identifier to publish a preview",
-    ],
-  ],
-}
-`;
-
-exports[`package file applies preview bump to pre-release bumps single js json without pre-release 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump (snapshot) bump multi rust toml as patch with object dep missing patch 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping rust_pkg_a_fixture with patch",
-    ],
-    Array [
-      "bumping rust_pkg_b_fixture with patch",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump (snapshot) bumps multi js json 1`] = `
+exports[`package file apply bump (snapshot) on js bumps multi 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -87,63 +17,21 @@ Object {
 }
 `;
 
-exports[`package file apply bump (snapshot) bumps multi rust toml 1`] = `
+exports[`package file apply bump (snapshot) on js bumps multi with parent as range 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
     Array [
-      "bumping rust_pkg_a_fixture with minor",
+      "bumping yarn-workspace-base-pkg-a with patch",
     ],
     Array [
-      "bumping rust_pkg_b_fixture with minor",
+      "bumping yarn-workspace-base-pkg-b with minor",
     ],
   ],
 }
 `;
 
-exports[`package file apply bump (snapshot) bumps multi rust toml as minor with object dep missing patch 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping rust_pkg_a_fixture with minor",
-    ],
-    Array [
-      "bumping rust_pkg_b_fixture with minor",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump (snapshot) bumps multi rust toml with dep missing patch 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping rust_pkg_a_fixture with minor",
-    ],
-    Array [
-      "bumping rust_pkg_b_fixture with minor",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump (snapshot) bumps multi rust toml with object dep 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping rust_pkg_a_fixture with minor",
-    ],
-    Array [
-      "bumping rust_pkg_b_fixture with minor",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump (snapshot) bumps single js json 1`] = `
+exports[`package file apply bump (snapshot) on js bumps single 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -154,7 +42,88 @@ Object {
 }
 `;
 
-exports[`package file apply bump (snapshot) bumps single rust toml 1`] = `
+exports[`package file apply bump (snapshot) on js fails bump single that satisfies range 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping js-single-json-fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump (snapshot) on rust bump multi as patch with object dep missing patch 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with patch",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with patch",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump (snapshot) on rust bumps multi 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with minor",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump (snapshot) on rust bumps multi as minor with object dep missing patch 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with minor",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump (snapshot) on rust bumps multi with dep missing patch 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with minor",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump (snapshot) on rust bumps multi with object dep 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust_pkg_a_fixture with minor",
+    ],
+    Array [
+      "bumping rust_pkg_b_fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump (snapshot) on rust bumps single 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
@@ -165,34 +134,23 @@ Object {
 }
 `;
 
-exports[`package file apply bump (snapshot) bumps single yaml toml 1`] = `
+exports[`package file apply bump (snapshot) on rust fails bumps single that satisfies range 1`] = `
+Object {
+  "consoleDir": Array [],
+  "consoleLog": Array [
+    Array [
+      "bumping rust-single-fixture with minor",
+    ],
+  ],
+}
+`;
+
+exports[`package file apply bump (snapshot) on yaml bumps single 1`] = `
 Object {
   "consoleDir": Array [],
   "consoleLog": Array [
     Array [
       "bumping test_app with minor",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump (snapshot) fails bump single js json that satisfies range 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping js-single-json-fixture with minor",
-    ],
-  ],
-}
-`;
-
-exports[`package file apply bump (snapshot) fails bumps single rust toml that satisfies range 1`] = `
-Object {
-  "consoleDir": Array [],
-  "consoleLog": Array [
-    Array [
-      "bumping rust-single-fixture with minor",
     ],
   ],
 }

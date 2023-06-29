@@ -42,6 +42,7 @@ export function* fillChangelogs({
     changelogs,
     assembledChanges,
     config,
+    applied,
   });
 
   if (create) {
@@ -141,10 +142,16 @@ function* readAllChangelogs({
   }));
 }
 
+const getVersionFromApplied = (
+  name: string,
+  applied: { name: string; version: string }[]
+) => applied.find((pkg) => pkg.name === name)?.version;
+
 const applyChanges = ({
   changelogs,
   assembledChanges,
   config,
+  applied,
 }: {
   changelogs: {
     changes: { name: string; version: string };
@@ -152,6 +159,7 @@ const applyChanges = ({
   }[];
   assembledChanges: AssembledChanges;
   config: ConfigFile;
+  applied: { name: string; version: string }[];
 }) => {
   const gitSiteUrl = !config.gitSiteUrl
     ? "/"
@@ -232,7 +240,7 @@ const applyChanges = ({
         Object.keys(changeTags).forEach((k) => (groupedChangesByTag[k] = []));
 
         // fill `deps` tag
-        const dependecies = Object.keys(
+        const dependencies = Object.keys(
           assembledChanges.releases[change.changes.name].changes
             .filter((c) => c.meta?.dependencies)
             // reduce to an object of keys to avoid duplication of deps
@@ -240,8 +248,15 @@ const applyChanges = ({
               c.meta!.dependencies.forEach((dep) => (acc[dep] = 1));
               return acc;
             }, {} as { [k: string]: any })
-        ).map((dep) => ({ summary: `Updated to latest \`${dep}\`` }));
-        groupedChangesByTag.deps.push(...dependecies);
+        ).map((dep) => {
+          const appliedVersion = getVersionFromApplied(dep, applied);
+          return {
+          	summary: appliedVersion 
+            	? `Upgraded to \`${dep}@${appliedVersion}\``
+            	: `Upgraded to latest \`${dep}\``,
+            }
+        });
+        groupedChangesByTag.deps.push(...dependencies);
 
         assembledChanges.releases[change.changes.name].changes
           .filter((c) => !c.meta?.dependencies)

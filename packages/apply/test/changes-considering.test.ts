@@ -3,12 +3,18 @@ import { it } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import {
   ConfigFile,
-  DepTypes,
   PackageFile,
   PackageConfig,
+  CommonBumps,
 } from "@covector/types";
 
-const allPackagesWithoutRead = ({ config }: { config: ConfigFile }) =>
+const allPackagesWithoutRead = ({
+  config,
+  pkgDepVersion,
+}: {
+  config: ConfigFile;
+  pkgDepVersion?: Record<string, Record<string, string>>;
+}) =>
   Object.entries(config.packages)
     .map(
       ([pkgName, configInfo]: [pkgName: string, configInfo: PackageConfig]) => {
@@ -16,9 +22,12 @@ const allPackagesWithoutRead = ({ config }: { config: ConfigFile }) =>
           name: pkgName,
           version: "none",
           deps: (configInfo.dependencies ?? []).reduce((deps, dep) => {
-            deps[dep] = [{ type: "dependencies", version: "none" }];
+            const version = pkgDepVersion?.[pkgName]?.[dep]
+              ? pkgDepVersion[pkgName][dep]
+              : "none";
+            deps[dep] = [{ type: "dependencies", version }];
             return deps;
-          }, {} as Record<string, { type: "dependencies"; version: "none" }[]>),
+          }, {} as Record<string, { type: "dependencies"; version: string }[]>),
         };
       }
     )
@@ -238,6 +247,81 @@ describe("list changes considering parents", () => {
     expect(changes.releases["pkg-three"].type).toBe("patch");
     expect(changes.releases["pkg-two"].type).toBe("patch");
     expect(changes.releases["pkg-one"].type).toBe("patch");
+
+    expect({
+      //@ts-expect-error
+      consoleLog: console.log.mock.calls,
+      //@ts-expect-error
+      consoleDir: console.dir.mock.calls,
+      changes,
+    }).toMatchSnapshot();
+  });
+
+  it("skips roll up if range dep", function* () {
+    const changesFiles = [
+      {
+        releases: {
+          "pkg-a": "patch",
+        },
+        summary: "Roll up just a bit please.",
+        meta: {},
+      },
+    ];
+
+    // this is the initial set of changes
+    const assembledChanges = {
+      releases: {
+        "pkg-a": {
+          type: "patch" as CommonBumps,
+          changes: [changesFiles[0]],
+        },
+      },
+    };
+
+    const config = {
+      changeFolder: ".changes",
+      packages: {
+        "pkg-a": {
+          path: "./packages/pkg-a/",
+          manager: "javascript",
+          dependencies: [],
+        },
+        "pkg-b": {
+          path: "./packages/pkg-b/",
+          manager: "javascript",
+          dependencies: ["pkg-a"],
+        },
+        "pkg-c": {
+          path: "./packages/pkg-c/",
+          manager: "javascript",
+          dependencies: ["pkg-a"],
+        },
+      },
+    };
+
+    const pkgDepVersion = {
+      "pkg-b": { "pkg-a": "1.0.0" },
+      "pkg-c": { "pkg-a": "^1.0.0" },
+    };
+    const allPackages = allPackagesWithoutRead({ config, pkgDepVersion });
+    console.dir(allPackages, { depth: 5 });
+
+    const changes = changesConsideringParents({
+      //@ts-expect-error
+      assembledChanges,
+      config,
+      allPackages,
+    });
+    // console.error(changes)
+
+    // these are directly defined in the change files
+    expect(changes.releases["pkg-a"].type).toBe("patch");
+
+    // these are the top level rolled up
+    expect(changes.releases["pkg-b"].type).toBe("patch");
+
+    // rolls up from pkg-d
+    expect(changes.releases["pkg-c"]).toBeUndefined();
 
     expect({
       //@ts-expect-error
