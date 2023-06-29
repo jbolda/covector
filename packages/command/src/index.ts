@@ -60,6 +60,7 @@ export const attemptCommands = function* ({
       ) {
         runningCommand.command = pubCommand.command;
         runningCommand.shouldRunCommand = !dryRun;
+        runningCommand.retries = pubCommand.retries;
       } else if (typeof pubCommand === "object") {
         // dryRunCommand will either be a !string (false) or !undefined (true) or !true (false)
         if (pubCommand.dryRunCommand === true) {
@@ -71,6 +72,7 @@ export const attemptCommands = function* ({
         } else {
           runningCommand.command = pubCommand.command;
           runningCommand.shouldRunCommand = !dryRun;
+          runningCommand.retries = pubCommand.retries;
         }
       } else {
         runningCommand.command = pubCommand;
@@ -116,8 +118,8 @@ export const attemptCommands = function* ({
             break;
           } catch (e) {
             console.error(e);
-            yield sleep(attemptTimeout * 1000);
             if (index + 1 >= commandBackoff.length) throw e;
+            yield sleep(attemptTimeout);
           }
         }
       } else {

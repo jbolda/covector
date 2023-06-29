@@ -192,8 +192,23 @@ Object {
 
 exports[`integration test in production mode fails with error 1`] = `
 Object {
-  "consoleInfo": Array [],
   "consoleLog": Array [
+    Array [
+      "tauri.js [publish]: npm publish",
+    ],
+  ],
+}
+`;
+
+exports[`integration test in production mode fails, tries and fails two more times with error 1`] = `
+Object {
+  "consoleLog": Array [
+    Array [
+      "tauri.js [publish]: npm publish",
+    ],
+    Array [
+      "tauri.js [publish]: npm publish",
+    ],
     Array [
       "tauri.js [publish]: npm publish",
     ],
@@ -5995,14 +6010,6 @@ Object {
 
 exports[`integration test in production mode runs version for dart / flutter multi 1`] = `
 Object {
-  "consoleInfo": Array [
-    Array [
-      ".changes/first-change.md was deleted",
-    ],
-    Array [
-      ".changes/second-change.md was deleted",
-    ],
-  ],
   "consoleLog": Array [
     Array [
       "bumping test_app_two with minor",
@@ -6515,14 +6522,6 @@ Summary about the changes in test_app_two
 
 exports[`integration test in production mode runs version for dart / flutter single 1`] = `
 Object {
-  "consoleInfo": Array [
-    Array [
-      ".changes/first-change.md was deleted",
-    ],
-    Array [
-      ".changes/second-change.md was deleted",
-    ],
-  ],
   "consoleLog": Array [
     Array [
       "bumping test_app with minor",
@@ -6704,14 +6703,6 @@ Summary about the changes again(!) in test_app
 
 exports[`integration test in production mode runs version for general file 1`] = `
 Object {
-  "consoleInfo": Array [
-    Array [
-      ".changes/first-change.md was deleted",
-    ],
-    Array [
-      ".changes/second-change.md was deleted",
-    ],
-  ],
   "consoleLog": Array [
     Array [
       "bumping general-pkg with minor",
@@ -6815,14 +6806,6 @@ A general summary about the generally changes in general-pkg generally
 
 exports[`integration test in production mode runs version for js and rust 1`] = `
 Object {
-  "consoleInfo": Array [
-    Array [
-      ".changes/first-change.md was deleted",
-    ],
-    Array [
-      ".changes/second-change.md was deleted",
-    ],
-  ],
   "consoleLog": Array [
     Array [
       "bumping tauri with minor",

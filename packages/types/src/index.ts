@@ -112,6 +112,7 @@ export type RunningCommand = {
 export type NormalizedCommand = {
   command?: string;
   runFromRoot?: boolean;
+  retries?: number[];
   dryRunCommand?: boolean;
   pipe?: boolean;
 };

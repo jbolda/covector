@@ -54,9 +54,15 @@ describe("integration test in production mode", () => {
     })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
+
+    expect((console.info as any).mock.calls.flat()).toContain(
+      ".changes/first-change.md was deleted"
+    );
+    expect((console.info as any).mock.calls.flat()).toContain(
+      ".changes/second-change.md was deleted"
+    );
     expect({
       consoleLog: (console.log as any).mock.calls,
-      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
 
@@ -90,9 +96,15 @@ describe("integration test in production mode", () => {
     })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
+
+    expect((console.info as any).mock.calls.flat()).toContain(
+      ".changes/first-change.md was deleted"
+    );
+    expect((console.info as any).mock.calls.flat()).toContain(
+      ".changes/second-change.md was deleted"
+    );
     expect({
       consoleLog: (console.log as any).mock.calls,
-      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
 
@@ -118,9 +130,15 @@ describe("integration test in production mode", () => {
     })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
+
+    expect((console.info as any).mock.calls.flat()).toContain(
+      ".changes/first-change.md was deleted"
+    );
+    expect((console.info as any).mock.calls.flat()).toContain(
+      ".changes/second-change.md was deleted"
+    );
     expect({
       consoleLog: (console.log as any).mock.calls,
-      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
 
@@ -152,9 +170,15 @@ describe("integration test in production mode", () => {
     })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
+
+    expect((console.info as any).mock.calls.flat()).toContain(
+      ".changes/first-change.md was deleted"
+    );
+    expect((console.info as any).mock.calls.flat()).toContain(
+      ".changes/second-change.md was deleted"
+    );
     expect({
       consoleLog: (console.log as any).mock.calls,
-      consoleInfo: (console.info as any).mock.calls,
       covectorReturn: covectored,
     }).toMatchSnapshot();
 
@@ -216,9 +240,35 @@ describe("integration test in production mode", () => {
       cwd: fullIntegration,
     });
     yield expect(run(covectored)).rejects.toThrow();
+
     expect({
       consoleLog: (console.log as any).mock.calls,
-      consoleInfo: (console.info as any).mock.calls,
+      // covectorReturn: covectored, // skip this as npm publish has fs dep output which creates false positives
+    }).toMatchSnapshot();
+  }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
+
+  it("fails, tries and fails two more times with error", function* () {
+    const fullIntegration = f.copy(
+      "integration.js-with-retrying-publish-error"
+    );
+    const covectored = covector({
+      command: "publish",
+      cwd: fullIntegration,
+    });
+    yield expect(run(covectored)).rejects.toThrow();
+    expect(console.error as any).toHaveBeenCalled();
+    expect((console.error as any).mock.calls).toEqual(
+      expect.arrayContaining([["npm ERR! code ENEEDAUTH"]])
+    );
+    const errorCount = (console.error as any).mock.calls
+      .flat()
+      .filter(
+        (c: string) => typeof c === "string" && c.includes("ENEEDAUTH")
+      ).length;
+    expect(errorCount).toBe(3);
+
+    expect({
+      consoleLog: (console.log as any).mock.calls,
       // covectorReturn: covectored, // skip this as npm publish has fs dep output which creates false positives
     }).toMatchSnapshot();
   }, 60000); // increase timeout to 60s, windows seems to take forever on a fail
