@@ -188,15 +188,17 @@ export type Release = {
   parents?: Parents;
 };
 
+export type CommandTypes = NormalizedCommand | string | Function;
+
 export type PkgVersion = {
   pkg: string;
   path?: string;
   packageFileName?: string;
   type?: string;
   parents?: Parents;
-  precommand?: (string | any)[] | null;
-  command?: (string | any)[] | null;
-  postcommand?: (string | any)[] | null;
+  precommand?: CommandTypes[] | CommandTypes | null;
+  command?: CommandTypes[] | CommandTypes | null;
+  postcommand?: CommandTypes[] | CommandTypes | null;
   manager?: string;
   dependencies?: string[];
   errorOnVersionRange?: string;
@@ -213,9 +215,9 @@ export type PkgPublish = {
   packageFileName?: string;
   changelog?: string;
   tag?: string;
-  precommand?: (string | any)[] | null;
-  command?: (string | any)[] | null;
-  postcommand?: (string | any)[] | null;
+  precommand?: CommandTypes[] | CommandTypes | null;
+  command?: CommandTypes[] | CommandTypes | null;
+  postcommand?: CommandTypes[] | CommandTypes | null;
   manager: string;
   dependencies?: string[];
   getPublishedVersion?: string;
