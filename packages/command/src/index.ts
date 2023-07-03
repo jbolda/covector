@@ -1,6 +1,7 @@
-import { spawn, timeout, Operation, MainError, sleep } from "effection";
+import { spawn, timeout, Operation, MainError, sleep, fetch } from "effection";
 import { exec } from "@effection/process";
 import path from "path";
+import { template } from "lodash";
 
 import type {
   PkgVersion,
@@ -92,6 +93,8 @@ function* executeEachCommand({
       runningCommand.command = pubCommand.command;
       runningCommand.shouldRunCommand = !dryRun;
       runningCommand.retries = pubCommand.retries;
+      runningCommand.use = pubCommand.use;
+      runningCommand.options = pubCommand.options;
     } else if (typeof pubCommand === "object") {
       // dryRunCommand will either be a !string (false) or !undefined (true) or !true (false)
       if (pubCommand.dryRunCommand === true) {
@@ -104,13 +107,18 @@ function* executeEachCommand({
         runningCommand.command = pubCommand.command;
         runningCommand.shouldRunCommand = !dryRun;
         runningCommand.retries = pubCommand.retries;
+        runningCommand.use = pubCommand.use;
+        runningCommand.options = pubCommand.options;
       }
     } else {
       runningCommand.command = pubCommand;
       runningCommand.shouldRunCommand = !dryRun;
     }
 
-    if (runningCommand.shouldRunCommand && runningCommand.command) {
+    if (
+      runningCommand.shouldRunCommand &&
+      (runningCommand.command || runningCommand.use)
+    ) {
       let commandBackoff = (runningCommand?.retries ?? []).concat([0]);
       for (let [index, attemptTimeout] of commandBackoff.entries()) {
         try {
@@ -127,8 +135,11 @@ function* executeEachCommand({
           // if nothing throws, continue out of the loop
           break;
         } catch (e) {
-          console.error(e);
-          if (index + 1 >= commandBackoff.length) throw e;
+          if (index + 1 >= commandBackoff.length) {
+            throw e;
+          } else {
+            console.error(e);
+          }
           yield sleep(attemptTimeout);
         }
       }
@@ -189,6 +200,29 @@ function* callCommand({
 
     if (typeof pubCommand === "object" && pubCommand.pipe) {
       stdout = `${stdout}${ranCommand}\n`;
+    }
+  } else if (runningCommand.use === "fetch:check") {
+    if (runningCommand?.options?.url) {
+      const url = template(runningCommand.options.url)({ pkg });
+      let request = yield fetch(url);
+      if (request.status >= 400) {
+        throw new MainError({
+          exitCode: 1,
+          message: `request returned code ${request.status}: ${request.statusText}`,
+        });
+      }
+      const response = yield request.json();
+      if (response.errors) {
+        throw new MainError({
+          exitCode: 1,
+          message: `request returned errors: ${JSON.stringify(
+            response.errors,
+            null,
+            2
+          )}`,
+        });
+      }
+      stdout = `${stdout}${response.version}\n`;
     }
   }
 

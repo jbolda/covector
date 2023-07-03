@@ -102,8 +102,13 @@ export type ConfigFile = {
 };
 
 /* @covector/command */
+type BuiltInCommands = "fetch:check";
+type BuiltInCommandOptions = Record<string, any>;
+
 export type RunningCommand = {
-  command?: string | Function;
+  command?: CommandTypes;
+  use?: BuiltInCommands;
+  options?: BuiltInCommandOptions;
   shouldRunCommand?: boolean;
   runFromRoot?: boolean;
   retries?: number[];
@@ -111,6 +116,8 @@ export type RunningCommand = {
 
 export type NormalizedCommand = {
   command?: string;
+  use?: BuiltInCommands;
+  options?: BuiltInCommandOptions;
   runFromRoot?: boolean;
   retries?: number[];
   dryRunCommand?: boolean;
