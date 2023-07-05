@@ -9,6 +9,8 @@ import type {
   RunningCommand,
   CommandTypes,
   CommandsRan,
+  BuiltInCommands,
+  BuiltInCommandOptions,
 } from "@covector/types";
 
 export const attemptCommands = function* ({
@@ -154,6 +156,45 @@ function* executeEachCommand({
   return stdout;
 }
 
+function* useFunction({
+  pkg,
+  use,
+  options,
+}: {
+  pkg: PkgVersion | PkgPublish;
+  use: BuiltInCommands;
+  options?: BuiltInCommandOptions;
+}): Operation<string> {
+  if (use === "fetch:check") {
+    if (options?.url) {
+      const url = template(options.url)({ pkg });
+      let request = yield fetch(url);
+      if (request.status >= 400) {
+        throw new MainError({
+          exitCode: 1,
+          message: `request returned code ${request.status}: ${request.statusText}`,
+        });
+      }
+      const response = yield request.json();
+      if (response.errors) {
+        throw new MainError({
+          exitCode: 1,
+          message: `request returned errors: ${JSON.stringify(
+            response.errors,
+            null,
+            2
+          )}`,
+        });
+      }
+      if (url.startsWith("https://crates.io")) {
+        return response.version.num;
+      }
+      return response.version;
+    }
+  }
+  return "";
+}
+
 function* callCommand({
   cwd,
   pkg,
@@ -201,29 +242,13 @@ function* callCommand({
     if (typeof pubCommand === "object" && pubCommand.pipe) {
       stdout = `${stdout}${ranCommand}\n`;
     }
-  } else if (runningCommand.use === "fetch:check") {
-    if (runningCommand?.options?.url) {
-      const url = template(runningCommand.options.url)({ pkg });
-      let request = yield fetch(url);
-      if (request.status >= 400) {
-        throw new MainError({
-          exitCode: 1,
-          message: `request returned code ${request.status}: ${request.statusText}`,
-        });
-      }
-      const response = yield request.json();
-      if (response.errors) {
-        throw new MainError({
-          exitCode: 1,
-          message: `request returned errors: ${JSON.stringify(
-            response.errors,
-            null,
-            2
-          )}`,
-        });
-      }
-      stdout = `${stdout}${response.version}\n`;
-    }
+  } else if (runningCommand.use) {
+    const used = yield useFunction({
+      pkg,
+      use: runningCommand.use,
+      options: runningCommand.options,
+    });
+    stdout = `${stdout}${used}\n`;
   }
 
   return stdout;
@@ -244,16 +269,42 @@ export function* confirmCommandsToRun({
     //@ts-expect-error template literals issues
     const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
     if (!!getPublishedVersion) {
-      const version = yield runCommand({
-        command: getPublishedVersion,
-        cwd,
-        pkg: pkg.pkg,
-        pkgPath: pkg.path || "",
-        log: `Checking if ${pkg.pkg}${
-          !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
-        } is already published with: ${getPublishedVersion}`,
-      });
+      let version = "";
+      if (typeof getPublishedVersion === "string") {
+        version = yield runCommand({
+          command: getPublishedVersion,
+          cwd,
+          pkg: pkg.pkg,
+          pkgPath: pkg.path || "",
+          log: `Checking if ${pkg.pkg}${
+            !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
+          } is already published with: ${getPublishedVersion}`,
+        });
+      } else if (typeof getPublishedVersion === "object") {
+        if (getPublishedVersion.use === "fetch:check") {
+          console.log(
+            `Checking if ${pkg.pkg}${
+              !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
+            } is already published with built-in ${getPublishedVersion.use}`
+          );
 
+          try {
+            version = yield useFunction({
+              pkg,
+              use: getPublishedVersion.use,
+              options: getPublishedVersion.options,
+            });
+          } catch (error: any) {
+            // it throws if version is not found
+          }
+        } else {
+          throw new Error(
+            `This configuration is not supported for getPublishedVersion on ${
+              pkg.pkg
+            }: ${JSON.stringify(getPublishedVersion, null, 2)}`
+          );
+        }
+      }
       if (pkg.pkgFile && pkg.pkgFile.version === version) {
         console.log(
           `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`

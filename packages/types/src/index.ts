@@ -102,8 +102,8 @@ export type ConfigFile = {
 };
 
 /* @covector/command */
-type BuiltInCommands = "fetch:check";
-type BuiltInCommandOptions = Record<string, any>;
+export type BuiltInCommands = "fetch:check";
+export type BuiltInCommandOptions = Record<string, any>;
 
 export type RunningCommand = {
   command?: CommandTypes;
@@ -227,7 +227,7 @@ export type PkgPublish = {
   postcommand?: CommandTypes[] | CommandTypes | null;
   manager: string;
   dependencies?: string[];
-  getPublishedVersion?: string;
+  getPublishedVersion?: CommandTypes;
   assets?: { name: string; path: string }[];
   pkgFile?: PackageFile;
   errorOnVersionRange?: string;
