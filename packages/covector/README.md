@@ -181,6 +181,38 @@ The `command` is required. The follow are additional options you may specify.
 
 - `retries`: `number[]` - If the command fails, opt-in to retrying based on this timeout and frequency. Using `[2000, 2000]` would try two additional times with a 2 second delay between attempts. It would throw on the last attempt if they all fail.
 
+## Built-In Commands
+
+Besides specifying a command with additional options, one may `use` a built-in command. The following are the currently available commands.
+
+### `fetch:check`
+
+This requires an `options.url` for use. It will fetch the specified endpoint, and throw if the response returns a code `>= 400` or if the JSON response includes an `errors`. This is useful to check if a version was published. The following would check the registry if this version was published to determine if it needs to run a `covector publish`. After publishing, it checks with `retries` on a five second timeout to confirm the publish appears in the registry.
+
+```json
+{
+  "packages": {
+    "covector": {
+      "path": "./packages/covector",
+      "getPublishedVersion": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+        }
+      },
+      "publish": "npm publish --access public",
+      "postpublish": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+        },
+        "retries": [5000, 5000, 5000]
+      }
+    }
+  }
+}
+```
+
 ## Change Tags
 
 Each bump in a change file could optionally contain a tag (section) in the format of `<bump>:<tag>`, and will be used to group related changes under one tag in the final changelog:
