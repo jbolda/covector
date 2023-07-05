@@ -55,7 +55,7 @@ describe("attemptCommand fails", () => {
       expect((console.error as any).mock.calls[0][0]).toBe(errorMessage);
       expect((console.error as any).mock.calls[2][0]).toBe(errorMessage);
       expect((console.error as any).mock.calls[4][0]).toBe(errorMessage);
-      expect((console.error as any).mock.calls[5][0]).toBe(errorMessage);
+      expect((console.error as any).mock.calls[6][0]).toBeUndefined();
       expect(errored.message).toBe(errorMessage);
     } else {
       const errorMessage = "spawn boop ENOENT";
