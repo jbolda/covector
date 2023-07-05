@@ -81,59 +81,61 @@ describe("confirmCommandsToRun", () => {
       });
     });
 
-    describe("cargo through curl", () => {
-      it("already published", function* () {
-        const commandsToRun = yield confirmCommandsToRun({
-          commands: [
-            {
-              pkg: "tauri",
-              manager: "cargo",
-              pkgFile: fillWithDefaults({ version: "0.11.0" }),
-              getPublishedVersion:
-                "curl -s https://crates.io/api/v1/crates/tauri/0.11.0 | if grep -q errors; then echo not found; else echo 0.11.0; fi;",
-            },
-          ],
-          cwd: "",
-          command: "publish",
+    if (process.platform !== "win32") {
+      describe("cargo through curl", () => {
+        it("already published", function* () {
+          const commandsToRun = yield confirmCommandsToRun({
+            commands: [
+              {
+                pkg: "tauri",
+                manager: "cargo",
+                pkgFile: fillWithDefaults({ version: "0.11.0" }),
+                getPublishedVersion:
+                  "curl -s https://crates.io/api/v1/crates/tauri/0.11.0 | if grep -q errors; then echo not found; else echo 0.11.0; fi;",
+              },
+            ],
+            cwd: "",
+            command: "publish",
+          });
+
+          expect((console.log as any).mock.calls).toEqual([
+            [
+              "Checking if tauri@0.11.0 is already published with: curl -s https://crates.io/api/v1/crates/tauri/0.11.0 | if grep -q errors; then echo not found; else echo 0.11.0; fi;",
+            ],
+            ["0.11.0"],
+            ["tauri@0.11.0 is already published. Skipping."],
+          ]);
+          expect(commandsToRun).toEqual([]);
         });
 
-        expect((console.log as any).mock.calls).toEqual([
-          [
-            "Checking if tauri@0.11.0 is already published with: curl -s https://crates.io/api/v1/crates/tauri/0.11.0 | if grep -q errors; then echo not found; else echo 0.11.0; fi;",
-          ],
-          ["0.11.0"],
-          ["tauri@0.11.0 is already published. Skipping."],
-        ]);
-        expect(commandsToRun).toEqual([]);
-      });
+        it("needs publish", function* () {
+          const commandsToRun = yield confirmCommandsToRun({
+            commands: [
+              {
+                pkg: "tauri",
+                manager: "cargo",
+                pkgFile: fillWithDefaults({ version: "0.12.0" }),
+                getPublishedVersion:
+                  "curl -s https://crates.io/api/v1/crates/tauri/0.12.0 | if grep -q errors; then echo not found; else echo 0.12.0; fi;",
+              },
+            ],
+            cwd: "",
+            command: "publish",
+          });
 
-      it("needs publish", function* () {
-        const commandsToRun = yield confirmCommandsToRun({
-          commands: [
-            {
-              pkg: "tauri",
-              manager: "cargo",
-              pkgFile: fillWithDefaults({ version: "0.12.0" }),
-              getPublishedVersion:
-                "curl -s https://crates.io/api/v1/crates/tauri/0.12.0 | if grep -q errors; then echo not found; else echo 0.12.0; fi;",
-            },
-          ],
-          cwd: "",
-          command: "publish",
+          expect((console.log as any).mock.calls).toEqual([
+            [
+              "Checking if tauri@0.12.0 is already published with: curl -s https://crates.io/api/v1/crates/tauri/0.12.0 | if grep -q errors; then echo not found; else echo 0.12.0; fi;",
+            ],
+            ["not found"],
+          ]);
+
+          expect(commandsToRun).toEqual(
+            expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })])
+          );
         });
-
-        expect((console.log as any).mock.calls).toEqual([
-          [
-            "Checking if tauri@0.12.0 is already published with: curl -s https://crates.io/api/v1/crates/tauri/0.12.0 | if grep -q errors; then echo not found; else echo 0.12.0; fi;",
-          ],
-          ["not found"],
-        ]);
-
-        expect(commandsToRun).toEqual(
-          expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })])
-        );
       });
-    });
+    }
   });
 
   describe("fetchCommand", () => {

@@ -29,16 +29,7 @@ describe("attemptCommand fails", () => {
       })
     );
 
-    console.dir(errored);
-    if (process.platform === "win32") {
-      const errorMessage =
-        "'boop' is not recognized as an internal or external command,\r\n" +
-        "operable program or batch file.";
-      expect(errored.message).toBe(errorMessage);
-    } else {
-      const errorMessage = "spawn boop ENOENT";
-      expect(errored.message).toBe(errorMessage);
-    }
+    expect(errored.message).toBe("spawn boop ENOENT");
   });
 
   it("retries a failed function", function* () {
@@ -63,7 +54,8 @@ describe("attemptCommand fails", () => {
         "operable program or batch file.";
       expect((console.error as any).mock.calls[0][0]).toBe(errorMessage);
       expect((console.error as any).mock.calls[2][0]).toBe(errorMessage);
-      expect((console.error as any).mock.calls[4][0]).toBeUndefined();
+      expect((console.error as any).mock.calls[4][0]).toBe(errorMessage);
+      expect((console.error as any).mock.calls[5][0]).toBe(errorMessage);
       expect(errored.message).toBe(errorMessage);
     } else {
       const errorMessage = "spawn boop ENOENT";
