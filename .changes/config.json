@@ -19,7 +19,7 @@
       "prepublish": [{ "command": "npm pack", "dryRunCommand": true }],
       "publish": [
         {
-          "command": "echo '<details>\n<summary><em><h4>Cargo Publish</h4></em></summary>\n\n```'",
+          "command": "echo '<h2>NPM Publish</h2>\n<details>\n<summary><em>publish details</em></summary>\n\n```'",
           "dryRunCommand": true,
           "pipe": true
         },
