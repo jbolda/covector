@@ -212,11 +212,12 @@ const applyChanges = ({
           }
         };
 
-        const changeTags: { [k: string]: string } = {
-          // ensures there is a `deps` tag if `none` is defined
-          deps: "Dependencies",
-          ...(config.changeTags ?? {}),
-        };
+        const changeTags: { [k: string]: string } = config.changeTags ?? {};
+        // ensures there is a `deps` tag if one wasn't defined
+        if (!('deps' in changeTags)) {
+          changeTags.deps = "Dependencies"
+        }
+        
 
         /**
          * Untagged changes are changes that don't have a tag associated with and `config.defaultChangeTag` is not set.
