@@ -75,7 +75,9 @@ describe("fetchCommand", () => {
         })
       );
 
-      expect(errored.message).toEqual("request returned code 404: Not Found");
+      expect(errored.message).toEqual(
+        "effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404: Not Found"
+      );
     });
 
     it("failure retries then throws", function* () {
@@ -103,7 +105,9 @@ describe("fetchCommand", () => {
       );
 
       expect(console.error as any).toBeCalledTimes(2);
-      expect(errored.message).toEqual("request returned code 404: Not Found");
+      expect(errored.message).toEqual(
+        "effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404: Not Found"
+      );
     });
   });
 
@@ -156,7 +160,7 @@ describe("fetchCommand", () => {
       );
 
       expect(errored.message).toEqual(
-        `request returned errors: [
+        `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned errors: [
   {
     "detail": "crate \`tauri\` does not have a version \`0.12.0\`"
   }
@@ -190,7 +194,7 @@ describe("fetchCommand", () => {
 
       expect(console.error as any).toBeCalledTimes(2);
       expect(errored.message).toEqual(
-        `request returned errors: [
+        `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned errors: [
   {
     "detail": "crate \`tauri\` does not have a version \`0.12.0\`"
   }
