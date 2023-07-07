@@ -1,4 +1,12 @@
-import { spawn, timeout, Operation, MainError, sleep, fetch } from "effection";
+import {
+  spawn,
+  timeout,
+  Operation,
+  MainError,
+  sleep,
+  fetch,
+  isMainError,
+} from "effection";
 import { exec } from "@effection/process";
 import path from "path";
 import { template } from "lodash";
@@ -140,7 +148,11 @@ function* executeEachCommand({
           if (index + 1 >= commandBackoff.length) {
             throw e;
           } else {
-            console.error(e);
+            if (isMainError(e as Error)) {
+              console.error((e as MainError).message);
+            } else {
+              console.error(e);
+            }
           }
           yield sleep(attemptTimeout);
         }
@@ -172,14 +184,16 @@ function* useFunction({
       if (request.status >= 400) {
         throw new MainError({
           exitCode: 1,
-          message: `request returned code ${request.status}: ${request.statusText}`,
+          message: `${pkg.pkg} request to ${url} returned code ${request.status}: ${request.statusText}`,
         });
       }
       const response = yield request.json();
       if (response.errors) {
         throw new MainError({
           exitCode: 1,
-          message: `request returned errors: ${JSON.stringify(
+          message: `${
+            pkg.pkg
+          } request to ${url} returned errors: ${JSON.stringify(
             response.errors,
             null,
             2

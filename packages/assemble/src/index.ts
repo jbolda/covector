@@ -559,10 +559,17 @@ export const mergeIntoConfig = function* ({
       ...(!pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
         ? {}
         : {
-            [`getPublishedVersion${subPublishCommand}`]: template(
+            [`getPublishedVersion${subPublishCommand}`]:
               //@ts-expect-error no index type string
-              pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
-            )(pipeToTemplate),
+              typeof pkgCommands[pkg][
+                `getPublishedVersion${subPublishCommand}`
+              ] === "object"
+                ? //@ts-expect-error no index type string
+                  pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
+                : template(
+                    //@ts-expect-error no index type string
+                    pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
+                  )(pipeToTemplate),
           }),
       ...(!pkgCommands[pkg].assets
         ? {}
