@@ -1,4 +1,5 @@
 ---
+"covector": minor:enhance
 "@covector/command": minor:enhance
 ---
 

@@ -1,4 +1,6 @@
 ---
+"covector": minor:feat
+"action": minor:feat
 "@covector/command": minor:feat
 ---
 
