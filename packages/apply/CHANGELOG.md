@@ -1,21 +1,5 @@
 # Changelog
 
-## \[0.9.0]
-
-### Enhancements
-
-- [`5b7ab24`](https://www.github.com/jbolda/covector/commit/5b7ab24f3e6b51743bf62711ff761f919467a207)([#274](https://www.github.com/jbolda/covector/pull/274)) Add support to Cargo's `build-dependencies` and target-specific dependencies.
-- [`7156ce0`](https://www.github.com/jbolda/covector/commit/7156ce0f6e45a852461ca24a4bc8b808419777a4)([#277](https://www.github.com/jbolda/covector/pull/277)) Add change for all exact deps rolled up to handle it with the changelog deps section. Add the version number to the changelog deps section.
-
-### Bug Fixes
-
-- [`7156ce0`](https://www.github.com/jbolda/covector/commit/7156ce0f6e45a852461ca24a4bc8b808419777a4)([#277](https://www.github.com/jbolda/covector/pull/277)) Fix `undefined` error when dep with range was bumped.
-- [`db3b43d`](https://www.github.com/jbolda/covector/commit/db3b43d4f98d8760d307303a66570fd5a165b4ec)([#273](https://www.github.com/jbolda/covector/pull/273)) Try to determine actual package name when bumping dependencies to support nicknames in the packages configuration.
-
-### Dependencies
-
-- Upgraded to `@covector/files@0.6.2`
-
 ## \[0.8.0]
 
 ### Dependencies

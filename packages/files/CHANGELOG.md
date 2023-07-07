@@ -1,11 +1,5 @@
 # Changelog
 
-## \[0.6.2]
-
-### Enhancements
-
-- [`5b7ab24`](https://www.github.com/jbolda/covector/commit/5b7ab24f3e6b51743bf62711ff761f919467a207)([#274](https://www.github.com/jbolda/covector/pull/274)) Add support to Cargo's `build-dependencies` and target-specific dependencies.
-
 ## \[0.6.1]
 
 ### Dependencies
