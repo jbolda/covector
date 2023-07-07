@@ -102,8 +102,13 @@ export type ConfigFile = {
 };
 
 /* @covector/command */
+export type BuiltInCommands = "fetch:check";
+export type BuiltInCommandOptions = Record<string, any>;
+
 export type RunningCommand = {
-  command?: string | Function;
+  command?: CommandTypes;
+  use?: BuiltInCommands;
+  options?: BuiltInCommandOptions;
   shouldRunCommand?: boolean;
   runFromRoot?: boolean;
   retries?: number[];
@@ -111,6 +116,8 @@ export type RunningCommand = {
 
 export type NormalizedCommand = {
   command?: string;
+  use?: BuiltInCommands;
+  options?: BuiltInCommandOptions;
   runFromRoot?: boolean;
   retries?: number[];
   dryRunCommand?: boolean;
@@ -188,15 +195,17 @@ export type Release = {
   parents?: Parents;
 };
 
+export type CommandTypes = NormalizedCommand | string | Function;
+
 export type PkgVersion = {
   pkg: string;
   path?: string;
   packageFileName?: string;
   type?: string;
   parents?: Parents;
-  precommand?: (string | any)[] | null;
-  command?: (string | any)[] | null;
-  postcommand?: (string | any)[] | null;
+  precommand?: CommandTypes[] | CommandTypes | null;
+  command?: CommandTypes[] | CommandTypes | null;
+  postcommand?: CommandTypes[] | CommandTypes | null;
   manager?: string;
   dependencies?: string[];
   errorOnVersionRange?: string;
@@ -213,12 +222,12 @@ export type PkgPublish = {
   packageFileName?: string;
   changelog?: string;
   tag?: string;
-  precommand?: (string | any)[] | null;
-  command?: (string | any)[] | null;
-  postcommand?: (string | any)[] | null;
+  precommand?: CommandTypes[] | CommandTypes | null;
+  command?: CommandTypes[] | CommandTypes | null;
+  postcommand?: CommandTypes[] | CommandTypes | null;
   manager: string;
   dependencies?: string[];
-  getPublishedVersion?: string;
+  getPublishedVersion?: CommandTypes;
   assets?: { name: string; path: string }[];
   pkgFile?: PackageFile;
   errorOnVersionRange?: string;

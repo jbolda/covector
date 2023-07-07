@@ -31,12 +31,14 @@ describe("attemptCommand", () => {
     yield attemptCommands({
       commands: [
         {
-          name: "pkg-nickname",
+          pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
-          //@ts-expect-error
           command: async () => console.log("boop"),
         },
       ],
+      command: "publish",
+      cwd: "",
+      dryRun: false,
     });
 
     //@ts-expect-error
@@ -77,7 +79,6 @@ describe("attemptCommand", () => {
         {
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
-          //@ts-expect-error
           command: async (pkg: any) =>
             console.log(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
         },

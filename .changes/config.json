@@ -10,7 +10,12 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "getPublishedVersion": "npm view ${ pkg.pkg } version --silent",
+      "getPublishedVersion": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+        }
+      },
       "prepublish": [{ "command": "npm pack", "dryRunCommand": true }],
       "publish": [
         {
@@ -23,7 +28,14 @@
           "dryRunCommand": "echo publish here",
           "pipe": true
         }
-      ]
+      ],
+      "postpublish": {
+        "use": "fetch:check",
+        "options": {
+          "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+        },
+        "retries": [5000, 5000, 5000]
+      }
     }
   },
   "packages": {
@@ -31,6 +43,13 @@
       "path": "./packages/covector",
       "manager": "javascript",
       "postpublish": [
+        {
+          "use": "fetch:check",
+          "options": {
+            "url": "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }"
+          },
+          "retries": [5000, 5000, 5000]
+        },
         "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor } -f",
         "git tag ${ pkg.pkg }-v${ pkgFile.versionMajor }.${ pkgFile.versionMinor } -f",
         "git push --tags -f"
@@ -119,11 +138,6 @@
       "getPublishedVersion": false,
       "dependencies": ["covector"],
       "assets": false
-    },
-    "all": {
-      "version": true,
-      "build": false,
-      "publish": false
     }
   }
 }

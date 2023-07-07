@@ -14,7 +14,7 @@ describe("attemptCommand fails", () => {
   });
 
   it("fails a function", function* () {
-    yield captureError(
+    const errored = yield captureError(
       attemptCommands({
         cwd: ".",
         command: "publish",
@@ -29,20 +29,11 @@ describe("attemptCommand fails", () => {
       })
     );
 
-    if (process.platform === "win32") {
-      const errorMessage =
-        "'boop' is not recognized as an internal or external command,\r\n" +
-        "operable program or batch file.";
-      //@ts-expect-error
-      expect(console.error.mock.calls[0][0]).toBe(errorMessage);
-    } else {
-      //@ts-expect-error
-      expect(console.error.mock.calls[0][0].message).toBe("spawn boop ENOENT");
-    }
+    expect(errored.message).toBe("spawn boop ENOENT");
   });
 
   it("retries a failed function", function* () {
-    yield captureError(
+    const errored = yield captureError(
       attemptCommands({
         cwd: ".",
         command: "",
@@ -57,28 +48,27 @@ describe("attemptCommand fails", () => {
       })
     );
 
+    const errorMessage = "spawn boop ENOENT";
     if (process.platform === "win32") {
-      const errorMessage =
+      const errorLog =
         "'boop' is not recognized as an internal or external command,\r\n" +
         "operable program or batch file.";
-      //@ts-expect-error
-      expect(console.error.mock.calls[0][0]).toBe(errorMessage);
-      //@ts-expect-error
-      expect(console.error.mock.calls[2][0]).toBe(errorMessage);
-      //@ts-expect-error
-      expect(console.error.mock.calls[4][0]).toBe(errorMessage);
-      // ts-expect-error
-      // expect(console.error.mock.calls[3]).toBeUndefined();
+      expect((console.error as any).mock.calls[0][0]).toBe(errorLog);
+      expect((console.error as any).mock.calls[2][0]).toBe(errorLog);
+      expect((console.error as any).mock.calls[4][0]).toBe(errorLog);
+      expect((console.error as any).mock.calls[6]).toBeUndefined();
+      expect(errored.message).toBe(errorMessage);
     } else {
-      const errorMessage = "spawn boop ENOENT";
-      //@ts-expect-error
-      expect(console.error.mock.calls[0][0].message).toBe(errorMessage);
-      //@ts-expect-error
-      expect(console.error.mock.calls[1][0].message).toBe(errorMessage);
-      //@ts-expect-error
-      expect(console.error.mock.calls[2][0].message).toBe(errorMessage);
-      //@ts-expect-error
-      expect(console.error.mock.calls?.[3]?.[0]?.message).toBeUndefined();
+      expect((console.error as any).mock.calls[0][0].message).toBe(
+        errorMessage
+      );
+      expect((console.error as any).mock.calls[1][0].message).toBe(
+        errorMessage
+      );
+      expect(
+        (console.error as any).mock.calls?.[2]?.[0]?.message
+      ).toBeUndefined();
+      expect(errored.message).toBe(errorMessage);
     }
   });
 });

@@ -1,12 +1,16 @@
-import { spawn, timeout, Operation, MainError, sleep } from "effection";
+import { spawn, timeout, Operation, MainError, sleep, fetch } from "effection";
 import { exec } from "@effection/process";
 import path from "path";
+import { template } from "lodash";
 
 import type {
   PkgVersion,
   PkgPublish,
   RunningCommand,
-  NormalizedCommand,
+  CommandTypes,
+  CommandsRan,
+  BuiltInCommands,
+  BuiltInCommandOptions,
 } from "@covector/types";
 
 export const attemptCommands = function* ({
@@ -19,129 +23,238 @@ export const attemptCommands = function* ({
 }: {
   cwd: string;
   commands: (PkgVersion | PkgPublish)[];
-  command: string; // the covector command that was ran
-  commandPrefix?: string;
-  pkgCommandsRan?: object;
+  command: "version" | "publish" | string; // the covector command that was ran
+  commandPrefix?: "pre" | "post" | "";
+  pkgCommandsRan?: CommandsRan;
   dryRun: boolean;
 }): Operation<{ [k: string]: { [c: string]: string | boolean } }> {
-  let _pkgCommandsRan: { [k: string]: { [c: string]: string | boolean } } = {
+  let pkgCommandsRun: { [k: string]: { [c: string]: string | boolean } } = {
     ...pkgCommandsRan,
   };
   for (let pkg of commands) {
+    const c = pkg[`${commandPrefix}command`];
+    if (!c) continue;
     const initialStdout =
-      pkgCommandsRan &&
-      //@ts-expect-error
-      pkgCommandsRan[pkg.pkg] &&
-      //@ts-expect-error
-      pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] &&
-      //@ts-expect-error
+      pkgCommandsRan?.[pkg.pkg][`${commandPrefix}command`] &&
       typeof pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] === "string"
-        ? //@ts-expect-error
-          pkgCommandsRan[pkg.pkg][`${commandPrefix}command`]
+        ? pkgCommandsRan[pkg.pkg][`${commandPrefix}command`]
         : false;
-    //@ts-expect-error template literals issues
-    if (!pkg[`${commandPrefix}command`]) continue;
-    //@ts-expect-error template literals issues
-    const c: string | Function | [] = pkg[`${commandPrefix}command`];
-    const pubCommands: (NormalizedCommand | string | Function)[] =
+    const pubCommands: CommandTypes[] =
       typeof c === "string" || typeof c === "function" || !Array.isArray(c)
         ? [c]
         : c;
     let stdout = initialStdout ? `${initialStdout}\n` : "";
-    for (let pubCommand of pubCommands) {
-      const runningCommand: RunningCommand = {
-        ...(typeof pubCommand === "object"
-          ? { runFromRoot: pubCommand.runFromRoot }
-          : {}),
-      };
-      if (
-        typeof pubCommand === "object" &&
-        pubCommand.dryRunCommand === false
-      ) {
-        runningCommand.command = pubCommand.command;
-        runningCommand.shouldRunCommand = !dryRun;
-        runningCommand.retries = pubCommand.retries;
-      } else if (typeof pubCommand === "object") {
-        // dryRunCommand will either be a !string (false) or !undefined (true) or !true (false)
-        if (pubCommand.dryRunCommand === true) {
-          runningCommand.command = pubCommand.command;
-          runningCommand.shouldRunCommand = true;
-        } else if (typeof pubCommand.dryRunCommand === "string" && dryRun) {
-          runningCommand.command = pubCommand.dryRunCommand;
-          runningCommand.shouldRunCommand = true;
-        } else {
-          runningCommand.command = pubCommand.command;
-          runningCommand.shouldRunCommand = !dryRun;
-          runningCommand.retries = pubCommand.retries;
-        }
-      } else {
-        runningCommand.command = pubCommand;
-        runningCommand.shouldRunCommand = !dryRun;
-      }
 
-      if (runningCommand.shouldRunCommand && runningCommand.command) {
-        let commandBackoff = (runningCommand?.retries ?? []).concat([0]);
-        for (let [index, attemptTimeout] of commandBackoff.entries()) {
-          try {
-            if (typeof runningCommand.command === "function") {
-              const pipeToFunction = {
-                ...pkg,
-                pkgCommandsRan: {
-                  ..._pkgCommandsRan[pkg.pkg],
-                  [`${commandPrefix}command`]: stdout,
-                },
-              };
-              yield runningCommand.command(pipeToFunction);
-
-              if (typeof pubCommand === "object" && pubCommand.pipe) {
-                console.warn(
-                  `We cannot pipe the function command in ${pkg.pkg}`
-                );
-              }
-            } else {
-              const ranCommand = yield runCommand({
-                command: runningCommand.command,
-                cwd,
-                pkg: pkg.pkg,
-                pkgPath:
-                  runningCommand.runFromRoot === true ? "" : pkg.path || "",
-                log: `${pkg.pkg} [${commandPrefix}${command}${
-                  runningCommand.runFromRoot === true ? " run from the cwd" : ""
-                }]: ${runningCommand.command}`,
-              });
-
-              if (typeof pubCommand === "object" && pubCommand.pipe) {
-                stdout = `${stdout}${ranCommand}\n`;
-              }
-            }
-            // if nothing throws, continue out of the loop
-            break;
-          } catch (e) {
-            console.error(e);
-            if (index + 1 >= commandBackoff.length) throw e;
-            yield sleep(attemptTimeout);
-          }
-        }
-      } else {
-        console.log(
-          `dryRun >> ${pkg.pkg} [${commandPrefix}${command}${
-            runningCommand.runFromRoot === true ? " run from the cwd" : ""
-          }]: ${runningCommand.command}`
-        );
-      }
-    }
+    stdout = yield executeEachCommand({
+      cwd,
+      stdout,
+      dryRun,
+      pkg,
+      pubCommands,
+      pkgCommandsRun,
+      commandPrefix,
+      command,
+    });
 
     if (!!pkgCommandsRan)
-      _pkgCommandsRan[pkg.pkg][`${commandPrefix}command`] =
+      pkgCommandsRun[pkg.pkg][`${commandPrefix}command`] =
         stdout !== "" ? stdout : true;
 
     if (!!pkgCommandsRan && command === "publish" && !commandPrefix)
-      _pkgCommandsRan[pkg.pkg]["published"] = true;
+      pkgCommandsRun[pkg.pkg]["published"] = true;
   }
-  return _pkgCommandsRan;
+  return pkgCommandsRun;
 };
 
-export const confirmCommandsToRun = function* ({
+function* executeEachCommand({
+  cwd,
+  stdout,
+  dryRun,
+  pkg,
+  pubCommands,
+  pkgCommandsRun,
+  command,
+  commandPrefix,
+}: {
+  cwd: string;
+  stdout: string;
+  dryRun: boolean;
+  pkg: PkgVersion | PkgPublish;
+  pubCommands: CommandTypes[];
+  pkgCommandsRun: any;
+  command: string;
+  commandPrefix: string;
+}): Operation<string> {
+  for (let pubCommand of pubCommands) {
+    const runningCommand: RunningCommand = {
+      ...(typeof pubCommand === "object"
+        ? { runFromRoot: pubCommand.runFromRoot }
+        : {}),
+    };
+    if (typeof pubCommand === "object" && pubCommand.dryRunCommand === false) {
+      runningCommand.command = pubCommand.command;
+      runningCommand.shouldRunCommand = !dryRun;
+      runningCommand.retries = pubCommand.retries;
+      runningCommand.use = pubCommand.use;
+      runningCommand.options = pubCommand.options;
+    } else if (typeof pubCommand === "object") {
+      // dryRunCommand will either be a !string (false) or !undefined (true) or !true (false)
+      if (pubCommand.dryRunCommand === true) {
+        runningCommand.command = pubCommand.command;
+        runningCommand.shouldRunCommand = true;
+      } else if (typeof pubCommand.dryRunCommand === "string" && dryRun) {
+        runningCommand.command = pubCommand.dryRunCommand;
+        runningCommand.shouldRunCommand = true;
+      } else {
+        runningCommand.command = pubCommand.command;
+        runningCommand.shouldRunCommand = !dryRun;
+        runningCommand.retries = pubCommand.retries;
+        runningCommand.use = pubCommand.use;
+        runningCommand.options = pubCommand.options;
+      }
+    } else {
+      runningCommand.command = pubCommand;
+      runningCommand.shouldRunCommand = !dryRun;
+    }
+
+    if (
+      runningCommand.shouldRunCommand &&
+      (runningCommand.command || runningCommand.use)
+    ) {
+      let commandBackoff = (runningCommand?.retries ?? []).concat([0]);
+      for (let [index, attemptTimeout] of commandBackoff.entries()) {
+        try {
+          stdout = yield callCommand({
+            cwd,
+            pkg,
+            runningCommand,
+            pubCommand,
+            command,
+            commandPrefix,
+            stdout,
+            pkgCommandsRun,
+          });
+          // if nothing throws, continue out of the loop
+          break;
+        } catch (e) {
+          if (index + 1 >= commandBackoff.length) {
+            throw e;
+          } else {
+            console.error(e);
+          }
+          yield sleep(attemptTimeout);
+        }
+      }
+    } else {
+      console.log(
+        `dryRun >> ${pkg.pkg} [${commandPrefix}${command}${
+          runningCommand.runFromRoot === true ? " run from the cwd" : ""
+        }]: ${runningCommand.command}`
+      );
+    }
+  }
+  return stdout;
+}
+
+function* useFunction({
+  pkg,
+  use,
+  options,
+}: {
+  pkg: PkgVersion | PkgPublish;
+  use: BuiltInCommands;
+  options?: BuiltInCommandOptions;
+}): Operation<string> {
+  if (use === "fetch:check") {
+    if (options?.url) {
+      const url = template(options.url)({ pkg });
+      let request = yield fetch(url);
+      if (request.status >= 400) {
+        throw new MainError({
+          exitCode: 1,
+          message: `request returned code ${request.status}: ${request.statusText}`,
+        });
+      }
+      const response = yield request.json();
+      if (response.errors) {
+        throw new MainError({
+          exitCode: 1,
+          message: `request returned errors: ${JSON.stringify(
+            response.errors,
+            null,
+            2
+          )}`,
+        });
+      }
+      if (url.startsWith("https://crates.io")) {
+        return response.version.num;
+      }
+      return response.version;
+    }
+  }
+  return "";
+}
+
+function* callCommand({
+  cwd,
+  pkg,
+  runningCommand,
+  pkgCommandsRun,
+  pubCommand,
+  stdout,
+  command,
+  commandPrefix,
+}: {
+  cwd: string;
+  stdout: string;
+  pkg: PkgVersion | PkgPublish;
+  pubCommand: CommandTypes;
+  runningCommand: RunningCommand;
+  pkgCommandsRun: any;
+  command: string;
+  commandPrefix: string;
+}): Operation<string> {
+  if (typeof runningCommand.command === "function") {
+    const pipeToFunction = {
+      ...pkg,
+      pkgCommandsRan: {
+        ...pkgCommandsRun[pkg.pkg],
+        [`${commandPrefix}command`]: stdout,
+      },
+    };
+
+    yield runningCommand.command(pipeToFunction);
+
+    if (typeof pubCommand === "object" && pubCommand.pipe) {
+      console.warn(`We cannot pipe the function command in ${pkg.pkg}`);
+    }
+  } else if (typeof runningCommand.command === "string") {
+    const ranCommand: string = yield runCommand({
+      command: runningCommand.command,
+      cwd,
+      pkg: pkg.pkg,
+      pkgPath: runningCommand.runFromRoot === true ? "" : pkg.path || "",
+      log: `${pkg.pkg} [${commandPrefix}${command}${
+        runningCommand.runFromRoot === true ? " run from the cwd" : ""
+      }]: ${runningCommand.command}`,
+    });
+
+    if (typeof pubCommand === "object" && pubCommand.pipe) {
+      stdout = `${stdout}${ranCommand}\n`;
+    }
+  } else if (runningCommand.use) {
+    const used = yield useFunction({
+      pkg,
+      use: runningCommand.use,
+      options: runningCommand.options,
+    });
+    stdout = `${stdout}${used}\n`;
+  }
+
+  return stdout;
+}
+
+export function* confirmCommandsToRun({
   cwd,
   commands,
   command,
@@ -156,16 +269,42 @@ export const confirmCommandsToRun = function* ({
     //@ts-expect-error template literals issues
     const getPublishedVersion = pkg[`getPublishedVersion${subPublishCommand}`];
     if (!!getPublishedVersion) {
-      const version = yield runCommand({
-        command: getPublishedVersion,
-        cwd,
-        pkg: pkg.pkg,
-        pkgPath: pkg.path || "",
-        log: `Checking if ${pkg.pkg}${
-          !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
-        } is already published with: ${getPublishedVersion}`,
-      });
+      let version = "";
+      if (typeof getPublishedVersion === "string") {
+        version = yield runCommand({
+          command: getPublishedVersion,
+          cwd,
+          pkg: pkg.pkg,
+          pkgPath: pkg.path || "",
+          log: `Checking if ${pkg.pkg}${
+            !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
+          } is already published with: ${getPublishedVersion}`,
+        });
+      } else if (typeof getPublishedVersion === "object") {
+        if (getPublishedVersion.use === "fetch:check") {
+          console.log(
+            `Checking if ${pkg.pkg}${
+              !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
+            } is already published with built-in ${getPublishedVersion.use}`
+          );
 
+          try {
+            version = yield useFunction({
+              pkg,
+              use: getPublishedVersion.use,
+              options: getPublishedVersion.options,
+            });
+          } catch (error: any) {
+            // it throws if version is not found
+          }
+        } else {
+          throw new Error(
+            `This configuration is not supported for getPublishedVersion on ${
+              pkg.pkg
+            }: ${JSON.stringify(getPublishedVersion, null, 2)}`
+          );
+        }
+      }
       if (pkg.pkgFile && pkg.pkgFile.version === version) {
         console.log(
           `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
@@ -178,7 +317,7 @@ export const confirmCommandsToRun = function* ({
   }
 
   return commandsToRun;
-};
+}
 
 export const runCommand = function* ({
   pkg = "package",
