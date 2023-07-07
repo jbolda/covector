@@ -1,5 +1,16 @@
 # Changelog
 
+## \[0.10.1]
+
+### Enhancements
+
+- [`de4f709`](https://www.github.com/jbolda/covector/commit/de4f709f251d7daa7b8cc56e3f7e12aede8b3e47)([#285](https://www.github.com/jbolda/covector/pull/285)) Consider getPublishedVersion can be either a string or an object.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.6.2`
+- Upgraded to `@covector/command@0.7.0`
+
 ## \[0.10.0]
 
 ### Dependencies
