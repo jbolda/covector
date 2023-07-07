@@ -1,5 +1,6 @@
 ---
 "covector": minor:enchance
+"action": minor:enchance
 "@covector/apply": minor:enchance
 "@covector/files": patch:enhance
 ---

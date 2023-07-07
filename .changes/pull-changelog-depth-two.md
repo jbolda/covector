@@ -1,4 +1,5 @@
 ---
+"covector": patch:bug
 "@covector/changelog": patch:bug
 ---
 
