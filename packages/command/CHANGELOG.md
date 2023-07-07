@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.7.0]
+
+### New Features
+
+- [`54f9d7a`](https://www.github.com/jbolda/covector/commit/54f9d7ac68a28e03c46d2354f5ecfdc261f23529)([#280](https://www.github.com/jbolda/covector/pull/280)) Support built-in commands to simplify typical operations.
+
+### Enhancements
+
+- [`c413eae`](https://www.github.com/jbolda/covector/commit/c413eaeab09c9ff571861c5b3b733fe36427661c)([#279](https://www.github.com/jbolda/covector/pull/279)) Allow a command to retry on failure by passing a `retries` timeout list with the command.
+
 ## \[0.6.1]
 
 ### Dependencies
