@@ -214,10 +214,9 @@ const applyChanges = ({
 
         const changeTags: { [k: string]: string } = config.changeTags ?? {};
         // ensures there is a `deps` tag if one wasn't defined
-        if (!('deps' in changeTags)) {
-          changeTags.deps = "Dependencies"
+        if (!("deps" in changeTags)) {
+          changeTags.deps = "Dependencies";
         }
-        
 
         /**
          * Untagged changes are changes that don't have a tag associated with and `config.defaultChangeTag` is not set.
@@ -252,10 +251,10 @@ const applyChanges = ({
         ).map((dep) => {
           const appliedVersion = getVersionFromApplied(dep, applied);
           return {
-          	summary: appliedVersion 
-            	? `Upgraded to \`${dep}@${appliedVersion}\``
-            	: `Upgraded to latest \`${dep}\``,
-            }
+            summary: appliedVersion
+              ? `Upgraded to \`${dep}@${appliedVersion}\``
+              : `Upgraded to latest \`${dep}\``,
+          };
         });
         groupedChangesByTag.deps.push(...dependencies);
 
