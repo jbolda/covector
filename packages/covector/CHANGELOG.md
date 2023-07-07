@@ -1,5 +1,31 @@
 # Changelog
 
+## \[0.10.0]
+
+### New Features
+
+- [`54f9d7a`](https://www.github.com/jbolda/covector/commit/54f9d7ac68a28e03c46d2354f5ecfdc261f23529)([#280](https://www.github.com/jbolda/covector/pull/280)) Support built-in commands to simplify typical operations.
+
+### Enhancements
+
+- [`5b7ab24`](https://www.github.com/jbolda/covector/commit/5b7ab24f3e6b51743bf62711ff761f919467a207)([#274](https://www.github.com/jbolda/covector/pull/274)) Add support to Cargo's `build-dependencies` and target-specific dependencies.
+- [`7156ce0`](https://www.github.com/jbolda/covector/commit/7156ce0f6e45a852461ca24a4bc8b808419777a4)([#277](https://www.github.com/jbolda/covector/pull/277)) Add change for all exact deps rolled up to handle it with the changelog deps section. Add the version number to the changelog deps section.
+- [`c413eae`](https://www.github.com/jbolda/covector/commit/c413eaeab09c9ff571861c5b3b733fe36427661c)([#279](https://www.github.com/jbolda/covector/pull/279)) Allow a command to retry on failure by passing a `retries` timeout list with the command.
+
+### Bug Fixes
+
+- [`7156ce0`](https://www.github.com/jbolda/covector/commit/7156ce0f6e45a852461ca24a4bc8b808419777a4)([#277](https://www.github.com/jbolda/covector/pull/277)) Fix `undefined` error when dep with range was bumped.
+- [`db3b43d`](https://www.github.com/jbolda/covector/commit/db3b43d4f98d8760d307303a66570fd5a165b4ec)([#273](https://www.github.com/jbolda/covector/pull/273)) Try to determine actual package name when bumping dependencies to support nicknames in the packages configuration.
+- [`828818e`](https://www.github.com/jbolda/covector/commit/828818eecf14c638ef9c74e3d243c02b8162d485)([#278](https://www.github.com/jbolda/covector/pull/278)) The changelog function to pull the last version in the changelog did not properly consider headings deeper than level 1 and level 2. When a third level was added, this caused the function to return the full changelog. Search for next heading with a specific depth of 2.
+
+### Dependencies
+
+- Upgraded to `@covector/apply@0.9.0`
+- Upgraded to `@covector/files@0.6.2`
+- Upgraded to `@covector/changelog@0.9.0`
+- Upgraded to `@covector/command@0.7.0`
+- Upgraded to `@covector/assemble@0.10.1`
+
 ## \[0.9.0]
 
 ### Dependencies

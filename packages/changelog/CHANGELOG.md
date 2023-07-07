@@ -1,5 +1,20 @@
 # Changelog
 
+## \[0.9.0]
+
+### Enhancements
+
+- [`7156ce0`](https://www.github.com/jbolda/covector/commit/7156ce0f6e45a852461ca24a4bc8b808419777a4)([#277](https://www.github.com/jbolda/covector/pull/277)) Add change for all exact deps rolled up to handle it with the changelog deps section. Add the version number to the changelog deps section.
+
+### Bug Fixes
+
+- [`708adf2`](https://www.github.com/jbolda/covector/commit/708adf2a60e7e4ac428d4c026fc89dc4dfe2e5a2)([#282](https://www.github.com/jbolda/covector/pull/282)) Fix the built-in fallback `deps: Dependecies` tag always appearing first in changelog when it should be the last one.
+- [`828818e`](https://www.github.com/jbolda/covector/commit/828818eecf14c638ef9c74e3d243c02b8162d485)([#278](https://www.github.com/jbolda/covector/pull/278)) The changelog function to pull the last version in the changelog did not properly consider headings deeper than level 1 and level 2. When a third level was added, this caused the function to return the full changelog. Search for next heading with a specific depth of 2.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.6.2`
+
 ## \[0.8.0]
 
 ### Dependencies

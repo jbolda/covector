@@ -1,5 +1,19 @@
 # Changelog
 
+## \[0.10.0]
+
+### New Features
+
+- [`54f9d7a`](https://www.github.com/jbolda/covector/commit/54f9d7ac68a28e03c46d2354f5ecfdc261f23529)([#280](https://www.github.com/jbolda/covector/pull/280)) Support built-in commands to simplify typical operations.
+
+### Enhancements
+
+- [`5b7ab24`](https://www.github.com/jbolda/covector/commit/5b7ab24f3e6b51743bf62711ff761f919467a207)([#274](https://www.github.com/jbolda/covector/pull/274)) Add support to Cargo's `build-dependencies` and target-specific dependencies.
+
+### Dependencies
+
+- Upgraded to `covector@0.10.0`
+
 ## \[0.9.0]
 
 ### Dependencies
