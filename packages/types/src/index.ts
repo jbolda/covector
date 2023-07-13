@@ -1,9 +1,7 @@
-import type { PathLike } from "fs";
-
 /* @covector/files */
 export interface File {
   content: string;
-  path: PathLike;
+  path: string;
   filename: string;
   extname: string;
 }
@@ -82,7 +80,7 @@ export type PackageConfig = {
 
 export type ConfigFile = {
   file?: File;
-  changeFolder: PathLike;
+  changeFolder: string;
   gitSiteUrl?: string;
   pkgManagers?: {
     [k: string]: {

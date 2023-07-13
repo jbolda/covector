@@ -308,17 +308,14 @@ describe("validate apply", () => {
         rust_pkg_a_fixture: {
           path: "./pkg-a/",
           manager: "rust",
-          deps: {},
         },
         rust_pkg_b_fixture: {
           path: "./pkg-b/",
           manager: "rust",
-          deps: {},
         },
       },
     };
     const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
-      //@ts-expect-error
       config,
       cwd: rustFolder,
     });

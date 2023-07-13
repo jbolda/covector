@@ -27,7 +27,9 @@ describe("general file test", () => {
   it("parses config", function* () {
     const configFolder = f.copy("config.simple");
     const configArray = yield configFile({ cwd: configFolder });
-    expect((configArray as any).stuff).toBe("here");
+    expect((configArray as any).gitSiteUrl).toBe(
+      "https://github.com/jbolda/covector"
+    );
   });
 
   it("reads all package files in config", function* () {
