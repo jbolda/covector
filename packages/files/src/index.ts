@@ -4,7 +4,7 @@ const fs = fsDefault.promises;
 
 import { all, MainError, type Operation } from "effection";
 import { configFileSchema, type File, type ConfigFile } from "./schema";
-import { fromZodError, isValidationErrorLike } from "zod-validation-error";
+import { fromZodError } from "zod-validation-error";
 import globby from "globby";
 import path from "path";
 import TOML from "@tauri-apps/toml";

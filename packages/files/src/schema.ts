@@ -14,7 +14,7 @@ export type File = z.infer<typeof fileSchema>;
 const commandBaseSchema = z.object({
   runFromRoot: z.boolean().optional(),
   retries: z.number().array().optional(),
-  dryRunCommand: z.union([z.literal(false), z.string()]).optional(),
+  dryRunCommand: z.union([z.boolean(), z.string()]).optional(),
   pipe: z.boolean().optional(),
 });
 const processCommandSchema = commandBaseSchema.extend({

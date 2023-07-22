@@ -4,9 +4,8 @@ import unified from "unified";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
 
+import type { File, ConfigFile } from "@covector/files/dist/schema";
 import type {
-  File,
-  ConfigFile,
   Changelog,
   PkgCommandResponse,
   AssembledChanges,

@@ -1,11 +1,6 @@
-/* @covector/files */
-export interface File {
-  content: string;
-  path: string;
-  filename: string;
-  extname: string;
-}
+import type { File } from "@covector/files/src/schema";
 
+/* @covector/files */
 interface NestedVersion {
   version?: string;
   [key: string]: any;
@@ -78,27 +73,6 @@ export type PackageConfig = {
   errorOnVersionRange?: string;
 };
 
-export type ConfigFile = {
-  file?: File;
-  changeFolder: string;
-  gitSiteUrl?: string;
-  pkgManagers?: {
-    [k: string]: {
-      version?: string;
-      publish?: string;
-      errorOnVersionRange?: string;
-    };
-  };
-  packages: {
-    [k: string]: PackageConfig;
-  };
-  additionalBumpTypes?: string[];
-  changeTags?: {
-    [k: string]: string;
-  };
-  defaultChangeTag?: string;
-};
-
 /* @covector/command */
 export type BuiltInCommands = "fetch:check";
 export type BuiltInCommandOptions = Record<string, any>;
@@ -118,7 +92,7 @@ export type NormalizedCommand = {
   options?: BuiltInCommandOptions;
   runFromRoot?: boolean;
   retries?: number[];
-  dryRunCommand?: boolean;
+  dryRunCommand?: string | boolean;
   pipe?: boolean;
 };
 
@@ -193,7 +167,9 @@ export type Release = {
   parents?: Parents;
 };
 
-export type CommandTypes = NormalizedCommand | string | Function;
+// where `true` effectively no-ops when running the command
+export type CommandTypes = NormalizedCommand | string | Function | true;
+export type Command = CommandTypes[] | CommandTypes | boolean;
 
 export type PkgVersion = {
   pkg: string;
@@ -201,9 +177,9 @@ export type PkgVersion = {
   packageFileName?: string;
   type?: string;
   parents?: Parents;
-  precommand?: CommandTypes[] | CommandTypes | null;
-  command?: CommandTypes[] | CommandTypes | null;
-  postcommand?: CommandTypes[] | CommandTypes | null;
+  precommand?: Command;
+  command?: Command;
+  postcommand?: Command;
   manager?: string;
   dependencies?: string[];
   errorOnVersionRange?: string;
@@ -220,9 +196,9 @@ export type PkgPublish = {
   packageFileName?: string;
   changelog?: string;
   tag?: string;
-  precommand?: CommandTypes[] | CommandTypes | null;
-  command?: CommandTypes[] | CommandTypes | null;
-  postcommand?: CommandTypes[] | CommandTypes | null;
+  precommand?: Command;
+  command?: Command;
+  postcommand?: Command;
   manager: string;
   dependencies?: string[];
   getPublishedVersion?: CommandTypes;
