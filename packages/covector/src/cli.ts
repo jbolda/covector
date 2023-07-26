@@ -49,7 +49,7 @@ function parseOptions(argv: readonly string[]): {
     .demandCommand(1)
     .help()
     .epilogue(
-      "For more information on covector, see: https://www.github.com/jbolda/covector"
+      "For more information on covector, see: https://www.github.com/jbolda/covector",
     )
     .parse(argv);
 

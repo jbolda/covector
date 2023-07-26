@@ -25,7 +25,7 @@ export const init = function* init({
   let pkgManagers: { [k: string]: boolean } = {};
   let gitURL: boolean | string = false;
   const pkgFiles: PackageFile[] = yield all(
-    pkgs.map((pkg: string) => readPkgFile({ file: pkg, nickname: pkg, cwd }))
+    pkgs.map((pkg: string) => readPkgFile({ file: pkg, nickname: pkg, cwd })),
   );
 
   for (let pkgFile of pkgFiles) {
@@ -53,7 +53,7 @@ export const init = function* init({
                 0,
                 repoURL.includes(".git", repoURL.length - 5)
                   ? repoURL.length - 4
-                  : repoURL.length
+                  : repoURL.length,
               )
             : "";
         if (tryURL !== "") {
@@ -156,17 +156,17 @@ export const init = function* init({
   try {
     const testOpen = yield fs.open(
       path.posix.join(cwd, changeFolder, "config.json"),
-      "r"
+      "r",
     );
     console.log(
-      `The config.json exists in ${changeFolder}, skipping creation.`
+      `The config.json exists in ${changeFolder}, skipping creation.`,
     );
     yield testOpen.close();
   } catch (e) {
     console.log("Writing out the config file.");
     yield fs.writeFile(
       path.posix.join(cwd, changeFolder, "config.json"),
-      JSON.stringify(config, null, 2)
+      JSON.stringify(config, null, 2),
     );
   }
 
@@ -174,7 +174,7 @@ export const init = function* init({
   try {
     const testOpen = yield fs.open(
       path.posix.join(cwd, changeFolder, "readme.md"),
-      "r"
+      "r",
     );
     console.log(`The readme.md exists in ${changeFolder}, skipping creation.`);
     yield testOpen.close();
@@ -189,7 +189,7 @@ export const init = function* init({
 
     try {
       const testOpen: Dir = yield fs.opendir(
-        path.posix.join(cwd, "./.github/workflows/")
+        path.posix.join(cwd, "./.github/workflows/"),
       );
       console.log(`The .github/workflows folder exists, skipping creation.`);
       yield testOpen.close();
@@ -204,19 +204,19 @@ export const init = function* init({
     try {
       const testOpen = yield fs.open(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
-        "r"
+        "r",
       );
       console.log(
-        `The status workflow exists in ./.github/workflows, skipping creation.`
+        `The status workflow exists in ./.github/workflows, skipping creation.`,
       );
       yield testOpen.close();
     } catch (e) {
       console.log(
-        "Writing out covector-status.yml to give you a covector update on PR."
+        "Writing out covector-status.yml to give you a covector update on PR.",
       );
       yield fs.writeFile(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
-        githubStatusWorkflow({ version: covectorVersion })
+        githubStatusWorkflow({ version: covectorVersion }),
       );
     }
 
@@ -227,30 +227,30 @@ export const init = function* init({
           cwd,
           ".github",
           "workflows",
-          "covector-version-or-publish.yml"
+          "covector-version-or-publish.yml",
         ),
-        "r"
+        "r",
       );
       console.log(
-        `The version/publish workflow exists in ./.github/workflows, skipping creation.`
+        `The version/publish workflow exists in ./.github/workflows, skipping creation.`,
       );
       yield testOpen.close();
     } catch (e) {
       console.log(
-        "Writing out covector-version-or-publish.yml to version and publish your packages."
+        "Writing out covector-version-or-publish.yml to version and publish your packages.",
       );
       yield fs.writeFile(
         path.posix.join(
           cwd,
           ".github",
           "workflows",
-          "covector-version-or-publish.yml"
+          "covector-version-or-publish.yml",
         ),
         githubPublishWorkflow({
           pkgManagers,
           branchName: answers["branch name"],
           version: covectorVersion,
-        })
+        }),
       );
     }
   }
@@ -264,7 +264,7 @@ const packageFiles = async ({ cwd = process.cwd() }) => {
     {
       cwd,
       gitignore: true,
-    }
+    },
   );
 };
 
@@ -403,12 +403,12 @@ jobs:
           registry-url: 'https://registry.npmjs.org'`
               : ""
           }${
-  pkgManagers.rust
-    ? `
+            pkgManagers.rust
+              ? `
       - name: cargo login
         run: cargo login \${{ secrets.crate_token }}`
-    : ""
-}
+              : ""
+          }
       - name: git config
         run: |
           git config --global user.name "\${{ github.event.pusher.name }}"
@@ -422,11 +422,11 @@ jobs:
           NODE_AUTH_TOKEN: \${{ secrets.NPM_TOKEN }}`
             : ""
         }${
-  pkgManagers.rust
-    ? `
+          pkgManagers.rust
+            ? `
           CARGO_AUDIT_OPTIONS: \${{ secrets.CARGO_AUDIT_OPTIONS }}`
-    : ""
-}
+            : ""
+        }
         with:
           token: \${{ secrets.GITHUB_TOKEN }}
           command: 'version-or-publish'

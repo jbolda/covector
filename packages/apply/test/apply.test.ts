@@ -56,7 +56,7 @@ describe("package file apply bump (snapshot)", () => {
           '  "description": "A single package at the root. No monorepo setup.",\n' +
           '  "repository": "https://www.github.com/jbolda/covector.git",\n' +
           '  "version": "0.6.0"\n' +
-          "}\n"
+          "}\n",
       );
 
       expect({
@@ -95,10 +95,10 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
       const applied = yield captureError(
         //@ts-expect-error
-        apply({ commands, config, allPackages, cwd: jsonFolder })
+        apply({ commands, config, allPackages, cwd: jsonFolder }),
       );
       expect(applied.message).toBe(
-        "js-single-json-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+        "js-single-json-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
       expect({
         //@ts-expect-error
@@ -164,7 +164,7 @@ describe("package file apply bump (snapshot)", () => {
       yield apply({ commands, config, allPackages, cwd: jsonFolder });
       const modifiedPkgAFile = yield loadFile(
         "packages/pkg-a/package.json",
-        jsonFolder
+        jsonFolder,
       );
       expect(modifiedPkgAFile.content).toBe(
         "{\n" +
@@ -173,18 +173,18 @@ describe("package file apply bump (snapshot)", () => {
           '  "dependencies": {\n' +
           '    "yarn-workspace-base-pkg-b": "1.1.0"\n' +
           "  }\n" +
-          "}\n"
+          "}\n",
       );
 
       const modifiedPkgBFile = yield loadFile(
         "packages/pkg-b/package.json",
-        jsonFolder
+        jsonFolder,
       );
       expect(modifiedPkgBFile.content).toBe(
         "{\n" +
           '  "name": "yarn-workspace-base-pkg-b",\n' +
           '  "version": "1.1.0"\n' +
-          "}\n"
+          "}\n",
       );
 
       expect({
@@ -251,19 +251,19 @@ describe("package file apply bump (snapshot)", () => {
 
       const modifiedPkgBFile = yield loadFile(
         "packages/pkg-b/package.json",
-        jsonFolder
+        jsonFolder,
       );
       expect(modifiedPkgBFile.content).toBe(
         "{\n" +
           '  "name": "yarn-workspace-base-pkg-b",\n' +
           '  "version": "1.1.0"\n' +
-          "}\n"
+          "}\n",
       );
 
       // this is an exact version dep which will be patch bumped
       const modifiedPkgAFile = yield loadFile(
         "packages/pkg-a/package.json",
-        jsonFolder
+        jsonFolder,
       );
       expect(modifiedPkgAFile.content).toBe(
         "{\n" +
@@ -272,13 +272,13 @@ describe("package file apply bump (snapshot)", () => {
           '  "dependencies": {\n' +
           '    "yarn-workspace-base-pkg-b": "1.1.0"\n' +
           "  }\n" +
-          "}\n"
+          "}\n",
       );
 
       // this is a range dep which will not be patch bumped
       const modifiedPkgCFile = yield loadFile(
         "packages/pkg-c/package.json",
-        jsonFolder
+        jsonFolder,
       );
 
       expect(modifiedPkgCFile.content).toEqual(
@@ -288,7 +288,7 @@ describe("package file apply bump (snapshot)", () => {
           '  "dependencies": {\n' +
           '    "yarn-workspace-base-pkg-b": "^1.0.0"\n' +
           "  }\n" +
-          "}\n"
+          "}\n",
       );
 
       expect({
@@ -331,7 +331,7 @@ describe("package file apply bump (snapshot)", () => {
       yield apply({ commands, allPackages, cwd: rustFolder });
       const modifiedFile = yield loadFile("Cargo.toml", rustFolder);
       expect(modifiedFile.content).toBe(
-        '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n'
+        '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n',
       );
 
       expect({
@@ -371,10 +371,10 @@ describe("package file apply bump (snapshot)", () => {
 
       const applied = yield captureError(
         //@ts-expect-error
-        apply({ commands, config, allPackages, cwd: rustFolder })
+        apply({ commands, config, allPackages, cwd: rustFolder }),
       );
       expect(applied.message).toBe(
-        "rust-single-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+        "rust-single-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
       expect({
         //@ts-expect-error
@@ -432,12 +432,12 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.6.0"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = "0.9.0"\n'
+          'rust_pkg_b_fixture = "0.9.0"\n',
       );
 
       const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
       expect({
@@ -496,12 +496,12 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.6.0"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = { version = "0.9.0", path = "../rust_pkg_b_fixture" }\n'
+          'rust_pkg_b_fixture = { version = "0.9.0", path = "../rust_pkg_b_fixture" }\n',
       );
 
       const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
       expect({
@@ -560,12 +560,12 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.6.0"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = "0.9"\n'
+          'rust_pkg_b_fixture = "0.9"\n',
       );
 
       const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
       expect({
@@ -626,12 +626,12 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.5.1"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = { version = "0.8", path = "../rust_pkg_b_fixture" }\n'
+          'rust_pkg_b_fixture = { version = "0.8", path = "../rust_pkg_b_fixture" }\n',
       );
 
       const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.8.9"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.8.9"\n',
       );
 
       expect({
@@ -690,12 +690,12 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.6.0"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = { version = "0.9", path = "../rust_pkg_b_fixture" }\n'
+          'rust_pkg_b_fixture = { version = "0.9", path = "../rust_pkg_b_fixture" }\n',
       );
 
       const modifiedBPKGFile = yield loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
       expect({
@@ -742,7 +742,7 @@ describe("package file apply bump (snapshot)", () => {
           "environment:\n  sdk: '>=2.10.0 <3.0.0'\n" +
           "dependencies:\n  flutter:\n    sdk: flutter\n  meta: any\n  provider: ^4.3.2\n  related_package:\n    git:\n      url: git@github.com:jbolda/covector.git\n      ref: main\n      path: __fixtures__/haha/\n" +
           "dev_dependencies:\n  flutter_test:\n    sdk: flutter\n  build_runner: any\n  json_serializable: any\n  mobx_codegen: any\n" +
-          "flutter:\n  assets:\n    - assets/schema/\n    - assets/localization/\n"
+          "flutter:\n  assets:\n    - assets/schema/\n    - assets/localization/\n",
       );
 
       expect({

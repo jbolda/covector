@@ -17,7 +17,7 @@ type Responses = [q: string | RegExp, a: string][];
 export function* runCommand(
   command: string,
   cwd: string,
-  responses: Responses = []
+  responses: Responses = [],
 ): Operation<{
   stdout: string;
   stderr: string;
@@ -50,13 +50,13 @@ export function* runCommand(
         } else {
           runCommand.stdin.send(pressEnter);
         }
-      })
+      }),
     );
 
     yield spawn(
       runCommand.stderr.forEach((chunk) => {
         stderrBuffer = Buffer.concat([stderrBuffer, chunk]);
-      })
+      }),
     );
 
     let status = yield withTimeout(24900, runCommand.join());

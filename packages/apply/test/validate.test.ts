@@ -39,7 +39,7 @@ describe("validate apply", () => {
     expect(
       async () =>
         //@ts-expect-error
-        await run(validateApply({ commands, config, cwd: jsonFolder }))
+        await run(validateApply({ commands, config, cwd: jsonFolder })),
     ).not.toThrow();
   });
 
@@ -69,7 +69,7 @@ describe("validate apply", () => {
     expect.assertions(1);
     expect(
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: rustFolder })
+      async () => await validateApply({ commands, config, cwd: rustFolder }),
     ).not.toThrow();
   });
 
@@ -122,7 +122,7 @@ describe("validate apply", () => {
     expect.assertions(1);
     expect(
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: jsonFolder })
+      async () => await validateApply({ commands, config, cwd: jsonFolder }),
     ).not.toThrow();
   });
 
@@ -164,7 +164,7 @@ describe("validate apply", () => {
     expect.assertions(1);
     expect(
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: rustFolder })
+      async () => await validateApply({ commands, config, cwd: rustFolder }),
     ).not.toThrow();
   });
 
@@ -206,7 +206,7 @@ describe("validate apply", () => {
     expect.assertions(1);
     expect(
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: rustFolder })
+      async () => await validateApply({ commands, config, cwd: rustFolder }),
     ).not.toThrow();
   });
 
@@ -248,7 +248,7 @@ describe("validate apply", () => {
     expect.assertions(1);
     expect(
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: rustFolder })
+      async () => await validateApply({ commands, config, cwd: rustFolder }),
     ).not.toThrow();
   });
 
@@ -343,11 +343,11 @@ describe("validate apply", () => {
       validateApply({
         commands,
         allPackages,
-      })
+      }),
     );
     expect(errored.message).toMatch(
       "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
-        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
+        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference.",
     );
 
     expect({

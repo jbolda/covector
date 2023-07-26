@@ -30,9 +30,12 @@ export function* fillChangelogs({
 }): Operation<{ [k: string]: PkgCommandResponse } | undefined> {
   const changelogs = yield readAllChangelogs({
     applied: applied.reduce(
-      (final: { name: string; version: string; changelog?: File }[], current) =>
+      (
+        final: { name: string; version: string; changelog?: File }[],
+        current,
+      ) =>
         !config.packages[current.name].path ? final : final.concat([current]),
-      []
+      [],
     ),
     packages: config.packages,
     cwd,
@@ -61,7 +64,7 @@ export function* fillChangelogs({
         });
         return pkgs;
       },
-      pkgCommandsRan
+      pkgCommandsRan,
     );
 
     return pkgCommandsRan;
@@ -94,7 +97,7 @@ export function* pullLastChangelog({
       changelogs[pkg.pkg] = pkg;
       return changelogs;
     },
-    {}
+    {},
   );
 }
 
@@ -114,7 +117,7 @@ export const pipeChangelogToCommands = async ({
       });
       return pkgs;
     },
-    pkgCommandsRan
+    pkgCommandsRan,
   );
 
 function* readAllChangelogs({
@@ -133,7 +136,7 @@ function* readAllChangelogs({
       cwd,
       packagePath: packages[change.name].path,
       create,
-    })
+    }),
   );
   const loadedChangelogs: File[] = yield all(prepChangelogs);
   return loadedChangelogs.map((changelog, index) => ({
@@ -144,7 +147,7 @@ function* readAllChangelogs({
 
 const getVersionFromApplied = (
   name: string,
-  applied: { name: string; version: string }[]
+  applied: { name: string; version: string }[],
 ) => applied.find((pkg) => pkg.name === name)?.version;
 
 const applyChanges = ({
@@ -190,12 +193,12 @@ const applyChanges = ({
             summary: string;
             meta?: Meta;
           },
-          indentation: number = 4
+          indentation: number = 4,
         ) => {
           // indent the summary so it fits under the new bullet point we added
           const summary = release.summary.replace(
             /\n/g,
-            `\n${" ".repeat(indentation)}`
+            `\n${" ".repeat(indentation)}`,
           );
 
           if (!release.meta || (!!release.meta && !release.meta.commits)) {
@@ -244,10 +247,13 @@ const applyChanges = ({
           assembledChanges.releases[change.changes.name].changes
             .filter((c) => c.meta?.dependencies)
             // reduce to an object of keys to avoid duplication of deps
-            .reduce((acc, c) => {
-              c.meta!.dependencies.forEach((dep) => (acc[dep] = 1));
-              return acc;
-            }, {} as { [k: string]: any })
+            .reduce(
+              (acc, c) => {
+                c.meta!.dependencies.forEach((dep) => (acc[dep] = 1));
+                return acc;
+              },
+              {} as { [k: string]: any },
+            ),
         ).map((dep) => {
           const appliedVersion = getVersionFromApplied(dep, applied);
           return {
@@ -308,7 +314,7 @@ const applyChanges = ({
       changelog.children = [].concat(
         changelogFirstElement,
         parsedAddition.children,
-        changelogRemainingElements
+        changelogRemainingElements,
       );
       change.changelog.content = processor.stringify(changelog);
     }
@@ -381,6 +387,6 @@ function* writeAllChangelogs({
       } else {
         throw new Error(`Changelog not properly created: ${changes}`);
       }
-    })
+    }),
   );
 }

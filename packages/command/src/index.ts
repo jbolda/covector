@@ -161,7 +161,7 @@ function* executeEachCommand({
       console.log(
         `dryRun >> ${pkg.pkg} [${commandPrefix}${command}${
           runningCommand.runFromRoot === true ? " run from the cwd" : ""
-        }]: ${runningCommand.command}`
+        }]: ${runningCommand.command}`,
       );
     }
   }
@@ -196,7 +196,7 @@ function* useFunction({
           } request to ${url} returned errors: ${JSON.stringify(
             response.errors,
             null,
-            2
+            2,
           )}`,
         });
       }
@@ -299,7 +299,7 @@ export function* confirmCommandsToRun({
           console.log(
             `Checking if ${pkg.pkg}${
               !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
-            } is already published with built-in ${getPublishedVersion.use}`
+            } is already published with built-in ${getPublishedVersion.use}`,
           );
 
           try {
@@ -315,13 +315,13 @@ export function* confirmCommandsToRun({
           throw new Error(
             `This configuration is not supported for getPublishedVersion on ${
               pkg.pkg
-            }: ${JSON.stringify(getPublishedVersion, null, 2)}`
+            }: ${JSON.stringify(getPublishedVersion, null, 2)}`,
           );
         }
       }
       if (pkg.pkgFile && pkg.pkgFile.version === version) {
         console.log(
-          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
+          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`,
         );
         // early return if published already
         continue;
@@ -365,7 +365,7 @@ export const runCommand = function* ({
     {
       cwd: path.join(cwd, pkgPath),
     },
-    log
+    log,
   );
 
   return ran.out;
@@ -374,7 +374,7 @@ export const runCommand = function* ({
 export const sh = function* (
   command: string,
   options: { [k: string]: any },
-  log: false | string
+  log: false | string,
 ): Operation<{ result: Number; stdout: string; stderr: string; out: string }> {
   let out = "";
   let stdout = "";
@@ -403,7 +403,7 @@ export const sh = function* (
       out += chunk.toString();
       stderr += chunk.toString();
       if (log !== false) console.error(chunk.toString().trim());
-    })
+    }),
   );
 
   yield spawn(
@@ -411,7 +411,7 @@ export const sh = function* (
       out += chunk.toString();
       stdout += chunk.toString();
       if (log !== false) console.log(chunk.toString().trim());
-    })
+    }),
   );
 
   const result = yield child.expect();

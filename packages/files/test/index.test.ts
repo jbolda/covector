@@ -28,7 +28,7 @@ describe("general file test", () => {
     const configFolder = f.copy("config.simple");
     const configArray = yield configFile({ cwd: configFolder });
     expect((configArray as any).gitSiteUrl).toBe(
-      "https://github.com/jbolda/covector"
+      "https://github.com/jbolda/covector",
     );
   });
 

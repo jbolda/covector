@@ -100,7 +100,7 @@ export function* arbitrary({
       };
       return pkgs;
     },
-    {}
+    {},
   );
 
   pkgCommandsRan = yield pipeChangelogToCommands({

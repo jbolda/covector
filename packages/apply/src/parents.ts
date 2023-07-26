@@ -27,7 +27,7 @@ const resolveParents = ({
       });
       return parents;
     },
-    {}
+    {},
   );
 };
 
@@ -53,7 +53,7 @@ export const changesConsideringParents = ({
       list[change].parents = parents[change];
       return list;
     },
-    {}
+    {},
   );
 
   const releases = parentBump({
