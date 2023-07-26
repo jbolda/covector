@@ -4,6 +4,13 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+const base = {
+  errorOnVersionRange: null,
+  precommand: null,
+  command: null,
+  postcommand: null,
+};
+
 const fillWithDefaults = ({ version }: { version: string }) => {
   const [versionMajor, versionMinor, versionPatch] = version
     .split(".")
@@ -31,6 +38,7 @@ describe("attemptCommand", () => {
     yield attemptCommands({
       commands: [
         {
+          ...base,
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
           command: async () => console.log("boop"),
@@ -49,6 +57,7 @@ describe("attemptCommand", () => {
     yield attemptCommands({
       commands: [
         {
+          ...base,
           pkg: "pkg-nickname",
           manager: "none",
           command: [
@@ -77,6 +86,7 @@ describe("attemptCommand", () => {
     yield attemptCommands({
       commands: [
         {
+          ...base,
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
           command: async (pkg: any) =>
@@ -96,6 +106,7 @@ describe("attemptCommand", () => {
     yield attemptCommands({
       commands: [
         {
+          ...base,
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
           manager: "none",

@@ -1,13 +1,19 @@
-import type { PathLike } from "fs";
+import { z } from "zod";
+import {
+  fileSchema,
+  packageConfigSchema,
+  allCommandsSchema,
+  pkgManagerSchema,
+  configFileSchema,
+} from "@covector/files/src/schema";
+
+export type File = z.infer<typeof fileSchema>;
+export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
+export type CommandConfig = z.infer<typeof allCommandsSchema>;
+export type PkgManagerConfig = z.infer<typeof pkgManagerSchema>;
+export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
 
 /* @covector/files */
-export interface File {
-  content: string;
-  path: PathLike;
-  filename: string;
-  extname: string;
-}
-
 interface NestedVersion {
   version?: string;
   [key: string]: any;
@@ -70,37 +76,6 @@ export interface PreFile {
   changes: string[] | [];
 }
 
-export type PackageConfig = {
-  manager?: string;
-  path?: string;
-  dependencies?: string[];
-  packageFileName?: string;
-  version?: string;
-  publish?: string;
-  errorOnVersionRange?: string;
-};
-
-export type ConfigFile = {
-  file?: File;
-  changeFolder: PathLike;
-  gitSiteUrl?: string;
-  pkgManagers?: {
-    [k: string]: {
-      version?: string;
-      publish?: string;
-      errorOnVersionRange?: string;
-    };
-  };
-  packages: {
-    [k: string]: PackageConfig;
-  };
-  additionalBumpTypes?: string[];
-  changeTags?: {
-    [k: string]: string;
-  };
-  defaultChangeTag?: string;
-};
-
 /* @covector/command */
 export type BuiltInCommands = "fetch:check";
 export type BuiltInCommandOptions = Record<string, any>;
@@ -120,7 +95,7 @@ export type NormalizedCommand = {
   options?: BuiltInCommandOptions;
   runFromRoot?: boolean;
   retries?: number[];
-  dryRunCommand?: boolean;
+  dryRunCommand?: string | boolean;
   pipe?: boolean;
 };
 
@@ -195,7 +170,9 @@ export type Release = {
   parents?: Parents;
 };
 
-export type CommandTypes = NormalizedCommand | string | Function;
+// where `true` effectively no-ops when running the command
+export type CommandTypes = NormalizedCommand | string | Function | true;
+export type Command = CommandTypes[] | CommandTypes | boolean;
 
 export type PkgVersion = {
   pkg: string;
@@ -203,12 +180,12 @@ export type PkgVersion = {
   packageFileName?: string;
   type?: string;
   parents?: Parents;
-  precommand?: CommandTypes[] | CommandTypes | null;
-  command?: CommandTypes[] | CommandTypes | null;
-  postcommand?: CommandTypes[] | CommandTypes | null;
+  precommand: Command | null;
+  command: Command | null;
+  postcommand: Command | null;
   manager?: string;
   dependencies?: string[];
-  errorOnVersionRange?: string;
+  errorOnVersionRange: string | null;
 };
 
 export type PipeVersionTemplate = {
@@ -222,16 +199,16 @@ export type PkgPublish = {
   packageFileName?: string;
   changelog?: string;
   tag?: string;
-  precommand?: CommandTypes[] | CommandTypes | null;
-  command?: CommandTypes[] | CommandTypes | null;
-  postcommand?: CommandTypes[] | CommandTypes | null;
-  manager: string;
+  precommand: Command | null;
+  command: Command | null;
+  postcommand: Command | null;
+  manager?: string;
   dependencies?: string[];
   getPublishedVersion?: CommandTypes;
   assets?: { name: string; path: string }[];
   pkgFile?: PackageFile;
-  errorOnVersionRange?: string;
-  releaseTag?: string | false;
+  errorOnVersionRange: string | null;
+  releaseTag?: string | false | null;
 };
 
 export type PipePublishTemplate = {

@@ -20,6 +20,10 @@ import type {
   PipeVersionTemplate,
   PkgPublish,
   PipePublishTemplate,
+  Command,
+  NormalizedCommand,
+  CommandTypes,
+  PkgManagerConfig,
 } from "@covector/types";
 
 export const parseChange = function* ({
@@ -359,16 +363,16 @@ export const mergeChangesToConfig = function* ({
           }),
           manager: config.packages[pkg].manager,
           dependencies: config.packages[pkg].dependencies,
-          errorOnVersionRange: mergeCommand({
-            ...commandItems,
-            command: `errorOnVersionRange`,
-          }),
+          errorOnVersionRange:
+            config.packages?.[pkg]?.errorOnVersionRange ??
+            config.pkgManagers?.[pkgManager ?? ""]?.errorOnVersionRange ??
+            null,
         };
       }
 
       return pkged;
     },
-    {}
+    {} as { [k: string]: PkgVersion }
   );
 
   const pipeOutput: {
@@ -506,14 +510,14 @@ export const mergeIntoConfig = function* ({
             : { assets: publishElements.assets }),
           manager: config.packages[pkg].manager || "",
           dependencies: config.packages[pkg].dependencies,
-          errorOnVersionRange: mergeCommand({
-            ...commandItems,
-            command: `errorOnVersionRange`,
-          }),
-          releaseTag: mergeCommand({
-            ...commandItems,
-            command: `releaseTag`,
-          }),
+          errorOnVersionRange:
+            config.packages?.[pkg]?.errorOnVersionRange ??
+            config.pkgManagers?.[pkgManager ?? ""]?.errorOnVersionRange ??
+            null,
+          releaseTag:
+            config.packages?.[pkg]?.releaseTag ??
+            config.pkgManagers?.[pkgManager ?? ""]?.releaseTag ??
+            null,
         };
       }
 
@@ -574,10 +578,10 @@ export const mergeIntoConfig = function* ({
       ...(!pkgCommands[pkg].assets
         ? {}
         : {
-            assets: templateCommands(pkgCommands[pkg].assets, pipeToTemplate, [
-              "path",
-              "name",
-            ]),
+            assets: pkgCommands[pkg].assets?.map((asset) => ({
+              path: template(asset.path)(pipeToTemplate),
+              name: template(asset.name)(pipeToTemplate),
+            })),
           }),
     };
 
@@ -609,14 +613,10 @@ export const mergeIntoConfig = function* ({
       releaseTag:
         pkgCommands[pkg].releaseTag === false
           ? false
-          : templateCommands(
-              [
-                pkgCommands[pkg].releaseTag ??
-                  "${ pkg.pkg }-v${ pkgFile.version }",
-              ],
-              pipeToTemplate,
-              ["releaseTag"]
-            )![0],
+          : template(
+              (pkgCommands[pkg].releaseTag as string | undefined) ??
+                "${ pkg.pkg }-v${ pkgFile.version }"
+            )(pipeToTemplate),
     };
 
     commands = [...commands, merged];
@@ -638,14 +638,13 @@ const mergeCommand = ({
   command,
   config,
 }: {
-  pkg: any;
-  pkgManager: any;
-  command: any;
+  pkg: keyof ConfigFile["packages"];
+  pkgManager: string | undefined;
+  command: keyof PkgManagerConfig;
   config: ConfigFile;
-}) => {
-  //@ts-expect-error
-  const managerCommand = config.pkgManagers?.[pkgManager]?.[command] ?? null;
-  //@ts-expect-error
+}): Command | null => {
+  const managerCommand =
+    config.pkgManagers?.[pkgManager ?? ""]?.[command] ?? null;
   const mergedCommand = config.packages?.[pkg]?.[command] ?? managerCommand;
 
   return mergedCommand;
@@ -663,31 +662,39 @@ const usePackageSubset = (commands: any, subset: string[] = []) =>
         }
       }, {});
 
+type PossibleTemplateCommands =
+  | "command"
+  | "dryRunCommand"
+  | "runFromRoot"
+  | "assets";
 const templateCommands = (
-  command: any,
+  command: Command | null,
   pipe: PipePublishTemplate | PipeVersionTemplate,
-  complexCommands: string[]
-) => {
-  if (!command) return null;
+  complexCommands: Extract<keyof NormalizedCommand, PossibleTemplateCommands>[]
+): CommandTypes[] | null => {
+  if (command === null) return command;
   const commands = !Array.isArray(command) ? [command] : command;
-  return commands.map((c) => {
-    if (typeof c === "object") {
-      return {
-        ...c,
-        ...complexCommands.reduce(
-          (templated: { [k: string]: any }, complex) => {
+  return commands
+    .map((c) => {
+      if (typeof c === "object") {
+        return {
+          ...c,
+          ...complexCommands.reduce((templated, complex) => {
+            const commandToTemplate = c[complex];
+            // @ts-expect-error issue with proper narrowing
             templated[complex] =
-              typeof c[complex] === "string"
-                ? template(c[complex])(pipe)
-                : c[complex];
+              typeof commandToTemplate === "string"
+                ? template(commandToTemplate)(pipe)
+                : commandToTemplate;
             return templated;
-          },
-          {}
-        ),
-      };
-    } else {
-      // if it is a function, we pipe when we run the function
-      return typeof c === "function" ? c : template(c)(pipe);
-    }
-  });
+          }, {} as NormalizedCommand),
+        };
+      } else {
+        // if it is a function, we pipe when we run the function
+        return typeof c === "function" || typeof c === "boolean"
+          ? c
+          : template(c)(pipe);
+      }
+    })
+    .filter((c) => c !== false) as CommandTypes[];
 };

@@ -4,6 +4,13 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+const base = {
+  errorOnVersionRange: null,
+  precommand: null,
+  command: null,
+  postcommand: null,
+};
+
 const fillWithDefaults = ({ version }: { version: string }) => {
   const [versionMajor, versionMinor, versionPatch] = version
     .split(".")
@@ -33,6 +40,7 @@ describe("confirmCommandsToRun", () => {
         const commandsToRun = yield confirmCommandsToRun({
           commands: [
             {
+              ...base,
               pkg: "effection",
               manager: "npm",
               pkgFile: fillWithDefaults({ version: "0.5.0" }),
@@ -57,6 +65,7 @@ describe("confirmCommandsToRun", () => {
         const commandsToRun = yield confirmCommandsToRun({
           commands: [
             {
+              ...base,
               pkg: "effection",
               manager: "npm",
               pkgFile: fillWithDefaults({ version: "0.5.99" }),
@@ -87,6 +96,7 @@ describe("confirmCommandsToRun", () => {
           const commandsToRun = yield confirmCommandsToRun({
             commands: [
               {
+                ...base,
                 pkg: "tauri",
                 manager: "cargo",
                 pkgFile: fillWithDefaults({ version: "0.11.0" }),
@@ -112,6 +122,7 @@ describe("confirmCommandsToRun", () => {
           const commandsToRun = yield confirmCommandsToRun({
             commands: [
               {
+                ...base,
                 pkg: "tauri",
                 manager: "cargo",
                 pkgFile: fillWithDefaults({ version: "0.12.0" }),
@@ -144,6 +155,7 @@ describe("confirmCommandsToRun", () => {
         const commandsToRun = yield confirmCommandsToRun({
           commands: [
             {
+              ...base,
               pkg: "effection",
               manager: "npm",
               pkgFile: fillWithDefaults({ version: "0.5.0" }),
@@ -172,6 +184,7 @@ describe("confirmCommandsToRun", () => {
         const commandsToRun = yield confirmCommandsToRun({
           commands: [
             {
+              ...base,
               pkg: "effection",
               manager: "npm",
               pkgFile: fillWithDefaults({ version: "0.5.99" }),
@@ -205,6 +218,7 @@ describe("confirmCommandsToRun", () => {
         const commandsToRun = yield confirmCommandsToRun({
           commands: [
             {
+              ...base,
               pkg: "tauri",
               manager: "cargo",
               pkgFile: fillWithDefaults({ version: "0.11.0" }),
@@ -233,6 +247,7 @@ describe("confirmCommandsToRun", () => {
         const commandsToRun = yield confirmCommandsToRun({
           commands: [
             {
+              ...base,
               pkg: "tauri",
               manager: "cargo",
               pkgFile: fillWithDefaults({ version: "0.12.0" }),

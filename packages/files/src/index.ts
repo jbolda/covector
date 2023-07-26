@@ -2,7 +2,9 @@ import { default as fsDefault, PathLike, statSync } from "fs";
 // this is compatible with node@12+
 const fs = fsDefault.promises;
 
-import { all, Operation } from "effection";
+import { all, MainError, type Operation } from "effection";
+import { configFileSchema } from "./schema";
+import { fromZodError } from "zod-validation-error";
 import globby from "globby";
 import path from "path";
 import TOML from "@tauri-apps/toml";
@@ -11,10 +13,10 @@ import semver from "semver";
 
 import type {
   File,
+  ConfigFile,
   PkgMinimum,
   PackageFile,
   PreFile,
-  ConfigFile,
   DepsKeyed,
   DepTypes,
   Pkg,
@@ -458,45 +460,22 @@ export function* configFile({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Operation<ConfigFile> {
-  const inputFile = yield loadFile(path.join(changeFolder, "config.json"), cwd);
-  const parsed = JSON.parse(inputFile.content);
-  return {
-    file: inputFile,
-    ...parsed,
-    ...checkFileOrDirectory({ cwd, config: parsed }),
-  };
+}): Operation<ConfigFile & File> {
+  const inputFile: File = yield loadFile(
+    path.join(changeFolder, "config.json"),
+    cwd
+  );
+  try {
+    const parsed = configFileSchema(cwd).parse(JSON.parse(inputFile.content));
+    return {
+      file: inputFile,
+      ...parsed,
+    };
+  } catch (error: any) {
+    const validationError = fromZodError(error);
+    throw new MainError({ exitCode: 1, message: validationError.message });
+  }
 }
-
-export const checkFileOrDirectory = ({
-  cwd,
-  config,
-}: {
-  cwd: string;
-  config: ConfigFile;
-}): ConfigFile["packages"] =>
-  !config.packages
-    ? {}
-    : {
-        packages: Object.keys(config.packages).reduce((packages, pkg) => {
-          const packagePath = config.packages[pkg].path;
-          if (!packagePath || !cwd) return packages;
-
-          const checkDir = statSync(path.join(cwd, packagePath));
-          if (checkDir.isFile()) {
-            const dirName = path.dirname(packagePath);
-            const packageFileName = path.basename(packagePath);
-            packages[pkg] = {
-              ...packages[pkg],
-              path: dirName,
-              packageFileName,
-            };
-            return packages;
-          } else {
-            return packages;
-          }
-        }, config?.packages),
-      };
 
 export const changeFiles = async ({
   cwd,

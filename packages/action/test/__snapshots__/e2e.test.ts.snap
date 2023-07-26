@@ -1221,8 +1221,8 @@ publish
       \\"precommand\\": null,
       \\"command\\": [
         {
-          \\"command\\": \\"echo publish\\",
-          \\"pipe\\": true
+          \\"pipe\\": true,
+          \\"command\\": \\"echo publish\\"
         },
         null
       ],
@@ -1268,8 +1268,8 @@ publish
       \\"precommand\\": null,
       \\"command\\": [
         {
-          \\"command\\": \\"echo publish\\",
-          \\"pipe\\": true
+          \\"pipe\\": true,
+          \\"command\\": \\"echo publish\\"
         },
         null
       ],

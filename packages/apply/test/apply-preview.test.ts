@@ -121,7 +121,6 @@ describe("package file applies preview bump", () => {
       },
     };
 
-    //@ts-expect-error
     const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
 
     yield apply({
@@ -276,7 +275,6 @@ describe("package file applies preview bump to pre-release", () => {
       },
     };
 
-    //@ts-expect-error
     const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
 
     yield apply({

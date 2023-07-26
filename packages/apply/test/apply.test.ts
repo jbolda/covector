@@ -158,7 +158,6 @@ describe("package file apply bump (snapshot)", () => {
         },
       };
 
-      //@ts-expect-error
       const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
 
       //@ts-expect-error
