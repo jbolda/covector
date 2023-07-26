@@ -4,6 +4,8 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+const base = { errorOnVersionRange: null };
+
 const fillWithDefaults = ({ version }: { version: string }) => {
   const [versionMajor, versionMinor, versionPatch] = version
     .split(".")
@@ -32,6 +34,7 @@ describe("fetchCommand", () => {
       yield attemptCommands({
         commands: [
           {
+            ...base,
             pkg: "effection",
             pkgFile: fillWithDefaults({ version: "0.5.0" }),
             command: [
@@ -57,6 +60,7 @@ describe("fetchCommand", () => {
         attemptCommands({
           commands: [
             {
+              ...base,
               pkg: "effection",
               pkgFile: fillWithDefaults({ version: "0.5.32" }),
               command: [
@@ -85,6 +89,7 @@ describe("fetchCommand", () => {
         attemptCommands({
           commands: [
             {
+              ...base,
               pkg: "effection",
               pkgFile: fillWithDefaults({ version: "0.5.32" }),
               command: [
@@ -116,6 +121,7 @@ describe("fetchCommand", () => {
       yield attemptCommands({
         commands: [
           {
+            ...base,
             pkg: "tauri",
             pkgFile: fillWithDefaults({ version: "0.11.0" }),
             command: [
@@ -141,6 +147,7 @@ describe("fetchCommand", () => {
         attemptCommands({
           commands: [
             {
+              ...base,
               pkg: "tauri",
               pkgFile: fillWithDefaults({ version: "0.12.0" }),
               command: [
@@ -173,6 +180,7 @@ describe("fetchCommand", () => {
         attemptCommands({
           commands: [
             {
+              ...base,
               pkg: "tauri",
               pkgFile: fillWithDefaults({ version: "0.12.0" }),
               command: [

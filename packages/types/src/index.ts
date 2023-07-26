@@ -182,7 +182,7 @@ export type PkgVersion = {
   postcommand?: Command;
   manager?: string;
   dependencies?: string[];
-  errorOnVersionRange?: string;
+  errorOnVersionRange: string | null;
 };
 
 export type PipeVersionTemplate = {
@@ -199,13 +199,13 @@ export type PkgPublish = {
   precommand?: Command;
   command?: Command;
   postcommand?: Command;
-  manager: string;
+  manager?: string;
   dependencies?: string[];
   getPublishedVersion?: CommandTypes;
   assets?: { name: string; path: string }[];
   pkgFile?: PackageFile;
-  errorOnVersionRange?: string;
-  releaseTag?: string | false;
+  errorOnVersionRange: string | null;
+  releaseTag?: string | false | null;
 };
 
 export type PipePublishTemplate = {

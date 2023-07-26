@@ -1,7 +1,7 @@
 import { it } from "@effection/jest";
 import { parseChange } from "../src";
 
-import type { File } from "@covector/types";
+import type { File } from "@covector/files/src/schema";
 
 describe("git parsing", () => {
   it("parses and returns multiple commits", function* () {

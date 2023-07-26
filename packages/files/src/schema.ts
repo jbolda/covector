@@ -85,3 +85,4 @@ export const configFileSchema = (cwd: string = ".") =>
     .strict();
 
 export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
+export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;

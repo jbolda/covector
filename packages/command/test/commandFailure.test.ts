@@ -4,6 +4,8 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
+const base = { errorOnVersionRange: null };
+
 describe("attemptCommand fails", () => {
   let restoreConsole: RestoreConsole;
   beforeEach(() => {
@@ -20,6 +22,7 @@ describe("attemptCommand fails", () => {
         command: "publish",
         commands: [
           {
+            ...base,
             pkg: "pkg-nickname",
             manager: "none",
             command: ["boop"],
@@ -39,6 +42,7 @@ describe("attemptCommand fails", () => {
         command: "",
         commands: [
           {
+            ...base,
             pkg: "pkg-nickname",
             manager: "none",
             command: [{ command: "boop", retries: [500, 500] }],

@@ -120,8 +120,8 @@ const config = {
 describe("merge config", () => {
   describe("full config", () => {
     it("merges version", function* () {
+      //@ts-expect-error
       const mergedVersionConfig = yield mergeChangesToConfig({
-        //@ts-expect-error
         config,
         assembledChanges,
         command: "version",
@@ -140,8 +140,8 @@ describe("merge config", () => {
       //@ts-expect-error
       delete modifiedConfig.packages["@namespaced/assemble2"].version;
 
+      //@ts-expect-error
       const mergedVersionConfig = yield mergeChangesToConfig({
-        //@ts-expect-error
         config: modifiedConfig,
         assembledChanges,
         command: "version",
@@ -206,8 +206,8 @@ describe("merge config", () => {
         },
       };
 
+      //@ts-expect-error
       const mergedVersionConfig = yield mergeChangesToConfig({
-        //@ts-expect-error
         config: nestedConfig,
         assembledChanges: nestedAssembledChanges,
         command: "version",
@@ -220,7 +220,6 @@ describe("merge config", () => {
 
       const mergedPublishConfig = yield mergeIntoConfig({
         cwd: configFolder,
-        //@ts-expect-error
         config,
         //@ts-expect-error
         assembledChanges: [],
@@ -232,8 +231,8 @@ describe("merge config", () => {
 
   describe("filtered config", () => {
     it("merges version", function* () {
+      //@ts-expect-error
       const mergedVersionConfig = yield mergeChangesToConfig({
-        //@ts-expect-error
         config,
         assembledChanges,
         command: "version",
@@ -245,9 +244,9 @@ describe("merge config", () => {
     it("merges publish", function* () {
       const configFolder = f.copy("assemble");
 
+      //@ts-expect-error
       const mergedPublishConfig = yield mergeIntoConfig({
         cwd: configFolder,
-        //@ts-expect-error
         config,
         assembledChanges,
         command: "publish",

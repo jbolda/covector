@@ -363,7 +363,8 @@ export const mergeChangesToConfig = function* ({
           dependencies: config.packages[pkg].dependencies,
           errorOnVersionRange:
             config.packages?.[pkg]?.errorOnVersionRange ??
-            config.pkgManagers?.[pkg]?.errorOnVersionRange,
+            config.pkgManagers?.[pkgManager ?? ""]?.errorOnVersionRange ??
+            null,
         };
       }
 
@@ -509,10 +510,12 @@ export const mergeIntoConfig = function* ({
           dependencies: config.packages[pkg].dependencies,
           errorOnVersionRange:
             config.packages?.[pkg]?.errorOnVersionRange ??
-            config.pkgManagers?.[pkg]?.errorOnVersionRange,
+            config.pkgManagers?.[pkgManager ?? ""]?.errorOnVersionRange ??
+            null,
           releaseTag:
             config.packages?.[pkg]?.releaseTag ??
-            config.pkgManagers?.[pkg]?.releaseTag,
+            config.pkgManagers?.[pkgManager ?? ""]?.releaseTag ??
+            null,
         };
       }
 
@@ -638,8 +641,7 @@ const mergeCommand = ({
   command: any;
   config: ConfigFile;
 }): Command => {
-  const managerCommand =
-    config.pkgManagers?.[pkgManager]?.[command] ?? undefined;
+  const managerCommand = config.pkgManagers?.[pkgManager]?.[command] ?? null;
   const mergedCommand = config.packages?.[pkg]?.[command] ?? managerCommand;
 
   return mergedCommand;
@@ -667,6 +669,7 @@ const templateCommands = (
   pipe: PipePublishTemplate | PipeVersionTemplate,
   complexCommands: Extract<keyof NormalizedCommand, PossibleTemplateCommands>[]
 ): CommandTypes[] => {
+  if (command === null) return command;
   const commands = !Array.isArray(command) ? [command] : command;
   return commands
     .map((c) => {

@@ -1612,7 +1612,7 @@ thiserror = \\"1.0.19\\"
       Array [
         Object {
           "command": Array [
-            "true",
+            true,
           ],
           "dependencies": Array [
             "tauri-api",
@@ -1997,7 +1997,7 @@ thiserror = \\"1.0.19\\"
         },
         Object {
           "command": Array [
-            "true",
+            true,
           ],
           "dependencies": undefined,
           "errorOnVersionRange": null,
@@ -2011,7 +2011,7 @@ thiserror = \\"1.0.19\\"
         },
         Object {
           "command": Array [
-            "true",
+            true,
           ],
           "dependencies": Array [
             "tauri",

@@ -161,7 +161,7 @@ Object {
   "commands": Array [
     Object {
       "command": Array [
-        "true",
+        true,
       ],
       "dependencies": Array [
         "assemble1",
@@ -177,7 +177,7 @@ Object {
     },
     Object {
       "command": Array [
-        "true",
+        true,
       ],
       "dependencies": Array [
         "all",
@@ -192,7 +192,7 @@ Object {
     },
     Object {
       "command": Array [
-        "true",
+        true,
       ],
       "dependencies": undefined,
       "errorOnVersionRange": null,
