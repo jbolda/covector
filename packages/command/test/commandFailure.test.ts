@@ -4,7 +4,12 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-const base = { errorOnVersionRange: null };
+const base = {
+  errorOnVersionRange: null,
+  precommand: null,
+  command: null,
+  postcommand: null,
+};
 
 describe("attemptCommand fails", () => {
   let restoreConsole: RestoreConsole;

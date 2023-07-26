@@ -29,7 +29,8 @@ const commandSchema = z.union([
   commandTypesSchema,
   commandTypesSchema.array(),
 ]);
-const allCommandsSchema = z
+
+export const allCommandsSchema = z
   .object({
     version: commandSchema.optional(),
     prepublish: commandSchema.optional(),
@@ -37,14 +38,28 @@ const allCommandsSchema = z
     postpublish: commandSchema.optional(),
     errorOnVersionRange: z.string().optional(),
     releaseTag: z.union([z.literal(false), z.string()]).optional(),
+    assets: z
+      .union([
+        z
+          .object({
+            path: z.string(),
+            name: z.string(),
+          })
+          .array(),
+        z.literal(false),
+      ])
+      .optional(),
   })
-  .catchall(commandSchema);
+  .passthrough();
 
-const pkgManagerSchema = allCommandsSchema.pick({
+export const pkgManagerSchema = allCommandsSchema.pick({
   version: true,
+  prepublish: true,
   publish: true,
+  postpublish: true,
   errorOnVersionRange: true,
   releaseTag: true,
+  assets: true,
 });
 
 export const packageConfigSchema = (cwd: string = ".") =>

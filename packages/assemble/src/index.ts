@@ -23,6 +23,7 @@ import type {
   Command,
   NormalizedCommand,
   CommandTypes,
+  PkgManagerConfig,
 } from "@covector/types";
 
 export const parseChange = function* ({
@@ -637,12 +638,13 @@ const mergeCommand = ({
   command,
   config,
 }: {
-  pkg: any;
-  pkgManager: any;
-  command: any;
+  pkg: keyof ConfigFile["packages"];
+  pkgManager: string | undefined;
+  command: keyof PkgManagerConfig;
   config: ConfigFile;
-}): Command => {
-  const managerCommand = config.pkgManagers?.[pkgManager]?.[command] ?? null;
+}): Command | null => {
+  const managerCommand =
+    config.pkgManagers?.[pkgManager ?? ""]?.[command] ?? null;
   const mergedCommand = config.packages?.[pkg]?.[command] ?? managerCommand;
 
   return mergedCommand;
@@ -666,10 +668,10 @@ type PossibleTemplateCommands =
   | "runFromRoot"
   | "assets";
 const templateCommands = (
-  command: Command | undefined,
+  command: Command | null,
   pipe: PipePublishTemplate | PipeVersionTemplate,
   complexCommands: Extract<keyof NormalizedCommand, PossibleTemplateCommands>[]
-): CommandTypes[] => {
+): CommandTypes[] | null => {
   if (command === null) return command;
   const commands = !Array.isArray(command) ? [command] : command;
   return commands

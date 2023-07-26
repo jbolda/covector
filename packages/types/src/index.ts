@@ -1,13 +1,17 @@
 import { z } from "zod";
 import {
   fileSchema,
-  configFileSchema,
   packageConfigSchema,
+  allCommandsSchema,
+  pkgManagerSchema,
+  configFileSchema,
 } from "@covector/files/src/schema";
 
 export type File = z.infer<typeof fileSchema>;
-export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
 export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
+export type CommandConfig = z.infer<typeof allCommandsSchema>;
+export type PkgManagerConfig = z.infer<typeof pkgManagerSchema>;
+export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
 
 /* @covector/files */
 interface NestedVersion {
@@ -176,9 +180,9 @@ export type PkgVersion = {
   packageFileName?: string;
   type?: string;
   parents?: Parents;
-  precommand?: Command;
-  command?: Command;
-  postcommand?: Command;
+  precommand: Command | null;
+  command: Command | null;
+  postcommand: Command | null;
   manager?: string;
   dependencies?: string[];
   errorOnVersionRange: string | null;
@@ -195,9 +199,9 @@ export type PkgPublish = {
   packageFileName?: string;
   changelog?: string;
   tag?: string;
-  precommand?: Command;
-  command?: Command;
-  postcommand?: Command;
+  precommand: Command | null;
+  command: Command | null;
+  postcommand: Command | null;
   manager?: string;
   dependencies?: string[];
   getPublishedVersion?: CommandTypes;
