@@ -2,14 +2,12 @@ import { z } from "zod";
 import { statSync } from "fs";
 import path from "path";
 
-const fileSchema = z.object({
+export const fileSchema = z.object({
   content: z.string(),
   path: z.string(),
   filename: z.string(),
   extname: z.string(),
 });
-
-export type File = z.infer<typeof fileSchema>;
 
 const commandBaseSchema = z.object({
   runFromRoot: z.boolean().optional(),
@@ -49,7 +47,7 @@ const pkgManagerSchema = allCommandsSchema.pick({
   releaseTag: true,
 });
 
-const packageConfigSchema = (cwd: string = ".") =>
+export const packageConfigSchema = (cwd: string = ".") =>
   allCommandsSchema
     .extend({
       manager: z.string().optional(),
@@ -83,6 +81,3 @@ export const configFileSchema = (cwd: string = ".") =>
       changeTags: z.record(z.string()).optional(),
     })
     .strict();
-
-export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
-export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;

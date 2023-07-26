@@ -2,7 +2,7 @@ import { changesConsideringParents } from "../src";
 import { it } from "@effection/jest";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import { PackageFile, CommonBumps } from "@covector/types";
-import type { ConfigFile, PackageConfig } from "@covector/files/src/schema";
+import type { ConfigFile, PackageConfig } from "@covector/types";
 
 const allPackagesWithoutRead = ({
   config,

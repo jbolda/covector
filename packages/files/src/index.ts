@@ -3,7 +3,7 @@ import { default as fsDefault, PathLike, statSync } from "fs";
 const fs = fsDefault.promises;
 
 import { all, MainError, type Operation } from "effection";
-import { configFileSchema, type File, type ConfigFile } from "./schema";
+import { configFileSchema } from "./schema";
 import { fromZodError } from "zod-validation-error";
 import globby from "globby";
 import path from "path";
@@ -12,6 +12,8 @@ import yaml from "js-yaml";
 import semver from "semver";
 
 import type {
+  File,
+  ConfigFile,
   PkgMinimum,
   PackageFile,
   PreFile,

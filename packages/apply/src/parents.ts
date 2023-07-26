@@ -1,6 +1,5 @@
-import type { ConfigFile } from "@covector/files/dist/schema";
-
 import type {
+  ConfigFile,
   Changed,
   ChangeParsed,
   Releases,

@@ -9,8 +9,9 @@ import { template, cloneDeep } from "lodash";
 import { readPkgFile } from "@covector/files";
 import { runCommand } from "@covector/command";
 
-import type { File, ConfigFile } from "@covector/files/dist/schema";
 import type {
+  File,
+  ConfigFile,
   Changeset,
   CommonBumps,
   Change,

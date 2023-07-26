@@ -5,7 +5,7 @@ const fs = fsDefault.promises;
 import { join } from "path";
 import { configFile } from "@covector/files";
 
-import type { ConfigFile } from "@covector/files/dist/schema";
+import type { ConfigFile } from "@covector/types";
 
 export const add = function* ({
   cwd = process.cwd(),

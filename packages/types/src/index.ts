@@ -1,4 +1,13 @@
-import type { File } from "@covector/files/src/schema";
+import { z } from "zod";
+import {
+  fileSchema,
+  configFileSchema,
+  packageConfigSchema,
+} from "@covector/files/src/schema";
+
+export type File = z.infer<typeof fileSchema>;
+export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
+export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
 
 /* @covector/files */
 interface NestedVersion {
@@ -62,16 +71,6 @@ export interface PreFile {
   tag: string;
   changes: string[] | [];
 }
-
-export type PackageConfig = {
-  manager?: string;
-  path?: string;
-  dependencies?: string[];
-  packageFileName?: string;
-  version?: string;
-  publish?: string;
-  errorOnVersionRange?: string;
-};
 
 /* @covector/command */
 export type BuiltInCommands = "fetch:check";
