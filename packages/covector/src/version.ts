@@ -94,7 +94,7 @@ export function* version({
           applied: string | false;
         };
       },
-      pkg: string
+      pkg: string,
     ) => {
       pkgs[pkg] = {
         precommand: false,
@@ -104,7 +104,7 @@ export function* version({
       };
       return pkgs;
     },
-    {}
+    {},
   );
 
   pkgCommandsRan = yield attemptCommands({
@@ -136,12 +136,12 @@ export function* version({
           applied: object;
         };
       },
-      result: { name: string }
+      result: { name: string },
     ) => {
       pkgs[result.name].applied = result;
       return pkgs;
     },
-    pkgCommandsRan
+    pkgCommandsRan,
   );
 
   pkgCommandsRan = yield fillChangelogs({

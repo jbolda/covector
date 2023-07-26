@@ -82,7 +82,7 @@ describe("full e2e test", () => {
       expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith(
         "status",
-        "There are 2 changes which include tauri with minor, tauri-updater with patch"
+        "There are 2 changes which include tauri with minor, tauri-updater with patch",
       );
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
       // to cover template pipe
@@ -132,18 +132,18 @@ describe("full e2e test", () => {
         // the log gets random /r on windows in CI
         (console.log as any).mock.calls.map((logArray: any) =>
           logArray.map((log: any) =>
-            typeof log === "string" ? log.replace(/\\r/g, "") : log
-          )
-        )
+            typeof log === "string" ? log.replace(/\\r/g, "") : log,
+          ),
+        ),
       ).toMatchSnapshot();
       expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("2.3.1")
+        expect.stringContaining("2.3.1"),
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("1.9.0")
+        expect.stringContaining("1.9.0"),
       );
     });
 
@@ -167,15 +167,15 @@ describe("full e2e test", () => {
       expect(core.setOutput).toHaveBeenCalledWith("successfulPublish", true);
       expect(core.setOutput).toHaveBeenCalledWith(
         "packagesPublished",
-        "package-one,package-two"
+        "package-one,package-two",
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("2.3.1")
+        expect.stringContaining("2.3.1"),
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("1.9.0")
+        expect.stringContaining("1.9.0"),
       );
     });
 
@@ -217,17 +217,17 @@ describe("full e2e test", () => {
               updateRelease: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               createRelease: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               uploadReleaseAsset: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
             },
           },
@@ -307,17 +307,17 @@ describe("full e2e test", () => {
               updateRelease: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               createRelease: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               uploadReleaseAsset: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
             },
           },
@@ -394,17 +394,17 @@ describe("full e2e test", () => {
               updateRelease: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               createRelease: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               uploadReleaseAsset: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
             },
           },
@@ -465,17 +465,17 @@ describe("full e2e test", () => {
               updateRelease: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               createRelease: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               uploadReleaseAsset: jest
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
             },
           },

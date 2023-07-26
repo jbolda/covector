@@ -133,7 +133,7 @@ describe("reads changelog", () => {
       "## \\[0.5.6]\n\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#43](/pull/43)) This is a test.\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#23](/pull/23)) This is another test.\n" +
-        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#9](/pull/9)) This is the last test.\n"
+        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#9](/pull/9)) This is the last test.\n",
     );
   });
 
@@ -227,7 +227,7 @@ describe("reads changelog", () => {
         "- This is the final test.\n\n" +
         "### Bugs\n\n" +
         "- This is a test.\n" +
-        "- This is another test.\n"
+        "- This is another test.\n",
     );
   });
 });

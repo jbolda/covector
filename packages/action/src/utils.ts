@@ -39,19 +39,19 @@ export const injectPublishFunctions = curry(
     if (!config) return config;
     if (!Array.isArray(functionsToInject))
       throw new Error(
-        "injectPublishFunctions() in modifyConfig() expects an array"
+        "injectPublishFunctions() in modifyConfig() expects an array",
       );
     return {
       ...config,
       pkgManagers: injectIntoPublish(config.pkgManagers, functionsToInject),
       packages: injectIntoPublish(config.packages, functionsToInject),
     };
-  }
+  },
 );
 
 const injectIntoPublish = (
   packages: { [k: string]: object } | undefined,
-  functionsToInject: Function[]
+  functionsToInject: Function[],
 ) => {
   if (!packages) return {};
   return Object.keys(packages).reduce((finalConfig, pkg) => {
@@ -64,7 +64,7 @@ const injectIntoPublish = (
         }
         return pm;
       },
-      packages![pkg] || {}
+      packages![pkg] || {},
     );
 
     return finalConfig;
@@ -98,18 +98,18 @@ export const createReleases = curry(
       repo: string;
       targetCommitish: string;
     },
-    pipe: FunctionPipe
+    pipe: FunctionPipe,
   ): Promise<void> => {
     if (!pipe.pkgFile) {
       console.log(
-        `skipping Github Release for ${pipe.pkg}, no package file present`
+        `skipping Github Release for ${pipe.pkg}, no package file present`,
       );
       return;
     }
 
     if (!pipe.releaseTag) {
       console.log(
-        `skipping Github Release for ${pipe.pkg}, releaseTag is null`
+        `skipping Github Release for ${pipe.pkg}, releaseTag is null`,
       );
       return;
     }
@@ -123,7 +123,7 @@ export const createReleases = curry(
       })
       .then((releases) => {
         const release = releases.data.find(
-          (r) => r.draft && r.tag_name === releaseTag
+          (r) => r.draft && r.tag_name === releaseTag,
         );
         return release ? release : null;
       })
@@ -132,7 +132,7 @@ export const createReleases = curry(
     let releaseResponse;
     if (existingRelease && existingRelease.draft) {
       console.log(
-        `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
+        `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`,
       );
       releaseResponse = await octokit.rest.repos
         .updateRelease({
@@ -147,7 +147,7 @@ export const createReleases = curry(
         .then((response) => response.data);
     } else {
       console.log(
-        `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
+        `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`,
       );
       releaseResponse = await octokit.rest.repos
         .createRelease({
@@ -179,7 +179,7 @@ export const createReleases = curry(
     core.setOutput(`${cleanPipePkg}-releaseUrl`, releaseResponse.url);
     core.setOutput(
       `${cleanPipePkg}-releaseUploadUrl`,
-      releaseResponse.upload_url
+      releaseResponse.upload_url,
     );
     core.setOutput(`${cleanPipePkg}-releaseId`, releaseResponse.id);
 
@@ -192,7 +192,7 @@ export const createReleases = curry(
       try {
         for (let asset of pipe.assets) {
           console.log(
-            `uploading asset ${asset.name} for ${pipe.pkg}@${pipe.pkgFile.version}`
+            `uploading asset ${asset.name} for ${pipe.pkg}@${pipe.pkgFile.version}`,
           );
           const uploadedAsset = await octokit.rest.repos
             .uploadReleaseAsset({
@@ -215,5 +215,5 @@ export const createReleases = curry(
         console.error(error);
       }
     }
-  }
+  },
 );

@@ -89,8 +89,8 @@ export function* status({
             ? `is 1 package`
             : `is ${commandsToRun.length} packages`
         } ready to publish which includes${commandsToRun.map(
-          (pkg) => ` ${pkg.pkg}@${pkg.pkgFile?.version}`
-        )}`
+          (pkg) => ` ${pkg.pkg}@${pkg.pkgFile?.version}`,
+        )}`,
       );
     }
 
@@ -102,7 +102,7 @@ export function* status({
     console.info("There are no changes.");
     console.log(
       "We have previously released the changes in these files:",
-      changesPaths
+      changesPaths,
     );
     return { pkgReadyToPublish: [], response: "No changes." };
   } else {
@@ -146,7 +146,7 @@ export function* status({
         Object.keys(assembledChanges.releases).length
       } changes which include${Object.keys(assembledChanges.releases).map(
         (release) =>
-          ` ${release} with ${assembledChanges.releases[release].type}`
+          ` ${release} with ${assembledChanges.releases[release].type}`,
       )}`,
     };
   }

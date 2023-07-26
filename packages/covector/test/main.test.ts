@@ -56,10 +56,10 @@ describe("integration test in production mode", () => {
       throw new Error("We are expecting an object here.");
 
     expect((console.info as any).mock.calls.flat()).toContain(
-      ".changes/first-change.md was deleted"
+      ".changes/first-change.md was deleted",
     );
     expect((console.info as any).mock.calls.flat()).toContain(
-      ".changes/second-change.md was deleted"
+      ".changes/second-change.md was deleted",
     );
     expect({
       consoleLog: (console.log as any).mock.calls,
@@ -68,23 +68,23 @@ describe("integration test in production mode", () => {
 
     const changelogTauriCore = yield loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     expect(changelogTauriCore.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.0]\n\n" +
-        "- Summary about the changes in tauri\n"
+        "- Summary about the changes in tauri\n",
     );
 
     const changelogTaurijs = yield loadFile(
       path.join("/cli/tauri.js/", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3]\n\n" +
         "### Dependencies\n\n" +
-        "- Upgraded to `tauri@0.6.0`\n"
+        "- Upgraded to `tauri@0.6.0`\n",
     );
   });
 
@@ -98,10 +98,10 @@ describe("integration test in production mode", () => {
       throw new Error("We are expecting an object here.");
 
     expect((console.info as any).mock.calls.flat()).toContain(
-      ".changes/first-change.md was deleted"
+      ".changes/first-change.md was deleted",
     );
     expect((console.info as any).mock.calls.flat()).toContain(
-      ".changes/second-change.md was deleted"
+      ".changes/second-change.md was deleted",
     );
     expect({
       consoleLog: (console.log as any).mock.calls,
@@ -113,12 +113,12 @@ describe("integration test in production mode", () => {
       "# Changelog\n\n" +
         "## \\[0.4.0]\n\n" +
         "- Summary about the changes in test_app\n" +
-        "- Summary about the changes again(!) in test_app\n"
+        "- Summary about the changes again(!) in test_app\n",
     );
 
     const versionFile = yield loadFile("pubspec.yaml", fullIntegration);
     expect(versionFile.content).toEqual(
-      expect.stringContaining("version: 0.4.0\n")
+      expect.stringContaining("version: 0.4.0\n"),
     );
   });
 
@@ -132,10 +132,10 @@ describe("integration test in production mode", () => {
       throw new Error("We are expecting an object here.");
 
     expect((console.info as any).mock.calls.flat()).toContain(
-      ".changes/first-change.md was deleted"
+      ".changes/first-change.md was deleted",
     );
     expect((console.info as any).mock.calls.flat()).toContain(
-      ".changes/second-change.md was deleted"
+      ".changes/second-change.md was deleted",
     );
     expect({
       consoleLog: (console.log as any).mock.calls,
@@ -144,22 +144,22 @@ describe("integration test in production mode", () => {
 
     const changelog = yield loadFile(
       path.join("dart", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.3.2]\n\n" +
         "### Dependencies\n\n" +
         "- Upgraded to `test_app_two@0.2.0`\n" +
-        "- Upgraded to `test_app_three@3.8.98`\n"
+        "- Upgraded to `test_app_three@3.8.98`\n",
     );
 
     const versionFile = yield loadFile(
       path.join("dart", "pubspec.yaml"),
-      fullIntegration
+      fullIntegration,
     );
     expect(versionFile.content).toEqual(
-      expect.stringContaining("version: 0.3.2\n")
+      expect.stringContaining("version: 0.3.2\n"),
     );
   });
 
@@ -173,10 +173,10 @@ describe("integration test in production mode", () => {
       throw new Error("We are expecting an object here.");
 
     expect((console.info as any).mock.calls.flat()).toContain(
-      ".changes/first-change.md was deleted"
+      ".changes/first-change.md was deleted",
     );
     expect((console.info as any).mock.calls.flat()).toContain(
-      ".changes/second-change.md was deleted"
+      ".changes/second-change.md was deleted",
     );
     expect({
       consoleLog: (console.log as any).mock.calls,
@@ -188,7 +188,7 @@ describe("integration test in production mode", () => {
       "# Changelog\n\n" +
         "## \\[6.2.0]\n\n" +
         "- Summary about the changes in general-pkg\n" +
-        "- A general summary about the generally changes in general-pkg generally\n"
+        "- A general summary about the generally changes in general-pkg generally\n",
     );
 
     const versionFile = yield loadFile("VERSION", fullIntegration);
@@ -250,7 +250,7 @@ describe("integration test in production mode", () => {
 
   it("fails, tries and fails two more times with error", function* () {
     const fullIntegration = f.copy(
-      "integration.js-with-retrying-publish-error"
+      "integration.js-with-retrying-publish-error",
     );
     const covectored = covector({
       command: "publish",
@@ -261,7 +261,7 @@ describe("integration test in production mode", () => {
     const errorCount = (console.error as any).mock.calls
       .flat()
       .filter(
-        (c: string) => typeof c === "string" && c.includes("ENEEDAUTH")
+        (c: string) => typeof c === "string" && c.includes("ENEEDAUTH"),
       ).length;
     expect(errorCount).toBe(3);
 
@@ -346,7 +346,7 @@ describe("integration test in production mode", () => {
       return Object.keys(config.pkgManagers).reduce(
         (finalConfig, pkgManager) => {
           finalConfig.pkgManagers[pkgManager] = Object.keys(
-            config.pkgManagers[pkgManager]
+            config.pkgManagers[pkgManager],
           ).reduce((pm, p) => {
             if (p.startsWith("publish")) {
               const functionInject = async () => console.log("deboop");
@@ -367,7 +367,7 @@ describe("integration test in production mode", () => {
 
           return finalConfig;
         },
-        config
+        config,
       );
     };
 
@@ -388,7 +388,7 @@ describe("integration test in production mode", () => {
       modifyConfig: injectPublishFunctions([
         async (pkg: any) =>
           console.log(
-            `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`
+            `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`,
           ),
         async () => console.log(`push another log`),
       ]),

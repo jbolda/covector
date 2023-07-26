@@ -85,7 +85,7 @@ describe("confirmCommandsToRun", () => {
         expect(commandsToRun).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ pkg: "effection" }),
-          ])
+          ]),
         );
       });
     });
@@ -142,7 +142,7 @@ describe("confirmCommandsToRun", () => {
           ]);
 
           expect(commandsToRun).toEqual(
-            expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })])
+            expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })]),
           );
         });
       });
@@ -208,7 +208,7 @@ describe("confirmCommandsToRun", () => {
         expect(commandsToRun).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ pkg: "effection" }),
-          ])
+          ]),
         );
       });
     });
@@ -270,7 +270,7 @@ describe("confirmCommandsToRun", () => {
         ]);
 
         expect(commandsToRun).toEqual(
-          expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })])
+          expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })]),
         );
       });
     });

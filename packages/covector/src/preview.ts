@@ -94,7 +94,7 @@ export function* preview({
           applied: string | false;
         };
       },
-      pkg: string
+      pkg: string,
     ) => {
       pkgs[pkg] = {
         precommand: false,
@@ -104,7 +104,7 @@ export function* preview({
       };
       return pkgs;
     },
-    {}
+    {},
   );
 
   pkgCommandsRan = yield attemptCommands({
@@ -136,12 +136,12 @@ export function* preview({
           applied: object;
         };
       },
-      result: { name: string }
+      result: { name: string },
     ) => {
       pkgs[result.name].applied = result;
       return pkgs;
     },
-    pkgCommandsRan
+    pkgCommandsRan,
   );
 
   pkgCommandsRan = yield attemptCommands({
@@ -187,7 +187,7 @@ export function* preview({
       };
       return pkgs;
     },
-    {}
+    {},
   );
 
   pkgCommandsRan = yield attemptCommands({

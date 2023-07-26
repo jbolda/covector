@@ -16,12 +16,12 @@
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
-    "@effection/process": "^2.1.2",
+    "@effection/process": "^2.1.3",
     "effection": "^2.0.6",
     "strip-ansi": "6.0.1"
   },
   "devDependencies": {
-    "@covector/types": "^0.0.0",
+    "@covector/types": "0.0.0",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5"
   },

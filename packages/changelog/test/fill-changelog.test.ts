@@ -80,7 +80,7 @@ describe("fills changelog", () => {
         "## \\[0.5.6]\n\n" +
         "- This is a test.\n" +
         "- This is another test.\n" +
-        "- This is the last test.\n"
+        "- This is the last test.\n",
     );
   });
 
@@ -179,8 +179,8 @@ describe("fills changelog", () => {
       "# Changelog\n\n" +
         "## \\[0.5.6]\n\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#43](/pull/43)) This is a test.\n" +
-        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#23](/pull/23)) This is another test.\n"+
-        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#9](/pull/9)) This is the last test.\n"
+        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#23](/pull/23)) This is another test.\n" +
+        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200)([#9](/pull/9)) This is the last test.\n",
     );
   });
 
@@ -248,7 +248,7 @@ describe("fills changelog", () => {
         "## \\[0.5.6]\n\n" +
         "- This is a test.\n" +
         "- This is another test.\n" +
-        "- This is the last test.\n"
+        "- This is the last test.\n",
     );
   });
 
@@ -320,7 +320,7 @@ describe("fills changelog", () => {
         "- Fixes no-server mode not running on another machine due to fs::read_to_string usage instead of the include_str macro.\n" +
         "- Build no longer fails when compiling without environment variables, now the app will show an error.\n" +
         "- Adds desktop notifications API.\n" +
-        "- Properly reflect tauri.conf.json changes on app when running tauri dev.\n"
+        "- Properly reflect tauri.conf.json changes on app when running tauri dev.\n",
     );
   });
 });

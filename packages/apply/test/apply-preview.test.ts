@@ -60,7 +60,7 @@ describe("package file applies preview bump", () => {
         '  "description": "A single package at the root. No monorepo setup.",\n' +
         '  "repository": "https://www.github.com/jbolda/covector.git",\n' +
         '  "version": "0.5.9-branch-name.12345"\n' +
-        "}\n"
+        "}\n",
     );
 
     expect({
@@ -133,7 +133,7 @@ describe("package file applies preview bump", () => {
     });
     const modifiedPkgAFile = yield loadFile(
       "packages/pkg-a/package.json",
-      jsonFolder
+      jsonFolder,
     );
     expect(modifiedPkgAFile.content).toBe(
       "{\n" +
@@ -142,18 +142,18 @@ describe("package file applies preview bump", () => {
         '  "dependencies": {\n' +
         '    "yarn-workspace-base-pkg-b": "1.0.0-branch-name.12345"\n' +
         "  }\n" +
-        "}\n"
+        "}\n",
     );
 
     const modifiedPkgBFile = yield loadFile(
       "packages/pkg-b/package.json",
-      jsonFolder
+      jsonFolder,
     );
     expect(modifiedPkgBFile.content).toBe(
       "{\n" +
         '  "name": "yarn-workspace-base-pkg-b",\n' +
         '  "version": "1.0.0-branch-name.12345"\n' +
-        "}\n"
+        "}\n",
     );
 
     expect({
@@ -215,7 +215,7 @@ describe("package file applies preview bump to pre-release", () => {
         '  "name": "js-single-prerelease-json-fixture",\n' +
         '  "description": "A single package at the root. No monorepo setup.",\n' +
         '  "version": "0.5.9-branch-name.12345"\n' +
-        "}\n"
+        "}\n",
     );
 
     expect({
@@ -287,7 +287,7 @@ describe("package file applies preview bump to pre-release", () => {
     });
     const modifiedPkgAFile = yield loadFile(
       "packages/pkg-a/package.json",
-      jsonFolder
+      jsonFolder,
     );
     expect(modifiedPkgAFile.content).toBe(
       "{\n" +
@@ -296,18 +296,18 @@ describe("package file applies preview bump to pre-release", () => {
         '  "dependencies": {\n' +
         '    "yarn-workspace-base-pkg-b": "1.0.0-branch-name.12345"\n' +
         "  }\n" +
-        "}\n"
+        "}\n",
     );
 
     const modifiedPkgBFile = yield loadFile(
       "packages/pkg-b/package.json",
-      jsonFolder
+      jsonFolder,
     );
     expect(modifiedPkgBFile.content).toBe(
       "{\n" +
         '  "name": "yarn-workspace-base-pkg-b",\n' +
         '  "version": "1.0.0-branch-name.12345"\n' +
-        "}\n"
+        "}\n",
     );
 
     expect({

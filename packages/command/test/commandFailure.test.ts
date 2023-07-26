@@ -34,7 +34,7 @@ describe("attemptCommand fails", () => {
           },
         ],
         dryRun: false,
-      })
+      }),
     );
 
     expect(errored.message).toBe("spawn boop ENOENT");
@@ -54,7 +54,7 @@ describe("attemptCommand fails", () => {
           },
         ],
         dryRun: false,
-      })
+      }),
     );
 
     const errorMessage = "spawn boop ENOENT";
@@ -69,13 +69,13 @@ describe("attemptCommand fails", () => {
       expect(errored.message).toBe(errorMessage);
     } else {
       expect((console.error as any).mock.calls[0][0].message).toBe(
-        errorMessage
+        errorMessage,
       );
       expect((console.error as any).mock.calls[1][0].message).toBe(
-        errorMessage
+        errorMessage,
       );
       expect(
-        (console.error as any).mock.calls?.[2]?.[0]?.message
+        (console.error as any).mock.calls?.[2]?.[0]?.message,
       ).toBeUndefined();
       expect(errored.message).toBe(errorMessage);
     }

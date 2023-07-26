@@ -20,7 +20,7 @@ describe("sh", () => {
 
 Usage:
 
-`
+`,
     );
   });
 
@@ -66,7 +66,7 @@ Usage:
         const { out } = yield sh(
           "echo this thing | echo but actually this",
           { shell: true },
-          false
+          false,
         );
         expect(out).toBe("but actually this");
       });
@@ -75,7 +75,7 @@ Usage:
         const { out } = yield sh(
           "echo this thing | echo but actually this",
           {},
-          false
+          false,
         );
         expect(out).toBe("but actually this");
       });
@@ -89,7 +89,7 @@ Usage:
         const { out } = yield sh(
           "echo this thing | echo but actually this",
           { shell: true },
-          false
+          false,
         );
 
         // this should always use git bash, same as defining it
@@ -100,7 +100,7 @@ Usage:
         const { out } = yield sh(
           "echo this thing | echo but actually this",
           {},
-          false
+          false,
         );
 
         // fallback is whichever shell this is run from
@@ -116,7 +116,7 @@ Usage:
         const { out } = yield sh(
           "echo this thing | echo but actually this",
           { shell: "cmd" },
-          false
+          false,
         );
         // should act like the fallback
         expect(out).toBe("but actually this");
@@ -126,7 +126,7 @@ Usage:
         const { out } = yield sh(
           "echo this thing | echo but actually this",
           { shell: "bash" },
-          false
+          false,
         );
         // can handle pipes just fine, works like other OS
         expect(out).toBe("but actually this");
@@ -137,12 +137,12 @@ Usage:
           sh(
             "echo this thing | echo but actually this",
             { shell: "pwsh" },
-            false
-          )
+            false,
+          ),
         );
         // pwsh doesn't handle pipes with echo
         expect(result.message).toBe(
-          "spawn echo this thing | echo but actually this ENOENT"
+          "spawn echo this thing | echo but actually this ENOENT",
         );
       }, 6000); // increase timeout to 60s, windows seems to take forever
     });

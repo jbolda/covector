@@ -17,20 +17,26 @@ const allPackagesWithoutRead = ({
         return {
           name: pkgName,
           version: "none",
-          deps: (configInfo.dependencies ?? []).reduce((deps, dep) => {
-            const version = pkgDepVersion?.[pkgName]?.[dep]
-              ? pkgDepVersion[pkgName][dep]
-              : "none";
-            deps[dep] = [{ type: "dependencies", version }];
-            return deps;
-          }, {} as Record<string, { type: "dependencies"; version: string }[]>),
+          deps: (configInfo.dependencies ?? []).reduce(
+            (deps, dep) => {
+              const version = pkgDepVersion?.[pkgName]?.[dep]
+                ? pkgDepVersion[pkgName][dep]
+                : "none";
+              deps[dep] = [{ type: "dependencies", version }];
+              return deps;
+            },
+            {} as Record<string, { type: "dependencies"; version: string }[]>,
+          ),
         };
-      }
+      },
     )
-    .reduce((pkgs, pkg: any) => {
-      if (pkg.name) pkgs[pkg.name] = pkg;
-      return pkgs;
-    }, {} as Record<string, PackageFile>);
+    .reduce(
+      (pkgs, pkg: any) => {
+        if (pkg.name) pkgs[pkg.name] = pkg;
+        return pkgs;
+      },
+      {} as Record<string, PackageFile>,
+    );
 
 describe("list changes considering parents", () => {
   let restoreConsole: RestoreConsole;
