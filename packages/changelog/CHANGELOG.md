@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.10.0]
+
+### Bug Fixes
+
+- [`48d11e3`](https://www.github.com/jbolda/covector/commit/48d11e3ced019971a3252c2c9658d0af6179c980)([#292](https://www.github.com/jbolda/covector/pull/292)) Fix detecting PR number when the merge commit contains another PR or an issue number, for example: `fix: add new api, closes #123 (#225)`.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.7.0`
+
 ## \[0.9.0]
 
 ### Enhancements

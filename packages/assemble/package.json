@@ -1,6 +1,6 @@
 {
   "name": "@covector/assemble",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "license": "Apache-2.0",
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@covector/command": "0.7.0",
-    "@covector/files": "0.6.2",
+    "@covector/files": "0.7.0",
     "effection": "^2.0.6",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",

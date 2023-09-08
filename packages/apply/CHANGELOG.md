@@ -1,5 +1,12 @@
 # Changelog
 
+## \[0.9.1]
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.7.0`
+- [`cb35f38`](https://www.github.com/jbolda/covector/commit/cb35f38287580597539f3c69d748ee330939cf84)([#291](https://www.github.com/jbolda/covector/pull/291)) Bumps `semver` minor to latest.
+
 ## \[0.9.0]
 
 ### Enhancements

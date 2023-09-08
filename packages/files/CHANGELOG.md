@@ -1,5 +1,16 @@
 # Changelog
 
+## \[0.7.0]
+
+### Enhancements
+
+- [`7498ecc`](https://www.github.com/jbolda/covector/commit/7498ecc332efd10a1d6d4b6cd487d2817c9a853d)([#289](https://www.github.com/jbolda/covector/pull/289)) Implement zod for config file schema parsing and checking. It will throw an error if the `config.json` has entries that do not match the schema.
+
+### Dependencies
+
+- [`cb35f38`](https://www.github.com/jbolda/covector/commit/cb35f38287580597539f3c69d748ee330939cf84)([#291](https://www.github.com/jbolda/covector/pull/291)) Bumps `js-yaml` minor to sync on the same version.
+- [`cb35f38`](https://www.github.com/jbolda/covector/commit/cb35f38287580597539f3c69d748ee330939cf84)([#291](https://www.github.com/jbolda/covector/pull/291)) Bumps `semver` minor to latest.
+
 ## \[0.6.2]
 
 ### Enhancements
