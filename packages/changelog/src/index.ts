@@ -206,7 +206,10 @@ const applyChanges = ({
           } else {
             const commit = release.meta.commits![0];
             const commitLink = `[\`${commit.hashShort}\`](${gitSiteUrl}commit/${commit.hashLong})`;
-            const [, pr] = /(#[0-9]+)/g.exec(commit.commitSubject) ?? [];
+            const matches = commit.commitSubject.match(/(#[0-9]+)/g) ?? [];
+            const len = matches.length;
+            const pr =
+              len === 0 ? null : len === 1 ? matches[0] : matches[len - 1];
             const prLink = pr
               ? `([${pr}](${gitSiteUrl}pull/${pr.slice(1)}))`
               : "";
