@@ -1,6 +1,6 @@
 {
   "name": "covector",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "license": "Apache-2.0",
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
@@ -19,11 +19,11 @@
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
-    "@covector/apply": "0.9.0",
-    "@covector/assemble": "0.10.1",
-    "@covector/changelog": "0.9.0",
+    "@covector/apply": "0.9.1",
+    "@covector/assemble": "0.10.2",
+    "@covector/changelog": "0.10.0",
     "@covector/command": "0.7.0",
-    "@covector/files": "0.6.2",
+    "@covector/files": "0.7.0",
     "effection": "^2.0.6",
     "globby": "^11.1.0",
     "inquirer": "^8.2.5",
