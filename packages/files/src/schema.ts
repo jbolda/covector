@@ -89,6 +89,7 @@ export const configFileSchema = (cwd: string = ".") =>
     .object({
       changeFolder: z.string().optional(),
       gitSiteUrl: z.string().optional(),
+      timeout: z.number().optional(),
       additionalBumpTypes: z.string().array().optional(),
       defaultChangeTag: z.string().optional(),
       pkgManagers: z.record(pkgManagerSchema).optional(),
