@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.7.1]
+
+- [`4bd5245`](https://www.github.com/jbolda/covector/commit/4bd5245c2c804f61f89fc4dd67aa12ef6675a563)([#297](https://www.github.com/jbolda/covector/pull/297)) Include `timeout` in the `.changes/config.json` schema. It was throwing an error that it was invalid, but it is indeed valid.
+
 ## \[0.7.0]
 
 ### Enhancements
