@@ -18,6 +18,7 @@ jobs:
         id: covector
         with:
           command: "status"
+          comment: true
       - name: dump covector output
         env:
           COVECTOR_CONTEXT: ${{ toJson(steps.covector) }}
