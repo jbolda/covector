@@ -15,6 +15,7 @@ import type {
   CovectorVersion,
   CovectorPublish,
 } from "../../types/src";
+import { formatComment } from "./comment/formatGithubComment";
 
 export function* run(): Generator<any, any, any> {
   try {
@@ -89,7 +90,7 @@ export function* run(): Generator<any, any, any> {
             fs.readFileSync(`${process.env.GITHUB_EVENT_PATH}`, "utf-8")
           );
 
-          const comment = JSON.stringify(covectored.pkgReadyToPublish);
+          const comment = formatComment({ covectored });
           yield postGithubComment({ comment, octokit, payload });
         }
       }
