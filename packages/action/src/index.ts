@@ -80,14 +80,18 @@ export function* run(): Generator<any, any, any> {
         });
       }
 
-      if (core.getInput("comment") && token) {
-        const octokit = github.getOctokit(token);
-        const payload = JSON.parse(
-          fs.readFileSync(`${process.env.GITHUB_EVENT_PATH}`, "utf-8")
-        );
+      if (core.getInput("comment")) {
+        if (!token) {
+          core.setFailed("The `token` is required to create a comment.");
+        } else {
+          const octokit = github.getOctokit(token);
+          const payload = JSON.parse(
+            fs.readFileSync(`${process.env.GITHUB_EVENT_PATH}`, "utf-8")
+          );
 
-        const comment = JSON.stringify(covectored.pkgReadyToPublish);
-        yield postGithubComment({ comment, octokit, payload });
+          const comment = JSON.stringify(covectored.pkgReadyToPublish);
+          yield postGithubComment({ comment, octokit, payload });
+        }
       }
     } else if (command === "version") {
       const status: CovectorStatus = yield covector({ command: "status", cwd });
