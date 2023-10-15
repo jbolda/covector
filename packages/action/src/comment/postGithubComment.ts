@@ -39,7 +39,7 @@ export function* postGithubComment({
     pull_request: { number: issue_number },
   } = payload;
   const tag = "<!-- Covector Action -->";
-  const body = comment + tag;
+  const body = tag + comment;
   const allComments = yield octokit.rest.issues.listComments({
     owner,
     repo,

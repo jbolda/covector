@@ -80,7 +80,7 @@ export function* run(): Generator<any, any, any> {
         });
       }
 
-      if (core.getInput("comment")) {
+      if (core.getInput("comment") && token) {
         const octokit = github.getOctokit(token);
         const payload = JSON.parse(
           fs.readFileSync(`${process.env.GITHUB_EVENT_PATH}`, "utf-8")
