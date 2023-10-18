@@ -1,9 +1,43 @@
-import { CovectorStatus } from "@covector/types";
+import { CovectorStatus, PackageFile } from "@covector/types";
 
 export function formatComment({ covectored }: { covectored: CovectorStatus }) {
-  if (covectored.pkgReadyToPublish.length > 0) {
-    return JSON.stringify(covectored.pkgReadyToPublish);
+  let comment = `## Changes Through [now]\n`;
+  if ("applied" in covectored) {
+    return `${comment}${
+      covectored.response
+    }\n\nThe follow package release are the planned based on the context of changes in this pull request.\n${objectAsMarkdownTable(
+      covectored.applied,
+      ["package", "current", "next"],
+      ["name", "version", "pkg.version"]
+    )}`;
+  } else if ("pkgReadyToPublish" in covectored) {
+    return covectored.response;
+  }
+}
+
+function objectAsMarkdownTable(
+  data: PackageFile[],
+  headings: string[],
+  contentItems: string[]
+) {
+  return `|${headings.map((heading) => ` ${heading} `).join("|")}|
+  |${headings.map(() => `----`).join("|")}|
+|${data
+    .map((item) =>
+      contentItems
+        .map((contentItem) => ` ${getItem(item, contentItem)} `)
+        .join("|")
+    )
+    .join("|\n")}|
+`;
+}
+
+function getItem(item: Record<string, any>, acc: string): any {
+  const keys = acc.split(".");
+  const nextKey = keys[0];
+  if (keys.length > 1) {
+    return getItem(item[nextKey], keys.slice(1).join("."));
   } else {
-    return "There are no packages ready to publish.";
+    return item[nextKey];
   }
 }

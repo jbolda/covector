@@ -37,7 +37,7 @@ export function* run(): Generator<any, any, any> {
     let command = inputCommand;
 
     if (inputCommand === "version-or-publish") {
-      const status = yield covector({ command: "status", cwd });
+      const status = yield covector({ command: "status", cwd, logs: false });
       if (status.response === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
         command = "publish";
@@ -60,9 +60,12 @@ export function* run(): Generator<any, any, any> {
       core.setOutput(
         `willPublish`,
         covectored.response === "No changes." &&
-          covectored.pkgReadyToPublish.length > 0
+          // @ts-expect-error
+          covectored?.pkgReadyToPublish.length > 0
       );
+      // @ts-expect-error
       if (covectored?.pkgReadyToPublish?.length > 0) {
+        // @ts-expect-error
         covectored.pkgReadyToPublish.forEach((pkg) => {
           core.setOutput(
             `willPublish-${pkg.pkg}`
