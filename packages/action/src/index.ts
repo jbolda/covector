@@ -93,8 +93,14 @@ export function* run(): Generator<any, any, any> {
             fs.readFileSync(`${process.env.GITHUB_EVENT_PATH}`, "utf-8")
           );
 
-          const comment = formatComment({ covectored });
-          yield postGithubComment({ comment, octokit, payload });
+          if (payload.pull_request) {
+            const comment = formatComment({ covectored });
+            yield postGithubComment({ comment, octokit, payload });
+          } else {
+            console.warn(
+              "Comments can only be used on pull requests, skipping."
+            );
+          }
         }
       }
     } else if (command === "version") {
