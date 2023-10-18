@@ -3,13 +3,17 @@ import { CovectorStatus, PackageFile } from "@covector/types";
 export function formatComment({ covectored }: { covectored: CovectorStatus }) {
   let comment = `## Changes Through [now]\n`;
   if ("applied" in covectored) {
-    return `${comment}${
-      covectored.response
-    }\n\nThe follow package release are the planned based on the context of changes in this pull request.\n${objectAsMarkdownTable(
-      covectored.applied,
-      ["package", "current", "next"],
-      ["name", "version", "pkg.version"]
-    )}`;
+    return (
+      `${comment}${covectored.response}\n\n` +
+      markdownAccordion(
+        "Planned Package Versions",
+        `The following package release${"s"} are the planned based on the context of changes in this pull request.\n${objectAsMarkdownTable(
+          covectored.applied,
+          ["package", "current", "next"],
+          ["name", "version", "pkg.version"]
+        )}`
+      )
+    );
   } else if ("pkgReadyToPublish" in covectored) {
     return covectored.response;
   }
@@ -40,4 +44,11 @@ function getItem(item: Record<string, any>, acc: string): any {
   } else {
     return item[nextKey];
   }
+}
+
+function markdownAccordion(summary: string, content: string) {
+  return `<details>
+<summary>${summary}</summary>
+${content}
+</details>`;
 }
