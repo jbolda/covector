@@ -8,18 +8,22 @@ export function formatComment({
   covectored: CovectorStatus;
   payload: PullRequestPayload;
 }) {
-  let comment = `## Changes Through ${payload.pull_request.head.sha}\n`;
+  let comment = `### Changes Through ${payload.pull_request.head.sha}\n`;
+  let defaultFooter =
+    "\n<p align='right'><em>Read about <a href='../tree/HEAD/.changes'>change files</a><em> or the docs at <a href='https://github.com/jbolda/covector/actions/tree/main/covector'>github.com/jbolda/covector</a><em></p>";
+
   if ("applied" in covectored) {
     return (
       `${comment}${covectored.response}\n\n` +
       markdownAccordion(
-        "Planned Package Versions",
+        "<i>Planned Package Versions</i>",
         `The following package release${"s"} are the planned based on the context of changes in this pull request.\n${objectAsMarkdownTable(
           covectored.applied,
           ["package", "current", "next"],
           ["name", "version", "pkg.version"]
         )}`
-      )
+      ) +
+      defaultFooter
     );
   } else if ("pkgReadyToPublish" in covectored) {
     return covectored.response;
@@ -57,5 +61,5 @@ function markdownAccordion(summary: string, content: string) {
   return `<details>
 <summary>${summary}</summary>\n
 ${content}
-</details>`;
+</details>\n\n`;
 }
