@@ -157,7 +157,6 @@ export function* status({
       allPackages,
       prereleaseIdentifier,
     });
-    // console.dir({ commands, pipeTemplate }, { depth: 5 });
 
     const applied = yield apply({
       //@ts-expect-error

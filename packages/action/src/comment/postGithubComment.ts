@@ -1,26 +1,6 @@
 import { GitHub } from "@actions/github/lib/utils";
 import { Operation } from "effection";
-import { WebhookPayload } from "@actions/github/lib/interfaces";
-
-interface PullRequestBranch {
-  ref: string;
-  repo: {
-    url: string;
-  };
-  sha: string;
-}
-
-interface PullRequestPayload extends WebhookPayload {
-  pull_request: WebhookPayload["pull_request"] & {
-    head: PullRequestBranch;
-    base: PullRequestBranch;
-  };
-  repository: WebhookPayload["repository"] & {
-    owner: {
-      login: string;
-    };
-  };
-}
+import type { PullRequestPayload } from "./types";
 
 export function* postGithubComment({
   comment,
