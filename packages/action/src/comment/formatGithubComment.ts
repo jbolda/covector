@@ -1,7 +1,14 @@
-import { CovectorStatus, PackageFile } from "@covector/types";
+import type { CovectorStatus, PackageFile } from "@covector/types";
+import type { PullRequestPayload } from "./types";
 
-export function formatComment({ covectored }: { covectored: CovectorStatus }) {
-  let comment = `## Changes Through [now]\n`;
+export function formatComment({
+  covectored,
+  payload,
+}: {
+  covectored: CovectorStatus;
+  payload: PullRequestPayload;
+}) {
+  let comment = `## Changes Through ${payload.pull_request.head}\n`;
   if ("applied" in covectored) {
     return (
       `${comment}${covectored.response}\n\n` +

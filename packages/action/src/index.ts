@@ -16,6 +16,7 @@ import type {
   CovectorPublish,
 } from "../../types/src";
 import { formatComment } from "./comment/formatGithubComment";
+import type { PullRequestPayload } from "./comment/types";
 
 export function* run(): Generator<any, any, any> {
   try {
@@ -89,12 +90,12 @@ export function* run(): Generator<any, any, any> {
           core.setFailed("The `token` is required to create a comment.");
         } else {
           const octokit = github.getOctokit(token);
-          const payload = JSON.parse(
+          const payload: PullRequestPayload = JSON.parse(
             fs.readFileSync(`${process.env.GITHUB_EVENT_PATH}`, "utf-8")
           );
 
           if (payload.pull_request) {
-            const comment = formatComment({ covectored });
+            const comment = formatComment({ covectored, payload });
             yield postGithubComment({ comment, octokit, payload });
           } else {
             console.warn(
