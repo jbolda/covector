@@ -8,7 +8,7 @@ export function formatComment({
   covectored: CovectorStatus;
   payload: PullRequestPayload;
 }) {
-  let comment = `## Changes Through ${payload.pull_request.head}\n`;
+  let comment = `## Changes Through ${payload.pull_request.head.sha}\n`;
   if ("applied" in covectored) {
     return (
       `${comment}${covectored.response}\n\n` +
@@ -55,7 +55,7 @@ function getItem(item: Record<string, any>, acc: string): any {
 
 function markdownAccordion(summary: string, content: string) {
   return `<details>
-<summary>${summary}</summary>
+<summary>${summary}</summary>\n
 ${content}
 </details>`;
 }
