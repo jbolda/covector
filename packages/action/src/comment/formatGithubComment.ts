@@ -85,6 +85,6 @@ function newChangeFile(
   const packageBumps = Object.keys(config.packages)
     .map((pkgName) => `${pkgName}: patch`)
     .join("\n");
-  const content = `---\n${packageBumps}---\n\n${prTitle}\n`;
+  const content = `---\n${packageBumps}\n---\n\n${prTitle}\n`;
   return `?filename=.changes/change-pr-${prNumber}&value=${encodeURI(content)}`;
 }
