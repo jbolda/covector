@@ -4,21 +4,29 @@ import type { PullRequestPayload } from "./types";
 export function formatComment({
   covectored,
   payload,
+  projectReadmeExists = false,
+  changeFolder,
 }: {
   covectored: CovectorStatus;
   payload: PullRequestPayload;
+  projectReadmeExists: boolean;
+  changeFolder: string;
 }) {
   if ("applied" in covectored) {
     let comment = `### Changes Through ${payload.pull_request.head.sha}\n`;
     let addChangeFileUrl = `${payload.pull_request.html_url}/../../new/${
       payload.pull_request.head.ref
-    }${newChangeFile(
-      payload.pull_request.number,
-      payload.pull_request.title,
-      covectored.config
-    )}`;
-    let defaultFooter =
-      "\n<p align='right'><em>Read about <a href='../tree/HEAD/.changes'>change files</a><em> or the docs at <a href='https://github.com/jbolda/covector/tree/main/covector'>github.com/jbolda/covector</a><em></p>";
+    }${newChangeFile({
+      prNumber: payload.pull_request.number,
+      prTitle: payload.pull_request.title,
+      changeFolder,
+      config: covectored.config,
+    })}`;
+    let defaultFooter = `\n\n---\n<p align='right'><em>Read ${
+      projectReadmeExists
+        ? `about <a href='../tree/HEAD/${changeFolder}'>change files</a><em> or`
+        : ""
+    } the docs at <a href='https://github.com/jbolda/covector/tree/main/covector'>github.com/jbolda/covector</a><em></p>`;
 
     return (
       `${comment}${covectored.response}\n\n` +
@@ -72,12 +80,22 @@ ${content}
 </details>\n\n`;
 }
 
-function newChangeFile(prNumber: number, prTitle: string, config: Config) {
+function newChangeFile({
+  prNumber,
+  prTitle,
+  changeFolder,
+  config,
+}: {
+  prNumber: number;
+  prTitle: string;
+  changeFolder: string;
+  config: Config;
+}) {
   const packageBumps = Object.keys(config.packages)
     .map((pkgName) => `"${pkgName}": patch`)
     .join("\n");
   const content = `---\n${packageBumps}\n---\n\n${prTitle}\n`;
-  return `?filename=.changes/change-pr-${prNumber}.md&value=${encodeURI(
+  return `?filename=${changeFolder}/change-pr-${prNumber}.md&value=${encodeURI(
     content
   )}`;
 }

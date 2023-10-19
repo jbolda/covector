@@ -61,12 +61,14 @@ export function* run(): Generator<any, any, any> {
       core.setOutput(
         `willPublish`,
         covectored.response === "No changes." &&
-          // @ts-expect-error
+          "pkgReadyToPublish" in covectored &&
           covectored?.pkgReadyToPublish.length > 0
       );
-      // @ts-expect-error
-      if (covectored?.pkgReadyToPublish?.length > 0) {
-        // @ts-expect-error
+
+      if (
+        "pkgReadyToPublish" in covectored &&
+        covectored?.pkgReadyToPublish?.length > 0
+      ) {
         covectored.pkgReadyToPublish.forEach((pkg) => {
           core.setOutput(
             `willPublish-${pkg.pkg}`
@@ -95,7 +97,13 @@ export function* run(): Generator<any, any, any> {
           );
 
           if (payload.pull_request) {
-            const comment = formatComment({ covectored, payload });
+            const projectReadmeExists = fs.existsSync(`${cwd}/.changes`);
+            const comment = formatComment({
+              covectored,
+              payload,
+              changeFolder: ".changes",
+              projectReadmeExists,
+            });
             if (comment) yield postGithubComment({ comment, octokit, payload });
           } else {
             console.warn(
