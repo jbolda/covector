@@ -23,8 +23,7 @@ import type {
   PkgPublish,
   PackageFile,
   PkgVersion,
-  ConfigFile,
-  File,
+  Config,
 } from "@covector/types";
 
 export function* status({
@@ -44,9 +43,7 @@ export function* status({
   branchTag?: string;
   logs?: boolean;
 }): Generator<any, Covector, any> {
-  const config: ConfigFile & File = yield modifyConfig(
-    yield configFile({ cwd })
-  );
+  const config: Config = yield modifyConfig(yield configFile({ cwd }));
   const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? null : pre.tag;
 
@@ -61,8 +58,7 @@ export function* status({
   const assembledChanges = yield assemble({
     cwd,
     files: changeFilesLoaded,
-    // TODO somehow the type signatures are different here?
-    config: config as any,
+    config,
     preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
 

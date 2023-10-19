@@ -11,7 +11,7 @@ import { runCommand } from "@covector/command";
 
 import type {
   File,
-  ConfigFile,
+  Config,
   Changeset,
   CommonBumps,
   Change,
@@ -176,7 +176,7 @@ export const assemble = function* ({
 }: {
   cwd?: string;
   files: File[];
-  config?: ConfigFile & File;
+  config?: Config;
   preMode?: { on: boolean; prevFiles: string[] };
 }) {
   let plan: {
@@ -330,12 +330,12 @@ export const mergeChangesToConfig = function* ({
   dryRun = false,
   filterPackages = [],
 }: {
-  config: ConfigFile;
-  assembledChanges: { releases: {} };
+  config: Config;
+  assembledChanges: any; //  { releases: {} };
   command: string;
   cwd: string;
-  dryRun: boolean;
-  filterPackages: string[];
+  dryRun?: boolean;
+  filterPackages?: string[];
 }): Operation<{ commands: PkgVersion[]; pipeTemplate: any }> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
@@ -441,12 +441,12 @@ export const mergeIntoConfig = function* ({
   changelogs,
   tag = "",
 }: {
-  config: ConfigFile;
+  config: Config;
   assembledChanges: { releases: {} };
   command: string;
   cwd: string;
-  dryRun: boolean;
-  filterPackages: string[];
+  dryRun?: boolean;
+  filterPackages?: string[];
   changelogs?: { [k: string]: { name: string; changelog: string } };
   tag?: string;
 }): Operation<{ commands: PkgPublish[]; pipeTemplate: any }> {
@@ -638,10 +638,10 @@ const mergeCommand = ({
   command,
   config,
 }: {
-  pkg: keyof ConfigFile["packages"];
+  pkg: keyof Config["packages"];
   pkgManager: string | undefined;
   command: keyof PkgManagerConfig;
-  config: ConfigFile;
+  config: Config;
 }): Command | null => {
   const managerCommand =
     config.pkgManagers?.[pkgManager ?? ""]?.[command] ?? null;

@@ -1,9 +1,4 @@
-import type {
-  ConfigFile,
-  File,
-  CovectorStatus,
-  PackageFile,
-} from "@covector/types";
+import type { Config, CovectorStatus, PackageFile } from "@covector/types";
 import type { PullRequestPayload } from "./types";
 
 export function formatComment({
@@ -77,11 +72,7 @@ ${content}
 </details>\n\n`;
 }
 
-function newChangeFile(
-  prNumber: number,
-  prTitle: string,
-  config: ConfigFile & File
-) {
+function newChangeFile(prNumber: number, prTitle: string, config: Config) {
   const packageBumps = Object.keys(config.packages)
     .map((pkgName) => `${pkgName}: patch`)
     .join("\n");

@@ -12,6 +12,7 @@ export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
 export type CommandConfig = z.infer<typeof allCommandsSchema>;
 export type PkgManagerConfig = z.infer<typeof pkgManagerSchema>;
 export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
+export type Config = ConfigFile & { file?: File };
 
 /* @covector/files */
 interface NestedVersion {
@@ -276,7 +277,7 @@ export type CovectorStatus =
   | {
       response: string;
       pipeTemplate?: object;
-      config: ConfigFile & File;
+      config: Config;
       applied: PackageFile[];
       pkgVersion: PkgVersion[];
     };

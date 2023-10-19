@@ -1,4 +1,4 @@
-import { default as fsDefault, PathLike, statSync } from "fs";
+import { default as fsDefault, PathLike } from "fs";
 // this is compatible with node@12+
 const fs = fsDefault.promises;
 
@@ -190,7 +190,7 @@ export function* readAllPkgFiles({
 }): Operation<Record<string, PackageFile>> {
   const pkgArray = Object.entries(config.packages);
   const readPkgs = pkgArray.map(([name, pkg]) =>
-    readPkgFile({ cwd, pkgConfig: pkg, nickname: name }),
+    readPkgFile({ cwd, pkgConfig: pkg, nickname: name })
   );
   const pkgFilesArray: PackageFile[] = yield all(readPkgs);
 
@@ -201,7 +201,7 @@ export function* readAllPkgFiles({
       }
       return pkgs;
     },
-    {},
+    {}
   );
 }
 
@@ -340,7 +340,7 @@ export const getPackageFileVersion = ({
                   throw new Error(
                     `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +
                       `This cannot be published. ` +
-                      `Please pin it to a MAJOR.MINOR.PATCH reference.`,
+                      `Please pin it to a MAJOR.MINOR.PATCH reference.`
                   );
                 }
                 return depDefinition.version;
@@ -393,8 +393,8 @@ export const setPackageFileVersion = ({
           `Expected ${property} not found in package:\n${JSON.stringify(
             pkg,
             null,
-            2,
-          )}`,
+            2
+          )}`
         );
       if (!dep) return pkg;
 
@@ -447,7 +447,7 @@ export const testSerializePkgFile = ({
   } catch (e: any) {
     if (e?.message === "Can only stringify objects, not null") {
       console.error(
-        "It appears that a dependency within this repo does not have a version specified.",
+        "It appears that a dependency within this repo does not have a version specified."
       );
     }
     throw new Error(`within ${packageFile.name} => ${e?.message}`);
@@ -460,10 +460,10 @@ export function* configFile({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Operation<ConfigFile & File> {
+}): Operation<ConfigFile & { file: File }> {
   const inputFile: File = yield loadFile(
     path.join(changeFolder, "config.json"),
-    cwd,
+    cwd
   );
   try {
     const parsed = configFileSchema(cwd).parse(JSON.parse(inputFile.content));
@@ -493,7 +493,7 @@ export const changeFiles = async ({
     ],
     {
       cwd,
-    },
+    }
   );
 };
 
@@ -520,7 +520,7 @@ export function* changeFilesRemove({
       yield fs.unlink(path.posix.join(cwd, changeFilePath));
       console.info(`${changeFilePath} was deleted`);
       return changeFilePath;
-    }),
+    })
   );
 }
 

@@ -10531,10 +10531,7 @@ Array [
     "tauri.js [publish]: echo publishing tauri.js would happen here",
   ],
   Array [
-    "publishing tauri.js would happen",
-  ],
-  Array [
-    "here",
+    "publishing tauri.js would happen here",
   ],
   Array [
     "push log into publish for tauri.js-v0.6.2",

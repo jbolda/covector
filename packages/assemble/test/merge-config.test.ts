@@ -120,11 +120,11 @@ const config = {
 describe("merge config", () => {
   describe("full config", () => {
     it("merges version", function* () {
-      //@ts-expect-error
       const mergedVersionConfig = yield mergeChangesToConfig({
         config,
         assembledChanges,
         command: "version",
+        cwd: ".",
       });
       expect(mergedVersionConfig).toMatchSnapshot();
     });
@@ -140,11 +140,11 @@ describe("merge config", () => {
       //@ts-expect-error
       delete modifiedConfig.packages["@namespaced/assemble2"].version;
 
-      //@ts-expect-error
       const mergedVersionConfig = yield mergeChangesToConfig({
         config: modifiedConfig,
         assembledChanges,
         command: "version",
+        cwd: ".",
       });
       expect(mergedVersionConfig).toMatchSnapshot();
     });
@@ -206,11 +206,11 @@ describe("merge config", () => {
         },
       };
 
-      //@ts-expect-error
       const mergedVersionConfig = yield mergeChangesToConfig({
         config: nestedConfig,
         assembledChanges: nestedAssembledChanges,
         command: "version",
+        cwd: ".",
       });
       expect(mergedVersionConfig).toMatchSnapshot();
     });
@@ -221,8 +221,7 @@ describe("merge config", () => {
       const mergedPublishConfig = yield mergeIntoConfig({
         cwd: configFolder,
         config,
-        //@ts-expect-error
-        assembledChanges: [],
+        assembledChanges: [] as any,
         command: "publish",
       });
       expect(mergedPublishConfig).toMatchSnapshot();
@@ -231,12 +230,12 @@ describe("merge config", () => {
 
   describe("filtered config", () => {
     it("merges version", function* () {
-      //@ts-expect-error
       const mergedVersionConfig = yield mergeChangesToConfig({
         config,
         assembledChanges,
         command: "version",
         filterPackages: ["assemble1", "@namespaced/assemble1"],
+        cwd: ".",
       });
       expect(mergedVersionConfig).toMatchSnapshot();
     });
@@ -244,7 +243,6 @@ describe("merge config", () => {
     it("merges publish", function* () {
       const configFolder = f.copy("assemble");
 
-      //@ts-expect-error
       const mergedPublishConfig = yield mergeIntoConfig({
         cwd: configFolder,
         config,
