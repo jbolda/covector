@@ -1,4 +1,9 @@
-import type { CovectorStatus, PackageFile } from "@covector/types";
+import type {
+  ConfigFile,
+  File,
+  CovectorStatus,
+  PackageFile,
+} from "@covector/types";
 import type { PullRequestPayload } from "./types";
 
 export function formatComment({
@@ -8,11 +13,18 @@ export function formatComment({
   covectored: CovectorStatus;
   payload: PullRequestPayload;
 }) {
-  let comment = `### Changes Through ${payload.pull_request.head.sha}\n`;
-  let defaultFooter =
-    "\n<p align='right'><em>Read about <a href='../tree/HEAD/.changes'>change files</a><em> or the docs at <a href='https://github.com/jbolda/covector/actions/tree/main/covector'>github.com/jbolda/covector</a><em></p>";
-
   if ("applied" in covectored) {
+    let comment = `### Changes Through ${payload.pull_request.head.sha}\n`;
+    let addChangeFileUrl = `${payload.pull_request.html_url}/../../new/${
+      payload.pull_request.head.ref
+    }${newChangeFile(
+      payload.pull_request.number,
+      payload.pull_request.title,
+      covectored.config
+    )}`;
+    let defaultFooter =
+      "\n<p align='right'><em>Read about <a href='../tree/HEAD/.changes'>change files</a><em> or the docs at <a href='https://github.com/jbolda/covector/tree/main/covector'>github.com/jbolda/covector</a><em></p>";
+
     return (
       `${comment}${covectored.response}\n\n` +
       markdownAccordion(
@@ -23,6 +35,7 @@ export function formatComment({
           ["name", "version", "pkg.version"]
         )}`
       ) +
+      `[Add another change file through the GitHub UI by following this link.](${addChangeFileUrl})\n` +
       defaultFooter
     );
   } else if ("pkgReadyToPublish" in covectored) {
@@ -62,4 +75,16 @@ function markdownAccordion(summary: string, content: string) {
 <summary>${summary}</summary>\n
 ${content}
 </details>\n\n`;
+}
+
+function newChangeFile(
+  prNumber: number,
+  prTitle: string,
+  config: ConfigFile & File
+) {
+  const packageBumps = Object.keys(config.packages).map(
+    (pkgName) => `${pkgName}: patch\n`
+  );
+  const content = `---\n${packageBumps}---\n\n${prTitle}\n`;
+  return `?filename=.changes/change-pr-${prNumber}&value=${content}`;
 }

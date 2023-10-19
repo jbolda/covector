@@ -23,6 +23,7 @@ import type {
   PkgPublish,
   PackageFile,
   PkgVersion,
+  ConfigFile,
 } from "@covector/types";
 
 export function* status({
@@ -42,7 +43,9 @@ export function* status({
   branchTag?: string;
   logs?: boolean;
 }): Generator<any, Covector, any> {
-  const config = yield modifyConfig(yield configFile({ cwd }));
+  const config: ConfigFile & File = yield modifyConfig(
+    yield configFile({ cwd })
+  );
   const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? null : pre.tag;
 
@@ -103,6 +106,7 @@ export function* status({
 
     return <CovectorStatus>{
       pkgReadyToPublish: commandsToRun,
+      config,
       response: "No changes.",
     };
   } else if (!!pre && assembledChanges?.changes?.length === 0) {
@@ -171,6 +175,7 @@ export function* status({
 
     return <CovectorStatus>{
       pkgVersion: commands,
+      config,
       applied,
       pipeTemplate: pipeTemplate,
       response: `There are ${
