@@ -276,7 +276,7 @@ export type CovectorStatus =
   | {
       response: string;
       pipeTemplate?: object;
-      config: ConfigFile;
+      config: ConfigFile & File;
       applied: PackageFile[];
       pkgVersion: PkgVersion[];
     };

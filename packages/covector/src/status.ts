@@ -24,6 +24,7 @@ import type {
   PackageFile,
   PkgVersion,
   ConfigFile,
+  File,
 } from "@covector/types";
 
 export function* status({

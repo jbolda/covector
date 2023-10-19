@@ -96,7 +96,7 @@ export function* run(): Generator<any, any, any> {
 
           if (payload.pull_request) {
             const comment = formatComment({ covectored, payload });
-            yield postGithubComment({ comment, octokit, payload });
+            if (comment) yield postGithubComment({ comment, octokit, payload });
           } else {
             console.warn(
               "Comments can only be used on pull requests, skipping."
