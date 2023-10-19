@@ -82,9 +82,9 @@ function newChangeFile(
   prTitle: string,
   config: ConfigFile & File
 ) {
-  const packageBumps = Object.keys(config.packages).map(
-    (pkgName) => `${pkgName}: patch\n`
-  );
+  const packageBumps = Object.keys(config.packages)
+    .map((pkgName) => `${pkgName}: patch`)
+    .join("\n");
   const content = `---\n${packageBumps}---\n\n${prTitle}\n`;
-  return `?filename=.changes/change-pr-${prNumber}&value=${content}`;
+  return `?filename=.changes/change-pr-${prNumber}&value=${encodeURI(content)}`;
 }
