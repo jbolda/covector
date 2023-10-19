@@ -51,11 +51,11 @@ export const parseChange = function* ({
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
   if (Object.keys(changeset.releases).length === 0)
     throw new Error(
-      `${file.path} didn't have any packages bumped. Please add a package bump.`,
+      `${file.path} didn't have any packages bumped. Please add a package bump.`
     );
 
   for (const [k, v] of Object.entries(
-    changeset.releases as { [k: string]: CommonBumps },
+    changeset.releases as { [k: string]: CommonBumps }
   )) {
     const [bump, tag] = (v as string).split(":");
     (changeset.releases as { [k: string]: CommonBumps })[k] =
@@ -118,19 +118,19 @@ export const compareBumps = (bumpOne: CommonBumps, bumpTwo: CommonBumps) => {
 
 const mergeReleases = (
   changes: Change[],
-  { additionalBumpTypes = [] }: { additionalBumpTypes?: string[] },
+  { additionalBumpTypes = [] }: { additionalBumpTypes?: string[] }
 ) => {
   return changes.reduce((release: { [k: string]: Release }, change) => {
     Object.keys(change.releases).forEach((pkg) => {
       const bumpOptions = ["major", "minor", "patch", "noop"].concat(
-        additionalBumpTypes,
+        additionalBumpTypes
       );
 
       assertBumpType(
         pkg,
         change.releases[pkg],
         bumpOptions,
-        !change.meta ? `` : ` in ${change.meta.path}`,
+        !change.meta ? `` : ` in ${change.meta.path}`
       );
 
       const bumpType = additionalBumpTypes.includes(change.releases[pkg])
@@ -156,14 +156,14 @@ function assertBumpType(
   pkgName: string,
   bumpType: string,
   bumpOptions: string[],
-  filenameRef: string,
+  filenameRef: string
 ) {
   const satisfiesAssertion = bumpOptions.includes(bumpType);
   if (!satisfiesAssertion) {
     throw new Error(
       `${bumpType} specified for ${pkgName} is invalid.\n` +
         `Try one of the following${filenameRef}: ` +
-        `${bumpOptions.filter((option) => option !== "noop").join(", ")}.\n`,
+        `${bumpOptions.filter((option) => option !== "noop").join(", ")}.\n`
     );
   }
 }
@@ -176,7 +176,7 @@ export const assemble = function* ({
 }: {
   cwd?: string;
   files: File[];
-  config?: ConfigFile;
+  config?: ConfigFile & File;
   preMode?: { on: boolean; prevFiles: string[] };
 }) {
   let plan: {
@@ -197,7 +197,7 @@ export const assemble = function* ({
     if (preMode.prevFiles.length > 0) {
       const newFiles = files.reduce((newFiles: File[], file) => {
         const prevFile = preMode.prevFiles.find(
-          (filename) => file.path === filename,
+          (filename) => file.path === filename
         );
         if (!prevFile) {
           return newFiles.concat([file]);
@@ -213,7 +213,7 @@ export const assemble = function* ({
 
       const oldFiles = files.reduce((newFiles: File[], file) => {
         const prevFile = preMode.prevFiles.find(
-          (filename) => file.path === filename,
+          (filename) => file.path === filename
         );
         if (prevFile) {
           return newFiles.concat([file]);
@@ -257,10 +257,10 @@ export const assemble = function* ({
             }`;
             return files;
           },
-          "",
+          ""
         );
         throw Error(
-          `${pkg} listed in ${changesContainingError} does not exist in the .changes/config.json`,
+          `${pkg} listed in ${changesContainingError} does not exist in the .changes/config.json`
         );
       }
     }
@@ -317,7 +317,7 @@ const changeDiff = ({
         diffed[pkg].type = `pre${allMergedRelease[pkg].type}`;
         return diffed;
       },
-      {},
+      {}
     );
   }
 };
@@ -372,7 +372,7 @@ export const mergeChangesToConfig = function* ({
 
       return pkged;
     },
-    {} as { [k: string]: PkgVersion },
+    {} as { [k: string]: PkgVersion }
   );
 
   const pipeOutput: {
@@ -380,7 +380,7 @@ export const mergeChangesToConfig = function* ({
   } = {};
   let commands: PkgVersion[] = [];
   for (let pkg of Object.keys(
-    usePackageSubset(assembledChanges.releases, filterPackages),
+    usePackageSubset(assembledChanges.releases, filterPackages)
   )) {
     if (!pkgCommands[pkg]) continue;
 
@@ -404,7 +404,7 @@ export const mergeChangesToConfig = function* ({
       precommand: templateCommands(
         pkgCommands[pkg].precommand,
         pipeToTemplate,
-        ["command", "dryRunCommand", "runFromRoot"],
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
       command: templateCommands(pkgCommands[pkg].command, pipeToTemplate, [
         "command",
@@ -413,7 +413,7 @@ export const mergeChangesToConfig = function* ({
       postcommand: templateCommands(
         pkgCommands[pkg].postcommand,
         pipeToTemplate,
-        ["command", "dryRunCommand", "runFromRoot"],
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
       errorOnVersionRange: pkgCommands[pkg].errorOnVersionRange,
     };
@@ -424,7 +424,7 @@ export const mergeChangesToConfig = function* ({
   if (dryRun) {
     console.dir("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
-      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 }),
+      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
     );
   }
 
@@ -523,7 +523,7 @@ export const mergeIntoConfig = function* ({
 
       return pkged;
     },
-    {},
+    {}
   );
 
   const pipeOutput: {
@@ -572,7 +572,7 @@ export const mergeIntoConfig = function* ({
                   pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
                 : template(
                     //@ts-expect-error no index type string
-                    pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`],
+                    pkgCommands[pkg][`getPublishedVersion${subPublishCommand}`]
                   )(pipeToTemplate),
           }),
       ...(!pkgCommands[pkg].assets
@@ -598,7 +598,7 @@ export const mergeIntoConfig = function* ({
       precommand: templateCommands(
         pkgCommands[pkg].precommand,
         pipeToTemplate,
-        ["command", "dryRunCommand", "runFromRoot"],
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
       command: templateCommands(pkgCommands[pkg].command, pipeToTemplate, [
         "command",
@@ -607,7 +607,7 @@ export const mergeIntoConfig = function* ({
       postcommand: templateCommands(
         pkgCommands[pkg].postcommand,
         pipeToTemplate,
-        ["command", "dryRunCommand", "runFromRoot"],
+        ["command", "dryRunCommand", "runFromRoot"]
       ),
       errorOnVersionRange: pkgCommands[pkg].errorOnVersionRange,
       releaseTag:
@@ -615,7 +615,7 @@ export const mergeIntoConfig = function* ({
           ? false
           : template(
               (pkgCommands[pkg].releaseTag as string | undefined) ??
-                "${ pkg.pkg }-v${ pkgFile.version }",
+                "${ pkg.pkg }-v${ pkgFile.version }"
             )(pipeToTemplate),
     };
 
@@ -625,7 +625,7 @@ export const mergeIntoConfig = function* ({
   if (dryRun) {
     console.dir("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
-      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 }),
+      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
     );
   }
 
@@ -670,7 +670,7 @@ type PossibleTemplateCommands =
 const templateCommands = (
   command: Command | null,
   pipe: PipePublishTemplate | PipeVersionTemplate,
-  complexCommands: Extract<keyof NormalizedCommand, PossibleTemplateCommands>[],
+  complexCommands: Extract<keyof NormalizedCommand, PossibleTemplateCommands>[]
 ): CommandTypes[] | null => {
   if (command === null) return command;
   const commands = !Array.isArray(command) ? [command] : command;

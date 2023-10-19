@@ -61,7 +61,8 @@ export function* status({
   const assembledChanges = yield assemble({
     cwd,
     files: changeFilesLoaded,
-    config,
+    // TODO somehow the type signatures are different here?
+    config: config as any,
     preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
 
