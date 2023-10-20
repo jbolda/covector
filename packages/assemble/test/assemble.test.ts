@@ -173,7 +173,7 @@ describe("assemble", () => {
             releases: { assemble1: "patch", assemble2: "patch" },
             summary: "This is a test.",
           },
-        ]),
+        ])
       );
       expect(assembled.releases).toMatchObject({
         "@namespaced/assemble2": { type: "prepatch" },
@@ -198,7 +198,7 @@ describe("assemble", () => {
             releases: { assemble1: "patch", assemble2: "patch" },
             summary: "This is a test.",
           },
-        ]),
+        ])
       );
       expect(assembled.releases).toMatchObject({
         "@namespaced/assemble2": { type: "prepatch" },
@@ -223,7 +223,7 @@ describe("assemble", () => {
             releases: { assemble1: "patch", assemble2: "patch" },
             summary: "This is a test.",
           },
-        ]),
+        ])
       );
       expect(assembled.releases).toMatchObject({
         assemble1: { type: "preminor" },
@@ -245,7 +245,7 @@ describe("assemble", () => {
             releases: { assemble1: "minor", assemble2: "patch" },
             summary: "This is a test.",
           },
-        ]),
+        ])
       );
       expect(assembled.releases).toMatchObject({
         assemble1: { type: "prerelease" },
@@ -277,7 +277,7 @@ This doesn't bump much.
         });
       } catch (e: any) {
         expect(e.message).toMatch(
-          ".changes/empty-file.md didn't have any packages bumped. Please add a package bump.",
+          ".changes/empty-file.md didn't have any packages bumped. Please add a package bump."
         );
       }
     });
@@ -314,7 +314,7 @@ This doesn't bump much.
       } catch (e: any) {
         expect(e.message).toMatch(
           "housekeeping specified for assemble1 is invalid.\n" +
-            "Try one of the following: major, minor, patch.\n",
+            "Try one of the following: major, minor, patch.\n"
         );
       }
     });
@@ -329,7 +329,7 @@ This doesn't bump much.
       } catch (e: any) {
         expect(e.message).toMatch(
           "explosions specified for @namespaced/assemble2 is invalid.\n" +
-            "Try one of the following: major, minor, patch, housekeeping, workflows.\n",
+            "Try one of the following: major, minor, patch, housekeeping, workflows.\n"
         );
       }
     });

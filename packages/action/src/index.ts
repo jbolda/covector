@@ -7,12 +7,16 @@ import {
   injectPublishFunctions,
   createReleases,
 } from "./utils";
+import { postGithubComment } from "./comment/postGithubComment";
+import fs from "fs";
 
 import type {
   CovectorStatus,
   CovectorVersion,
   CovectorPublish,
 } from "../../types/src";
+import { formatComment } from "./comment/formatGithubComment";
+import type { PullRequestPayload } from "./comment/types";
 
 export function* run(): Generator<any, any, any> {
   try {
@@ -34,7 +38,7 @@ export function* run(): Generator<any, any, any> {
     let command = inputCommand;
 
     if (inputCommand === "version-or-publish") {
-      const status = yield covector({ command: "status", cwd });
+      const status = yield covector({ command: "status", cwd, logs: false });
       if (status.response === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
         command = "publish";
@@ -57,25 +61,56 @@ export function* run(): Generator<any, any, any> {
       core.setOutput(
         `willPublish`,
         covectored.response === "No changes." &&
-          covectored.pkgReadyToPublish.length > 0,
+          "pkgReadyToPublish" in covectored &&
+          covectored?.pkgReadyToPublish.length > 0
       );
-      if (covectored?.pkgReadyToPublish?.length > 0) {
+
+      if (
+        "pkgReadyToPublish" in covectored &&
+        covectored?.pkgReadyToPublish?.length > 0
+      ) {
         covectored.pkgReadyToPublish.forEach((pkg) => {
           core.setOutput(
             `willPublish-${pkg.pkg}`
               .replace(/\@/g, "-")
               .replace(/\//g, "-")
               .replace(/\_/g, "-"),
-            true,
+            true
           );
           core.setOutput(
             `version-${pkg.pkg}`
               .replace(/\@/g, "-")
               .replace(/\//g, "-")
               .replace(/\_/g, "-"),
-            pkg?.pkgFile?.version ?? "",
+            pkg?.pkgFile?.version ?? ""
           );
         });
+      }
+
+      if (core.getInput("comment")) {
+        if (!token) {
+          core.setFailed("The `token` is required to create a comment.");
+        } else {
+          const octokit = github.getOctokit(token);
+          const payload: PullRequestPayload = JSON.parse(
+            fs.readFileSync(`${process.env.GITHUB_EVENT_PATH}`, "utf-8")
+          );
+
+          if (payload.pull_request) {
+            const projectReadmeExists = fs.existsSync(`${cwd}/.changes`);
+            const comment = formatComment({
+              covectored,
+              payload,
+              changeFolder: ".changes",
+              projectReadmeExists,
+            });
+            if (comment) yield postGithubComment({ comment, octokit, payload });
+          } else {
+            console.warn(
+              "Comments can only be used on pull requests, skipping."
+            );
+          }
+        }
       }
     } else if (command === "version") {
       const status: CovectorStatus = yield covector({ command: "status", cwd });
@@ -92,12 +127,12 @@ export function* run(): Generator<any, any, any> {
         (text, pkg) => {
           if (typeof covectored.commandsRan[pkg].command === "string") {
             text = `${text}\n\n\n# ${pkg}\n\n${commandText(
-              covectored.commandsRan[pkg],
+              covectored.commandsRan[pkg]
             )}`;
           }
           return text;
         },
-        "# Version Updates\n\nMerging this PR will release new versions of the following packages based on your change files.\n\n",
+        "# Version Updates\n\nMerging this PR will release new versions of the following packages based on your change files.\n\n"
       );
       core.setOutput("change", covectoredSmushed);
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
@@ -112,7 +147,7 @@ export function* run(): Generator<any, any, any> {
       core.debug(
         `createRelease is ${core.getInput("createRelease")} ${
           token ? "with" : "without"
-        } a token.`,
+        } a token.`
       );
       if (core.getInput("createRelease") === "true" && token) {
         const octokit = github.getOctokit(token);
@@ -149,7 +184,7 @@ export function* run(): Generator<any, any, any> {
               return pub === "" ? pkg : `${pub},${pkg}`;
             }
           },
-          "",
+          ""
         );
         core.setOutput("packagesPublished", packagesPublished);
         core.setOutput("templatePipe", JSON.stringify(covectored.pipeTemplate));
@@ -172,26 +207,26 @@ export function* run(): Generator<any, any, any> {
       const configuredLabel = core.getInput("label");
       const previewLabel =
         github?.context?.payload?.pull_request?.labels?.filter(
-          ({ name }: { name: String }) => name === configuredLabel,
+          ({ name }: { name: String }) => name === configuredLabel
         ).length;
       const previewVersion = core.getInput("previewVersion");
       const versionIdentifier = core.getInput("identifier");
 
       if (github.context.eventName !== "pull_request") {
         throw new Error(
-          `The 'preview' command for the covector action is only meant to run on pull requests.`,
+          `The 'preview' command for the covector action is only meant to run on pull requests.`
         );
       }
 
       if (github.context.eventName !== "pull_request") {
         throw new Error(
-          `The 'preview' command for the covector action is only meant to run on pull requests.`,
+          `The 'preview' command for the covector action is only meant to run on pull requests.`
         );
       }
 
       if (!previewLabel) {
         console.log(
-          `Not publishing any preview packages because the "${configuredLabel}" label has not been applied to this pull request.`,
+          `Not publishing any preview packages because the "${configuredLabel}" label has not been applied to this pull request.`
         );
       } else {
         // primarily runs publish
@@ -205,7 +240,7 @@ export function* run(): Generator<any, any, any> {
 
         if (branchName === "latest") {
           throw new Error(
-            `Using the branch name, 'latest', will conflict with restricted tags when publishing packages. Please create another pull request with a different branch name.`,
+            `Using the branch name, 'latest', will conflict with restricted tags when publishing packages. Please create another pull request with a different branch name.`
           );
         }
 
@@ -215,7 +250,7 @@ export function* run(): Generator<any, any, any> {
             break;
           default:
             throw new Error(
-              `Version identifier you specified, "${versionIdentifier}", is invalid.`,
+              `Version identifier you specified, "${versionIdentifier}", is invalid.`
             );
         }
 
@@ -226,12 +261,12 @@ export function* run(): Generator<any, any, any> {
           case "sha":
             versionTemplate = `${identifier}.${github.context.payload.after.substring(
               0,
-              7,
+              7
             )}`;
             break;
           default:
             throw new Error(
-              `Preview version template you specified, "${previewVersion}", is invalid. Please use 'date' or 'sha'.`,
+              `Preview version template you specified, "${previewVersion}", is invalid. Please use 'date' or 'sha'.`
             );
         }
 
@@ -245,7 +280,7 @@ export function* run(): Generator<any, any, any> {
 
         if (covectored.commandsRan) {
           let packagesPublished: any = Object.entries(
-            covectored.commandsRan,
+            covectored.commandsRan
           ).reduce((pub: string[], pkg: any[]) => {
             if (pkg[1].published) {
               let { name: pkgName, version: pkgVersion }: any =
@@ -273,7 +308,7 @@ export function* run(): Generator<any, any, any> {
             });
 
             const covectorComments = data.filter((comment: any) =>
-              comment.body.includes("<!-- covector comment -->"),
+              comment.body.includes("<!-- covector comment -->")
             );
 
             let prComment = () => {
@@ -285,7 +320,7 @@ export function* run(): Generator<any, any, any> {
                   (result: string, publishedPackage: string) => {
                     return `${result}- \`${publishedPackage}\`\n`;
                   },
-                  "",
+                  ""
                 );
               } else {
                 commentHead = "Covector did not publish any preview packages.";
@@ -311,7 +346,7 @@ export function* run(): Generator<any, any, any> {
             }
           } else {
             throw new Error(
-              `Github token argument in preview workflow is missing but it is required in order to generate comments on pull requests.`,
+              `Github token argument in preview workflow is missing but it is required in order to generate comments on pull requests.`
             );
           }
 
@@ -327,7 +362,7 @@ export function* run(): Generator<any, any, any> {
       }
     } else {
       throw new Error(
-        `Command "${command}" not recognized. See README for which commands are available.`,
+        `Command "${command}" not recognized. See README for which commands are available.`
       );
     }
   } catch (error: any) {

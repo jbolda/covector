@@ -11,6 +11,7 @@ export function* covector({
   // shared
   command,
   cwd = process.cwd(),
+  logs = true,
   // usage inputs
   dryRun = false,
   filterPackages = [],
@@ -23,6 +24,7 @@ export function* covector({
 }: {
   command: string;
   dryRun?: boolean;
+  logs?: boolean;
   cwd?: string;
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
@@ -42,6 +44,7 @@ export function* covector({
       command,
       dryRun,
       cwd,
+      logs,
       filterPackages,
       modifyConfig,
       branchTag,

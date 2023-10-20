@@ -23,6 +23,7 @@ export function* apply({
   bump = true,
   previewVersion = "",
   prereleaseIdentifier,
+  logs = true,
 }: {
   commands: PackageCommand[];
   allPackages: Record<string, PackageFile>;
@@ -30,19 +31,21 @@ export function* apply({
   bump: boolean;
   previewVersion: string;
   prereleaseIdentifier?: string;
+  logs?: boolean;
 }): Operation<PackageFile[]> {
   const changes = commands.reduce(
     (finalChanges: { [k: string]: PackageCommand }, command) => {
       finalChanges[command.pkg] = command;
       return finalChanges;
     },
-    {},
+    {}
   );
 
   const bumps = bumpAll({
     changes,
     allPackages,
     previewVersion,
+    logs,
     prereleaseIdentifier,
   });
 
@@ -51,13 +54,14 @@ export function* apply({
       bumps: bumps.reduce(
         (final: PackageFile[], current) =>
           !current.file ? final : final.concat([current]),
-        [],
+        []
       ),
       cwd,
     });
   } else {
     bumps.forEach((b) => {
-      if (!!b) console.log(`${b.name} planned to be bumped to ${b.version}`);
+      if (!!b && logs)
+        console.log(`${b.name} planned to be bumped to ${b.version}`);
     });
   }
   return bumps;
@@ -77,7 +81,7 @@ export function* validateApply({
       finalChanges[command.pkg] = command;
       return finalChanges;
     },
-    {},
+    {}
   );
 
   const bumps = bumpAll({
@@ -88,7 +92,7 @@ export function* validateApply({
   }).reduce(
     (final: PackageFile[], current) =>
       !current.file ? final : final.concat([current]),
-    [],
+    []
   );
 
   try {
@@ -139,7 +143,7 @@ const bumpAll = ({
     } else if (previewVersion) {
       // change log (assume that the prerelease will be removed)
       console.log(
-        `bumping ${pkg} with ${previewVersion} identifier to publish a preview`,
+        `bumping ${pkg} with ${previewVersion} identifier to publish a preview`
       );
     }
 
@@ -198,7 +202,7 @@ const bumpMain = ({
 
   if (prereleaseIdentifier && typeof prereleaseIdentifier !== "string")
     throw new Error(
-      `${pkg.name} needs prereleaseIdentifier passed as a string`,
+      `${pkg.name} needs prereleaseIdentifier passed as a string`
     );
 
   let next = semver.inc(pkg.version, bumpType, prereleaseIdentifier);
@@ -224,7 +228,7 @@ const bumpMain = ({
       throw new Error(
         `${pkg.name} will be bumped to ${version}. ` +
           `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
-          `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`,
+          `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
       );
     }
   }
