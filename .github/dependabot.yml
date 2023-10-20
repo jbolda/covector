@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # no update PRs
+    open-pull-requests-limit: 0
+  # ignore the fixtures directory
+  - package-ecosystem: "npm"
+    directory: "/__fixtures__"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # no update PRs
+    open-pull-requests-limit: 0
+  # ignore the fixtures directory
+  - package-ecosystem: "cargo"
+    directory: "/__fixtures__"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
