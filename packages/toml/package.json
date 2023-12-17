@@ -1,0 +1,23 @@
+{
+  "name": "@covector/toml",
+  "version": "0.0.0",
+  "files": [
+    "pkg/covector_toml_bg.wasm",
+    "pkg/covector_toml.js",
+    "pkg/covector_toml.d.ts",
+    "index.js",
+    "index.d.ts"
+  ],
+  "main": "index.js",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "wasm-pack build --release --no-pack --target nodejs && rimraf pkg/.gitignore",
+    "build:debug": "wasm-pack build --dev --no-pack --target nodejs && rimraf pkg/.gitignore",
+    "pretest": "npm run build",
+    "test": "node ./tests/index.spec.js"
+  },
+  "devDependencies": {
+    "wasm-pack": "^0.12.1",
+    "rimraf": "^3.0.2"
+  }
+}
