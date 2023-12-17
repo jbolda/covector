@@ -14,7 +14,7 @@
     "build": "wasm-pack build --release --no-pack --target nodejs && rimraf pkg/.gitignore",
     "build:debug": "wasm-pack build --dev --no-pack --target nodejs && rimraf pkg/.gitignore",
     "pretest": "npm run build",
-    "test": "node ./tests/index.spec.js"
+    "test": "jest"
   },
   "devDependencies": {
     "wasm-pack": "^0.12.1",
