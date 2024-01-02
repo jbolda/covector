@@ -73,6 +73,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
         throw new Error(`package version is not valid in ./${file.path}`);
       return {
         version: version,
+        currentVersion: version,
         versionMajor: semver.major(version),
         versionMinor: semver.minor(version),
         versionPatch: semver.patch(version),
@@ -84,6 +85,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
       const parsedJSON = JSON.parse(file.content);
       return {
         version: parsedJSON.version,
+        currentVersion: parsedJSON.version,
         versionMajor: semver.major(parsedJSON.version),
         versionMinor: semver.minor(parsedJSON.version),
         versionPatch: semver.patch(parsedJSON.version),
@@ -106,6 +108,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
       const verifiedYAML = parsedYAML as { name: string; version: string };
       return {
         version: verifiedYAML.version,
+        currentVersion: verifiedYAML.version,
         versionMajor: semver.major(verifiedYAML.version),
         versionMinor: semver.minor(verifiedYAML.version),
         versionPatch: semver.patch(verifiedYAML.version),
@@ -120,6 +123,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
       }
       return {
         version: stringVersion,
+        currentVersion: stringVersion,
         versionMajor: semver.major(stringVersion),
         versionMinor: semver.minor(stringVersion),
         versionPatch: semver.patch(stringVersion),
@@ -385,7 +389,6 @@ export const setPackageFileVersion = ({
       property === "dev-dependencies" ||
       property === "build-dependencies"
     ) {
-      const currentPkg = pkg.pkg;
       const currentProperty = currentPkg[property];
       if (currentProperty === undefined)
         // throw as this definitely shouldn't happen

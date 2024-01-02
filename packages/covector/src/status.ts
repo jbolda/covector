@@ -16,6 +16,7 @@ import {
   changesConsideringParents,
   validateApply,
 } from "@covector/apply";
+import { cloneDeep } from "lodash";
 
 import type {
   CovectorStatus,
@@ -156,7 +157,8 @@ export function* status({
     yield validateApply({
       //@ts-expect-error
       commands,
-      allPackages,
+      // as the validate ends up mutating
+      allPackages: cloneDeep(allPackages),
       prereleaseIdentifier,
     });
 

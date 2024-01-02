@@ -61,7 +61,9 @@ export function* apply({
   } else {
     bumps.forEach((b) => {
       if (!!b && logs)
-        console.log(`${b.name} planned to be bumped to ${b.version}`);
+        console.log(
+          `${b.name} planned to be bumped from ${b.currentVersion} to ${b.version}`
+        );
     });
   }
   return bumps;

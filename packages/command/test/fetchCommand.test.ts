@@ -17,6 +17,7 @@ const fillWithDefaults = ({ version }: { version: string }) => {
     .map((v) => parseInt(v));
   return {
     version,
+    currentVersion: version,
     versionMajor,
     versionMinor,
     versionPatch,
@@ -81,11 +82,11 @@ describe("fetchCommand", () => {
           command: "publish",
           cwd: "",
           dryRun: false,
-        }),
+        })
       );
 
       expect(errored.message).toEqual(
-        "effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404: Not Found",
+        "effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404: Not Found"
       );
     });
 
@@ -111,12 +112,12 @@ describe("fetchCommand", () => {
           command: "publish",
           cwd: "",
           dryRun: false,
-        }),
+        })
       );
 
       expect(console.error as any).toBeCalledTimes(2);
       expect(errored.message).toEqual(
-        "effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404: Not Found",
+        "effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404: Not Found"
       );
     });
   });
@@ -168,7 +169,7 @@ describe("fetchCommand", () => {
           command: "publish",
           cwd: "",
           dryRun: false,
-        }),
+        })
       );
 
       expect(errored.message).toEqual(
@@ -176,7 +177,7 @@ describe("fetchCommand", () => {
   {
     "detail": "crate \`tauri\` does not have a version \`0.12.0\`"
   }
-]`,
+]`
       );
     });
 
@@ -202,7 +203,7 @@ describe("fetchCommand", () => {
           command: "publish",
           cwd: "",
           dryRun: false,
-        }),
+        })
       );
 
       expect(console.error as any).toBeCalledTimes(2);
@@ -211,7 +212,7 @@ describe("fetchCommand", () => {
   {
     "detail": "crate \`tauri\` does not have a version \`0.12.0\`"
   }
-]`,
+]`
       );
     });
   });
