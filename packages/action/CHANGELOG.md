@@ -1,5 +1,14 @@
 # Changelog
 
+## \[0.11.0]
+
+- [`9480736`](https://www.github.com/jbolda/covector/commit/9480736961fb92b1861938015b1be3fd53ee5355)([#299](https://www.github.com/jbolda/covector/pull/299)) Return additional `status` content from `covector` to enable posting a comment in PR providing additional context of the expected change files.
+- [`9480736`](https://www.github.com/jbolda/covector/commit/9480736961fb92b1861938015b1be3fd53ee5355)([#299](https://www.github.com/jbolda/covector/pull/299)) Add option to post a comment in a GitHub pull request comment lifting the context from covector.
+
+### Dependencies
+
+- Upgraded to `covector@0.11.0`
+
 ## \[0.10.2]
 
 ### Dependencies

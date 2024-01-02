@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.10.2]
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.7.2`
+
 ## \[0.10.1]
 
 ### Dependencies

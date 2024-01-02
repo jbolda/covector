@@ -1,5 +1,13 @@
 # Changelog
 
+## \[0.10.4]
+
+- [`9e111fc`](https://www.github.com/jbolda/covector/commit/9e111fcf2431690b8719ca493e6580a42e72c457)([#304](https://www.github.com/jbolda/covector/pull/304)) Add currentVersion property to more easily refer to the version before a bump.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.7.2`
+
 ## \[0.10.3]
 
 ### Dependencies
