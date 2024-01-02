@@ -290,18 +290,19 @@ Summary about the changes in tauri-updater
       "bumping tauri.js with patch",
     ],
     Array [
-      "tauri.js planned to be bumped to 0.6.3",
+      "tauri.js planned to be bumped from 0.6.2 to 0.6.3",
     ],
     Array [
-      "tauri planned to be bumped to 0.6.0",
+      "tauri planned to be bumped from 0.5.2 to 0.6.0",
     ],
     Array [
-      "tauri-updater planned to be bumped to 0.4.3",
+      "tauri-updater planned to be bumped from 0.4.2 to 0.4.3",
     ],
   ],
   "covectorReturn": Object {
     "applied": Array [
       Object {
+        "currentVersion": "0.6.2",
         "deps": Object {
           "@babel/core": Array [
             Object {
@@ -891,7 +892,7 @@ Summary about the changes in tauri-updater
             "test": "jest --runInBand --no-cache --testPathIgnorePatterns=\\"(build|dev)\\"",
             "test:local": "jest --runInBand",
           },
-          "version": "0.6.4",
+          "version": "0.6.3",
         },
         "version": "0.6.3",
         "versionMajor": 0,
@@ -900,6 +901,7 @@ Summary about the changes in tauri-updater
         "versionPrerelease": null,
       },
       Object {
+        "currentVersion": "0.5.2",
         "deps": Object {
           "anyhow": Array [
             Object {
@@ -1205,7 +1207,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
             },
             "name": "tauri",
             "repository": "https://github.com/tauri-apps/tauri",
-            "version": "0.7.0",
+            "version": "0.6.0",
           },
         },
         "version": "0.6.0",
@@ -1215,6 +1217,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
         "versionPrerelease": null,
       },
       Object {
+        "currentVersion": "0.4.2",
         "deps": Object {
           "anyhow": Array [
             Object {
@@ -1338,7 +1341,7 @@ thiserror = \\"1.0.19\\"
             "license": "MIT",
             "name": "tauri-updater",
             "repository": "https://github.com/tauri-apps/tauri",
-            "version": "0.4.4",
+            "version": "0.4.3",
           },
         },
         "version": "0.4.3",
@@ -2451,6 +2454,7 @@ Object {
           "path": "./tauri",
           "pkg": "tauri",
           "pkgFile": Object {
+            "currentVersion": "0.5.2",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -2787,6 +2791,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
           "path": "./tauri-api",
           "pkg": "tauri-api",
           "pkgFile": Object {
+            "currentVersion": "0.5.1",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -3047,6 +3052,7 @@ totems = \\"0.2.7\\"",
           "path": "./cli/tauri-bundler",
           "pkg": "tauri-bundler",
           "pkgFile": Object {
+            "currentVersion": "0.6.0",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -3384,6 +3390,7 @@ path = \\"src/main.rs\\"
           "path": "./tauri-updater",
           "pkg": "tauri-updater",
           "pkgFile": Object {
+            "currentVersion": "0.4.2",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -3536,6 +3543,7 @@ thiserror = \\"1.0.19\\"
           "path": "./tauri-utils",
           "pkg": "tauri-utils",
           "pkgFile": Object {
+            "currentVersion": "0.5.0",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -3631,6 +3639,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.5.2",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -3896,6 +3905,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.5.1",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -4116,6 +4126,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.6.0",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -4392,6 +4403,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.4.2",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -4517,6 +4529,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.5.0",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -4592,6 +4605,7 @@ Object {
           "path": ".",
           "pkg": "test_app",
           "pkgFile": Object {
+            "currentVersion": "0.3.1",
             "deps": Object {
               "flutter": Array [],
               "meta": Array [
@@ -4715,6 +4729,7 @@ flutter:
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.3.1",
             "deps": Object {
               "flutter": Array [],
               "meta": Array [
@@ -4806,6 +4821,7 @@ Object {
           "path": ".",
           "pkg": "general-pkg",
           "pkgFile": Object {
+            "currentVersion": "6.1.0",
             "deps": Object {},
             "file": Object {
               "content": "6.1.0",
@@ -4851,6 +4867,7 @@ Object {
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "6.1.0",
             "deps": Object {},
             "name": "general-pkg",
             "pkg": Object {
@@ -5051,6 +5068,7 @@ tauri-utils",
           "path": "./tauri",
           "pkg": "tauri",
           "pkgFile": Object {
+            "currentVersion": "0.5.2",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -5398,6 +5416,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
           "path": "./tauri-api",
           "pkg": "tauri-api",
           "pkgFile": Object {
+            "currentVersion": "0.5.1",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -5670,6 +5689,7 @@ totems = \\"0.2.7\\"",
           "path": "./cli/tauri-bundler",
           "pkg": "tauri-bundler",
           "pkgFile": Object {
+            "currentVersion": "0.6.0",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -6019,6 +6039,7 @@ path = \\"src/main.rs\\"
           "path": "./tauri-utils",
           "pkg": "tauri-utils",
           "pkgFile": Object {
+            "currentVersion": "0.5.0",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -6109,6 +6130,7 @@ thiserror = \\"1.0.19\\"",
           "path": "./cli/tauri.js",
           "pkg": "tauri.js",
           "pkgFile": Object {
+            "currentVersion": "0.6.2",
             "deps": Object {
               "@babel/core": Array [
                 Object {
@@ -6744,6 +6766,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.5.2",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -7015,6 +7038,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.5.1",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -7241,6 +7265,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.6.0",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -7523,6 +7548,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.5.0",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -7587,6 +7613,7 @@ thiserror = \\"1.0.19\\"",
             "tag": "",
           },
           "pkgFile": Object {
+            "currentVersion": "0.6.2",
             "deps": Object {
               "@babel/core": Array [
                 Object {
@@ -8116,6 +8143,7 @@ Object {
     "commandsRan": Object {
       "test_app_one": Object {
         "applied": Object {
+          "currentVersion": "0.3.1",
           "deps": Object {
             "flutter": Array [],
             "meta": Array [
@@ -8249,6 +8277,7 @@ flutter:
       },
       "test_app_three": Object {
         "applied": Object {
+          "currentVersion": "3.8.97",
           "deps": Object {
             "flutter": Array [],
             "meta": Array [
@@ -8313,6 +8342,7 @@ dependencies:
       },
       "test_app_two": Object {
         "applied": Object {
+          "currentVersion": "0.1.7",
           "deps": Object {
             "flutter": Array [],
             "meta": Array [
@@ -8614,6 +8644,7 @@ Object {
     "commandsRan": Object {
       "test_app": Object {
         "applied": Object {
+          "currentVersion": "0.3.1",
           "deps": Object {
             "flutter": Array [],
             "meta": Array [
@@ -8795,6 +8826,7 @@ Object {
     "commandsRan": Object {
       "general-pkg": Object {
         "applied": Object {
+          "currentVersion": "6.1.0",
           "deps": Object {},
           "file": Object {
             "content": "6.1.0",
@@ -8910,6 +8942,7 @@ Object {
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "currentVersion": "0.5.2",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -9243,6 +9276,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
       },
       "tauri-updater": Object {
         "applied": Object {
+          "currentVersion": "0.4.2",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -9388,6 +9422,7 @@ thiserror = \\"1.0.19\\"
       },
       "tauri.js": Object {
         "applied": Object {
+          "currentVersion": "0.6.2",
           "deps": Object {
             "@babel/core": Array [
               Object {

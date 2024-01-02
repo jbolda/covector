@@ -66,6 +66,7 @@ Object {
           "path": "./package-a",
           "pkg": "package-a",
           "pkgFile": Object {
+            "currentVersion": "0.0.1-branch-name.12345",
             "deps": Object {
               "package-b": Array [
                 Object {
@@ -128,6 +129,7 @@ Object {
           "path": "./package-b",
           "pkg": "package-b",
           "pkgFile": Object {
+            "currentVersion": "0.0.1-branch-name.12345",
             "deps": Object {},
             "file": Object {
               "content": "{
@@ -181,6 +183,7 @@ Object {
           "path": "./package-c",
           "pkg": "package-c",
           "pkgFile": Object {
+            "currentVersion": "0.0.1-branch-name.12345",
             "deps": Object {
               "package-b": Array [
                 Object {
@@ -246,6 +249,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-a",
         "pkg": "package-a",
         "pkgFile": Object {
+          "currentVersion": "0.0.1-branch-name.12345",
           "deps": Object {
             "package-b": Array [
               Object {
@@ -302,6 +306,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-b",
         "pkg": "package-b",
         "pkgFile": Object {
+          "currentVersion": "0.0.1-branch-name.12345",
           "deps": Object {},
           "file": Object {
             "content": "{
@@ -349,6 +354,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-c",
         "pkg": "package-c",
         "pkgFile": Object {
+          "currentVersion": "0.0.1-branch-name.12345",
           "deps": Object {
             "package-b": Array [
               Object {
@@ -467,6 +473,7 @@ Object {
           "path": "./package-a",
           "pkg": "package-a",
           "pkgFile": Object {
+            "currentVersion": "0.0.1-branch-name.12345",
             "deps": Object {
               "package-b": Array [
                 Object {
@@ -529,6 +536,7 @@ Object {
           "path": "./package-b",
           "pkg": "package-b",
           "pkgFile": Object {
+            "currentVersion": "0.0.1-branch-name.12345",
             "deps": Object {},
             "file": Object {
               "content": "{
@@ -582,6 +590,7 @@ Object {
           "path": "./package-c",
           "pkg": "package-c",
           "pkgFile": Object {
+            "currentVersion": "0.0.1-branch-name.12345",
             "deps": Object {
               "package-b": Array [
                 Object {
@@ -647,6 +656,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-a",
         "pkg": "package-a",
         "pkgFile": Object {
+          "currentVersion": "0.0.1-branch-name.12345",
           "deps": Object {
             "package-b": Array [
               Object {
@@ -703,6 +713,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-b",
         "pkg": "package-b",
         "pkgFile": Object {
+          "currentVersion": "0.0.1-branch-name.12345",
           "deps": Object {},
           "file": Object {
             "content": "{
@@ -750,6 +761,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
         "path": "./package-c",
         "pkg": "package-c",
         "pkgFile": Object {
+          "currentVersion": "0.0.1-branch-name.12345",
           "deps": Object {
             "package-b": Array [
               Object {

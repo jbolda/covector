@@ -509,6 +509,7 @@ Summary about the changes in tauri-updater
       Object {
         "tauri": Object {
           "applied": Object {
+            "currentVersion": "0.5.2",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -845,6 +846,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
         },
         "tauri-updater": Object {
           "applied": Object {
+            "currentVersion": "0.4.2",
             "deps": Object {
               "anyhow": Array [
                 Object {
@@ -993,6 +995,7 @@ thiserror = \\"1.0.19\\"
         },
         "tauri.js": Object {
           "applied": Object {
+            "currentVersion": "0.6.2",
             "deps": Object {
               "@babel/core": Array [
                 Object {
@@ -2037,13 +2040,13 @@ thiserror = \\"1.0.19\\"
       "bumping tauri.js with prerelease",
     ],
     Array [
-      "tauri.js planned to be bumped to 0.6.3-beta.0",
+      "tauri.js planned to be bumped from 0.6.2 to 0.6.3-beta.0",
     ],
     Array [
-      "tauri planned to be bumped to 0.6.0-beta.0",
+      "tauri planned to be bumped from 0.5.2 to 0.6.0-beta.0",
     ],
     Array [
-      "tauri-updater planned to be bumped to 0.4.3-beta.0",
+      "tauri-updater planned to be bumped from 0.4.2 to 0.4.3-beta.0",
     ],
     Array [
       "Could not load the CHANGELOG.md. Creating one.",
@@ -2059,6 +2062,7 @@ thiserror = \\"1.0.19\\"
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "currentVersion": "0.5.2",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -2395,6 +2399,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
       },
       "tauri-updater": Object {
         "applied": Object {
+          "currentVersion": "0.4.2",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -2543,6 +2548,7 @@ thiserror = \\"1.0.19\\"
       },
       "tauri.js": Object {
         "applied": Object {
+          "currentVersion": "0.6.2",
           "deps": Object {
             "@babel/core": Array [
               Object {
@@ -3665,6 +3671,7 @@ Object {
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "currentVersion": "0.5.2",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -4001,6 +4008,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
       },
       "tauri-updater": Object {
         "applied": Object {
+          "currentVersion": "0.4.2",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -4149,6 +4157,7 @@ thiserror = \\"1.0.19\\"
       },
       "tauri.js": Object {
         "applied": Object {
+          "currentVersion": "0.6.2",
           "deps": Object {
             "@babel/core": Array [
               Object {
@@ -5283,6 +5292,7 @@ Object {
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "currentVersion": "0.5.2",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -5619,6 +5629,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"",
       },
       "tauri-updater": Object {
         "applied": Object {
+          "currentVersion": "0.4.2",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -5767,6 +5778,7 @@ thiserror = \\"1.0.19\\"
       },
       "tauri.js": Object {
         "applied": Object {
+          "currentVersion": "0.6.2",
           "deps": Object {
             "@babel/core": Array [
               Object {
@@ -6863,6 +6875,7 @@ Summary about the changes in tauri-updater
     "commandsRan": Object {
       "tauri": Object {
         "applied": Object {
+          "currentVersion": "0.6.0-beta.0",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -7189,6 +7202,7 @@ path = \\"examples/communication/src-tauri/src/main.rs\\"
       },
       "tauri-api": Object {
         "applied": Object {
+          "currentVersion": "0.5.1",
           "deps": Object {
             "anyhow": Array [
               Object {
@@ -7457,6 +7471,7 @@ totems = \\"0.2.7\\"",
       },
       "tauri.js": Object {
         "applied": Object {
+          "currentVersion": "0.6.3-beta.0",
           "deps": Object {
             "@babel/core": Array [
               Object {

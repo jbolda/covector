@@ -17,6 +17,7 @@ const fillWithDefaults = ({ version }: { version: string }) => {
     .map((v) => parseInt(v));
   return {
     version,
+    currentVersion: version,
     versionMajor,
     versionMinor,
     versionPatch,
