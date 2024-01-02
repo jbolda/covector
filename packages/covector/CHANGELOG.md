@@ -1,5 +1,18 @@
 # Changelog
 
+## \[0.11.0]
+
+- [`9480736`](https://www.github.com/jbolda/covector/commit/9480736961fb92b1861938015b1be3fd53ee5355)([#299](https://www.github.com/jbolda/covector/pull/299)) Return additional `status` content from `covector` to enable posting a comment in PR providing additional context of the expected change files.
+- [`9e111fc`](https://www.github.com/jbolda/covector/commit/9e111fcf2431690b8719ca493e6580a42e72c457)([#304](https://www.github.com/jbolda/covector/pull/304)) `status` command was mutating the package file representation when running the validation function. Use `cloneDeep` for the time being to work around it.
+- [`9480736`](https://www.github.com/jbolda/covector/commit/9480736961fb92b1861938015b1be3fd53ee5355)([#299](https://www.github.com/jbolda/covector/pull/299)) Allow running status command without logging. This allows the command to also serve more utilitarian purposes as well.
+
+### Dependencies
+
+- Upgraded to `@covector/apply@0.9.3`
+- Upgraded to `@covector/assemble@0.10.4`
+- Upgraded to `@covector/files@0.7.2`
+- Upgraded to `@covector/changelog@0.10.2`
+
 ## \[0.10.2]
 
 ### Dependencies
