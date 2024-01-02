@@ -35,7 +35,7 @@ export function formatComment({
         `The following package release${"s"} are the planned based on the context of changes in this pull request.\n${objectAsMarkdownTable(
           covectored.applied,
           ["package", "current", "next"],
-          ["name", "version", "pkg.version"]
+          ["name", "version", "pkg.currentVersion"]
         )}`
       ) +
       `[Add another change file through the GitHub UI by following this link.](${addChangeFileUrl})\n` +
