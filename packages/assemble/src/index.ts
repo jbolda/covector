@@ -548,6 +548,7 @@ export const mergeIntoConfig = function* ({
     pipeToTemplate.pkgFile = {
       name: extraPublishParams.pkgFile.name,
       version: extraPublishParams.pkgFile.version,
+      currentVersion: extraPublishParams.pkgFile.version,
       versionMajor: extraPublishParams.pkgFile.versionMajor,
       versionMinor: extraPublishParams.pkgFile.versionMinor,
       versionPatch: extraPublishParams.pkgFile.versionPatch,

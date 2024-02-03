@@ -15,6 +15,7 @@ Object {
       "path": "./packages/assemble1",
       "pkg": "assemble1",
       "pkgFile": Object {
+        "currentVersion": "0.0.0",
         "deps": Object {},
         "file": Object {
           "content": "{
@@ -54,6 +55,7 @@ Object {
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble1",
       "pkgFile": Object {
+        "currentVersion": "0.0.0",
         "deps": Object {},
         "file": Object {
           "content": "{
@@ -101,6 +103,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "currentVersion": "0.0.0",
           "deps": Object {},
           "name": "@namespaced/assemble1",
           "pkg": Object {
@@ -132,6 +135,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "currentVersion": "0.0.0",
           "deps": Object {},
           "name": "assemble1",
           "pkg": Object {
@@ -307,6 +311,7 @@ Object {
       "path": "./packages/assemble1",
       "pkg": "assemble1",
       "pkgFile": Object {
+        "currentVersion": "0.0.0",
         "deps": Object {},
         "file": Object {
           "content": "{
@@ -346,6 +351,7 @@ Object {
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble1",
       "pkgFile": Object {
+        "currentVersion": "0.0.0",
         "deps": Object {},
         "file": Object {
           "content": "{
@@ -385,6 +391,7 @@ Object {
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble2",
       "pkgFile": Object {
+        "currentVersion": "0.0.0",
         "deps": Object {},
         "file": Object {
           "content": "{
@@ -432,6 +439,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "currentVersion": "0.0.0",
           "deps": Object {},
           "name": "@namespaced/assemble1",
           "pkg": Object {
@@ -464,6 +472,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "currentVersion": "0.0.0",
           "deps": Object {},
           "name": "@namespaced/assemble2",
           "pkg": Object {
@@ -495,6 +504,7 @@ Object {
           "tag": "",
         },
         "pkgFile": Object {
+          "currentVersion": "0.0.0",
           "deps": Object {},
           "name": "assemble1",
           "pkg": Object {
