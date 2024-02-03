@@ -25,6 +25,12 @@ impl TomlDocument {
         })
     }
 
+    /// @param {string} toml - Toml document as a JS String.
+    #[wasm_bindgen(skip_jsdoc)]
+    pub fn parse(toml: &str) -> Result<TomlDocument> {
+        Self::new(toml)
+    }
+
     /// Set a `key` to `value`.
     ///
     /// @param {string} key - The key to set, can also be a nested key i.e `package.details.name`

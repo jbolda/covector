@@ -26,6 +26,10 @@ class TomlDocument {
     });
   }
 
+  static parse(toml) {
+    new TomlDocument(toml);
+  }
+
   set(key, value) {
     return this.inner.set(key, value);
   }

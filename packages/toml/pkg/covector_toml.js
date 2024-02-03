@@ -203,6 +203,14 @@ function handleError(f, args) {
 */
 class TomlDocument {
 
+    static __wrap(ptr) {
+        ptr = ptr >>> 0;
+        const obj = Object.create(TomlDocument.prototype);
+        obj.__wbg_ptr = ptr;
+
+        return obj;
+    }
+
     __destroy_into_raw() {
         const ptr = this.__wbg_ptr;
         this.__wbg_ptr = 0;
@@ -231,6 +239,26 @@ class TomlDocument {
             }
             this.__wbg_ptr = r0 >>> 0;
             return this;
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+        }
+    }
+    /**
+    * @param {string} toml - Toml document as a JS String.
+    */
+    static parse(toml) {
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            const ptr0 = passStringToWasm0(toml, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
+            const len0 = WASM_VECTOR_LEN;
+            wasm.tomldocument_new(retptr, ptr0, len0);
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            var r2 = getInt32Memory0()[retptr / 4 + 2];
+            if (r2) {
+                throw takeObject(r1);
+            }
+            return TomlDocument.__wrap(r0);
         } finally {
             wasm.__wbindgen_add_to_stack_pointer(16);
         }

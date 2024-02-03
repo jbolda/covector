@@ -9,6 +9,10 @@ export class TomlDocument {
 */
   constructor(toml: string);
 /**
+* @param {string} toml - Toml document as a JS String.
+*/
+  static parse(toml: string): TomlDocument;
+/**
 * Set a `key` to `value`.
 *
 * @param {string} key - The key to set, can also be a nested key i.e `package.details.name`
