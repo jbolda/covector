@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use js_sys::TypeError;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -29,6 +30,21 @@ impl TomlDocument {
     #[wasm_bindgen(skip_jsdoc)]
     pub fn parse(toml: &str) -> Result<TomlDocument> {
         Self::new(toml)
+    }
+
+    /// @param {string} toml - Toml document as a JS Object.
+    #[wasm_bindgen(skip_jsdoc)]
+    pub fn stringify(value: JsValue) -> Result<String> {
+        if !value.is_object() {
+            return Err(TypeError::new("Expected an object").into());
+        }
+
+        let toml = js_value_to_toml(&value)?;
+        let toml = toml
+            .as_inline_table()
+            .ok_or_else(|| TypeError::new("Expected an object"))?;
+
+        Ok(toml.to_string())
     }
 
     /// Set a `key` to `value`.

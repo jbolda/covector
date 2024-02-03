@@ -24,9 +24,11 @@ describe("toml", () => {
     expect(Array.isArray(toml.dependencies.toml_edit.features)).toBe(true);
   });
 
-  it("sets", function () {
+  it("sets and gets", function () {
     const toml = new TomlDocument(INPUT_TOML);
     toml.package.name = "newName";
+    toml.set("package.version", "0.1.0");
     expect(toml.package.name).toBe("newName");
+    expect(toml.get("package.version")).toBe("0.1.0");
   });
 });

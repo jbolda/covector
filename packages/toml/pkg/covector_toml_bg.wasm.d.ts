@@ -3,6 +3,7 @@
 export const memory: WebAssembly.Memory;
 export function __wbg_tomldocument_free(a: number): void;
 export function tomldocument_new(a: number, b: number, c: number): void;
+export function tomldocument_stringify(a: number, b: number): void;
 export function tomldocument_set(a: number, b: number, c: number, d: number, e: number): void;
 export function tomldocument_get(a: number, b: number, c: number): number;
 export function tomldocument_toString(a: number, b: number): void;

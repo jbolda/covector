@@ -13,6 +13,10 @@ export class TomlDocument {
 */
   static parse(toml: string): TomlDocument;
 /**
+* @param {string} toml - Toml document as a JS Object.
+*/
+  static stringify(value: any): string;
+/**
 * Set a `key` to `value`.
 *
 * @param {string} key - The key to set, can also be a nested key i.e `package.details.name`

@@ -264,6 +264,33 @@ class TomlDocument {
         }
     }
     /**
+    * @param {string} toml - Toml document as a JS Object.
+    */
+    static stringify(value) {
+        let deferred2_0;
+        let deferred2_1;
+        try {
+            const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+            wasm.tomldocument_stringify(retptr, addHeapObject(value));
+            var r0 = getInt32Memory0()[retptr / 4 + 0];
+            var r1 = getInt32Memory0()[retptr / 4 + 1];
+            var r2 = getInt32Memory0()[retptr / 4 + 2];
+            var r3 = getInt32Memory0()[retptr / 4 + 3];
+            var ptr1 = r0;
+            var len1 = r1;
+            if (r3) {
+                ptr1 = 0; len1 = 0;
+                throw takeObject(r2);
+            }
+            deferred2_0 = ptr1;
+            deferred2_1 = len1;
+            return getStringFromWasm0(ptr1, len1);
+        } finally {
+            wasm.__wbindgen_add_to_stack_pointer(16);
+            wasm.__wbindgen_free(deferred2_0, deferred2_1, 1);
+        }
+    }
+    /**
     * Set a `key` to `value`.
     *
     * @param {string} key - The key to set, can also be a nested key i.e `package.details.name`
@@ -489,6 +516,11 @@ module.exports.__wbg_instanceof_Object_702c4990f4c3db8d = function(arg0) {
 
 module.exports.__wbg_entries_9e2e2aa45aa5094a = function(arg0) {
     const ret = Object.entries(getObject(arg0));
+    return addHeapObject(ret);
+};
+
+module.exports.__wbg_new_4a703d5c73064dfb = function(arg0, arg1) {
+    const ret = new TypeError(getStringFromWasm0(arg0, arg1));
     return addHeapObject(ret);
 };
 
