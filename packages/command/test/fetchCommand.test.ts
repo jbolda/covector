@@ -173,11 +173,7 @@ describe("fetchCommand", () => {
       );
 
       expect(errored.message).toEqual(
-        `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned errors: [
-  {
-    "detail": "crate \`tauri\` does not have a version \`0.12.0\`"
-  }
-]`
+        "tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404: Not Found"
       );
     });
 
@@ -208,11 +204,7 @@ describe("fetchCommand", () => {
 
       expect(console.error as any).toBeCalledTimes(2);
       expect(errored.message).toEqual(
-        `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned errors: [
-  {
-    "detail": "crate \`tauri\` does not have a version \`0.12.0\`"
-  }
-]`
+        "tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404: Not Found"
       );
     });
   });
