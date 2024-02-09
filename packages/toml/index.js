@@ -27,7 +27,15 @@ class TomlDocument {
   }
 
   static parse(toml) {
-    new TomlDocument(toml);
+    return new TomlDocument(toml);
+  }
+
+  static stringify(toml) {
+    if (toml instanceof TomlDocument) {
+      return toml.toString();
+    } else {
+      return new TomlDocument(toml).toString();
+    }
   }
 
   set(key, value) {
