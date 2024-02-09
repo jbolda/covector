@@ -1,7 +1,11 @@
 const { TomlDocument: TomlDocumentInner } = require("./pkg/covector_toml");
 
 function proxyPropGet(target, prop) {
-  return new Proxy(target.get(prop), {
+  const propTarget = target.get(prop);
+
+  if (!propTarget) return undefined;
+
+  return new Proxy(propTarget, {
     get(t, innerProp) {
       const ret = Reflect.get(...arguments);
       return ret ? ret : proxyPropGet(target, prop + "." + innerProp);

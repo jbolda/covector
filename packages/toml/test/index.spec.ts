@@ -29,6 +29,7 @@ describe("toml", () => {
     expect(toml.lib["crate-type"]).toStrictEqual(["cdylib"]);
     expect(Array.isArray(toml.dependencies)).toBe(false);
     expect(Array.isArray(toml.dependencies.toml_edit.features)).toBe(true);
+    expect(toml.package.description).toBe(undefined);
   });
 
   it("sets and gets", function () {
