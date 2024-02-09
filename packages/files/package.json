@@ -16,8 +16,7 @@
     "prepublishOnly": "tsc -b"
   },
   "dependencies": {
-    "@iarna/toml": "^2.2.5",
-    "@tauri-apps/toml": "^2.2.4",
+    "@covector/toml": "0.0.0",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "semver": "^7.5.4",
