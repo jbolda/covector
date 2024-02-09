@@ -1,4 +1,4 @@
-const { TomlDocument } = require("..");
+const { TomlDocument } = require("../dist");
 
 const INPUT_TOML = `[package]
 name = "covector-toml"
