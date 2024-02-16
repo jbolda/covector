@@ -44,4 +44,15 @@ describe("toml", () => {
     const toml = new TomlDocument(INPUT_TOML);
     expect(toml.toString()).toBe(INPUT_TOML);
   });
+
+  it("in operator works fine", function () {
+    const toml = new TomlDocument(INPUT_TOML);
+    expect("package" in toml).toBe(true);
+    expect("package.name" in toml).toBe(true);
+    expect("package.license" in toml).toBe(false);
+    expect("dependencies" in toml).toBe(true);
+    let dependencies = toml.dependencies;
+    console.log(dependencies);
+    expect("toml_edit" in dependencies).toBe(true);
+  });
 });

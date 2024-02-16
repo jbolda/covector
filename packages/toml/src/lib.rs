@@ -83,6 +83,21 @@ impl TomlDocument {
         key.map(item_to_js).unwrap_or(JsValue::UNDEFINED)
     }
 
+    /// Get the value of a `key`.
+    ///
+    /// @param {string} key - The key to set, can also be a nested key i.e `package.details.name`
+    /// @returns {*} The value of the key.
+    #[wasm_bindgen(skip_jsdoc)]
+    pub fn has(&mut self, key: &str) -> JsValue {
+        let mut path = key.split('.');
+        let key = path.next().unwrap_or(key);
+        let mut key = self.toml.get(key);
+        for k in path {
+            key = key.and_then(|key| key.get(k));
+        }
+        key.is_some().into()
+    }
+
     /// Returns a JS String representation of this toml document.
     #[wasm_bindgen(js_name = toString)]
     pub fn to_string(&self) -> String {

@@ -11,6 +11,13 @@ function proxyPropGet<T extends TomlDocument>(
   if (!propTarget) return undefined;
 
   return new Proxy(propTarget, {
+    has(_, innerProp) {
+      if (typeof innerProp === "symbol") return false;
+
+      // @ts-expect-error this is valid usage of spread
+      const ret = Reflect.get(...arguments);
+      return ret ? ret : target.get(prop + "." + innerProp);
+    },
     get(_, innerProp) {
       if (typeof innerProp === "symbol") return undefined;
 
@@ -38,6 +45,13 @@ export class TomlDocument {
     this.inner = new TomlDocumentInner(toml);
 
     return new Proxy(this, {
+      has(target, prop) {
+        if (typeof prop === "symbol") return false;
+
+        // @ts-expect-error this is valid usage of spread
+        const ret = Reflect.get(...arguments);
+        return ret ? ret : target.get(prop);
+      },
       get(target, prop) {
         // @ts-expect-error this is valid usage of spread
         const ret = Reflect.get(...arguments);
@@ -84,6 +98,16 @@ export class TomlDocument {
    */
   get(key: string): any {
     return this.inner.get(key);
+  }
+
+  /**
+   * Checks if a `key` exists.
+   *
+   * @param {string} key - The key to check, can also be a nested key i.e `package.details.name`
+   * @returns {boolean} Whether the key exists or not.
+   */
+  has(key: string): boolean {
+    return this.inner.has(key);
   }
 
   /**
