@@ -31,15 +31,19 @@ function proxyPropGet<T extends TomlDocument>(
 }
 
 export class TomlDocument {
-  #inner: TomlDocumentInner;
-
   [key: string]: any;
+
+  // @ts-expect-error we assign it using Object.defineProperty
+  inner: TomlDocumentInner;
 
   /**
    * @param {string} toml - Toml document as a JS String.
    */
   constructor(toml: string) {
-    this.#inner = new TomlDocumentInner(toml);
+    Object.defineProperty(this, "inner", {
+      value: new TomlDocumentInner(toml),
+      enumerable: false,
+    });
 
     return new Proxy(this, {
       has(target, prop) {
@@ -84,7 +88,7 @@ export class TomlDocument {
    * @param {string} value - The new value of the key.
    */
   set(key: string, value: any) {
-    return this.#inner.set(key, value);
+    return this.inner.set(key, value);
   }
 
   /**
@@ -94,7 +98,7 @@ export class TomlDocument {
    * @returns {*} The value of the key.
    */
   get(key: string): any {
-    return this.#inner.get(key);
+    return this.inner.get(key);
   }
 
   /**
@@ -104,7 +108,7 @@ export class TomlDocument {
    * @returns {boolean} Whether the key exists or not.
    */
   has(key: string): boolean {
-    return this.#inner.has(key);
+    return this.inner.has(key);
   }
 
   /**
@@ -112,7 +116,7 @@ export class TomlDocument {
    * @returns {string}
    */
   toString(): string {
-    return this.#inner.toString();
+    return this.inner.toString();
   }
 
   /**
@@ -120,6 +124,6 @@ export class TomlDocument {
    * @returns {any}
    */
   toObject(): any {
-    return this.#inner.toObject();
+    return this.inner.toObject();
   }
 }
