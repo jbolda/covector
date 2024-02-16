@@ -11,12 +11,10 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "wasm-pack build --release --no-pack --target nodejs && rimraf pkg/.gitignore",
-    "postbuild": "cp ./pkg/covector_toml_bg.wasm ../action/dist && cp ./pkg/covector_toml.js ../action/dist && npm run build:ts",
-    "build:debug": "wasm-pack build --dev --no-pack --target nodejs && rimraf pkg/.gitignore && npm run postbuild",
-    "build:ts": "tsc -b",
+    "prebuild": "wasm-pack build --release --no-pack --target nodejs",
+    "build": "tsc -b",
+    "postbuild": "cp ./pkg/covector_toml_bg.wasm ../action/dist",
     "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
-    "pretest": "npm run build",
     "test": "jest"
   },
   "devDependencies": {
