@@ -48,3 +48,5 @@ dist
 # but we want the action dist
 !packages/action/dist
 !packages/action/dist/**
+
+Cargo.lock
