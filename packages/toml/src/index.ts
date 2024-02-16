@@ -10,24 +10,21 @@ function proxyPropGet<T extends TomlDocument>(
 
   if (!propTarget) return undefined;
 
+  if (typeof propTarget !== "object") {
+    return propTarget;
+  }
+
   return new Proxy(propTarget, {
     has(_, innerProp) {
       if (typeof innerProp === "symbol") return false;
-
-      // @ts-expect-error this is valid usage of spread
-      const ret = Reflect.get(...arguments);
-      return ret ? ret : target.get(prop + "." + innerProp);
+      return target.get(prop + "." + innerProp);
     },
     get(_, innerProp) {
       if (typeof innerProp === "symbol") return undefined;
-
-      // @ts-expect-error this is valid usage of spread
-      const ret = Reflect.get(...arguments);
-      return ret ? ret : proxyPropGet(target, prop + "." + innerProp);
+      return proxyPropGet(target, prop + "." + innerProp);
     },
     set(_, innerProp, newValue) {
       if (typeof innerProp === "symbol") return undefined;
-
       return target.set(prop + "." + innerProp, newValue);
     },
   });

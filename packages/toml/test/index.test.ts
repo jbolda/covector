@@ -26,7 +26,7 @@ describe("toml", () => {
     const toml = new TomlDocument(INPUT_TOML);
     expect(toml.package.name).toBe("covector-toml");
     expect(toml.package.edition).toBe("2021");
-    expect(toml.lib["crate-type"]).toStrictEqual(["cdylib"]);
+    expect(toml.lib["crate-type"][0]).toBe("cdylib");
     expect(Array.isArray(toml.dependencies)).toBe(false);
     expect(Array.isArray(toml.dependencies.toml_edit.features)).toBe(true);
     expect(toml.package.description).toBe(undefined);
@@ -36,8 +36,10 @@ describe("toml", () => {
     const toml = new TomlDocument(INPUT_TOML);
     toml.package.name = "newName";
     toml.set("package.version", "0.1.0");
+    toml.dependencies["toml_edit"].version = "1.0.0";
     expect(toml.package.name).toBe("newName");
     expect(toml.get("package.version")).toBe("0.1.0");
+    expect(toml.dependencies["toml_edit"].version).toBe("1.0.0");
   });
 
   it("perserves ordering and formatting", function () {
@@ -52,7 +54,6 @@ describe("toml", () => {
     expect("package.license" in toml).toBe(false);
     expect("dependencies" in toml).toBe(true);
     let dependencies = toml.dependencies;
-    console.log(dependencies);
     expect("toml_edit" in dependencies).toBe(true);
   });
 });

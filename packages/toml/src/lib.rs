@@ -76,11 +76,22 @@ impl TomlDocument {
     pub fn get(&mut self, key: &str) -> JsValue {
         let mut path = key.split('.');
         let key = path.next().unwrap_or(key);
-        let mut key = self.toml.get(key);
+        let mut current_key = self.toml.get(key);
         for k in path {
-            key = key.and_then(|key| key.get(k));
+            if let Some(key) = current_key {
+                if let Some(array) = key.as_array() {
+                    if let Ok(idx) = k.parse::<usize>() {
+                        return array
+                            .get(idx)
+                            .map(value_to_js)
+                            .unwrap_or(JsValue::UNDEFINED);
+                    }
+                }
+
+                current_key = key.get(k);
+            }
         }
-        key.map(item_to_js).unwrap_or(JsValue::UNDEFINED)
+        current_key.map(item_to_js).unwrap_or(JsValue::UNDEFINED)
     }
 
     /// Get the value of a `key`.
