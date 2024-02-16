@@ -8,7 +8,7 @@
   "scripts": {
     "run-source": "ncc run index.ts",
     "pkg": "ncc build index.ts -o dist -m",
-    "postpkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist && cp ../toml/pkg/covector_toml.js ./dist",
+    "postpkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist",
     "build": "echo noop",
     "clean": "echo noop"
   },
