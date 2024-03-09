@@ -2,7 +2,7 @@ import { TomlDocument as TomlDocumentInner } from "../pkg/covector_toml";
 
 function proxyPropGet<T extends TomlDocument>(
   target: T,
-  prop: string | symbol
+  prop: string | symbol,
 ): typeof Proxy<T> | undefined {
   if (typeof prop === "symbol") return undefined;
 
@@ -33,17 +33,13 @@ function proxyPropGet<T extends TomlDocument>(
 export class TomlDocument {
   [key: string]: any;
 
-  // @ts-expect-error we assign it using Object.defineProperty
   inner: TomlDocumentInner;
 
   /**
    * @param {string} toml - Toml document as a JS String.
    */
   constructor(toml: string) {
-    Object.defineProperty(this, "inner", {
-      value: new TomlDocumentInner(toml),
-      enumerable: false,
-    });
+    this.inner = new TomlDocumentInner(toml);
 
     return new Proxy(this, {
       has(target, prop) {
@@ -76,7 +72,7 @@ export class TomlDocument {
       return toml.toString();
     } else {
       throw new TypeError(
-        `Expected: \`TomlDocument\`, Got: \`${typeof toml}\``
+        `Expected: \`TomlDocument\`, Got: \`${typeof toml}\``,
       );
     }
   }
