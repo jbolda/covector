@@ -21,6 +21,7 @@
       "@covector/command": ["packages/command/src"],
       "@covector/changelog": ["packages/changelog/src"],
       "@covector/assemble": ["packages/assemble/src"],
+      "@covector/toml": ["packages/toml/src"],
       "@covector/apply": ["packages/apply/src"]
     }
   }

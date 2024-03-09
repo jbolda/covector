@@ -5,7 +5,13 @@ import { loadFile } from "@covector/files";
 import path from "path";
 import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";
+import { TomlDocument } from "@covector/toml";
 const f = fixtures(__dirname);
+
+expect.addSnapshotSerializer({
+  test: (value) => value instanceof TomlDocument,
+  print: (_) => `TomlDocument {}`,
+});
 
 describe("integration test in --dry-run mode", () => {
   it("passes correct config for js and rust", function* () {

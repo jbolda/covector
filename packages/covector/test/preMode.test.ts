@@ -6,7 +6,13 @@ import path from "path";
 import * as fs from "fs";
 import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";
+import { TomlDocument } from "@covector/toml";
 const f = fixtures(__dirname);
+
+expect.addSnapshotSerializer({
+  test: (value) => value instanceof TomlDocument,
+  print: (_) => `TomlDocument {}`,
+});
 
 describe("integration test with preMode `on`", () => {
   let restoreConsole: Function;

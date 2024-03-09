@@ -205,15 +205,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
               "path": "package-c/Cargo.toml",
             },
             "name": "package-c",
-            "pkg": Object {
-              "dependencies": Object {
-                "package-b": "0.0.1-branch-name.12345",
-              },
-              "package": Object {
-                "name": "package-c",
-                "version": "0.0.1-branch-name.12345",
-              },
-            },
+            "pkg": TomlDocument {},
             "version": "0.0.1-branch-name.12345",
             "versionMajor": 0,
             "versionMinor": 0,
@@ -376,15 +368,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
             "path": "package-c/Cargo.toml",
           },
           "name": "package-c",
-          "pkg": Object {
-            "dependencies": Object {
-              "package-b": "0.0.1-branch-name.12345",
-            },
-            "package": Object {
-              "name": "package-c",
-              "version": "0.0.1-branch-name.12345",
-            },
-          },
+          "pkg": TomlDocument {},
           "version": "0.0.1-branch-name.12345",
           "versionMajor": 0,
           "versionMinor": 0,
@@ -612,15 +596,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
               "path": "package-c/Cargo.toml",
             },
             "name": "package-c",
-            "pkg": Object {
-              "dependencies": Object {
-                "package-b": "0.0.1-branch-name.12345",
-              },
-              "package": Object {
-                "name": "package-c",
-                "version": "0.0.1-branch-name.12345",
-              },
-            },
+            "pkg": TomlDocument {},
             "version": "0.0.1-branch-name.12345",
             "versionMajor": 0,
             "versionMinor": 0,
@@ -783,15 +759,7 @@ package-b = \\"0.0.1-branch-name.12345\\"
             "path": "package-c/Cargo.toml",
           },
           "name": "package-c",
-          "pkg": Object {
-            "dependencies": Object {
-              "package-b": "0.0.1-branch-name.12345",
-            },
-            "package": Object {
-              "name": "package-c",
-              "version": "0.0.1-branch-name.12345",
-            },
-          },
+          "pkg": TomlDocument {},
           "version": "0.0.1-branch-name.12345",
           "versionMajor": 0,
           "versionMinor": 0,

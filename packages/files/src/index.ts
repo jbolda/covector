@@ -7,7 +7,7 @@ import { configFileSchema } from "./schema";
 import { fromZodError } from "zod-validation-error";
 import globby from "globby";
 import path from "path";
-import TOML from "@tauri-apps/toml";
+import { TomlDocument } from "@covector/toml";
 import yaml from "js-yaml";
 import semver from "semver";
 
@@ -53,7 +53,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
   if (!file.content) throw new Error(`${file.path} does not have any content`);
   switch (file.extname) {
     case ".toml":
-      const parsedTOML = TOML.parse(file.content) as unknown as Pkg;
+      const parsedTOML = TomlDocument.parse(file.content);
       let version;
       if (
         parsedTOML?.package?.version &&
@@ -133,7 +133,7 @@ const parsePkg = (file: Partial<File>): PkgMinimum => {
   }
 };
 
-const keyDeps = (parsed: Pkg): DepsKeyed => {
+const keyDeps = (parsed: Pkg | TomlDocument): DepsKeyed => {
   const deps: DepsKeyed = {};
   const depTypes: DepTypes[] = [
     "dependencies",
@@ -152,7 +152,13 @@ const keyDeps = (parsed: Pkg): DepsKeyed => {
             type: depType,
             version,
           });
-        } else if (typeof version === "object" && version.version) {
+        } else if (
+          version &&
+          typeof version === "object" &&
+          "version" in version &&
+          version.version &&
+          typeof version.version === "string"
+        ) {
           deps[dep].push({
             type: depType,
             version: version.version,
@@ -173,7 +179,7 @@ const stringifyPkg = ({
 }): string => {
   switch (extname) {
     case ".toml":
-      return TOML.stringify(newContents);
+      return TomlDocument.stringify(newContents);
     case ".json":
       return `${JSON.stringify(newContents, null, "  ")}\n`;
     case ".yml":
@@ -271,7 +277,7 @@ export function* writePkgFile({
   cwd: string;
 }): Operation<File> {
   if (!packageFile.file)
-    throw new Error(`no vfile present for ${packageFile.name}`);
+    throw new Error(`no file present for ${packageFile.name}`);
   const fileNext = { ...packageFile.file };
   fileNext.content = stringifyPkg({
     newContents: packageFile.pkg,
@@ -403,11 +409,9 @@ export const setPackageFileVersion = ({
 
       const currentDepVersion = currentProperty[dep];
       if (typeof currentDepVersion === "string") {
-        //@ts-expect-error TS struggles to type narrow, but we are confident it should be defined
         pkg.pkg[property][dep] = version;
       } else if (typeof currentDepVersion === "object") {
         if ("version" in currentDepVersion) {
-          //@ts-expect-error TS struggles to type narrow, but we are confident it should be defined
           pkg.pkg[property][dep].version = version;
         }
       }

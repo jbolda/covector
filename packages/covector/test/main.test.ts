@@ -8,6 +8,12 @@ import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 import { injectPublishFunctions } from "../../action/src/utils";
+import { TomlDocument } from "@covector/toml";
+
+expect.addSnapshotSerializer({
+  test: (value) => value instanceof TomlDocument,
+  print: (_) => `TomlDocument {}`,
+});
 
 describe("integration test in production mode", () => {
   let restoreConsole: RestoreConsole;

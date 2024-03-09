@@ -1,0 +1,6 @@
+[workspace]
+members = ["packages/toml"]
+resolver = "2"
+
+[profile.release]
+opt-level = "s"

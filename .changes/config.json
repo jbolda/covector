@@ -129,6 +129,17 @@
         }
       ]
     },
+    "@covector/toml": {
+      "path": "./packages/toml",
+      "manager": "javascript",
+      "dependencies": [],
+      "assets": [
+        {
+          "path": "./packages/toml/covector-toml-${ pkgFile.version }.tgz",
+          "name": "covector-toml-${ pkgFile.version }.tgz"
+        }
+      ]
+    },
     "@covector/types": {
       "path": "./packages/types",
       "manager": "javascript",
