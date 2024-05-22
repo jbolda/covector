@@ -44,6 +44,7 @@ export interface PkgTarget {
 
 export interface PkgMinimum {
   version: string;
+  currentVersion: string;
   pkg: Pkg;
   versionMajor: number;
   versionMinor: number;
