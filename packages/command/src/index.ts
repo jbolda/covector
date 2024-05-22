@@ -180,11 +180,14 @@ function* useFunction({
   if (use === "fetch:check") {
     if (options?.url) {
       const url = template(options.url)({ pkg });
-      let request = yield fetch(url);
+      let request = yield fetch(url, {
+        headers: { ["user-agent"]: "covector/0 github.com/jbolda/covector" },
+      });
       if (request.status >= 400) {
+        const errorText = yield request.text();
         throw new MainError({
           exitCode: 1,
-          message: `${pkg.pkg} request to ${url} returned code ${request.status}: ${request.statusText}`,
+          message: `${pkg.pkg} request to ${url} returned code ${request.status} ${request.statusText}: ${errorText}`,
         });
       }
       const response = yield request.json();
