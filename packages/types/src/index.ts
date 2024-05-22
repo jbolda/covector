@@ -6,6 +6,7 @@ import {
   pkgManagerSchema,
   configFileSchema,
 } from "@covector/files/src/schema";
+import { TomlDocument } from "@covector/toml";
 
 export type File = z.infer<typeof fileSchema>;
 export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
@@ -45,7 +46,7 @@ export interface PkgTarget {
 export interface PkgMinimum {
   version: string;
   currentVersion: string;
-  pkg: Pkg;
+  pkg: Pkg | TomlDocument;
   versionMajor: number;
   versionMinor: number;
   versionPatch: number;
