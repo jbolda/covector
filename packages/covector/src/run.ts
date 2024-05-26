@@ -6,6 +6,7 @@ import { version } from "./version";
 import { preview } from "./preview";
 import { publish } from "./publish";
 import { arbitrary } from "./arbitrary";
+import { type Operation } from "effection";
 
 export function* covector({
   // shared
@@ -21,6 +22,7 @@ export function* covector({
   // setup inputs
   changeFolder = ".changes",
   yes = false,
+  createContext,
 }: {
   command: string;
   dryRun?: boolean;
@@ -32,6 +34,7 @@ export function* covector({
   branchTag?: string;
   changeFolder?: string;
   yes?: boolean;
+  createContext?: Operation<any>;
 }): Generator<any, any, any> {
   if (command === "init") {
     return yield init({ cwd, changeFolder, yes });
@@ -56,6 +59,7 @@ export function* covector({
       cwd,
       filterPackages,
       modifyConfig,
+      createContext,
     });
   } else if (command === "preview") {
     return yield preview({

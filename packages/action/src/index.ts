@@ -17,6 +17,7 @@ import type {
 } from "../../types/src";
 import { formatComment } from "./comment/formatGithubComment";
 import type { PullRequestPayload } from "./comment/types";
+import type { Operation } from "effection";
 
 export function* run(): Generator<any, any, any> {
   try {
@@ -116,10 +117,30 @@ export function* run(): Generator<any, any, any> {
       const status: CovectorStatus = yield covector({ command: "status", cwd });
       core.setOutput("status", status.response);
 
+      function* createContext(): Operation<
+        Operation<{ context: Record<string, string>; changeContext: any }>
+      > {
+        const context = {};
+        return function* defineContexts({
+          commits,
+        }: {
+          commits: string[];
+        }): Operation<{
+          context: any;
+          changeContext: any;
+        }> {
+          const changeContext = {};
+          console.dir({ commits });
+          // TODO make query happen here
+          return { context, changeContext };
+        };
+      }
+
       const covectored: CovectorVersion = yield covector({
         command,
         filterPackages,
         cwd,
+        createContext,
       });
       core.setOutput("templatePipe", covectored.pipeTemplate);
 

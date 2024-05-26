@@ -1,4 +1,4 @@
-import { Operation, all } from "effection";
+import { type Operation, all } from "effection";
 import { readAllChangelogs } from "./get";
 import { writeAllChangelogs } from "./write";
 import unified from "unified";
@@ -107,6 +107,7 @@ const getVersionFromApplied = (
  *
  */
 const renderRelease = (
+  context: Record<string, string>,
   gitSiteUrl: string,
   release: {
     summary: string;
@@ -129,8 +130,13 @@ const renderRelease = (
     const len = matches.length;
     const pr = len === 0 ? null : len === 1 ? matches[0] : matches[len - 1];
     const prLink = pr ? `([${pr}](${gitSiteUrl}pull/${pr.slice(1)}))` : "";
+    const recognizeContributions = context.author
+      ? ` by ${context.author}${
+          context.reviewed ? `, reviewed by ${context.reviewed}` : ``
+        }`
+      : ``;
 
-    return `\n- ${commitLink}${prLink} ${summary}`;
+    return `\n- ${commitLink}${prLink} ${summary}${recognizeContributions}`;
   }
 };
 
@@ -141,7 +147,7 @@ type Change = {
 type ChangedLog = { pkg: string; change: Change; addition: string };
 
 function* defaultCreateContext(): Operation<
-  Operation<{ context: any; changeContext: any }>
+  Operation<{ context: Record<string, string>; changeContext: any }>
 > {
   const context = {};
   return function* defineContexts(): Operation<{
@@ -158,13 +164,14 @@ function* applyChanges({
   assembledChanges,
   config,
   applied,
+  // @ts-expect-error
   createContext = defaultCreateContext,
 }: {
   changelogs: Change[];
   assembledChanges: AssembledChanges;
   config: ConfigFile;
   applied: { name: string; version: string }[];
-  createContext: Operation<Operation<{ context: any; changeContext: any }>>;
+  createContext: Operation<Operation<Record<string, string>>>;
 }): Operation<ChangedLog[]> {
   const gitSiteUrl = !config.gitSiteUrl
     ? "/"
@@ -175,22 +182,20 @@ function* applyChanges({
     listItemIndent: "one",
   });
 
-  const createChangeContext: Operation<{ context: any; changeContext: any }> =
-    // @ts-expect-error it struggle with the call signature here
-    yield createContext();
+  // @ts-expect-error
+  const createChangeContext = yield createContext();
 
   return yield all(
     changelogs.map(function* (change) {
-      let addition = "";
+      let additionChunks = [];
       if (change.changelog && createChangeContext) {
-        const context: { context: any; changeContext: any } =
-          // @ts-expect-error it struggles with the call signature here
-          yield createChangeContext();
         let changelog = processor.parse(change.changelog.content);
         if (!assembledChanges.releases[change.changes.name]) {
-          addition = `## [${change.changes.version}]\nBumped due to dependency.`;
+          additionChunks.push(
+            `## [${change.changes.version}]\nBumped due to dependency.`
+          );
         } else {
-          addition = `## [${change.changes.version}]`;
+          additionChunks.push(`## [${change.changes.version}]`);
 
           const changeTags: { [k: string]: string } = config.changeTags ?? {};
           // ensures there is a `deps` tag if one wasn't defined
@@ -254,9 +259,17 @@ function* applyChanges({
               }
             });
 
+          const commits = assembledChanges.releases[change.changes.name].changes
+            .map((change) => change.meta?.commits?.[0])
+            .filter(Boolean);
+          const { changeContext }: { changeContext: Record<string, string> } =
+            yield createChangeContext({ commits });
+
           // render untagged changes freely at the top
           for (const release of untaggedChanges) {
-            addition += renderRelease(gitSiteUrl, release);
+            additionChunks.push(
+              renderRelease(changeContext, gitSiteUrl, release)
+            );
           }
 
           // render tagged changes as:
@@ -277,14 +290,17 @@ function* applyChanges({
               // if the specified tag is not defined in config,
               // fallback to the short tag specified in the change file
               const longTag = changeTags[tag] ?? tag;
-              addition += `\n### ${longTag}\n`;
+              additionChunks.push(`\n### ${longTag}\n`);
               for (const release of change) {
-                addition += renderRelease(gitSiteUrl, release);
+                additionChunks.push(
+                  renderRelease(changeContext, gitSiteUrl, release)
+                );
               }
             }
           }
         }
 
+        const addition = additionChunks.join("");
         const parsedAddition = processor.parse(addition);
         const changelogFirstElement = changelog.children.shift();
         const changelogRemainingElements = changelog.children;
@@ -295,7 +311,11 @@ function* applyChanges({
         );
         change.changelog.content = processor.stringify(changelog);
       }
-      return { pkg: change.changes.name, change, addition };
+      return {
+        pkg: change.changes.name,
+        change,
+        addition: additionChunks.join(""),
+      };
     })
   );
 }
