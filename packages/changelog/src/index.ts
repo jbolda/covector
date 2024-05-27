@@ -45,6 +45,7 @@ export function* fillChangelogs({
     cwd,
   });
 
+  console.dir({ createContext });
   const writtenChanges: ChangedLog[] = yield applyChanges({
     changelogs,
     assembledChanges,
@@ -172,7 +173,7 @@ function* applyChanges({
   assembledChanges: AssembledChanges;
   config: ConfigFile;
   applied: { name: string; version: string }[];
-  createContext: Operation<Operation<Record<string, string>>>;
+  createContext?: Operation<Operation<Record<string, string>>>;
 }): Operation<ChangedLog[]> {
   const gitSiteUrl = !config.gitSiteUrl
     ? "/"
