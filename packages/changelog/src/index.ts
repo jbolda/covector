@@ -107,7 +107,7 @@ const getVersionFromApplied = (
  *
  */
 const renderRelease = (
-  context: Record<string, string>,
+  context: Record<string, Record<string, string>>,
   gitSiteUrl: string,
   release: {
     summary: string;
@@ -130,9 +130,12 @@ const renderRelease = (
     const len = matches.length;
     const pr = len === 0 ? null : len === 1 ? matches[0] : matches[len - 1];
     const prLink = pr ? `([${pr}](${gitSiteUrl}pull/${pr.slice(1)}))` : "";
-    const recognizeContributions = context.author
-      ? ` by ${context.author}${
-          context.reviewed ? `, reviewed by ${context.reviewed}` : ``
+    const hashLookup = `sha_${commit.hashLong}`;
+    const recognizeContributions = context?.[hashLookup]?.author
+      ? ` by ${context[hashLookup].author}${
+          context?.[hashLookup]?.reviewed
+            ? `, reviewed by ${context[hashLookup].reviewed}`
+            : ``
         }`
       : ``;
 
@@ -270,17 +273,14 @@ function* applyChanges({
               }
             });
 
-          const commits = assembledChanges.releases[change.changes.name].changes
-            .map((change) => change.meta?.commits?.[0])
-            .filter(Boolean);
-          const { changeContext }: { changeContext: Record<string, string> } =
-            yield createChangeContext({ commits });
+          const {
+            context,
+          }: { context: Record<string, Record<string, string>> } =
+            yield createChangeContext();
 
           // render untagged changes freely at the top
           for (const release of untaggedChanges) {
-            additionChunks.push(
-              renderRelease(changeContext, gitSiteUrl, release)
-            );
+            additionChunks.push(renderRelease(context, gitSiteUrl, release));
           }
 
           // render tagged changes as:
@@ -304,7 +304,7 @@ function* applyChanges({
               additionChunks.push(`\n### ${longTag}\n`);
               for (const release of change) {
                 additionChunks.push(
-                  renderRelease(changeContext, gitSiteUrl, release)
+                  renderRelease(context, gitSiteUrl, release)
                 );
               }
             }

@@ -125,8 +125,6 @@ export function* run(): Generator<any, any, any> {
       }): Operation<
         Operation<{ context: Record<string, string>; changeContext: any }>
       > {
-        const context = {};
-
         const octokit = github.getOctokit(token);
         const prContext = yield getCommitContext(
           octokit.graphql,
@@ -134,7 +132,27 @@ export function* run(): Generator<any, any, any> {
           github.context.repo.repo,
           commits
         );
-        console.dir({ prContext });
+        console.dir({ prContext }, { depth: 6 });
+        const shas = Object.entries(prContext.repository).reduce(
+          (finalShas, [shaKey, shaContext]) => {
+            finalShas[shaKey].author =
+              // @ts-expect-error
+              shaContext.associatedPullRequests.nodes[0].author.login;
+            const reviewers =
+              // @ts-expect-error
+              shaContext.associatedPullRequests.nodes[0].reviews.nodes.reduce(
+                (reviewersList, reviewer) => {
+                  reviewersList[reviewer.author.login] = "APPROVED";
+                  return reviewersList;
+                },
+                {}
+              );
+            finalShas[shaKey].reviewed = Object.keys(reviewers).join(", ");
+            return finalShas;
+          },
+          {}
+        );
+        const context = { ...shas };
 
         return function* defineContexts(): Operation<{
           context: any;

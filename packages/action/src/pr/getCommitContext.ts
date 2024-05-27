@@ -22,7 +22,7 @@ export function* getCommitContext(
                 author {
                   login
                 }
-                reviews(first: 5) {
+                reviews(first: 5, states: [APPROVED]) {
                   nodes {
                     author {
                       login
