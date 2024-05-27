@@ -182,13 +182,23 @@ function* applyChanges({
     listItemIndent: "one",
   });
 
+  const commits = [
+    ...new Set(
+      Object.values(assembledChanges.releases).flatMap((release) =>
+        release.changes
+          .map((change) => change.meta?.commits?.[0].hashLong)
+          .filter(Boolean)
+      )
+    ),
+  ];
+  console.dir({ commits });
   // @ts-expect-error
-  const createChangeContext = yield createContext();
+  const createChangeContext = yield createContext({ commits });
 
   return yield all(
     changelogs.map(function* (change) {
       let additionChunks = [];
-      if (change.changelog && createChangeContext) {
+      if (change.changelog) {
         let changelog = processor.parse(change.changelog.content);
         if (!assembledChanges.releases[change.changes.name]) {
           additionChunks.push(

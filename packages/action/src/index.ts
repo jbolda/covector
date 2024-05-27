@@ -18,6 +18,7 @@ import type {
 import { formatComment } from "./comment/formatGithubComment";
 import type { PullRequestPayload } from "./comment/types";
 import type { Operation } from "effection";
+import { getCommitContext } from "./pr/getCommitContext";
 
 export function* run(): Generator<any, any, any> {
   try {
@@ -117,10 +118,24 @@ export function* run(): Generator<any, any, any> {
       const status: CovectorStatus = yield covector({ command: "status", cwd });
       core.setOutput("status", status.response);
 
-      function* createContext(): Operation<
+      function* createContext({
+        commits,
+      }: {
+        commits: string[];
+      }): Operation<
         Operation<{ context: Record<string, string>; changeContext: any }>
       > {
         const context = {};
+
+        const octokit = github.getOctokit(token);
+        const prContext = yield getCommitContext(
+          octokit.graphql,
+          github.context.repo.owner,
+          github.context.repo.repo,
+          commits
+        );
+        console.dir({ prContext });
+
         return function* defineContexts({
           commits,
         }: {
@@ -140,6 +155,7 @@ export function* run(): Generator<any, any, any> {
         command,
         filterPackages,
         cwd,
+        // @ts-expect-error
         createContext,
       });
       core.setOutput("templatePipe", covectored.pipeTemplate);
