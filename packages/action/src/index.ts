@@ -151,9 +151,7 @@ export function* run(): Generator<any, any, any> {
         filterPackages,
         cwd,
         // @ts-expect-error
-        createContext: () => {
-          console.dir("booped from directly passed");
-        },
+        createContext,
       });
       core.setOutput("templatePipe", covectored.pipeTemplate);
 

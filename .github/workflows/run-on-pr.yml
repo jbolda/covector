@@ -24,8 +24,11 @@ jobs:
         env:
           COVECTOR_CONTEXT: ${{ toJson(steps.covector) }}
         run: echo "$COVECTOR_CONTEXT"
-      - name: version dry run directly
-        run: node ./packages/covector/bin/covector.js version --dry-run
+      - name: covector version
+        uses: ./packages/action
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          command: "version"
 
   preview:
     runs-on: ubuntu-latest
