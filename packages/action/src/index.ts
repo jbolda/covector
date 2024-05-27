@@ -142,7 +142,6 @@ export function* run(): Generator<any, any, any> {
         }> {
           const changeContext = {};
           console.dir({ commits });
-          // TODO make query happen here
           return { context, changeContext };
         };
       }
@@ -152,7 +151,9 @@ export function* run(): Generator<any, any, any> {
         filterPackages,
         cwd,
         // @ts-expect-error
-        createContext,
+        createContext: () => {
+          console.dir("booped from directly passed");
+        },
       });
       core.setOutput("templatePipe", covectored.pipeTemplate);
 
