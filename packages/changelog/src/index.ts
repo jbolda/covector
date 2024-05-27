@@ -45,7 +45,6 @@ export function* fillChangelogs({
     cwd,
   });
 
-  console.dir({ createContext });
   const writtenChanges: ChangedLog[] = yield applyChanges({
     changelogs,
     assembledChanges,

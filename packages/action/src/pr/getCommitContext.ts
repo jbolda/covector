@@ -16,13 +16,13 @@ export function* getCommitContext(
         ) {
           ... on Commit {
             abbreviatedOid
-            associatedPullRequests(first: 50) {
+            associatedPullRequests(first: 5) {
               nodes {
                 number
                 author {
                   login
                 }
-                reviews(first: 50) {
+                reviews(first: 10) {
                   nodes {
                     author {
                       login
@@ -42,6 +42,8 @@ export function* getCommitContext(
         nodeCount
       }
   `;
+
+  console.dir({ query });
 
   const response = yield client(query, {
     owner,

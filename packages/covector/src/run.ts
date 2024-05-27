@@ -53,7 +53,6 @@ export function* covector({
       branchTag,
     });
   } else if (command === "version") {
-    console.dir({ createContextAtRun: createContext });
     return yield version({
       command,
       dryRun,
