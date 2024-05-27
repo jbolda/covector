@@ -36,12 +36,11 @@ export function* getCommitContext(
           })
           .join("\n")}
         }
-      }
       rateLimit {
         cost
         nodeCount
       }
-  `;
+    }`;
 
   console.dir({ query });
 
