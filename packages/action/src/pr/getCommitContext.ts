@@ -16,13 +16,13 @@ export function* getCommitContext(
         ) {
           ... on Commit {
             abbreviatedOid
-            associatedPullRequests(first: 5) {
+            associatedPullRequests(first: 2) {
               nodes {
                 number
                 author {
                   login
                 }
-                reviews(first: 10) {
+                reviews(first: 5) {
                   nodes {
                     author {
                       login
