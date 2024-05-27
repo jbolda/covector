@@ -149,6 +149,7 @@ type ChangedLog = { pkg: string; change: Change; addition: string };
 function* defaultCreateContext(): Operation<
   Operation<{ context: Record<string, string>; changeContext: any }>
 > {
+  console.dir({ wrongContext: "bucko" });
   const context = {};
   return function* defineContexts(): Operation<{
     context: any;

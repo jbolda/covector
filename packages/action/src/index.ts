@@ -136,11 +136,7 @@ export function* run(): Generator<any, any, any> {
         );
         console.dir({ prContext });
 
-        return function* defineContexts({
-          commits,
-        }: {
-          commits: string[];
-        }): Operation<{
+        return function* defineContexts(): Operation<{
           context: any;
           changeContext: any;
         }> {
