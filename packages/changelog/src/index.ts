@@ -131,10 +131,15 @@ const renderRelease = (
     const pr = len === 0 ? null : len === 1 ? matches[0] : matches[len - 1];
     const prLink = pr ? `([${pr}](${gitSiteUrl}pull/${pr.slice(1)}))` : "";
     const hashLookup = `sha_${commit.hashLong}`;
+    const personLink = (person: string) =>
+      `[@${person}](${gitSiteUrl}../../${person})`;
     const recognizeContributions = context?.[hashLookup]?.author
-      ? ` by ${context[hashLookup].author}${
+      ? ` by ${personLink(context[hashLookup].author)}${
           context?.[hashLookup]?.reviewed
-            ? `, reviewed by ${context[hashLookup].reviewed}`
+            ? `, reviewed by ${context[hashLookup].reviewed
+                .split(", ")
+                .map((person) => personLink(person))
+                .join(", ")}`
             : ``
         }`
       : ``;
