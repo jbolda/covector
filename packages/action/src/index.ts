@@ -132,9 +132,10 @@ export function* run(): Generator<any, any, any> {
           github.context.repo.repo,
           commits
         );
-        console.dir({ prContext }, { depth: 6 });
+        console.dir({ prContext }, { depth: 8 });
         const shas = Object.entries(prContext.repository).reduce(
           (finalShas, [shaKey, shaContext]) => {
+            finalShas[shaKey] = {};
             finalShas[shaKey].author =
               // @ts-expect-error
               shaContext.associatedPullRequests.nodes[0].author.login;
