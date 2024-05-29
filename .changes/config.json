@@ -64,8 +64,7 @@
         "@covector/assemble",
         "@covector/files",
         "@covector/changelog",
-        "@covector/command",
-        "all"
+        "@covector/command"
       ],
       "assets": [
         {
@@ -77,7 +76,7 @@
     "@covector/apply": {
       "path": "./packages/apply",
       "manager": "javascript",
-      "dependencies": ["@covector/files", "all"],
+      "dependencies": ["@covector/files"],
       "assets": [
         {
           "path": "./packages/apply/covector-apply-${ pkgFile.version }.tgz",
@@ -88,7 +87,7 @@
     "@covector/assemble": {
       "path": "./packages/assemble",
       "manager": "javascript",
-      "dependencies": ["@covector/command", "@covector/files", "all"],
+      "dependencies": ["@covector/command", "@covector/files"],
       "assets": [
         {
           "path": "./packages/assemble/covector-assemble-${ pkgFile.version }.tgz",
@@ -99,7 +98,7 @@
     "@covector/changelog": {
       "path": "./packages/changelog",
       "manager": "javascript",
-      "dependencies": ["@covector/files", "all"],
+      "dependencies": ["@covector/files"],
       "assets": [
         {
           "path": "./packages/changelog/covector-changelog-${ pkgFile.version }.tgz",
@@ -110,7 +109,7 @@
     "@covector/files": {
       "path": "./packages/files",
       "manager": "javascript",
-      "dependencies": ["all"],
+      "dependencies": ["@covector/toml"],
       "assets": [
         {
           "path": "./packages/files/covector-files-${ pkgFile.version }.tgz",
@@ -121,7 +120,7 @@
     "@covector/command": {
       "path": "./packages/command",
       "manager": "javascript",
-      "dependencies": ["all"],
+      "dependencies": [],
       "assets": [
         {
           "path": "./packages/command/covector-command-${ pkgFile.version }.tgz",
