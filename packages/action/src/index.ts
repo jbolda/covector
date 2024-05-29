@@ -133,21 +133,21 @@ export function* run(): Generator<any, any, any> {
         );
         const shas = Object.entries(prContext.repository).reduce(
           (finalShas, [shaKey, shaContext]) => {
-            finalShas[shaKey] = {};
-            finalShas[shaKey].author =
-              shaContext.associatedPullRequests.nodes[0].author.login;
             const reviewers =
               shaContext.associatedPullRequests.nodes[0].reviews.nodes.reduce(
                 (reviewersList, reviewer) => {
                   reviewersList[reviewer.author.login] = "APPROVED";
                   return reviewersList;
                 },
-                {}
+                {} as { [key: string]: string }
               );
-            finalShas[shaKey].reviewed = Object.keys(reviewers).join(", ");
+            finalShas[shaKey] = {
+              author: shaContext.associatedPullRequests.nodes[0].author.login,
+              reviewed: Object.keys(reviewers).join(", "),
+            };
             return finalShas;
           },
-          {}
+          {} as { [key: string]: { author: string; reviewed: string } }
         );
         const context = { ...shas };
 

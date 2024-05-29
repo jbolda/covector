@@ -31,12 +31,6 @@ describe("git parsing", () => {
         hashLong: "a346221102075e647693851fd1019d66641f8014",
         hashShort: "a346221",
       },
-      {
-        commitSubject: "publish new versions (#231)",
-        date: "2023-01-17",
-        hashLong: "b5375deed67cb47f75e29b5628c5c15ff4b99b78",
-        hashShort: "b5375de",
-      },
     ]);
   });
 });

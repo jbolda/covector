@@ -56,7 +56,7 @@ export function* getCommitContext(
     #   }
     }`;
 
-  const response = yield client(query, {
+  const response: CommitResponse = yield client(query, {
     owner,
     name,
   });
