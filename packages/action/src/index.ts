@@ -124,31 +124,37 @@ export function* run(): Generator<any, any, any> {
           changeContext: Record<string, string>;
         }>
       > {
-        const octokit = github.getOctokit(token);
-        const prContext: CommitResponse = yield getCommitContext(
-          octokit.graphql,
-          github.context.repo.owner,
-          github.context.repo.repo,
-          commits
-        );
-        const shas = Object.entries(prContext.repository).reduce(
-          (finalShas, [shaKey, shaContext]) => {
-            const reviewers =
-              shaContext.associatedPullRequests.nodes[0].reviews.nodes.reduce(
-                (reviewersList, reviewer) => {
-                  reviewersList[reviewer.author.login] = "APPROVED";
-                  return reviewersList;
-                },
-                {} as { [key: string]: string }
-              );
-            finalShas[shaKey] = {
-              author: shaContext.associatedPullRequests.nodes[0].author.login,
-              reviewed: Object.keys(reviewers).join(", "),
-            };
-            return finalShas;
-          },
-          {} as { [key: string]: { author: string; reviewed: string } }
-        );
+        let shas = {};
+        try {
+          const octokit = github.getOctokit(token);
+          const prContext: CommitResponse = yield getCommitContext(
+            octokit.graphql,
+            github.context.repo.owner,
+            github.context.repo.repo,
+            commits
+          );
+          shas = Object.entries(prContext.repository).reduce(
+            (finalShas, [shaKey, shaContext]) => {
+              const reviewers =
+                shaContext.associatedPullRequests.nodes[0].reviews.nodes.reduce(
+                  (reviewersList, reviewer) => {
+                    reviewersList[reviewer.author.login] = "APPROVED";
+                    return reviewersList;
+                  },
+                  {} as { [key: string]: string }
+                );
+              finalShas[shaKey] = {
+                author: shaContext.associatedPullRequests.nodes[0].author.login,
+                reviewed: Object.keys(reviewers).join(", "),
+              };
+              return finalShas;
+            },
+            {} as { [key: string]: { author: string; reviewed: string } }
+          );
+        } catch (error) {
+          // if it fails, continue with context
+          console.error(error);
+        }
         const context = { ...shas };
 
         return function* defineContexts() {
