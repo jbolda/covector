@@ -1,5 +1,19 @@
 import { getOctokit } from "@actions/github";
 
+export type CommitResponse = {
+  repository: Record<string, Commit>;
+};
+type Commit = {
+  abbreviatedOid: string;
+  associatedPullRequests: {
+    nodes: {
+      number: number;
+      author: { login: string };
+      reviews: { nodes: { author: { login: string } }[] };
+    }[];
+  };
+};
+
 export function* getCommitContext(
   client: ReturnType<typeof getOctokit>["graphql"],
   owner: string,
@@ -41,8 +55,6 @@ export function* getCommitContext(
     #     nodeCount
     #   }
     }`;
-
-  console.dir({ query });
 
   const response = yield client(query, {
     owner,

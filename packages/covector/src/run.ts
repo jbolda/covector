@@ -6,7 +6,7 @@ import { version } from "./version";
 import { preview } from "./preview";
 import { publish } from "./publish";
 import { arbitrary } from "./arbitrary";
-import { type Operation } from "effection";
+import { ChangeContext } from "../../types/src";
 
 export function* covector({
   // shared
@@ -34,7 +34,7 @@ export function* covector({
   branchTag?: string;
   changeFolder?: string;
   yes?: boolean;
-  createContext?: Operation<any>;
+  createContext?: ChangeContext;
 }): Generator<any, any, any> {
   if (command === "init") {
     return yield init({ cwd, changeFolder, yes });

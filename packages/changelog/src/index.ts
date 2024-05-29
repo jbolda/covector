@@ -11,6 +11,7 @@ import type {
   PkgCommandResponse,
   AssembledChanges,
   Meta,
+  ChangeContext,
 } from "@covector/types";
 
 export { pullLastChangelog } from "./get";
@@ -30,7 +31,7 @@ export function* fillChangelogs({
   cwd: string;
   pkgCommandsRan?: { [k: string]: PkgCommandResponse };
   create?: boolean;
-  createContext?: Operation<any>;
+  createContext?: ChangeContext;
 }): Operation<{ [k: string]: PkgCommandResponse } | undefined> {
   const changelogs = yield readAllChangelogs({
     applied: applied.reduce(
@@ -155,13 +156,15 @@ type Change = {
 type ChangedLog = { pkg: string; change: Change; addition: string };
 
 function* defaultCreateContext(): Operation<
-  Operation<{ context: Record<string, string>; changeContext: any }>
+  Operation<{
+    context: Record<string, string>;
+    changeContext: Record<string, string>;
+  }>
 > {
-  console.dir({ wrongContext: "bucko" });
   const context = {};
   return function* defineContexts(): Operation<{
-    context: any;
-    changeContext: any;
+    context: Record<string, string>;
+    changeContext: Record<string, string>;
   }> {
     const changeContext = {};
     return { context, changeContext };
@@ -173,14 +176,13 @@ function* applyChanges({
   assembledChanges,
   config,
   applied,
-  // @ts-expect-error
   createContext = defaultCreateContext,
 }: {
   changelogs: Change[];
   assembledChanges: AssembledChanges;
   config: ConfigFile;
   applied: { name: string; version: string }[];
-  createContext?: Operation<Operation<Record<string, string>>>;
+  createContext?: ChangeContext;
 }): Operation<ChangedLog[]> {
   const gitSiteUrl = !config.gitSiteUrl
     ? "/"
@@ -200,8 +202,8 @@ function* applyChanges({
       )
     ),
   ];
-  console.dir({ commits });
-  // @ts-expect-error
+  // @ts-expect-error expression not callable, but it is, we don't have a reasonable way to type narrow
+  //  through the exported types from effection however (expects that it could possibly be OperationPromise)
   const createChangeContext = yield createContext({ commits });
 
   return yield all(

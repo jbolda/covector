@@ -18,6 +18,7 @@ import type {
   Covector,
   PkgVersion,
   PackageFile,
+  ChangeContext,
 } from "@covector/types";
 import { Operation } from "effection";
 
@@ -34,7 +35,7 @@ export function* version({
   cwd?: string;
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
-  createContext?: Operation<any>;
+  createContext?: ChangeContext;
 }): Operation<Covector> {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
