@@ -76,7 +76,7 @@ export const parseChange = function* ({
       const gitInfo = yield runCommand({
         cwd,
         pkgPath: ".",
-        command: `git --no-pager log --reverse --format="%h %H %as %s" ${file.path}`,
+        command: `git --no-pager log --reverse --format="%h %H %as %s" --diff-filter=ARM --remove-empty -- ${file.path}`,
         log: false,
       });
       const commits = gitInfo.split(/\n/).map((commit: string) => {

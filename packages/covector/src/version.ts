@@ -18,6 +18,7 @@ import type {
   Covector,
   PkgVersion,
   PackageFile,
+  ChangeContext,
 } from "@covector/types";
 import { Operation } from "effection";
 
@@ -27,12 +28,14 @@ export function* version({
   cwd = process.cwd(),
   filterPackages = [],
   modifyConfig = async (c) => c,
+  createContext,
 }: {
   command: string;
   dryRun?: boolean;
   cwd?: string;
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
+  createContext?: ChangeContext;
 }): Operation<Covector> {
   const config = yield modifyConfig(yield configFile({ cwd }));
   const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
@@ -94,7 +97,7 @@ export function* version({
           applied: string | false;
         };
       },
-      pkg: string,
+      pkg: string
     ) => {
       pkgs[pkg] = {
         precommand: false,
@@ -104,7 +107,7 @@ export function* version({
       };
       return pkgs;
     },
-    {},
+    {}
   );
 
   pkgCommandsRan = yield attemptCommands({
@@ -136,12 +139,12 @@ export function* version({
           applied: object;
         };
       },
-      result: { name: string },
+      result: { name: string }
     ) => {
       pkgs[result.name].applied = result;
       return pkgs;
     },
-    pkgCommandsRan,
+    pkgCommandsRan
   );
 
   pkgCommandsRan = yield fillChangelogs({
@@ -151,6 +154,7 @@ export function* version({
     config,
     cwd,
     pkgCommandsRan,
+    createContext,
     create: !dryRun,
   });
 

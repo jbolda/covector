@@ -7,6 +7,7 @@ import {
   configFileSchema,
 } from "@covector/files/src/schema";
 import { TomlDocument } from "@covector/toml";
+import { Operation } from "effection";
 
 export type File = z.infer<typeof fileSchema>;
 export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
@@ -226,6 +227,13 @@ export type ChangeParsed = {
   summary: string;
   meta: { dependencies: string[] };
 };
+
+export type ChangeContext = ({ commits }: { commits: string[] }) => Operation<
+  Operation<{
+    context: Record<string, string>;
+    changeContext: Record<string, string>;
+  }>
+>;
 
 export type Changed = Record<
   string,

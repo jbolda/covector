@@ -17,6 +17,8 @@ import type {
 } from "../../types/src";
 import { formatComment } from "./comment/formatGithubComment";
 import type { PullRequestPayload } from "./comment/types";
+import type { Operation } from "effection";
+import { CommitResponse, getCommitContext } from "./pr/getCommitContext";
 
 export function* run(): Generator<any, any, any> {
   try {
@@ -116,10 +118,56 @@ export function* run(): Generator<any, any, any> {
       const status: CovectorStatus = yield covector({ command: "status", cwd });
       core.setOutput("status", status.response);
 
+      function* createContext({ commits }: { commits: string[] }): Operation<
+        Operation<{
+          context: Record<string, string>;
+          changeContext: Record<string, string>;
+        }>
+      > {
+        let shas = {};
+        try {
+          const octokit = github.getOctokit(token);
+          const prContext: CommitResponse = yield getCommitContext(
+            octokit.graphql,
+            github.context.repo.owner,
+            github.context.repo.repo,
+            commits
+          );
+          shas = Object.entries(prContext.repository).reduce(
+            (finalShas, [shaKey, shaContext]) => {
+              const reviewers =
+                shaContext.associatedPullRequests.nodes[0].reviews.nodes.reduce(
+                  (reviewersList, reviewer) => {
+                    reviewersList[reviewer.author.login] = "APPROVED";
+                    return reviewersList;
+                  },
+                  {} as { [key: string]: string }
+                );
+              finalShas[shaKey] = {
+                author: shaContext.associatedPullRequests.nodes[0].author.login,
+                reviewed: Object.keys(reviewers).join(", "),
+              };
+              return finalShas;
+            },
+            {} as { [key: string]: { author: string; reviewed: string } }
+          );
+        } catch (error) {
+          // if it fails, continue with context
+          console.error(error);
+        }
+        const context = { ...shas };
+
+        return function* defineContexts() {
+          const changeContext = {};
+          return { context, changeContext };
+        };
+      }
+
       const covectored: CovectorVersion = yield covector({
         command,
         filterPackages,
         cwd,
+        ...(core.getInput("recognizeContributors") ? { createContext } : {}),
       });
       core.setOutput("templatePipe", covectored.pipeTemplate);
 
