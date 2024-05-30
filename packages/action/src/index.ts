@@ -182,7 +182,13 @@ export function* run(): Generator<any, any, any> {
         },
         "# Version Updates\n\nMerging this PR will release new versions of the following packages based on your change files.\n\n"
       );
-      core.setOutput("change", covectoredSmushed);
+      core.setOutput(
+        "change",
+        covectoredSmushed.replace(
+          /\[`?(.*?)`?\]\(.*?https\:\/\/www.github\.com.*?\)/gm,
+          "$1"
+        )
+      );
       const payload = JSON.stringify(covectoredSmushed, undefined, 2);
       core.startGroup(`covector version output`);
       console.log(`The covector output: ${payload}`);
