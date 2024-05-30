@@ -29,6 +29,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           command: "version"
+          recognizeContributors: true
 
   preview:
     runs-on: ubuntu-latest
