@@ -32,6 +32,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           command: "version-or-publish"
           createRelease: true
+          recognizeContributors: true
       - name: dump covector output
         env:
           COVECTOR_CONTEXT: ${{ toJson(steps.covector) }}
