@@ -12,8 +12,8 @@ export function formatComment({
   projectReadmeExists: boolean;
   changeFolder: string;
 }) {
+  let comment = `### Package Changes Through ${payload.pull_request.head.sha}\n`;
   if ("applied" in covectored) {
-    let comment = `### Changes Through ${payload.pull_request.head.sha}\n`;
     let addChangeFileUrl = `${payload.pull_request.html_url}/../../new/${
       payload.pull_request.head.ref
     }${newChangeFile({
@@ -42,7 +42,7 @@ export function formatComment({
       defaultFooter
     );
   } else if ("pkgReadyToPublish" in covectored) {
-    return covectored.response;
+    return `${comment}${covectored.response}\n\n`;
   }
 }
 
