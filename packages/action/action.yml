@@ -28,6 +28,10 @@ inputs:
     description: Include a comment on the pull request including context around the comment run
     required: false
     defaults: false
+  recognizeContributors:
+    description: Include contributor and reviewer names within changelog
+    required: false
+    defaults: false
   label:
     description: "the Github pull request label that triggers preview packages"
     required: false

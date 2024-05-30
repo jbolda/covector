@@ -167,7 +167,7 @@ export function* run(): Generator<any, any, any> {
         command,
         filterPackages,
         cwd,
-        createContext,
+        ...(core.getInput("recognizeContributors") ? { createContext } : {}),
       });
       core.setOutput("templatePipe", covectored.pipeTemplate);
 
