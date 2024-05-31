@@ -187,7 +187,7 @@ export function* run(): Generator<any, any, any> {
       core.setOutput(
         "change",
         covectoredSmushed.replace(
-          /\[`?(.*?)`?\]\(.*?https\:\/\/www.github\.com.*?\)/gm,
+          /\[`?(.*?)`?\]\(.*?https\:\/\/(www\.)?github\.com.*?\)/gm,
           "$1"
         )
       );
