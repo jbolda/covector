@@ -140,7 +140,7 @@ const renderRelease = (
 
     return `\n- ${commitLink}${
       pr ? ` (${prLink}${recognizeContributions})` : ""
-    } ${summary}${recognizeContributions}`;
+    } ${summary}`;
   }
 };
 
