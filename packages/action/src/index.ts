@@ -135,14 +135,16 @@ export function* run(): Generator<any, any, any> {
           );
           shas = Object.entries(prContext.repository).reduce(
             (finalShas, [shaKey, shaContext]) => {
-              const reviewers =
-                shaContext.associatedPullRequests.nodes[0].reviews.nodes.reduce(
-                  (reviewersList, reviewer) => {
-                    reviewersList[reviewer.author.login] = "APPROVED";
-                    return reviewersList;
-                  },
-                  {} as { [key: string]: string }
-                );
+              const reviewers = shaContext.associatedPullRequests.nodes[0]
+                ?.reviews?.nodes
+                ? shaContext.associatedPullRequests.nodes[0].reviews.nodes.reduce(
+                    (reviewersList, reviewer) => {
+                      reviewersList[reviewer.author.login] = "APPROVED";
+                      return reviewersList;
+                    },
+                    {} as { [key: string]: string }
+                  )
+                : {};
               finalShas[shaKey] = {
                 author: shaContext.associatedPullRequests.nodes[0].author.login,
                 reviewed: Object.keys(reviewers).join(", "),

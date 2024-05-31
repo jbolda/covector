@@ -9,7 +9,7 @@ type Commit = {
     nodes: {
       number: number;
       author: { login: string };
-      reviews: { nodes: { author: { login: string } }[] };
+      reviews?: { nodes: { author: { login: string } }[] };
     }[];
   };
 };
