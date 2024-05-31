@@ -1,6 +1,6 @@
 {
   "name": "@covector/toml",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "files": [
     "pkg/covector_toml_bg.wasm",
     "pkg/covector_toml.js",

@@ -1,5 +1,9 @@
 # Changelog
 
+## \[0.7.1]
+
+- [`f5b2e5a`](https://www.github.com/jbolda/covector/commit/f5b2e5a8d129d15234080d3161e3702fe1cae1b5) ([#306](https://www.github.com/jbolda/covector/pull/306) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) The crates.io API endpoint requires a User Agent otherwise it returns a 403. Added agent to the fetch calls.
+
 ## \[0.7.0]
 
 ### New Features

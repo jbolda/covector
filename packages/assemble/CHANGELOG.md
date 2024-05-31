@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.11.0]
+
+- [`9e111fc`](https://www.github.com/jbolda/covector/commit/9e111fcf2431690b8719ca493e6580a42e72c457) ([#304](https://www.github.com/jbolda/covector/pull/304) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add currentVersion property to more easily refer to the version before a bump.
+- [`9202dca`](https://www.github.com/jbolda/covector/commit/9202dca0d8d0fd114ecceb4154c58bc764b85c43) ([#307](https://www.github.com/jbolda/covector/pull/307) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Use additional git log flags, `--diff-filter=ACM --remove-empty`, to filter out previous versions of files with non-unique (across all shas) file names.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.7.2`
+- Upgraded to `@covector/command@0.7.1`
+
 ## \[0.10.3]
 
 ### Dependencies

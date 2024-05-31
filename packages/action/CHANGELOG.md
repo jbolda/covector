@@ -1,5 +1,18 @@
 # Changelog
 
+## \[0.11.0]
+
+- [`9480736`](https://www.github.com/jbolda/covector/commit/9480736961fb92b1861938015b1be3fd53ee5355) ([#299](https://www.github.com/jbolda/covector/pull/299) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Return additional `status` content from `covector` to enable posting a comment in PR providing additional context of the expected change files.
+- [`9202dca`](https://www.github.com/jbolda/covector/commit/9202dca0d8d0fd114ecceb4154c58bc764b85c43) ([#307](https://www.github.com/jbolda/covector/pull/307) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Pass `createContext` function from action through to changelog to enable passing specific context usable within changelogs.
+- [`9480736`](https://www.github.com/jbolda/covector/commit/9480736961fb92b1861938015b1be3fd53ee5355) ([#299](https://www.github.com/jbolda/covector/pull/299) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add option to post a comment in a GitHub pull request comment lifting the context from covector.
+- [`2db4d6e`](https://www.github.com/jbolda/covector/commit/2db4d6edc661442612a390a375b6bab7853c0968) ([#309](https://www.github.com/jbolda/covector/pull/309) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) The GitHub comment was previously rather terse. We are now including the sha within the comment so as to make it clear when the command last ran.
+- [`9202dca`](https://www.github.com/jbolda/covector/commit/9202dca0d8d0fd114ecceb4154c58bc764b85c43) ([#307](https://www.github.com/jbolda/covector/pull/307) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Query the GitHub API for the PR creator, and highlight their names in the changelogs for recognition of their contribution.
+- [`737ebed`](https://www.github.com/jbolda/covector/commit/737ebed96593454aa8517b8e32a1f04566097646) ([#310](https://www.github.com/jbolda/covector/pull/310) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Fix links within GitHub by removing the explicit markdown syntax to allow GitHub Flavored Markdown to resolve, render and interlink the Version Packages PR with the change files and their PRs.
+
+### Dependencies
+
+- Upgraded to `covector@0.11.0`
+
 ## \[0.10.2]
 
 ### Dependencies

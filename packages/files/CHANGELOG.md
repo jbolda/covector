@@ -1,5 +1,13 @@
 # Changelog
 
+## \[0.7.2]
+
+- [`9e111fc`](https://www.github.com/jbolda/covector/commit/9e111fcf2431690b8719ca493e6580a42e72c457) ([#304](https://www.github.com/jbolda/covector/pull/304) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add currentVersion property to more easily refer to the version before a bump.
+
+### Dependencies
+
+- Upgraded to `@covector/toml@0.1.0`
+
 ## \[0.7.1]
 
 - [`4bd5245`](https://www.github.com/jbolda/covector/commit/4bd5245c2c804f61f89fc4dd67aa12ef6675a563)([#297](https://www.github.com/jbolda/covector/pull/297)) Include `timeout` in the `.changes/config.json` schema. It was throwing an error that it was invalid, but it is indeed valid.
