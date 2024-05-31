@@ -30,19 +30,20 @@ export function* getCommitContext(
         ) {
           ... on Commit {
             abbreviatedOid
-            associatedPullRequests(first: 2) {
+            associatedPullRequests(first: 1) {
               nodes {
                 number
                 author {
                   login
                 }
-                reviews(first: 5, states: [APPROVED]) {
-                  nodes {
-                    author {
-                      login
-                    }
-                  }
-                }
+                # Hard to support reviewers without possible excessive verbosity and spam, disabling
+                # reviews(first: 5, states: [APPROVED]) {
+                #   nodes {
+                #     author {
+                #       login
+                #     }
+                #   }
+                # }
               }
             }
           }
