@@ -1,5 +1,14 @@
 # Changelog
 
+## \[0.11.0]
+
+- [`9202dca`](https://www.github.com/jbolda/covector/commit/9202dca0d8d0fd114ecceb4154c58bc764b85c43) ([#307](https://www.github.com/jbolda/covector/pull/307) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Pass `createContext` function from action through to changelog to enable passing specific context usable within changelogs.
+- [`9202dca`](https://www.github.com/jbolda/covector/commit/9202dca0d8d0fd114ecceb4154c58bc764b85c43) ([#307](https://www.github.com/jbolda/covector/pull/307) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Query the GitHub API for the PR creator, and highlight their names in the changelogs for recognition of their contribution.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.7.2`
+
 ## \[0.10.1]
 
 ### Dependencies

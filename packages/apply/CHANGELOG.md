@@ -1,5 +1,14 @@
 # Changelog
 
+## \[0.9.3]
+
+- [`9e111fc`](https://www.github.com/jbolda/covector/commit/9e111fcf2431690b8719ca493e6580a42e72c457) ([#304](https://www.github.com/jbolda/covector/pull/304) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add currentVersion property to more easily refer to the version before a bump.
+- [`9480736`](https://www.github.com/jbolda/covector/commit/9480736961fb92b1861938015b1be3fd53ee5355) ([#299](https://www.github.com/jbolda/covector/pull/299) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Allow running status command without logging. This allows the command to also serve more utilitarian purposes as well.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.7.2`
+
 ## \[0.9.2]
 
 ### Dependencies
