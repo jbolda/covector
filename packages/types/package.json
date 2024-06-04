@@ -9,6 +9,10 @@
     "url": "https://github.com/jbolda/covector.git"
   },
   "main": "dist/index.js",
+  "exports": {
+    "development": "./src/index.ts",
+    "default": "./dist/index.js"
+  },
   "scripts": {
     "build": "echo noop",
     "clean": "rimraf dist tsconfig.tsbuildinfo"

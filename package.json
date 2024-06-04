@@ -6,7 +6,7 @@
   "author": "Jacob Bolda <me@jacobbolda.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "covector": "node ./packages/covector/bin/covector.js",
+    "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.js",
     "prebuild": "npm run prebuild -w @covector/toml",
     "build": "tsc --build tsconfig.packages.json",
     "watch": "tsc --build --watch tsconfig.packages.json",
