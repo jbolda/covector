@@ -10,6 +10,10 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    "development": "./src/index.ts",
+    "default": "./dist/index.js"
+  },
   "scripts": {
     "prebuild": "wasm-pack build --release --no-pack --target nodejs",
     "build": "tsc -b",
@@ -18,7 +22,9 @@
     "test": "jest"
   },
   "devDependencies": {
-    "wasm-pack": "^0.12.1",
-    "rimraf": "^3.0.2"
+    "wasm-pack": "^0.12.1"
+  },
+  "volta": {
+    "extends": "../../package.json"
   }
 }

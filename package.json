@@ -6,7 +6,7 @@
   "author": "Jacob Bolda <me@jacobbolda.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "covector": "node ./packages/covector/bin/covector.js",
+    "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.js",
     "prebuild": "npm run prebuild -w @covector/toml",
     "build": "tsc --build tsconfig.packages.json",
     "watch": "tsc --build --watch tsconfig.packages.json",
@@ -22,12 +22,14 @@
   "devDependencies": {
     "@effection/jest": "^2.0.5",
     "@types/jest": "^27.4.1",
-    "@types/node": "^16.18.12",
+    "@types/node": "^20.13.0",
+    "fixturez": "^1.1.0",
     "jest": "^27.5.1",
     "jest-mock-console": "^1.2.3",
-    "prettier": "^3.0.0",
-    "rimraf": "^3.0.2",
-    "ts-jest": "^27.1.4"
+    "prettier": "^3.3.0",
+    "rimraf": "^5.0.7",
+    "ts-jest": "^27.1.4",
+    "tsx": "^4.11.0"
   },
   "volta": {
     "node": "20.14.0",
