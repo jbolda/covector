@@ -1,60 +1,82 @@
-import { it, captureError } from "@effection/jest";
 import { sh } from "../src";
-import mockConsole, { RestoreConsole } from "jest-mock-console";
+import { describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 describe("sh", () => {
-  let restoreConsole: RestoreConsole;
-  beforeEach(() => {
-    restoreConsole = mockConsole(["log", "dir"]);
-  });
-  afterEach(() => {
-    restoreConsole();
-  });
+  const stream = pinoTest.sink();
+  const logger = pino(stream);
 
   it("handle base command", function* () {
-    const { out } = yield sh("npm help", {}, false);
+    const { out } = yield sh("npm help", {}, false, logger);
     expect(out.substring(0, 23)).toEqual(
       `npm <command>
 
 Usage:
 
-`,
+`
     );
   });
 
   it("handle single command", function* () {
-    const { out } = yield sh("echo 'this thing'", {}, false);
+    const { out } = yield sh("echo 'this thing'", {}, false, logger);
     expect(out).toBe("this thing");
   });
 
   describe("shell defined", () => {
     it("shell opted in", function* () {
-      const { out } = yield sh("echo this thing", { shell: true }, false);
+      const { out } = yield sh(
+        "echo this thing",
+        { shell: true },
+        false,
+        logger
+      );
       expect(out).toBe("this thing");
-    }, 6000); // increase timeout to 60s, windows seems to take forever
+    }); // TODO increase timeout to 60s, windows seems to take forever
 
     it("defines bash as shell", function* () {
-      const { out } = yield sh("echo this thing", { shell: "bash" }, false);
+      const { out } = yield sh(
+        "echo this thing",
+        { shell: "bash" },
+        false,
+        logger
+      );
       expect(out).toBe("this thing");
     });
 
     if (process.platform !== "win32") {
       it("defines sh as shell", function* () {
-        const { out } = yield sh("echo this thing", { shell: "sh" }, false);
+        const { out } = yield sh(
+          "echo this thing",
+          { shell: "sh" },
+          false,
+          logger
+        );
         expect(out).toBe("this thing");
       });
     }
 
     if (process.platform === "win32") {
       it("defines cmd as shell", function* () {
-        const { out } = yield sh("echo this thing", { shell: "cmd" }, false);
+        const { out } = yield sh(
+          "echo this thing",
+          { shell: "cmd" },
+          false,
+          logger
+        );
         expect(out).toBe("this thing");
       });
 
       it("defines pwsh as shell", function* () {
-        const { out } = yield sh("echo this thing", { shell: "pwsh" }, false);
+        const { out } = yield sh(
+          "echo this thing",
+          { shell: "pwsh" },
+          false,
+          logger
+        );
         expect(out).toBe("this\r\nthing");
       });
     }
@@ -67,6 +89,7 @@ Usage:
           "echo this thing | echo but actually this",
           { shell: true },
           false,
+          logger
         );
         expect(out).toBe("but actually this");
       });
@@ -76,6 +99,7 @@ Usage:
           "echo this thing | echo but actually this",
           {},
           false,
+          logger
         );
         expect(out).toBe("but actually this");
       });
@@ -90,6 +114,7 @@ Usage:
           "echo this thing | echo but actually this",
           { shell: true },
           false,
+          logger
         );
 
         // this should always use git bash, same as defining it
@@ -101,6 +126,7 @@ Usage:
           "echo this thing | echo but actually this",
           {},
           false,
+          logger
         );
 
         // fallback is whichever shell this is run from
@@ -117,6 +143,7 @@ Usage:
           "echo this thing | echo but actually this",
           { shell: "cmd" },
           false,
+          logger
         );
         // should act like the fallback
         expect(out).toBe("but actually this");
@@ -127,24 +154,25 @@ Usage:
           "echo this thing | echo but actually this",
           { shell: "bash" },
           false,
+          logger
         );
         // can handle pipes just fine, works like other OS
         expect(out).toBe("but actually this");
       });
 
       it("considers piped commands, defines pwsh as shell", function* () {
-        const result = yield captureError(
-          sh(
-            "echo this thing | echo but actually this",
-            { shell: "pwsh" },
-            false,
-          ),
+        // TODO captureError
+        const result = yield sh(
+          "echo this thing | echo but actually this",
+          { shell: "pwsh" },
+          false,
+          logger
         );
         // pwsh doesn't handle pipes with echo
         expect(result.message).toBe(
-          "spawn echo this thing | echo but actually this ENOENT",
+          "spawn echo this thing | echo but actually this ENOENT"
         );
-      }, 6000); // increase timeout to 60s, windows seems to take forever
+      }); // TODO increase timeout to 60s, windows seems to take forever
     });
   }
 });
