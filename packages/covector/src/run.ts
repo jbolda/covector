@@ -1,3 +1,4 @@
+import { pino } from "pino";
 import { init } from "./init";
 import { add } from "./add";
 import { status } from "./status";
@@ -7,6 +8,7 @@ import { preview } from "./preview";
 import { publish } from "./publish";
 import { arbitrary } from "./arbitrary";
 import { ChangeContext } from "../../types/src";
+import { ensure, sleep } from "effection";
 
 export function* covector({
   // shared
@@ -36,14 +38,39 @@ export function* covector({
   yes?: boolean;
   createContext?: ChangeContext;
 }): Generator<any, any, any> {
+  const logger = pino(
+    {
+      name: "covector",
+      transport: {
+        target: "./logger.mjs",
+      },
+    }
+    // pino.destination({ dest: 1, sync: true })
+  );
+
   if (command === "init") {
-    return yield init({ cwd, changeFolder, yes });
+    yield init({
+      logger: logger.child({ command: "init" }),
+      cwd,
+      changeFolder,
+      yes,
+    });
   } else if (command === "add") {
-    return yield add({ cwd, changeFolder, yes });
+    yield add({
+      logger: logger.child({ command: "add" }),
+      cwd,
+      changeFolder,
+      yes,
+    });
   } else if (command === "config") {
-    return yield config({ cwd, modifyConfig });
+    yield config({
+      logger: logger.child({ command: "config" }),
+      cwd,
+      modifyConfig,
+    });
   } else if (command === "status") {
-    return yield status({
+    yield status({
+      logger: logger.child({ command: "status" }),
       command,
       dryRun,
       cwd,
@@ -53,7 +80,8 @@ export function* covector({
       branchTag,
     });
   } else if (command === "version") {
-    return yield version({
+    yield version({
+      logger: logger.child({ command: "version" }),
       command,
       dryRun,
       cwd,
@@ -62,7 +90,8 @@ export function* covector({
       createContext,
     });
   } else if (command === "preview") {
-    return yield preview({
+    yield preview({
+      logger: logger.child({ command: "preview" }),
       command,
       dryRun,
       cwd,
@@ -72,7 +101,8 @@ export function* covector({
       branchTag,
     });
   } else if (command === "publish") {
-    return yield publish({
+    yield publish({
+      logger: logger.child({ command: "publish" }),
       command,
       dryRun,
       cwd,
@@ -80,7 +110,8 @@ export function* covector({
       modifyConfig,
     });
   } else {
-    return yield arbitrary({
+    yield arbitrary({
+      logger: logger.child({ command: "arbitrary" }),
       command,
       dryRun,
       cwd,
@@ -88,4 +119,9 @@ export function* covector({
       modifyConfig,
     });
   }
+
+  yield ensure(() => logger.flush());
+  // to ensure all logs are properly flushed
+  // (no other method we can await currently)
+  yield sleep(200);
 }

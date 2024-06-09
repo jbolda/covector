@@ -19,9 +19,11 @@ import type {
   CommandsRan,
   BuiltInCommands,
   BuiltInCommandOptions,
+  Logger,
 } from "@covector/types";
 
 export const attemptCommands = function* ({
+  logger,
   cwd,
   commands,
   command,
@@ -29,6 +31,7 @@ export const attemptCommands = function* ({
   pkgCommandsRan,
   dryRun,
 }: {
+  logger: Logger;
   cwd: string;
   commands: (PkgVersion | PkgPublish)[];
   command: "version" | "publish" | string; // the covector command that was ran
@@ -54,6 +57,7 @@ export const attemptCommands = function* ({
     let stdout = initialStdout ? `${initialStdout}\n` : "";
 
     stdout = yield executeEachCommand({
+      logger,
       cwd,
       stdout,
       dryRun,
@@ -75,6 +79,7 @@ export const attemptCommands = function* ({
 };
 
 function* executeEachCommand({
+  logger,
   cwd,
   stdout,
   dryRun,
@@ -84,6 +89,7 @@ function* executeEachCommand({
   command,
   commandPrefix,
 }: {
+  logger: Logger;
   cwd: string;
   stdout: string;
   dryRun: boolean;
@@ -133,6 +139,7 @@ function* executeEachCommand({
       for (let [index, attemptTimeout] of commandBackoff.entries()) {
         try {
           stdout = yield callCommand({
+            logger,
             cwd,
             pkg,
             runningCommand,
@@ -149,19 +156,19 @@ function* executeEachCommand({
             throw e;
           } else {
             if (isMainError(e as Error)) {
-              console.error((e as MainError).message);
+              logger.error((e as MainError).message);
             } else {
-              console.error(e);
+              logger.error(e);
             }
           }
           yield sleep(attemptTimeout);
         }
       }
     } else {
-      console.log(
+      logger.info(
         `dryRun >> ${pkg.pkg} [${commandPrefix}${command}${
           runningCommand.runFromRoot === true ? " run from the cwd" : ""
-        }]: ${runningCommand.command}`,
+        }]: ${runningCommand.command}`
       );
     }
   }
@@ -199,7 +206,7 @@ function* useFunction({
           } request to ${url} returned errors: ${JSON.stringify(
             response.errors,
             null,
-            2,
+            2
           )}`,
         });
       }
@@ -213,6 +220,7 @@ function* useFunction({
 }
 
 function* callCommand({
+  logger,
   cwd,
   pkg,
   runningCommand,
@@ -222,6 +230,7 @@ function* callCommand({
   command,
   commandPrefix,
 }: {
+  logger: Logger;
   cwd: string;
   stdout: string;
   pkg: PkgVersion | PkgPublish;
@@ -243,10 +252,11 @@ function* callCommand({
     yield runningCommand.command(pipeToFunction);
 
     if (typeof pubCommand === "object" && pubCommand.pipe) {
-      console.warn(`We cannot pipe the function command in ${pkg.pkg}`);
+      logger.warn(`We cannot pipe the function command in ${pkg.pkg}`);
     }
   } else if (typeof runningCommand.command === "string") {
     const ranCommand: string = yield runCommand({
+      logger,
       command: runningCommand.command,
       cwd,
       pkg: pkg.pkg,
@@ -272,10 +282,12 @@ function* callCommand({
 }
 
 export function* confirmCommandsToRun({
+  logger,
   cwd,
   commands,
   command,
 }: {
+  logger: Logger;
   cwd: string;
   commands: PkgPublish[];
   command: string;
@@ -289,6 +301,7 @@ export function* confirmCommandsToRun({
       let version = "";
       if (typeof getPublishedVersion === "string") {
         version = yield runCommand({
+          logger,
           command: getPublishedVersion,
           cwd,
           pkg: pkg.pkg,
@@ -299,10 +312,10 @@ export function* confirmCommandsToRun({
         });
       } else if (typeof getPublishedVersion === "object") {
         if (getPublishedVersion.use === "fetch:check") {
-          console.log(
+          logger.info(
             `Checking if ${pkg.pkg}${
               !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
-            } is already published with built-in ${getPublishedVersion.use}`,
+            } is already published with built-in ${getPublishedVersion.use}`
           );
 
           try {
@@ -318,13 +331,13 @@ export function* confirmCommandsToRun({
           throw new Error(
             `This configuration is not supported for getPublishedVersion on ${
               pkg.pkg
-            }: ${JSON.stringify(getPublishedVersion, null, 2)}`,
+            }: ${JSON.stringify(getPublishedVersion, null, 2)}`
           );
         }
       }
       if (pkg.pkgFile && pkg.pkgFile.version === version) {
-        console.log(
-          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`,
+        logger.info(
+          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
         );
         // early return if published already
         continue;
@@ -337,19 +350,21 @@ export function* confirmCommandsToRun({
 }
 
 export const runCommand = function* ({
+  logger,
   pkg = "package",
   command,
   cwd,
   pkgPath,
   log = `running command for ${pkg}`,
 }: {
+  logger: Logger;
   pkg?: string;
   command: string;
   cwd: string;
   pkgPath: string;
   log: false | string;
 }): Operation<string> {
-  if (log !== false) console.log(log);
+  if (log !== false) logger.info(log);
 
   const timeoutPeriod = 1200000;
   try {
@@ -369,6 +384,7 @@ export const runCommand = function* ({
       cwd: path.join(cwd, pkgPath),
     },
     log,
+    logger
   );
 
   return ran.out;
@@ -378,6 +394,7 @@ export const sh = function* (
   command: string,
   options: { [k: string]: any },
   log: false | string,
+  logger: Logger
 ): Operation<{ result: Number; stdout: string; stderr: string; out: string }> {
   let out = "";
   let stdout = "";
@@ -405,16 +422,16 @@ export const sh = function* (
     child.stderr.forEach((chunk: Buffer) => {
       out += chunk.toString();
       stderr += chunk.toString();
-      if (log !== false) console.error(chunk.toString().trim());
-    }),
+      if (log !== false) logger.error(chunk.toString().trim());
+    })
   );
 
   yield spawn(
     child.stdout.forEach((chunk: Buffer) => {
       out += chunk.toString();
       stdout += chunk.toString();
-      if (log !== false) console.log(chunk.toString().trim());
-    }),
+      if (log !== false) logger.info(chunk.toString().trim());
+    })
   );
 
   const result = yield child.expect();

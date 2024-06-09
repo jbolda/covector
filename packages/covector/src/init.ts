@@ -1,3 +1,4 @@
+import { type Logger } from "@covector/types";
 import inquirer from "inquirer";
 import globby from "globby";
 import { default as fsDefault, Dir } from "fs";
@@ -10,10 +11,12 @@ import type { PackageFile } from "@covector/types";
 const covectorPackageFile = require("../package.json");
 
 export const init = function* init({
+  logger,
   cwd = process.cwd(),
   changeFolder = ".changes",
   yes,
 }: {
+  logger: Logger;
   cwd?: string;
   changeFolder?: string;
   yes: boolean;
@@ -25,7 +28,7 @@ export const init = function* init({
   let pkgManagers: { [k: string]: boolean } = {};
   let gitURL: boolean | string = false;
   const pkgFiles: PackageFile[] = yield all(
-    pkgs.map((pkg: string) => readPkgFile({ file: pkg, nickname: pkg, cwd })),
+    pkgs.map((pkg: string) => readPkgFile({ file: pkg, nickname: pkg, cwd }))
   );
 
   for (let pkgFile of pkgFiles) {
@@ -53,7 +56,7 @@ export const init = function* init({
                 0,
                 repoURL.includes(".git", repoURL.length - 5)
                   ? repoURL.length - 4
-                  : repoURL.length,
+                  : repoURL.length
               )
             : "";
         if (tryURL !== "") {
@@ -109,10 +112,10 @@ export const init = function* init({
 
   try {
     const testOpen: Dir = yield fs.opendir(path.posix.join(cwd, changeFolder));
-    console.log(`The ${changeFolder} folder exists, skipping creation.`);
+    logger.info(`The ${changeFolder} folder exists, skipping creation.`);
     yield testOpen.close();
   } catch (e) {
-    console.log(`Creating the ${changeFolder} directory.`);
+    logger.info(`Creating the ${changeFolder} directory.`);
     yield fs.mkdir(path.posix.join(cwd, changeFolder));
   }
 
@@ -156,17 +159,17 @@ export const init = function* init({
   try {
     const testOpen = yield fs.open(
       path.posix.join(cwd, changeFolder, "config.json"),
-      "r",
+      "r"
     );
-    console.log(
-      `The config.json exists in ${changeFolder}, skipping creation.`,
+    logger.info(
+      `The config.json exists in ${changeFolder}, skipping creation.`
     );
     yield testOpen.close();
   } catch (e) {
-    console.log("Writing out the config file.");
+    logger.info("Writing out the config file.");
     yield fs.writeFile(
       path.posix.join(cwd, changeFolder, "config.json"),
-      JSON.stringify(config, null, 2),
+      JSON.stringify(config, null, 2)
     );
   }
 
@@ -174,12 +177,12 @@ export const init = function* init({
   try {
     const testOpen = yield fs.open(
       path.posix.join(cwd, changeFolder, "readme.md"),
-      "r",
+      "r"
     );
-    console.log(`The readme.md exists in ${changeFolder}, skipping creation.`);
+    logger.info(`The readme.md exists in ${changeFolder}, skipping creation.`);
     yield testOpen.close();
   } catch (e) {
-    console.log("Writing out a readme to serve as your guide.");
+    logger.info("Writing out a readme to serve as your guide.");
     yield fs.writeFile(path.posix.join(cwd, changeFolder, "readme.md"), readme);
   }
 
@@ -189,12 +192,12 @@ export const init = function* init({
 
     try {
       const testOpen: Dir = yield fs.opendir(
-        path.posix.join(cwd, "./.github/workflows/"),
+        path.posix.join(cwd, "./.github/workflows/")
       );
-      console.log(`The .github/workflows folder exists, skipping creation.`);
+      logger.info(`The .github/workflows folder exists, skipping creation.`);
       yield testOpen.close();
     } catch (e) {
-      console.log(`Creating the .github/workflows directory.`);
+      logger.info(`Creating the .github/workflows directory.`);
       yield fs.mkdir(path.posix.join(cwd, "./.github/workflows/"), {
         recursive: true,
       });
@@ -204,19 +207,19 @@ export const init = function* init({
     try {
       const testOpen = yield fs.open(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
-        "r",
+        "r"
       );
-      console.log(
-        `The status workflow exists in ./.github/workflows, skipping creation.`,
+      logger.info(
+        `The status workflow exists in ./.github/workflows, skipping creation.`
       );
       yield testOpen.close();
     } catch (e) {
-      console.log(
-        "Writing out covector-status.yml to give you a covector update on PR.",
+      logger.info(
+        "Writing out covector-status.yml to give you a covector update on PR."
       );
       yield fs.writeFile(
         path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
-        githubStatusWorkflow({ version: covectorVersion }),
+        githubStatusWorkflow({ version: covectorVersion })
       );
     }
 
@@ -227,30 +230,30 @@ export const init = function* init({
           cwd,
           ".github",
           "workflows",
-          "covector-version-or-publish.yml",
+          "covector-version-or-publish.yml"
         ),
-        "r",
+        "r"
       );
-      console.log(
-        `The version/publish workflow exists in ./.github/workflows, skipping creation.`,
+      logger.info(
+        `The version/publish workflow exists in ./.github/workflows, skipping creation.`
       );
       yield testOpen.close();
     } catch (e) {
-      console.log(
-        "Writing out covector-version-or-publish.yml to version and publish your packages.",
+      logger.info(
+        "Writing out covector-version-or-publish.yml to version and publish your packages."
       );
       yield fs.writeFile(
         path.posix.join(
           cwd,
           ".github",
           "workflows",
-          "covector-version-or-publish.yml",
+          "covector-version-or-publish.yml"
         ),
         githubPublishWorkflow({
           pkgManagers,
           branchName: answers["branch name"],
           version: covectorVersion,
-        }),
+        })
       );
     }
   }
@@ -264,7 +267,7 @@ const packageFiles = async ({ cwd = process.cwd() }) => {
     {
       cwd,
       gitignore: true,
-    },
+    }
   );
 };
 

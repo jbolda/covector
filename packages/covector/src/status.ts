@@ -1,3 +1,4 @@
+import { type Logger } from "@covector/types";
 import { confirmCommandsToRun } from "@covector/command";
 import {
   configFile,
@@ -28,6 +29,7 @@ import type {
 } from "@covector/types";
 
 export function* status({
+  logger,
   command,
   dryRun = false,
   cwd = process.cwd(),
@@ -36,6 +38,7 @@ export function* status({
   branchTag = "",
   logs = true,
 }: {
+  logger: Logger;
   command: string;
   dryRun?: boolean;
   cwd?: string;
@@ -57,6 +60,7 @@ export function* status({
     paths: changesPaths,
   });
   const assembledChanges = yield assemble({
+    logger,
     cwd,
     files: changeFilesLoaded,
     config,
@@ -68,6 +72,7 @@ export function* status({
 
     const { commands: publishCommands }: { commands: PkgPublish[] } =
       yield mergeIntoConfig({
+        logger,
         assembledChanges,
         config,
         command: "publish",
@@ -78,7 +83,7 @@ export function* status({
       });
 
     if (publishCommands.length === 0) {
-      if (logs) console.log(`No commands configured to run on publish.`);
+      if (logs) logger.info(`No commands configured to run on publish.`);
       return {
         response: `No commands configured to run on publish.`,
         pkgReadyToPublish: [],
@@ -86,13 +91,14 @@ export function* status({
     }
 
     const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
+      logger,
       cwd,
       commands: publishCommands,
       command: "publish",
     });
 
     if (commandsToRun.length > 0 && logs) {
-      console.log(
+      logger.info(
         `There ${
           commandsToRun.length === 1
             ? `is 1 package`
@@ -111,7 +117,7 @@ export function* status({
   } else if (!!pre && assembledChanges?.changes?.length === 0) {
     if (logs) {
       console.info("There are no changes.");
-      console.log(
+      logger.info(
         "We have previously released the changes in these files:",
         changesPaths
       );
@@ -121,10 +127,10 @@ export function* status({
     if (logs) {
       // write out all of the changes
       // TODO make it pretty
-      console.log("changes:");
+      logger.info("changes:");
       Object.keys(assembledChanges.releases).forEach((release) => {
-        console.log(`${release} => ${assembledChanges.releases[release].type}`);
-        console.dir(assembledChanges.releases[release].changes, { depth: 4 });
+        logger.info(`${release} => ${assembledChanges.releases[release].type}`);
+        logger.info(assembledChanges.releases[release].changes);
       });
     }
 
@@ -145,6 +151,7 @@ export function* status({
       pipeTemplate,
     }: { commands: PkgVersion[]; pipeTemplate: any } =
       yield mergeChangesToConfig({
+        logger,
         assembledChanges: changes,
         config,
         command,

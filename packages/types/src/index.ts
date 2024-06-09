@@ -8,6 +8,7 @@ import {
 } from "@covector/files/src/schema";
 import { TomlDocument } from "@covector/toml";
 import { Operation } from "effection";
+export { Logger } from "pino";
 
 export type File = z.infer<typeof fileSchema>;
 export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;

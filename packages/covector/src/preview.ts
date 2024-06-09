@@ -1,3 +1,4 @@
+import { type Logger } from "@covector/types";
 import {
   attemptCommands,
   confirmCommandsToRun,
@@ -26,6 +27,7 @@ import type {
 } from "@covector/types";
 
 export function* preview({
+  logger,
   command,
   dryRun = false,
   cwd = process.cwd(),
@@ -34,6 +36,7 @@ export function* preview({
   previewVersion = "",
   branchTag = "",
 }: {
+  logger: Logger;
   command: string;
   dryRun?: boolean;
   cwd?: string;
@@ -55,6 +58,7 @@ export function* preview({
     paths: changesPaths,
   });
   const assembledChanges = yield assemble({
+    logger,
     cwd,
     files: changeFilesLoaded,
     config,
@@ -76,6 +80,7 @@ export function* preview({
 
   const { commands: versionCommands }: { commands: PkgVersion[] } =
     yield mergeChangesToConfig({
+      logger,
       assembledChanges: versionChanges,
       config,
       command: "version",
@@ -94,7 +99,7 @@ export function* preview({
           applied: string | false;
         };
       },
-      pkg: string,
+      pkg: string
     ) => {
       pkgs[pkg] = {
         precommand: false,
@@ -104,10 +109,11 @@ export function* preview({
       };
       return pkgs;
     },
-    {},
+    {}
   );
 
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands: versionCommands,
     commandPrefix: "pre",
@@ -136,15 +142,16 @@ export function* preview({
           applied: object;
         };
       },
-      result: { name: string },
+      result: { name: string }
     ) => {
       pkgs[result.name].applied = result;
       return pkgs;
     },
-    pkgCommandsRan,
+    pkgCommandsRan
   );
 
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands: versionCommands,
     commandPrefix: "post",
@@ -155,6 +162,7 @@ export function* preview({
 
   const { commands: publishCommands }: { commands: PkgPublish[] } =
     yield mergeIntoConfig({
+      logger,
       assembledChanges,
       config,
       command: "publish",
@@ -165,13 +173,14 @@ export function* preview({
     });
 
   if (publishCommands.length === 0) {
-    console.log(`No commands configured to run on publish.`);
+    logger.info(`No commands configured to run on publish.`);
     return {
       response: `No commands configured to run on publish.`,
     };
   }
 
   const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
+    logger,
     cwd,
     commands: publishCommands,
     command: "publish",
@@ -187,10 +196,11 @@ export function* preview({
       };
       return pkgs;
     },
-    {},
+    {}
   );
 
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands: commandsToRun,
     commandPrefix: "pre",
@@ -200,6 +210,7 @@ export function* preview({
   });
 
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands: commandsToRun,
     command: "publish",

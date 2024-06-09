@@ -1,3 +1,4 @@
+import { type Logger } from "@covector/types";
 import {
   attemptCommands,
   confirmCommandsToRun,
@@ -23,12 +24,14 @@ import type {
 } from "@covector/types";
 
 export function* arbitrary({
+  logger,
   command,
   dryRun = false,
   cwd = process.cwd(),
   filterPackages = [],
   modifyConfig = async (c) => c,
 }: {
+  logger: Logger;
   command: string;
   dryRun?: boolean;
   cwd?: string;
@@ -47,6 +50,7 @@ export function* arbitrary({
     paths: changesPaths,
   });
   const assembledChanges = yield assemble({
+    logger,
     cwd,
     files: changeFilesLoaded,
     config,
@@ -55,6 +59,7 @@ export function* arbitrary({
 
   yield raceTime({ t: config.timeout });
   const changelogs = yield pullLastChangelog({
+    logger,
     config,
     cwd,
   });
@@ -63,6 +68,7 @@ export function* arbitrary({
     commands,
     pipeTemplate,
   }: { commands: PkgPublish[]; pipeTemplate: any } = yield mergeIntoConfig({
+    logger,
     assembledChanges,
     config,
     command,
@@ -73,18 +79,19 @@ export function* arbitrary({
   });
 
   if (dryRun) {
-    console.log("==== commands ready to run ===");
-    console.log(commands);
+    logger.info("==== commands ready to run ===");
+    logger.info(commands);
   }
 
   if (commands.length === 0) {
-    console.log(`No commands configured to run on [${command}].`);
+    logger.info(`No commands configured to run on [${command}].`);
     return {
       response: `No commands configured to run on [${command}].`,
     };
   }
 
   const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
+    logger,
     cwd,
     commands,
     command,
@@ -100,7 +107,7 @@ export function* arbitrary({
       };
       return pkgs;
     },
-    {},
+    {}
   );
 
   pkgCommandsRan = yield pipeChangelogToCommands({
@@ -109,6 +116,7 @@ export function* arbitrary({
   });
 
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands: commandsToRun,
     commandPrefix: "pre",
@@ -117,6 +125,7 @@ export function* arbitrary({
     dryRun,
   });
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands: commandsToRun,
     command,
@@ -124,6 +133,7 @@ export function* arbitrary({
     dryRun,
   });
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands: commandsToRun,
     commandPrefix: "post",
@@ -133,8 +143,8 @@ export function* arbitrary({
   });
 
   if (dryRun) {
-    console.log("==== result ===");
-    console.log(pkgCommandsRan);
+    logger.info("==== result ===");
+    logger.info(pkgCommandsRan);
   }
 
   return <CovectorPublish>{ commandsRan: pkgCommandsRan, pipeTemplate };

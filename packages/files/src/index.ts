@@ -2,6 +2,7 @@ import { default as fsDefault, PathLike } from "fs";
 // this is compatible with node@12+
 const fs = fsDefault.promises;
 
+import { type Logger } from "@covector/types";
 import { all, MainError, type Operation } from "effection";
 import { configFileSchema } from "./schema";
 import { fromZodError } from "zod-validation-error";
@@ -532,10 +533,12 @@ export function* changeFilesRemove({
 }
 
 export function* readChangelog({
+  logger,
   cwd,
   packagePath = "",
   create = true,
 }: {
+  logger: Logger;
   cwd: string;
   packagePath?: string;
   create?: boolean;
@@ -545,7 +548,7 @@ export function* readChangelog({
     file = yield loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
   } catch {
     if (create) {
-      console.log("Could not load the CHANGELOG.md. Creating one.");
+      logger.info("Could not load the CHANGELOG.md. Creating one.");
       file = {
         path: path.join(packagePath, "CHANGELOG.md"),
         content: "# Changelog\n\n\n",

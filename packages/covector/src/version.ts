@@ -1,3 +1,4 @@
+import { type Logger } from "@covector/types";
 import { attemptCommands, raceTime } from "@covector/command";
 import {
   configFile,
@@ -23,6 +24,7 @@ import type {
 import { Operation } from "effection";
 
 export function* version({
+  logger,
   command,
   dryRun = false,
   cwd = process.cwd(),
@@ -30,6 +32,7 @@ export function* version({
   modifyConfig = async (c) => c,
   createContext,
 }: {
+  logger: Logger;
   command: string;
   dryRun?: boolean;
   cwd?: string;
@@ -50,6 +53,7 @@ export function* version({
     paths: changesPaths,
   });
   const assembledChanges = yield assemble({
+    logger,
     cwd,
     files: changeFilesLoaded,
     config,
@@ -75,6 +79,7 @@ export function* version({
     commands: PkgVersion[];
     pipeTemplate: any;
   } = yield mergeChangesToConfig({
+    logger,
     assembledChanges: changes,
     config,
     command,
@@ -83,8 +88,8 @@ export function* version({
     cwd,
   });
   if (dryRun) {
-    console.log("==== commands ready to run ===");
-    console.log(commands);
+    logger.info("==== commands ready to run ===");
+    logger.info(commands);
   }
 
   let pkgCommandsRan: CommandsRan = Object.keys(config.packages).reduce(
@@ -111,6 +116,7 @@ export function* version({
   );
 
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands,
     commandPrefix: "pre",
@@ -159,6 +165,7 @@ export function* version({
   });
 
   pkgCommandsRan = yield attemptCommands({
+    logger,
     cwd,
     commands,
     commandPrefix: "post",
@@ -177,8 +184,8 @@ export function* version({
   }
 
   if (dryRun) {
-    console.dir("==== result ===");
-    console.dir(pkgCommandsRan);
+    logger.info("==== result ===");
+    logger.info(pkgCommandsRan);
   }
 
   return <CovectorVersion>{ commandsRan: pkgCommandsRan, pipeTemplate };
