@@ -1,8 +1,9 @@
-import { readPkgFile, setPackageFileVersion, writePkgFile } from "../src";
-import { it } from "@effection/jest";
+import { describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
 import path from "path";
 import fixtures from "fixturez";
-import { PackageFile } from "@covector/types";
+import { readPkgFile, setPackageFileVersion, writePkgFile } from "../src";
+
 const f = fixtures(__dirname);
 
 describe("toml", () => {

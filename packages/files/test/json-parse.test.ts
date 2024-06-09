@@ -1,6 +1,8 @@
-import { readPkgFile } from "../src";
-import { it } from "@effection/jest";
+import { describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
 import fixtures from "fixturez";
+import { readPkgFile } from "../src";
+
 const f = fixtures(__dirname);
 
 describe("parses json", () => {

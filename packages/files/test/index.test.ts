@@ -1,3 +1,7 @@
+import { describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import fixtures from "fixturez";
+
 import {
   readPkgFile,
   readAllPkgFiles,
@@ -7,9 +11,7 @@ import {
   loadChangeFiles,
   changeFilesRemove,
 } from "../src";
-import { it } from "@effection/jest";
-import mockConsole from "jest-mock-console";
-import fixtures from "fixturez";
+
 const f = fixtures(__dirname);
 
 describe("general file test", () => {
@@ -28,7 +30,7 @@ describe("general file test", () => {
     const configFolder = f.copy("config.simple");
     const configArray = yield configFile({ cwd: configFolder });
     expect((configArray as any).gitSiteUrl).toBe(
-      "https://github.com/jbolda/covector",
+      "https://github.com/jbolda/covector"
     );
   });
 
@@ -67,7 +69,6 @@ describe("general file test", () => {
   });
 
   it("globs changes", function* () {
-    const restoreConsole = mockConsole(["info"]);
     const changesFolder = f.copy("changes.multiple-changes");
     const changesPaths = yield changeFiles({ cwd: changesFolder });
     const changesFiles = yield loadChangeFiles({
@@ -75,19 +76,15 @@ describe("general file test", () => {
       paths: changesPaths,
     });
     expect(changesFiles).toMatchSnapshot();
-    restoreConsole();
   });
 
   it("ignores readme", function* () {
-    const restoreConsole = mockConsole(["info"]);
     const changesFolder = f.copy("changes.no-changes-with-readme");
     const changesArray = yield changeFiles({ cwd: changesFolder });
     expect(changesArray).toMatchSnapshot();
-    restoreConsole();
   });
 
   it("deletes files", function* () {
-    const restoreConsole = mockConsole(["info"]);
     const changesFolder = f.copy("integration.general-file");
     const changeFilesToDelete = [
       "./.changes/first-change.md",
