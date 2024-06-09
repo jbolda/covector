@@ -21,15 +21,14 @@
   ],
   "devDependencies": {
     "@effection/jest": "^2.0.5",
-    "@types/jest": "^27.4.1",
     "@types/node": "^20.13.0",
     "fixturez": "^1.1.0",
-    "jest": "^27.5.1",
-    "jest-mock-console": "^1.2.3",
+    "pino-test": "^1.0.1",
     "prettier": "^3.3.0",
     "rimraf": "^5.0.7",
-    "ts-jest": "^27.1.4",
-    "tsx": "^4.11.0"
+    "tsx": "^4.11.0",
+    "typescript": "5.4.5",
+    "vitest": "^1.6.0"
   },
   "volta": {
     "node": "20.14.0",
