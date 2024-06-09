@@ -17,7 +17,8 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
-    "prepublishOnly": "tsc -b"
+    "prepublishOnly": "tsc -b",
+    "test": "vitest"
   },
   "dependencies": {
     "@covector/files": "0.7.2",

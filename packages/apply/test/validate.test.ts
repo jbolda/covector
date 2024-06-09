@@ -1,10 +1,14 @@
 import { validateApply } from "../src";
-import { run } from "effection";
-import { captureError, it } from "@effection/jest";
-import mockConsole from "jest-mock-console";
-import fixtures from "fixturez";
-import { PackageCommand, PackageFile } from "@covector/types";
 import { readAllPkgFiles } from "@covector/files";
+import { PackageCommand, PackageFile } from "@covector/types";
+
+import { run } from "effection";
+
+import { describe, it, captureError } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
+import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -13,6 +17,8 @@ const configDefaults = {
 
 describe("validate apply", () => {
   it("bumps single js json", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const jsonFolder = f.copy("pkg.js-single-json");
 
     const commands = [
@@ -35,15 +41,19 @@ describe("validate apply", () => {
       },
     };
 
-    expect.assertions(1);
-    expect(
-      async () =>
-        //@ts-expect-error
-        await run(validateApply({ commands, config, cwd: jsonFolder })),
-    ).not.toThrow();
+    const validated = yield validateApply({
+      logger,
+      // @ts-expect-error
+      commands,
+      config,
+      cwd: jsonFolder,
+    });
+    expect(validated).toBe(true);
   });
 
   it("bumps single rust toml", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const rustFolder = f.copy("pkg.rust-single");
 
     const commands = [
@@ -66,14 +76,19 @@ describe("validate apply", () => {
       },
     };
 
-    expect.assertions(1);
-    expect(
+    const validated = yield validateApply({
+      logger,
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: rustFolder }),
-    ).not.toThrow();
+      commands,
+      config,
+      cwd: rustFolder,
+    });
+    expect(validated).toBe(true);
   });
 
   it("bumps multi js json", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
     const commands = [
@@ -119,14 +134,19 @@ describe("validate apply", () => {
       },
     };
 
-    expect.assertions(1);
-    expect(
+    const validated = yield validateApply({
+      logger,
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: jsonFolder }),
-    ).not.toThrow();
+      commands,
+      config,
+      cwd: jsonFolder,
+    });
+    expect(validated).toBe(true);
   });
 
   it("bumps multi rust toml", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const rustFolder = f.copy("pkg.rust-multi");
 
     const commands = [
@@ -161,14 +181,19 @@ describe("validate apply", () => {
       },
     };
 
-    expect.assertions(1);
-    expect(
+    const validated = yield validateApply({
+      logger,
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: rustFolder }),
-    ).not.toThrow();
+      commands,
+      config,
+      cwd: rustFolder,
+    });
+    expect(validated).toBe(true);
   });
 
   it("bumps multi rust toml with object dep", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
     const commands = [
@@ -203,14 +228,19 @@ describe("validate apply", () => {
       },
     };
 
-    expect.assertions(1);
-    expect(
+    const validated = yield validateApply({
+      logger,
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: rustFolder }),
-    ).not.toThrow();
+      commands,
+      config,
+      cwd: rustFolder,
+    });
+    expect(validated).toBe(true);
   });
 
   it("bumps multi rust toml with dep missing patch", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
     const commands = [
@@ -245,14 +275,19 @@ describe("validate apply", () => {
       },
     };
 
-    expect.assertions(1);
-    expect(
+    const validated = yield validateApply({
+      logger,
       //@ts-expect-error
-      async () => await validateApply({ commands, config, cwd: rustFolder }),
-    ).not.toThrow();
+      commands,
+      config,
+      cwd: rustFolder,
+    });
+    expect(validated).toBe(true);
   });
 
   it("bumps multi rust toml as patch with object dep missing patch", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -288,8 +323,8 @@ describe("validate apply", () => {
       },
     };
 
-    expect.assertions(1);
     const validated = yield validateApply({
+      logger,
       //@ts-expect-error
       commands,
       config,
@@ -299,7 +334,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as minor with object dep without version number", function* () {
-    let restoreConsole = mockConsole(["error"]);
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
 
     const rustFolder: string = f.copy("pkg.rust-multi-object-path-dep-only");
 
@@ -341,20 +377,18 @@ describe("validate apply", () => {
 
     const errored = yield captureError(
       validateApply({
+        logger,
         commands,
         allPackages,
-      }),
+      })
     );
+    logger.info("completed");
     expect(errored.message).toMatch(
       "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
-        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference.",
+        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
     );
 
-    expect({
-      //@ts-expect-error
-      consoleError: console.error.mock.calls,
-    }).toMatchSnapshot();
-
-    restoreConsole();
+    // to confirm that no error logs have been returned
+    yield pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }]);
   });
 });

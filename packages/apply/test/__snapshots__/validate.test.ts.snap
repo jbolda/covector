@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`validate apply bumps multi rust toml as minor with object dep without version number 1`] = `
-Object {
-  "consoleError": Array [],
-}
-`;
