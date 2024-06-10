@@ -1,4 +1,4 @@
-import { covector } from "../src";
+import { covector } from "../../src";
 import { CovectorVersion } from "@covector/types";
 import { it, captureError } from "@effection/jest";
 import { loadFile } from "@covector/files";
@@ -24,13 +24,13 @@ describe("integration test for complex commands", () => {
     }).toMatchSnapshot();
 
     const changelogTauriCore = yield captureError(
-      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration),
+      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration)
     );
     expect(changelogTauriCore.effectionTrace[0].state).toEqual("erroring");
     expect(changelogTauriCore.effectionTrace[1].state).toEqual("erroring");
 
     const changelogTaurijs = yield captureError(
-      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration),
+      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration)
     );
     expect(changelogTaurijs.effectionTrace[0].state).toEqual("erroring");
     expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");
@@ -101,13 +101,13 @@ describe("integration test for complex commands", () => {
     }).toMatchSnapshot();
 
     const changelogTauriCore = yield captureError(
-      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration),
+      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration)
     );
     expect(changelogTauriCore.effectionTrace[0].state).toEqual("erroring");
     expect(changelogTauriCore.effectionTrace[1].state).toEqual("erroring");
 
     const changelogTaurijs = yield captureError(
-      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration),
+      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration)
     );
     expect(changelogTaurijs.effectionTrace[0].state).toEqual("erroring");
     expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");

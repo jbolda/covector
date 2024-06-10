@@ -1,4 +1,4 @@
-import { covector } from "../src";
+import { covector } from "../../src";
 import { it } from "@effection/jest";
 import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";

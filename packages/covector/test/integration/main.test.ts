@@ -1,4 +1,4 @@
-import { covector } from "../src";
+import { covector } from "../../src";
 import { CovectorVersion } from "@covector/types";
 import { run } from "effection";
 import { it } from "@effection/jest";
@@ -7,7 +7,7 @@ import path from "path";
 import mockConsole, { RestoreConsole } from "jest-mock-console";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
-import { injectPublishFunctions } from "../../action/src/utils";
+import { injectPublishFunctions } from "../../../action/src/utils";
 import { TomlDocument } from "@covector/toml";
 
 expect.addSnapshotSerializer({
