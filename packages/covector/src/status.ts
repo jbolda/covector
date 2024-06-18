@@ -60,7 +60,7 @@ export function* status({
     paths: changesPaths,
   });
   const assembledChanges = yield assemble({
-    logger,
+    logger: logger.child({ step: "assemble changes" }),
     cwd,
     files: changeFilesLoaded,
     config,
@@ -68,11 +68,11 @@ export function* status({
   });
 
   if (changeFilesLoaded.length === 0) {
-    if (logs) console.info("There are no changes.");
+    if (logs) logger.info("There are no changes.");
 
     const { commands: publishCommands }: { commands: PkgPublish[] } =
       yield mergeIntoConfig({
-        logger,
+        logger: logger.child({ step: "assemble changes" }),
         assembledChanges,
         config,
         command: "publish",
@@ -91,7 +91,7 @@ export function* status({
     }
 
     const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
-      logger,
+      logger: logger.child({ step: "assemble changes" }),
       cwd,
       commands: publishCommands,
       command: "publish",
@@ -116,7 +116,7 @@ export function* status({
     };
   } else if (!!pre && assembledChanges?.changes?.length === 0) {
     if (logs) {
-      console.info("There are no changes.");
+      logger.info("There are no changes.");
       logger.info(
         "We have previously released the changes in these files:",
         changesPaths
@@ -151,7 +151,7 @@ export function* status({
       pipeTemplate,
     }: { commands: PkgVersion[]; pipeTemplate: any } =
       yield mergeChangesToConfig({
-        logger,
+        logger: logger.child({ step: "compile changes" }),
         assembledChanges: changes,
         config,
         command,
@@ -162,6 +162,7 @@ export function* status({
 
     // throws if failed validation
     yield validateApply({
+      logger: logger.child({ step: "apply changes" }),
       //@ts-expect-error
       commands,
       // as the validate ends up mutating
@@ -170,6 +171,7 @@ export function* status({
     });
 
     const applied = yield apply({
+      logger: logger.child({ step: "apply changes" }),
       //@ts-expect-error
       commands,
       config,

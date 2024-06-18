@@ -1,5 +1,5 @@
 import { mergeIntoConfig, mergeChangesToConfig } from "../src";
-import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";

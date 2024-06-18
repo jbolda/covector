@@ -40,38 +40,28 @@ export function* covector({
   yes?: boolean;
   createContext?: ChangeContext;
 }): Generator<any, any, any> {
-  const logger = pino(
-    {
-      name: "covector",
-      transport: {
-        target: "./logger.mjs",
-      },
-    }
-    // pino.destination({ dest: 1, sync: true })
-  );
-
   if (command === "init") {
-    yield init({
+    return yield init({
       logger: logger.child({ command: "init" }),
       cwd,
       changeFolder,
       yes,
     });
   } else if (command === "add") {
-    yield add({
+    return yield add({
       logger: logger.child({ command: "add" }),
       cwd,
       changeFolder,
       yes,
     });
   } else if (command === "config") {
-    yield config({
+    return yield config({
       logger: logger.child({ command: "config" }),
       cwd,
       modifyConfig,
     });
   } else if (command === "status") {
-    yield status({
+    return yield status({
       logger: logger.child({ command: "status" }),
       command,
       dryRun,
@@ -82,7 +72,7 @@ export function* covector({
       branchTag,
     });
   } else if (command === "version") {
-    yield version({
+    return yield version({
       logger: logger.child({ command: "version" }),
       command,
       dryRun,
@@ -92,7 +82,7 @@ export function* covector({
       createContext,
     });
   } else if (command === "preview") {
-    yield preview({
+    return yield preview({
       logger: logger.child({ command: "preview" }),
       command,
       dryRun,
@@ -103,7 +93,7 @@ export function* covector({
       branchTag,
     });
   } else if (command === "publish") {
-    yield publish({
+    return yield publish({
       logger: logger.child({ command: "publish" }),
       command,
       dryRun,
@@ -112,7 +102,7 @@ export function* covector({
       modifyConfig,
     });
   } else {
-    yield arbitrary({
+    return yield arbitrary({
       logger: logger.child({ command: "arbitrary" }),
       command,
       dryRun,
@@ -121,9 +111,4 @@ export function* covector({
       modifyConfig,
     });
   }
-
-  yield ensure(() => logger.flush());
-  // to ensure all logs are properly flushed
-  // (no other method we can await currently)
-  yield sleep(200);
 }

@@ -1,12 +1,15 @@
 import { covector } from "../../src";
 import { CovectorVersion } from "@covector/types";
-import { it, captureError } from "@effection/jest";
+import { TomlDocument } from "@covector/toml";
 import { loadFile } from "@covector/files";
+import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
+import { checksWithObject } from "../helpers.ts";
 import path from "path";
 import * as fs from "fs";
-import mockConsole from "jest-mock-console";
 import fixtures from "fixturez";
-import { TomlDocument } from "@covector/toml";
 const f = fixtures(__dirname);
 
 expect.addSnapshotSerializer({
@@ -15,7 +18,6 @@ expect.addSnapshotSerializer({
 });
 
 describe("integration test with preMode `on`", () => {
-  let restoreConsole: Function;
   const makePre = (folder: string, prevChanges: string[] = []) =>
     fs.writeFileSync(
       path.join(folder, "./.changes/pre.json"),
@@ -27,29 +29,59 @@ describe("integration test with preMode `on`", () => {
   `
     );
 
-  beforeEach(() => {
-    restoreConsole = mockConsole(["log", "dir", "info", "warn", "error"]);
-  });
-  afterEach(() => {
-    restoreConsole();
-  });
-
   it("runs version in production for js and rust", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
 
     const covectored = (yield covector({
+      logger,
       command: "version",
       cwd: fullIntegration,
     })) as CovectorVersion;
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
-    expect({
-      consoleLog: (console.log as any).mock.calls,
-      consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: covectored,
-    }).toMatchSnapshot();
+
+    yield pinoTest.consecutive(
+      stream,
+      [
+        {
+          command: "version",
+          msg: "bumping tauri with preminor",
+          level: 30,
+        },
+        {
+          command: "version",
+          msg: "bumping tauri-updater with prepatch",
+          level: 30,
+        },
+        {
+          command: "version",
+          msg: "bumping tauri.js with prerelease",
+          level: 30,
+        },
+        {
+          command: "version",
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: 30,
+        },
+        {
+          command: "version",
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: 30,
+        },
+        {
+          command: "version",
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: 30,
+        },
+      ],
+      checksWithObject()
+    );
+
+    expect(covectored).toMatchSnapshot();
 
     const changelogTauriCore = yield loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
@@ -76,13 +108,51 @@ describe("integration test with preMode `on`", () => {
   });
 
   it("runs version in production with existing changes for js and rust", function* () {
+    const streamOne = pinoTest.sink();
+    const loggerOne = pino(streamOne);
+    const streamTwo = pinoTest.sink();
+    const loggerTwo = pino(streamTwo);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
     const covectoredOne = (yield covector({
+      logger: loggerOne,
       command: "version",
       cwd: fullIntegration,
     })) as CovectorVersion;
+
+    yield pinoTest.consecutive(streamOne, [
+      {
+        command: "version",
+        msg: "bumping tauri with preminor",
+        level: 30,
+      },
+      {
+        command: "version",
+        msg: "bumping tauri-updater with prepatch",
+        level: 30,
+      },
+      {
+        command: "version",
+        msg: "bumping tauri.js with prerelease",
+        level: 30,
+      },
+      {
+        command: "version",
+        msg: "Could not load the CHANGELOG.md. Creating one.",
+        level: 30,
+      },
+      {
+        command: "version",
+        msg: "Could not load the CHANGELOG.md. Creating one.",
+        level: 30,
+      },
+      {
+        command: "version",
+        msg: "Could not load the CHANGELOG.md. Creating one.",
+        level: 30,
+      },
+    ]);
 
     const changelogTauriCoreOne = yield loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
@@ -136,9 +206,33 @@ Boop again.
     );
 
     const covectoredTwo = (yield covector({
+      logger: loggerTwo,
       command: "version",
       cwd: fullIntegration,
     })) as CovectorVersion;
+
+    yield pinoTest.consecutive(streamTwo, [
+      {
+        command: "version",
+        msg: "bumping tauri-api with prepatch",
+        level: 30,
+      },
+      {
+        command: "version",
+        msg: "bumping tauri with prerelease",
+        level: 30,
+      },
+      {
+        command: "version",
+        msg: "bumping tauri.js with prerelease",
+        level: 30,
+      },
+      {
+        command: "version",
+        msg: "Could not load the CHANGELOG.md. Creating one.",
+        level: 30,
+      },
+    ]);
 
     const changelogTauriCoreTwo = yield loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
@@ -184,31 +278,39 @@ Boop again.
     if (typeof covectoredTwo !== "object")
       throw new Error("We are expecting an object here.");
     expect({
-      consoleLog: (console.log as any).mock.calls,
-      consoleInfo: (console.info as any).mock.calls,
       covectorReturnOne: covectoredOne,
       covectorReturnTwo: covectoredTwo,
     }).toMatchSnapshot();
   });
 
   it("runs version in --dry-run mode for js and rust", function* () {
-    const restoreConsole = mockConsole(["log", "dir", "info"]);
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
     const covectored = (yield covector({
+      logger,
       command: "version",
       cwd: fullIntegration,
       dryRun: true,
     })) as CovectorVersion;
+
+    yield pinoTest.consecutive(
+      stream,
+      [
+        {
+          command: "version",
+          msg: "==== data piped into commands ===",
+          level: 30,
+        },
+      ],
+      checksWithObject()
+    );
+
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
-    expect({
-      consoleLog: (console.log as any).mock.calls,
-      consoleDir: (console.dir as any).mock.calls,
-      consoleInfo: (console.info as any).mock.calls,
-      covectorReturn: covectored,
-    }).toMatchSnapshot();
+    expect(covectored).toMatchSnapshot();
 
     const changelogTauriCore = yield captureError(
       loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration)
@@ -221,7 +323,5 @@ Boop again.
     );
     expect(changelogTaurijs.effectionTrace[0].state).toEqual("erroring");
     expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");
-
-    restoreConsole();
   });
 });

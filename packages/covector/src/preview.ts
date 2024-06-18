@@ -123,6 +123,7 @@ export function* preview({
   });
 
   const applied = yield apply({
+    logger,
     //@ts-expect-error
     commands: versionCommands,
     allPackages,

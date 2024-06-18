@@ -126,6 +126,7 @@ export function* version({
   });
 
   const applied = yield apply({
+    logger,
     //@ts-expect-error
     commands,
     config,
@@ -154,6 +155,7 @@ export function* version({
   );
 
   pkgCommandsRan = yield fillChangelogs({
+    logger,
     applied,
     //@ts-expect-error
     assembledChanges: changes,
@@ -179,7 +181,7 @@ export function* version({
       pre.changes = changesPaths;
       yield writePreFile({ preFile: pre, cwd });
     } else {
-      yield changeFilesRemove({ cwd, paths: changesPaths });
+      yield changeFilesRemove({ logger, cwd, paths: changesPaths });
     }
   }
 

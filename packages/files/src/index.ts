@@ -441,8 +441,10 @@ export function* writePreFile({
 }
 
 export const testSerializePkgFile = ({
+  logger,
   packageFile,
 }: {
+  logger: Logger;
   packageFile: PackageFile;
 }) => {
   try {
@@ -454,7 +456,7 @@ export const testSerializePkgFile = ({
     return true;
   } catch (e: any) {
     if (e?.message === "Can only stringify objects, not null") {
-      console.error(
+      logger.error(
         "It appears that a dependency within this repo does not have a version specified."
       );
     }
@@ -517,16 +519,18 @@ export function* loadChangeFiles({
 }
 
 export function* changeFilesRemove({
+  logger,
   cwd,
   paths,
 }: {
+  logger: Logger;
   cwd: string;
   paths: string[];
 }): Operation<string> {
   return yield all(
     paths.map(function* (changeFilePath) {
       yield fs.unlink(path.posix.join(cwd, changeFilePath));
-      console.info(`${changeFilePath} was deleted`);
+      logger.warn(`${changeFilePath} was deleted`);
       return changeFilePath;
     })
   );

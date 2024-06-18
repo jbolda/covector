@@ -5,7 +5,7 @@ import pino from "pino";
 import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
-
+// TODO check the TODO here
 describe("sh", () => {
   const stream = pinoTest.sink();
   const logger = pino(stream);

@@ -17,10 +17,15 @@
   "bin": {
     "covector": "./bin/covector.js"
   },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
-    "prepublishOnly": "tsc -b"
+    "prepublishOnly": "tsc -b",
+    "test": "vitest"
   },
   "dependencies": {
     "@covector/apply": "0.9.3",

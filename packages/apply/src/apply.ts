@@ -106,7 +106,7 @@ export function* validateApply({
 
   try {
     for (let bump of bumps) {
-      testSerializePkgFile({ packageFile: bump });
+      testSerializePkgFile({ logger, packageFile: bump });
     }
     // will throw on validation error and not return true
     return true;
