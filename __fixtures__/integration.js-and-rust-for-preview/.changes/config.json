@@ -2,15 +2,15 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "publish": "echo publishing${ !pkg.tag ? ' --tag ' + pkg.tag : null } would happen here",
-      "prepublish": "echo prepublishing ${ pkg.pkg } would happen here",
-      "postpublish": "echo postpublishing ${ pkg.pkg } would happen here"
+      "publish": "node -e \"fs.appendFileSync('../log.txt', 'publishing${ !pkg.tag ? ' --tag ' + pkg.tag : null } would happen here\\\\n')\"",
+      "prepublish": "node -e \"fs.appendFileSync('../log.txt', 'prepublishing ${ pkg.pkg } would happen here\\\\n')\"",
+      "postpublish": "node -e \"fs.appendFileSync('../log.txt', 'postpublishing ${ pkg.pkg } would happen here\\\\n')\""
     },
     "rust": {
       "version": true,
-      "publish": "echo publishing${ pkg.tag ? ' --tag ' + pkg.tag : null } would happen here",
-      "prepublish": "echo prepublishing ${ pkg.pkg } would happen here",
-      "postpublish": "echo postpublishing ${ pkg.pkg } would happen here"
+      "publish": "node -e \"fs.appendFileSync('../log.txt', 'publishing${ pkg.tag ? ' --tag ' + pkg.tag : null } would happen here\\\\n')\"",
+      "prepublish": "node -e \"fs.appendFileSync('../log.txt', 'prepublishing ${ pkg.pkg } would happen here\\\\n')\"",
+      "postpublish": "node -e \"fs.appendFileSync('../log.txt', 'postpublishing ${ pkg.pkg } would happen here\\\\n')\""
     }
   },
   "packages": {

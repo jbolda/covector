@@ -2,7 +2,10 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "publish": { "command": "npm publish", "retries": [2000, 2000] }
+      "publish": {
+        "command": "node -e \"throw new Error('boom')\"",
+        "retries": [2000, 2000]
+      }
     }
   },
   "packages": {
