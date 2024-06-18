@@ -1,4 +1,4 @@
-import { pino } from "pino";
+import { Logger } from "pino";
 import { init } from "./init";
 import { add } from "./add";
 import { status } from "./status";
@@ -12,6 +12,7 @@ import { ensure, sleep } from "effection";
 
 export function* covector({
   // shared
+  logger,
   command,
   cwd = process.cwd(),
   logs = true,
@@ -26,6 +27,7 @@ export function* covector({
   yes = false,
   createContext,
 }: {
+  logger: Logger;
   command: string;
   dryRun?: boolean;
   logs?: boolean;

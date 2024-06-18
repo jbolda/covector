@@ -1,9 +1,14 @@
 import yargs from "yargs";
 import { covector } from "./run";
+import { pino } from "pino";
+import logStream from "./logger";
 
 export function* cli(argv: readonly string[]): Generator<any, any, any> {
   const { command, directory, yes, dryRun } = parseOptions(argv);
+  const stream = logStream();
+  const logger = pino(stream);
   return yield covector({
+    logger,
     command,
     changeFolder: directory,
     yes,
@@ -49,7 +54,7 @@ function parseOptions(argv: readonly string[]): {
     .demandCommand(1)
     .help()
     .epilogue(
-      "For more information on covector, see: https://www.github.com/jbolda/covector",
+      "For more information on covector, see: https://www.github.com/jbolda/covector"
     )
     .parse(argv);
 
