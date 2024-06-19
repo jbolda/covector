@@ -530,7 +530,7 @@ export function* changeFilesRemove({
   return yield all(
     paths.map(function* (changeFilePath) {
       yield fs.unlink(path.posix.join(cwd, changeFilePath));
-      logger.warn(`${changeFilePath} was deleted`);
+      logger.info(`${changeFilePath} was deleted`);
       return changeFilePath;
     })
   );

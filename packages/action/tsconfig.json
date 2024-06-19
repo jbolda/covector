@@ -4,5 +4,5 @@
     "target": "es2015",
     "moduleResolution": "node"
   },
-  "include": ["."]
+  "include": ["./src"]
 }

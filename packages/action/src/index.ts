@@ -8,6 +8,8 @@ import {
   createReleases,
 } from "./utils";
 import { postGithubComment } from "./comment/postGithubComment";
+import { pino } from "pino";
+import logStream from "./logger";
 import fs from "fs";
 
 import type {
@@ -22,6 +24,9 @@ import { CommitResponse, getCommitContext } from "./pr/getCommitContext";
 
 export function* run(): Generator<any, any, any> {
   try {
+    const stream = logStream();
+    const logger = pino(stream);
+
     const cwd =
       core.getInput("cwd") === "" ? process.cwd() : core.getInput("cwd");
     const token =
@@ -40,7 +45,12 @@ export function* run(): Generator<any, any, any> {
     let command = inputCommand;
 
     if (inputCommand === "version-or-publish") {
-      const status = yield covector({ command: "status", cwd, logs: false });
+      const status = yield covector({
+        logger,
+        command: "status",
+        cwd,
+        logs: false,
+      });
       if (status.response === "No changes.") {
         console.log("As there are no changes, let's try publishing.");
         command = "publish";
@@ -53,6 +63,7 @@ export function* run(): Generator<any, any, any> {
     let successfulPublish = false;
     if (command === "status") {
       const covectored: CovectorStatus = yield covector({
+        logger,
         command,
         filterPackages,
         cwd,
@@ -115,7 +126,11 @@ export function* run(): Generator<any, any, any> {
         }
       }
     } else if (command === "version") {
-      const status: CovectorStatus = yield covector({ command: "status", cwd });
+      const status: CovectorStatus = yield covector({
+        logger,
+        command: "status",
+        cwd,
+      });
       core.setOutput("status", status.response);
 
       function* createContext({ commits }: { commits: string[] }): Operation<
@@ -166,6 +181,7 @@ export function* run(): Generator<any, any, any> {
       }
 
       const covectored: CovectorVersion = yield covector({
+        logger,
         command,
         filterPackages,
         cwd,
@@ -196,7 +212,7 @@ export function* run(): Generator<any, any, any> {
       console.log(`The covector output: ${payload}`);
       core.endGroup();
     } else if (command === "publish") {
-      const status = yield covector({ command: "status", cwd });
+      const status = yield covector({ logger, command: "status", cwd });
       core.setOutput("status", status.response);
 
       let covectored: CovectorPublish;
@@ -210,6 +226,7 @@ export function* run(): Generator<any, any, any> {
         const { owner, repo } = github.context.repo;
         core.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
         covectored = yield covector({
+          logger,
           command,
           filterPackages,
           cwd,
@@ -225,6 +242,7 @@ export function* run(): Generator<any, any, any> {
         });
       } else {
         covectored = yield covector({
+          logger,
           command,
           filterPackages,
           cwd,
@@ -327,6 +345,7 @@ export function* run(): Generator<any, any, any> {
         }
 
         covectored = yield covector({
+          logger,
           command,
           filterPackages,
           cwd,
