@@ -1,29 +1,31 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { run as covector } from "../src";
-import { run } from "effection";
-import mockConsole from "jest-mock-console";
+import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { expect, vi } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
+import { checksWithObject } from "./helpers.ts";
 const f = fixtures(__dirname);
 
-jest.mock("@actions/core");
-jest.mock("@actions/github", () => ({
-  getOctokit: jest.fn(),
+vi.mock("@actions/core", () => ({
+  setOutput: vi.fn(),
+  getInput: vi.fn(),
+  setFailed: (err) => {
+    throw new Error(err);
+  },
+}));
+vi.mock("@actions/github", () => ({
+  getOctokit: vi.fn(),
   context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
 }));
 
 describe("full e2e test", () => {
-  let restoreConsole: Function;
-  beforeEach(() => {
-    restoreConsole = mockConsole(["log", "dir", "info", "error"]);
-    jest.clearAllMocks();
-  });
-  afterEach(() => {
-    restoreConsole();
-  });
-
   describe("of status", () => {
-    it("output", async () => {
+    it("output", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -34,17 +36,41 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = await run(covector());
-      expect({ covectoredAction }).toMatchSnapshot();
+      yield covector(logger);
+
+      // to confirm we have reached the end of the logs
+      logger.info("completed");
+      yield pinoTest.consecutive(
+        stream,
+        [
+          {
+            command: "status",
+            msg: "There are no changes.",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+            level: 30,
+          },
+          {
+            msg: "completed",
+            level: 30,
+          },
+        ],
+        checksWithObject()
+      );
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "status");
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
     });
   });
 
   describe("of version", () => {
-    it("outputs for no change", async () => {
+    it("outputs for no change", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -55,17 +81,54 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = await run(covector());
-      expect({ covectoredAction }).toMatchSnapshot();
+      yield covector(logger);
+
+      const changeOutput =
+        "# Version Updates\n\n" +
+        "Merging this PR will release new versions of the following packages based on your change files.\n\n";
+      // to confirm we have reached the end of the logs
+      logger.info("completed");
+      yield pinoTest.consecutive(
+        stream,
+        [
+          // status runs first to set some output
+          {
+            command: "status",
+            msg: "There are no changes.",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+            level: 30,
+          },
+          // then the version command runs
+          // TODO should there be more logs?
+          // and finishes with the output
+          {
+            msg: "covector version output",
+            renderAsYAML: changeOutput,
+            level: 30,
+          },
+          {
+            msg: "completed",
+            level: 30,
+          },
+        ],
+        checksWithObject()
+      );
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
-      // to cover template pipe
-      expect(core.setOutput).toMatchSnapshot();
+      expect(core.setOutput).toHaveBeenCalledWith("change", changeOutput);
+      // @ts-expect-error
+      expect(core.setOutput?.calls?.templatePipe).toBeUndefined();
     });
 
-    it("outputs with changes", async () => {
+    it("outputs with changes", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-and-rust-with-changes");
 
       const input: { [k: string]: string } = {
@@ -76,45 +139,149 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = await run(covector());
-      expect({ covectoredAction }).toMatchSnapshot();
+      yield covector(logger);
+
+      // to confirm we have reached the end of the logs
+      logger.info("completed");
+      yield pinoTest.consecutive(
+        stream,
+        [
+          // status runs first to set some output
+          {
+            command: "status",
+            msg: "changes:",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "tauri => minor",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "tauri-updater => patch",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "bumping tauri with minor",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "bumping tauri-updater with patch",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "bumping tauri.js with patch",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "tauri planned to be bumped from 0.5.2 to 0.6.0",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3",
+            level: 30,
+          },
+          // then the version command runs
+          {
+            command: "version",
+            msg: "bumping tauri with minor",
+            level: 30,
+          },
+          {
+            command: "version",
+            msg: "bumping tauri-updater with patch",
+            level: 30,
+          },
+          {
+            command: "version",
+            msg: "bumping tauri.js with patch",
+            level: 30,
+          },
+          {
+            command: "version",
+            msg: "Could not load the CHANGELOG.md. Creating one.",
+            level: 30,
+          },
+          {
+            command: "version",
+            msg: "Could not load the CHANGELOG.md. Creating one.",
+            level: 30,
+          },
+          {
+            command: "version",
+            msg: "Could not load the CHANGELOG.md. Creating one.",
+            level: 30,
+          },
+          {
+            command: "version",
+            msg: ".changes/first-change.md was deleted",
+            level: 30,
+          },
+          {
+            command: "version",
+            msg: ".changes/second-change.md was deleted",
+            level: 30,
+          },
+          {
+            msg: "covector version output",
+            level: 30,
+          },
+          {
+            msg: "completed",
+            level: 30,
+          },
+        ],
+        checksWithObject()
+      );
       expect(core.setOutput).toHaveBeenCalledWith(
         "status",
-        "There are 2 changes which include tauri with minor, tauri-updater with patch",
+        "There are 2 changes which include tauri with minor, tauri-updater with patch"
       );
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
-      // to cover template pipe
-      expect(core.setOutput).toMatchSnapshot();
+      // @ts-expect-error
+      expect(core.setOutput?.calls?.templatePipe).toMatchSnapshot();
     });
   });
 
   describe("of publish", () => {
-    jest
-      .spyOn(github, "getOctokit")
+    vi.spyOn(github, "getOctokit")
       //@ts-expect-error
       .mockImplementation((token: string) => ({
         context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
         rest: {
           repos: {
-            listReleases: jest.fn().mockResolvedValue({
+            listReleases: vi.fn().mockResolvedValue({
               data: [],
             }),
-            updateRelease: jest
+            updateRelease: vi
               .fn()
               .mockImplementation((input) => Promise.resolve({ data: input })),
-            createRelease: jest
+            createRelease: vi
               .fn()
               .mockImplementation((input) => Promise.resolve({ data: input })),
-            uploadReleaseAsset: jest
+            uploadReleaseAsset: vi
               .fn()
               .mockImplementation((input) => Promise.resolve({ data: input })),
           },
         },
       }));
 
-    it("input", async () => {
+    it("input", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -125,29 +292,92 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = await run(covector());
-      expect(
-        // the log gets random /r on windows in CI
-        (console.log as any).mock.calls.map((logArray: any) =>
-          logArray.map((log: any) =>
-            typeof log === "string" ? log.replace(/\\r/g, "") : log,
-          ),
-        ),
-      ).toMatchSnapshot();
+      const covectoredAction = yield covector(logger);
+
+      // to confirm we have reached the end of the logs
+      logger.info("completed");
+      yield pinoTest.consecutive(
+        stream,
+        [
+          // status runs first to set some output
+          {
+            command: "status",
+            msg: "There are no changes.",
+            level: 30,
+          },
+          {
+            command: "status",
+            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+            level: 30,
+          },
+          // then the publish command runs
+          {
+            command: "publish",
+            msg: "package-one [publish]: echo publish",
+            level: 30,
+          },
+          {
+            command: "publish",
+            msg: "publish",
+            level: 30,
+          },
+          // create release call
+          {
+            msg: "creating Github Release for package-one@2.3.1",
+            level: 30,
+          },
+          {
+            msg: "github release created for package-one with id: undefined",
+            level: 30,
+          },
+          {
+            command: "publish",
+            msg: "package-two [publish]: echo publish",
+            level: 30,
+          },
+          {
+            command: "publish",
+            msg: "publish",
+            level: 30,
+          },
+          // create release call
+          {
+            msg: "creating Github Release for package-two@1.9.0",
+            level: 30,
+          },
+          {
+            msg: "github release created for package-two with id: undefined",
+            level: 30,
+          },
+          {
+            msg: "covector publish output",
+            level: 30,
+          },
+          // and finishes with the output
+          {
+            msg: "completed",
+            level: 30,
+          },
+        ],
+        checksWithObject()
+      );
+
       expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("2.3.1"),
+        expect.stringContaining("2.3.1")
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("1.9.0"),
+        expect.stringContaining("1.9.0")
       );
     });
 
-    it("output", async () => {
+    it("output", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -158,28 +388,30 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = await run(covector());
-      expect({ covectoredAction }).toMatchSnapshot();
+      const covectoredAction = yield covector(logger);
+      expect(covectoredAction).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "publish");
       expect(core.setOutput).toHaveBeenCalledWith("successfulPublish", true);
       expect(core.setOutput).toHaveBeenCalledWith(
         "packagesPublished",
-        "package-one,package-two",
+        "package-one,package-two"
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("2.3.1"),
+        expect.stringContaining("2.3.1")
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("1.9.0"),
+        expect.stringContaining("1.9.0")
       );
     });
 
-    it("github release update of all packages", async () => {
+    it("github release update of all packages", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -190,15 +422,15 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
-      const octokit = jest
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      const octokit = vi
         .spyOn(github, "getOctokit")
         //@ts-expect-error
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
           rest: {
             repos: {
-              listReleases: jest.fn().mockResolvedValue({
+              listReleases: vi.fn().mockResolvedValue({
                 data: [
                   {
                     draft: true,
@@ -213,28 +445,28 @@ describe("full e2e test", () => {
                     tag_name: "package-two-v1.9.0",
                   },
                 ],
-              }) as jest.MockedFunction<any>,
-              updateRelease: jest
+              }),
+              updateRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
-              createRelease: jest
+              createRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
-              uploadReleaseAsset: jest
+              uploadReleaseAsset: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
             },
           },
         }));
 
-      const covectoredAction = await run(covector());
-      expect({ covectoredAction }).toMatchSnapshot();
+      const covectoredAction = yield covector(logger);
+      expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
         listReleases,
@@ -269,7 +501,9 @@ describe("full e2e test", () => {
       expect(createRelease).toHaveBeenCalledTimes(0);
     });
 
-    it("github release creation of all packages", async () => {
+    it("github release creation of all packages", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -280,15 +514,15 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
-      const octokit = jest
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      const octokit = vi
         .spyOn(github, "getOctokit")
         //@ts-expect-error
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
           rest: {
             repos: {
-              listReleases: jest.fn().mockResolvedValue({
+              listReleases: vi.fn().mockResolvedValue({
                 data: [
                   {
                     draft: false,
@@ -303,28 +537,28 @@ describe("full e2e test", () => {
                     tag_name: "package-two-v1.8.7",
                   },
                 ],
-              }) as jest.MockedFunction<any>,
-              updateRelease: jest
+              }),
+              updateRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
-              createRelease: jest
+              createRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
-              uploadReleaseAsset: jest
+              uploadReleaseAsset: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
             },
           },
         }));
 
-      const covectoredAction = await run(covector());
-      expect({ covectoredAction }).toMatchSnapshot();
+      const covectoredAction = yield covector(logger);
+      expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
         listReleases,
@@ -362,7 +596,9 @@ describe("full e2e test", () => {
       expect(updateRelease).toHaveBeenCalledTimes(0);
     });
 
-    it("github release update of single package", async () => {
+    it("github release update of single package", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-with-single-github-release");
 
       const input: { [k: string]: string } = {
@@ -373,15 +609,15 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
-      const octokit = jest
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      const octokit = vi
         .spyOn(github, "getOctokit")
         //@ts-expect-error
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
           rest: {
             repos: {
-              listReleases: jest.fn().mockResolvedValue({
+              listReleases: vi.fn().mockResolvedValue({
                 data: [
                   {
                     draft: true,
@@ -390,28 +626,28 @@ describe("full e2e test", () => {
                     tag_name: "v2.3.1",
                   },
                 ],
-              }) as jest.MockedFunction<any>,
-              updateRelease: jest
+              }),
+              updateRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
-              createRelease: jest
+              createRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
-              uploadReleaseAsset: jest
+              uploadReleaseAsset: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
             },
           },
         }));
 
-      const covectoredAction = await run(covector());
-      expect({ covectoredAction }).toMatchSnapshot();
+      const covectoredAction = yield covector(logger);
+      expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
         listReleases,
@@ -440,7 +676,9 @@ describe("full e2e test", () => {
       expect(createRelease).toHaveBeenCalledTimes(0);
     });
 
-    it("github release creation of single package", async () => {
+    it("github release creation of single package", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
       const cwd: string = f.copy("integration.js-with-single-github-release");
 
       const input: { [k: string]: string } = {
@@ -451,38 +689,38 @@ describe("full e2e test", () => {
         token: "randomsequenceofcharactersforsecurity",
       };
 
-      jest.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
-      const octokit = jest
+      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+      const octokit = vi
         .spyOn(github, "getOctokit")
         //@ts-expect-error
         .mockImplementation((token: string) => ({
           context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
           rest: {
             repos: {
-              listReleases: jest.fn().mockResolvedValue({
+              listReleases: vi.fn().mockResolvedValue({
                 data: [],
-              }) as jest.MockedFunction<any>,
-              updateRelease: jest
+              }),
+              updateRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
-              createRelease: jest
+              createRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
-              uploadReleaseAsset: jest
+              uploadReleaseAsset: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
+                  Promise.resolve({ data: input })
                 ),
             },
           },
         }));
 
-      const covectoredAction = await run(covector());
-      expect({ covectoredAction }).toMatchSnapshot();
+      const covectoredAction = yield covector(logger);
+      expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
         listReleases,

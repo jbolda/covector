@@ -1,25 +1,26 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { expect, vi } from "vitest";
 
-jest.mock("@actions/core");
-jest.mock("@actions/github", () => ({
-  getOctokit: jest.fn(),
+vi.mock("@actions/core");
+vi.mock("@actions/github", () => ({
+  getOctokit: vi.fn(),
   context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
 }));
 
 // doing this is an example showing how we can mock the github side effects
 describe("test mocks", () => {
-  it("mocks core getInput", () => {
-    jest
-      .spyOn(core, "getInput")
-      .mockImplementationOnce((arg) => `This returns ${arg}`);
+  it("mocks core getInput", function* () {
+    vi.spyOn(core, "getInput").mockImplementationOnce(
+      (arg) => `This returns ${arg}`
+    );
     const test = core.getInput("test");
     expect(test).toBe("This returns test");
   });
 
-  it("mocks github context", () => {
-    jest
-      .spyOn(github, "getOctokit")
+  it("mocks github context", function* () {
+    vi.spyOn(github, "getOctokit")
       //@ts-expect-error
       .mockImplementationOnce((arg) => ({
         context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
@@ -30,9 +31,9 @@ describe("test mocks", () => {
     });
   });
 
-  it("mocks octokit createRelease", () => {
+  it("mocks octokit createRelease", function* () {
     //@ts-expect-error not all things are mocked despite TS expecting to be
-    jest.spyOn(github, "getOctokit").mockImplementationOnce((arg) => ({
+    vi.spyOn(github, "getOctokit").mockImplementationOnce((arg) => ({
       repos: { createRelease: (obj: any) => obj },
     }));
     const octokit = github.getOctokit("token");

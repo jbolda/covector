@@ -10,6 +10,7 @@
     "pkg": "ncc build index.ts -o dist -m",
     "postpkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist",
     "build": "echo noop",
+    "test": "vitest",
     "clean": "echo noop"
   },
   "dependencies": {

@@ -214,7 +214,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
       core.setOutput("status", status.response);
 
       let covectored: CovectorPublish;
-      core.debug(
+      logger.debug(
         `createRelease is ${core.getInput("createRelease")} ${
           token ? "with" : "without"
         } a token.`
@@ -222,7 +222,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
       if (core.getInput("createRelease") === "true" && token) {
         const octokit = github.getOctokit(token);
         const { owner, repo } = github.context.repo;
-        core.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
+        logger.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
         covectored = yield covector({
           logger,
           command,
@@ -230,6 +230,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
           cwd,
           modifyConfig: injectPublishFunctions([
             createReleases({
+              logger,
               core,
               octokit,
               owner,
