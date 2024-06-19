@@ -125,12 +125,12 @@ export function* status({
     return { pkgReadyToPublish: [], response: "No changes." };
   } else {
     if (logs) {
-      // write out all of the changes
-      // TODO make it pretty
       logger.info("changes:");
       Object.keys(assembledChanges.releases).forEach((release) => {
-        logger.info(`${release} => ${assembledChanges.releases[release].type}`);
-        logger.info(assembledChanges.releases[release].changes);
+        logger.info({
+          msg: `${release} => ${assembledChanges.releases[release].type}`,
+          renderAsYAML: assembledChanges.releases[release].changes,
+        });
       });
     }
 

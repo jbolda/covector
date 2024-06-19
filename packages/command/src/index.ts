@@ -252,7 +252,7 @@ function* callCommand({
     yield runningCommand.command(pipeToFunction);
 
     if (typeof pubCommand === "object" && pubCommand.pipe) {
-      logger.warn(`We cannot pipe the function command in ${pkg.pkg}`);
+      logger.error(`We cannot pipe the function command in ${pkg.pkg}`);
     }
   } else if (typeof runningCommand.command === "string") {
     const ranCommand: string = yield runCommand({
