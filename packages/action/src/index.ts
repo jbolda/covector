@@ -8,25 +8,21 @@ import {
   createReleases,
 } from "./utils";
 import { postGithubComment } from "./comment/postGithubComment";
-import { pino } from "pino";
-import logStream from "./logger";
 import fs from "fs";
 
 import type {
   CovectorStatus,
   CovectorVersion,
   CovectorPublish,
+  Logger,
 } from "../../types/src";
 import { formatComment } from "./comment/formatGithubComment";
 import type { PullRequestPayload } from "./comment/types";
 import type { Operation } from "effection";
 import { CommitResponse, getCommitContext } from "./pr/getCommitContext";
 
-export function* run(): Generator<any, any, any> {
+export function* run(logger: Logger): Generator<any, any, any> {
   try {
-    const stream = logStream();
-    const logger = pino(stream);
-
     const cwd =
       core.getInput("cwd") === "" ? process.cwd() : core.getInput("cwd");
     const token =
