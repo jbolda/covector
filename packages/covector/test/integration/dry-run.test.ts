@@ -47,19 +47,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "status",
-          // TODO check render
-          // msg: "tauri => minor",
-          level: 30,
-        },
-        {
-          command: "status",
           msg: "tauri-updater => patch",
-          level: 30,
-        },
-        {
-          command: "status",
-          // TODO check render
-          // msg: "tauri => minor",
           level: 30,
         },
         {

@@ -47,19 +47,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "status",
-            // msg: "boop",
-            // TODO check change, comes back as `0`
-            level: 30,
-          },
-          {
-            command: "status",
             msg: "tauri-updater => patch",
-            level: 30,
-          },
-          {
-            command: "status",
-            // msg: "boop",
-            // TODO check change, comes back as `0`
             level: 30,
           },
           {
@@ -768,12 +756,12 @@ describe("integration test in production mode", () => {
           {
             command: "version",
             msg: ".changes/first-change.md was deleted",
-            level: 40,
+            level: 30,
           },
           {
             command: "version",
             msg: ".changes/second-change.md was deleted",
-            level: 40,
+            level: 30,
           },
           {
             msg: "completed",
@@ -836,12 +824,12 @@ describe("integration test in production mode", () => {
           {
             command: "version",
             msg: ".changes/first-change.md was deleted",
-            level: 40,
+            level: 30,
           },
           {
             command: "version",
             msg: ".changes/second-change.md was deleted",
-            level: 40,
+            level: 30,
           },
           {
             msg: "completed",
@@ -917,12 +905,12 @@ describe("integration test in production mode", () => {
           {
             command: "version",
             msg: ".changes/first-change.md was deleted",
-            level: 40,
+            level: 30,
           },
           {
             command: "version",
             msg: ".changes/second-change.md was deleted",
-            level: 40,
+            level: 30,
           },
           {
             msg: "completed",
@@ -984,12 +972,12 @@ describe("integration test in production mode", () => {
           {
             command: "version",
             msg: ".changes/first-change.md was deleted",
-            level: 40,
+            level: 30,
           },
           {
             command: "version",
             msg: ".changes/second-change.md was deleted",
-            level: 40,
+            level: 30,
           },
           {
             msg: "completed",

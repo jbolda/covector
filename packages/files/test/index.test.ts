@@ -1,5 +1,7 @@
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
 
 import {
@@ -85,6 +87,8 @@ describe("general file test", () => {
   });
 
   it("deletes files", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const changesFolder = f.copy("integration.general-file");
     const changeFilesToDelete = [
       "./.changes/first-change.md",
@@ -92,6 +96,7 @@ describe("general file test", () => {
     ];
 
     const filesRemoved = yield changeFilesRemove({
+      logger,
       cwd: changesFolder,
       paths: changeFilesToDelete,
     });
