@@ -13,14 +13,13 @@
     "clean": "tsc --build --clean tsconfig.packages.json",
     "wipe": "npm run clean -ws && rimraf node_modules dist tsconfig.tsbuildinfo && npm i",
     "build:action": "npm run pkg -w action",
-    "test": "jest",
+    "test": "vitest",
     "pretty": "prettier --write --ignore-path .gitignore \"!packages/action/dist/index.js\" \"packages/**/*.{js,ts}\" \"__fixtures__/**/*.{json,js,ts,yml,yaml}\""
   },
   "workspaces": [
     "packages/*"
   ],
   "devDependencies": {
-    "@effection/jest": "^2.0.5",
     "@types/node": "^20.13.0",
     "fixturez": "^1.1.0",
     "pino-test": "^1.0.1",
