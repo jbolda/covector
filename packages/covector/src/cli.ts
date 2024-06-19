@@ -58,10 +58,15 @@ function parseOptions(argv: readonly string[]): {
     )
     .parse(argv);
 
+  // TODO type narrow, it thinks it could be a promise
   return {
+    // @ts-expect-error
     command: String(rawOptions._[0]),
+    // @ts-expect-error
     dryRun: rawOptions["dry-run"],
+    // @ts-expect-error
     yes: rawOptions.yes,
+    // @ts-expect-error
     directory: rawOptions.directory,
   };
 }
