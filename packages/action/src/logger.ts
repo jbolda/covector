@@ -1,6 +1,7 @@
 import build from "pino-abstract-transport";
 import yaml from "js-yaml";
 import * as core from "@actions/core";
+import type { LoggerBindings } from "@covector/types";
 
 const logLevel = {
   10: "trace",
@@ -13,7 +14,7 @@ const logLevel = {
 
 export default function (opts?: never) {
   return build(function (source) {
-    source.on("data", function (log) {
+    source.on("data", function (log: LoggerBindings) {
       const level =
         log.level > 40
           ? `[${logLevel[log.level as keyof typeof logLevel].toLowerCase()}]`
@@ -23,12 +24,12 @@ export default function (opts?: never) {
         ? `\n    ${yaml.dump(log.renderAsYAML).replace(/\n/gm, "\n    ")}`
         : "";
 
-      actionLog(log.level, `${level}${msg}${renderAsYAML}`);
+      actionLog(log, `${level}${msg}${renderAsYAML}`);
     });
   });
 }
 
-function actionLog(log, message: string) {
+function actionLog(log: LoggerBindings, message: string) {
   if (log.renderAsYAML) core.startGroup(log.msg);
   switch (log.level) {
     case 60:
