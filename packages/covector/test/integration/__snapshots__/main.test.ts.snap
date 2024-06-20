@@ -11,8 +11,8 @@ exports[`integration test in production mode > handles config > allows modifying
       "command": false,
       "pkg": {
         "command": [
-          "echo publishing tauri",
-          "echo running in ./tauri",
+          "node -e "console.log('publishing tauri')"",
+          "node -e "console.log('running in ./tauri')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -25,7 +25,7 @@ exports[`integration test in production mode > handles config > allows modifying
           "tauri-api",
         ],
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri",
         "pkg": "tauri",
@@ -245,8 +245,8 @@ path = "examples/communication/src-tauri/src/main.rs"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-api",
-          "echo running in ./tauri-api",
+          "node -e "console.log('publishing tauri-api')"",
+          "node -e "console.log('running in ./tauri-api')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -259,7 +259,7 @@ path = "examples/communication/src-tauri/src/main.rs"",
           "tauri-utils",
         ],
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri-api",
         "pkg": "tauri-api",
@@ -464,8 +464,8 @@ totems = "0.2.7"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-bundler",
-          "echo running in ./cli/tauri-bundler",
+          "node -e "console.log('publishing tauri-bundler')"",
+          "node -e "console.log('running in ./cli/tauri-bundler')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -476,7 +476,7 @@ totems = "0.2.7"",
         ],
         "dependencies": undefined,
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./cli/tauri-bundler",
         "pkg": "tauri-bundler",
@@ -714,8 +714,8 @@ path = "src/main.rs"
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-utils",
-          "echo running in ./tauri-utils",
+          "node -e "console.log('publishing tauri-utils')"",
+          "node -e "console.log('running in ./tauri-utils')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -726,7 +726,7 @@ path = "src/main.rs"
         ],
         "dependencies": undefined,
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri-utils",
         "pkg": "tauri-utils",
@@ -796,7 +796,7 @@ thiserror = "1.0.19"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri.js",
+          "node -e "console.log('publishing tauri.js')"",
           [Function],
         ],
         "dependencies": [
@@ -1421,8 +1421,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -1434,7 +1434,7 @@ thiserror = "1.0.19"",
             "tauri-api",
           ],
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri",
           "pkg": "tauri",
@@ -1581,8 +1581,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -1594,7 +1594,7 @@ thiserror = "1.0.19"",
             "tauri-utils",
           ],
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri-api",
           "pkg": "tauri-api",
@@ -1756,8 +1756,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -1767,7 +1767,7 @@ thiserror = "1.0.19"",
           ],
           "dependencies": undefined,
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./cli/tauri-bundler",
           "pkg": "tauri-bundler",
@@ -1941,8 +1941,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -1952,7 +1952,7 @@ thiserror = "1.0.19"",
           ],
           "dependencies": undefined,
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri-utils",
           "pkg": "tauri-utils",
@@ -2000,7 +2000,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
             [Function],
           ],
           "dependencies": [
@@ -3409,20 +3409,23 @@ thiserror = "1.0.19"
   "pkgManagers": {
     "rust": {
       "version": true,
-      "getPublishedVersion": "echo 0.5.2",
-      "prepublish": "echo premode for \${ pkg.pkg }",
+      "getPublishedVersion": "node -e \\"console.log('0.5.2')\\"",
+      "prepublish": "node -e \\"console.log('premode for \${ pkg.pkg }')\\"",
       "publish": [
-        "echo publishing \${ pkg.pkg }",
-        "echo running in \${ pkg.path }",
+        "node -e \\"console.log('publishing \${ pkg.pkg }')\\"",
+        "node -e \\"console.log('running in \${ pkg.path }')\\"",
         { "command": "ls", "runFromRoot": true },
         "ls"
       ],
-      "postpublish": "echo postmode for \${ pkg.pkg }",
-      "build": ["echo the files in the \${ pkg.pkg } folder are", "ls"]
+      "postpublish": "node -e \\"console.log('postmode for \${ pkg.pkg }')\\"",
+      "build": [
+        "node -e \\"console.log('the files in the \${ pkg.pkg } folder are')\\"",
+        "ls"
+      ]
     },
     "javascript": {
       "version": true,
-      "publish": "echo publishing \${ pkg.pkg }"
+      "publish": "node -e \\"console.log('publishing \${ pkg.pkg }')\\""
     }
   },
   "packages": {
@@ -3501,20 +3504,20 @@ thiserror = "1.0.19"
     },
     "pkgManagers": {
       "javascript": {
-        "publish": "echo publishing \${ pkg.pkg }",
+        "publish": "node -e "console.log('publishing \${ pkg.pkg }')"",
         "version": true,
       },
       "rust": {
         "build": [
-          "echo the files in the \${ pkg.pkg } folder are",
+          "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
           "ls",
         ],
-        "getPublishedVersion": "echo 0.5.2",
-        "postpublish": "echo postmode for \${ pkg.pkg }",
-        "prepublish": "echo premode for \${ pkg.pkg }",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
+        "postpublish": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+        "prepublish": "node -e "console.log('premode for \${ pkg.pkg }')"",
         "publish": [
-          "echo publishing \${ pkg.pkg }",
-          "echo running in \${ pkg.path }",
+          "node -e "console.log('publishing \${ pkg.pkg }')"",
+          "node -e "console.log('running in \${ pkg.path }')"",
           {
             "command": "ls",
             "runFromRoot": true,
@@ -4430,8 +4433,8 @@ exports[`integration test in production mode > handles config > uses the action 
       "command": false,
       "pkg": {
         "command": [
-          "echo publishing tauri",
-          "echo running in ./tauri",
+          "node -e "console.log('publishing tauri')"",
+          "node -e "console.log('running in ./tauri')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -4445,7 +4448,7 @@ exports[`integration test in production mode > handles config > uses the action 
           "tauri-api",
         ],
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri",
         "pkg": "tauri",
@@ -4651,10 +4654,10 @@ path = "examples/communication/src-tauri/src/main.rs"",
           "versionPrerelease": null,
         },
         "postcommand": [
-          "echo postmode for tauri",
+          "node -e "console.log('postmode for tauri')"",
         ],
         "precommand": [
-          "echo premode for tauri",
+          "node -e "console.log('premode for tauri')"",
         ],
         "releaseTag": "tauri-v0.5.2",
       },
@@ -4665,8 +4668,8 @@ path = "examples/communication/src-tauri/src/main.rs"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-api",
-          "echo running in ./tauri-api",
+          "node -e "console.log('publishing tauri-api')"",
+          "node -e "console.log('running in ./tauri-api')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -4680,7 +4683,7 @@ path = "examples/communication/src-tauri/src/main.rs"",
           "tauri-utils",
         ],
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri-api",
         "pkg": "tauri-api",
@@ -4870,10 +4873,10 @@ totems = "0.2.7"",
           "versionPrerelease": null,
         },
         "postcommand": [
-          "echo postmode for tauri-api",
+          "node -e "console.log('postmode for tauri-api')"",
         ],
         "precommand": [
-          "echo premode for tauri-api",
+          "node -e "console.log('premode for tauri-api')"",
         ],
         "releaseTag": "tauri-api-v0.5.1",
       },
@@ -4885,8 +4888,8 @@ totems = "0.2.7"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-bundler",
-          "echo running in ./cli/tauri-bundler",
+          "node -e "console.log('publishing tauri-bundler')"",
+          "node -e "console.log('running in ./cli/tauri-bundler')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -4898,7 +4901,7 @@ totems = "0.2.7"",
         ],
         "dependencies": undefined,
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./cli/tauri-bundler",
         "pkg": "tauri-bundler",
@@ -5121,10 +5124,10 @@ path = "src/main.rs"
           "versionPrerelease": null,
         },
         "postcommand": [
-          "echo postmode for tauri-bundler",
+          "node -e "console.log('postmode for tauri-bundler')"",
         ],
         "precommand": [
-          "echo premode for tauri-bundler",
+          "node -e "console.log('premode for tauri-bundler')"",
         ],
         "releaseTag": "tauri-bundler-v0.6.0",
       },
@@ -5136,8 +5139,8 @@ path = "src/main.rs"
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-utils",
-          "echo running in ./tauri-utils",
+          "node -e "console.log('publishing tauri-utils')"",
+          "node -e "console.log('running in ./tauri-utils')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -5149,7 +5152,7 @@ path = "src/main.rs"
         ],
         "dependencies": undefined,
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri-utils",
         "pkg": "tauri-utils",
@@ -5204,10 +5207,10 @@ thiserror = "1.0.19"",
           "versionPrerelease": null,
         },
         "postcommand": [
-          "echo postmode for tauri-utils",
+          "node -e "console.log('postmode for tauri-utils')"",
         ],
         "precommand": [
-          "echo premode for tauri-utils",
+          "node -e "console.log('premode for tauri-utils')"",
         ],
         "releaseTag": "tauri-utils-v0.5.0",
       },
@@ -5219,7 +5222,7 @@ thiserror = "1.0.19"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri.js",
+          "node -e "console.log('publishing tauri.js')"",
           [Function],
           [Function],
         ],
@@ -5845,8 +5848,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -5859,12 +5862,12 @@ thiserror = "1.0.19"",
             "tauri-api",
           ],
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri",
           "pkg": "tauri",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
+          "postcommand": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+          "precommand": "node -e "console.log('premode for \${ pkg.pkg }')"",
           "releaseTag": null,
           "tag": "",
         },
@@ -6004,8 +6007,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -6018,12 +6021,12 @@ thiserror = "1.0.19"",
             "tauri-utils",
           ],
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri-api",
           "pkg": "tauri-api",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
+          "postcommand": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+          "precommand": "node -e "console.log('premode for \${ pkg.pkg }')"",
           "releaseTag": null,
           "tag": "",
         },
@@ -6178,8 +6181,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -6190,12 +6193,12 @@ thiserror = "1.0.19"",
           ],
           "dependencies": undefined,
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./cli/tauri-bundler",
           "pkg": "tauri-bundler",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
+          "postcommand": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+          "precommand": "node -e "console.log('premode for \${ pkg.pkg }')"",
           "releaseTag": null,
           "tag": "",
         },
@@ -6362,8 +6365,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -6374,12 +6377,12 @@ thiserror = "1.0.19"",
           ],
           "dependencies": undefined,
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri-utils",
           "pkg": "tauri-utils",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
+          "postcommand": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+          "precommand": "node -e "console.log('premode for \${ pkg.pkg }')"",
           "releaseTag": null,
           "tag": "",
         },
@@ -6420,7 +6423,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
             [Function],
             [Function],
           ],
@@ -6933,7 +6936,7 @@ exports[`integration test in production mode > publish > runs publish for dart /
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing",
+          "node -e "console.log('publishing')"",
         ],
         "dependencies": undefined,
         "errorOnVersionRange": null,
@@ -7053,7 +7056,7 @@ flutter:
       "pipe": {
         "pkg": {
           "changelog": false,
-          "command": "echo publishing",
+          "command": "node -e "console.log('publishing')"",
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "flutter",
@@ -7138,7 +7141,7 @@ exports[`integration test in production mode > publish > runs publish for genera
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing",
+          "node -e "console.log('publishing')"",
         ],
         "dependencies": undefined,
         "errorOnVersionRange": null,
@@ -7179,7 +7182,7 @@ exports[`integration test in production mode > publish > runs publish for genera
       "pipe": {
         "pkg": {
           "changelog": false,
-          "command": "echo publishing",
+          "command": "node -e "console.log('publishing')"",
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "",
@@ -7217,8 +7220,8 @@ exports[`integration test in production mode > publish > runs publish for js and
       "command": false,
       "pkg": {
         "command": [
-          "echo publishing tauri",
-          "echo running in ./tauri",
+          "node -e "console.log('publishing tauri')"",
+          "node -e "console.log('running in ./tauri')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -7230,7 +7233,7 @@ exports[`integration test in production mode > publish > runs publish for js and
           "tauri-api",
         ],
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri",
         "pkg": "tauri",
@@ -7436,10 +7439,10 @@ path = "examples/communication/src-tauri/src/main.rs"",
           "versionPrerelease": null,
         },
         "postcommand": [
-          "echo postmode for tauri",
+          "node -e "console.log('postmode for tauri')"",
         ],
         "precommand": [
-          "echo premode for tauri",
+          "node -e "console.log('premode for tauri')"",
         ],
         "releaseTag": "tauri-v0.5.2",
       },
@@ -7450,8 +7453,8 @@ path = "examples/communication/src-tauri/src/main.rs"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-api",
-          "echo running in ./tauri-api",
+          "node -e "console.log('publishing tauri-api')"",
+          "node -e "console.log('running in ./tauri-api')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -7463,7 +7466,7 @@ path = "examples/communication/src-tauri/src/main.rs"",
           "tauri-utils",
         ],
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri-api",
         "pkg": "tauri-api",
@@ -7653,10 +7656,10 @@ totems = "0.2.7"",
           "versionPrerelease": null,
         },
         "postcommand": [
-          "echo postmode for tauri-api",
+          "node -e "console.log('postmode for tauri-api')"",
         ],
         "precommand": [
-          "echo premode for tauri-api",
+          "node -e "console.log('premode for tauri-api')"",
         ],
         "releaseTag": "tauri-api-v0.5.1",
       },
@@ -7668,8 +7671,8 @@ totems = "0.2.7"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-bundler",
-          "echo running in ./cli/tauri-bundler",
+          "node -e "console.log('publishing tauri-bundler')"",
+          "node -e "console.log('running in ./cli/tauri-bundler')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -7679,7 +7682,7 @@ totems = "0.2.7"",
         ],
         "dependencies": undefined,
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./cli/tauri-bundler",
         "pkg": "tauri-bundler",
@@ -7902,10 +7905,10 @@ path = "src/main.rs"
           "versionPrerelease": null,
         },
         "postcommand": [
-          "echo postmode for tauri-bundler",
+          "node -e "console.log('postmode for tauri-bundler')"",
         ],
         "precommand": [
-          "echo premode for tauri-bundler",
+          "node -e "console.log('premode for tauri-bundler')"",
         ],
         "releaseTag": "tauri-bundler-v0.6.0",
       },
@@ -7917,8 +7920,8 @@ path = "src/main.rs"
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-utils",
-          "echo running in ./tauri-utils",
+          "node -e "console.log('publishing tauri-utils')"",
+          "node -e "console.log('running in ./tauri-utils')"",
           {
             "command": "ls",
             "dryRunCommand": undefined,
@@ -7928,7 +7931,7 @@ path = "src/main.rs"
         ],
         "dependencies": undefined,
         "errorOnVersionRange": null,
-        "getPublishedVersion": "echo 0.5.2",
+        "getPublishedVersion": "node -e "console.log('0.5.2')"",
         "manager": "rust",
         "path": "./tauri-utils",
         "pkg": "tauri-utils",
@@ -7983,10 +7986,10 @@ thiserror = "1.0.19"",
           "versionPrerelease": null,
         },
         "postcommand": [
-          "echo postmode for tauri-utils",
+          "node -e "console.log('postmode for tauri-utils')"",
         ],
         "precommand": [
-          "echo premode for tauri-utils",
+          "node -e "console.log('premode for tauri-utils')"",
         ],
         "releaseTag": "tauri-utils-v0.5.0",
       },
@@ -7998,7 +8001,7 @@ thiserror = "1.0.19"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri.js",
+          "node -e "console.log('publishing tauri.js')"",
         ],
         "dependencies": [
           "tauri",
@@ -8622,8 +8625,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -8634,12 +8637,12 @@ thiserror = "1.0.19"",
             "tauri-api",
           ],
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri",
           "pkg": "tauri",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
+          "postcommand": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+          "precommand": "node -e "console.log('premode for \${ pkg.pkg }')"",
           "releaseTag": null,
           "tag": "",
         },
@@ -8779,8 +8782,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -8791,12 +8794,12 @@ thiserror = "1.0.19"",
             "tauri-utils",
           ],
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri-api",
           "pkg": "tauri-api",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
+          "postcommand": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+          "precommand": "node -e "console.log('premode for \${ pkg.pkg }')"",
           "releaseTag": null,
           "tag": "",
         },
@@ -8951,8 +8954,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -8961,12 +8964,12 @@ thiserror = "1.0.19"",
           ],
           "dependencies": undefined,
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./cli/tauri-bundler",
           "pkg": "tauri-bundler",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
+          "postcommand": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+          "precommand": "node -e "console.log('premode for \${ pkg.pkg }')"",
           "releaseTag": null,
           "tag": "",
         },
@@ -9133,8 +9136,8 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg }",
-            "echo running in \${ pkg.path }",
+            "node -e "console.log('publishing \${ pkg.pkg }')"",
+            "node -e "console.log('running in \${ pkg.path }')"",
             {
               "command": "ls",
               "runFromRoot": true,
@@ -9143,12 +9146,12 @@ thiserror = "1.0.19"",
           ],
           "dependencies": undefined,
           "errorOnVersionRange": null,
-          "getPublishedVersion": "echo 0.5.2",
+          "getPublishedVersion": "node -e "console.log('0.5.2')"",
           "manager": "rust",
           "path": "./tauri-utils",
           "pkg": "tauri-utils",
-          "postcommand": "echo postmode for \${ pkg.pkg }",
-          "precommand": "echo premode for \${ pkg.pkg }",
+          "postcommand": "node -e "console.log('postmode for \${ pkg.pkg }')"",
+          "precommand": "node -e "console.log('premode for \${ pkg.pkg }')"",
           "releaseTag": null,
           "tag": "",
         },
@@ -9188,7 +9191,7 @@ thiserror = "1.0.19"",
       "pipe": {
         "pkg": {
           "changelog": false,
-          "command": "echo publishing \${ pkg.pkg }",
+          "command": "node -e "console.log('publishing \${ pkg.pkg }')"",
           "dependencies": [
             "tauri",
           ],
@@ -9698,7 +9701,7 @@ exports[`integration test in production mode > runs build for js and rust 1`] = 
       "command": true,
       "pkg": {
         "command": [
-          "echo the files in the tauri folder are",
+          "node -e "console.log('the files in the tauri folder are')"",
           "ls",
         ],
         "dependencies": [
@@ -9920,7 +9923,7 @@ path = "examples/communication/src-tauri/src/main.rs"",
       "command": true,
       "pkg": {
         "command": [
-          "echo the files in the tauri-api folder are",
+          "node -e "console.log('the files in the tauri-api folder are')"",
           "ls",
         ],
         "dependencies": [
@@ -10126,7 +10129,7 @@ totems = "0.2.7"",
       "command": true,
       "pkg": {
         "command": [
-          "echo the files in the tauri-bundler folder are",
+          "node -e "console.log('the files in the tauri-bundler folder are')"",
           "ls",
         ],
         "dependencies": undefined,
@@ -10363,7 +10366,7 @@ path = "src/main.rs"
       "command": true,
       "pkg": {
         "command": [
-          "echo the files in the tauri-updater folder are",
+          "node -e "console.log('the files in the tauri-updater folder are')"",
           "ls",
         ],
         "dependencies": undefined,
@@ -10476,7 +10479,7 @@ thiserror = "1.0.19"
       "command": true,
       "pkg": {
         "command": [
-          "echo the files in the tauri-utils folder are",
+          "node -e "console.log('the files in the tauri-utils folder are')"",
           "ls",
         ],
         "dependencies": undefined,
@@ -10549,7 +10552,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo the files in the \${ pkg.pkg } folder are",
+            "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
           ],
           "dependencies": [
@@ -10700,7 +10703,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo the files in the \${ pkg.pkg } folder are",
+            "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
           ],
           "dependencies": [
@@ -10866,7 +10869,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo the files in the \${ pkg.pkg } folder are",
+            "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
           ],
           "dependencies": undefined,
@@ -11042,7 +11045,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo the files in the \${ pkg.pkg } folder are",
+            "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
           ],
           "dependencies": undefined,
@@ -11128,7 +11131,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo the files in the \${ pkg.pkg } folder are",
+            "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
           ],
           "dependencies": undefined,

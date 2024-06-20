@@ -138,7 +138,7 @@ describe("integration test in production mode", () => {
         [
           {
             command: "publish",
-            msg: "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-bundler@0.6.0 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -148,7 +148,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
+            msg: "Checking if tauri@0.5.2 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -163,7 +163,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-api@0.5.1 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -173,7 +173,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-utils@0.5.0 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -198,7 +198,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri.js [publish]: echo publishing tauri.js",
+            msg: "tauri.js [publish]: node -e \"console.log('publishing tauri.js')\"",
             level: 30,
           },
           {
@@ -213,7 +213,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo publishing tauri-bundler",
+            msg: "tauri-bundler [publish]: node -e \"console.log('publishing tauri-bundler')\"",
             level: 30,
           },
           {
@@ -223,7 +223,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo running in ./cli/tauri-bundler",
+            msg: "tauri-bundler [publish]: node -e \"console.log('running in ./cli/tauri-bundler')\"",
             level: 30,
           },
           {
@@ -263,7 +263,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo publishing tauri-api",
+            msg: "tauri-api [publish]: node -e \"console.log('publishing tauri-api')\"",
             level: 30,
           },
           {
@@ -273,7 +273,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo running in ./tauri-api",
+            msg: "tauri-api [publish]: node -e \"console.log('running in ./tauri-api')\"",
             level: 30,
           },
           {
@@ -312,7 +312,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo publishing tauri-utils",
+            msg: "tauri-utils [publish]: node -e \"console.log('publishing tauri-utils')\"",
             level: 30,
           },
           {
@@ -322,7 +322,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo running in ./tauri-utils",
+            msg: "tauri-utils [publish]: node -e \"console.log('running in ./tauri-utils')\"",
             level: 30,
           },
           {
@@ -406,7 +406,7 @@ describe("integration test in production mode", () => {
         [
           {
             command: "publish",
-            msg: "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-bundler@0.6.0 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -416,7 +416,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
+            msg: "Checking if tauri@0.5.2 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -431,7 +431,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-api@0.5.1 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -441,7 +441,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-utils@0.5.0 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -451,7 +451,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [prepublish]: echo premode for tauri-bundler",
+            msg: "tauri-bundler [prepublish]: node -e \"console.log('premode for tauri-bundler')\"",
             level: 30,
           },
           {
@@ -461,7 +461,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [prepublish]: echo premode for tauri-api",
+            msg: "tauri-api [prepublish]: node -e \"console.log('premode for tauri-api')\"",
             level: 30,
           },
           {
@@ -471,7 +471,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [prepublish]: echo premode for tauri-utils",
+            msg: "tauri-utils [prepublish]: node -e \"console.log('premode for tauri-utils')\"",
             level: 30,
           },
           {
@@ -481,7 +481,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri.js [publish]: echo publishing tauri.js",
+            msg: "tauri.js [publish]: node -e \"console.log('publishing tauri.js')\"",
             level: 30,
           },
           {
@@ -501,7 +501,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo publishing tauri-bundler",
+            msg: "tauri-bundler [publish]: node -e \"console.log('publishing tauri-bundler')\"",
             level: 30,
           },
           {
@@ -511,7 +511,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo running in ./cli/tauri-bundler",
+            msg: "tauri-bundler [publish]: node -e \"console.log('running in ./cli/tauri-bundler')\"",
             level: 30,
           },
           {
@@ -556,7 +556,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo publishing tauri-api",
+            msg: "tauri-api [publish]: node -e \"console.log('publishing tauri-api')\"",
             level: 30,
           },
           {
@@ -566,7 +566,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo running in ./tauri-api",
+            msg: "tauri-api [publish]: node -e \"console.log('running in ./tauri-api')\"",
             level: 30,
           },
           {
@@ -611,7 +611,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo publishing tauri-utils",
+            msg: "tauri-utils [publish]: node -e \"console.log('publishing tauri-utils')\"",
             level: 30,
           },
           {
@@ -621,7 +621,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo running in ./tauri-utils",
+            msg: "tauri-utils [publish]: node -e \"console.log('running in ./tauri-utils')\"",
             level: 30,
           },
           {
@@ -666,7 +666,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [postpublish]: echo postmode for tauri-bundler",
+            msg: "tauri-bundler [postpublish]: node -e \"console.log('postmode for tauri-bundler')\"",
             level: 30,
           },
           {
@@ -676,7 +676,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [postpublish]: echo postmode for tauri-api",
+            msg: "tauri-api [postpublish]: node -e \"console.log('postmode for tauri-api')\"",
             level: 30,
           },
           {
@@ -686,7 +686,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [postpublish]: echo postmode for tauri-utils",
+            msg: "tauri-utils [postpublish]: node -e \"console.log('postmode for tauri-utils')\"",
             level: 30,
           },
           {
@@ -1019,7 +1019,7 @@ describe("integration test in production mode", () => {
         [
           {
             command: "publish",
-            msg: "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-bundler@0.6.0 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -1029,7 +1029,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
+            msg: "Checking if tauri@0.5.2 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -1044,7 +1044,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-api@0.5.1 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -1054,7 +1054,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+            msg: "Checking if tauri-utils@0.5.0 is already published with: node -e \"console.log('0.5.2')\"",
             level: 30,
           },
           {
@@ -1064,7 +1064,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [prepublish]: echo premode for tauri-bundler",
+            msg: "tauri-bundler [prepublish]: node -e \"console.log('premode for tauri-bundler')\"",
             level: 30,
           },
           {
@@ -1074,7 +1074,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [prepublish]: echo premode for tauri-api",
+            msg: "tauri-api [prepublish]: node -e \"console.log('premode for tauri-api')\"",
             level: 30,
           },
           {
@@ -1084,7 +1084,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [prepublish]: echo premode for tauri-utils",
+            msg: "tauri-utils [prepublish]: node -e \"console.log('premode for tauri-utils')\"",
             level: 30,
           },
           {
@@ -1094,7 +1094,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri.js [publish]: echo publishing tauri.js",
+            msg: "tauri.js [publish]: node -e \"console.log('publishing tauri.js')\"",
             level: 30,
           },
           {
@@ -1104,7 +1104,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo publishing tauri-bundler",
+            msg: "tauri-bundler [publish]: node -e \"console.log('publishing tauri-bundler')\"",
             level: 30,
           },
           {
@@ -1114,7 +1114,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo running in ./cli/tauri-bundler",
+            msg: "tauri-bundler [publish]: node -e \"console.log('running in ./cli/tauri-bundler')\"",
             level: 30,
           },
           {
@@ -1149,7 +1149,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo publishing tauri-api",
+            msg: "tauri-api [publish]: node -e \"console.log('publishing tauri-api')\"",
             level: 30,
           },
           {
@@ -1159,7 +1159,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo running in ./tauri-api",
+            msg: "tauri-api [publish]: node -e \"console.log('running in ./tauri-api')\"",
             level: 30,
           },
           {
@@ -1194,7 +1194,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo publishing tauri-utils",
+            msg: "tauri-utils [publish]: node -e \"console.log('publishing tauri-utils')\"",
             level: 30,
           },
           {
@@ -1204,7 +1204,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo running in ./tauri-utils",
+            msg: "tauri-utils [publish]: node -e \"console.log('running in ./tauri-utils')\"",
             level: 30,
           },
           {
@@ -1239,7 +1239,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [postpublish]: echo postmode for tauri-bundler",
+            msg: "tauri-bundler [postpublish]: node -e \"console.log('postmode for tauri-bundler')\"",
             level: 30,
           },
           {
@@ -1249,7 +1249,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [postpublish]: echo postmode for tauri-api",
+            msg: "tauri-api [postpublish]: node -e \"console.log('postmode for tauri-api')\"",
             level: 30,
           },
           {
@@ -1259,7 +1259,7 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [postpublish]: echo postmode for tauri-utils",
+            msg: "tauri-utils [postpublish]: node -e \"console.log('postmode for tauri-utils')\"",
             level: 30,
           },
           {
@@ -1294,7 +1294,7 @@ describe("integration test in production mode", () => {
         [
           {
             command: "publish",
-            msg: "test_app [publish]: echo publishing",
+            msg: "test_app [publish]: node -e \"console.log('publishing')\"",
             level: 30,
           },
           {
@@ -1329,7 +1329,7 @@ describe("integration test in production mode", () => {
         [
           {
             command: "publish",
-            msg: "general-pkg [publish]: echo publishing",
+            msg: "general-pkg [publish]: node -e \"console.log('publishing')\"",
             level: 30,
           },
           {
@@ -1568,7 +1568,7 @@ describe("integration test in production mode", () => {
       [
         {
           command: "arbitrary",
-          msg: "tauri-bundler [build]: echo the files in the tauri-bundler folder are",
+          msg: "tauri-bundler [build]: node -e \"console.log('the files in the tauri-bundler folder are')\"",
           level: 30,
         },
         {
@@ -1588,7 +1588,7 @@ describe("integration test in production mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "tauri [build]: echo the files in the tauri folder are",
+          msg: "tauri [build]: node -e \"console.log('the files in the tauri folder are')\"",
           level: 30,
         },
         {
@@ -1608,7 +1608,7 @@ describe("integration test in production mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "tauri-api [build]: echo the files in the tauri-api folder are",
+          msg: "tauri-api [build]: node -e \"console.log('the files in the tauri-api folder are')\"",
           level: 30,
         },
         {
@@ -1628,7 +1628,7 @@ describe("integration test in production mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "tauri-utils [build]: echo the files in the tauri-utils folder are",
+          msg: "tauri-utils [build]: node -e \"console.log('the files in the tauri-utils folder are')\"",
           level: 30,
         },
         {
@@ -1648,7 +1648,7 @@ describe("integration test in production mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "tauri-updater [build]: echo the files in the tauri-updater folder are",
+          msg: "tauri-updater [build]: node -e \"console.log('the files in the tauri-updater folder are')\"",
           level: 30,
         },
         {

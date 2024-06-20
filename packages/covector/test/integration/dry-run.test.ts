@@ -298,7 +298,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "Checking if tauri-bundler@0.6.0 is already published with: echo 0.5.2",
+          msg: "Checking if tauri-bundler@0.6.0 is already published with: node -e \"console.log('0.5.2')\"",
           level: 30,
         },
         {
@@ -308,7 +308,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "Checking if tauri@0.5.2 is already published with: echo 0.5.2",
+          msg: "Checking if tauri@0.5.2 is already published with: node -e \"console.log('0.5.2')\"",
           level: 30,
         },
         {
@@ -323,7 +323,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "Checking if tauri-api@0.5.1 is already published with: echo 0.5.2",
+          msg: "Checking if tauri-api@0.5.1 is already published with: node -e \"console.log('0.5.2')\"",
           level: 30,
         },
         {
@@ -333,7 +333,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "Checking if tauri-utils@0.5.0 is already published with: echo 0.5.2",
+          msg: "Checking if tauri-utils@0.5.0 is already published with: node -e \"console.log('0.5.2')\"",
           level: 30,
         },
         {
@@ -343,32 +343,32 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-bundler [prepublish]: echo premode for tauri-bundler",
+          msg: "dryRun >> tauri-bundler [prepublish]: node -e \"console.log('premode for tauri-bundler')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-api [prepublish]: echo premode for tauri-api",
+          msg: "dryRun >> tauri-api [prepublish]: node -e \"console.log('premode for tauri-api')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-utils [prepublish]: echo premode for tauri-utils",
+          msg: "dryRun >> tauri-utils [prepublish]: node -e \"console.log('premode for tauri-utils')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri.js [publish]: echo publishing tauri.js",
+          msg: "dryRun >> tauri.js [publish]: node -e \"console.log('publishing tauri.js')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-bundler [publish]: echo publishing tauri-bundler",
+          msg: "dryRun >> tauri-bundler [publish]: node -e \"console.log('publishing tauri-bundler')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-bundler [publish]: echo running in ./cli/tauri-bundler",
+          msg: "dryRun >> tauri-bundler [publish]: node -e \"console.log('running in ./cli/tauri-bundler')\"",
           level: 30,
         },
         {
@@ -383,12 +383,12 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-api [publish]: echo publishing tauri-api",
+          msg: "dryRun >> tauri-api [publish]: node -e \"console.log('publishing tauri-api')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-api [publish]: echo running in ./tauri-api",
+          msg: "dryRun >> tauri-api [publish]: node -e \"console.log('running in ./tauri-api')\"",
           level: 30,
         },
         {
@@ -403,12 +403,12 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-utils [publish]: echo publishing tauri-utils",
+          msg: "dryRun >> tauri-utils [publish]: node -e \"console.log('publishing tauri-utils')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-utils [publish]: echo running in ./tauri-utils",
+          msg: "dryRun >> tauri-utils [publish]: node -e \"console.log('running in ./tauri-utils')\"",
           level: 30,
         },
         {
@@ -423,17 +423,17 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-bundler [postpublish]: echo postmode for tauri-bundler",
+          msg: "dryRun >> tauri-bundler [postpublish]: node -e \"console.log('postmode for tauri-bundler')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-api [postpublish]: echo postmode for tauri-api",
+          msg: "dryRun >> tauri-api [postpublish]: node -e \"console.log('postmode for tauri-api')\"",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-utils [postpublish]: echo postmode for tauri-utils",
+          msg: "dryRun >> tauri-utils [postpublish]: node -e \"console.log('postmode for tauri-utils')\"",
           level: 30,
         },
         {
@@ -562,7 +562,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "dryRun >> tauri-bundler [build]: echo the files in the tauri-bundler folder are",
+          msg: "dryRun >> tauri-bundler [build]: node -e \"console.log('the files in the tauri-bundler folder are')\"",
           level: 30,
         },
         {
@@ -572,7 +572,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "dryRun >> tauri [build]: echo the files in the tauri folder are",
+          msg: "dryRun >> tauri [build]: node -e \"console.log('the files in the tauri folder are')\"",
           level: 30,
         },
         {
@@ -582,7 +582,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "dryRun >> tauri-api [build]: echo the files in the tauri-api folder are",
+          msg: "dryRun >> tauri-api [build]: node -e \"console.log('the files in the tauri-api folder are')\"",
           level: 30,
         },
         {
@@ -592,7 +592,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "dryRun >> tauri-utils [build]: echo the files in the tauri-utils folder are",
+          msg: "dryRun >> tauri-utils [build]: node -e \"console.log('the files in the tauri-utils folder are')\"",
           level: 30,
         },
         {
@@ -602,7 +602,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "arbitrary",
-          msg: "dryRun >> tauri-updater [build]: echo the files in the tauri-updater folder are",
+          msg: "dryRun >> tauri-updater [build]: node -e \"console.log('the files in the tauri-updater folder are')\"",
           level: 30,
         },
         {

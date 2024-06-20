@@ -3,7 +3,7 @@
     "general-pkg": {
       "path": "./VERSION",
       "version": true,
-      "publish": "echo publishing"
+      "publish": "node -e \"console.log('publishing')\""
     }
   }
 }
