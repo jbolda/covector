@@ -71,10 +71,13 @@ describe("attemptCommand fails", () => {
         [
           { msg: "pkg-nickname []: boop", level: 30 },
           { msg: errorLog, level: 50 },
+          { msg: errorMessage, level: 50 },
           { msg: "pkg-nickname []: boop", level: 30 },
           { msg: errorLog, level: 50 },
+          { msg: errorMessage, level: 50 },
           { msg: "pkg-nickname []: boop", level: 30 },
           { msg: errorLog, level: 50 },
+          { msg: errorMessage, level: 50 },
           { msg: "pkg-nickname []: boop", level: 30 },
           // to confirm we are done with logs
           { msg: "completed", level: 30 },
