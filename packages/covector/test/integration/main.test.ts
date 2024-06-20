@@ -1415,8 +1415,8 @@ describe("integration test in production mode", () => {
         })
       );
 
-      const linuxExtraErrorLog = (errorNumber) =>
-        process.platform === "linux"
+      const extraErrorLog = (errorNumber) =>
+        process.platform !== "darwin"
           ? // ubuntu has an extra error log line
             //  when it throws
             [
@@ -1444,7 +1444,6 @@ describe("integration test in production mode", () => {
             level: 50,
             errorNumber: 1,
           },
-          ...linuxExtraErrorLog(1),
           {
             command: "publish",
             err: "code: 1",
@@ -1462,7 +1461,6 @@ describe("integration test in production mode", () => {
             level: 50,
             errorNumber: 2,
           },
-          ...linuxExtraErrorLog(2),
           {
             command: "publish",
             err: "code: 1",
@@ -1480,7 +1478,7 @@ describe("integration test in production mode", () => {
             level: 50,
             errorNumber: 3,
           },
-          ...linuxExtraErrorLog(3),
+          ...extraErrorLog(3),
           // it actually throws after the third error it hits
           {
             msg: "completed",
