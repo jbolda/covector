@@ -720,6 +720,13 @@ describe("full e2e test", () => {
         }));
 
       const covectoredAction = yield covector(logger);
+
+      yield pinoTest.once(stream, {
+        command: "publish",
+        msg: "We cannot pipe the function command in package-one@2.3.1",
+        level: 50,
+      });
+
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
