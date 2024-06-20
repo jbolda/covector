@@ -240,6 +240,7 @@ function* callCommand({
   command: string;
   commandPrefix: string;
 }): Operation<string> {
+  console.dir(pubCommand);
   if (typeof runningCommand.command === "function") {
     const pipeToFunction = {
       ...pkg,
