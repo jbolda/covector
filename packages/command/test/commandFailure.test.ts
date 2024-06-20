@@ -77,8 +77,6 @@ describe("attemptCommand fails", () => {
           { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
           { msg: "pkg-nickname []: boop", level: 30 },
           { msg: errorLog, level: 50 },
-          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-          { msg: "pkg-nickname []: boop", level: 30 },
           // to confirm we are done with logs
           { msg: "completed", level: 30 },
         ],
