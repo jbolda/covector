@@ -1478,7 +1478,6 @@ describe("integration test in production mode", () => {
             level: 50,
             errorNumber: 3,
           },
-          ...extraErrorLog(3),
           // it actually throws after the third error it hits
           {
             msg: "completed",
