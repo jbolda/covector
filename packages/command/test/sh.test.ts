@@ -1,5 +1,5 @@
 import { sh } from "../src";
-import { describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it, captureError } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
@@ -161,12 +161,13 @@ Usage:
       });
 
       it("considers piped commands, defines pwsh as shell", function* () {
-        // TODO captureError
-        const result = yield sh(
-          "echo this thing | echo but actually this",
-          { shell: "pwsh" },
-          false,
-          logger
+        const result = yield captureError(
+          sh(
+            "echo this thing | echo but actually this",
+            { shell: "pwsh" },
+            false,
+            logger
+          )
         );
         // pwsh doesn't handle pipes with echo
         expect(result.message).toBe(
