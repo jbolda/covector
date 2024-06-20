@@ -1391,6 +1391,17 @@ describe("integration test in production mode", () => {
             err: "Error: boom",
             level: 50,
           },
+          ...(process.platform !== "linux"
+            ? // ubuntu has an extra error log line
+              //  when it throws
+              [
+                {
+                  command: "publish",
+                  msg: ["Node.js v20"],
+                  level: 50,
+                },
+              ]
+            : []),
           {
             msg: "completed",
             level: 30,
@@ -1415,6 +1426,19 @@ describe("integration test in production mode", () => {
         })
       );
 
+      const extraErrorLogLine =
+        process.platform !== "linux"
+          ? // ubuntu has an extra error log line
+            //  when it throws
+            [
+              {
+                command: "publish",
+                msg: ["Node.js v20"],
+                level: 50,
+              },
+            ]
+          : [];
+
       logger.info("completed");
       yield pinoTest.consecutive(
         stream,
@@ -1429,6 +1453,7 @@ describe("integration test in production mode", () => {
             err: "Error: boom",
             level: 50,
           },
+          ...extraErrorLogLine,
           {
             command: "publish",
             err: "code: 1",
@@ -1444,6 +1469,7 @@ describe("integration test in production mode", () => {
             err: "Error: boom",
             level: 50,
           },
+          ...extraErrorLogLine,
           {
             command: "publish",
             err: "code: 1",
@@ -1459,6 +1485,7 @@ describe("integration test in production mode", () => {
             err: "Error: boom",
             level: 50,
           },
+          ...extraErrorLogLine,
           // it actually throws after the third error it hits
           {
             msg: "completed",
