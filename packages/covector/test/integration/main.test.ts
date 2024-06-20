@@ -1428,11 +1428,25 @@ describe("integration test in production mode", () => {
             command: "publish",
             err: "Error: boom",
             level: 50,
+            errorNumber: 1,
           },
+          ...(process.platform !== "darwin"
+            ? // ubuntu has an extra error log line
+              //  when it throws
+              [
+                {
+                  command: "publish",
+                  msg: ["Node.js v20"],
+                  level: 50,
+                  errorNumber: 1,
+                },
+              ]
+            : []),
           {
             command: "publish",
             err: "code: 1",
             level: 50,
+            errorNumber: 1,
           },
           {
             command: "publish",
@@ -1443,11 +1457,13 @@ describe("integration test in production mode", () => {
             command: "publish",
             err: "Error: boom",
             level: 50,
+            errorNumber: 2,
           },
           {
             command: "publish",
             err: "code: 1",
             level: 50,
+            errorNumber: 2,
           },
           {
             command: "publish",
@@ -1458,6 +1474,7 @@ describe("integration test in production mode", () => {
             command: "publish",
             err: "Error: boom",
             level: 50,
+            errorNumber: 3,
           },
           // it actually throws after the third error it hits
           {
