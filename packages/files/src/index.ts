@@ -527,13 +527,11 @@ export function* changeFilesRemove({
   cwd: string;
   paths: string[];
 }): Operation<string> {
-  return yield all(
-    paths.map(function* (changeFilePath) {
-      yield fs.unlink(path.posix.join(cwd, changeFilePath));
-      logger.info(`${changeFilePath} was deleted`);
-      return changeFilePath;
-    })
-  );
+  for (let changeFilePath of paths) {
+    yield fs.unlink(path.posix.join(cwd, changeFilePath));
+    logger.info(`${changeFilePath} was deleted`);
+  }
+  return paths;
 }
 
 export function* readChangelog({
