@@ -5,7 +5,7 @@
       "getPublishedVersion": "echo 0.5.2",
       "prepublish": "echo premode for ${ pkg.pkg }",
       "publish": [
-        "echo publishing ${ pkg.pkg } would happen here",
+        "echo publishing ${ pkg.pkg }",
         "echo running in ${ pkg.path }",
         { "command": "ls", "runFromRoot": true },
         "ls"
@@ -15,7 +15,7 @@
     },
     "javascript": {
       "version": true,
-      "publish": "echo publishing ${ pkg.pkg } would happen here"
+      "publish": "echo publishing ${ pkg.pkg }"
     }
   },
   "packages": {

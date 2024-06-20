@@ -198,12 +198,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri.js [publish]: echo publishing tauri.js would happen here",
+            msg: "tauri.js [publish]: echo publishing tauri.js",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri.js would happen here",
+            msg: "publishing tauri.js",
             level: 30,
           },
           {
@@ -213,12 +213,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
+            msg: "tauri-bundler [publish]: echo publishing tauri-bundler",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-bundler would happen here",
+            msg: "publishing tauri-bundler",
             level: 30,
           },
           {
@@ -263,12 +263,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo publishing tauri-api would happen here",
+            msg: "tauri-api [publish]: echo publishing tauri-api",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-api would happen here",
+            msg: "publishing tauri-api",
             level: 30,
           },
           {
@@ -312,12 +312,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo publishing tauri-utils would happen here",
+            msg: "tauri-utils [publish]: echo publishing tauri-utils",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-utils would happen here",
+            msg: "publishing tauri-utils",
             level: 30,
           },
           {
@@ -481,12 +481,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri.js [publish]: echo publishing tauri.js would happen here",
+            msg: "tauri.js [publish]: echo publishing tauri.js",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri.js would happen here",
+            msg: "publishing tauri.js",
             level: 30,
           },
           {
@@ -501,12 +501,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
+            msg: "tauri-bundler [publish]: echo publishing tauri-bundler",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-bundler would happen here",
+            msg: "publishing tauri-bundler",
             level: 30,
           },
           {
@@ -556,12 +556,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo publishing tauri-api would happen here",
+            msg: "tauri-api [publish]: echo publishing tauri-api",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-api would happen here",
+            msg: "publishing tauri-api",
             level: 30,
           },
           {
@@ -611,12 +611,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo publishing tauri-utils would happen here",
+            msg: "tauri-utils [publish]: echo publishing tauri-utils",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-utils would happen here",
+            msg: "publishing tauri-utils",
             level: 30,
           },
           {
@@ -1094,22 +1094,22 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri.js [publish]: echo publishing tauri.js would happen here",
+            msg: "tauri.js [publish]: echo publishing tauri.js",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri.js would happen here",
+            msg: "publishing tauri.js",
             level: 30,
           },
           {
             command: "publish",
-            msg: "tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
+            msg: "tauri-bundler [publish]: echo publishing tauri-bundler",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-bundler would happen here",
+            msg: "publishing tauri-bundler",
             level: 30,
           },
           {
@@ -1149,12 +1149,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-api [publish]: echo publishing tauri-api would happen here",
+            msg: "tauri-api [publish]: echo publishing tauri-api",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-api would happen here",
+            msg: "publishing tauri-api",
             level: 30,
           },
           {
@@ -1194,12 +1194,12 @@ describe("integration test in production mode", () => {
           },
           {
             command: "publish",
-            msg: "tauri-utils [publish]: echo publishing tauri-utils would happen here",
+            msg: "tauri-utils [publish]: echo publishing tauri-utils",
             level: 30,
           },
           {
             command: "publish",
-            msg: "publishing tauri-utils would happen here",
+            msg: "publishing tauri-utils",
             level: 30,
           },
           {

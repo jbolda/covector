@@ -358,12 +358,12 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri.js [publish]: echo publishing tauri.js would happen here",
+          msg: "dryRun >> tauri.js [publish]: echo publishing tauri.js",
           level: 30,
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-bundler [publish]: echo publishing tauri-bundler would happen here",
+          msg: "dryRun >> tauri-bundler [publish]: echo publishing tauri-bundler",
           level: 30,
         },
         {
@@ -383,7 +383,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-api [publish]: echo publishing tauri-api would happen here",
+          msg: "dryRun >> tauri-api [publish]: echo publishing tauri-api",
           level: 30,
         },
         {
@@ -403,7 +403,7 @@ describe("integration test in --dry-run mode", () => {
         },
         {
           command: "publish",
-          msg: "dryRun >> tauri-utils [publish]: echo publishing tauri-utils would happen here",
+          msg: "dryRun >> tauri-utils [publish]: echo publishing tauri-utils",
           level: 30,
         },
         {

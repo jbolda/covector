@@ -11,7 +11,7 @@ exports[`integration test in production mode > handles config > allows modifying
       "command": false,
       "pkg": {
         "command": [
-          "echo publishing tauri would happen here",
+          "echo publishing tauri",
           "echo running in ./tauri",
           {
             "command": "ls",
@@ -245,7 +245,7 @@ path = "examples/communication/src-tauri/src/main.rs"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-api would happen here",
+          "echo publishing tauri-api",
           "echo running in ./tauri-api",
           {
             "command": "ls",
@@ -464,7 +464,7 @@ totems = "0.2.7"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-bundler would happen here",
+          "echo publishing tauri-bundler",
           "echo running in ./cli/tauri-bundler",
           {
             "command": "ls",
@@ -714,7 +714,7 @@ path = "src/main.rs"
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-utils would happen here",
+          "echo publishing tauri-utils",
           "echo running in ./tauri-utils",
           {
             "command": "ls",
@@ -796,7 +796,7 @@ thiserror = "1.0.19"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri.js would happen here",
+          "echo publishing tauri.js",
           [Function],
         ],
         "dependencies": [
@@ -1421,7 +1421,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -1581,7 +1581,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -1756,7 +1756,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -1941,7 +1941,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -2000,7 +2000,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             [Function],
           ],
           "dependencies": [
@@ -3412,7 +3412,7 @@ thiserror = "1.0.19"
       "getPublishedVersion": "echo 0.5.2",
       "prepublish": "echo premode for \${ pkg.pkg }",
       "publish": [
-        "echo publishing \${ pkg.pkg } would happen here",
+        "echo publishing \${ pkg.pkg }",
         "echo running in \${ pkg.path }",
         { "command": "ls", "runFromRoot": true },
         "ls"
@@ -3422,7 +3422,7 @@ thiserror = "1.0.19"
     },
     "javascript": {
       "version": true,
-      "publish": "echo publishing \${ pkg.pkg } would happen here"
+      "publish": "echo publishing \${ pkg.pkg }"
     }
   },
   "packages": {
@@ -3501,7 +3501,7 @@ thiserror = "1.0.19"
     },
     "pkgManagers": {
       "javascript": {
-        "publish": "echo publishing \${ pkg.pkg } would happen here",
+        "publish": "echo publishing \${ pkg.pkg }",
         "version": true,
       },
       "rust": {
@@ -3513,7 +3513,7 @@ thiserror = "1.0.19"
         "postpublish": "echo postmode for \${ pkg.pkg }",
         "prepublish": "echo premode for \${ pkg.pkg }",
         "publish": [
-          "echo publishing \${ pkg.pkg } would happen here",
+          "echo publishing \${ pkg.pkg }",
           "echo running in \${ pkg.path }",
           {
             "command": "ls",
@@ -4430,7 +4430,7 @@ exports[`integration test in production mode > handles config > uses the action 
       "command": false,
       "pkg": {
         "command": [
-          "echo publishing tauri would happen here",
+          "echo publishing tauri",
           "echo running in ./tauri",
           {
             "command": "ls",
@@ -4665,7 +4665,7 @@ path = "examples/communication/src-tauri/src/main.rs"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-api would happen here",
+          "echo publishing tauri-api",
           "echo running in ./tauri-api",
           {
             "command": "ls",
@@ -4885,7 +4885,7 @@ totems = "0.2.7"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-bundler would happen here",
+          "echo publishing tauri-bundler",
           "echo running in ./cli/tauri-bundler",
           {
             "command": "ls",
@@ -5136,7 +5136,7 @@ path = "src/main.rs"
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-utils would happen here",
+          "echo publishing tauri-utils",
           "echo running in ./tauri-utils",
           {
             "command": "ls",
@@ -5219,7 +5219,7 @@ thiserror = "1.0.19"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri.js would happen here",
+          "echo publishing tauri.js",
           [Function],
           [Function],
         ],
@@ -5845,7 +5845,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -6004,7 +6004,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -6178,7 +6178,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -6362,7 +6362,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -6420,7 +6420,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             [Function],
             [Function],
           ],
@@ -7217,7 +7217,7 @@ exports[`integration test in production mode > publish > runs publish for js and
       "command": false,
       "pkg": {
         "command": [
-          "echo publishing tauri would happen here",
+          "echo publishing tauri",
           "echo running in ./tauri",
           {
             "command": "ls",
@@ -7450,7 +7450,7 @@ path = "examples/communication/src-tauri/src/main.rs"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-api would happen here",
+          "echo publishing tauri-api",
           "echo running in ./tauri-api",
           {
             "command": "ls",
@@ -7668,7 +7668,7 @@ totems = "0.2.7"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-bundler would happen here",
+          "echo publishing tauri-bundler",
           "echo running in ./cli/tauri-bundler",
           {
             "command": "ls",
@@ -7917,7 +7917,7 @@ path = "src/main.rs"
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri-utils would happen here",
+          "echo publishing tauri-utils",
           "echo running in ./tauri-utils",
           {
             "command": "ls",
@@ -7998,7 +7998,7 @@ thiserror = "1.0.19"",
       "command": true,
       "pkg": {
         "command": [
-          "echo publishing tauri.js would happen here",
+          "echo publishing tauri.js",
         ],
         "dependencies": [
           "tauri",
@@ -8622,7 +8622,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -8779,7 +8779,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -8951,7 +8951,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -9133,7 +9133,7 @@ thiserror = "1.0.19"",
         "pkg": {
           "changelog": false,
           "command": [
-            "echo publishing \${ pkg.pkg } would happen here",
+            "echo publishing \${ pkg.pkg }",
             "echo running in \${ pkg.path }",
             {
               "command": "ls",
@@ -9188,7 +9188,7 @@ thiserror = "1.0.19"",
       "pipe": {
         "pkg": {
           "changelog": false,
-          "command": "echo publishing \${ pkg.pkg } would happen here",
+          "command": "echo publishing \${ pkg.pkg }",
           "dependencies": [
             "tauri",
           ],
