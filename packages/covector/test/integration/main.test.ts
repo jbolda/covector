@@ -1391,7 +1391,7 @@ describe("integration test in production mode", () => {
             err: "Error: boom",
             level: 50,
           },
-          ...(process.platform !== "linux"
+          ...(process.platform === "linux"
             ? // ubuntu has an extra error log line
               //  when it throws
               [
@@ -1427,7 +1427,7 @@ describe("integration test in production mode", () => {
       );
 
       const extraErrorLogLine =
-        process.platform !== "linux"
+        process.platform === "linux"
           ? // ubuntu has an extra error log line
             //  when it throws
             [
