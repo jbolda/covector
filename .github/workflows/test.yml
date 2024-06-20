@@ -21,4 +21,4 @@ jobs:
       - uses: volta-cli/action@v4
       - run: npm ci
       - run: npm run build # covector CLI tests run built files
-      - run: npm test -- action
+      - run: npm test
