@@ -1377,20 +1377,6 @@ describe("integration test in production mode", () => {
         })
       );
 
-      const extraErrorLog = (errorNumber) =>
-        process.platform !== "darwin" && process.platform !== "win32"
-          ? // ubuntu has an extra error log line
-            //  when it throws
-            [
-              {
-                command: "publish",
-                msg: ["Node.js v20"],
-                level: 50,
-                errorNumber,
-              },
-            ]
-          : [];
-
       logger.info("completed");
       yield pinoTest.consecutive(
         stream,
@@ -1405,7 +1391,6 @@ describe("integration test in production mode", () => {
             err: "Error: boom",
             level: 50,
           },
-          ...extraErrorLog(1),
           {
             msg: "completed",
             level: 30,
@@ -1459,7 +1444,6 @@ describe("integration test in production mode", () => {
             level: 50,
             errorNumber: 1,
           },
-          ...extraErrorLog(1),
           {
             command: "publish",
             err: "code: 1",
