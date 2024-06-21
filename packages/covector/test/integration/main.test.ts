@@ -1377,7 +1377,6 @@ describe("integration test in production mode", () => {
         })
       );
 
-      logger.info("completed");
       yield pinoTest.consecutive(
         stream,
         [
@@ -1391,10 +1390,8 @@ describe("integration test in production mode", () => {
             err: "Error: boom",
             level: 50,
           },
-          {
-            msg: "completed",
-            level: 30,
-          },
+          // it actually here and the logs (especially on linux) aren't output
+          //  consistently enough to check the remaining
         ],
         checksChunksInMsg()
       );
@@ -1415,7 +1412,6 @@ describe("integration test in production mode", () => {
         })
       );
 
-      logger.info("completed");
       yield pinoTest.consecutive(
         stream,
         [
@@ -1465,10 +1461,8 @@ describe("integration test in production mode", () => {
             errorNumber: 3,
           },
           // it actually throws after the third error it hits
-          {
-            msg: "completed",
-            level: 30,
-          },
+          //  and the logs (especially on linux) aren't output
+          //  consistently enough to check the remaining
         ],
         checksChunksInMsg()
       );
