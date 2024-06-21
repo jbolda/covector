@@ -1477,7 +1477,6 @@ describe("integration test in production mode", () => {
             level: 50,
             errorNumber: 2,
           },
-          ...extraErrorLog(2),
           {
             command: "publish",
             err: "code: 1",
@@ -1489,7 +1488,6 @@ describe("integration test in production mode", () => {
             msg: "tauri.js [publish]: node -e \"throw new Error('boom')\"",
             level: 30,
           },
-          ...extraErrorLog(3),
           {
             command: "publish",
             err: "Error: boom",
