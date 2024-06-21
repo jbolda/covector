@@ -4,20 +4,20 @@
       "path": "./dart",
       "manager": "dart",
       "version": true,
-      "publish": "echo publishing ${ pkgFile.name }",
+      "publish": "node -e \"console.log('publishing ${ pkgFile.name }')\"",
       "dependencies": ["test_app_two", "test_app_three"]
     },
     "test_app_two": {
       "path": "./flutter",
       "manager": "flutter",
       "version": true,
-      "publish": "echo publishing ${ pkgFile.name }"
+      "publish": "node -e \"console.log('publishing ${ pkgFile.name }')\""
     },
     "test_app_three": {
       "path": "./objectDep",
       "manager": "flutter",
       "version": true,
-      "publish": "echo publishing ${ pkgFile.name }"
+      "publish": "node -e \"console.log('publishing ${ pkgFile.name }')\""
     }
   }
 }

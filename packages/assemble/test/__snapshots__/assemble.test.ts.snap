@@ -1,21 +1,21 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`assemble assemble changes assembles deps 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
+exports[`assemble > assemble changes > assembles deps 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
         "all": "minor",
       },
       "summary": "This is a test.",
       "tag": undefined,
     },
   ],
-  "releases": Object {
-    "all": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+  "releases": {
+    "all": {
+      "changes": [
+        {
+          "releases": {
             "all": "minor",
           },
           "summary": "This is a test.",
@@ -28,113 +28,35 @@ Object {
 }
 `;
 
-exports[`assemble assemble changes in preMode with existing changes and a first bump 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
-        "assemble1": "minor",
-        "assemble2": "patch",
-      },
-      "summary": "This is a test.",
-      "tag": undefined,
-    },
-  ],
-  "releases": Object {
-    "assemble1": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "minor",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-      ],
-      "type": "preminor",
-    },
-    "assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "minor",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-      ],
-      "type": "prerelease",
-    },
-  },
-}
-`;
-
-exports[`assemble assemble changes in preMode with existing changes and a lower bump 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
+exports[`assemble > assemble changes > runs 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
         "assemble1": "patch",
         "assemble2": "patch",
       },
       "summary": "This is a test.",
       "tag": undefined,
     },
-  ],
-  "releases": Object {
-    "assemble1": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-      ],
-      "type": "prerelease",
-    },
-    "assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-      ],
-      "type": "prerelease",
-    },
-  },
-}
-`;
-
-exports[`assemble assemble changes in preMode with existing changes that upgrade 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
+    {
+      "releases": {
         "assemble1": "minor",
         "assemble2": "patch",
       },
       "summary": "This is a test.",
       "tag": undefined,
     },
-    Object {
-      "releases": Object {
+    {
+      "releases": {
         "assemble1": "patch",
         "assemble2": "major",
       },
       "summary": "This is a test.",
       "tag": undefined,
     },
-    Object {
-      "releases": Object {
+    {
+      "releases": {
         "@namespaced/assemble2": "patch",
         "assemble1": "patch",
       },
@@ -142,307 +64,11 @@ Object {
       "tag": undefined,
     },
   ],
-  "releases": Object {
-    "@namespaced/assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "@namespaced/assemble2": "patch",
-            "assemble1": "patch",
-          },
-          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-          "tag": undefined,
-        },
-      ],
-      "type": "prepatch",
-    },
-    "assemble1": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "minor",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "major",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "@namespaced/assemble2": "patch",
-            "assemble1": "patch",
-          },
-          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-          "tag": undefined,
-        },
-      ],
-      "type": "preminor",
-    },
-    "assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "minor",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "major",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-      ],
-      "type": "premajor",
-    },
-  },
-}
-`;
-
-exports[`assemble assemble changes in preMode with existing changes with the same bump 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
-        "assemble1": "minor",
-        "assemble2": "patch",
-      },
-      "summary": "This is a test.",
-      "tag": undefined,
-    },
-    Object {
-      "releases": Object {
-        "@namespaced/assemble2": "patch",
-        "assemble1": "patch",
-      },
-      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-      "tag": undefined,
-    },
-  ],
-  "releases": Object {
-    "@namespaced/assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "@namespaced/assemble2": "patch",
-            "assemble1": "patch",
-          },
-          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-          "tag": undefined,
-        },
-      ],
-      "type": "prepatch",
-    },
-    "assemble1": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "minor",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "@namespaced/assemble2": "patch",
-            "assemble1": "patch",
-          },
-          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-          "tag": undefined,
-        },
-      ],
-      "type": "preminor",
-    },
-    "assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "minor",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-      ],
-      "type": "prerelease",
-    },
-  },
-}
-`;
-
-exports[`assemble assemble changes in preMode with no existing changes 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
-        "assemble1": "patch",
-        "assemble2": "patch",
-      },
-      "summary": "This is a test.",
-      "tag": undefined,
-    },
-    Object {
-      "releases": Object {
-        "assemble1": "minor",
-        "assemble2": "patch",
-      },
-      "summary": "This is a test.",
-      "tag": undefined,
-    },
-    Object {
-      "releases": Object {
-        "assemble1": "patch",
-        "assemble2": "major",
-      },
-      "summary": "This is a test.",
-      "tag": undefined,
-    },
-    Object {
-      "releases": Object {
-        "@namespaced/assemble2": "patch",
-        "assemble1": "patch",
-      },
-      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-      "tag": undefined,
-    },
-  ],
-  "releases": Object {
-    "@namespaced/assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "@namespaced/assemble2": "patch",
-            "assemble1": "patch",
-          },
-          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-          "tag": undefined,
-        },
-      ],
-      "type": "prepatch",
-    },
-    "assemble1": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "assemble1": "minor",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "major",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "@namespaced/assemble2": "patch",
-            "assemble1": "patch",
-          },
-          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-          "tag": undefined,
-        },
-      ],
-      "type": "preminor",
-    },
-    "assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "assemble1": "minor",
-            "assemble2": "patch",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-        Object {
-          "releases": Object {
-            "assemble1": "patch",
-            "assemble2": "major",
-          },
-          "summary": "This is a test.",
-          "tag": undefined,
-        },
-      ],
-      "type": "premajor",
-    },
-  },
-}
-`;
-
-exports[`assemble assemble changes runs 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
-        "assemble1": "patch",
-        "assemble2": "patch",
-      },
-      "summary": "This is a test.",
-      "tag": undefined,
-    },
-    Object {
-      "releases": Object {
-        "assemble1": "minor",
-        "assemble2": "patch",
-      },
-      "summary": "This is a test.",
-      "tag": undefined,
-    },
-    Object {
-      "releases": Object {
-        "assemble1": "patch",
-        "assemble2": "major",
-      },
-      "summary": "This is a test.",
-      "tag": undefined,
-    },
-    Object {
-      "releases": Object {
-        "@namespaced/assemble2": "patch",
-        "assemble1": "patch",
-      },
-      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
-      "tag": undefined,
-    },
-  ],
-  "releases": Object {
-    "@namespaced/assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+  "releases": {
+    "@namespaced/assemble2": {
+      "changes": [
+        {
+          "releases": {
             "@namespaced/assemble2": "patch",
             "assemble1": "patch",
           },
@@ -452,34 +78,34 @@ Object {
       ],
       "type": "patch",
     },
-    "assemble1": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+    "assemble1": {
+      "changes": [
+        {
+          "releases": {
             "assemble1": "patch",
             "assemble2": "patch",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "minor",
             "assemble2": "patch",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "patch",
             "assemble2": "major",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "@namespaced/assemble2": "patch",
             "assemble1": "patch",
           },
@@ -489,26 +115,26 @@ Object {
       ],
       "type": "minor",
     },
-    "assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+    "assemble2": {
+      "changes": [
+        {
+          "releases": {
             "assemble1": "patch",
             "assemble2": "patch",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "minor",
             "assemble2": "patch",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "patch",
             "assemble2": "major",
           },
@@ -522,11 +148,385 @@ Object {
 }
 `;
 
-exports[`assemble special bump types handles an only noop 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
+exports[`assemble > assemble changes in preMode > with existing changes and a first bump 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
+        "assemble1": "minor",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+      "tag": undefined,
+    },
+  ],
+  "releases": {
+    "assemble1": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+      ],
+      "type": "preminor",
+    },
+    "assemble2": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+      ],
+      "type": "prerelease",
+    },
+  },
+}
+`;
+
+exports[`assemble > assemble changes in preMode > with existing changes and a lower bump 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
+        "assemble1": "patch",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+      "tag": undefined,
+    },
+  ],
+  "releases": {
+    "assemble1": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+      ],
+      "type": "prerelease",
+    },
+    "assemble2": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+      ],
+      "type": "prerelease",
+    },
+  },
+}
+`;
+
+exports[`assemble > assemble changes in preMode > with existing changes that upgrade 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
+        "assemble1": "minor",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+      "tag": undefined,
+    },
+    {
+      "releases": {
+        "assemble1": "patch",
+        "assemble2": "major",
+      },
+      "summary": "This is a test.",
+      "tag": undefined,
+    },
+    {
+      "releases": {
+        "@namespaced/assemble2": "patch",
+        "assemble1": "patch",
+      },
+      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+      "tag": undefined,
+    },
+  ],
+  "releases": {
+    "@namespaced/assemble2": {
+      "changes": [
+        {
+          "releases": {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+          "tag": undefined,
+        },
+      ],
+      "type": "prepatch",
+    },
+    "assemble1": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "assemble1": "patch",
+            "assemble2": "major",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+          "tag": undefined,
+        },
+      ],
+      "type": "preminor",
+    },
+    "assemble2": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "assemble1": "patch",
+            "assemble2": "major",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+      ],
+      "type": "premajor",
+    },
+  },
+}
+`;
+
+exports[`assemble > assemble changes in preMode > with existing changes with the same bump 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
+        "assemble1": "minor",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+      "tag": undefined,
+    },
+    {
+      "releases": {
+        "@namespaced/assemble2": "patch",
+        "assemble1": "patch",
+      },
+      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+      "tag": undefined,
+    },
+  ],
+  "releases": {
+    "@namespaced/assemble2": {
+      "changes": [
+        {
+          "releases": {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+          "tag": undefined,
+        },
+      ],
+      "type": "prepatch",
+    },
+    "assemble1": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+          "tag": undefined,
+        },
+      ],
+      "type": "preminor",
+    },
+    "assemble2": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+      ],
+      "type": "prerelease",
+    },
+  },
+}
+`;
+
+exports[`assemble > assemble changes in preMode > with no existing changes 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
+        "assemble1": "patch",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+      "tag": undefined,
+    },
+    {
+      "releases": {
+        "assemble1": "minor",
+        "assemble2": "patch",
+      },
+      "summary": "This is a test.",
+      "tag": undefined,
+    },
+    {
+      "releases": {
+        "assemble1": "patch",
+        "assemble2": "major",
+      },
+      "summary": "This is a test.",
+      "tag": undefined,
+    },
+    {
+      "releases": {
+        "@namespaced/assemble2": "patch",
+        "assemble1": "patch",
+      },
+      "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+      "tag": undefined,
+    },
+  ],
+  "releases": {
+    "@namespaced/assemble2": {
+      "changes": [
+        {
+          "releases": {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+          "tag": undefined,
+        },
+      ],
+      "type": "prepatch",
+    },
+    "assemble1": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "assemble1": "patch",
+            "assemble2": "major",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "@namespaced/assemble2": "patch",
+            "assemble1": "patch",
+          },
+          "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
+          "tag": undefined,
+        },
+      ],
+      "type": "preminor",
+    },
+    "assemble2": {
+      "changes": [
+        {
+          "releases": {
+            "assemble1": "patch",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "assemble1": "minor",
+            "assemble2": "patch",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+        {
+          "releases": {
+            "assemble1": "patch",
+            "assemble2": "major",
+          },
+          "summary": "This is a test.",
+          "tag": undefined,
+        },
+      ],
+      "type": "premajor",
+    },
+  },
+}
+`;
+
+exports[`assemble > special bump types > handles an only noop 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
         "assemble1": "housekeeping",
         "assemble2": "workflows",
       },
@@ -534,11 +534,11 @@ Object {
       "tag": undefined,
     },
   ],
-  "releases": Object {
-    "assemble1": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+  "releases": {
+    "assemble1": {
+      "changes": [
+        {
+          "releases": {
             "assemble1": "housekeeping",
             "assemble2": "workflows",
           },
@@ -548,10 +548,10 @@ Object {
       ],
       "type": "noop",
     },
-    "assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+    "assemble2": {
+      "changes": [
+        {
+          "releases": {
             "assemble1": "housekeeping",
             "assemble2": "workflows",
           },
@@ -565,43 +565,43 @@ Object {
 }
 `;
 
-exports[`assemble special bump types valid additional bump types 1`] = `
-Object {
-  "changes": Array [
-    Object {
-      "releases": Object {
+exports[`assemble > special bump types > valid additional bump types 1`] = `
+{
+  "changes": [
+    {
+      "releases": {
         "assemble1": "patch",
         "assemble2": "patch",
       },
       "summary": "This is a test.",
       "tag": undefined,
     },
-    Object {
-      "releases": Object {
+    {
+      "releases": {
         "assemble1": "minor",
         "assemble2": "patch",
       },
       "summary": "This is a test.",
       "tag": undefined,
     },
-    Object {
-      "releases": Object {
+    {
+      "releases": {
         "assemble1": "patch",
         "assemble2": "major",
       },
       "summary": "This is a test.",
       "tag": undefined,
     },
-    Object {
-      "releases": Object {
+    {
+      "releases": {
         "@namespaced/assemble2": "patch",
         "assemble1": "patch",
       },
       "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
       "tag": undefined,
     },
-    Object {
-      "releases": Object {
+    {
+      "releases": {
         "assemble1": "housekeeping",
         "assemble2": "workflows",
       },
@@ -609,11 +609,11 @@ Object {
       "tag": undefined,
     },
   ],
-  "releases": Object {
-    "@namespaced/assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+  "releases": {
+    "@namespaced/assemble2": {
+      "changes": [
+        {
+          "releases": {
             "@namespaced/assemble2": "patch",
             "assemble1": "patch",
           },
@@ -623,42 +623,42 @@ Object {
       ],
       "type": "patch",
     },
-    "assemble1": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+    "assemble1": {
+      "changes": [
+        {
+          "releases": {
             "assemble1": "patch",
             "assemble2": "patch",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "minor",
             "assemble2": "patch",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "patch",
             "assemble2": "major",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "@namespaced/assemble2": "patch",
             "assemble1": "patch",
           },
           "summary": "This is a test. We might link out to a [website](https://www.jacobbolda.com).",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "housekeeping",
             "assemble2": "workflows",
           },
@@ -668,34 +668,34 @@ Object {
       ],
       "type": "minor",
     },
-    "assemble2": Object {
-      "changes": Array [
-        Object {
-          "releases": Object {
+    "assemble2": {
+      "changes": [
+        {
+          "releases": {
             "assemble1": "patch",
             "assemble2": "patch",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "minor",
             "assemble2": "patch",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "patch",
             "assemble2": "major",
           },
           "summary": "This is a test.",
           "tag": undefined,
         },
-        Object {
-          "releases": Object {
+        {
+          "releases": {
             "assemble1": "housekeeping",
             "assemble2": "workflows",
           },

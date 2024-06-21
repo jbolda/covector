@@ -1,4 +1,8 @@
 import { main } from "effection";
 import { run } from "./src";
+import { pino } from "pino";
+import logStream from "./src/logger";
 
-main(run());
+const stream = logStream();
+const logger = pino(stream);
+main(run(logger));

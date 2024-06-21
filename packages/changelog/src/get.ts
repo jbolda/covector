@@ -4,14 +4,16 @@ import unified from "unified";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
 
-import type { File, ConfigFile, Changelog } from "@covector/types";
+import type { File, ConfigFile, Changelog, Logger } from "@covector/types";
 
 export function* readAllChangelogs({
+  logger,
   applied,
   packages,
   cwd,
   create = true,
 }: {
+  logger: Logger;
   applied: { name: string; version: string }[];
   packages: ConfigFile["packages"];
   cwd: string;
@@ -19,6 +21,7 @@ export function* readAllChangelogs({
 }): Operation<Changelog[]> {
   const prepChangelogs = applied.map((change) =>
     readChangelog({
+      logger,
       cwd,
       packagePath: packages[change.name].path,
       create,
@@ -32,13 +35,16 @@ export function* readAllChangelogs({
 }
 
 export function* pullLastChangelog({
+  logger,
   config,
   cwd,
 }: {
+  logger: Logger;
   config: ConfigFile;
   cwd: string;
 }): Operation<{ [k: string]: { pkg: string; changelog: string } }> {
   const changelogs = yield readAllChangelogs({
+    logger,
     applied: Object.keys(config.packages).map((pkg) => ({
       name: pkg,
       version: "",

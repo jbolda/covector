@@ -1,6 +1,7 @@
-import { it } from "@effection/jest";
-import { command, runCommand } from "./helpers";
 import { loadFile } from "@covector/files";
+import { describe, it } from "../../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import { command, runCommand } from "../helpers";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -18,7 +19,7 @@ describe("integration test for init command", () => {
           /^\? What is the name of your default branch\? \(main\)$/,
           "pressEnter",
         ],
-      ],
+      ]
     );
 
     expect(stderr).toBe("");
@@ -29,7 +30,7 @@ describe("integration test for init command", () => {
     const config = yield loadFile("./.changes/config.json", fullIntegration);
     expect(config.path).toEqual(".changes/config.json");
     expect(JSON.parse(config.content).gitSiteUrl).toBe(`${gitSiteUrl}/`);
-  }, 25000); // windows takes some time
+  });
 
   it("sets gitSiteUrl default to repo url", function* () {
     const fullIntegration = f.copy("pkg.js-single-json");
@@ -43,7 +44,7 @@ describe("integration test for init command", () => {
           /\? What is the name of your default branch\? \(main\)$/,
           "pressEnter",
         ],
-      ],
+      ]
     );
 
     expect(stderr).toBe("");
@@ -54,7 +55,7 @@ describe("integration test for init command", () => {
     const config = yield loadFile("./.changes/config.json", fullIntegration);
     expect(config.path).toEqual(".changes/config.json");
     expect(JSON.parse(config.content).gitSiteUrl).toBe(
-      "https://www.github.com/jbolda/covector/",
+      "https://www.github.com/jbolda/covector/"
     );
-  }, 25000); // windows takes some time
+  });
 });

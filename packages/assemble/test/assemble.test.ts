@@ -1,5 +1,8 @@
-import { it } from "@effection/jest";
 import { assemble } from "../src";
+import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
 
 const filePart = (filename: string) => ({
   filename,
@@ -132,21 +135,32 @@ This is a test.
 describe("assemble", () => {
   describe("assemble changes", () => {
     it("runs", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const assembled = yield assemble({
+        logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
       });
       expect(assembled).toMatchSnapshot();
     });
 
     it("assembles deps", function* () {
-      const assembled = yield assemble({ files: [testTextFive] });
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
+      const assembled = yield assemble({ logger, files: [testTextFive] });
       expect(assembled).toMatchSnapshot();
     });
   });
 
   describe("assemble changes in preMode", () => {
     it("with no existing changes", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const assembled = yield assemble({
+        logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
         preMode: { on: true, prevFiles: [] },
       });
@@ -163,7 +177,11 @@ describe("assemble", () => {
     });
 
     it("with existing changes that upgrade", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const assembled = yield assemble({
+        logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
         preMode: { on: true, prevFiles: [testTextOne.path] },
       });
@@ -188,7 +206,11 @@ describe("assemble", () => {
     });
 
     it("with existing changes with the same bump", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const assembled = yield assemble({
+        logger,
         files: [testTextOne, testTextTwo, testTextFour],
         preMode: { on: true, prevFiles: [testTextOne.path] },
       });
@@ -213,7 +235,11 @@ describe("assemble", () => {
     });
 
     it("with existing changes and a first bump", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const assembled = yield assemble({
+        logger,
         files: [testTextOne, testTextTwo],
         preMode: { on: true, prevFiles: [testTextOne.path] },
       });
@@ -235,7 +261,11 @@ describe("assemble", () => {
     });
 
     it("with existing changes and a lower bump", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const assembled = yield assemble({
+        logger,
         files: [testTextOne, testTextTwo],
         preMode: { on: true, prevFiles: [testTextTwo.path] },
       });
@@ -270,22 +300,29 @@ This doesn't bump much.
     };
 
     it("throws on no changes", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       expect.assertions(1);
-      try {
-        yield assemble({
+      const e = yield captureError(
+        assemble({
+          logger,
           files: [emptyChangefile],
-        });
-      } catch (e: any) {
-        expect(e.message).toMatch(
-          ".changes/empty-file.md didn't have any packages bumped. Please add a package bump."
-        );
-      }
+        })
+      );
+      expect(e.message).toMatch(
+        ".changes/empty-file.md didn't have any packages bumped. Please add a package bump."
+      );
     });
   });
 
   describe("special bump types", () => {
     it("valid additional bump types", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const assembled = yield assemble({
+        logger,
         files: [
           testTextOne,
           testTextTwo,
@@ -299,9 +336,13 @@ This doesn't bump much.
     });
 
     it("invalid bump types", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       expect.assertions(1);
-      try {
-        yield assemble({
+      const e = yield captureError(
+        assemble({
+          logger,
           files: [
             testTextOne,
             testTextTwo,
@@ -310,32 +351,38 @@ This doesn't bump much.
             testTextSpecialOne,
           ],
           config,
-        });
-      } catch (e: any) {
-        expect(e.message).toMatch(
-          "housekeeping specified for assemble1 is invalid.\n" +
-            "Try one of the following: major, minor, patch.\n"
-        );
-      }
+        })
+      );
+      expect(e.message).toMatch(
+        "housekeeping specified for assemble1 is invalid.\n" +
+          "Try one of the following: major, minor, patch.\n"
+      );
     });
 
     it("one each valid and invalid", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       expect.assertions(1);
-      try {
-        yield assemble({
+      const e = yield captureError(
+        assemble({
+          logger,
           files: [testTextSpecialTwo],
           config: configSpecial,
-        });
-      } catch (e: any) {
-        expect(e.message).toMatch(
-          "explosions specified for @namespaced/assemble2 is invalid.\n" +
-            "Try one of the following: major, minor, patch, housekeeping, workflows.\n"
-        );
-      }
+        })
+      );
+      expect(e.message).toMatch(
+        "explosions specified for @namespaced/assemble2 is invalid.\n" +
+          "Try one of the following: major, minor, patch, housekeeping, workflows.\n"
+      );
     });
 
     it("handles an only noop", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const assembled = yield assemble({
+        logger,
         files: [testTextSpecialOne],
         config: configSpecial,
       });

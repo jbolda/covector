@@ -1,9 +1,14 @@
 import yargs from "yargs";
 import { covector } from "./run";
+import { pino } from "pino";
+import logStream from "./logger";
 
 export function* cli(argv: readonly string[]): Generator<any, any, any> {
   const { command, directory, yes, dryRun } = parseOptions(argv);
+  const stream = logStream();
+  const logger = pino(stream);
   return yield covector({
+    logger,
     command,
     changeFolder: directory,
     yes,
@@ -49,14 +54,19 @@ function parseOptions(argv: readonly string[]): {
     .demandCommand(1)
     .help()
     .epilogue(
-      "For more information on covector, see: https://www.github.com/jbolda/covector",
+      "For more information on covector, see: https://www.github.com/jbolda/covector"
     )
     .parse(argv);
 
+  // TODO type narrow, it thinks it could be a promise
   return {
+    // @ts-expect-error
     command: String(rawOptions._[0]),
+    // @ts-expect-error
     dryRun: rawOptions["dry-run"],
+    // @ts-expect-error
     yes: rawOptions.yes,
+    // @ts-expect-error
     directory: rawOptions.directory,
   };
 }

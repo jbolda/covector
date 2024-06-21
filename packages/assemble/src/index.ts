@@ -24,12 +24,15 @@ import type {
   NormalizedCommand,
   CommandTypes,
   PkgManagerConfig,
+  Logger,
 } from "@covector/types";
 
 export const parseChange = function* ({
+  logger,
   cwd,
   file,
 }: {
+  logger: Logger;
   cwd?: string;
   file: File;
 }): Operation<Changeset> {
@@ -74,6 +77,7 @@ export const parseChange = function* ({
   if (cwd) {
     try {
       const gitInfo = yield runCommand({
+        logger,
         cwd,
         pkgPath: ".",
         command: `git --no-pager log --reverse --format="%h %H %as %s" --diff-filter=ARM --remove-empty -- ${file.path}`,
@@ -169,11 +173,13 @@ function assertBumpType(
 }
 
 export const assemble = function* ({
+  logger,
   cwd,
   files,
   config,
   preMode = { on: false, prevFiles: [] },
 }: {
+  logger: Logger;
   cwd?: string;
   files: File[];
   config?: Config;
@@ -192,7 +198,7 @@ export const assemble = function* ({
   // if in prerelease mode, we only make bumps if the new one is "larger" than the last
   // otherwise we only want a prerelease bump (which just increments the ending number)
   if (preMode.on) {
-    const allChanges: Change[] = yield changesParsed({ cwd, files });
+    const allChanges: Change[] = yield changesParsed({ logger, cwd, files });
     const allMergedRelease = mergeReleases(allChanges, config || {});
     if (preMode.prevFiles.length > 0) {
       const newFiles = files.reduce((newFiles: File[], file) => {
@@ -206,6 +212,7 @@ export const assemble = function* ({
         }
       }, []);
       const newChanges: Change[] = yield changesParsed({
+        logger,
         cwd,
         files: newFiles,
       });
@@ -222,6 +229,7 @@ export const assemble = function* ({
         }
       }, []);
       const oldChanges: Change[] = yield changesParsed({
+        logger,
         cwd,
         files: oldFiles,
       });
@@ -241,7 +249,7 @@ export const assemble = function* ({
       });
     }
   } else {
-    let changes: Change[] = yield changesParsed({ cwd, files });
+    let changes: Change[] = yield changesParsed({ logger, cwd, files });
     plan.changes = changes;
     plan.releases = mergeReleases(changes, config || {});
   }
@@ -270,16 +278,18 @@ export const assemble = function* ({
 };
 
 const changesParsed = function* ({
+  logger,
   cwd,
   files,
 }: {
+  logger: Logger;
   cwd?: string;
   files: File[];
 }): Operation<Change[]> {
   const allChangesParsed = [];
 
   for (let file of files) {
-    const parsed = yield parseChange({ cwd, file });
+    const parsed = yield parseChange({ logger, cwd, file });
     allChangesParsed.push(parsed);
   }
 
@@ -323,6 +333,7 @@ const changeDiff = ({
 };
 
 export const mergeChangesToConfig = function* ({
+  logger,
   config,
   assembledChanges,
   command,
@@ -330,6 +341,7 @@ export const mergeChangesToConfig = function* ({
   dryRun = false,
   filterPackages = [],
 }: {
+  logger: Logger;
   config: Config;
   assembledChanges: any; //  { releases: {} };
   command: string;
@@ -422,9 +434,11 @@ export const mergeChangesToConfig = function* ({
   }
 
   if (dryRun) {
-    console.dir("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
-      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
+      logger.info({
+        msg: "==== data piped into commands ===",
+        renderAsYAML: { pkg, pipe: pipeOutput[pkg].pipe },
+      })
     );
   }
 
@@ -432,6 +446,7 @@ export const mergeChangesToConfig = function* ({
 };
 
 export const mergeIntoConfig = function* ({
+  logger,
   config,
   assembledChanges,
   command,
@@ -441,6 +456,7 @@ export const mergeIntoConfig = function* ({
   changelogs,
   tag = "",
 }: {
+  logger: Logger;
   config: Config;
   assembledChanges: { releases: {} };
   command: string;
@@ -624,9 +640,11 @@ export const mergeIntoConfig = function* ({
   }
 
   if (dryRun) {
-    console.dir("==== data piped into commands ===");
     Object.keys(pipeOutput).forEach((pkg) =>
-      console.dir({ pkg, pipe: pipeOutput[pkg].pipe }, { depth: 5 })
+      logger.info({
+        msg: "==== data piped into commands ===",
+        renderAsYAML: { pkg, pipe: pipeOutput[pkg].pipe },
+      })
     );
   }
 

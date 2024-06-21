@@ -1,10 +1,10 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`general file test globs changes 1`] = `
-Array [
-  Object {
+exports[`general file test > globs changes 1`] = `
+[
+  {
     "content": "---
-\\"package-a\\": minor
+"package-a": minor
 ---
 
 Summary about the changes in pkg-a
@@ -13,9 +13,9 @@ Summary about the changes in pkg-a
     "filename": "first-change",
     "path": ".changes/first-change.md",
   },
-  Object {
+  {
     "content": "---
-\\"package-b\\": patch
+"package-b": patch
 ---
 
 Summary about the changes in pkg-b
@@ -27,4 +27,4 @@ Summary about the changes in pkg-b
 ]
 `;
 
-exports[`general file test ignores readme 1`] = `Array []`;
+exports[`general file test > ignores readme 1`] = `[]`;

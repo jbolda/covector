@@ -2,20 +2,23 @@
   "pkgManagers": {
     "rust": {
       "version": true,
-      "getPublishedVersion": "echo 0.5.2",
-      "prepublish": "echo premode for ${ pkg.pkg }",
+      "getPublishedVersion": "node -e \"console.log('0.5.2')\"",
+      "prepublish": "node -e \"console.log('premode for ${ pkg.pkg }')\"",
       "publish": [
-        "echo publishing ${ pkg.pkg } would happen here",
-        "echo running in ${ pkg.path }",
+        "node -e \"console.log('publishing ${ pkg.pkg }')\"",
+        "node -e \"console.log('running in ${ pkg.path }')\"",
         { "command": "ls", "runFromRoot": true },
         "ls"
       ],
-      "postpublish": "echo postmode for ${ pkg.pkg }",
-      "build": ["echo the files in the ${ pkg.pkg } folder are", "ls"]
+      "postpublish": "node -e \"console.log('postmode for ${ pkg.pkg }')\"",
+      "build": [
+        "node -e \"console.log('the files in the ${ pkg.pkg } folder are')\"",
+        "ls"
+      ]
     },
     "javascript": {
       "version": true,
-      "publish": "echo publishing ${ pkg.pkg } would happen here"
+      "publish": "node -e \"console.log('publishing ${ pkg.pkg }')\""
     }
   },
   "packages": {

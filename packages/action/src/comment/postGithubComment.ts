@@ -1,12 +1,15 @@
 import { GitHub } from "@actions/github/lib/utils";
 import { Operation } from "effection";
 import type { PullRequestPayload } from "./types";
+import { Logger } from "@covector/types";
 
 export function* postGithubComment({
+  logger,
   comment,
   octokit,
   payload,
 }: {
+  logger: Logger;
   comment: string;
   octokit: InstanceType<typeof GitHub>;
   payload: PullRequestPayload;
@@ -32,7 +35,7 @@ export function* postGithubComment({
     );
 
   if (previousComment) {
-    console.log("Updating comment in pull request.");
+    logger.info("Updating comment in pull request.");
     yield octokit.rest.issues.updateComment({
       owner,
       repo,
@@ -40,7 +43,7 @@ export function* postGithubComment({
       body,
     });
   } else {
-    console.log("Posting comment in pull request.");
+    logger.info("Posting comment in pull request.");
     yield octokit.rest.issues.createComment({
       owner,
       repo,
