@@ -60,17 +60,14 @@ export function* postGithubComment({
     logger.error("Posting comment failed, creating artifact instead.");
     const artifactRoot = process.env.RUNNER_TEMP ?? "..";
     const artifactFilename = "./covector-comment.md";
-    logger.info(
-      `Writing comment body to ${path.join(artifactRoot, artifactFilename)}`
-    );
-    yield fs.writeFile(path.join(artifactRoot, artifactFilename), body);
+    const artifactAbsolutePath = path.join(artifactRoot, artifactFilename);
+    logger.debug(`Writing comment body to ${artifactAbsolutePath}`);
+    yield fs.writeFile(artifactAbsolutePath, body);
     const artifact = new DefaultArtifactClient();
-    logger.info(
-      `Uploading comment from ${path.join(artifactRoot, artifactFilename)}`
-    );
+    logger.debug(`Uploading comment from ${artifactAbsolutePath}`);
     yield artifact.uploadArtifact(
       "covector-comment",
-      [artifactFilename],
+      [artifactAbsolutePath],
       artifactRoot,
       {
         retentionDays: 1,
