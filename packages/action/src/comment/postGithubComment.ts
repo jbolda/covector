@@ -59,7 +59,7 @@ export function* postGithubComment({
   } catch (error) {
     logger.error("Posting comment failed, creating artifact instead.");
     const artifactRoot = process.env.RUNNER_TEMP ?? "..";
-    const artifactFilename = "covector-comment.md";
+    const artifactFilename = "./covector-comment.md";
     logger.debug(
       `Writing comment body to ${path.join(artifactRoot, artifactFilename)}`
     );
