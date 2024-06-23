@@ -1382,7 +1382,7 @@ describe("integration test in production mode", () => {
         [
           {
             command: "publish",
-            msg: "tauri.js [publish]: node -e \"throw new Error('boom')\"",
+            msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
             level: 30,
           },
           {
