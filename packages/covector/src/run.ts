@@ -1,3 +1,4 @@
+import { Logger } from "pino";
 import { init } from "./init";
 import { add } from "./add";
 import { status } from "./status";
@@ -7,9 +8,11 @@ import { preview } from "./preview";
 import { publish } from "./publish";
 import { arbitrary } from "./arbitrary";
 import { ChangeContext } from "../../types/src";
+import { ensure, sleep } from "effection";
 
 export function* covector({
   // shared
+  logger,
   command,
   cwd = process.cwd(),
   logs = true,
@@ -24,6 +27,7 @@ export function* covector({
   yes = false,
   createContext,
 }: {
+  logger: Logger;
   command: string;
   dryRun?: boolean;
   logs?: boolean;
@@ -37,13 +41,28 @@ export function* covector({
   createContext?: ChangeContext;
 }): Generator<any, any, any> {
   if (command === "init") {
-    return yield init({ cwd, changeFolder, yes });
+    return yield init({
+      logger: logger.child({ command: "init" }),
+      cwd,
+      changeFolder,
+      yes,
+    });
   } else if (command === "add") {
-    return yield add({ cwd, changeFolder, yes });
+    return yield add({
+      logger: logger.child({ command: "add" }),
+      cwd,
+      changeFolder,
+      yes,
+    });
   } else if (command === "config") {
-    return yield config({ cwd, modifyConfig });
+    return yield config({
+      logger: logger.child({ command: "config" }),
+      cwd,
+      modifyConfig,
+    });
   } else if (command === "status") {
     return yield status({
+      logger: logger.child({ command: "status" }),
       command,
       dryRun,
       cwd,
@@ -54,6 +73,7 @@ export function* covector({
     });
   } else if (command === "version") {
     return yield version({
+      logger: logger.child({ command: "version" }),
       command,
       dryRun,
       cwd,
@@ -63,6 +83,7 @@ export function* covector({
     });
   } else if (command === "preview") {
     return yield preview({
+      logger: logger.child({ command: "preview" }),
       command,
       dryRun,
       cwd,
@@ -73,6 +94,7 @@ export function* covector({
     });
   } else if (command === "publish") {
     return yield publish({
+      logger: logger.child({ command: "publish" }),
       command,
       dryRun,
       cwd,
@@ -81,6 +103,7 @@ export function* covector({
     });
   } else {
     return yield arbitrary({
+      logger: logger.child({ command: "arbitrary" }),
       command,
       dryRun,
       cwd,

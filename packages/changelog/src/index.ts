@@ -12,11 +12,13 @@ import type {
   AssembledChanges,
   Meta,
   ChangeContext,
+  Logger,
 } from "@covector/types";
 
 export { pullLastChangelog } from "./get";
 
 export function* fillChangelogs({
+  logger,
   applied,
   assembledChanges,
   config,
@@ -25,6 +27,7 @@ export function* fillChangelogs({
   create = true,
   createContext,
 }: {
+  logger: Logger;
   applied: { name: string; version: string }[];
   assembledChanges: AssembledChanges;
   config: ConfigFile;
@@ -34,6 +37,7 @@ export function* fillChangelogs({
   createContext?: ChangeContext;
 }): Operation<{ [k: string]: PkgCommandResponse } | undefined> {
   const changelogs = yield readAllChangelogs({
+    logger,
     applied: applied.reduce(
       (
         final: { name: string; version: string; changelog?: File }[],

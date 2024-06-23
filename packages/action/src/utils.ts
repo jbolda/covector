@@ -1,6 +1,6 @@
 import fs from "fs";
 import type { FunctionPipe } from "../../types/src";
-import type { ConfigFile } from "@covector/types";
+import type { ConfigFile, Logger } from "@covector/types";
 import type { GitHub } from "@actions/github/lib/utils";
 
 export const commandText = (pkg: {
@@ -86,12 +86,14 @@ function curry(func: Function): Function {
 export const createReleases = curry(
   async (
     {
+      logger,
       core,
       octokit,
       owner,
       repo,
       targetCommitish,
     }: {
+      logger: Logger;
       core: { [k: string]: Function };
       octokit: InstanceType<typeof GitHub>;
       owner: string;
@@ -101,21 +103,21 @@ export const createReleases = curry(
     pipe: FunctionPipe
   ): Promise<void> => {
     if (!pipe.pkgFile) {
-      console.log(
+      logger.error(
         `skipping Github Release for ${pipe.pkg}, no package file present`
       );
       return;
     }
 
     if (!pipe.releaseTag) {
-      console.log(
+      logger.error(
         `skipping Github Release for ${pipe.pkg}, releaseTag is null`
       );
       return;
     }
 
     const releaseTag = pipe.releaseTag;
-    core.debug(`creating release with tag ${releaseTag}`);
+    logger.debug(`creating release with tag ${releaseTag}`);
     const existingRelease = await octokit.rest.repos
       .listReleases({
         owner,
@@ -131,7 +133,7 @@ export const createReleases = curry(
 
     let releaseResponse;
     if (existingRelease && existingRelease.draft) {
-      console.log(
+      logger.info(
         `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
       );
       releaseResponse = await octokit.rest.repos
@@ -146,7 +148,7 @@ export const createReleases = curry(
         })
         .then((response) => response.data);
     } else {
-      console.log(
+      logger.info(
         `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
       );
       releaseResponse = await octokit.rest.repos
@@ -183,15 +185,15 @@ export const createReleases = curry(
     );
     core.setOutput(`${cleanPipePkg}-releaseId`, releaseResponse.id);
 
-    core.startGroup(`github release created for ${pipe.pkg}`);
-    console.log("releaseId", releaseResponse.id);
-    console.log("release created: ", releaseResponse);
-    core.endGroup();
+    logger.info({
+      msg: `github release created for ${pipe.pkg} with id: ${releaseResponse.id}`,
+      renderAsYAML: releaseResponse,
+    });
 
     if (pipe.assets) {
       try {
         for (let asset of pipe.assets) {
-          console.log(
+          logger.info(
             `uploading asset ${asset.name} for ${pipe.pkg}@${pipe.pkgFile.version}`
           );
           const uploadedAsset = await octokit.rest.repos
@@ -207,12 +209,13 @@ export const createReleases = curry(
               data: fs.readFileSync(asset.path),
             })
             .then((response) => response.data);
-          core.startGroup(`asset uploaded to release for ${pipe.pkg}`);
-          console.log("release created: ", uploadedAsset);
-          core.endGroup();
+          logger.info({
+            msg: `asset uploaded to release for ${pipe.pkg}`,
+            renderAsYAML: uploadedAsset,
+          });
         }
       } catch (error) {
-        console.error(error);
+        logger.error(error);
       }
     }
   }

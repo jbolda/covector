@@ -3,8 +3,10 @@ import {
   pullLastChangelog,
   pipeChangelogToCommands,
 } from "../src";
-import { it } from "@effection/jest";
-import mockConsole, { RestoreConsole } from "jest-mock-console";
+import { describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -14,15 +16,9 @@ const configDefaults = {
 };
 
 describe("reads changelog", () => {
-  let restoreConsole: RestoreConsole;
-  beforeEach(() => {
-    restoreConsole = mockConsole(["log", "dir"]);
-  });
-  afterEach(() => {
-    restoreConsole();
-  });
-
   it("reads back the recent change", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -107,6 +103,7 @@ describe("reads changelog", () => {
     };
 
     yield fillChangelogs({
+      logger,
       applied,
       //@ts-expect-error
       assembledChanges,
@@ -121,6 +118,7 @@ describe("reads changelog", () => {
     };
 
     const changelogs = yield pullLastChangelog({
+      logger,
       config,
       cwd: projectFolder,
     });
@@ -138,6 +136,8 @@ describe("reads changelog", () => {
   });
 
   it("reads a changelog with multiple entries", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [
@@ -198,6 +198,7 @@ describe("reads changelog", () => {
     };
 
     yield fillChangelogs({
+      logger,
       applied,
       //@ts-expect-error
       assembledChanges,
@@ -212,6 +213,7 @@ describe("reads changelog", () => {
     };
 
     const changelogs = yield pullLastChangelog({
+      logger,
       config,
       cwd: projectFolder,
     });

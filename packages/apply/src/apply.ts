@@ -14,9 +14,11 @@ import type {
   PackageCommand,
   DepTypes,
   Pkg,
+  Logger,
 } from "@covector/types";
 
 export function* apply({
+  logger,
   commands,
   allPackages,
   cwd = process.cwd(),
@@ -25,6 +27,7 @@ export function* apply({
   prereleaseIdentifier,
   logs = true,
 }: {
+  logger: Logger;
   commands: PackageCommand[];
   allPackages: Record<string, PackageFile>;
   cwd: string;
@@ -42,6 +45,7 @@ export function* apply({
   );
 
   const bumps = bumpAll({
+    logger,
     changes,
     allPackages,
     previewVersion,
@@ -61,7 +65,7 @@ export function* apply({
   } else {
     bumps.forEach((b) => {
       if (!!b && logs)
-        console.log(
+        logger.info(
           `${b.name} planned to be bumped from ${b.currentVersion} to ${b.version}`
         );
     });
@@ -70,10 +74,12 @@ export function* apply({
 }
 
 export function* validateApply({
+  logger,
   commands,
   allPackages,
   prereleaseIdentifier,
 }: {
+  logger: Logger;
   commands: PackageCommand[];
   allPackages: Record<string, PackageFile>;
   prereleaseIdentifier?: string;
@@ -87,6 +93,7 @@ export function* validateApply({
   );
 
   const bumps = bumpAll({
+    logger,
     changes,
     allPackages,
     logs: false,
@@ -99,7 +106,7 @@ export function* validateApply({
 
   try {
     for (let bump of bumps) {
-      testSerializePkgFile({ packageFile: bump });
+      testSerializePkgFile({ logger, packageFile: bump });
     }
     // will throw on validation error and not return true
     return true;
@@ -121,12 +128,14 @@ const writeAll = function* ({
 };
 
 const bumpAll = ({
+  logger,
   changes,
   allPackages,
   logs = true,
   previewVersion = "",
   prereleaseIdentifier,
 }: {
+  logger: Logger;
   changes: Releases;
   allPackages: Record<string, PackageFile>;
   logs?: boolean;
@@ -141,10 +150,10 @@ const bumpAll = ({
     if (!packageFiles[pkg]?.file || changes[pkg].type === "noop") continue;
 
     if (logs && !previewVersion) {
-      console.log(`bumping ${pkg} with ${changes[pkg].type}`);
+      logger.info(`bumping ${pkg} with ${changes[pkg].type}`);
     } else if (previewVersion) {
       // change log (assume that the prerelease will be removed)
-      console.log(
+      logger.info(
         `bumping ${pkg} with ${previewVersion} identifier to publish a preview`
       );
     }

@@ -16,6 +16,13 @@ export type PkgManagerConfig = z.infer<typeof pkgManagerSchema>;
 export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
 export type Config = ConfigFile & { file?: File };
 
+export { Logger } from "pino";
+export interface LoggerBindings {
+  level: number;
+  msg: string;
+  renderAsYAML?: Record<string, any>;
+}
+
 /* @covector/files */
 interface NestedVersion {
   version?: string;

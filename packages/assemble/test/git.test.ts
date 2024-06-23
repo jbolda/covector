@@ -1,10 +1,16 @@
-import { it } from "@effection/jest";
 import { parseChange } from "../src";
+import { describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
+import { join } from "path";
 
 import type { File } from "@covector/types";
 
 describe("git parsing", () => {
   it("parses and returns multiple commits", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
     // this was a file on a previous commit, we can use it
     //   to check the git command as that should still be in the history
     const file: File = {
@@ -14,8 +20,11 @@ describe("git parsing", () => {
       filename: "upgrade-to-effection-v2.md",
       extname: "md",
     };
+    // will resolve if vitest is run from this package dir or root
+    const cwd = join(import.meta.dirname, "../../..");
     const parsed = yield parseChange({
-      cwd: ".",
+      logger,
+      cwd,
       file,
     });
     expect(parsed.meta.commits).toEqual([

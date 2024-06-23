@@ -19,7 +19,7 @@
     "build": "tsc -b",
     "postbuild": "cp ./pkg/covector_toml_bg.wasm ../action/dist",
     "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
-    "test": "jest"
+    "test": "vitest"
   },
   "devDependencies": {
     "wasm-pack": "^0.12.1"

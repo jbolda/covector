@@ -1,8 +1,8 @@
 import { changesConsideringParents } from "../src";
-import { it } from "@effection/jest";
-import mockConsole, { RestoreConsole } from "jest-mock-console";
 import { PackageFile, CommonBumps } from "@covector/types";
 import type { ConfigFile, PackageConfig } from "@covector/types";
+import { describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
 
 const allPackagesWithoutRead = ({
   config,
@@ -25,28 +25,20 @@ const allPackagesWithoutRead = ({
               deps[dep] = [{ type: "dependencies", version }];
               return deps;
             },
-            {} as Record<string, { type: "dependencies"; version: string }[]>,
+            {} as Record<string, { type: "dependencies"; version: string }[]>
           ),
         };
-      },
+      }
     )
     .reduce(
       (pkgs, pkg: any) => {
         if (pkg.name) pkgs[pkg.name] = pkg;
         return pkgs;
       },
-      {} as Record<string, PackageFile>,
+      {} as Record<string, PackageFile>
     );
 
 describe("list changes considering parents", () => {
-  let restoreConsole: RestoreConsole;
-  beforeEach(() => {
-    restoreConsole = mockConsole(["log", "dir"]);
-  });
-  afterEach(() => {
-    restoreConsole();
-  });
-
   it("adds changes for dependency", function* () {
     const assembledChanges = {
       releases: {
@@ -80,10 +72,6 @@ describe("list changes considering parents", () => {
     const changes = changesConsideringParents({ assembledChanges, config });
 
     expect({
-      //@ts-expect-error
-      consoleLog: console.log.mock.calls,
-      //@ts-expect-error
-      consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
   });
@@ -128,10 +116,6 @@ describe("list changes considering parents", () => {
     const changes = changesConsideringParents({ assembledChanges, config });
 
     expect({
-      //@ts-expect-error
-      consoleLog: console.log.mock.calls,
-      //@ts-expect-error
-      consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
   });
@@ -251,10 +235,6 @@ describe("list changes considering parents", () => {
     expect(changes.releases["pkg-one"].type).toBe("patch");
 
     expect({
-      //@ts-expect-error
-      consoleLog: console.log.mock.calls,
-      //@ts-expect-error
-      consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
   });
@@ -306,7 +286,6 @@ describe("list changes considering parents", () => {
       "pkg-c": { "pkg-a": "^1.0.0" },
     };
     const allPackages = allPackagesWithoutRead({ config, pkgDepVersion });
-    console.dir(allPackages, { depth: 5 });
 
     const changes = changesConsideringParents({
       //@ts-expect-error
@@ -326,10 +305,6 @@ describe("list changes considering parents", () => {
     expect(changes.releases["pkg-c"]).toBeUndefined();
 
     expect({
-      //@ts-expect-error
-      consoleLog: console.log.mock.calls,
-      //@ts-expect-error
-      consoleDir: console.dir.mock.calls,
       changes,
     }).toMatchSnapshot();
   });

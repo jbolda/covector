@@ -1,26 +1,26 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`merge config filtered config merges publish 1`] = `
-Object {
-  "commands": Array [
-    Object {
-      "command": Array [
+exports[`merge config > filtered config > merges publish 1`] = `
+{
+  "commands": [
+    {
+      "command": [
         "npm publish",
       ],
-      "dependencies": Array [
+      "dependencies": [
         "all",
       ],
       "errorOnVersionRange": null,
       "manager": "javascript",
       "path": "./packages/assemble1",
       "pkg": "assemble1",
-      "pkgFile": Object {
+      "pkgFile": {
         "currentVersion": "0.0.0",
-        "deps": Object {},
-        "file": Object {
+        "deps": {},
+        "file": {
           "content": "{
-  \\"name\\": \\"assemble1\\",
-  \\"version\\": \\"0.0.0\\"
+  "name": "assemble1",
+  "version": "0.0.0"
 }
 ",
           "extname": ".json",
@@ -28,7 +28,7 @@ Object {
           "path": "packages/assemble1/package.json",
         },
         "name": "assemble1",
-        "pkg": Object {
+        "pkg": {
           "name": "assemble1",
           "version": "0.0.0",
         },
@@ -42,11 +42,11 @@ Object {
       "precommand": null,
       "releaseTag": "assemble1-v0.0.0",
     },
-    Object {
-      "command": Array [
+    {
+      "command": [
         "cargo publish",
       ],
-      "dependencies": Array [
+      "dependencies": [
         "assemble1",
         "all",
       ],
@@ -54,13 +54,13 @@ Object {
       "manager": "cargo",
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble1",
-      "pkgFile": Object {
+      "pkgFile": {
         "currentVersion": "0.0.0",
-        "deps": Object {},
-        "file": Object {
+        "deps": {},
+        "file": {
           "content": "{
-  \\"name\\": \\"@namedspaced/assemble2\\",
-  \\"version\\": \\"0.0.0\\"
+  "name": "@namedspaced/assemble2",
+  "version": "0.0.0"
 }
 ",
           "extname": ".json",
@@ -68,7 +68,7 @@ Object {
           "path": "packages/namespaced-assemble2/package.json",
         },
         "name": "@namespaced/assemble1",
-        "pkg": Object {
+        "pkg": {
           "name": "@namedspaced/assemble2",
           "version": "0.0.0",
         },
@@ -83,13 +83,13 @@ Object {
       "releaseTag": "@namespaced/assemble1-v0.0.0",
     },
   ],
-  "pipeTemplate": Object {
-    "@namespaced/assemble1": Object {
+  "pipeTemplate": {
+    "@namespaced/assemble1": {
       "name": "@namespaced/assemble1",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": "cargo publish",
-          "dependencies": Array [
+          "dependencies": [
             "assemble1",
             "all",
           ],
@@ -102,11 +102,11 @@ Object {
           "releaseTag": null,
           "tag": "",
         },
-        "pkgFile": Object {
+        "pkgFile": {
           "currentVersion": "0.0.0",
-          "deps": Object {},
+          "deps": {},
           "name": "@namespaced/assemble1",
-          "pkg": Object {
+          "pkg": {
             "name": "@namedspaced/assemble2",
             "version": "0.0.0",
           },
@@ -117,12 +117,12 @@ Object {
         },
       },
     },
-    "assemble1": Object {
+    "assemble1": {
       "name": "assemble1",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": "npm publish",
-          "dependencies": Array [
+          "dependencies": [
             "all",
           ],
           "errorOnVersionRange": null,
@@ -134,11 +134,11 @@ Object {
           "releaseTag": null,
           "tag": "",
         },
-        "pkgFile": Object {
+        "pkgFile": {
           "currentVersion": "0.0.0",
-          "deps": Object {},
+          "deps": {},
           "name": "assemble1",
-          "pkg": Object {
+          "pkg": {
             "name": "assemble1",
             "version": "0.0.0",
           },
@@ -153,21 +153,21 @@ Object {
 }
 `;
 
-exports[`merge config filtered config merges version 1`] = `
-Object {
-  "commands": Array [],
-  "pipeTemplate": Object {},
+exports[`merge config > filtered config > merges version 1`] = `
+{
+  "commands": [],
+  "pipeTemplate": {},
 }
 `;
 
-exports[`merge config full config merges nested bumps 1`] = `
-Object {
-  "commands": Array [
-    Object {
-      "command": Array [
+exports[`merge config > full config > merges nested bumps 1`] = `
+{
+  "commands": [
+    {
+      "command": [
         true,
       ],
-      "dependencies": Array [
+      "dependencies": [
         "assemble1",
         "all",
       ],
@@ -179,11 +179,11 @@ Object {
       "precommand": null,
       "type": "minor",
     },
-    Object {
-      "command": Array [
+    {
+      "command": [
         true,
       ],
-      "dependencies": Array [
+      "dependencies": [
         "all",
       ],
       "errorOnVersionRange": null,
@@ -194,8 +194,8 @@ Object {
       "precommand": null,
       "type": "minor",
     },
-    Object {
-      "command": Array [
+    {
+      "command": [
         true,
       ],
       "dependencies": undefined,
@@ -208,11 +208,11 @@ Object {
       "type": "minor",
     },
   ],
-  "pipeTemplate": Object {
-    "all": Object {
+  "pipeTemplate": {
+    "all": {
       "name": "all",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": true,
           "dependencies": undefined,
           "errorOnVersionRange": null,
@@ -222,10 +222,10 @@ Object {
           "postcommand": null,
           "precommand": null,
         },
-        "release": Object {
-          "changes": Array [
-            Object {
-              "releases": Object {
+        "release": {
+          "changes": [
+            {
+              "releases": {
                 "all": "minor",
               },
               "summary": "This is a test.",
@@ -235,12 +235,12 @@ Object {
         },
       },
     },
-    "assemble1": Object {
+    "assemble1": {
       "name": "assemble1",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": true,
-          "dependencies": Array [
+          "dependencies": [
             "assemble1",
             "all",
           ],
@@ -251,10 +251,10 @@ Object {
           "postcommand": null,
           "precommand": null,
         },
-        "release": Object {
-          "changes": Array [
-            Object {
-              "releases": Object {
+        "release": {
+          "changes": [
+            {
+              "releases": {
                 "assemble1": "patch",
               },
               "summary": "This is a test.",
@@ -264,12 +264,12 @@ Object {
         },
       },
     },
-    "assemble2": Object {
+    "assemble2": {
       "name": "assemble2",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": true,
-          "dependencies": Array [
+          "dependencies": [
             "all",
           ],
           "errorOnVersionRange": null,
@@ -279,10 +279,10 @@ Object {
           "postcommand": null,
           "precommand": null,
         },
-        "release": Object {
-          "changes": Array [
-            Object {
-              "releases": Object {
+        "release": {
+          "changes": [
+            {
+              "releases": {
                 "all": "minor",
               },
               "summary": "This is a test.",
@@ -296,27 +296,27 @@ Object {
 }
 `;
 
-exports[`merge config full config merges publish 1`] = `
-Object {
-  "commands": Array [
-    Object {
-      "command": Array [
+exports[`merge config > full config > merges publish 1`] = `
+{
+  "commands": [
+    {
+      "command": [
         "npm publish",
       ],
-      "dependencies": Array [
+      "dependencies": [
         "all",
       ],
       "errorOnVersionRange": null,
       "manager": "javascript",
       "path": "./packages/assemble1",
       "pkg": "assemble1",
-      "pkgFile": Object {
+      "pkgFile": {
         "currentVersion": "0.0.0",
-        "deps": Object {},
-        "file": Object {
+        "deps": {},
+        "file": {
           "content": "{
-  \\"name\\": \\"assemble1\\",
-  \\"version\\": \\"0.0.0\\"
+  "name": "assemble1",
+  "version": "0.0.0"
 }
 ",
           "extname": ".json",
@@ -324,7 +324,7 @@ Object {
           "path": "packages/assemble1/package.json",
         },
         "name": "assemble1",
-        "pkg": Object {
+        "pkg": {
           "name": "assemble1",
           "version": "0.0.0",
         },
@@ -338,11 +338,11 @@ Object {
       "precommand": null,
       "releaseTag": "assemble1-v0.0.0",
     },
-    Object {
-      "command": Array [
+    {
+      "command": [
         "cargo publish",
       ],
-      "dependencies": Array [
+      "dependencies": [
         "assemble1",
         "all",
       ],
@@ -350,13 +350,13 @@ Object {
       "manager": "cargo",
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble1",
-      "pkgFile": Object {
+      "pkgFile": {
         "currentVersion": "0.0.0",
-        "deps": Object {},
-        "file": Object {
+        "deps": {},
+        "file": {
           "content": "{
-  \\"name\\": \\"@namedspaced/assemble2\\",
-  \\"version\\": \\"0.0.0\\"
+  "name": "@namedspaced/assemble2",
+  "version": "0.0.0"
 }
 ",
           "extname": ".json",
@@ -364,7 +364,7 @@ Object {
           "path": "packages/namespaced-assemble2/package.json",
         },
         "name": "@namespaced/assemble1",
-        "pkg": Object {
+        "pkg": {
           "name": "@namedspaced/assemble2",
           "version": "0.0.0",
         },
@@ -378,11 +378,11 @@ Object {
       "precommand": null,
       "releaseTag": "@namespaced/assemble1-v0.0.0",
     },
-    Object {
-      "command": Array [
+    {
+      "command": [
         "cargo publish",
       ],
-      "dependencies": Array [
+      "dependencies": [
         "assemble2",
         "all",
       ],
@@ -390,13 +390,13 @@ Object {
       "manager": "cargo",
       "path": "./packages/namespaced-assemble2",
       "pkg": "@namespaced/assemble2",
-      "pkgFile": Object {
+      "pkgFile": {
         "currentVersion": "0.0.0",
-        "deps": Object {},
-        "file": Object {
+        "deps": {},
+        "file": {
           "content": "{
-  \\"name\\": \\"@namedspaced/assemble2\\",
-  \\"version\\": \\"0.0.0\\"
+  "name": "@namedspaced/assemble2",
+  "version": "0.0.0"
 }
 ",
           "extname": ".json",
@@ -404,7 +404,7 @@ Object {
           "path": "packages/namespaced-assemble2/package.json",
         },
         "name": "@namespaced/assemble2",
-        "pkg": Object {
+        "pkg": {
           "name": "@namedspaced/assemble2",
           "version": "0.0.0",
         },
@@ -419,13 +419,13 @@ Object {
       "releaseTag": "@namespaced/assemble2-v0.0.0",
     },
   ],
-  "pipeTemplate": Object {
-    "@namespaced/assemble1": Object {
+  "pipeTemplate": {
+    "@namespaced/assemble1": {
       "name": "@namespaced/assemble1",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": "cargo publish",
-          "dependencies": Array [
+          "dependencies": [
             "assemble1",
             "all",
           ],
@@ -438,11 +438,11 @@ Object {
           "releaseTag": null,
           "tag": "",
         },
-        "pkgFile": Object {
+        "pkgFile": {
           "currentVersion": "0.0.0",
-          "deps": Object {},
+          "deps": {},
           "name": "@namespaced/assemble1",
-          "pkg": Object {
+          "pkg": {
             "name": "@namedspaced/assemble2",
             "version": "0.0.0",
           },
@@ -453,12 +453,12 @@ Object {
         },
       },
     },
-    "@namespaced/assemble2": Object {
+    "@namespaced/assemble2": {
       "name": "@namespaced/assemble2",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": "cargo publish",
-          "dependencies": Array [
+          "dependencies": [
             "assemble2",
             "all",
           ],
@@ -471,11 +471,11 @@ Object {
           "releaseTag": null,
           "tag": "",
         },
-        "pkgFile": Object {
+        "pkgFile": {
           "currentVersion": "0.0.0",
-          "deps": Object {},
+          "deps": {},
           "name": "@namespaced/assemble2",
-          "pkg": Object {
+          "pkg": {
             "name": "@namedspaced/assemble2",
             "version": "0.0.0",
           },
@@ -486,12 +486,12 @@ Object {
         },
       },
     },
-    "assemble1": Object {
+    "assemble1": {
       "name": "assemble1",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": "npm publish",
-          "dependencies": Array [
+          "dependencies": [
             "all",
           ],
           "errorOnVersionRange": null,
@@ -503,11 +503,11 @@ Object {
           "releaseTag": null,
           "tag": "",
         },
-        "pkgFile": Object {
+        "pkgFile": {
           "currentVersion": "0.0.0",
-          "deps": Object {},
+          "deps": {},
           "name": "assemble1",
-          "pkg": Object {
+          "pkg": {
             "name": "assemble1",
             "version": "0.0.0",
           },
@@ -522,14 +522,14 @@ Object {
 }
 `;
 
-exports[`merge config full config merges version 1`] = `
-Object {
-  "commands": Array [
-    Object {
-      "command": Array [
+exports[`merge config > full config > merges version 1`] = `
+{
+  "commands": [
+    {
+      "command": [
         "cargo version patch",
       ],
-      "dependencies": Array [
+      "dependencies": [
         "assemble2",
         "all",
       ],
@@ -541,11 +541,11 @@ Object {
       "precommand": null,
       "type": "patch",
     },
-    Object {
-      "command": Array [
+    {
+      "command": [
         "lerna version minor --no-git-tag-version --no-push",
       ],
-      "dependencies": Array [
+      "dependencies": [
         "all",
       ],
       "errorOnVersionRange": null,
@@ -556,11 +556,11 @@ Object {
       "precommand": null,
       "type": "minor",
     },
-    Object {
-      "command": Array [
+    {
+      "command": [
         "lerna version major",
       ],
-      "dependencies": Array [
+      "dependencies": [
         "all",
       ],
       "errorOnVersionRange": null,
@@ -572,13 +572,13 @@ Object {
       "type": "major",
     },
   ],
-  "pipeTemplate": Object {
-    "@namespaced/assemble2": Object {
+  "pipeTemplate": {
+    "@namespaced/assemble2": {
       "name": "@namespaced/assemble2",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": "cargo version \${ release.type }",
-          "dependencies": Array [
+          "dependencies": [
             "assemble2",
             "all",
           ],
@@ -589,10 +589,10 @@ Object {
           "postcommand": null,
           "precommand": null,
         },
-        "release": Object {
-          "changes": Array [
-            Object {
-              "releases": Object {
+        "release": {
+          "changes": [
+            {
+              "releases": {
                 "@namespaced/assemble2": "patch",
                 "assemble1": "patch",
               },
@@ -603,12 +603,12 @@ Object {
         },
       },
     },
-    "assemble1": Object {
+    "assemble1": {
       "name": "assemble1",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": "lerna version \${ release.type } --no-git-tag-version --no-push",
-          "dependencies": Array [
+          "dependencies": [
             "all",
           ],
           "errorOnVersionRange": null,
@@ -618,31 +618,31 @@ Object {
           "postcommand": null,
           "precommand": null,
         },
-        "release": Object {
-          "changes": Array [
-            Object {
-              "releases": Object {
+        "release": {
+          "changes": [
+            {
+              "releases": {
                 "assemble1": "patch",
                 "assemble2": "patch",
               },
               "summary": "This is a a double patch test.",
             },
-            Object {
-              "releases": Object {
+            {
+              "releases": {
                 "assemble1": "minor",
                 "assemble2": "patch",
               },
               "summary": "This is a minor/patch test.",
             },
-            Object {
-              "releases": Object {
+            {
+              "releases": {
                 "assemble1": "patch",
                 "assemble2": "major",
               },
               "summary": "This is a patch/major test.",
             },
-            Object {
-              "releases": Object {
+            {
+              "releases": {
                 "@namespaced/assemble2": "patch",
                 "assemble1": "patch",
               },
@@ -653,12 +653,12 @@ Object {
         },
       },
     },
-    "assemble2": Object {
+    "assemble2": {
       "name": "assemble2",
-      "pipe": Object {
-        "pkg": Object {
+      "pipe": {
+        "pkg": {
           "command": "lerna version \${ release.type }",
-          "dependencies": Array [
+          "dependencies": [
             "all",
           ],
           "errorOnVersionRange": null,
@@ -668,24 +668,24 @@ Object {
           "postcommand": null,
           "precommand": null,
         },
-        "release": Object {
-          "changes": Array [
-            Object {
-              "releases": Object {
+        "release": {
+          "changes": [
+            {
+              "releases": {
                 "assemble1": "patch",
                 "assemble2": "patch",
               },
               "summary": "This is the copy of the double patch test.",
             },
-            Object {
-              "releases": Object {
+            {
+              "releases": {
                 "assemble1": "minor",
                 "assemble2": "patch",
               },
               "summary": "This is the copy of the minor patch test.",
             },
-            Object {
-              "releases": Object {
+            {
+              "releases": {
                 "assemble1": "patch",
                 "assemble2": "major",
               },
@@ -700,9 +700,9 @@ Object {
 }
 `;
 
-exports[`merge config full config merges version without command 1`] = `
-Object {
-  "commands": Array [],
-  "pipeTemplate": Object {},
+exports[`merge config > full config > merges version without command 1`] = `
+{
+  "commands": [],
+  "pipeTemplate": {},
 }
 `;

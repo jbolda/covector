@@ -2,7 +2,7 @@
   "pkgManagers": {
     "javascript": {
       "version": true,
-      "publish": "npm publish"
+      "publish": "node -e \"throw new Error('boom')\""
     }
   },
   "packages": {

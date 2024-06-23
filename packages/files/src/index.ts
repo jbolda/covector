@@ -2,6 +2,7 @@ import { default as fsDefault, PathLike } from "fs";
 // this is compatible with node@12+
 const fs = fsDefault.promises;
 
+import { type Logger } from "@covector/types";
 import { all, MainError, type Operation } from "effection";
 import { configFileSchema } from "./schema";
 import { fromZodError } from "zod-validation-error";
@@ -440,8 +441,10 @@ export function* writePreFile({
 }
 
 export const testSerializePkgFile = ({
+  logger,
   packageFile,
 }: {
+  logger: Logger;
   packageFile: PackageFile;
 }) => {
   try {
@@ -453,7 +456,7 @@ export const testSerializePkgFile = ({
     return true;
   } catch (e: any) {
     if (e?.message === "Can only stringify objects, not null") {
-      console.error(
+      logger.error(
         "It appears that a dependency within this repo does not have a version specified."
       );
     }
@@ -516,26 +519,28 @@ export function* loadChangeFiles({
 }
 
 export function* changeFilesRemove({
+  logger,
   cwd,
   paths,
 }: {
+  logger: Logger;
   cwd: string;
   paths: string[];
 }): Operation<string> {
-  return yield all(
-    paths.map(function* (changeFilePath) {
-      yield fs.unlink(path.posix.join(cwd, changeFilePath));
-      console.info(`${changeFilePath} was deleted`);
-      return changeFilePath;
-    })
-  );
+  for (let changeFilePath of paths) {
+    yield fs.unlink(path.posix.join(cwd, changeFilePath));
+    logger.info(`${changeFilePath} was deleted`);
+  }
+  return paths;
 }
 
 export function* readChangelog({
+  logger,
   cwd,
   packagePath = "",
   create = true,
 }: {
+  logger: Logger;
   cwd: string;
   packagePath?: string;
   create?: boolean;
@@ -545,7 +550,7 @@ export function* readChangelog({
     file = yield loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
   } catch {
     if (create) {
-      console.log("Could not load the CHANGELOG.md. Creating one.");
+      logger.info("Could not load the CHANGELOG.md. Creating one.");
       file = {
         path: path.join(packagePath, "CHANGELOG.md"),
         content: "# Changelog\n\n\n",

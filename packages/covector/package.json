@@ -17,10 +17,15 @@
   "bin": {
     "covector": "./bin/covector.js"
   },
+  "files": [
+    "bin",
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
-    "prepublishOnly": "tsc -b"
+    "prepublishOnly": "tsc -b",
+    "test": "vitest"
   },
   "dependencies": {
     "@covector/apply": "0.9.3",
@@ -31,13 +36,17 @@
     "effection": "^2.0.6",
     "globby": "^11.1.0",
     "inquirer": "^8.2.5",
-    "strip-ansi": "6.0.1",
+    "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
+    "pino": "^9.1.0",
+    "pino-abstract-transport": "^1.2.0",
+    "strip-ansi": "6.0.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@covector/types": "0.0.0",
     "@types/inquirer": "^8.2.6",
+    "@types/yargs": "^17.0.32",
     "fixturez": "^1.1.0",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5"

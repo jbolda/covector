@@ -1,6 +1,8 @@
-import { it, captureError } from "@effection/jest";
 import { attemptCommands } from "../src";
-import mockConsole, { RestoreConsole } from "jest-mock-console";
+import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -12,17 +14,13 @@ const base = {
 };
 
 describe("attemptCommand fails", () => {
-  let restoreConsole: RestoreConsole;
-  beforeEach(() => {
-    restoreConsole = mockConsole(["log", "dir", "error", "warn"]);
-  });
-  afterEach(() => {
-    restoreConsole();
-  });
-
   it("fails a function", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
+
     const errored = yield captureError(
       attemptCommands({
+        logger,
         cwd: ".",
         command: "publish",
         commands: [
@@ -34,15 +32,19 @@ describe("attemptCommand fails", () => {
           },
         ],
         dryRun: false,
-      }),
+      })
     );
 
     expect(errored.message).toBe("spawn boop ENOENT");
   });
 
   it("retries a failed function", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
+
     const errored = yield captureError(
       attemptCommands({
+        logger,
         cwd: ".",
         command: "",
         commands: [
@@ -54,30 +56,66 @@ describe("attemptCommand fails", () => {
           },
         ],
         dryRun: false,
-      }),
+      })
     );
+    logger.info("completed");
 
     const errorMessage = "spawn boop ENOENT";
     if (process.platform === "win32") {
       const errorLog =
         "'boop' is not recognized as an internal or external command,\r\n" +
         "operable program or batch file.";
-      expect((console.error as any).mock.calls[0][0]).toBe(errorLog);
-      expect((console.error as any).mock.calls[2][0]).toBe(errorLog);
-      expect((console.error as any).mock.calls[4][0]).toBe(errorLog);
-      expect((console.error as any).mock.calls[6]).toBeUndefined();
+
+      yield pinoTest.consecutive(
+        stream,
+        [
+          { msg: "pkg-nickname []: boop", level: 30 },
+          { msg: errorLog, level: 50 },
+          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+          { msg: "pkg-nickname []: boop", level: 30 },
+          { msg: errorLog, level: 50 },
+          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+          { msg: "pkg-nickname []: boop", level: 30 },
+          { msg: errorLog, level: 50 },
+          // to confirm we are done with logs
+          { msg: "completed", level: 30 },
+        ],
+        isShallowError
+      );
       expect(errored.message).toBe(errorMessage);
     } else {
-      expect((console.error as any).mock.calls[0][0].message).toBe(
-        errorMessage,
+      yield pinoTest.consecutive(
+        stream,
+        [
+          { msg: "pkg-nickname []: boop", level: 30 },
+          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+          { msg: "pkg-nickname []: boop", level: 30 },
+          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+          { msg: "pkg-nickname []: boop", level: 30 },
+          // to confirm we are done with logs
+          { msg: "completed", level: 30 },
+        ],
+        isShallowError
       );
-      expect((console.error as any).mock.calls[1][0].message).toBe(
-        errorMessage,
-      );
-      expect(
-        (console.error as any).mock.calls?.[2]?.[0]?.message,
-      ).toBeUndefined();
       expect(errored.message).toBe(errorMessage);
     }
   });
 });
+
+function isShallowError(received, expected) {
+  if (received.msg !== expected.msg) {
+    throw new Error(
+      `expected msg "${expected.msg}" doesn't match the received one "${received.msg}"`
+    );
+  }
+  if (received.level !== expected.level) {
+    throw new Error(
+      `expected level ${expected.level} doesn't match the received one ${received.level}`
+    );
+  }
+  if (received?.err?.code !== expected?.err?.code) {
+    throw new Error(
+      `expected err code ${expected?.err?.code} doesn't match the received one ${received?.err?.code}`
+    );
+  }
+}

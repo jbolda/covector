@@ -4,7 +4,7 @@
       "path": ".",
       "manager": "flutter",
       "version": true,
-      "publish": "echo publishing"
+      "publish": "node -e \"console.log('publishing')\""
     }
   }
 }

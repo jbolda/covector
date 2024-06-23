@@ -1,3 +1,4 @@
+import { type Logger } from "@covector/types";
 import inquirer from "inquirer";
 import { default as fsDefault } from "fs";
 // this is compatible with node@12+
@@ -8,10 +9,12 @@ import { configFile } from "@covector/files";
 import type { ConfigFile } from "@covector/types";
 
 export const add = function* ({
+  logger,
   cwd = process.cwd(),
   changeFolder = ".changes",
   yes,
 }: {
+  logger: Logger;
   cwd?: string;
   changeFolder?: string;
   yes: boolean;

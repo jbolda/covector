@@ -1,6 +1,8 @@
-import { captureError, it } from "@effection/jest";
 import { attemptCommands } from "../src";
-import mockConsole, { RestoreConsole } from "jest-mock-console";
+import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
+import pino from "pino";
+import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -27,17 +29,13 @@ const fillWithDefaults = ({ version }: { version: string }) => {
 };
 
 describe("fetchCommand", () => {
-  let restoreConsole: RestoreConsole;
-  beforeEach(() => {
-    restoreConsole = mockConsole(["log", "error"]);
-  });
-  afterEach(() => {
-    restoreConsole();
-  });
-
   describe("fetch npm registry", () => {
     it("success", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       yield attemptCommands({
+        logger,
         commands: [
           {
             ...base,
@@ -57,13 +55,19 @@ describe("fetchCommand", () => {
         cwd: "",
         dryRun: false,
       });
+      // it hangs with no logs
+      logger.info("completed");
 
-      expect((console.log as any).mock.calls).toEqual([]);
+      yield pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }]);
     });
 
     it("failure throws", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const errored = yield captureError(
         attemptCommands({
+          logger,
           commands: [
             {
               ...base,
@@ -85,14 +89,18 @@ describe("fetchCommand", () => {
         })
       );
 
-      expect(errored.message).toEqual(
+      expect(errored.message).toBe(
         'effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404 Not Found: "version not found: 0.5.32"'
       );
     });
 
     it("failure retries then throws", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const errored = yield captureError(
         attemptCommands({
+          logger,
           commands: [
             {
               ...base,
@@ -115,16 +123,25 @@ describe("fetchCommand", () => {
         })
       );
 
-      expect(console.error as any).toBeCalledTimes(2);
-      expect(errored.message).toEqual(
-        'effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404 Not Found: "version not found: 0.5.32"'
-      );
+      const errorMessage =
+        'effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404 Not Found: "version not found: 0.5.32"';
+      // first two attempts log error then retry
+      yield pinoTest.consecutive(stream, [
+        { msg: errorMessage, level: 50 },
+        { msg: errorMessage, level: 50 },
+      ]);
+      // final attempt throws
+      expect(errored.message).toEqual(errorMessage);
     });
   });
 
   describe("fetch cargo registry", () => {
     it("success", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       yield attemptCommands({
+        logger,
         commands: [
           {
             ...base,
@@ -144,13 +161,19 @@ describe("fetchCommand", () => {
         cwd: "",
         dryRun: false,
       });
+      // it hangs with no logs
+      logger.info("completed");
 
-      expect((console.log as any).mock.calls).toEqual([]);
+      yield pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }]);
     });
 
     it("failure throws", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const errored = yield captureError(
         attemptCommands({
+          logger,
           commands: [
             {
               ...base,
@@ -178,8 +201,12 @@ describe("fetchCommand", () => {
     });
 
     it("failure retries then throws", function* () {
+      const stream = pinoTest.sink();
+      const logger = pino(stream);
+
       const errored = yield captureError(
         attemptCommands({
+          logger,
           commands: [
             {
               ...base,
@@ -202,10 +229,14 @@ describe("fetchCommand", () => {
         })
       );
 
-      expect(console.error as any).toBeCalledTimes(2);
-      expect(errored.message).toEqual(
-        `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404 Not Found: {"errors":[{"detail":"crate \`tauri\` does not have a version \`0.12.0\`"}]}`
-      );
+      const errorMessage = `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404 Not Found: {"errors":[{"detail":"crate \`tauri\` does not have a version \`0.12.0\`"}]}`;
+      // first two attempts log error then retry
+      yield pinoTest.consecutive(stream, [
+        { msg: errorMessage, level: 50 },
+        { msg: errorMessage, level: 50 },
+      ]);
+      // final attempt throws
+      expect(errored.message).toEqual(errorMessage);
     });
   });
 });
