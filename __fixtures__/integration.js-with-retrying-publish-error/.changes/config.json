@@ -3,7 +3,7 @@
     "javascript": {
       "version": true,
       "publish": {
-        "command": "node -e \"throw new Error('boom')\"",
+        "command": "node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
         "retries": [2000, 2000]
       }
     }

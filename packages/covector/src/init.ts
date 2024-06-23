@@ -360,7 +360,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # required for use of git history
       - name: covector status
@@ -395,7 +395,7 @@ jobs:
       successfulPublish: \${{ steps.covector.outputs.successfulPublish }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # required for use of git history${
             pkgManagers.javascript
@@ -436,7 +436,7 @@ jobs:
           createRelease: true
       - name: Create Pull Request With Versions Bumped
         id: cpr
-        uses: peter-evans/create-pull-request@v3
+        uses: peter-evans/create-pull-request@v6
         if: steps.covector.outputs.commandRan == 'version'
         with:
           title: "Publish New Versions"
