@@ -27,7 +27,11 @@ export const checksChunksInMsg =
       assert.deepEqual(received, expected);
     }
     if (expected.err) {
-      assert.include(received.msg, expected.err);
+      assert.include(
+        received.msg,
+        expected.err,
+        `Expected ${received.msg} to include ${expected.err}, but received:\n${JSON.stringify(received, null, 2)}`
+      );
     } else if (received.msg !== expected.msg) {
       if (Array.isArray(expected.msg)) {
         for (let chunk of expected.msg) {

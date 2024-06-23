@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           # some of the tests use the covector git history to run
           fetch-depth: 0
