@@ -9,7 +9,7 @@ on:
 jobs:
   download:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch.repository == github.repository && github.actor == 'dependabot[bot]')
+    if: github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.repository.full_name != github.repository || github.actor == 'dependabot[bot]')
     steps:
       - name: covector status
         uses: jbolda/covector/packages/action@main
