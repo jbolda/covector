@@ -1,0 +1,18 @@
+name: Covector Comment
+
+on:
+  workflow_run:
+    workflows: [covector]
+    types:
+      - completed
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_branch.repository == github.repository && github.actor == 'dependabot[bot]')
+    steps:
+      - name: covector status
+        uses: jbolda/covector/packages/action@main
+        id: covector
+        with:
+          command: "status"
