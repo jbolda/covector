@@ -1,26 +1,22 @@
 import { GitHub } from "@actions/github/lib/utils";
 import { Operation } from "effection";
-import type { PullRequestPayload } from "./types";
 import { Logger } from "@covector/types";
 
 export function* postGithubComment({
   logger,
   comment,
   octokit,
-  payload,
+  repo,
+  owner,
+  prNumber: issue_number,
 }: {
   logger: Logger;
   comment: string;
   octokit: InstanceType<typeof GitHub>;
-  payload: PullRequestPayload;
+  repo: string;
+  owner: string;
+  prNumber: number;
 }): Operation<void> {
-  const {
-    repository: {
-      name: repo,
-      owner: { login: owner },
-    },
-    pull_request: { number: issue_number },
-  } = payload;
   const tag = "<!-- Covector Action -->\n";
   const body = tag + comment;
   const allComments = yield octokit.rest.issues.listComments({

@@ -1,5 +1,5 @@
 import type { Config, CovectorStatus, PackageFile } from "@covector/types";
-import type { PullRequestPayload } from "./types";
+import type { PullRequestEvent } from "@octokit/webhooks-definitions/schema";
 
 export function formatComment({
   covectored,
@@ -8,7 +8,7 @@ export function formatComment({
   changeFolder,
 }: {
   covectored: CovectorStatus;
-  payload: PullRequestPayload;
+  payload: PullRequestEvent;
   projectReadmeExists: boolean;
   changeFolder: string;
 }) {

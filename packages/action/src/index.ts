@@ -11,15 +11,19 @@ import { postGithubComment } from "./comment/postGithubComment";
 import fs from "fs";
 
 import type {
+  PullRequestEvent,
+  WorkflowRunEvent,
+} from "@octokit/webhooks-definitions/schema";
+import type {
   CovectorStatus,
   CovectorVersion,
   CovectorPublish,
   Logger,
 } from "../../types/src";
 import { formatComment } from "./comment/formatGithubComment";
-import type { PullRequestPayload } from "./comment/types";
 import type { Operation } from "effection";
 import { CommitResponse, getCommitContext } from "./pr/getCommitContext";
+import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact";
 
 export function* run(logger: Logger): Generator<any, any, any> {
   try {
@@ -58,67 +62,86 @@ export function* run(logger: Logger): Generator<any, any, any> {
     core.setOutput("commandRan", command);
     let successfulPublish = false;
     if (command === "status") {
-      const covectored: CovectorStatus = yield covector({
-        logger,
-        command,
-        filterPackages,
-        cwd,
-      });
-      core.setOutput("status", covectored.response);
-      core.setOutput("templatePipe", covectored.pipeTemplate);
-
-      core.setOutput(
-        `willPublish`,
-        covectored.response === "No changes." &&
-          "pkgReadyToPublish" in covectored &&
-          covectored?.pkgReadyToPublish.length > 0
-      );
-
-      if (
-        "pkgReadyToPublish" in covectored &&
-        covectored?.pkgReadyToPublish?.length > 0
-      ) {
-        covectored.pkgReadyToPublish.forEach((pkg) => {
-          core.setOutput(
-            `willPublish-${pkg.pkg}`
-              .replace(/\@/g, "-")
-              .replace(/\//g, "-")
-              .replace(/\_/g, "-"),
-            true
-          );
-          core.setOutput(
-            `version-${pkg.pkg}`
-              .replace(/\@/g, "-")
-              .replace(/\//g, "-")
-              .replace(/\_/g, "-"),
-            pkg?.pkgFile?.version ?? ""
-          );
+      if (github.context.eventName === "workflow_run") {
+        const octokit = github.getOctokit(token);
+        const payload = github.context.payload as WorkflowRunEvent;
+        yield postGithubCommentFromArtifact({ logger, octokit, payload });
+      } else {
+        const covectored: CovectorStatus = yield covector({
+          logger,
+          command,
+          filterPackages,
+          cwd,
         });
-      }
+        core.setOutput("status", covectored.response);
+        core.setOutput("templatePipe", covectored.pipeTemplate);
 
-      if (core.getInput("comment")) {
-        if (!token) {
-          core.setFailed("The `token` is required to create a comment.");
-        } else {
-          const octokit = github.getOctokit(token);
-          const payload: PullRequestPayload = JSON.parse(
-            fs.readFileSync(`${process.env.GITHUB_EVENT_PATH}`, "utf-8")
-          );
+        core.setOutput(
+          `willPublish`,
+          covectored.response === "No changes." &&
+            "pkgReadyToPublish" in covectored &&
+            covectored?.pkgReadyToPublish.length > 0
+        );
 
-          if (payload.pull_request) {
-            const projectReadmeExists = fs.existsSync(`${cwd}/.changes`);
-            const comment = formatComment({
-              covectored,
-              payload,
-              changeFolder: ".changes",
-              projectReadmeExists,
-            });
-            if (comment)
-              yield postGithubComment({ logger, comment, octokit, payload });
-          } else {
-            logger.error(
-              "Comments can only be used on pull requests, skipping."
+        if (
+          "pkgReadyToPublish" in covectored &&
+          covectored?.pkgReadyToPublish?.length > 0
+        ) {
+          covectored.pkgReadyToPublish.forEach((pkg) => {
+            core.setOutput(
+              `willPublish-${pkg.pkg}`
+                .replace(/\@/g, "-")
+                .replace(/\//g, "-")
+                .replace(/\_/g, "-"),
+              true
             );
+            core.setOutput(
+              `version-${pkg.pkg}`
+                .replace(/\@/g, "-")
+                .replace(/\//g, "-")
+                .replace(/\_/g, "-"),
+              pkg?.pkgFile?.version ?? ""
+            );
+          });
+        }
+
+        if (core.getInput("comment")) {
+          if (!token) {
+            core.setFailed("The `token` is required to create a comment.");
+          } else {
+            const octokit = github.getOctokit(token);
+            const payload = github.context.payload as PullRequestEvent;
+
+            if (github.context.eventName === "pull_request") {
+              const projectReadmeExists = fs.existsSync(`${cwd}/.changes`);
+              const comment = formatComment({
+                covectored,
+                payload,
+                changeFolder: ".changes",
+                projectReadmeExists,
+              });
+              if (comment) {
+                const {
+                  repository: {
+                    name: repo,
+                    owner: { login: owner },
+                  },
+                  pull_request: { number: prNumber },
+                } = payload;
+                yield postGithubComment({
+                  logger,
+                  comment,
+                  octokit,
+                  repo,
+                  owner,
+                  prNumber,
+                });
+              }
+            } else {
+              logger.error(
+                "Comments can only be used on pull requests, skipping."
+              );
+            }
           }
         }
       }
