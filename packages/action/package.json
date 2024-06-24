@@ -22,6 +22,7 @@
   },
   "devDependencies": {
     "@covector/types": "0.0.0",
+    "@octokit/webhooks-definitions": "^3.67.3",
     "@vercel/ncc": "^0.38.1",
     "fixturez": "^1.1.0",
     "tslib": "^2.5.0",
