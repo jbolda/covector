@@ -67,7 +67,7 @@ export function* postGithubComment({
 
     const artifactPRNumber = "./covector-prNumber.md";
     const prNumberAbsolutePath = path.join(artifactRoot, artifactPRNumber);
-    yield fs.writeFile(prNumberAbsolutePath, body);
+    yield fs.writeFile(prNumberAbsolutePath, issue_number.toString());
 
     const artifact = new DefaultArtifactClient();
     logger.debug(`Uploading comment from ${artifactAbsolutePath}`);
