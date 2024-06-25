@@ -1,4 +1,4 @@
-name: Covector Comment
+name: covector comment on forks
 
 on:
   workflow_run:

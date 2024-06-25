@@ -1,6 +1,5 @@
 # covector
 
-
 Transparent and flexible change management for publishing packages and assets. Publish and deploy from a single asset repository, monorepos, and even multi-language repositories.
 
 ## Docs
@@ -20,7 +19,6 @@ Below is a list of all of the packages within this repository. The usage and doc
 | [@covector/changelog](./packages/changelog) | [![npm](https://img.shields.io/npm/v/@covector/changelog?style=for-the-badge)](https://www.npmjs.com/package/@covector/changelog) | [./packages/changelog/CHANGELOG.md](https://github.com/jbolda/covector/blob/main/packages/changelog/CHANGELOG.md) |
 | [@covector/command](./packages/command)     | [![npm](https://img.shields.io/npm/v/@covector/command?style=for-the-badge)](https://www.npmjs.com/package/@covector/command)     | [./packages/command/CHANGELOG.md](https://github.com/jbolda/covector/blob/main/packages/command/CHANGELOG.md)     |
 | [@covector/files](./packages/files)         | [![npm](https://img.shields.io/npm/v/@covector/files?style=for-the-badge)](https://www.npmjs.com/package/@covector/files)         | [./packages/files/CHANGELOG.md](https://github.com/jbolda/covector/blob/main/packages/files/CHANGELOG.md)         |
-
 
 ## Prior Art
 
