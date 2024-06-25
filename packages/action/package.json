@@ -21,6 +21,7 @@
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
+    "@actions/artifact": "^2.1.7",
     "@covector/types": "0.0.0",
     "@octokit/webhooks-definitions": "^3.67.3",
     "@vercel/ncc": "^0.38.1",
