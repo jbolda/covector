@@ -17,6 +17,6 @@ jobs:
       - name: covector status
         uses: jbolda/covector/packages/action@main
         id: covector
-        if: github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.repository.full_name != github.repository || github.actor == 'dependabot[bot]')
+        if: github.event.workflow_run.conclusion == 'success' && (github.event.workflow_run.head_repository.full_name != github.repository || github.actor == 'dependabot[bot]')
         with:
           command: "status"
