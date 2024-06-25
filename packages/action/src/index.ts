@@ -65,7 +65,12 @@ export function* run(logger: Logger): Generator<any, any, any> {
       if (github.context.eventName === "workflow_run") {
         const octokit = github.getOctokit(token);
         const payload = github.context.payload as WorkflowRunEvent;
-        yield postGithubCommentFromArtifact({ logger, octokit, payload });
+        yield postGithubCommentFromArtifact({
+          logger,
+          octokit,
+          token,
+          payload,
+        });
       } else {
         const covectored: CovectorStatus = yield covector({
           logger,
