@@ -20,9 +20,9 @@ export const add = function* ({
   yes: boolean;
 }): Generator<any, string, any> {
   const config: ConfigFile = yield configFile({ cwd });
-  let packageBumps: { [k: string]: string } = {};
+  let packageBumps: { [k: string]: { bump: string; changeTag?: string } } = {};
 
-  const answers: { [k: string]: string } = yield inquirer.prompt([
+  const answers: { packages: string[] } = yield inquirer.prompt([
     {
       type: "checkbox",
       message: "Select packages which need a version bump.",
@@ -38,12 +38,26 @@ export const add = function* ({
   ]);
 
   for (let pkg of answers.packages) {
-    packageBumps[pkg] = yield inquirer.prompt({
+    const { bump } = yield inquirer.prompt({
       type: "list",
-      name: "bump",
       message: `bump ${pkg} with?`,
-      choices: ["patch", "minor", "major"],
+      name: "bump",
+      choices: ["patch", "minor", "major"].concat(
+        config.additionalBumpTypes ? config.additionalBumpTypes : []
+      ),
     });
+    let changeTag;
+    if (config?.changeTags) {
+      const tags = Object.keys(config.changeTags);
+      const addTag = yield inquirer.prompt({
+        type: "list",
+        name: "changeTag",
+        message: `bump ${pkg} with?`,
+        choices: ["none"].concat(tags),
+      });
+      if (addTag.changeTag !== "none") changeTag = addTag.changeTag;
+    }
+    packageBumps[pkg] = { bump, changeTag };
   }
 
   const summary = yield inquirer.prompt({
@@ -79,8 +93,10 @@ export const add = function* ({
 
   const frontmatter = `---
 ${answers.packages
-  //@ts-expect-error
-  .map((pkg) => `"${pkg}": ${packageBumps[pkg].bump}`)
+  .map(
+    (pkg) =>
+      `"${pkg}": ${packageBumps[pkg].bump}${packageBumps[pkg].changeTag ? `:${packageBumps[pkg].changeTag}` : ``}`
+  )
   .join("\n")}
 ---\n\n`;
 
