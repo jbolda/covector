@@ -10,10 +10,10 @@ jobs:
   download:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ${{ github.event.workflow_run.conclusion }}
-      - run: echo ${{ github.event.workflow_run.repository.full_name }}
-      - run: echo ${{ github.repository }}
-      - run: echo ${{ github.actor }}
+      - name: dump github context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
       - name: covector status
         uses: jbolda/covector/packages/action@main
         id: covector
