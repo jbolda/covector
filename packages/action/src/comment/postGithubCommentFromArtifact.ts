@@ -52,5 +52,13 @@ export function* postGithubCommentFromArtifact({
   );
   const prNumber = parseInt(prNumberAsString, 10);
 
-  yield postGithubComment({ logger, comment, octokit, repo, owner, prNumber });
+  yield postGithubComment({
+    logger,
+    comment,
+    octokit,
+    repo,
+    owner,
+    prNumber,
+    artifactOnFailure: false,
+  });
 }
