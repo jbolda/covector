@@ -10,10 +10,12 @@ import type { Logger } from "@covector/types";
 export function* postGithubCommentFromArtifact({
   logger,
   octokit,
+  token,
   payload,
 }: {
   logger: Logger;
   octokit: InstanceType<typeof GitHub>;
+  token: string;
   payload: WorkflowRunEvent;
 }): Operation<void> {
   const {
@@ -22,22 +24,28 @@ export function* postGithubCommentFromArtifact({
       owner: { login: owner },
     },
   } = payload;
-  const allArtifacts = yield octokit.rest.actions.listWorkflowRunArtifacts({
-    owner: owner,
-    repo: repo,
+
+  const artifacts = yield octokit.rest.actions.listWorkflowRunArtifacts({
+    owner,
+    repo,
     run_id: payload.workflow_run.id,
   });
-
-  // download the artifact from `pull_request` workflow that generated it
-  const commentArtifact = allArtifacts.data.artifacts.filter((artifact) => {
+  const commentArtifact = artifacts.data.artifacts.filter((artifact) => {
     return artifact.name == "covector-comment";
   })[0];
 
   const artifact = new DefaultArtifactClient();
   const artifactRoot = process.env.RUNNER_TEMP ?? "..";
+  // this is required to elevate iternal permissions to fetch artifacts from another workflow
+  const findBy = {
+    token,
+    workflowRunId: payload.workflow_run.id,
+    repositoryOwner: owner,
+    repositoryName: repo,
+  };
   const { downloadPath } = yield artifact.downloadArtifact(commentArtifact.id, {
-    // optional: download destination path. otherwise defaults to $GITHUB_WORKSPACE
     path: artifactRoot,
+    findBy,
   });
 
   const comment = yield fs.readFile(
@@ -52,5 +60,12 @@ export function* postGithubCommentFromArtifact({
   );
   const prNumber = parseInt(prNumberAsString, 10);
 
-  yield postGithubComment({ logger, comment, octokit, repo, owner, prNumber });
+  yield postGithubComment({
+    logger,
+    comment,
+    octokit,
+    repo,
+    owner,
+    prNumber,
+  });
 }
