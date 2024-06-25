@@ -67,5 +67,6 @@ export function* postGithubCommentFromArtifact({
     repo,
     owner,
     prNumber,
+    artifactOnFailure: false,
   });
 }

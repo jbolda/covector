@@ -58,3 +58,39 @@ Besides these static outputs, we also supply dynamic outputs for each of your pa
 Outputs will generally be specified in the [action.yml](./action.yml), but since these are dynamic, it is not possible. See the [docs noting this is an optional required](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#outputs).
 
 > If you don't declare an output in your action metadata file, you can still set outputs and use them in a workflow.
+
+## Comments On Forks
+
+The action runs in a reduced-permission environment on forks which will cause an API call to add a comment to fail. To work around this, with `comment: true` specified, it will upload the comment content as an artifact to the workflow if it fails. With the following additional workflow, it will pick up that workflow completion and post the comment as `workflow_run` has normal repository permissions.
+
+```yml
+name: Covector Comment
+
+on:
+  workflow_run:
+    workflows: [covector status] # the `name` of the workflow run on `pull_request` running `status` with `comment: true`
+    types:
+      - completed
+
+# note all other permissions are set to none if not specified
+permissions:
+  # to read the action artifacts
+  actions: read
+  # to write the comment
+  pull-requests: write
+# note that these set the permissions for `secrets.GITHUB_TOKEN`
+#  if you plan to use your own token, use `permissions: {}` instead
+#  to completely remove all default permissions for added security
+
+jobs:
+  download:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.head_repository.full_name != github.repository || github.actor == 'dependabot[bot]')
+    steps:
+      - name: covector status
+        uses: jbolda/covector/packages/action@covector-v0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          command: "status"
+```

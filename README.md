@@ -20,7 +20,6 @@ Below is a list of all of the packages within this repository. The usage and doc
 | [@covector/command](./packages/command)     | [![npm](https://img.shields.io/npm/v/@covector/command?style=for-the-badge)](https://www.npmjs.com/package/@covector/command)     | [./packages/command/CHANGELOG.md](https://github.com/jbolda/covector/blob/main/packages/command/CHANGELOG.md)     |
 | [@covector/files](./packages/files)         | [![npm](https://img.shields.io/npm/v/@covector/files?style=for-the-badge)](https://www.npmjs.com/package/@covector/files)         | [./packages/files/CHANGELOG.md](https://github.com/jbolda/covector/blob/main/packages/files/CHANGELOG.md)         |
 
-
 ## Prior Art
 
 We drew on inspiration from [changesets](https://github.com/atlassian/changesets) which specifically focuses on the npm ecosystem with the expectation to publish to [npmjs.com](https://www.npmjs.com/). We had a need for much greater flexibility, primarily around additional languages, which changesets wasn't looking to handle. You may notice some similarities around the markdown based change files, and it begins to diverge from there. Since we started the codebase from scratch, it also opened the door for incredibly flexible and unique publishing schemes, deep changelogs, and the ability to publish to any "target" with any "asset" (such as publishing a website, a github action or a vscode extension even!).
