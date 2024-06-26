@@ -5,7 +5,8 @@
     "feat": "New Features",
     "enhance": "Enhancements",
     "bug": "Bug Fixes",
-    "deps": "Dependencies"
+    "deps": "Dependencies",
+    "internal": "Changes Supporting Covector Development"
   },
   "pkgManagers": {
     "javascript": {
