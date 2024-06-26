@@ -1,5 +1,21 @@
 # Changelog
 
+## \[0.12.0]
+
+### Enhancements
+
+- [`e2c83dc`](https://www.github.com/jbolda/covector/commit/e2c83dc5e98b9d8ddbf428af2dda32168e4df9ec) ([#318](https://www.github.com/jbolda/covector/pull/318) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add `exports` to `package.json` for improved capability and an enhanced experience when developed covector and testing locally.
+- [`ce43ad7`](https://www.github.com/jbolda/covector/commit/ce43ad7fd924319b544b30785217070436182d71) ([#319](https://www.github.com/jbolda/covector/pull/319) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add logger instance to allow custom loggers based on the usage context. It enables different structured logs for the CLI vs within a GitHub Action, as well as for local development and testing.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.8.0`
+- Upgraded to `@covector/command@0.8.0`
+
+### Changes Supporting Covector Development
+
+- [`ce43ad7`](https://www.github.com/jbolda/covector/commit/ce43ad7fd924319b544b30785217070436182d71) ([#319](https://www.github.com/jbolda/covector/pull/319) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Switch to Vitest for the test runner. This improves speed and enables improved ability to update to current standards. Additionally, we use `pino-test` with the changes to the logger to more specifically check log output. Along with this, we switch multiple test fixtures to run commands that would return more standard output across OS which reduces test flakiness.
+
 ## \[0.11.0]
 
 - [`9e111fc`](https://www.github.com/jbolda/covector/commit/9e111fcf2431690b8719ca493e6580a42e72c457) ([#304](https://www.github.com/jbolda/covector/pull/304) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add currentVersion property to more easily refer to the version before a bump.
