@@ -1,15 +1,33 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`integration test for init command > runs on a workspace 1`] = `
-"? What is the url to your github repo?
-? should we include github action workflows? (Y/n)
-? What is the name of your default branch? (main)
+"│
+◆  What is the url to your GitHub repo?
+│  _
+└
+│
+◆  should we include GitHub Action workflows?
+│  ● Yes / ○ No
+└
+│
+◆  What is the name of your default branch?
+│  main
+└
 "
 `;
 
 exports[`integration test for init command > sets gitSiteUrl default to repo url 1`] = `
-"? What is the url to your github repo? (https://www.github.com/jbolda/covector)
-? should we include github action workflows? (Y/n)
-? What is the name of your default branch? (main)
+"│
+◆  What is the url to your GitHub repo?
+│  https://www.github.com/jbolda/covector
+└
+│
+◆  should we include GitHub Action workflows?
+│  ● Yes / ○ No
+└
+│
+◆  What is the name of your default branch?
+│  main
+└
 "
 `;

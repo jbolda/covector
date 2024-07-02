@@ -280,6 +280,8 @@ export const init = function* init({
     }
   }
 
+  // tests struggle to close `stdin` and we don't use the return value anyways
+  process.exit();
   return "complete";
 };
 
