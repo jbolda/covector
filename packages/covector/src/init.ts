@@ -121,6 +121,11 @@ export const init = function* init({
   const answers: Awaited<typeof questions> = yield questions;
   outro("Generating files...");
 
+  // https://github.com/bombshell-dev/clack/issues/134
+  // stdin seems to get "stuck", this shakes it up and allows the process to complete
+  // this is currently only noted to occur in tests
+  process.stdin.resume();
+
   try {
     const testOpen: Dir = yield fs.opendir(path.posix.join(cwd, changeFolder));
     logger.info(`The ${changeFolder} folder exists, skipping creation.`);
@@ -280,8 +285,6 @@ export const init = function* init({
     }
   }
 
-  // tests struggle to close `stdin` and we don't use the return value anyways
-  process.exit();
   return "complete";
 };
 
