@@ -289,6 +289,7 @@ export type CovectorStatus =
   | {
       response: string;
       pipeTemplate?: object;
+      config: Config;
       pkgReadyToPublish: PkgPublish[];
     }
   | {
