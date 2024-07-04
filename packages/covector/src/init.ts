@@ -124,7 +124,8 @@ export const init = function* init({
   // https://github.com/bombshell-dev/clack/issues/134
   // stdin seems to get "stuck", this shakes it up and allows the process to complete
   // this is currently only noted to occur in tests
-  process.stdin.resume();
+  // However adding this line then means that Windows never finishes the process.
+  // process.stdin.resume();
 
   try {
     const testOpen: Dir = yield fs.opendir(path.posix.join(cwd, changeFolder));
@@ -285,6 +286,8 @@ export const init = function* init({
     }
   }
 
+  // It seems to get stuck on Windows and not close with the resume  //
+  process.exit();
   return "complete";
 };
 
