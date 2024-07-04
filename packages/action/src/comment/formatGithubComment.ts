@@ -13,21 +13,21 @@ export function formatComment({
   changeFolder: string;
 }) {
   let comment = `### Package Changes Through ${payload.pull_request.head.sha}\n`;
-  if ("applied" in covectored) {
-    let addChangeFileUrl = `${payload.pull_request.html_url}/../../new/${
-      payload.pull_request.head.ref
-    }${newChangeFile({
-      prNumber: payload.pull_request.number,
-      prTitle: payload.pull_request.title,
-      changeFolder,
-      config: covectored.config,
-    })}`;
-    let defaultFooter = `\n\n---\n<p align='right'><em>Read ${
-      projectReadmeExists
-        ? `about <a href='../tree/HEAD/${changeFolder}'>change files</a><em> or`
-        : ""
-    } the docs at <a href='https://github.com/jbolda/covector/tree/main/covector'>github.com/jbolda/covector</a><em></p>`;
+  let addChangeFileUrl = `${payload.pull_request.html_url}/../../new/${
+    payload.pull_request.head.ref
+  }${newChangeFile({
+    prNumber: payload.pull_request.number,
+    prTitle: payload.pull_request.title,
+    changeFolder,
+    config: covectored.config,
+  })}`;
+  let defaultFooter = `\n\n---\n<p align='right'><em>Read ${
+    projectReadmeExists
+      ? `about <a href='../tree/HEAD/${changeFolder}'>change files</a><em> or`
+      : ""
+  } the docs at <a href='https://github.com/jbolda/covector/tree/main/covector'>github.com/jbolda/covector</a><em></p>`;
 
+  if ("applied" in covectored) {
     return (
       `${comment}${covectored.response}\n\n` +
       markdownAccordion(
@@ -42,7 +42,11 @@ export function formatComment({
       defaultFooter
     );
   } else if ("pkgReadyToPublish" in covectored) {
-    return `${comment}${covectored.response}\n\n`;
+    return (
+      `${comment}${covectored.response}\n\n` +
+      `[Add a change file through the GitHub UI by following this link.](${addChangeFileUrl})\n` +
+      defaultFooter
+    );
   }
 }
 
