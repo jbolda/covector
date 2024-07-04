@@ -5,7 +5,10 @@ import { command, runCommand } from "../helpers";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-describe("integration test for init command", () => {
+import os from 'node:os';
+const isWindows = os.platform() === 'win32';
+
+describe.skipIf(isWindows)("integration test for init command", () => {
   it("runs on a workspace", function* () {
     const fullIntegration = f.copy("pkg.js-yarn-workspace");
     const gitSiteUrl = "https://example.com";
