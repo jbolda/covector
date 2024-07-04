@@ -64,7 +64,8 @@ type Responses = [q: string | RegExp, a: string][];
 export function* runCommand(
   command: string,
   cwd: string,
-  responses: Responses = []
+  responses: Responses = [],
+  timeout: number = 5000
 ): Operation<{
   stdout: string;
   stderr: string;
@@ -78,35 +79,40 @@ export function* runCommand(
   let responded = "";
   try {
     const debug = false;
-    const runCommand: Process = yield exec(command, { cwd });
+    const commandExec: Process = yield exec(command, { cwd });
     const elegantlyRespond = responses.length > 0;
+    let responseCount = 0;
 
     yield spawn(
-      runCommand.stdout.forEach(function* (chunk) {
+      commandExec.stdout.forEach(function* (chunk) {
         stdoutBuffer = Buffer.concat([stdoutBuffer, chunk]);
         if (elegantlyRespond) {
-          const lastMessage = chunk
-            .toString("utf-8")
-            .split("\n")
-            .map((ansied) => stripAnsi(ansied).trim())
-            .filter((message) => message.length > 0)
-            .pop();
+          const lastMessage = stripAnsi(chunk.toString("utf-8")).trim();
 
-          if (debug) console.log(lastMessage);
-          responded += tryResponse({ responses, runCommand, lastMessage });
+          if (debug)
+            console.dir({ /* stdout: stdoutBuffer.toString(), */ lastMessage });
+          const response = tryResponse({
+            responseCount,
+            responses,
+            commandExec,
+            lastMessage,
+          });
+          if (response.length > 0) responseCount = responseCount + 1;
+
+          responded += response;
         } else {
-          runCommand.stdin.send(pressEnter);
+          commandExec.stdin.send(pressEnter);
         }
       })
     );
 
     yield spawn(
-      runCommand.stderr.forEach((chunk) => {
+      commandExec.stderr.forEach((chunk) => {
         stderrBuffer = Buffer.concat([stderrBuffer, chunk]);
       })
     );
 
-    let status = yield withTimeout(24900, runCommand.join());
+    let status = yield withTimeout(timeout, commandExec.join());
 
     stdout = stripAnsi(stdoutBuffer.toString("utf-8").trim());
     stderr = stripAnsi(stderrBuffer.toString("utf-8").trim());
@@ -126,25 +132,29 @@ export function* runCommand(
 const pressEnter = String.fromCharCode(13);
 
 const tryResponse = ({
+  responseCount,
   responses,
-  runCommand,
+  commandExec,
   lastMessage,
 }: {
+  responseCount: number;
   responses: Responses;
-  runCommand: Process;
+  commandExec: Process;
   lastMessage?: string;
 }) => {
-  for (let [question, answer] of responses) {
-    if (lastMessage && lastMessage.match(question)) {
-      if (answer === "pressEnter") {
-        // console.log(`sending Enter to ${lastMessage}`);
-        runCommand.stdin.send(pressEnter);
-      } else {
-        // console.log(`sending ${answer} to ${lastMessage}`);
-        runCommand.stdin.send(answer + pressEnter);
-      }
-      return lastMessage.trim() + "\n";
+  if (responseCount >= responses.length) {
+    return "";
+  }
+  const [question, answer] = responses[responseCount];
+  if (lastMessage && lastMessage.match(question)) {
+    if (answer === "pressEnter") {
+      // console.log(`sending Enter to ${lastMessage}`);
+      commandExec.stdin.send(pressEnter);
+    } else {
+      // console.log(`sending ${answer} to ${lastMessage}`);
+      commandExec.stdin.send(answer + pressEnter);
     }
+    return lastMessage.trim() + "\n";
   }
   return "";
 };

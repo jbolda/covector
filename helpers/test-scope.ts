@@ -43,7 +43,8 @@ function describeWithScope(
 }
 
 describeWithScope.only = vitest.describe.only;
-describeWithScope.ignore = vitest.describe.skip;
+describeWithScope.skip = vitest.describe.skip;
+describeWithScope.skipIf = vitest.describe.skipIf;
 
 export const describe = <typeof vitest.describe>(<unknown>describeWithScope);
 

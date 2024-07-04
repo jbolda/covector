@@ -1,14 +1,12 @@
-import { type Logger } from "@covector/types";
-import inquirer from "inquirer";
 import globby from "globby";
-import { default as fsDefault, Dir } from "fs";
-// this is compatible with node@12+
-const fs = fsDefault.promises;
+import { intro, outro, group, cancel, text, confirm } from "@clack/prompts";
+import * as fs from "fs/promises";
+import type { Dir } from "fs";
 import path from "path";
 import { all } from "effection";
 import { readPkgFile } from "@covector/files";
 import type { PackageFile } from "@covector/types";
-const covectorPackageFile = require("../package.json");
+import { type Logger } from "@covector/types";
 
 export const init = function* init({
   logger,
@@ -26,12 +24,22 @@ export const init = function* init({
     [k: string]: { path: string; manager: string; dependencies?: string[] };
   } = {};
   let pkgManagers: { [k: string]: boolean } = {};
-  let gitURL: boolean | string = false;
+  let gitURL: string | undefined;
   const pkgFiles: PackageFile[] = yield all(
-    pkgs.map((pkg: string) => readPkgFile({ file: pkg, nickname: pkg, cwd }))
+    pkgs.map(
+      (pkg: string) =>
+        function* () {
+          try {
+            return yield readPkgFile({ file: pkg, nickname: pkg, cwd });
+          } catch (error) {
+            return undefined;
+          }
+        }
+    )
   );
 
   for (let pkgFile of pkgFiles) {
+    if (!pkgFile) continue;
     if (!pkgFile?.pkg?.workspaces) {
       const manager: string = yield derivePkgManager({
         path: path.dirname(`./${pkgFile.name}`),
@@ -72,43 +80,52 @@ export const init = function* init({
     }
   }
 
-  const answers: { [k: string]: string } = yield inquirer
-    .prompt([
-      {
-        type: "input",
-        name: "git url",
-        message: "What is the url to your github repo?",
-        when: !yes,
-        ...(!gitURL ? {} : { default: gitURL }),
-        filter: (userInput, answers) => {
-          if (userInput.endsWith("/")) {
-            return userInput;
-          } else {
-            return userInput.length > 0 ? `${userInput}/` : userInput;
-          }
+  intro(`Initializing Covector${yes ? " with defaults" : ""}`);
+  const defaults = async () => ({
+    gitSiteUrl: gitURL,
+    gh: true,
+    defaultBranch: "main",
+  });
+
+  const questions = yes
+    ? defaults()
+    : group(
+        {
+          gitSiteUrl: async () => {
+            const userInput = await text({
+              message: "What is the url to your GitHub repo?",
+              defaultValue: gitURL,
+              placeholder: gitURL,
+            });
+            if (typeof userInput !== "string") return userInput;
+            return userInput.endsWith("/") ? userInput : `${userInput}/`;
+          },
+          gh: () =>
+            confirm({
+              message: "should we include GitHub Action workflows?",
+            }),
+          defaultBranch: () =>
+            text({
+              message: "What is the name of your default branch?",
+              defaultValue: "main",
+              placeholder: "main",
+            }),
         },
-      },
-      {
-        type: "confirm",
-        name: "github actions",
-        message: "should we include github action workflows?",
-        default: true,
-        when: !yes,
-      },
-      {
-        type: "input",
-        name: "branch name",
-        message: "What is the name of your default branch?",
-        default: "main",
-        when: (answers) => !yes && answers["github actions"],
-      },
-    ])
-    .then((answers) => {
-      return { "github actions": true, ...answers };
-    })
-    .catch((error) => {
-      throw new Error(error);
-    });
+        {
+          onCancel: ({ results }) => {
+            cancel("Cancelled Covector intialization.");
+            process.exit(0);
+          },
+        }
+      );
+  const answers: Awaited<typeof questions> = yield questions;
+  outro("Generating files...");
+
+  // https://github.com/bombshell-dev/clack/issues/134
+  // stdin seems to get "stuck", this shakes it up and allows the process to complete
+  // this is currently only noted to occur in tests
+  // However adding this line then means that Windows never finishes the process.
+  // process.stdin.resume();
 
   try {
     const testOpen: Dir = yield fs.opendir(path.posix.join(cwd, changeFolder));
@@ -121,15 +138,24 @@ export const init = function* init({
 
   const javascript = {
     version: true,
-    getPublishedVersion: "npm view ${ pkgFile.pkg.name } version",
+    getPublishedVersion: {
+      use: "fetch:check",
+      options: {
+        url: "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }",
+      },
+    },
     publish: ["npm publish --access public"],
   };
 
   const rust = {
     version: true,
-    getPublishedVersion:
-      'cargo search ${ pkg.pkg } --limit 1 | sed -nE \'s/^[^"]*"//; s/".*//1p\' -',
-    publish: ["cargo publish"],
+    getPublishedVersion: {
+      use: "fetch:check",
+      options: {
+        url: "https://crates.io/api/v1/crates/${ pkg.pkg }/${ pkg.pkgFile.version }",
+      },
+    },
+    publish: ["cargo publish --no-verify --allow-dirty"],
   };
 
   const githubAction = {
@@ -144,7 +170,7 @@ export const init = function* init({
   };
 
   const config = {
-    ...(answers["git url"] ? { gitSiteUrl: answers["git url"] } : {}),
+    ...(answers?.gitSiteUrl ? { gitSiteUrl: answers.gitSiteUrl } : {}),
     pkgManagers: {
       ...(pkgManagers.javascript ? { javascript } : {}),
       ...(pkgManagers.rust ? { rust } : {}),
@@ -186,9 +212,11 @@ export const init = function* init({
     yield fs.writeFile(path.posix.join(cwd, changeFolder, "readme.md"), readme);
   }
 
-  if (answers["github actions"]) {
-    const covectorVersionSplit = covectorPackageFile.version.split(".");
-    let covectorVersion: string = `${covectorVersionSplit[0]}.${covectorVersionSplit[1]}`;
+  if (answers.gh) {
+    const covectorPackageFile = yield import("../package.json");
+    const covectorVersionSplit: string[] =
+      covectorPackageFile.version.split(".");
+    let covectorVersion = `${covectorVersionSplit[0]}.${covectorVersionSplit[1]}`;
 
     try {
       const testOpen: Dir = yield fs.opendir(
@@ -251,13 +279,15 @@ export const init = function* init({
         ),
         githubPublishWorkflow({
           pkgManagers,
-          branchName: answers["branch name"],
+          branchName: answers.defaultBranch,
           version: covectorVersion,
         })
       );
     }
   }
 
+  // It seems to get stuck on Windows and not close with the resume  //
+  process.exit();
   return "complete";
 };
 

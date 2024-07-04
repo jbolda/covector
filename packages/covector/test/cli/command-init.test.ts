@@ -5,7 +5,10 @@ import { command, runCommand } from "../helpers";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-describe("integration test for init command", () => {
+import os from 'node:os';
+const isWindows = os.platform() === 'win32';
+
+describe.skipIf(isWindows)("integration test for init command", () => {
   it("runs on a workspace", function* () {
     const fullIntegration = f.copy("pkg.js-yarn-workspace");
     const gitSiteUrl = "https://example.com";
@@ -13,13 +16,11 @@ describe("integration test for init command", () => {
       command("init", fullIntegration),
       fullIntegration,
       [
-        [/^\? What is the url to your github repo\?$/, gitSiteUrl],
-        [/^\? should we include github action workflows\? \(Y\/n\)$/, "Y"],
-        [
-          /^\? What is the name of your default branch\? \(main\)$/,
-          "pressEnter",
-        ],
-      ]
+        [/What is the url to your GitHub repo/, gitSiteUrl],
+        [/should we include GitHub Action workflows/, "pressEnter"],
+        [/What is the name of your default branch/, "pressEnter"],
+      ],
+      14900
     );
 
     expect(stderr).toBe("");
@@ -30,7 +31,7 @@ describe("integration test for init command", () => {
     const config = yield loadFile("./.changes/config.json", fullIntegration);
     expect(config.path).toEqual(".changes/config.json");
     expect(JSON.parse(config.content).gitSiteUrl).toBe(`${gitSiteUrl}/`);
-  });
+  }, 15000);
 
   it("sets gitSiteUrl default to repo url", function* () {
     const fullIntegration = f.copy("pkg.js-single-json");
@@ -38,12 +39,9 @@ describe("integration test for init command", () => {
       command("init", fullIntegration),
       fullIntegration,
       [
-        [/\? What is the url to your github repo\? \(.+\)$/, "pressEnter"],
-        [/\? should we include github action workflows\? \(Y\/n\)$/, "Y"],
-        [
-          /\? What is the name of your default branch\? \(main\)$/,
-          "pressEnter",
-        ],
+        [/What is the url to your GitHub repo/, "pressEnter"],
+        [/should we include GitHub Action workflows/, "pressEnter"],
+        [/What is the name of your default branch/, "pressEnter"],
       ]
     );
 

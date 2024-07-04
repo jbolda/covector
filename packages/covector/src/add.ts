@@ -1,12 +1,27 @@
+import {
+  cancel,
+  intro,
+  isCancel,
+  multiselect,
+  outro,
+  select,
+  text,
+} from "@clack/prompts";
 import { type Logger } from "@covector/types";
-import inquirer from "inquirer";
-import { default as fsDefault } from "fs";
-// this is compatible with node@12+
-const fs = fsDefault.promises;
+import { writeFile } from "fs/promises";
+import { existsSync } from "fs";
 import { join } from "path";
 import { configFile } from "@covector/files";
-
 import type { ConfigFile } from "@covector/types";
+import { sh } from "@covector/command";
+
+const exit = (value: any) => {
+  if (isCancel(value)) {
+    cancel(`Skipping creating change file.`);
+    return true;
+  }
+  return false;
+};
 
 export const add = function* ({
   logger,
@@ -22,87 +37,97 @@ export const add = function* ({
   const config: ConfigFile = yield configFile({ cwd });
   let packageBumps: { [k: string]: { bump: string; changeTag?: string } } = {};
 
-  const answers: { packages: string[] } = yield inquirer.prompt([
-    {
-      type: "checkbox",
-      message: "Select packages which need a version bump.",
-      name: "packages",
-      choices: Object.keys(config.packages).map((pkg) => ({ name: pkg })),
-      validate(answer) {
-        if (answer.length < 1) {
-          return "You must choose at least one package.";
-        }
-        return true;
-      },
-    },
-  ]);
+  intro(`What have we changed?`);
 
-  for (let pkg of answers.packages) {
-    const { bump } = yield inquirer.prompt({
-      type: "list",
+  const packagesWithBump: string[] = yield multiselect({
+    message: "Select packages which need a version bump.",
+    options: Object.keys(config.packages).map((pkg) => ({
+      value: pkg,
+      label: pkg,
+    })),
+  });
+
+  if (exit(packagesWithBump)) return "skipped";
+
+  for (let pkg of packagesWithBump) {
+    const additionalBumpTypes = config.additionalBumpTypes
+      ? config.additionalBumpTypes
+      : [];
+    const bump = yield select({
       message: `bump ${pkg} with?`,
-      name: "bump",
-      choices: ["patch", "minor", "major"].concat(
-        config.additionalBumpTypes ? config.additionalBumpTypes : []
-      ),
+      options: ["patch", "minor", "major"]
+        .concat(additionalBumpTypes)
+        .map((bumpKind) => ({
+          value: bumpKind,
+          label: bumpKind,
+          hint: additionalBumpTypes.includes(bumpKind)
+            ? "won't affect the version number"
+            : undefined,
+        })),
     });
+
+    if (exit(bump)) return "skipped";
+
     let changeTag;
     if (config?.changeTags) {
       const tags = Object.keys(config.changeTags);
-      const addTag = yield inquirer.prompt({
-        type: "list",
-        name: "changeTag",
-        message: `bump ${pkg} with?`,
-        choices: ["none"].concat(tags),
+      const addTag = yield select({
+        message: `tag ${pkg} ${bump} bump with?`,
+        options: ["none"].concat(tags).map((t) => ({ value: t, label: t })),
       });
-      if (addTag.changeTag !== "none") changeTag = addTag.changeTag;
+      if (addTag !== "none") changeTag = addTag;
+
+      if (exit(addTag)) return "skipped";
     }
     packageBumps[pkg] = { bump, changeTag };
   }
 
-  const summary = yield inquirer.prompt({
-    type: "input",
-    name: "input",
+  const summary: string = yield text({
     message: `Please summarize the changes that occurred.`,
-    validate(answer) {
-      if (answer.length < 1) {
-        return "You must enter a summary.";
-      }
-      return true;
+    validate(value: string) {
+      if (value.length === 0) return "You must enter a summary.";
     },
   });
+  if (exit(summary)) return "skipped";
 
-  const file = yield inquirer.prompt({
-    type: "input",
-    name: "name",
+  let branchName = "change-file.md";
+  try {
+    const currentBranch = yield sh(
+      "git branch --show-current",
+      {},
+      false,
+      logger
+    );
+    branchName = `${currentBranch?.out ?? branchName}.md`;
+  } catch (error) {
+    // ignore, filled for convenience
+  }
+  const filename: string = yield text({
     message: `Please name the change file.`,
+    initialValue: branchName,
     validate(answer) {
-      if (answer.length < 1) {
-        return "You must enter a file name.";
-      }
-      return true;
-    },
-    filter: (input) => {
-      if (input.endsWith(".md")) {
-        return input;
-      } else {
-        return `${input}.md`;
-      }
+      if (answer.length === 0) return "You must enter a file name.";
+      if (!answer.endsWith(".md"))
+        return "File name must end with the .md file extension.";
+      if (existsSync(join(cwd, changeFolder, `${answer}`)))
+        return `Change file ${join(changeFolder, `${answer}`)} already exists. Use a different filename.`;
     },
   });
+  if (exit(filename)) return "skipped";
 
   const frontmatter = `---
-${answers.packages
+${packagesWithBump
   .map(
-    (pkg) =>
+    (pkg: string) =>
       `"${pkg}": ${packageBumps[pkg].bump}${packageBumps[pkg].changeTag ? `:${packageBumps[pkg].changeTag}` : ``}`
   )
   .join("\n")}
 ---\n\n`;
 
-  const content = `${frontmatter}${summary.input}\n`;
+  const content = `${frontmatter}${summary}\n`;
 
-  yield fs.writeFile(join(cwd, changeFolder, `${file.name}`), content);
+  yield writeFile(join(cwd, changeFolder, `${filename}`), content);
 
+  outro(`Change file written to ${join(changeFolder, `${filename}`)}`);
   return "complete";
 };
