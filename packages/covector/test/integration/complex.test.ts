@@ -125,7 +125,7 @@ describe("integration test for complex commands", () => {
           {
             command: "arbitrary",
             msg: "npm warn Ignoring workspaces for specified package(s)",
-            level: 50,
+            level: 30,
           },
           {
             command: "arbitrary",
@@ -147,7 +147,7 @@ describe("integration test for complex commands", () => {
           {
             command: "arbitrary",
             msg: "npm warn Ignoring workspaces for specified package(s)",
-            level: 50,
+            level: 30,
           },
           {
             command: "arbitrary",
@@ -247,7 +247,7 @@ describe("integration test for complex commands", () => {
           {
             command: "arbitrary",
             msg: "npm warn Ignoring workspaces for specified package(s)",
-            level: 50,
+            level: 30,
           },
           {
             command: "arbitrary",

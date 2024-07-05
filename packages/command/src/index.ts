@@ -422,7 +422,7 @@ export const sh = function* (
     child.stderr.forEach((chunk: Buffer) => {
       out += chunk.toString();
       stderr += chunk.toString();
-      if (log !== false) logger.error(chunk.toString().trim());
+      if (log !== false) logger.info(chunk.toString().trim());
     })
   );
 
