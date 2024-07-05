@@ -25,7 +25,7 @@
           "pipe": true
         },
         {
-          "command": "npm publish --access public",
+          "command": "npm publish --provenance --access public",
           "dryRunCommand": "echo publish here",
           "pipe": true
         },
