@@ -8,7 +8,7 @@ exports[`full e2e test > of publish > github release creation of all packages 1`
 
 - Added some cool things.
 
-
+publish
 ",
       "pkg": {
         "command": [
@@ -572,7 +572,7 @@ exports[`full e2e test > of publish > github release update of all packages 1`] 
 
 - Added some cool things.
 
-
+publish
 ",
       "pkg": {
         "command": [
