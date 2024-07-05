@@ -3,7 +3,7 @@ import { intro, outro, group, cancel, text, confirm } from "@clack/prompts";
 import * as fs from "fs/promises";
 import type { Dir } from "fs";
 import path from "path";
-import { all } from "effection";
+import { Operation, all } from "effection";
 import { readPkgFile } from "@covector/files";
 import type { PackageFile } from "@covector/types";
 import { type Logger } from "@covector/types";
@@ -25,10 +25,10 @@ export const init = function* init({
   } = {};
   let pkgManagers: { [k: string]: boolean } = {};
   let gitURL: string | undefined;
-  const pkgFiles: PackageFile[] = yield all(
+  const pkgFiles: (PackageFile | undefined)[] = yield all(
     pkgs.map(
       (pkg: string) =>
-        function* () {
+        function* (): Operation<(PackageFile | undefined)[]> {
           try {
             return yield readPkgFile({ file: pkg, nickname: pkg, cwd });
           } catch (error) {
@@ -213,6 +213,7 @@ export const init = function* init({
   }
 
   if (answers.gh) {
+    // @ts-ignore we don't need TS to check this import
     const covectorPackageFile = yield import("../package.json");
     const covectorVersionSplit: string[] =
       covectorPackageFile.version.split(".");
@@ -325,7 +326,7 @@ const buildDependencyGraph = ({
   pkgFiles,
 }: {
   pkgFile: PackageFile;
-  pkgFiles: PackageFile[];
+  pkgFiles: (PackageFile | undefined)[];
 }) => {
   const pkgDeps = [
     ...(pkgFile.pkg?.dependencies ? Object.keys(pkgFile.pkg.dependencies) : []),
