@@ -144,7 +144,7 @@ export const init = function* init({
         url: "https://registry.npmjs.com/${ pkg.pkg }/${ pkg.pkgFile.version }",
       },
     },
-    publish: ["npm publish --access public"],
+    publish: ["npm publish --provenance --access public"],
   };
 
   const rust = {
