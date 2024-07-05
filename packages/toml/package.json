@@ -1,6 +1,16 @@
 {
   "name": "@covector/toml",
   "version": "0.2.0",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/jbolda/covector#readme",
+  "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbolda/covector.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "files": [
     "pkg/covector_toml_bg.wasm",
     "pkg/covector_toml.js",
