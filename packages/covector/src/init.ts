@@ -416,6 +416,9 @@ on:
     branches:
       - ${branchName}
 
+permissions:
+  id-token: write
+
 jobs:
   version-or-publish:
     runs-on: ubuntu-latest
