@@ -1388,7 +1388,7 @@ describe("integration test in production mode", () => {
           {
             command: "publish",
             err: "Error: boom",
-            level: 50,
+            level: 30,
           },
           // it actually here and the logs (especially on linux) aren't output
           //  consistently enough to check the remaining
@@ -1423,7 +1423,7 @@ describe("integration test in production mode", () => {
           {
             command: "publish",
             err: "Error: boom",
-            level: 50,
+            level: 30,
             errorNumber: 1,
           },
           {
@@ -1440,7 +1440,7 @@ describe("integration test in production mode", () => {
           {
             command: "publish",
             err: "Error: boom",
-            level: 50,
+            level: 30,
             errorNumber: 2,
           },
           {
@@ -1457,7 +1457,7 @@ describe("integration test in production mode", () => {
           {
             command: "publish",
             err: "Error: boom",
-            level: 50,
+            level: 30,
             errorNumber: 3,
           },
           // it actually throws after the third error it hits
