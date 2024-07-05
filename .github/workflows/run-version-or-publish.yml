@@ -5,7 +5,10 @@ on:
       - main
 
 permissions:
+  # required for npm provenance
   id-token: write
+  # required to create the GitHub Release
+  contents: write
 
 jobs:
   covector:
