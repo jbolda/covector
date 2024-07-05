@@ -1,5 +1,28 @@
 # Changelog
 
+## \[0.12.0]
+
+- [`e5d2be5`](https://www.github.com/jbolda/covector/commit/e5d2be5ee547170f8128e09e241e512c8bf5f1c3) ([#322](https://www.github.com/jbolda/covector/pull/322) by [@echocaro](https://www.github.com/jbolda/covector/../../echocaro)) On comment post error, upload the content instead as an artifact. This prevents the workflow from failing on a fork, and allows another workflow with permissions to handle the work from there.
+
+### New Features
+
+- [`c78050e`](https://www.github.com/jbolda/covector/commit/c78050e1de34590d67abe28818c8e91affbaf610) ([#324](https://www.github.com/jbolda/covector/pull/324) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Handle `workflow_run` to enable generating a comment, uploading it as an artifact and post the comment in a workflow which has appropriate permissions.
+
+### Enhancements
+
+- [`e2c83dc`](https://www.github.com/jbolda/covector/commit/e2c83dc5e98b9d8ddbf428af2dda32168e4df9ec) ([#318](https://www.github.com/jbolda/covector/pull/318) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add `exports` to `package.json` for improved capability and an enhanced experience when developed covector and testing locally.
+- [`dda5430`](https://www.github.com/jbolda/covector/commit/dda5430e44d6dddc1946f13e5e4306a2d534e6ab) ([#337](https://www.github.com/jbolda/covector/pull/337) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) When there are no changes, also include a link to create a new change file.
+- [`c72c060`](https://www.github.com/jbolda/covector/commit/c72c060e7d14434d946d1a481a0cc6c8e67ed229) ([#316](https://www.github.com/jbolda/covector/pull/316) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Use node v20 in GitHub Action.
+- [`ce43ad7`](https://www.github.com/jbolda/covector/commit/ce43ad7fd924319b544b30785217070436182d71) ([#319](https://www.github.com/jbolda/covector/pull/319) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add logger instance to allow custom loggers based on the usage context. It enables different structured logs for the CLI vs within a GitHub Action, as well as for local development and testing.
+
+### Dependencies
+
+- Upgraded to `covector@0.12.0`
+
+### Changes Supporting Covector Development
+
+- [`ce43ad7`](https://www.github.com/jbolda/covector/commit/ce43ad7fd924319b544b30785217070436182d71) ([#319](https://www.github.com/jbolda/covector/pull/319) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Switch to Vitest for the test runner. This improves speed and enables improved ability to update to current standards. Additionally, we use `pino-test` with the changes to the logger to more specifically check log output. Along with this, we switch multiple test fixtures to run commands that would return more standard output across OS which reduces test flakiness.
+
 ## \[0.11.0]
 
 - [`9480736`](https://www.github.com/jbolda/covector/commit/9480736961fb92b1861938015b1be3fd53ee5355) ([#299](https://www.github.com/jbolda/covector/pull/299) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Return additional `status` content from `covector` to enable posting a comment in PR providing additional context of the expected change files.
