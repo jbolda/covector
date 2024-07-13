@@ -423,6 +423,8 @@ permissions:
   id-token: write
   # required to create the GitHub Release
   contents: write
+  # required for creating the Version Packages Release
+  pull-requests: write
 
 jobs:
   version-or-publish:
