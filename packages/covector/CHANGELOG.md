@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.12.2]
+
+### Enhancements
+
+- [`ef274be`](https://www.github.com/jbolda/covector/commit/ef274be8ad5722c9a2362d931bdd9a1653687e06) ([#347](https://www.github.com/jbolda/covector/pull/347) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Add `cwd` option to pass to the CLI. Useful for local development, at minimum.
+
+### Bug Fixes
+
+- [`7fe7243`](https://www.github.com/jbolda/covector/commit/7fe7243ec96c925da189348c33bcb04ac0ac56b0) ([#348](https://www.github.com/jbolda/covector/pull/348) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Prerelease versions which post comments require the config passed in the return signature.
+
 ## \[0.12.1]
 
 ### Enhancements
