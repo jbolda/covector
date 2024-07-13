@@ -117,10 +117,10 @@ export function* status({
   } else if (!!pre && assembledChanges?.changes?.length === 0) {
     if (logs) {
       logger.info("There are no changes.");
-      logger.info(
-        "We have previously released the changes in these files:",
-        changesPaths
-      );
+      logger.info({
+        msg: "We have previously released the changes in these files:",
+        renderAsYAML: changesPaths,
+      });
     }
     return { pkgReadyToPublish: [], response: "No changes." };
   } else {

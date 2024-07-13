@@ -88,8 +88,10 @@ export function* version({
     cwd,
   });
   if (dryRun) {
-    logger.info("==== commands ready to run ===");
-    logger.info(commands);
+    logger.info({
+      msg: "==== commands ready to run ===",
+      renderAsYAML: commands,
+    });
   }
 
   let pkgCommandsRan: CommandsRan = Object.keys(config.packages).reduce(
@@ -186,8 +188,7 @@ export function* version({
   }
 
   if (dryRun) {
-    logger.info("==== result ===");
-    logger.info(pkgCommandsRan);
+    logger.info({ msg: "==== result ===", renderAsYAML: pkgCommandsRan });
   }
 
   return <CovectorVersion>{ commandsRan: pkgCommandsRan, pipeTemplate };
