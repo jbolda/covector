@@ -4,7 +4,7 @@ import { pino } from "pino";
 import logStream from "./logger";
 
 export function* cli(argv: readonly string[]): Generator<any, any, any> {
-  const { command, directory, yes, dryRun } = parseOptions(argv);
+  const { command, directory, yes, dryRun, cwd } = parseOptions(argv);
   const stream = logStream();
   const logger = pino(stream);
   return yield covector({
@@ -13,6 +13,7 @@ export function* cli(argv: readonly string[]): Generator<any, any, any> {
     changeFolder: directory,
     yes,
     dryRun,
+    cwd,
   });
 }
 
@@ -21,6 +22,7 @@ function parseOptions(argv: readonly string[]): {
   dryRun: boolean;
   yes?: boolean;
   directory?: string;
+  cwd: string;
 } {
   let rawOptions = yargs
     .scriptName("covector")
@@ -51,6 +53,13 @@ function parseOptions(argv: readonly string[]): {
           "run a command that shows the expected command without executing",
       },
     })
+    .options({
+      cwd: {
+        type: "string",
+        default: ".",
+        describe: "context in which to run",
+      },
+    })
     .demandCommand(1)
     .help()
     .epilogue(
@@ -68,5 +77,7 @@ function parseOptions(argv: readonly string[]): {
     yes: rawOptions.yes,
     // @ts-expect-error
     directory: rawOptions.directory,
+    // @ts-expect-error
+    cwd: rawOptions.cwd,
   };
 }
