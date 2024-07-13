@@ -398,7 +398,9 @@ jobs:
         uses: jbolda/covector/packages/action@covector-v${version}
         id: covector
         with:
+          token: \${{ secrets.GITHUB_TOKEN }}
           command: 'status'
+          comment: true
 `;
 
 const githubPublishWorkflow = ({
@@ -417,7 +419,12 @@ on:
       - ${branchName}
 
 permissions:
+  # required for npm provenance
   id-token: write
+  # required to create the GitHub Release
+  contents: write
+  # required for creating the Version Packages Release
+  pull-requests: write
 
 jobs:
   version-or-publish:
@@ -436,7 +443,6 @@ jobs:
               ? `
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
           registry-url: 'https://registry.npmjs.org'`
               : ""
           }${
@@ -468,6 +474,7 @@ jobs:
           token: \${{ secrets.GITHUB_TOKEN }}
           command: 'version-or-publish'
           createRelease: true
+          recognizeContributors: true
       - name: Create Pull Request With Versions Bumped
         id: cpr
         uses: peter-evans/create-pull-request@v6
