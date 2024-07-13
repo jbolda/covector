@@ -128,32 +128,25 @@ describe("integration test in --dry-run mode", () => {
           command: "version",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "version",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "version",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "version",
           msg: "==== commands ready to run ===",
           level: 30,
-          // TODO check render
-        },
-        {
-          command: "version",
-          // TODO no message?
-          // msg: "==== commands ready to run ===",
-          level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "version",
@@ -204,12 +197,7 @@ describe("integration test in --dry-run mode", () => {
           command: "version",
           msg: "==== result ===",
           level: 30,
-        },
-        {
-          command: "version",
-          // TODO check render
-          // msg: "completed",
-          level: 30,
+          renderAsYAML: {},
         },
         {
           msg: "completed",
@@ -257,44 +245,37 @@ describe("integration test in --dry-run mode", () => {
           command: "publish",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "publish",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "publish",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "publish",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "publish",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "publish",
           msg: "==== commands ready to run ===",
           level: 30,
-          // TODO check render
-        },
-        {
-          command: "publish",
-          // TODO no message?
-          // msg: "==== commands ready to run ===",
-          level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "publish",
@@ -440,12 +421,7 @@ describe("integration test in --dry-run mode", () => {
           command: "publish",
           msg: "==== result ===",
           level: 30,
-        },
-        {
-          command: "publish",
-          // msg: "completed",
-          // TODO check render
-          level: 30,
+          renderAsYAML: {},
         },
         {
           msg: "completed",
@@ -477,14 +453,7 @@ describe("integration test in --dry-run mode", () => {
           command: "arbitrary",
           msg: "==== commands ready to run ===",
           level: 30,
-          // TODO check render
-        },
-        {
-          command: "arbitrary",
-          // TODO no message?
-          // msg: "==== commands ready to run ===",
-          level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "arbitrary",
@@ -521,44 +490,37 @@ describe("integration test in --dry-run mode", () => {
           command: "arbitrary",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "arbitrary",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "arbitrary",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "arbitrary",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "arbitrary",
           msg: "==== data piped into commands ===",
           level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "arbitrary",
           msg: "==== commands ready to run ===",
           level: 30,
-          // TODO check render
-        },
-        {
-          command: "arbitrary",
-          // TODO no message?
-          // msg: "==== commands ready to run ===",
-          level: 30,
-          // TODO check render
+          renderAsYAML: {},
         },
         {
           command: "arbitrary",
@@ -614,13 +576,6 @@ describe("integration test in --dry-run mode", () => {
           command: "arbitrary",
           msg: "==== result ===",
           level: 30,
-        },
-        {
-          command: "arbitrary",
-          // TODO no message?
-          // msg: "completed",
-          level: 30,
-          // TODO check render
         },
         {
           msg: "completed",

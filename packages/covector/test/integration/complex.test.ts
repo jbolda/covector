@@ -304,21 +304,13 @@ describe("integration test for complex commands", () => {
             command: "version",
             msg: "==== commands ready to run ===",
             level: 30,
-          },
-          {
-            command: "version",
-            // command data piped
-            level: 30,
+            renderAsYAML: {},
           },
           {
             command: "version",
             msg: "==== result ===",
             level: 30,
-          },
-          {
-            command: "version",
-            // command data piped
-            level: 30,
+            renderAsYAML: {},
           },
           {
             msg: "completed",
@@ -361,21 +353,19 @@ describe("integration test for complex commands", () => {
             command: "publish",
             msg: "==== data piped into commands ===",
             level: 30,
+            renderAsYAML: {},
           },
           {
             command: "publish",
             msg: "==== data piped into commands ===",
             level: 30,
+            renderAsYAML: {},
           },
           {
             command: "publish",
             msg: "==== commands ready to run ===",
             level: 30,
-          },
-          {
-            command: "publish",
-            // TODO this has extra, check render YAML
-            level: 30,
+            renderAsYAML: {},
           },
           {
             command: "publish",
@@ -391,12 +381,7 @@ describe("integration test for complex commands", () => {
             command: "publish",
             msg: "==== result ===",
             level: 30,
-          },
-          {
-            command: "publish",
-            // TODO check YAML render
-            // msg: "boop",
-            level: 30,
+            renderAsYAML: {},
           },
           {
             msg: "completed",
@@ -426,25 +411,20 @@ describe("integration test for complex commands", () => {
           {
             command: "arbitrary",
             msg: "==== data piped into commands ===",
-            // TODO check YAML render
             level: 30,
+            renderAsYAML: {},
           },
           {
             command: "arbitrary",
             msg: "==== data piped into commands ===",
-            // TODO check YAML render
             level: 30,
+            renderAsYAML: {},
           },
           {
             command: "arbitrary",
             msg: "==== commands ready to run ===",
-            // TODO check YAML render
             level: 30,
-          },
-          {
-            command: "arbitrary",
-            // TODO check command output
-            level: 30,
+            renderAsYAML: {},
           },
           {
             command: "arbitrary",
@@ -490,11 +470,7 @@ describe("integration test for complex commands", () => {
             command: "arbitrary",
             msg: "==== result ===",
             level: 30,
-          },
-          {
-            command: "arbitrary",
-            // TODO check result output
-            level: 30,
+            renderAsYAML: {},
           },
           {
             msg: "completed",
@@ -525,22 +501,19 @@ describe("integration test for complex commands", () => {
             command: "arbitrary",
             msg: "==== data piped into commands ===",
             level: 30,
+            renderAsYAML: {},
           },
           {
             command: "arbitrary",
             msg: "==== data piped into commands ===",
             level: 30,
+            renderAsYAML: {},
           },
           {
             command: "arbitrary",
             msg: "==== commands ready to run ===",
             level: 30,
-          },
-          {
-            command: "arbitrary",
-            // msg: "boop",
-            // data pipe
-            level: 30,
+            renderAsYAML: {},
           },
           {
             command: "arbitrary",
@@ -556,12 +529,7 @@ describe("integration test for complex commands", () => {
             command: "arbitrary",
             msg: "==== result ===",
             level: 30,
-          },
-          {
-            command: "arbitrary",
-            // msg: "boop",
-            // result
-            level: 30,
+            renderAsYAML: {},
           },
           {
             msg: "completed",

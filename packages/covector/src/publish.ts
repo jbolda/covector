@@ -79,8 +79,10 @@ export function* publish({
   });
 
   if (dryRun) {
-    logger.info("==== commands ready to run ===");
-    logger.info(commands);
+    logger.info({
+      msg: "==== commands ready to run ===",
+      renderAsYAML: commands,
+    });
   }
 
   if (commands.length === 0) {
@@ -143,8 +145,7 @@ export function* publish({
   });
 
   if (dryRun) {
-    logger.info("==== result ===");
-    logger.info(pkgCommandsRan);
+    logger.info({ msg: "==== result ===", renderAsYAML: pkgCommandsRan });
   }
 
   return <CovectorPublish>{ commandsRan: pkgCommandsRan, pipeTemplate };
