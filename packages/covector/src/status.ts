@@ -122,7 +122,7 @@ export function* status({
         renderAsYAML: changesPaths,
       });
     }
-    return { pkgReadyToPublish: [], response: "No changes." };
+    return { pkgReadyToPublish: [], config, response: "No changes." };
   } else {
     if (logs) {
       logger.info("changes:");
