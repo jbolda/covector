@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.12.1]
+
+### Enhancements
+
+- [`1a1f4c6`](https://www.github.com/jbolda/covector/commit/1a1f4c6e08e08893d841d4ac0f057d4f72b7712c) ([#344](https://www.github.com/jbolda/covector/pull/344) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Enable new features in `covector init` and adjust permissions to suit. This includes tagging contributors in the changelog and writing a comment in PRs with additional context (non-forks only through `init`).
+
+### Bug Fixes
+
+- [`055a319`](https://www.github.com/jbolda/covector/commit/055a3191f0783e99f15028cc8b16b1780d3d8167) ([#343](https://www.github.com/jbolda/covector/pull/343) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Missed some logger function which were improperly passed an non-message object. If rendering an object, it requires `msg` and `renderAsYAML`.
+
 ## \[0.12.0]
 
 ### Enhancements

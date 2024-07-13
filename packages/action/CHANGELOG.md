@@ -1,5 +1,15 @@
 # Changelog
 
+## \[0.12.1]
+
+### Bug Fixes
+
+- [`055a319`](https://www.github.com/jbolda/covector/commit/055a3191f0783e99f15028cc8b16b1780d3d8167) ([#343](https://www.github.com/jbolda/covector/pull/343) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Missed some logger function which were improperly passed an non-message object. If rendering an object, it requires `msg` and `renderAsYAML`.
+
+### Dependencies
+
+- Upgraded to `covector@0.12.1`
+
 ## \[0.12.0]
 
 - [`e5d2be5`](https://www.github.com/jbolda/covector/commit/e5d2be5ee547170f8128e09e241e512c8bf5f1c3) ([#322](https://www.github.com/jbolda/covector/pull/322) by [@echocaro](https://www.github.com/jbolda/covector/../../echocaro)) On comment post error, upload the content instead as an artifact. This prevents the workflow from failing on a fork, and allows another workflow with permissions to handle the work from there.
