@@ -25,7 +25,7 @@ export function formatComment({
     projectReadmeExists
       ? `about <a href='../tree/HEAD/${changeFolder}'>change files</a><em> or`
       : ""
-  } the docs at <a href='https://github.com/jbolda/covector/tree/main/covector'>github.com/jbolda/covector</a><em></p>`;
+  } the docs at <a href='https://github.com/jbolda/covector/tree/main/packages/covector'>github.com/jbolda/covector</a><em></p>`;
 
   if ("applied" in covectored) {
     return (
