@@ -13,7 +13,7 @@ export function formatComment({
   changeFolder: string;
 }) {
   let comment = `### Package Changes Through ${payload.pull_request.head.sha}\n`;
-  let addChangeFileUrl = `${payload.pull_request.html_url}/../../new/${
+  let addChangeFileUrl = `${payload.pull_request.head.repo.html_url}/../../new/${
     payload.pull_request.head.ref
   }${newChangeFile({
     prNumber: payload.pull_request.number,
