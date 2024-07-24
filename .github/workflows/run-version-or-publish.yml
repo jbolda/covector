@@ -48,6 +48,12 @@ jobs:
       - name: sync lockfile
         if: steps.covector.outputs.commandRan == 'version'
         run: npm install
+      - name: covector publish --dry-run
+        uses: ./packages/action
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          command: "publish"
+          dryRun: true
       - name: create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v6

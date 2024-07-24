@@ -12,6 +12,10 @@ inputs:
     description: The directory to run covector within.
     required: false
     default: ""
+  dryRun:
+    description: Run in dry-run mode which skips executing steps, and instead logs. Useful for testing a publish beforehand.
+    required: false
+    defaults: false
   createRelease:
     description: Opt-in to create a release on publish
     required: false
