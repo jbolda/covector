@@ -22,9 +22,8 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
       - name: covector status
-        uses: jbolda/covector/packages/action@release
-        id: covector
-        # note that this could be shifted to the job, but for future reference we are dumping the full github context
+        uses: jbolda/covector/packages/action@covector-v0
+        # note that this check could be shifted to the job, but for future reference, we are dumping the full github context
         if: github.event.workflow_run.conclusion == 'success' &&
           (github.event.workflow_run.head_repository.full_name != github.repository || github.actor == 'dependabot[bot]')
         with:
