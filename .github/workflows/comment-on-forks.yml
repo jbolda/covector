@@ -2,7 +2,7 @@ name: covector comment on forks
 
 on:
   workflow_run:
-    workflows: [covector]
+    workflows: [covector status]
     types:
       - completed
 
