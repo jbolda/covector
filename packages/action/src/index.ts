@@ -34,6 +34,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
         ? process.env.GITHUB_TOKEN || ""
         : core.getInput("token");
     const inputCommand = core.getInput("command");
+    const dryRun = core.getInput("dryRun") === "true";
     const releaseCommitish =
       core.getInput("releaseCommitish") || github.context.sha;
 
@@ -74,6 +75,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
       } else {
         const covectored: CovectorStatus = yield covector({
           logger,
+          dryRun,
           command,
           filterPackages,
           cwd,
@@ -153,6 +155,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
     } else if (command === "version") {
       const status: CovectorStatus = yield covector({
         logger,
+        dryRun,
         command: "status",
         cwd,
       });
@@ -207,6 +210,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
 
       const covectored: CovectorVersion = yield covector({
         logger,
+        dryRun,
         command,
         filterPackages,
         cwd,
@@ -238,7 +242,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
         renderAsYAML: covectoredSmushed,
       });
     } else if (command === "publish") {
-      const status = yield covector({ logger, command: "status", cwd });
+      const status = yield covector({ logger, dryRun, command: "status", cwd });
       core.setOutput("status", status.response);
 
       let covectored: CovectorPublish;
@@ -253,6 +257,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
         logger.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
         covectored = yield covector({
           logger,
+          dryRun,
           command,
           filterPackages,
           cwd,
@@ -270,6 +275,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
       } else {
         covectored = yield covector({
           logger,
+          dryRun,
           command,
           filterPackages,
           cwd,
@@ -373,6 +379,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
 
         covectored = yield covector({
           logger,
+          dryRun,
           command,
           filterPackages,
           cwd,
