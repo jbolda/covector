@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.12.3]
+
+### Bug Fixes
+
+- [`e81201f`](https://www.github.com/jbolda/covector/commit/e81201fe12a06292ea6bebfb62951a718bee3d74) ([#350](https://www.github.com/jbolda/covector/pull/350) by [@chippers](https://www.github.com/jbolda/covector/../../chippers)) Fix GitHub pull request comment link to correctly point at the docs.
+
 ## \[0.12.2]
 
 ### Enhancements

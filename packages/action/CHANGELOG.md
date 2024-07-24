@@ -1,5 +1,20 @@
 # Changelog
 
+## \[0.12.3]
+
+### Enhancements
+
+- [`294a3c0`](https://www.github.com/jbolda/covector/commit/294a3c0df993dc08a3ff8898881500dceb15d688) ([#354](https://www.github.com/jbolda/covector/pull/354) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) The action now supports running in dry run mode. This enables testing of workflows and publish sequences prior to publishing.
+
+### Bug Fixes
+
+- [`9f85eae`](https://www.github.com/jbolda/covector/commit/9f85eaef055bee41f4b6508a296938f04de25e89) ([#355](https://www.github.com/jbolda/covector/pull/355) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) The URL to create a change file on forks was broken. It was incorrectly pointing at the root repo.
+- [`e81201f`](https://www.github.com/jbolda/covector/commit/e81201fe12a06292ea6bebfb62951a718bee3d74) ([#350](https://www.github.com/jbolda/covector/pull/350) by [@chippers](https://www.github.com/jbolda/covector/../../chippers)) Fix GitHub pull request comment link to correctly point at the docs.
+
+### Dependencies
+
+- Upgraded to `covector@0.12.3`
+
 ## \[0.12.2]
 
 ### Dependencies
