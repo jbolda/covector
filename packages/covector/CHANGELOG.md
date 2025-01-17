@@ -1,5 +1,11 @@
 # Changelog
 
+## \[0.12.4]
+
+### Enhancements
+
+- [`6b78335`](https://www.github.com/jbolda/covector/commit/6b78335e559d7fa25b47d545e6d61cc993124d39) ([#358](https://www.github.com/jbolda/covector/pull/358) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Adding a few more outputs from the `status` command for use cases which want to work off the derived state.
+
 ## \[0.12.3]
 
 ### Bug Fixes
