@@ -80,6 +80,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
           filterPackages,
           cwd,
         });
+        console.dir(covectored)
         core.setOutput("status", covectored.response);
         core.setOutput("templatePipe", covectored.pipeTemplate);
 
