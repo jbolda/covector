@@ -34,18 +34,22 @@ Note that command can also use `version-or-publish` which is an input command un
 
 See the [action.yml](./action.yml) for outputs for your use or see below.
 
-| output            | description                                                                                             | command                           |
-| ----------------- | ------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| status            | Returns either "No changes." or a dyanmic list of packages changed.                                     | status, version, publish          |
-| willPublish       | Will be set as `"true"` (stringified boolean) if the next step is to try publishing.                    | status                            |
-| change            | The changes that were applied                                                                           | version, preview                  |
-| commandRan        | The command ran (particularly useful for 'version-or-publish' input option).                            | all                               |
-| successfulPublish | Boolean as a string if we published. Useful to skip follow-on steps with nothing published.             | publish, preview                  |
-| packagesPublished | Comma separated list of all of the packages that published.                                             | publish, preview                  |
-| templatePipe      | A stringified key/value pair object of the `pipe` that is passed to each command.                       | status, version, publish, preview |
-| releaseId         | The ID of the created release. Only present when `createRelease` is set to true.                        | publish                           |
-| releaseUrl        | The URL users can navigate to in order to view the release.                                             | publish                           |
-| releaseUploadUrl  | The URL for uploading assets to the release, which could be used by GitHub Actions for additional uses. | publish                           |
+| output                   | description                                                                                             | command                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| status                   | Returns either "No changes." or a dyanmic list of packages changed.                                     | status, version, publish          |
+| willPublish              | Will be set as `"true"` (stringified boolean) if the next step is to try publishing.                    | status                            |
+| packagesReady            | Comma separated list of packages with changes: `covector,action`                                        | status                            |
+| packagesReadyPaths       | Command separated list of paths to packages with changes: `./packages/covector,./packages/action`       | status                            |
+| packagesReadySpaced      | Space separated list of packages with changes: `'covector' 'action'`                                    | status                            |
+| packagesReadyPathsSpaced | Space separated list of paths to packages with changes: `'./packages/covector' './packages/action'`     | status                            |
+| change                   | The changes that were applied                                                                           | version, preview                  |
+| commandRan               | The command ran (particularly useful for 'version-or-publish' input option).                            | all                               |
+| successfulPublish        | Boolean as a string if we published. Useful to skip follow-on steps with nothing published.             | publish, preview                  |
+| packagesPublished        | Comma separated list of all of the packages that published.                                             | publish, preview                  |
+| templatePipe             | A stringified key/value pair object of the `pipe` that is passed to each command.                       | status, version, publish, preview |
+| releaseId                | The ID of the created release. Only present when `createRelease` is set to true.                        | publish                           |
+| releaseUrl               | The URL users can navigate to in order to view the release.                                             | publish                           |
+| releaseUploadUrl         | The URL for uploading assets to the release, which could be used by GitHub Actions for additional uses. | publish                           |
 
 Besides these static outputs, we also supply dynamic outputs for each of your packages. Replace the `*` with your package name. Note, this will not be listed in the [action.yml](./action.yml). Outputs can only alphanumeric characters, and are replaced with a dash: `-`. For example, a scoped npm package of `@covector/awesome` would be `willPublish--covector-awesome`.
 
