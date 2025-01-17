@@ -80,9 +80,25 @@ export function* run(logger: Logger): Generator<any, any, any> {
           filterPackages,
           cwd,
         });
-        console.dir(covectored)
+        console.dir(covectored, { depth: 7 });
         core.setOutput("status", covectored.response);
         core.setOutput("templatePipe", covectored.pipeTemplate);
+        core.setOutput(
+          "packagesReady",
+          covectored.pkgVersion.map((p) => p.pkg).join(",")
+        );
+        core.setOutput(
+          "packagesReadyPaths",
+          covectored.pkgVersion.map((p) => p.path).join(",")
+        );
+        core.setOutput(
+          "packagesReadySpaced",
+          covectored.pkgVersion.map((p) => `'${p.pkg}'`).join(" ")
+        );
+        core.setOutput(
+          "packagesReadyPathsSpaced",
+          covectored.pkgVersion.map((p) => `'${p.path}'`).join(" ")
+        );
 
         core.setOutput(
           `willPublish`,
