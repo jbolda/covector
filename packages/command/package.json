@@ -21,8 +21,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@effection/process": "^2.1.3",
-    "effection": "^2.0.6"
+    "effection": "4.0.0-alpha.4"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"

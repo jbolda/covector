@@ -21,17 +21,16 @@
   ],
   "devDependencies": {
     "@types/node": "^20.13.0",
-    "@vitest/ui": "^1.6.0",
+    "effection": "^4.0.0-alpha.4",
     "fixturez": "^1.1.0",
-    "pino-test": "^1.0.1",
-    "prettier": "^3.3.0",
-    "rimraf": "^5.0.7",
-    "tsx": "^4.11.0",
-    "typescript": "5.4.5",
-    "vitest": "^1.6.0"
+    "pino-test": "^1.1.0",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.2",
+    "vitest": "^3.0.2"
   },
   "volta": {
-    "node": "20.14.0",
-    "npm": "10.8.1"
+    "node": "20.18.1",
+    "npm": "11.0.0"
   }
 }

@@ -23,7 +23,7 @@
   "dependencies": {
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
-    "effection": "^2.0.6",
+    "effection": "4.0.0-alpha.4",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
     "remark-frontmatter": "^3.0.0",

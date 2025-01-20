@@ -18,8 +18,7 @@
     "clean": "rimraf dist tsconfig.tsbuildinfo"
   },
   "devDependencies": {
-    "tslib": "^2.5.0",
-    "typescript": "^4.9.5"
+    "typescript": "^5.7.3"
   },
   "volta": {
     "extends": "../../package.json"

@@ -37,7 +37,7 @@
     "@covector/changelog": "0.12.0",
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
-    "effection": "^2.0.6",
+    "effection": "4.0.0-alpha.4",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
@@ -50,9 +50,7 @@
     "@covector/types": "0.0.0",
     "@types/inquirer": "^8.2.6",
     "@types/yargs": "^17.0.32",
-    "fixturez": "^1.1.0",
-    "tslib": "^2.5.0",
-    "typescript": "^4.9.5"
+    "fixturez": "^1.1.0"
   },
   "volta": {
     "extends": "../../package.json"

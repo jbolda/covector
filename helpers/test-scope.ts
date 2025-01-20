@@ -1,4 +1,4 @@
-import { type Operation, run } from "effection";
+import { type Operation, type Effect, run } from "effection";
 
 export interface TestScope {
   addSetup(op: () => Operation<void>): void;
@@ -14,9 +14,9 @@ export function createTestScope(): TestScope {
     runTest(op) {
       return run(function* () {
         for (let step of setup) {
-          yield step();
+          yield* step();
         }
-        yield op();
+        yield* op();
       });
     },
   };
@@ -28,8 +28,8 @@ let scope: TestScope | undefined;
 
 function describeWithScope(
   name: string | Function,
-  factory?: vitest.SuiteFactory<{}>
-): vitest.SuiteCollector<{}> {
+  factory?: vitest.SuiteFactory
+): vitest.SuiteCollector {
   return vitest.describe(name, () => {
     vitest.beforeEach(() => {
       if (!scope) {
@@ -60,7 +60,7 @@ export function it(
   if (op) {
     return vitest.it(desc, async () => scope?.runTest(op), timeout);
   } else {
-    return vitest.it.skip(desc, () => {});
+    return vitest.it.todo(desc);
   }
 }
 
@@ -76,13 +76,13 @@ it.only = function only(
   }
 };
 
-export function captureError<T>(op: Operation<T>): Operation<T | Error> {
-  return function* () {
-    try {
-      yield op;
-    } catch (error) {
-      return error;
-    }
-    throw new Error("expected operation to throw an error, but it did not!");
-  };
-}
+// export function captureError<T>(op: Operation<T>): Operation<T | Error> {
+//   return function* () {
+//     try {
+//       return yield* op;
+//     } catch (error) {
+//       return error;
+//     }
+//     throw new Error("expected operation to throw an error, but it did not!");
+//   };
+// }
