@@ -5,6 +5,7 @@ import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
+import { call } from "effection";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -38,9 +39,9 @@ describe("package file applies preview bump", () => {
       },
     };
 
-    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+    const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
 
-    yield apply({
+    yield* apply({
       logger,
       //@ts-expect-error
       commands,
@@ -49,7 +50,7 @@ describe("package file applies preview bump", () => {
       allPackages,
       previewVersion: "branch-name.12345",
     });
-    const modifiedFile = yield loadFile("package.json", jsonFolder);
+    const modifiedFile = yield* loadFile("package.json", jsonFolder);
     expect(modifiedFile.content).toBe(
       "{\n" +
         '  "private": true,\n' +
@@ -60,12 +61,14 @@ describe("package file applies preview bump", () => {
         "}\n"
     );
 
-    yield pinoTest.consecutive(stream, [
-      {
-        msg: "bumping js-single-json-fixture with branch-name.12345 identifier to publish a preview",
-        level: 30,
-      },
-    ]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        {
+          msg: "bumping js-single-json-fixture with branch-name.12345 identifier to publish a preview",
+          level: 30,
+        },
+      ])
+    );
   });
 
   it("bumps multi js json", function* () {
@@ -120,9 +123,9 @@ describe("package file applies preview bump", () => {
       },
     };
 
-    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+    const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
 
-    yield apply({
+    yield* apply({
       logger,
       //@ts-expect-error
       commands,
@@ -131,7 +134,7 @@ describe("package file applies preview bump", () => {
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
-    const modifiedPkgAFile = yield loadFile(
+    const modifiedPkgAFile = yield* loadFile(
       "packages/pkg-a/package.json",
       jsonFolder
     );
@@ -145,7 +148,7 @@ describe("package file applies preview bump", () => {
         "}\n"
     );
 
-    const modifiedPkgBFile = yield loadFile(
+    const modifiedPkgBFile = yield* loadFile(
       "packages/pkg-b/package.json",
       jsonFolder
     );
@@ -156,20 +159,22 @@ describe("package file applies preview bump", () => {
         "}\n"
     );
 
-    yield pinoTest.consecutive(stream, [
-      {
-        msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-        level: 30,
-      },
-      {
-        msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-        level: 30,
-      },
-      {
-        msg: "bumping all with branch-name.12345 identifier to publish a preview",
-        level: 30,
-      },
-    ]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        {
+          msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
+          level: 30,
+        },
+        {
+          msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
+          level: 30,
+        },
+        {
+          msg: "bumping all with branch-name.12345 identifier to publish a preview",
+          level: 30,
+        },
+      ])
+    );
   });
 });
 
@@ -200,9 +205,9 @@ describe("package file applies preview bump to pre-release", () => {
       },
     };
 
-    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+    const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
 
-    yield apply({
+    yield* apply({
       logger,
       //@ts-expect-error
       commands,
@@ -211,7 +216,7 @@ describe("package file applies preview bump to pre-release", () => {
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
-    const modifiedFile = yield loadFile("package.json", jsonFolder);
+    const modifiedFile = yield* loadFile("package.json", jsonFolder);
     expect(modifiedFile.content).toBe(
       "{\n" +
         '  "private": true,\n' +
@@ -221,12 +226,14 @@ describe("package file applies preview bump to pre-release", () => {
         "}\n"
     );
 
-    yield pinoTest.consecutive(stream, [
-      {
-        msg: "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
-        level: 30,
-      },
-    ]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        {
+          msg: "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
+          level: 30,
+        },
+      ])
+    );
   });
 
   it("bumps multi js json without pre-release", function* () {
@@ -280,9 +287,9 @@ describe("package file applies preview bump to pre-release", () => {
       },
     };
 
-    const allPackages = yield readAllPkgFiles({ config, cwd: jsonFolder });
+    const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
 
-    yield apply({
+    yield* apply({
       logger,
       //@ts-expect-error
       commands,
@@ -291,7 +298,7 @@ describe("package file applies preview bump to pre-release", () => {
       cwd: jsonFolder,
       previewVersion: "branch-name.12345",
     });
-    const modifiedPkgAFile = yield loadFile(
+    const modifiedPkgAFile = yield* loadFile(
       "packages/pkg-a/package.json",
       jsonFolder
     );
@@ -305,7 +312,7 @@ describe("package file applies preview bump to pre-release", () => {
         "}\n"
     );
 
-    const modifiedPkgBFile = yield loadFile(
+    const modifiedPkgBFile = yield* loadFile(
       "packages/pkg-b/package.json",
       jsonFolder
     );
@@ -316,19 +323,21 @@ describe("package file applies preview bump to pre-release", () => {
         "}\n"
     );
 
-    yield pinoTest.consecutive(stream, [
-      {
-        msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-        level: 30,
-      },
-      {
-        msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-        level: 30,
-      },
-      {
-        msg: "bumping all with branch-name.12345 identifier to publish a preview",
-        level: 30,
-      },
-    ]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        {
+          msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
+          level: 30,
+        },
+        {
+          msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
+          level: 30,
+        },
+        {
+          msg: "bumping all with branch-name.12345 identifier to publish a preview",
+          level: 30,
+        },
+      ])
+    );
   });
 });

@@ -76,13 +76,11 @@ it.only = function only(
   }
 };
 
-// export function captureError<T>(op: Operation<T>): Operation<T | Error> {
-//   return function* () {
-//     try {
-//       return yield* op;
-//     } catch (error) {
-//       return error;
-//     }
-//     throw new Error("expected operation to throw an error, but it did not!");
-//   };
-// }
+export function* captureError<T>(op: Operation<T>): Operation<Error> {
+  try {
+    yield* op;
+    throw new Error("expected operation to throw an error, but it did not!");
+  } catch (error) {
+    return error;
+  }
+}

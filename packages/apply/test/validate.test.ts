@@ -2,13 +2,14 @@ import { validateApply } from "../src";
 import { readAllPkgFiles } from "@covector/files";
 import { PackageCommand, PackageFile } from "@covector/types";
 
-import { run } from "effection";
+import { call, run } from "effection";
 
 import { describe, it, captureError } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
+import exp from "constants";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -41,7 +42,7 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
+    const validated = yield* validateApply({
       logger,
       // @ts-expect-error
       commands,
@@ -76,7 +77,7 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
+    const validated = yield* validateApply({
       logger,
       //@ts-expect-error
       commands,
@@ -134,7 +135,7 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
+    const validated = yield* validateApply({
       logger,
       //@ts-expect-error
       commands,
@@ -181,7 +182,7 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
+    const validated = yield* validateApply({
       logger,
       //@ts-expect-error
       commands,
@@ -228,7 +229,7 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
+    const validated = yield* validateApply({
       logger,
       //@ts-expect-error
       commands,
@@ -275,7 +276,7 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
+    const validated = yield* validateApply({
       logger,
       //@ts-expect-error
       commands,
@@ -323,7 +324,7 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
+    const validated = yield* validateApply({
       logger,
       //@ts-expect-error
       commands,
@@ -351,7 +352,7 @@ describe("validate apply", () => {
         },
       },
     };
-    const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+    const allPackages: Record<string, PackageFile> = yield* readAllPkgFiles({
       config,
       cwd: rustFolder,
     });
@@ -375,7 +376,7 @@ describe("validate apply", () => {
       },
     ];
 
-    const errored = yield captureError(
+    const errored = yield* captureError(
       validateApply({
         logger,
         commands,
@@ -389,6 +390,8 @@ describe("validate apply", () => {
     );
 
     // to confirm that no error logs have been returned
-    yield pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }])
+    );
   });
 });

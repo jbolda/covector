@@ -54,7 +54,7 @@ export function* apply({
   });
 
   if (bump) {
-    yield writeAll({
+    yield* writeAll({
       bumps: bumps.reduce(
         (final: PackageFile[], current) =>
           !current.file ? final : final.concat([current]),
@@ -123,7 +123,7 @@ const writeAll = function* ({
   cwd: string;
 }) {
   for (let bump of bumps) {
-    yield writePkgFile({ packageFile: bump, cwd });
+    yield* writePkgFile({ packageFile: bump, cwd });
   }
 };
 
