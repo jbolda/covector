@@ -12,7 +12,7 @@ describe("toml", () => {
       const cargoFolder = f.copy("pkg.rust-single");
 
       it("with file specified", function* () {
-        const cargoFile = yield readPkgFile({
+        const cargoFile = yield* readPkgFile({
           file: "Cargo.toml",
           cwd: cargoFolder,
           nickname: "rust-single-fixture",
@@ -23,7 +23,7 @@ describe("toml", () => {
       });
 
       it("by deriving", function* () {
-        const cargoFile = yield readPkgFile({
+        const cargoFile = yield* readPkgFile({
           cwd: cargoFolder,
           pkgConfig: { manager: "rust", path: "." },
           nickname: "rust-single-fixture",
@@ -40,7 +40,7 @@ describe("toml", () => {
         // https://doc.rust-lang.org/cargo/reference/workspaces.html#virtual-workspace
         const cargoFolder = f.copy("pkg.rust-multi");
 
-        const cargoFilePkgA = yield readPkgFile({
+        const cargoFilePkgA = yield* readPkgFile({
           file: "Cargo.toml",
           cwd: path.join(cargoFolder, "pkg-a"),
           nickname: "rust_pkg_a_fixture",
@@ -49,7 +49,7 @@ describe("toml", () => {
         expect(cargoFilePkgA?.pkg?.package?.name).toBe("rust_pkg_a_fixture");
         expect(cargoFilePkgA.version).toBe("0.5.0");
 
-        const cargoFilePkgB = yield readPkgFile({
+        const cargoFilePkgB = yield* readPkgFile({
           file: "Cargo.toml",
           cwd: path.join(cargoFolder, "pkg-b"),
           nickname: "rust_pkg_b_fixture",
@@ -64,7 +64,7 @@ describe("toml", () => {
         // https://doc.rust-lang.org/cargo/reference/workspaces.html#virtual-workspace
         const cargoFolder = f.copy("pkg.rust-multi-inheritance");
 
-        const cargoFilePkgA = yield readPkgFile({
+        const cargoFilePkgA = yield* readPkgFile({
           file: "Cargo.toml",
           cwd: cargoFolder,
           nickname: "rust_pkg_a_fixture",
@@ -72,7 +72,7 @@ describe("toml", () => {
         expect(cargoFilePkgA?.pkg?.workspace?.package?.version).toBe("1.2.3");
         expect(cargoFilePkgA.version).toBe("1.2.3");
 
-        const cargoFilePkgB = yield readPkgFile({
+        const cargoFilePkgB = yield* readPkgFile({
           file: "Cargo.toml",
           cwd: path.join(cargoFolder, "pkg-b"),
           nickname: "rust_pkg_b_fixture",
@@ -91,7 +91,7 @@ describe("toml", () => {
         // https://doc.rust-lang.org/cargo/reference/workspaces.html#virtual-workspace
         const cargoFolder = f.copy("pkg.rust-multi");
 
-        const cargoFilePkgA = yield readPkgFile({
+        const cargoFilePkgA = yield* readPkgFile({
           file: "pkg-a/Cargo.toml",
           cwd: cargoFolder,
           nickname: "rust_pkg_a_fixture",
@@ -101,12 +101,12 @@ describe("toml", () => {
           version: "4.5.6",
           property: "version",
         });
-        yield writePkgFile({
+        yield* writePkgFile({
           packageFile: cargoFileMemoryPkgA,
           cwd: cargoFolder,
         });
 
-        const cargoFileModifiedPkgA = yield readPkgFile({
+        const cargoFileModifiedPkgA = yield* readPkgFile({
           file: "pkg-a/Cargo.toml",
           cwd: cargoFolder,
           nickname: "rust_pkg_a_fixture",
@@ -119,7 +119,7 @@ describe("toml", () => {
         // https://doc.rust-lang.org/cargo/reference/workspaces.html#virtual-workspace
         const cargoFolder = f.copy("pkg.rust-multi-inheritance");
 
-        const cargoFilePkgA = yield readPkgFile({
+        const cargoFilePkgA = yield* readPkgFile({
           file: "Cargo.toml",
           cwd: cargoFolder,
           nickname: "rust_pkg_a_fixture",
@@ -129,12 +129,12 @@ describe("toml", () => {
           version: "4.5.6",
           property: "version",
         });
-        yield writePkgFile({
+        yield* writePkgFile({
           packageFile: cargoFileMemoryPkgA,
           cwd: cargoFolder,
         });
 
-        const cargoFileModifiedPkgA = yield readPkgFile({
+        const cargoFileModifiedPkgA = yield* readPkgFile({
           file: "Cargo.toml",
           cwd: cargoFolder,
           nickname: "rust_pkg_a_fixture",

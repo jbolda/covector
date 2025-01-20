@@ -9,7 +9,7 @@ describe("parses yaml", () => {
   const yamlFolder = f.copy("pkg.dart-flutter-single");
 
   it("with file specified", function* () {
-    const yamlFile = yield readPkgFile({
+    const yamlFile = yield* readPkgFile({
       file: "pubspec.yaml",
       cwd: yamlFolder,
       nickname: "test_app",
@@ -20,7 +20,7 @@ describe("parses yaml", () => {
   });
 
   it("by deriving via dart", function* () {
-    const yamlFile = yield readPkgFile({
+    const yamlFile = yield* readPkgFile({
       cwd: yamlFolder,
       pkgConfig: { manager: "dart", path: "." },
       nickname: "test_app",
@@ -31,7 +31,7 @@ describe("parses yaml", () => {
   });
 
   it("by deriving via flutter", function* () {
-    const yamlFile = yield readPkgFile({
+    const yamlFile = yield* readPkgFile({
       cwd: yamlFolder,
       pkgConfig: { manager: "flutter", path: "." },
       nickname: "test_app",
