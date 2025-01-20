@@ -20,7 +20,7 @@ export function* writeAllChangelogs({
   }[];
   cwd: string;
 }): Operation<any> {
-  return yield all(
+  return yield* all(
     writtenChanges.map((changes) => {
       const { changelog } = changes.change;
       if (changelog) {

@@ -18,10 +18,10 @@
     "dist/index.js",
     "dist/index.d.ts"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "exports": {
+    "types": "./dist/index.d.ts",
     "development": "./src/index.ts",
+    "require": "./dist/index.js",
     "default": "./dist/index.js"
   },
   "scripts": {

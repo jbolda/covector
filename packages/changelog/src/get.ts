@@ -27,7 +27,7 @@ export function* readAllChangelogs({
       create,
     })
   );
-  const loadedChangelogs: File[] = yield all(prepChangelogs);
+  const loadedChangelogs: File[] = yield* all(prepChangelogs);
   return loadedChangelogs.map((changelog, index) => ({
     changes: applied[index],
     changelog,
@@ -43,7 +43,7 @@ export function* pullLastChangelog({
   config: ConfigFile;
   cwd: string;
 }): Operation<{ [k: string]: { pkg: string; changelog: string } }> {
-  const changelogs = yield readAllChangelogs({
+  const changelogs = yield* readAllChangelogs({
     logger,
     applied: Object.keys(config.packages).map((pkg) => ({
       name: pkg,

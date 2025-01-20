@@ -62,7 +62,7 @@ describe("fills changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    yield* fillChangelogs({
       logger,
       applied,
       //@ts-expect-error
@@ -71,7 +71,7 @@ describe("fills changelog", () => {
       cwd: projectFolder,
     });
 
-    const changelog = yield loadFile("CHANGELOG.md", projectFolder);
+    const changelog = yield* loadFile("CHANGELOG.md", projectFolder);
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.5.6]\n\n" +
@@ -165,7 +165,7 @@ describe("fills changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    yield* fillChangelogs({
       logger,
       applied,
       //@ts-expect-error
@@ -174,7 +174,7 @@ describe("fills changelog", () => {
       cwd: projectFolder,
     });
 
-    const changelog = yield loadFile("CHANGELOG.md", projectFolder);
+    const changelog = yield* loadFile("CHANGELOG.md", projectFolder);
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.5.6]\n\n" +
@@ -236,7 +236,7 @@ describe("fills changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    yield* fillChangelogs({
       logger,
       applied,
       //@ts-expect-error
@@ -245,7 +245,7 @@ describe("fills changelog", () => {
       cwd: projectFolder,
     });
 
-    const changelog = yield loadFile("CHANGELOG.md", projectFolder);
+    const changelog = yield* loadFile("CHANGELOG.md", projectFolder);
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.5.6]\n\n" +
@@ -305,7 +305,7 @@ describe("fills changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    yield* fillChangelogs({
       logger,
       applied,
       //@ts-expect-error
@@ -314,7 +314,7 @@ describe("fills changelog", () => {
       cwd: projectFolder,
     });
 
-    const changelog = yield loadFile("CHANGELOG.md", projectFolder);
+    const changelog = yield* loadFile("CHANGELOG.md", projectFolder);
     expect(changelog.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.9.0]\n\n" +

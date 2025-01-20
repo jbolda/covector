@@ -102,7 +102,7 @@ describe("reads changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    yield* fillChangelogs({
       logger,
       applied,
       //@ts-expect-error
@@ -117,13 +117,13 @@ describe("reads changelog", () => {
       },
     };
 
-    const changelogs = yield pullLastChangelog({
+    const changelogs = yield* pullLastChangelog({
       logger,
       config,
       cwd: projectFolder,
     });
 
-    pkgCommandsRan = yield pipeChangelogToCommands({
+    pkgCommandsRan = yield* pipeChangelogToCommands({
       changelogs,
       pkgCommandsRan,
     });
@@ -197,7 +197,7 @@ describe("reads changelog", () => {
       },
     };
 
-    yield fillChangelogs({
+    yield* fillChangelogs({
       logger,
       applied,
       //@ts-expect-error
@@ -212,13 +212,13 @@ describe("reads changelog", () => {
       },
     };
 
-    const changelogs = yield pullLastChangelog({
+    const changelogs = yield* pullLastChangelog({
       logger,
       config,
       cwd: projectFolder,
     });
 
-    pkgCommandsRan = yield pipeChangelogToCommands({
+    pkgCommandsRan = yield* pipeChangelogToCommands({
       changelogs,
       pkgCommandsRan,
     });

@@ -34,9 +34,9 @@ export function* fillChangelogs({
   cwd: string;
   pkgCommandsRan?: { [k: string]: PkgCommandResponse };
   create?: boolean;
-  createContext?: ChangeContext;
+  createContext?: ChangeContext<{ commits: string[] }>;
 }): Operation<{ [k: string]: PkgCommandResponse } | undefined> {
-  const changelogs = yield readAllChangelogs({
+  const changelogs = yield* readAllChangelogs({
     logger,
     applied: applied.reduce(
       (
@@ -50,7 +50,7 @@ export function* fillChangelogs({
     cwd,
   });
 
-  const writtenChanges: ChangedLog[] = yield applyChanges({
+  const writtenChanges: ChangedLog[] = yield* applyChanges({
     changelogs,
     assembledChanges,
     config,
@@ -59,7 +59,7 @@ export function* fillChangelogs({
   });
 
   if (create) {
-    yield writeAllChangelogs({ writtenChanges, cwd });
+    yield* writeAllChangelogs({ writtenChanges, cwd });
   }
 
   if (!pkgCommandsRan) {
@@ -81,14 +81,14 @@ export function* fillChangelogs({
   }
 }
 
-export const pipeChangelogToCommands = async ({
+export function* pipeChangelogToCommands({
   changelogs,
   pkgCommandsRan,
 }: {
   changelogs: { [k: string]: { pkg: string; changelog: string } };
   pkgCommandsRan: { [k: string]: PkgCommandResponse };
-}) =>
-  Object.keys(pkgCommandsRan).reduce(
+}) {
+  return Object.keys(pkgCommandsRan).reduce(
     (pkgs: { [k: string]: PkgCommandResponse }, pkg) => {
       Object.keys(changelogs).forEach((pkg) => {
         if (pkgs[pkg]) {
@@ -99,6 +99,7 @@ export const pipeChangelogToCommands = async ({
     },
     pkgCommandsRan
   );
+}
 
 const getVersionFromApplied = (
   name: string,
@@ -154,20 +155,21 @@ type Change = {
 };
 type ChangedLog = { pkg: string; change: Change; addition: string };
 
-function* defaultCreateContext(): Operation<
-  Operation<{
-    context: Record<string, string>;
+function* defaultCreateContext({ commits }: { commits: string[] }): Operation<
+  () => Operation<{
+    context: Record<string, Record<string, string>>;
     changeContext: Record<string, string>;
   }>
 > {
   const context = {};
-  return function* defineContexts(): Operation<{
-    context: Record<string, string>;
+  function* defaultDefineContexts(): Operation<{
+    context: Record<string, Record<string, string>>;
     changeContext: Record<string, string>;
   }> {
     const changeContext = {};
     return { context, changeContext };
-  };
+  }
+  return defaultDefineContexts;
 }
 
 function* applyChanges({
@@ -181,7 +183,7 @@ function* applyChanges({
   assembledChanges: AssembledChanges;
   config: ConfigFile;
   applied: { name: string; version: string }[];
-  createContext?: ChangeContext;
+  createContext?: ChangeContext<{ commits: string[] }>;
 }): Operation<ChangedLog[]> {
   const gitSiteUrl = !config.gitSiteUrl
     ? "/"
@@ -192,20 +194,15 @@ function* applyChanges({
     listItemIndent: "one",
   });
 
-  const commits = [
-    ...new Set(
-      Object.values(assembledChanges.releases).flatMap((release) =>
-        release.changes
-          .map((change) => change.meta?.commits?.[0].hashLong)
-          .filter(Boolean)
-      )
-    ),
-  ];
-  // @ts-expect-error expression not callable, but it is, we don't have a reasonable way to type narrow
-  //  through the exported types from effection however (expects that it could possibly be OperationPromise)
-  const createChangeContext = yield createContext({ commits });
+  const commits = Object.values(assembledChanges.releases).flatMap(
+    (release) =>
+      release.changes
+        .map((change) => change.meta?.commits?.[0].hashLong)
+        .filter(Boolean) as string[]
+  );
+  const createChangeContext = yield* createContext({ commits });
 
-  return yield all(
+  return yield* all(
     changelogs.map(function* (change) {
       let additionChunks = [];
       if (change.changelog) {
@@ -279,10 +276,7 @@ function* applyChanges({
               }
             });
 
-          const {
-            context,
-          }: { context: Record<string, Record<string, string>> } =
-            yield createChangeContext();
+          const { context } = yield* createChangeContext();
 
           // render untagged changes freely at the top
           for (const release of untaggedChanges) {

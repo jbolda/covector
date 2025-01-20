@@ -235,9 +235,9 @@ export type ChangeParsed = {
   meta: { dependencies: string[] };
 };
 
-export type ChangeContext = ({ commits }: { commits: string[] }) => Operation<
-  Operation<{
-    context: Record<string, string>;
+export type ChangeContext<A> = (args: A) => Operation<
+  () => Operation<{
+    context: Record<string, Record<string, string>>;
     changeContext: Record<string, string>;
   }>
 >;

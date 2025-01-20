@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "strict": true,
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
     "target": "es6",
     "pretty": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
     "checkJs": false,
     "preserveSymlinks": true,
     "skipLibCheck": true,
