@@ -45,6 +45,7 @@ function describeWithScope(
 describeWithScope.only = vitest.describe.only;
 describeWithScope.skip = vitest.describe.skip;
 describeWithScope.skipIf = vitest.describe.skipIf;
+describeWithScope.runIf = vitest.describe.runIf;
 
 export const describe = <typeof vitest.describe>(<unknown>describeWithScope);
 
