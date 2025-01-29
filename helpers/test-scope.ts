@@ -1,19 +1,27 @@
-import { type Operation, type Effect, run } from "effection";
+import { type Scope, type Operation, createScope } from "effection";
 
 export interface TestScope {
-  addSetup(op: () => Operation<void>): void;
+  scope: Scope;
+  parent?: TestScope;
+  setup: Array<() => Operation<void>>;
   runTest(op: () => Operation<void>): Promise<void>;
 }
 
-export function createTestScope(): TestScope {
-  let setup: (() => Operation<void>)[] = [];
+export function createTestScope(parent?: TestScope): TestScope {
+  let setup: TestScope["setup"] = [];
+  let [scope, destroy] = createScope(parent?.scope);
   return {
-    addSetup(op) {
-      setup.push(op);
-    },
+    scope,
+    parent,
+    setup,
     runTest(op) {
-      return run(function* () {
-        for (let step of setup) {
+      return scope.run(function* () {
+        let setups = setup;
+        for (let current = parent; !!current; current = current.parent) {
+          setups = current.setup.concat(setups);
+        }
+        console.dir({ l: setups.length, parent });
+        for (let step of setups) {
           yield* step();
         }
         yield* op();
@@ -24,20 +32,24 @@ export function createTestScope(): TestScope {
 
 import * as vitest from "vitest";
 
-let scope: TestScope | undefined;
+let currentTestScope = createTestScope();
 
 function describeWithScope(
   name: string | Function,
   factory?: vitest.SuiteFactory
 ): vitest.SuiteCollector {
-  return vitest.describe(name, () => {
-    vitest.beforeEach(() => {
-      if (!scope) {
-        scope = createTestScope();
+  return vitest.describe(name, (...args) => {
+    // saves a local reference to the current test scope
+    const original = currentTestScope;
+    console.dir({ currentTestScope });
+    currentTestScope = createTestScope(original);
+    try {
+      if (factory && typeof factory === "function") {
+        factory(...args);
       }
-    });
-    if (factory && typeof factory === "function") {
-      (<Function>factory)();
+    } finally {
+      // restores the original test scope
+      currentTestScope = original;
     }
   });
 }
@@ -50,7 +62,7 @@ describeWithScope.runIf = vitest.describe.runIf;
 export const describe = <typeof vitest.describe>(<unknown>describeWithScope);
 
 export function beforeEach(op: () => Operation<void>): void {
-  vitest.beforeEach(() => scope!.addSetup(op));
+  currentTestScope.setup.push(op);
 }
 
 export function it(
@@ -58,8 +70,10 @@ export function it(
   op?: () => Operation<void>,
   timeout?: number
 ): void {
+  const scope = currentTestScope;
+  console.log({ scope });
   if (op) {
-    return vitest.it(desc, async () => scope?.runTest(op), timeout);
+    return vitest.it(desc, async () => scope.runTest(op), timeout);
   } else {
     return vitest.it.todo(desc);
   }
@@ -70,8 +84,9 @@ it.only = function only(
   op?: () => Operation<void>,
   timeout?: number
 ): void {
+  const scope = currentTestScope;
   if (op) {
-    return vitest.it.only(desc, async () => scope!.runTest(op), timeout);
+    return vitest.it.only(desc, async () => scope.runTest(op), timeout);
   } else {
     return vitest.it.skip(desc, () => {});
   }

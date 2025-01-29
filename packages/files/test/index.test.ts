@@ -1,4 +1,4 @@
-import { describe, it } from "../../../helpers/test-scope.ts";
+import { beforeEach, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
@@ -13,10 +13,58 @@ import {
   loadChangeFiles,
   changeFilesRemove,
 } from "../src";
+import { createContext } from "effection";
 
 const f = fixtures(__dirname);
 
-describe("general file test", () => {
+describe("general file test final final v2", () => {
+  const generalFolder = createContext<string>("generalFolder");
+
+  beforeEach(function* () {
+    yield* generalFolder.set(f.copy("pkg.general-file"));
+  });
+
+  it("parses general file", function* () {
+    const generalFile = yield* readPkgFile({
+      file: "VERSION",
+      cwd: yield* generalFolder.expect(),
+      nickname: "general-package",
+    });
+    expect(generalFile.name).toBe("general-package");
+    expect(generalFile.version).toBe("6.1.0");
+  });
+
+  describe("parses pre", () => {
+    beforeEach(function* () {
+      // yield* generalFolder.set((f.copy("pkg.general-file")));
+      console.log("hellop");
+    });
+
+    it("parses pre without changes", function* () {
+      expect(yield* generalFolder.expect()).toBe("thing");
+      const preFolder = f.copy("pre.with-changes");
+      const preFile = yield* readPreFile({ cwd: preFolder });
+      expect(preFile?.tag).toBe("beta");
+      expect(preFile?.changes.length).toBe(0);
+    });
+
+    it("parses pre with changes", function* () {
+      const preFolder = f.copy("pre.with-changes");
+      const preFile = yield* readPreFile({ cwd: preFolder });
+      expect(preFile?.tag).toBe("beta");
+      expect(preFile?.changes.length).toBe(3);
+      expect(preFile?.changes[1]).toBe("chocolate-pudding.md");
+    });
+
+    it("returns cleanly without pre", function* () {
+      const preFolder = f.copy("pkg.js-basic");
+      const preFile = yield* readPreFile({ cwd: preFolder });
+      expect(preFile).toBe(null);
+    });
+  });
+});
+
+describe.skip("general file test", () => {
   it("parses general file", function* () {
     const generalFolder = f.copy("pkg.general-file");
     const generalFile = yield* readPkgFile({
