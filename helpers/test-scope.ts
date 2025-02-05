@@ -1,55 +1,24 @@
-import { type Scope, type Operation, createScope } from "effection";
-
-export interface TestScope {
-  scope: Scope;
-  parent?: TestScope;
-  setup: Array<() => Operation<void>>;
-  runTest(op: () => Operation<void>): Promise<void>;
-}
-
-export function createTestScope(parent?: TestScope): TestScope {
-  let setup: TestScope["setup"] = [];
-  let [scope, destroy] = createScope(parent?.scope);
-  return {
-    scope,
-    parent,
-    setup,
-    runTest(op) {
-      return scope.run(function* () {
-        let setups = setup;
-        for (let current = parent; !!current; current = current.parent) {
-          setups = current.setup.concat(setups);
-        }
-        console.dir({ l: setups.length, parent });
-        for (let step of setups) {
-          yield* step();
-        }
-        yield* op();
-      });
-    },
-  };
-}
+import {  type Operation } from "effection";
+import { createTestAdapter } from "./test-adapter";
 
 import * as vitest from "vitest";
-
-let currentTestScope = createTestScope();
 
 function describeWithScope(
   name: string | Function,
   factory?: vitest.SuiteFactory
 ): vitest.SuiteCollector {
   return vitest.describe(name, (...args) => {
-    // saves a local reference to the current test scope
-    const original = currentTestScope;
-    console.dir({ currentTestScope });
-    currentTestScope = createTestScope(original);
-    try {
-      if (factory && typeof factory === "function") {
-        factory(...args);
-      }
-    } finally {
-      // restores the original test scope
-      currentTestScope = original;
+    vitest.beforeAll((suite: any) => {
+      let parent = suite.suite?.adapter;
+      suite.adapter = createTestAdapter({ name: String(name), parent });
+    });
+
+    vitest.afterAll(async (suite: any) => {
+      await suite.adapter.destroy();
+    })
+
+    if (factory && typeof factory === "function") {
+      factory(...args);
     }
   });
 }
@@ -62,7 +31,9 @@ describeWithScope.runIf = vitest.describe.runIf;
 export const describe = <typeof vitest.describe>(<unknown>describeWithScope);
 
 export function beforeEach(op: () => Operation<void>): void {
-  currentTestScope.setup.push(op);
+  vitest.beforeEach(async (context: any) => {
+    context.task.suite.adapter.addSetup(op);
+  })
 }
 
 export function it(
@@ -70,10 +41,10 @@ export function it(
   op?: () => Operation<void>,
   timeout?: number
 ): void {
-  const scope = currentTestScope;
-  console.log({ scope });
   if (op) {
-    return vitest.it(desc, async () => scope.runTest(op), timeout);
+    return vitest.it(desc, async (context: any) => {
+      context.task.suite.adapter.runTest(op);
+    }, timeout);
   } else {
     return vitest.it.todo(desc);
   }
@@ -84,9 +55,10 @@ it.only = function only(
   op?: () => Operation<void>,
   timeout?: number
 ): void {
-  const scope = currentTestScope;
   if (op) {
-    return vitest.it.only(desc, async () => scope.runTest(op), timeout);
+    return vitest.it.only(desc, async (context: any) => {
+      context.task.suite.adapter.runTest(op);
+    }, timeout);
   } else {
     return vitest.it.skip(desc, () => {});
   }
