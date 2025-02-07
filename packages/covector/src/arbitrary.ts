@@ -22,6 +22,7 @@ import type {
   Covector,
   PkgPublish,
 } from "@covector/types";
+import { call } from "effection";
 
 export function* arbitrary({
   logger,
@@ -38,18 +39,19 @@ export function* arbitrary({
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
 }): Generator<any, Covector, any> {
-  const config = yield modifyConfig(yield configFile({ cwd }));
-  const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
+  const rawConfig = yield* configFile({ cwd });
+  const config = yield* call(() => modifyConfig(rawConfig));
+  const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
 
-  const changesPaths = yield changeFiles({
+  const changesPaths = yield* changeFiles({
     cwd,
     changeFolder: config.changeFolder,
   });
-  const changeFilesLoaded = yield loadChangeFiles({
+  const changeFilesLoaded = yield* loadChangeFiles({
     cwd,
     paths: changesPaths,
   });
-  const assembledChanges = yield assemble({
+  const assembledChanges = yield* assemble({
     logger,
     cwd,
     files: changeFilesLoaded,
@@ -57,8 +59,8 @@ export function* arbitrary({
     preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
 
-  yield raceTime({ t: config.timeout });
-  const changelogs = yield pullLastChangelog({
+  yield* raceTime({ t: config.timeout });
+  const changelogs = yield* pullLastChangelog({
     logger,
     config,
     cwd,
@@ -67,7 +69,7 @@ export function* arbitrary({
   const {
     commands,
     pipeTemplate,
-  }: { commands: PkgPublish[]; pipeTemplate: any } = yield mergeIntoConfig({
+  }: { commands: PkgPublish[]; pipeTemplate: any } = yield* mergeIntoConfig({
     logger,
     assembledChanges,
     config,
@@ -92,7 +94,7 @@ export function* arbitrary({
     };
   }
 
-  const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
+  const commandsToRun: PkgPublish[] = yield* confirmCommandsToRun({
     logger,
     cwd,
     commands,
@@ -112,12 +114,12 @@ export function* arbitrary({
     {}
   );
 
-  pkgCommandsRan = yield pipeChangelogToCommands({
+  pkgCommandsRan = yield* pipeChangelogToCommands({
     changelogs,
     pkgCommandsRan,
   });
 
-  pkgCommandsRan = yield attemptCommands({
+  pkgCommandsRan = yield* attemptCommands({
     logger,
     cwd,
     commands: commandsToRun,
@@ -126,7 +128,7 @@ export function* arbitrary({
     pkgCommandsRan,
     dryRun,
   });
-  pkgCommandsRan = yield attemptCommands({
+  pkgCommandsRan = yield* attemptCommands({
     logger,
     cwd,
     commands: commandsToRun,
@@ -134,7 +136,7 @@ export function* arbitrary({
     pkgCommandsRan,
     dryRun,
   });
-  pkgCommandsRan = yield attemptCommands({
+  pkgCommandsRan = yield* attemptCommands({
     logger,
     cwd,
     commands: commandsToRun,

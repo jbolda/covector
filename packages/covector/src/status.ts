@@ -27,6 +27,7 @@ import type {
   PkgVersion,
   Config,
 } from "@covector/types";
+import { call } from "effection";
 
 export function* status({
   logger,
@@ -47,19 +48,20 @@ export function* status({
   branchTag?: string;
   logs?: boolean;
 }): Generator<any, Covector, any> {
-  const config: Config = yield modifyConfig(yield configFile({ cwd }));
-  const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
+  const rawConfig = yield* configFile({ cwd });
+  const config = yield* call(() => modifyConfig(rawConfig));
+  const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? null : pre.tag;
 
-  const changesPaths = yield changeFiles({
+  const changesPaths = yield* changeFiles({
     cwd,
     changeFolder: config.changeFolder,
   });
-  const changeFilesLoaded = yield loadChangeFiles({
+  const changeFilesLoaded = yield* loadChangeFiles({
     cwd,
     paths: changesPaths,
   });
-  const assembledChanges = yield assemble({
+  const assembledChanges = yield* assemble({
     logger: logger.child({ step: "assemble changes" }),
     cwd,
     files: changeFilesLoaded,
@@ -70,17 +72,16 @@ export function* status({
   if (changeFilesLoaded.length === 0) {
     if (logs) logger.info("There are no changes.");
 
-    const { commands: publishCommands }: { commands: PkgPublish[] } =
-      yield mergeIntoConfig({
-        logger: logger.child({ step: "assemble changes" }),
-        assembledChanges,
-        config,
-        command: "publish",
-        cwd,
-        dryRun,
-        filterPackages,
-        tag: branchTag,
-      });
+    const { commands: publishCommands } = yield* mergeIntoConfig({
+      logger: logger.child({ step: "assemble changes" }),
+      assembledChanges,
+      config,
+      command: "publish",
+      cwd,
+      dryRun,
+      filterPackages,
+      tag: branchTag,
+    });
 
     if (publishCommands.length === 0) {
       if (logs) logger.info(`No commands configured to run on publish.`);
@@ -90,7 +91,7 @@ export function* status({
       };
     }
 
-    const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
+    const commandsToRun = yield* confirmCommandsToRun({
       logger: logger.child({ step: "assemble changes" }),
       cwd,
       commands: publishCommands,
@@ -126,7 +127,7 @@ export function* status({
   } else {
     if (logs) {
       logger.info("changes:");
-      Object.keys(assembledChanges.releases).forEach((release) => {
+      Object.keys(assembledChanges?.releases ?? {}).forEach((release) => {
         logger.info({
           msg: `${release} => ${assembledChanges.releases[release].type}`,
           renderAsYAML: assembledChanges.releases[release].changes,
@@ -134,7 +135,7 @@ export function* status({
       });
     }
 
-    const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+    const allPackages: Record<string, PackageFile> = yield* readAllPkgFiles({
       config,
       cwd,
     });
@@ -150,7 +151,7 @@ export function* status({
       commands,
       pipeTemplate,
     }: { commands: PkgVersion[]; pipeTemplate: any } =
-      yield mergeChangesToConfig({
+      yield* mergeChangesToConfig({
         logger: logger.child({ step: "compile changes" }),
         assembledChanges: changes,
         config,
@@ -161,7 +162,7 @@ export function* status({
       });
 
     // throws if failed validation
-    yield validateApply({
+    yield* validateApply({
       logger: logger.child({ step: "apply changes" }),
       //@ts-expect-error
       commands,
@@ -170,7 +171,7 @@ export function* status({
       prereleaseIdentifier,
     });
 
-    const applied = yield apply({
+    const applied = yield* apply({
       logger: logger.child({ step: "apply changes" }),
       //@ts-expect-error
       commands,

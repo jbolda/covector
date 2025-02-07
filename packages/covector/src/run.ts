@@ -40,27 +40,27 @@ export function* covector({
   createContext?: ChangeContext;
 }): Generator<any, any, any> {
   if (command === "init") {
-    return yield init({
+    return yield* init({
       logger: logger.child({ command: "init" }),
       cwd,
       changeFolder,
       yes,
     });
   } else if (command === "add") {
-    return yield add({
+    return yield* add({
       logger: logger.child({ command: "add" }),
       cwd,
       changeFolder,
       yes,
     });
   } else if (command === "config") {
-    return yield config({
+    return yield* config({
       logger: logger.child({ command: "config" }),
       cwd,
       modifyConfig,
     });
   } else if (command === "status") {
-    return yield status({
+    return yield* status({
       logger: logger.child({ command: "status" }),
       command,
       dryRun,
@@ -71,7 +71,7 @@ export function* covector({
       branchTag,
     });
   } else if (command === "version") {
-    return yield version({
+    return yield* version({
       logger: logger.child({ command: "version" }),
       command,
       dryRun,
@@ -81,7 +81,7 @@ export function* covector({
       createContext,
     });
   } else if (command === "preview") {
-    return yield preview({
+    return yield* preview({
       logger: logger.child({ command: "preview" }),
       command,
       dryRun,
@@ -92,7 +92,7 @@ export function* covector({
       branchTag,
     });
   } else if (command === "publish") {
-    return yield publish({
+    return yield* publish({
       logger: logger.child({ command: "publish" }),
       command,
       dryRun,
@@ -101,7 +101,7 @@ export function* covector({
       modifyConfig,
     });
   } else {
-    return yield arbitrary({
+    return yield* arbitrary({
       logger: logger.child({ command: "arbitrary" }),
       command,
       dryRun,

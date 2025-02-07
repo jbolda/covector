@@ -1,6 +1,6 @@
-import { Operation } from "effection";
+import { call, Operation } from "effection";
 import unified from "unified";
-import { Root, YAML as Frontmatter, Content } from "mdast";
+import { YAML as Frontmatter, Content } from "mdast";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
 import frontmatter from "remark-frontmatter";
@@ -44,11 +44,10 @@ export const parseChange = function* ({
     });
 
   const parsed = processor.parse(file.content.trim());
-  const processed: Root = yield processor.run(parsed);
+  const processed = yield* call(() => processor.run(parsed));
   let changeset: Changeset = {};
   const [parsedChanges, ...remaining]: (Frontmatter | Content)[] =
     processed.children;
-  //@ts-expect-error
   const parsedYaml = yaml.load(parsedChanges.value as string);
   changeset.releases =
     typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
@@ -69,14 +68,13 @@ export const parseChange = function* ({
   changeset.summary = processor
     .stringify({
       type: "root",
-      //@ts-expect-error
       children: remaining,
     })
     .trim();
 
   if (cwd) {
     try {
-      const gitInfo = yield runCommand({
+      const gitInfo = yield* runCommand({
         logger,
         cwd,
         pkgPath: ".",
@@ -198,7 +196,7 @@ export const assemble = function* ({
   // if in prerelease mode, we only make bumps if the new one is "larger" than the last
   // otherwise we only want a prerelease bump (which just increments the ending number)
   if (preMode.on) {
-    const allChanges: Change[] = yield changesParsed({ logger, cwd, files });
+    const allChanges: Change[] = yield* changesParsed({ logger, cwd, files });
     const allMergedRelease = mergeReleases(allChanges, config || {});
     if (preMode.prevFiles.length > 0) {
       const newFiles = files.reduce((newFiles: File[], file) => {
@@ -211,7 +209,7 @@ export const assemble = function* ({
           return newFiles;
         }
       }, []);
-      const newChanges: Change[] = yield changesParsed({
+      const newChanges: Change[] = yield* changesParsed({
         logger,
         cwd,
         files: newFiles,
@@ -228,7 +226,7 @@ export const assemble = function* ({
           return newFiles;
         }
       }, []);
-      const oldChanges: Change[] = yield changesParsed({
+      const oldChanges: Change[] = yield* changesParsed({
         logger,
         cwd,
         files: oldFiles,
@@ -249,7 +247,7 @@ export const assemble = function* ({
       });
     }
   } else {
-    let changes: Change[] = yield changesParsed({ logger, cwd, files });
+    let changes: Change[] = yield* changesParsed({ logger, cwd, files });
     plan.changes = changes;
     plan.releases = mergeReleases(changes, config || {});
   }
@@ -289,7 +287,7 @@ const changesParsed = function* ({
   const allChangesParsed = [];
 
   for (let file of files) {
-    const parsed = yield parseChange({ logger, cwd, file });
+    const parsed = yield* parseChange({ logger, cwd, file });
     allChangesParsed.push(parsed);
   }
 
@@ -310,7 +308,6 @@ const changeDiff = ({
     Object.keys(newMergedRelease).forEach((pkg: string) => {
       const nextBump = newMergedRelease[pkg]?.type || "noop";
       const oldBump = oldMergedRelease[pkg]?.type || "noop";
-      //@ts-expect-error bumpMap could be undefined?
       if (bumpMap.get(nextBump) < bumpMap.get(oldBump)) {
         //@ts-expect-error TODO template string doesn't play nice with the type
         diffed[pkg].type = `pre${nextBump}`;
@@ -554,7 +551,7 @@ export const mergeIntoConfig = function* ({
     };
 
     let extraPublishParams = {
-      pkgFile: yield readPkgFile({
+      pkgFile: yield* readPkgFile({
         cwd,
         pkgConfig: pkgCommands[pkg],
         nickname: pkg,

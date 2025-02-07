@@ -7,7 +7,7 @@ export function* cli(argv: readonly string[]): Generator<any, any, any> {
   const { command, directory, yes, dryRun, cwd } = parseOptions(argv);
   const stream = logStream();
   const logger = pino(stream);
-  return yield covector({
+  return yield* covector({
     logger,
     command,
     changeFolder: directory,
@@ -24,7 +24,7 @@ function parseOptions(argv: readonly string[]): {
   directory?: string;
   cwd: string;
 } {
-  let rawOptions = yargs
+  const rawOptions = yargs(hideBin(process.argv))
     .scriptName("covector")
     .command("init", "initialize covector in your repo", function (yargs) {
       return yargs
@@ -65,19 +65,16 @@ function parseOptions(argv: readonly string[]): {
     .epilogue(
       "For more information on covector, see: https://www.github.com/jbolda/covector"
     )
-    .parse(argv);
+    .parseSync();
 
-  // TODO type narrow, it thinks it could be a promise
   return {
-    // @ts-expect-error
     command: String(rawOptions._[0]),
-    // @ts-expect-error
-    dryRun: rawOptions["dry-run"],
-    // @ts-expect-error
-    yes: rawOptions.yes,
-    // @ts-expect-error
-    directory: rawOptions.directory,
-    // @ts-expect-error
     cwd: rawOptions.cwd,
+    dryRun: rawOptions.dryRun,
+    yes: rawOptions.yes as boolean | undefined,
+    directory: rawOptions.directory as string | undefined,
   };
+}
+function hideBin(argv: string[]): string | readonly string[] | undefined {
+  throw new Error("Function not implemented.");
 }

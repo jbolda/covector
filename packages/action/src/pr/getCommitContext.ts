@@ -1,4 +1,5 @@
 import { getOctokit } from "@actions/github";
+import { call, Operation } from "effection";
 
 export type CommitResponse = {
   repository: Record<string, Commit>;
@@ -19,7 +20,7 @@ export function* getCommitContext(
   owner: string,
   name: string,
   commits: string[]
-) {
+): Operation<CommitResponse> {
   const query = /* GraphQL */ `
     query RepositoryCommits($owner: String!, $name: String!) {
       repository(owner: $owner, name: $name) {
@@ -57,10 +58,12 @@ export function* getCommitContext(
     #   }
     }`;
 
-  const response: CommitResponse = yield client(query, {
-    owner,
-    name,
-  });
+  const response = yield* call(async () =>
+    client(query, {
+      owner,
+      name,
+    })
+  ) as Operation<CommitResponse>;
 
   return response;
 }

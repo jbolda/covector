@@ -25,6 +25,7 @@ import type {
   PkgPublish,
   PkgVersion,
 } from "@covector/types";
+import { call } from "effection";
 
 export function* preview({
   logger,
@@ -45,31 +46,32 @@ export function* preview({
   previewVersion?: string;
   branchTag?: string;
 }): Generator<any, Covector, any> {
-  const config = yield modifyConfig(yield configFile({ cwd }));
-  const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
+  const rawConfig = yield* configFile({ cwd });
+  const config = yield* call(() => modifyConfig(rawConfig));
+  const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? null : pre.tag;
 
-  const changesPaths = yield changeFiles({
+  const changesPaths = yield* changeFiles({
     cwd,
     changeFolder: config.changeFolder,
   });
-  const changeFilesLoaded = yield loadChangeFiles({
+  const changeFilesLoaded = yield* loadChangeFiles({
     cwd,
     paths: changesPaths,
   });
-  const assembledChanges = yield assemble({
+  const assembledChanges = yield* assemble({
     logger,
     cwd,
     files: changeFilesLoaded,
     config,
     preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
-  const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+  const allPackages: Record<string, PackageFile> = yield* readAllPkgFiles({
     config,
     cwd,
   });
 
-  yield raceTime({ t: config.timeout });
+  yield* raceTime({ t: config.timeout });
 
   const versionChanges = changesConsideringParents({
     assembledChanges,
@@ -79,7 +81,7 @@ export function* preview({
   });
 
   const { commands: versionCommands }: { commands: PkgVersion[] } =
-    yield mergeChangesToConfig({
+    yield* mergeChangesToConfig({
       logger,
       assembledChanges: versionChanges,
       config,
@@ -112,7 +114,7 @@ export function* preview({
     {}
   );
 
-  pkgCommandsRan = yield attemptCommands({
+  pkgCommandsRan = yield* attemptCommands({
     logger,
     cwd,
     commands: versionCommands,
@@ -122,7 +124,7 @@ export function* preview({
     dryRun,
   });
 
-  const applied = yield apply({
+  const applied = yield* apply({
     logger,
     //@ts-expect-error
     commands: versionCommands,
@@ -151,7 +153,7 @@ export function* preview({
     pkgCommandsRan
   );
 
-  pkgCommandsRan = yield attemptCommands({
+  pkgCommandsRan = yield* attemptCommands({
     logger,
     cwd,
     commands: versionCommands,
@@ -162,7 +164,7 @@ export function* preview({
   });
 
   const { commands: publishCommands }: { commands: PkgPublish[] } =
-    yield mergeIntoConfig({
+    yield* mergeIntoConfig({
       logger,
       assembledChanges,
       config,
@@ -180,7 +182,7 @@ export function* preview({
     };
   }
 
-  const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
+  const commandsToRun: PkgPublish[] = yield* confirmCommandsToRun({
     logger,
     cwd,
     commands: publishCommands,
@@ -200,7 +202,7 @@ export function* preview({
     {}
   );
 
-  pkgCommandsRan = yield attemptCommands({
+  pkgCommandsRan = yield* attemptCommands({
     logger,
     cwd,
     commands: commandsToRun,
@@ -210,7 +212,7 @@ export function* preview({
     dryRun,
   });
 
-  pkgCommandsRan = yield attemptCommands({
+  pkgCommandsRan = yield* attemptCommands({
     logger,
     cwd,
     commands: commandsToRun,

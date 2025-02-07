@@ -189,7 +189,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
         let shas = {};
         try {
           const octokit = github.getOctokit(token);
-          const prContext: CommitResponse = yield getCommitContext(
+          const prContext: CommitResponse = yield* getCommitContext(
             octokit.graphql,
             github.context.repo.owner,
             github.context.repo.repo,

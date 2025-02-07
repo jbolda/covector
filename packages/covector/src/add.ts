@@ -34,12 +34,12 @@ export const add = function* ({
   changeFolder?: string;
   yes: boolean;
 }): Generator<any, string, any> {
-  const config: ConfigFile = yield configFile({ cwd });
+  const config: ConfigFile = yield* configFile({ cwd });
   let packageBumps: { [k: string]: { bump: string; changeTag?: string } } = {};
 
   intro(`What have we changed?`);
 
-  const packagesWithBump: string[] = yield multiselect({
+  const packagesWithBump: string[] = yield* multiselect({
     message: "Select packages which need a version bump.",
     options: Object.keys(config.packages).map((pkg) => ({
       value: pkg,
@@ -53,7 +53,7 @@ export const add = function* ({
     const additionalBumpTypes = config.additionalBumpTypes
       ? config.additionalBumpTypes
       : [];
-    const bump = yield select({
+    const bump = yield* select({
       message: `bump ${pkg} with?`,
       options: ["patch", "minor", "major"]
         .concat(additionalBumpTypes)
@@ -71,7 +71,7 @@ export const add = function* ({
     let changeTag;
     if (config?.changeTags) {
       const tags = Object.keys(config.changeTags);
-      const addTag = yield select({
+      const addTag = yield* select({
         message: `tag ${pkg} ${bump} bump with?`,
         options: ["none"].concat(tags).map((t) => ({ value: t, label: t })),
       });
@@ -82,7 +82,7 @@ export const add = function* ({
     packageBumps[pkg] = { bump, changeTag };
   }
 
-  const summary: string = yield text({
+  const summary: string = yield* text({
     message: `Please summarize the changes that occurred.`,
     validate(value: string) {
       if (value.length === 0) return "You must enter a summary.";
@@ -92,7 +92,7 @@ export const add = function* ({
 
   let branchName = "change-file.md";
   try {
-    const currentBranch = yield sh(
+    const currentBranch = yield* sh(
       "git branch --show-current",
       {},
       false,
@@ -102,7 +102,7 @@ export const add = function* ({
   } catch (error) {
     // ignore, filled for convenience
   }
-  const filename: string = yield text({
+  const filename: string = yield* text({
     message: `Please name the change file.`,
     initialValue: branchName,
     validate(answer) {
@@ -126,7 +126,7 @@ ${packagesWithBump
 
   const content = `${frontmatter}${summary}\n`;
 
-  yield writeFile(join(cwd, changeFolder, `${filename}`), content);
+  yield* writeFile(join(cwd, changeFolder, `${filename}`), content);
 
   outro(`Change file written to ${join(changeFolder, `${filename}`)}`);
   return "complete";
