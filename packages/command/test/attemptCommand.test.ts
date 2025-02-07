@@ -3,6 +3,7 @@ import { describe, it } from "../../../helpers/test-scope.ts";
 import pino from "pino";
 import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
+import { call } from "effection";
 const f = fixtures(__dirname);
 
 const base = {
@@ -33,7 +34,7 @@ describe("attemptCommand", () => {
     const logger = pino(stream);
     const commandLogger = pino(stream);
 
-    yield attemptCommands({
+    yield* attemptCommands({
       logger,
       commands: [
         {
@@ -48,7 +49,9 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield pinoTest.consecutive(stream, [{ msg: "boop", level: 30 }]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [{ msg: "boop", level: 30 }])
+    );
   });
 
   it("invokes an array of functions", function* () {
@@ -56,7 +59,7 @@ describe("attemptCommand", () => {
     const logger = pino(stream);
     const commandLogger = pino(stream);
 
-    yield attemptCommands({
+    yield* attemptCommands({
       logger,
       commands: [
         {
@@ -76,12 +79,14 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield pinoTest.consecutive(stream, [
-      { msg: "boop", level: 30 },
-      { msg: "booop", level: 30 },
-      { msg: "boooop", level: 30 },
-      { msg: "booooop", level: 30 },
-    ]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        { msg: "boop", level: 30 },
+        { msg: "booop", level: 30 },
+        { msg: "boooop", level: 30 },
+        { msg: "booooop", level: 30 },
+      ])
+    );
   });
 
   it("invokes a function using package values", function* () {
@@ -89,7 +94,7 @@ describe("attemptCommand", () => {
     const logger = pino(stream);
     const commandLogger = pino(stream);
 
-    yield attemptCommands({
+    yield* attemptCommands({
       logger,
       commands: [
         {
@@ -105,9 +110,11 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield pinoTest.consecutive(stream, [
-      { msg: "boop pkg-nickname@0.5.6", level: 30 },
-    ]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        { msg: "boop pkg-nickname@0.5.6", level: 30 },
+      ])
+    );
   });
 
   it("invokes an array of functions using package values", function* () {
@@ -115,7 +122,7 @@ describe("attemptCommand", () => {
     const logger = pino(stream);
     const commandLogger = pino(stream);
 
-    yield attemptCommands({
+    yield* attemptCommands({
       logger,
       commands: [
         {
@@ -140,11 +147,13 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield pinoTest.consecutive(stream, [
-      { msg: "boop pkg-nickname@0.5.6", level: 30 },
-      { msg: "booop pkg-nickname@0.5.6", level: 30 },
-      { msg: "boooop pkg-nickname@0.5.6", level: 30 },
-      { msg: "booooop pkg-nickname@0.5.6", level: 30 },
-    ]);
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        { msg: "boop pkg-nickname@0.5.6", level: 30 },
+        { msg: "booop pkg-nickname@0.5.6", level: 30 },
+        { msg: "boooop pkg-nickname@0.5.6", level: 30 },
+        { msg: "booooop pkg-nickname@0.5.6", level: 30 },
+      ])
+    );
   });
 });

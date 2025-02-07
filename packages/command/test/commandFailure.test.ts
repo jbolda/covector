@@ -4,6 +4,7 @@ import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
+import { call } from "effection";
 const f = fixtures(__dirname);
 
 const base = {
@@ -18,7 +19,7 @@ describe("attemptCommand fails", () => {
     const stream = pinoTest.sink();
     const logger = pino(stream);
 
-    const errored = yield captureError(
+    const errored = yield* captureError(
       attemptCommands({
         logger,
         cwd: ".",
@@ -42,7 +43,7 @@ describe("attemptCommand fails", () => {
     const stream = pinoTest.sink();
     const logger = pino(stream);
 
-    const errored = yield captureError(
+    const errored = yield* captureError(
       attemptCommands({
         logger,
         cwd: ".",
@@ -66,36 +67,40 @@ describe("attemptCommand fails", () => {
         "'boop' is not recognized as an internal or external command,\r\n" +
         "operable program or batch file.";
 
-      yield pinoTest.consecutive(
-        stream,
-        [
-          { msg: "pkg-nickname []: boop", level: 30 },
-          { msg: errorLog, level: 30 },
-          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-          { msg: "pkg-nickname []: boop", level: 30 },
-          { msg: errorLog, level: 30 },
-          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-          { msg: "pkg-nickname []: boop", level: 30 },
-          { msg: errorLog, level: 30 },
-          // to confirm we are done with logs
-          { msg: "completed", level: 30 },
-        ],
-        isShallowError
+      yield* call(() =>
+        pinoTest.consecutive(
+          stream,
+          [
+            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: errorLog, level: 30 },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: errorLog, level: 30 },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: errorLog, level: 30 },
+            // to confirm we are done with logs
+            { msg: "completed", level: 30 },
+          ],
+          isShallowError
+        )
       );
       expect(errored.message).toBe(errorMessage);
     } else {
-      yield pinoTest.consecutive(
-        stream,
-        [
-          { msg: "pkg-nickname []: boop", level: 30 },
-          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-          { msg: "pkg-nickname []: boop", level: 30 },
-          { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-          { msg: "pkg-nickname []: boop", level: 30 },
-          // to confirm we are done with logs
-          { msg: "completed", level: 30 },
-        ],
-        isShallowError
+      yield* call(() =>
+        pinoTest.consecutive(
+          stream,
+          [
+            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+            { msg: "pkg-nickname []: boop", level: 30 },
+            // to confirm we are done with logs
+            { msg: "completed", level: 30 },
+          ],
+          isShallowError
+        )
       );
       expect(errored.message).toBe(errorMessage);
     }

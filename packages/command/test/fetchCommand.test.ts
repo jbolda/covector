@@ -4,6 +4,7 @@ import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
+import { call } from "effection";
 const f = fixtures(__dirname);
 
 const base = {
@@ -34,7 +35,7 @@ describe("fetchCommand", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      yield attemptCommands({
+      yield* attemptCommands({
         logger,
         commands: [
           {
@@ -58,14 +59,16 @@ describe("fetchCommand", () => {
       // it hangs with no logs
       logger.info("completed");
 
-      yield pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }]);
+      yield* call(() =>
+        pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }])
+      );
     });
 
     it("failure throws", function* () {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const errored = yield captureError(
+      const errored = yield* captureError(
         attemptCommands({
           logger,
           commands: [
@@ -98,7 +101,7 @@ describe("fetchCommand", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const errored = yield captureError(
+      const errored = yield* captureError(
         attemptCommands({
           logger,
           commands: [
@@ -126,10 +129,12 @@ describe("fetchCommand", () => {
       const errorMessage =
         'effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404 Not Found: "version not found: 0.5.32"';
       // first two attempts log error then retry
-      yield pinoTest.consecutive(stream, [
-        { msg: errorMessage, level: 50 },
-        { msg: errorMessage, level: 50 },
-      ]);
+      yield* call(() =>
+        pinoTest.consecutive(stream, [
+          { msg: errorMessage, level: 50 },
+          { msg: errorMessage, level: 50 },
+        ])
+      );
       // final attempt throws
       expect(errored.message).toEqual(errorMessage);
     });
@@ -140,7 +145,7 @@ describe("fetchCommand", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      yield attemptCommands({
+      yield* attemptCommands({
         logger,
         commands: [
           {
@@ -164,14 +169,16 @@ describe("fetchCommand", () => {
       // it hangs with no logs
       logger.info("completed");
 
-      yield pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }]);
+      yield* call(() =>
+        pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }])
+      );
     });
 
     it("failure throws", function* () {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const errored = yield captureError(
+      const errored = yield* captureError(
         attemptCommands({
           logger,
           commands: [
@@ -204,7 +211,7 @@ describe("fetchCommand", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const errored = yield captureError(
+      const errored = yield* captureError(
         attemptCommands({
           logger,
           commands: [
@@ -231,10 +238,12 @@ describe("fetchCommand", () => {
 
       const errorMessage = `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404 Not Found: {"errors":[{"detail":"crate \`tauri\` does not have a version \`0.12.0\`"}]}`;
       // first two attempts log error then retry
-      yield pinoTest.consecutive(stream, [
-        { msg: errorMessage, level: 50 },
-        { msg: errorMessage, level: 50 },
-      ]);
+      yield* call(() =>
+        pinoTest.consecutive(stream, [
+          { msg: errorMessage, level: 50 },
+          { msg: errorMessage, level: 50 },
+        ])
+      );
       // final attempt throws
       expect(errored.message).toEqual(errorMessage);
     });
