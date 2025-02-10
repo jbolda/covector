@@ -41,6 +41,8 @@ export function x(
   return resource(function* (provide) {
     const child = commandWithPipes(cmd, { windowsHide: true, ...options });
 
+    console.log({ child: child[Symbol.asyncIterator] });
+
     let output = call(() => child);
 
     let process = {
