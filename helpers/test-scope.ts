@@ -1,5 +1,5 @@
 import { type Operation } from "effection";
-import { createTestAdapter } from "./test-adapter";
+import { createTestAdapter, TestAdapter } from "./test-adapter";
 
 import * as vitest from "vitest";
 
@@ -51,7 +51,7 @@ describeWithScope.runIf = (condition: any) =>
 export const describe = <typeof vitest.describe>(<unknown>describeWithScope);
 
 export function beforeEach(op: () => Operation<void>): void {
-  vitest.beforeEach(async (context: any) => {
+  vitest.beforeEach((context: any) => {
     context.task.suite.adapter.addSetup(op);
   });
 }
@@ -64,8 +64,11 @@ export function it(
   if (op) {
     return vitest.it(
       desc,
-      async (context: any) => {
-        context.task.suite.adapter.runTest(op);
+      async (context) => {
+        if (!context.task.suite?.adapter)
+          throw new Error("missing test adapter");
+        let adapter: TestAdapter = context.task.suite.adapter;
+        return adapter.runTest(op);
       },
       timeout
     );
@@ -74,23 +77,26 @@ export function it(
   }
 }
 
-it.only = function only(
-  desc: string,
-  op?: () => Operation<void>,
-  timeout?: number
-): void {
-  if (op) {
-    return vitest.it.only(
-      desc,
-      async (context: any) => {
-        context.task.suite.adapter.runTest(op);
-      },
-      timeout
-    );
-  } else {
-    return vitest.it.skip(desc, () => {});
-  }
-};
+// it.only = function only(
+//   desc: string,
+//   op?: () => Operation<void>,
+//   timeout?: number
+// ): void {
+//   if (op) {
+//     return vitest.it.only(
+//       desc,
+//       async (context) => {
+//         if (!context.task.suite?.adapter)
+//           throw new Error("missing test adapter");
+//         let adapter: TestAdapter = context.task.suite.adapter;
+//         return adapter.runTest(op);
+//       },
+//       timeout
+//     );
+//   } else {
+//     return vitest.it.skip(desc, () => {});
+//   }
+// };
 
 it.skip = function skip(
   desc: string,

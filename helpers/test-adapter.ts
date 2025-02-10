@@ -29,9 +29,7 @@ const anonymousNames: Iterator<string, never> = (function* () {
   }
 })();
 
-export function createTestAdapter(
-  options: TestAdapterOptions,
-): TestAdapter {
+export function createTestAdapter(options: TestAdapterOptions): TestAdapter {
   let setups: TestOp[] = [];
   let { parent, name = anonymousNames.next().value } = options;
 
@@ -57,10 +55,13 @@ export function createTestAdapter(
     },
     runTest(op) {
       return scope.run(function* () {
-	let allSetups = adapter.lineage.reduce((all, adapter) => all.concat(adapter.setups),[] as TestOp[])
-	for (let setup of allSetups) {
-	  yield* setup();
-	}
+        let allSetups = adapter.lineage.reduce(
+          (all, adapter) => all.concat(adapter.setups),
+          [] as TestOp[]
+        );
+        for (let setup of allSetups) {
+          yield* setup();
+        }
         yield* op();
       });
     },
