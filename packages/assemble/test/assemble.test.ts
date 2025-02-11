@@ -138,7 +138,7 @@ describe("assemble", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
       });
@@ -149,7 +149,7 @@ describe("assemble", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({ logger, files: [testTextFive] });
+      const assembled = yield* assemble({ logger, files: [testTextFive] });
       expect(assembled).toMatchSnapshot();
     });
   });
@@ -159,7 +159,7 @@ describe("assemble", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
         preMode: { on: true, prevFiles: [] },
@@ -180,7 +180,7 @@ describe("assemble", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
         preMode: { on: true, prevFiles: [testTextOne.path] },
@@ -209,7 +209,7 @@ describe("assemble", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo, testTextFour],
         preMode: { on: true, prevFiles: [testTextOne.path] },
@@ -238,7 +238,7 @@ describe("assemble", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo],
         preMode: { on: true, prevFiles: [testTextOne.path] },
@@ -264,7 +264,7 @@ describe("assemble", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo],
         preMode: { on: true, prevFiles: [testTextTwo.path] },
@@ -304,7 +304,7 @@ This doesn't bump much.
       const logger = pino(stream);
 
       expect.assertions(1);
-      const e = yield captureError(
+      const e = yield* captureError(
         assemble({
           logger,
           files: [emptyChangefile],
@@ -321,7 +321,7 @@ This doesn't bump much.
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [
           testTextOne,
@@ -340,7 +340,7 @@ This doesn't bump much.
       const logger = pino(stream);
 
       expect.assertions(1);
-      const e = yield captureError(
+      const e = yield* captureError(
         assemble({
           logger,
           files: [
@@ -364,7 +364,7 @@ This doesn't bump much.
       const logger = pino(stream);
 
       expect.assertions(1);
-      const e = yield captureError(
+      const e = yield* captureError(
         assemble({
           logger,
           files: [testTextSpecialTwo],
@@ -381,7 +381,7 @@ This doesn't bump much.
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextSpecialOne],
         config: configSpecial,

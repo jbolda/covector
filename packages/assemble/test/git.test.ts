@@ -22,7 +22,7 @@ describe("git parsing", () => {
     };
     // will resolve if vitest is run from this package dir or root
     const cwd = join(import.meta.dirname, "../../..");
-    const parsed = yield parseChange({
+    const parsed = yield* parseChange({
       logger,
       cwd,
       file,

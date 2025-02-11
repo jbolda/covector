@@ -126,7 +126,7 @@ describe("merge config", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const mergedVersionConfig = yield mergeChangesToConfig({
+      const mergedVersionConfig = yield* mergeChangesToConfig({
         logger,
         config,
         assembledChanges,
@@ -150,7 +150,7 @@ describe("merge config", () => {
       //@ts-expect-error
       delete modifiedConfig.packages["@namespaced/assemble2"].version;
 
-      const mergedVersionConfig = yield mergeChangesToConfig({
+      const mergedVersionConfig = yield* mergeChangesToConfig({
         logger,
         config: modifiedConfig,
         assembledChanges,
@@ -220,7 +220,7 @@ describe("merge config", () => {
         },
       };
 
-      const mergedVersionConfig = yield mergeChangesToConfig({
+      const mergedVersionConfig = yield* mergeChangesToConfig({
         logger,
         config: nestedConfig,
         assembledChanges: nestedAssembledChanges,
@@ -235,7 +235,7 @@ describe("merge config", () => {
       const logger = pino(stream);
       const configFolder = f.copy("assemble");
 
-      const mergedPublishConfig = yield mergeIntoConfig({
+      const mergedPublishConfig = yield* mergeIntoConfig({
         logger,
         cwd: configFolder,
         config,
@@ -251,7 +251,7 @@ describe("merge config", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
 
-      const mergedVersionConfig = yield mergeChangesToConfig({
+      const mergedVersionConfig = yield* mergeChangesToConfig({
         logger,
         config,
         assembledChanges,
@@ -267,7 +267,7 @@ describe("merge config", () => {
       const logger = pino(stream);
       const configFolder = f.copy("assemble");
 
-      const mergedPublishConfig = yield mergeIntoConfig({
+      const mergedPublishConfig = yield* mergeIntoConfig({
         logger,
         cwd: configFolder,
         config,
