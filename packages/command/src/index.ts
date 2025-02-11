@@ -16,7 +16,7 @@ import { sh } from "./sh";
 
 export { sh };
 
-export const attemptCommands = function* ({
+export function* attemptCommands({
   logger,
   cwd,
   commands,
@@ -70,7 +70,7 @@ export const attemptCommands = function* ({
       pkgCommandsRun[pkg.pkg]["published"] = true;
   }
   return pkgCommandsRun;
-};
+}
 
 function* executeEachCommand({
   logger,
@@ -227,7 +227,9 @@ function* callCommand({
   command: string;
   commandPrefix: string;
 }): Operation<string> {
-  if (typeof runningCommand.command === "function") {
+  // this helps with TS type guards
+  const commandFn = runningCommand?.command;
+  if (commandFn && typeof commandFn === "function") {
     const pipeToFunction = {
       ...pkg,
       pkgCommandsRan: {
@@ -236,7 +238,7 @@ function* callCommand({
       },
     };
 
-    yield* runningCommand.command(pipeToFunction);
+    yield* call(() => commandFn(pipeToFunction));
 
     if (typeof pubCommand === "object" && pubCommand.pipe) {
       logger.error(`We cannot pipe the function command in ${pkg.pkg}`);
@@ -336,7 +338,7 @@ export function* confirmCommandsToRun({
   return commandsToRun;
 }
 
-export const runCommand = function* ({
+export function* runCommand({
   logger,
   pkg = "package",
   command,
@@ -372,7 +374,7 @@ export const runCommand = function* ({
   );
 
   return ran.out;
-};
+}
 
 export interface CommandErrorOptions {
   exitCode?: number;

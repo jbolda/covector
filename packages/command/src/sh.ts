@@ -42,8 +42,6 @@ export function x(
     const [command, ...args] = split(cmd);
     const child = execa(command, args, { windowsHide: true, ...options });
 
-    console.log({ child: child[Symbol.asyncIterator] });
-
     let output = call(() => child);
 
     let process = {
