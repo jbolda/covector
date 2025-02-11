@@ -77,26 +77,26 @@ export function it(
   }
 }
 
-// it.only = function only(
-//   desc: string,
-//   op?: () => Operation<void>,
-//   timeout?: number
-// ): void {
-//   if (op) {
-//     return vitest.it.only(
-//       desc,
-//       async (context) => {
-//         if (!context.task.suite?.adapter)
-//           throw new Error("missing test adapter");
-//         let adapter: TestAdapter = context.task.suite.adapter;
-//         return adapter.runTest(op);
-//       },
-//       timeout
-//     );
-//   } else {
-//     return vitest.it.skip(desc, () => {});
-//   }
-// };
+it.only = function only(
+  desc: string,
+  op?: () => Operation<void>,
+  timeout?: number
+): void {
+  if (op) {
+    return vitest.it.only(
+      desc,
+      async (context) => {
+        if (!context.task.suite?.adapter)
+          throw new Error("missing test adapter");
+        let adapter: TestAdapter = context.task.suite.adapter;
+        return adapter.runTest(op);
+      },
+      timeout
+    );
+  } else {
+    return vitest.it.skip(desc, () => {});
+  }
+};
 
 it.skip = function skip(
   desc: string,

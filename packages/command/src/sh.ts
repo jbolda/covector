@@ -39,7 +39,8 @@ export function x(
   logger?: Logger
 ): Operation<ExecaProcess> {
   return resource(function* (provide) {
-    const child = commandWithPipes(cmd, { windowsHide: true, ...options });
+    const [command, ...args] = split(cmd);
+    const child = execa(command, args, { windowsHide: true, ...options });
 
     console.log({ child: child[Symbol.asyncIterator] });
 
@@ -64,28 +65,6 @@ export function x(
   });
 }
 
-export function commandWithPipes(
-  commandString: string,
-  options: Partial<ExecaOptions> = {}
-) {
-  if (commandString.includes(" | ")) {
-    const [primaryCommandString, ...pipedCommandStrings] =
-      commandString.split(" | ");
-    const [primaryCommand, ...primaryArgs] = split(primaryCommandString);
-    let command = execa(primaryCommand, primaryArgs, options);
-
-    for (const pipedCommandString of pipedCommandStrings) {
-      const [pipedCommand, ...pipedArgs] = split(pipedCommandString);
-      // @ts-expect-error types get weird with the pipe
-      command = command.pipe(pipedCommand, pipedArgs, options);
-    }
-    return command;
-  } else {
-    const [command, ...args] = split(commandString);
-    return execa(command, args, options);
-  }
-}
-
 export function* sh(
   command: string,
   options: Partial<ExecaOptions> = {},
@@ -96,7 +75,13 @@ export function* sh(
   let stdout = "";
   let stderr = "";
 
-  const child = yield* x(command, options);
+  const workingOptions = { ...options };
+  if (command.includes(" | ") && !options?.shell) {
+    workingOptions.shell = true;
+    logger.warn(`"|" detected in command, setting shell to true: ${command}`);
+  }
+
+  const child = yield* x(command, workingOptions);
 
   for (let line of yield* each(child.lines)) {
     out += line + "\n";

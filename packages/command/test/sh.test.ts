@@ -5,7 +5,6 @@ import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
 import { execa, type Options } from "execa";
-import { commandWithPipes } from "../src/sh.ts";
 
 describe("execa compatibility checks", () => {
   itPromises("handles multiple pipes with function syntax", async () => {
@@ -24,16 +23,16 @@ describe("execa compatibility checks", () => {
     expect(all).toBe("but this");
   });
 
-  describe("with shellwords wrapper", () => {
+  describe("with `shell: true`", () => {
     itPromises("single command", async () => {
-      const options: Options = { all: true };
-      const { all } = await commandWithPipes("echo but this", options);
+      const options: Options = { all: true, shell: true };
+      const { all } = await execa("echo but this", options);
       expect(all).toBe("but this");
     });
 
     itPromises("multiple pipes", async () => {
-      const options: Options = { all: true };
-      const { all } = await commandWithPipes(
+      const options: Options = { all: true, shell: true };
+      const { all } = await execa(
         'echo "this thing" | echo "and this" | echo "but this"',
         options
       );
@@ -71,7 +70,7 @@ Usage:
         logger
       );
       expect(out).toBe("this thing");
-    }); // TODO increase timeout to 60s, windows seems to take forever
+    });
 
     it("defines bash as shell", function* () {
       const { out } = yield* sh(
