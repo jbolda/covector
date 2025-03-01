@@ -5,7 +5,7 @@ import {
   allCommandsSchema,
   pkgManagerSchema,
   configFileSchema,
-} from "@covector/files/src/schema";
+} from "../../files/src/schema";
 import { TomlDocument } from "@covector/toml";
 import { Operation } from "effection";
 
@@ -132,6 +132,7 @@ export type Meta = {
     date: string;
     commitSubject: string;
   }[];
+  path: string;
 };
 
 export type AssembledChanges = {
@@ -148,8 +149,19 @@ export type AssembledChanges = {
   meta?: Meta;
 };
 
+export interface AssembledPlan {
+  changes: Change[];
+  releases: { [k: string]: Release };
+}
+
+export interface AssembledPlanParsed {
+  changes: AssembledPlan["changes"];
+  releases: { [k: string]: ReleaseParsed };
+}
+
 /* @covector/assemble */
-export type Changeset = {
+// rename to break references for the moment
+export type Changeset2 = {
   releases?: { [k: string]: CommonBumps } | {};
   tag?: string;
   summary?: string;
@@ -172,7 +184,18 @@ export type CommonBumpsWithTag =
 export type Change = {
   releases: { [k: string]: CommonBumps };
   tag?: string;
-  meta: File;
+  summary?: string;
+  meta: {
+    file?: File;
+    dependencies?: string[];
+    commits?: {
+      hashShort: string;
+      hashLong: string;
+      date: string;
+      commitSubject: string;
+    }[];
+    path: string;
+  };
 };
 
 export type Release = {
@@ -185,19 +208,19 @@ export type Release = {
 export type CommandTypes = NormalizedCommand | string | Function | true;
 export type Command = CommandTypes[] | CommandTypes | boolean;
 
-export type PkgVersion = {
+export interface PkgVersion {
   pkg: string;
   path?: string;
+  dependencies?: string[];
+  manager?: string;
+  type: CommonBumps;
+  parents: Parents;
   packageFileName?: string;
-  type?: string;
-  parents?: Parents;
   precommand: Command | null;
   command: Command | null;
   postcommand: Command | null;
-  manager?: string;
-  dependencies?: string[];
   errorOnVersionRange: string | null;
-};
+}
 
 export type PipeVersionTemplate = {
   release: Release;
@@ -232,7 +255,13 @@ export type ChangeParsed = {
   releases: { [k: string]: string };
   tag?: string;
   summary: string;
-  meta: { dependencies: string[] };
+  meta: Meta;
+};
+
+export type ReleaseParsed = {
+  type: CommonBumps;
+  changes: ChangeParsed[];
+  parents?: Parents;
 };
 
 export type ChangeContext<A> = (args: A) => Operation<
@@ -265,20 +294,21 @@ export type Releases = {
 
 export type PackageCommand = {
   pkg: string;
+  path?: string;
   dependencies?: string[];
   manager?: string;
-  path: string;
   type: CommonBumps;
   parents: Parents;
 };
 
 /* covector */
 export type PkgCommandsRan = {
-  precommand: string | false;
-  command: string | false;
-  postcommand: string | false;
-  applied: string | false;
+  precommand: string | boolean;
+  command: string | boolean;
+  postcommand: string | boolean;
+  applied?: PackageFile | false;
   published?: boolean;
+  pkg?: PkgPublish;
 };
 
 export type CommandsRan = {

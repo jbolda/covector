@@ -13,6 +13,9 @@ import type {
   Meta,
   ChangeContext,
   Logger,
+  CommandsRan,
+  PackageFile,
+  AssembledPlanParsed,
 } from "@covector/types";
 
 export { pullLastChangelog } from "./get";
@@ -28,14 +31,14 @@ export function* fillChangelogs({
   createContext,
 }: {
   logger: Logger;
-  applied: { name: string; version: string }[];
-  assembledChanges: AssembledChanges;
+  applied: PackageFile[];
+  assembledChanges: AssembledPlanParsed;
   config: ConfigFile;
   cwd: string;
-  pkgCommandsRan?: { [k: string]: PkgCommandResponse };
+  pkgCommandsRan?: CommandsRan;
   create?: boolean;
   createContext?: ChangeContext<{ commits: string[] }>;
-}): Operation<{ [k: string]: PkgCommandResponse } | undefined> {
+}): Operation<CommandsRan | undefined> {
   const changelogs = yield* readAllChangelogs({
     logger,
     applied: applied.reduce(
@@ -43,14 +46,16 @@ export function* fillChangelogs({
         final: { name: string; version: string; changelog?: File }[],
         current
       ) =>
-        !config.packages[current.name].path ? final : final.concat([current]),
+        current?.name && !config.packages[current.name].path
+          ? final
+          : final.concat([current]),
       []
     ),
     packages: config.packages,
     cwd,
   });
 
-  const writtenChanges: ChangedLog[] = yield* applyChanges({
+  const writtenChanges = yield* applyChanges({
     changelogs,
     assembledChanges,
     config,
@@ -63,21 +68,16 @@ export function* fillChangelogs({
   }
 
   if (!pkgCommandsRan) {
-    return;
+    return undefined;
   } else {
-    pkgCommandsRan = Object.keys(pkgCommandsRan).reduce(
-      (pkgs: { [k: string]: PkgCommandResponse }, pkg) => {
-        writtenChanges.forEach((change) => {
-          if (change.pkg === pkg) {
-            pkgs[pkg].command = change.addition;
-          }
-        });
-        return pkgs;
-      },
-      pkgCommandsRan
-    );
-
-    return pkgCommandsRan;
+    return Object.keys(pkgCommandsRan).reduce((pkgs, pkg) => {
+      writtenChanges.forEach((change) => {
+        if (change.pkg === pkg) {
+          pkgs[pkg].command = change.addition;
+        }
+      });
+      return pkgs;
+    }, pkgCommandsRan);
   }
 }
 
@@ -86,25 +86,20 @@ export function* pipeChangelogToCommands({
   pkgCommandsRan,
 }: {
   changelogs: { [k: string]: { pkg: string; changelog: string } };
-  pkgCommandsRan: { [k: string]: PkgCommandResponse };
-}) {
-  return Object.keys(pkgCommandsRan).reduce(
-    (pkgs: { [k: string]: PkgCommandResponse }, pkg) => {
-      Object.keys(changelogs).forEach((pkg) => {
-        if (pkgs[pkg]) {
-          pkgs[pkg].command = changelogs[pkg].changelog;
-        }
-      });
-      return pkgs;
-    },
-    pkgCommandsRan
-  );
+  pkgCommandsRan: CommandsRan;
+}): Operation<CommandsRan> {
+  return Object.keys(pkgCommandsRan).reduce((pkgs: CommandsRan, pkg) => {
+    Object.keys(changelogs).forEach((pkg) => {
+      if (pkgs[pkg]) {
+        pkgs[pkg].command = changelogs[pkg].changelog;
+      }
+    });
+    return pkgs;
+  }, pkgCommandsRan);
 }
 
-const getVersionFromApplied = (
-  name: string,
-  applied: { name: string; version: string }[]
-) => applied.find((pkg) => pkg.name === name)?.version;
+const getVersionFromApplied = (name: string, applied: PackageFile[]) =>
+  applied.find((pkg) => pkg.name === name)?.version;
 
 /**
  *  Renders a change file in the format:
@@ -180,9 +175,9 @@ function* applyChanges({
   createContext = defaultCreateContext,
 }: {
   changelogs: Change[];
-  assembledChanges: AssembledChanges;
+  assembledChanges: AssembledPlanParsed;
   config: ConfigFile;
-  applied: { name: string; version: string }[];
+  applied: PackageFile[];
   createContext?: ChangeContext<{ commits: string[] }>;
 }): Operation<ChangedLog[]> {
   const gitSiteUrl = !config.gitSiteUrl

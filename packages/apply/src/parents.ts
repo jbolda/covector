@@ -1,10 +1,11 @@
 import type {
   ConfigFile,
-  Changed,
-  ChangeParsed,
-  Releases,
   PackageFile,
   DepsKeyed,
+  AssembledPlan,
+  ReleaseParsed,
+  AssembledChanges,
+  AssembledPlanParsed,
 } from "@covector/types";
 
 const resolveParents = ({
@@ -27,34 +28,33 @@ const resolveParents = ({
       });
       return parents;
     },
-    {},
+    {}
   );
 };
 
 export const changesConsideringParents = ({
-  assembledChanges,
+  assembledPlan,
   config,
   allPackages,
   prereleaseIdentifier,
 }: {
-  assembledChanges: {
-    releases: Releases;
-    changes: ChangeParsed[];
-  };
+  assembledPlan: AssembledPlan;
   config: ConfigFile;
   allPackages: Record<string, PackageFile>;
   prereleaseIdentifier?: string;
-}) => {
+}): AssembledPlanParsed => {
   const parents = resolveParents({ config, allPackages });
 
-  let initialChanges = Object.keys(assembledChanges.releases).reduce(
-    (list: Changed, change) => {
-      list[change] = assembledChanges.releases[change];
-      list[change].parents = parents[change];
-      return list;
-    },
-    {},
-  );
+  let initialChanges = !assembledPlan?.releases
+    ? {}
+    : Object.keys(assembledPlan.releases).reduce(
+        (list: AssembledPlan["releases"], change) => {
+          list[change] = assembledPlan.releases![change];
+          list[change].parents = parents[change];
+          return list;
+        },
+        {}
+      );
 
   const releases = parentBump({
     initialChanges,
@@ -64,7 +64,7 @@ export const changesConsideringParents = ({
 
   return {
     releases,
-    changes: assembledChanges.changes,
+    changes: assembledPlan.changes,
   };
 };
 
@@ -73,15 +73,16 @@ const parentBump = ({
   parents,
   prereleaseIdentifier,
 }: {
-  initialChanges: Changed;
-  parents: any;
+  initialChanges: AssembledPlan["releases"] | { [k: string]: ReleaseParsed };
+  parents: Record<string, Record<string, DepsKeyed>>;
   prereleaseIdentifier?: string;
-}): Changed => {
-  let changes = { ...initialChanges };
+}): { [k: string]: ReleaseParsed } => {
+  let changes = { ...initialChanges } as { [k: string]: ReleaseParsed };
   let recurse = false;
   Object.keys(initialChanges).forEach((main) => {
-    if (Object.keys(changes[main].parents).length > 0) {
-      Object.entries(changes[main].parents).forEach(([pkg, deps]) => {
+    const changeParent = changes[main]?.parents ?? {};
+    if (Object.keys(changeParent).length > 0) {
+      Object.entries(changeParent).forEach(([pkg, deps]) => {
         // if we can't find this package in the dependencies, mark it as none
         //   and presume that the intent is for it to receive a patch bump from a dep
         const prevDepVersion =

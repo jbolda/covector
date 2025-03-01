@@ -1,9 +1,9 @@
-import { spawn, withTimeout, Operation, MainError } from "effection";
-import { exec, Process } from "@effection/process";
+import { spawn, type Operation } from "effection";
 import stripAnsi from "strip-ansi";
 import fs from "node:fs";
 import path from "node:path";
 import { assert } from "vitest";
+import { x } from "@covector/command";
 
 export const loadContent = (cwd: string, pathToContent: string) => {
   return fs.readFileSync(path.join(cwd, pathToContent), { encoding: "utf8" });
@@ -79,11 +79,11 @@ export function* runCommand(
   let responded = "";
   try {
     const debug = false;
-    const commandExec: Process = yield exec(command, { cwd });
+    const commandExec = yield* x(command, { cwd });
     const elegantlyRespond = responses.length > 0;
     let responseCount = 0;
 
-    yield spawn(
+    yield* spawn(
       commandExec.stdout.forEach(function* (chunk) {
         stdoutBuffer = Buffer.concat([stdoutBuffer, chunk]);
         if (elegantlyRespond) {
@@ -106,13 +106,13 @@ export function* runCommand(
       })
     );
 
-    yield spawn(
+    yield* spawn(
       commandExec.stderr.forEach((chunk) => {
         stderrBuffer = Buffer.concat([stderrBuffer, chunk]);
       })
     );
 
-    let status = yield withTimeout(timeout, commandExec.join());
+    let status = yield* withTimeout(timeout, commandExec.join());
 
     stdout = stripAnsi(stdoutBuffer.toString("utf-8").trim());
     stderr = stripAnsi(stderrBuffer.toString("utf-8").trim());

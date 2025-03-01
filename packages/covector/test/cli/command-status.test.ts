@@ -7,7 +7,7 @@ const f = fixtures(__dirname);
 describe("integration test for init command", () => {
   it("runs version for prod", function* () {
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const { stdout, stderr, status } = yield runCommand(
+    const { stdout, stderr, status } = yield* runCommand(
       command("status", fullIntegration),
       fullIntegration
     );

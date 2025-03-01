@@ -12,9 +12,9 @@ import type {
   BuiltInCommandOptions,
   Logger,
 } from "@covector/types";
-import { sh } from "./sh";
+import { sh, x } from "./sh";
 
-export { sh };
+export { sh, x };
 
 export function* attemptCommands({
   logger,
@@ -32,8 +32,8 @@ export function* attemptCommands({
   commandPrefix?: "pre" | "post" | "";
   pkgCommandsRan?: CommandsRan;
   dryRun: boolean;
-}): Operation<{ [k: string]: { [c: string]: string | boolean } }> {
-  let pkgCommandsRun: { [k: string]: { [c: string]: string | boolean } } = {
+}): Operation<CommandsRan> {
+  let pkgCommandsRun = {
     ...pkgCommandsRan,
   };
   for (let pkg of commands) {

@@ -9,59 +9,6 @@ exports[`integration test for complex commands > dry run > runs build 1`] = `
 - Added some cool things.
 
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": {
-          "currentVersion": "2.3.1",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-one",
-  "description": "shrugs",
-  "version": "2.3.1",
-  "license": "MIT",
-  "scripts": {
-    "build": "npm info tauri@0.8.0 description",
-    "test": "npm info covector@0.1.0 license"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": {
-            "description": "shrugs",
-            "license": "MIT",
-            "name": "package-one",
-            "scripts": {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
-            },
-            "version": "2.3.1",
-          },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -71,59 +18,6 @@ exports[`integration test for complex commands > dry run > runs build 1`] = `
 - Added some even cooler things.
 
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": {
-          "currentVersion": "1.9.0",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-two",
-  "description": "shrugs",
-  "version": "1.9.0",
-  "license": "MIT",
-  "scripts": {
-    "build": "echo this command is not piped, it is run from scripts for pk2",
-    "test": "echo this command is not piped, it is run from the test script"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": {
-            "description": "shrugs",
-            "license": "MIT",
-            "name": "package-two",
-            "scripts": {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
-            },
-            "version": "1.9.0",
-          },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -437,6 +331,7 @@ exports[`integration test for complex commands > dry run > runs publish 1`] = `
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -449,67 +344,6 @@ exports[`integration test for complex commands > dry run > runs test 1`] = `
 - Added some cool things.
 
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-          {
-            "command": "npm test",
-            "dryRunCommand": false,
-          },
-          {
-            "command": "echo boop",
-            "dryRunCommand": "echo deboop",
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": {
-          "currentVersion": "2.3.1",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-one",
-  "description": "shrugs",
-  "version": "2.3.1",
-  "license": "MIT",
-  "scripts": {
-    "build": "npm info tauri@0.8.0 description",
-    "test": "npm info covector@0.1.0 license"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": {
-            "description": "shrugs",
-            "license": "MIT",
-            "name": "package-one",
-            "scripts": {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
-            },
-            "version": "2.3.1",
-          },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -519,67 +353,6 @@ exports[`integration test for complex commands > dry run > runs test 1`] = `
 - Added some even cooler things.
 
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-          {
-            "command": "npm test",
-            "dryRunCommand": false,
-          },
-          {
-            "command": "echo boop",
-            "dryRunCommand": "echo deboop",
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": {
-          "currentVersion": "1.9.0",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-two",
-  "description": "shrugs",
-  "version": "1.9.0",
-  "license": "MIT",
-  "scripts": {
-    "build": "echo this command is not piped, it is run from scripts for pk2",
-    "test": "echo this command is not piped, it is run from the test script"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": {
-            "description": "shrugs",
-            "license": "MIT",
-            "name": "package-two",
-            "scripts": {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
-            },
-            "version": "1.9.0",
-          },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -726,62 +499,8 @@ exports[`integration test for complex commands > prod > runs build 1`] = `
 > package-one@2.3.1 build
 > npm info tauri@0.8.0 description
 
-npm warn Ignoring workspaces for specified package(s)
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": {
-          "currentVersion": "2.3.1",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-one",
-  "description": "shrugs",
-  "version": "2.3.1",
-  "license": "MIT",
-  "scripts": {
-    "build": "npm info tauri@0.8.0 description",
-    "test": "npm info covector@0.1.0 license"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": {
-            "description": "shrugs",
-            "license": "MIT",
-            "name": "package-one",
-            "scripts": {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
-            },
-            "version": "2.3.1",
-          },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -795,59 +514,6 @@ Multi-binding collection of libraries and templates for building Tauri apps
 
 this command is not piped, it is run from scripts for pk2
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": {
-          "currentVersion": "1.9.0",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-two",
-  "description": "shrugs",
-  "version": "1.9.0",
-  "license": "MIT",
-  "scripts": {
-    "build": "echo this command is not piped, it is run from scripts for pk2",
-    "test": "echo this command is not piped, it is run from the test script"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": {
-            "description": "shrugs",
-            "license": "MIT",
-            "name": "package-two",
-            "scripts": {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
-            },
-            "version": "1.9.0",
-          },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -1163,6 +829,7 @@ publish
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -1177,70 +844,8 @@ exports[`integration test for complex commands > prod > runs test 1`] = `
 > package-one@2.3.1 build
 > npm info tauri@0.8.0 description
 
-npm warn Ignoring workspaces for specified package(s)
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-          {
-            "command": "npm test",
-            "dryRunCommand": false,
-          },
-          {
-            "command": "echo boop",
-            "dryRunCommand": "echo deboop",
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": {
-          "currentVersion": "2.3.1",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-one",
-  "description": "shrugs",
-  "version": "2.3.1",
-  "license": "MIT",
-  "scripts": {
-    "build": "npm info tauri@0.8.0 description",
-    "test": "npm info covector@0.1.0 license"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": {
-            "description": "shrugs",
-            "license": "MIT",
-            "name": "package-one",
-            "scripts": {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
-            },
-            "version": "2.3.1",
-          },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -1254,67 +859,6 @@ Multi-binding collection of libraries and templates for building Tauri apps
 
 this command is not piped, it is run from scripts for pk2
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "npm run build",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-          {
-            "command": "npm test",
-            "dryRunCommand": false,
-          },
-          {
-            "command": "echo boop",
-            "dryRunCommand": "echo deboop",
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": {
-          "currentVersion": "1.9.0",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-two",
-  "description": "shrugs",
-  "version": "1.9.0",
-  "license": "MIT",
-  "scripts": {
-    "build": "echo this command is not piped, it is run from scripts for pk2",
-    "test": "echo this command is not piped, it is run from the test script"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": {
-            "description": "shrugs",
-            "license": "MIT",
-            "name": "package-two",
-            "scripts": {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
-            },
-            "version": "1.9.0",
-          },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -1456,114 +1000,12 @@ exports[`integration test to invoke sub commands > runs publish-primary in prod 
     "package-one": {
       "command": "publish
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": {
-          "currentVersion": "2.3.1",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-one",
-  "version": "2.3.1",
-  "license": "MIT",
-  "scripts": {
-    "build": "npm info tauri@0.8.0 description",
-    "test": "npm info covector@0.1.0 license"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": {
-            "license": "MIT",
-            "name": "package-one",
-            "scripts": {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
-            },
-            "version": "2.3.1",
-          },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
-      },
       "postcommand": false,
       "precommand": false,
     },
     "package-two": {
       "command": "publish
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": {
-          "currentVersion": "1.9.0",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-two",
-  "version": "1.9.0",
-  "license": "MIT",
-  "scripts": {
-    "build": "echo this command is not piped, it is run from scripts for pk2",
-    "test": "echo this command is not piped, it is run from the test script"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": {
-            "license": "MIT",
-            "name": "package-two",
-            "scripts": {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
-            },
-            "version": "1.9.0",
-          },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
-      },
       "postcommand": false,
       "precommand": false,
     },
@@ -1657,114 +1099,12 @@ exports[`integration test to invoke sub commands > runs publishSecondary in prod
     "package-one": {
       "command": "publish
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-one",
-        "pkg": "package-one",
-        "pkgFile": {
-          "currentVersion": "2.3.1",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-one",
-  "version": "2.3.1",
-  "license": "MIT",
-  "scripts": {
-    "build": "npm info tauri@0.8.0 description",
-    "test": "npm info covector@0.1.0 license"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-one/package.json",
-          },
-          "name": "package-one",
-          "pkg": {
-            "license": "MIT",
-            "name": "package-one",
-            "scripts": {
-              "build": "npm info tauri@0.8.0 description",
-              "test": "npm info covector@0.1.0 license",
-            },
-            "version": "2.3.1",
-          },
-          "version": "2.3.1",
-          "versionMajor": 2,
-          "versionMinor": 3,
-          "versionPatch": 1,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-one-v2.3.1",
-      },
       "postcommand": false,
       "precommand": false,
     },
     "package-two": {
       "command": "publish
 ",
-      "pkg": {
-        "command": [
-          {
-            "command": "echo publish",
-            "dryRunCommand": undefined,
-            "pipe": true,
-          },
-        ],
-        "dependencies": undefined,
-        "errorOnVersionRange": null,
-        "manager": "javascript",
-        "path": "./packages/package-two",
-        "pkg": "package-two",
-        "pkgFile": {
-          "currentVersion": "1.9.0",
-          "deps": {},
-          "file": {
-            "content": "{
-  "name": "package-two",
-  "version": "1.9.0",
-  "license": "MIT",
-  "scripts": {
-    "build": "echo this command is not piped, it is run from scripts for pk2",
-    "test": "echo this command is not piped, it is run from the test script"
-  }
-}
-",
-            "extname": ".json",
-            "filename": "package",
-            "path": "packages/package-two/package.json",
-          },
-          "name": "package-two",
-          "pkg": {
-            "license": "MIT",
-            "name": "package-two",
-            "scripts": {
-              "build": "echo this command is not piped, it is run from scripts for pk2",
-              "test": "echo this command is not piped, it is run from the test script",
-            },
-            "version": "1.9.0",
-          },
-          "version": "1.9.0",
-          "versionMajor": 1,
-          "versionMinor": 9,
-          "versionPatch": 0,
-          "versionPrerelease": null,
-        },
-        "postcommand": null,
-        "precommand": null,
-        "releaseTag": "package-two-v1.9.0",
-      },
       "postcommand": false,
       "precommand": false,
     },

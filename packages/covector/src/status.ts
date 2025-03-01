@@ -19,15 +19,8 @@ import {
 } from "@covector/apply";
 import { cloneDeep } from "lodash";
 
-import type {
-  CovectorStatus,
-  Covector,
-  PkgPublish,
-  PackageFile,
-  PkgVersion,
-  Config,
-} from "@covector/types";
-import { call } from "effection";
+import type { CovectorStatus, PackageFile } from "@covector/types";
+import { call, type Operation } from "effection";
 
 export function* status({
   logger,
@@ -47,11 +40,11 @@ export function* status({
   modifyConfig?: (c: any) => Promise<any>;
   branchTag?: string;
   logs?: boolean;
-}): Generator<any, Covector, any> {
+}): Operation<CovectorStatus> {
   const rawConfig = yield* configFile({ cwd });
   const config = yield* call(() => modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
-  const prereleaseIdentifier = !pre ? null : pre.tag;
+  const prereleaseIdentifier = !pre ? undefined : pre.tag;
 
   const changesPaths = yield* changeFiles({
     cwd,
@@ -61,7 +54,7 @@ export function* status({
     cwd,
     paths: changesPaths,
   });
-  const assembledChanges = yield* assemble({
+  const assembledPlan = yield* assemble({
     logger: logger.child({ step: "assemble changes" }),
     cwd,
     files: changeFilesLoaded,
@@ -74,7 +67,7 @@ export function* status({
 
     const { commands: publishCommands } = yield* mergeIntoConfig({
       logger: logger.child({ step: "assemble changes" }),
-      assembledChanges,
+      assembledPlan,
       config,
       command: "publish",
       cwd,
@@ -86,8 +79,10 @@ export function* status({
     if (publishCommands.length === 0) {
       if (logs) logger.info(`No commands configured to run on publish.`);
       return {
+        config,
         response: `No commands configured to run on publish.`,
         pkgReadyToPublish: [],
+        pkgVersion: [],
       };
     }
 
@@ -110,12 +105,13 @@ export function* status({
       );
     }
 
-    return <CovectorStatus>{
+    return {
       pkgReadyToPublish: commandsToRun,
+      pkgVersion: [],
       config,
       response: "No changes.",
     };
-  } else if (!!pre && assembledChanges?.changes?.length === 0) {
+  } else if (!!pre && assembledPlan?.changes?.length === 0) {
     if (logs) {
       logger.info("There are no changes.");
       logger.info({
@@ -123,14 +119,19 @@ export function* status({
         renderAsYAML: changesPaths,
       });
     }
-    return { pkgReadyToPublish: [], config, response: "No changes." };
+    return {
+      pkgReadyToPublish: [],
+      pkgVersion: [],
+      config,
+      response: "No changes.",
+    };
   } else {
     if (logs) {
       logger.info("changes:");
-      Object.keys(assembledChanges?.releases ?? {}).forEach((release) => {
+      Object.keys(assembledPlan?.releases ?? {}).forEach((release) => {
         logger.info({
-          msg: `${release} => ${assembledChanges.releases[release].type}`,
-          renderAsYAML: assembledChanges.releases[release].changes,
+          msg: `${release} => ${assembledPlan?.releases?.[release].type}`,
+          renderAsYAML: assembledPlan?.releases?.[release].changes,
         });
       });
     }
@@ -141,30 +142,24 @@ export function* status({
     });
 
     const changes = changesConsideringParents({
-      assembledChanges,
+      assembledPlan,
       config,
       allPackages,
       prereleaseIdentifier,
     });
 
-    const {
-      commands,
-      pipeTemplate,
-    }: { commands: PkgVersion[]; pipeTemplate: any } =
-      yield* mergeChangesToConfig({
-        logger: logger.child({ step: "compile changes" }),
-        assembledChanges: changes,
-        config,
-        command,
-        dryRun,
-        filterPackages,
-        cwd,
-      });
+    const { commands, pipeTemplate } = yield* mergeChangesToConfig({
+      logger: logger.child({ step: "compile changes" }),
+      assembledChanges: changes,
+      config,
+      command,
+      dryRun,
+      filterPackages,
+    });
 
     // throws if failed validation
     yield* validateApply({
       logger: logger.child({ step: "apply changes" }),
-      //@ts-expect-error
       commands,
       // as the validate ends up mutating
       allPackages: cloneDeep(allPackages),
@@ -173,9 +168,7 @@ export function* status({
 
     const applied = yield* apply({
       logger: logger.child({ step: "apply changes" }),
-      //@ts-expect-error
       commands,
-      config,
       allPackages,
       cwd,
       bump: false,
@@ -183,16 +176,15 @@ export function* status({
       logs,
     });
 
-    return <CovectorStatus>{
+    return {
       pkgVersion: commands,
       config,
       applied,
       pipeTemplate: pipeTemplate,
       response: `There are ${
-        Object.keys(assembledChanges.releases).length
-      } changes which include${Object.keys(assembledChanges.releases).map(
-        (release) =>
-          ` ${release} with ${assembledChanges.releases[release].type}`
+        Object.keys(assembledPlan.releases).length
+      } changes which include${Object.keys(assembledPlan.releases).map(
+        (release) => ` ${release} with ${assembledPlan.releases[release].type}`
       )}`,
     };
   }

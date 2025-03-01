@@ -32,7 +32,7 @@ export function* apply({
   allPackages: Record<string, PackageFile>;
   cwd: string;
   bump: boolean;
-  previewVersion: string;
+  previewVersion?: string;
   prereleaseIdentifier?: string;
   logs?: boolean;
 }): Operation<PackageFile[]> {

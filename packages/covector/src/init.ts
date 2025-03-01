@@ -3,11 +3,18 @@ import { intro, outro, group, cancel, text, confirm } from "@clack/prompts";
 import * as fs from "fs/promises";
 import type { Dir } from "fs";
 import path from "path";
-import { Operation, all } from "effection";
+import { Operation, all, call } from "effection";
 import { readPkgFile } from "@covector/files";
 import type { PackageFile } from "@covector/types";
 import { type Logger } from "@covector/types";
 
+function* reader(pkg: string, cwd: string): Operation<PackageFile | undefined> {
+  try {
+    return yield* readPkgFile({ file: pkg, nickname: pkg, cwd });
+  } catch (error) {
+    return undefined;
+  }
+}
 export const init = function* init({
   logger,
   cwd = process.cwd(),
@@ -19,32 +26,23 @@ export const init = function* init({
   changeFolder?: string;
   yes: boolean;
 }): Generator<any, any, any> {
-  const pkgs: string[] = yield* packageFiles({ cwd });
+  const pkgs = yield* call(() => packageFiles({ cwd }));
   let packages: {
     [k: string]: { path: string; manager: string; dependencies?: string[] };
   } = {};
   let pkgManagers: { [k: string]: boolean } = {};
   let gitURL: string | undefined;
-  const pkgFiles: (PackageFile | undefined)[] = yield* all(
-    pkgs.map(
-      (pkg: string) =>
-        function* (): Operation<(PackageFile | undefined)[]> {
-          try {
-            return yield* readPkgFile({ file: pkg, nickname: pkg, cwd });
-          } catch (error) {
-            return undefined;
-          }
-        }
-    )
-  );
+  const pkgFiles = yield* all(pkgs.map((pkg) => reader(pkg, cwd)));
 
   for (let pkgFile of pkgFiles) {
     if (!pkgFile) continue;
     if (!pkgFile?.pkg?.workspaces) {
-      const manager: string = yield* derivePkgManager({
-        path: path.dirname(`./${pkgFile.name}`),
-        pkgFile,
-      });
+      const manager = yield* call(() =>
+        derivePkgManager({
+          path: path.dirname(`./${pkgFile.name}`),
+          pkgFile,
+        })
+      );
       pkgManagers[manager] = true;
       const dependencies = buildDependencyGraph({ pkgFile, pkgFiles });
 
@@ -118,7 +116,7 @@ export const init = function* init({
           },
         }
       );
-  const answers: Awaited<typeof questions> = yield* questions;
+  const answers: Awaited<typeof questions> = yield* call(() => questions);
   outro("Generating files...");
 
   // https://github.com/bombshell-dev/clack/issues/134
@@ -128,12 +126,14 @@ export const init = function* init({
   // process.stdin.resume();
 
   try {
-    const testOpen: Dir = yield* fs.opendir(path.posix.join(cwd, changeFolder));
+    const testOpen = yield* call(() =>
+      fs.opendir(path.posix.join(cwd, changeFolder))
+    );
     logger.info(`The ${changeFolder} folder exists, skipping creation.`);
-    yield* testOpen.close();
+    yield* call(() => testOpen.close());
   } catch (e) {
     logger.info(`Creating the ${changeFolder} directory.`);
-    yield* fs.mkdir(path.posix.join(cwd, changeFolder));
+    yield* call(() => fs.mkdir(path.posix.join(cwd, changeFolder)));
   }
 
   const javascript = {
@@ -183,109 +183,116 @@ export const init = function* init({
 
   // .changes/config.json
   try {
-    const testOpen = yield* fs.open(
-      path.posix.join(cwd, changeFolder, "config.json"),
-      "r"
+    const testOpen = yield* call(() =>
+      fs.open(path.posix.join(cwd, changeFolder, "config.json"), "r")
     );
     logger.info(
       `The config.json exists in ${changeFolder}, skipping creation.`
     );
-    yield* testOpen.close();
+    yield* call(() => testOpen.close());
   } catch (e) {
     logger.info("Writing out the config file.");
-    yield* fs.writeFile(
-      path.posix.join(cwd, changeFolder, "config.json"),
-      JSON.stringify(config, null, 2)
+    yield* call(() =>
+      fs.writeFile(
+        path.posix.join(cwd, changeFolder, "config.json"),
+        JSON.stringify(config, null, 2)
+      )
     );
   }
 
   // .changes/readme.md
   try {
-    const testOpen = yield* fs.open(
-      path.posix.join(cwd, changeFolder, "readme.md"),
-      "r"
+    const testOpen = yield* call(() =>
+      fs.open(path.posix.join(cwd, changeFolder, "readme.md"), "r")
     );
     logger.info(`The readme.md exists in ${changeFolder}, skipping creation.`);
-    yield* testOpen.close();
+    yield* call(() => testOpen.close());
   } catch (e) {
     logger.info("Writing out a readme to serve as your guide.");
-    yield* fs.writeFile(
-      path.posix.join(cwd, changeFolder, "readme.md"),
-      readme
+    yield* call(() =>
+      fs.writeFile(path.posix.join(cwd, changeFolder, "readme.md"), readme)
     );
   }
 
   if (answers.gh) {
-    // @ts-ignore we don't need TS to check this import
-    const covectorPackageFile = yield* import("../package.json");
-    const covectorVersionSplit: string[] =
-      covectorPackageFile.version.split(".");
+    const covectorPackageFile = yield* call(() => import("../package.json"));
+    const covectorVersionSplit = covectorPackageFile.version.split(".");
     let covectorVersion = `${covectorVersionSplit[0]}.${covectorVersionSplit[1]}`;
 
     try {
-      const testOpen: Dir = yield* fs.opendir(
-        path.posix.join(cwd, "./.github/workflows/")
+      const testOpen: Dir = yield* call(() =>
+        fs.opendir(path.posix.join(cwd, "./.github/workflows/"))
       );
       logger.info(`The .github/workflows folder exists, skipping creation.`);
-      yield* testOpen.close();
+      yield* call(() => testOpen.close());
     } catch (e) {
       logger.info(`Creating the .github/workflows directory.`);
-      yield* fs.mkdir(path.posix.join(cwd, "./.github/workflows/"), {
-        recursive: true,
-      });
+      yield* call(() =>
+        fs.mkdir(path.posix.join(cwd, "./.github/workflows/"), {
+          recursive: true,
+        })
+      );
     }
 
     // github status
     try {
-      const testOpen = yield* fs.open(
-        path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
-        "r"
+      const testOpen = yield* call(() =>
+        fs.open(
+          path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
+          "r"
+        )
       );
       logger.info(
         `The status workflow exists in ./.github/workflows, skipping creation.`
       );
-      yield* testOpen.close();
+      yield* call(() => testOpen.close());
     } catch (e) {
       logger.info(
         "Writing out covector-status.yml to give you a covector update on PR."
       );
-      yield* fs.writeFile(
-        path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
-        githubStatusWorkflow({ version: covectorVersion })
+      yield* call(() =>
+        fs.writeFile(
+          path.posix.join(cwd, ".github", "workflows", "covector-status.yml"),
+          githubStatusWorkflow({ version: covectorVersion })
+        )
       );
     }
 
     // github version and publish
     try {
-      const testOpen = yield* fs.open(
-        path.posix.join(
-          cwd,
-          ".github",
-          "workflows",
-          "covector-version-or-publish.yml"
-        ),
-        "r"
+      const testOpen = yield* call(() =>
+        fs.open(
+          path.posix.join(
+            cwd,
+            ".github",
+            "workflows",
+            "covector-version-or-publish.yml"
+          ),
+          "r"
+        )
       );
       logger.info(
         `The version/publish workflow exists in ./.github/workflows, skipping creation.`
       );
-      yield* testOpen.close();
+      yield* call(() => testOpen.close());
     } catch (e) {
       logger.info(
         "Writing out covector-version-or-publish.yml to version and publish your packages."
       );
-      yield* fs.writeFile(
-        path.posix.join(
-          cwd,
-          ".github",
-          "workflows",
-          "covector-version-or-publish.yml"
-        ),
-        githubPublishWorkflow({
-          pkgManagers,
-          branchName: answers.defaultBranch,
-          version: covectorVersion,
-        })
+      yield* call(() =>
+        fs.writeFile(
+          path.posix.join(
+            cwd,
+            ".github",
+            "workflows",
+            "covector-version-or-publish.yml"
+          ),
+          githubPublishWorkflow({
+            pkgManagers,
+            branchName: answers.defaultBranch,
+            version: covectorVersion,
+          })
+        )
       );
     }
   }

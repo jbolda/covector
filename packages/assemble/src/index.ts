@@ -25,6 +25,9 @@ import type {
   CommandTypes,
   PkgManagerConfig,
   Logger,
+  AssembledChanges,
+  AssembledPlan,
+  AssembledPlanParsed,
 } from "@covector/types";
 
 export const parseChange = function* ({
@@ -35,7 +38,7 @@ export const parseChange = function* ({
   logger: Logger;
   cwd?: string;
   file: File;
-}): Operation<Changeset> {
+}): Operation<Change> {
   const processor = unified()
     .use(parse)
     .use(frontmatter, ["yaml"])
@@ -170,7 +173,7 @@ function assertBumpType(
   }
 }
 
-export const assemble = function* ({
+export function* assemble({
   logger,
   cwd,
   files,
@@ -182,21 +185,21 @@ export const assemble = function* ({
   files: File[];
   config?: Config;
   preMode?: { on: boolean; prevFiles: string[] };
-}) {
+}): Operation<AssembledPlan> {
   let plan: {
-    changes?: Change[];
-    releases?: {
+    changes: Change[];
+    releases: {
       [k: string]: {
         type: CommonBumps;
         changes: Change[];
       };
     };
-  } = {};
+  } = { changes: [], releases: {} };
 
   // if in prerelease mode, we only make bumps if the new one is "larger" than the last
   // otherwise we only want a prerelease bump (which just increments the ending number)
   if (preMode.on) {
-    const allChanges: Change[] = yield* changesParsed({ logger, cwd, files });
+    const allChanges = yield* changesParsed({ logger, cwd, files });
     const allMergedRelease = mergeReleases(allChanges, config || {});
     if (preMode.prevFiles.length > 0) {
       const newFiles = files.reduce((newFiles: File[], file) => {
@@ -209,7 +212,7 @@ export const assemble = function* ({
           return newFiles;
         }
       }, []);
-      const newChanges: Change[] = yield* changesParsed({
+      const newChanges = yield* changesParsed({
         logger,
         cwd,
         files: newFiles,
@@ -226,7 +229,7 @@ export const assemble = function* ({
           return newFiles;
         }
       }, []);
-      const oldChanges: Change[] = yield* changesParsed({
+      const oldChanges = yield* changesParsed({
         logger,
         cwd,
         files: oldFiles,
@@ -247,7 +250,7 @@ export const assemble = function* ({
       });
     }
   } else {
-    let changes: Change[] = yield* changesParsed({ logger, cwd, files });
+    let changes = yield* changesParsed({ logger, cwd, files });
     plan.changes = changes;
     plan.releases = mergeReleases(changes, config || {});
   }
@@ -273,7 +276,7 @@ export const assemble = function* ({
   }
 
   return plan;
-};
+}
 
 const changesParsed = function* ({
   logger,
@@ -308,8 +311,10 @@ const changeDiff = ({
     Object.keys(newMergedRelease).forEach((pkg: string) => {
       const nextBump = newMergedRelease[pkg]?.type || "noop";
       const oldBump = oldMergedRelease[pkg]?.type || "noop";
-      if (bumpMap.get(nextBump) < bumpMap.get(oldBump)) {
-        //@ts-expect-error TODO template string doesn't play nice with the type
+      if (
+        bumpMap.get(nextBump) < bumpMap.get(oldBump) &&
+        nextBump !== "major"
+      ) {
         diffed[pkg].type = `pre${nextBump}`;
       } else {
         diffed[pkg].type = "prerelease";
@@ -320,7 +325,6 @@ const changeDiff = ({
     return Object.keys(allMergedRelease).reduce(
       (diffed: { [k: string]: Release }, pkg: string) => {
         diffed[pkg] = { ...allMergedRelease[pkg] };
-        //@ts-expect-error TODO template string doesn't play nice with the type
         diffed[pkg].type = `pre${allMergedRelease[pkg].type}`;
         return diffed;
       },
@@ -334,22 +338,20 @@ export const mergeChangesToConfig = function* ({
   config,
   assembledChanges,
   command,
-  cwd,
   dryRun = false,
   filterPackages = [],
 }: {
   logger: Logger;
   config: Config;
-  assembledChanges: any; //  { releases: {} };
+  assembledChanges: AssembledPlanParsed;
   command: string;
-  cwd: string;
   dryRun?: boolean;
   filterPackages?: string[];
 }): Operation<{ commands: PkgVersion[]; pipeTemplate: any }> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce(
-    (pkged: { [k: string]: PkgVersion }, pkg) => {
+    (pkged, pkg) => {
       const pkgManager = config.packages[pkg].manager;
       const commandItems = { pkg, pkgManager, config };
       const mergedCommand = mergeCommand({ ...commandItems, command });
@@ -393,7 +395,7 @@ export const mergeChangesToConfig = function* ({
   )) {
     if (!pkgCommands[pkg]) continue;
 
-    const pkgs: { [k: string]: Release } = assembledChanges.releases;
+    const pkgs = assembledChanges.releases;
     const pipeToTemplate: PipeVersionTemplate = {
       release: pkgs[pkg],
       pkg: pkgCommands[pkg],
@@ -442,10 +444,10 @@ export const mergeChangesToConfig = function* ({
   return { commands, pipeTemplate: pipeOutput };
 };
 
-export const mergeIntoConfig = function* ({
+export function* mergeIntoConfig({
   logger,
   config,
-  assembledChanges,
+  assembledPlan,
   command,
   cwd,
   dryRun = false,
@@ -455,15 +457,15 @@ export const mergeIntoConfig = function* ({
 }: {
   logger: Logger;
   config: Config;
-  assembledChanges: { releases: {} };
+  assembledPlan: AssembledPlan;
   command: string;
   cwd: string;
   dryRun?: boolean;
   filterPackages?: string[];
-  changelogs?: { [k: string]: { name: string; changelog: string } };
+  changelogs?: { [k: string]: { pkg: string; changelog: string } };
   tag?: string;
 }): Operation<{ commands: PkgPublish[]; pipeTemplate: any }> {
-  // build in assembledChanges to only issue commands with ones with changes
+  // build in assembledPlan to only issue commands with ones with changes
   // and pipe in data to template function
 
   const pkgCommands = Object.keys(config.packages).reduce(
@@ -599,9 +601,7 @@ export const mergeIntoConfig = function* ({
           }),
     };
 
-    pipeOutput[pkg] = {};
-    pipeOutput[pkg].name = pkg;
-    pipeOutput[pkg].pipe = pipeToTemplate;
+    pipeOutput[pkg] = { name: pkg, pipe: pipeToTemplate };
 
     const merged: PkgPublish = {
       pkg,
@@ -646,7 +646,7 @@ export const mergeIntoConfig = function* ({
   }
 
   return { commands, pipeTemplate: pipeOutput };
-};
+}
 
 const mergeCommand = ({
   pkg,

@@ -205,7 +205,7 @@ export function* readAllPkgFiles({
   const readPkgs = pkgArray.map(([name, pkg]) =>
     readPkgFile({ cwd, pkgConfig: pkg, nickname: name })
   );
-  const pkgFilesArray: PackageFile[] = yield* all(readPkgs);
+  const pkgFilesArray = yield* all(readPkgs);
 
   return pkgFilesArray.reduce(
     (pkgs: Record<string, PackageFile>, pkg: PackageFile) => {
@@ -473,7 +473,7 @@ export function* configFile({
   cwd: string;
   changeFolder?: string;
 }): Operation<ConfigFile & { file: File }> {
-  const inputFile: File = yield* loadFile(
+  const inputFile = yield* loadFile(
     path.join(changeFolder, "config.json"),
     cwd
   );
@@ -548,7 +548,7 @@ export function* readChangelog({
   cwd: string;
   packagePath?: string;
   create?: boolean;
-}): Operation<File> {
+}): Operation<File | undefined> {
   try {
     return yield* loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
   } catch {
@@ -561,7 +561,8 @@ export function* readChangelog({
         extname: ".md",
       };
     } else {
-      throw new Error("CHANGELOG.md not found");
+      logger.error("CHANGELOG.md not found");
+      return;
     }
   }
 }

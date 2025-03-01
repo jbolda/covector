@@ -27,7 +27,7 @@ export function* readAllChangelogs({
       create,
     })
   );
-  const loadedChangelogs: File[] = yield* all(prepChangelogs);
+  const loadedChangelogs = yield* all(prepChangelogs);
   return loadedChangelogs.map((changelog, index) => ({
     changes: applied[index],
     changelog,

@@ -1,3 +1,5 @@
+import type { ChangeContext, Covector } from "../../types/src";
+import { type Operation } from "effection";
 import { Logger } from "pino";
 import { init } from "./init";
 import { add } from "./add";
@@ -7,7 +9,6 @@ import { version } from "./version";
 import { preview } from "./preview";
 import { publish } from "./publish";
 import { arbitrary } from "./arbitrary";
-import { ChangeContext } from "../../types/src";
 
 export function* covector({
   // shared
@@ -38,7 +39,7 @@ export function* covector({
   changeFolder?: string;
   yes?: boolean;
   createContext?: ChangeContext;
-}): Generator<any, any, any> {
+}): Operation<Covector> {
   if (command === "init") {
     return yield* init({
       logger: logger.child({ command: "init" }),
