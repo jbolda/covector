@@ -1,21 +1,16 @@
 import { z } from "zod";
-import {
-  fileSchema,
-  packageConfigSchema,
-  allCommandsSchema,
-  pkgManagerSchema,
-  configFileSchema,
-} from "@covector/files";
-import { TomlDocument } from "@covector/toml";
+import type { TomlDocument } from "@covector/toml";
 import { Operation } from "effection";
 
-export type File = z.infer<typeof fileSchema>;
-export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
-export type CommandConfig = z.infer<typeof allCommandsSchema>;
-export type PkgManagerConfig = z.infer<typeof pkgManagerSchema>;
-export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
-export type Config = ConfigFile & { file?: File };
-
+import { File, Config } from "@covector/files";
+export {
+  File,
+  CommandConfig,
+  PkgManagerConfig,
+  PackageConfig,
+  ConfigFile,
+  Config,
+} from "@covector/files";
 export { Logger } from "pino";
 export interface LoggerBindings {
   level: number;

@@ -8,6 +8,7 @@ export const fileSchema = z.object({
   filename: z.string(),
   extname: z.string(),
 });
+export type File = z.infer<typeof fileSchema>;
 
 const commandBaseSchema = z.object({
   runFromRoot: z.boolean().optional(),
@@ -51,6 +52,7 @@ export const allCommandsSchema = z
       .optional(),
   })
   .passthrough();
+export type CommandConfig = z.infer<typeof allCommandsSchema>;
 
 export const pkgManagerSchema = allCommandsSchema.pick({
   version: true,
@@ -61,6 +63,7 @@ export const pkgManagerSchema = allCommandsSchema.pick({
   releaseTag: true,
   assets: true,
 });
+export type PkgManagerConfig = z.infer<typeof pkgManagerSchema>;
 
 export const packageConfigSchema = (cwd: string = ".") =>
   allCommandsSchema
@@ -83,6 +86,7 @@ export const packageConfigSchema = (cwd: string = ".") =>
         return packageConfig;
       }
     });
+export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
 
 export const configFileSchema = (cwd: string = ".") =>
   z
@@ -97,3 +101,5 @@ export const configFileSchema = (cwd: string = ".") =>
       changeTags: z.record(z.string()).optional(),
     })
     .strict();
+export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
+export type Config = ConfigFile & { file?: File };

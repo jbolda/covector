@@ -3,6 +3,7 @@
   "references": [{ "path": "../types" }],
   "include": ["src"],
   "compilerOptions": {
+    "rootDir": "src",
     "outDir": "dist"
   }
 }

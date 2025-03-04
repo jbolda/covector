@@ -8,7 +8,7 @@
   "scripts": {
     "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.js",
     "prebuild": "npm run prebuild -w @covector/toml",
-    "build": "tsc --build tsconfig.packages.json",
+    "build": "tsc --build packages/covector",
     "watch": "tsc --build --watch tsconfig.packages.json",
     "clean": "tsc --build --clean tsconfig.packages.json",
     "wipe": "npm run clean -ws && rimraf node_modules dist tsconfig.tsbuildinfo && npm i",
