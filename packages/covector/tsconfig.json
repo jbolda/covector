@@ -1,10 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "dist",
-    "rootDir": "./src"
-  },
   "references": [
     { "path": "../files" },
     { "path": "../changelog" },
@@ -13,5 +8,8 @@
     { "path": "../apply" },
     { "path": "../types" }
   ],
-  "include": ["src/**/*.ts"]
+  "include": ["src"],
+  "compilerOptions": {
+    "outDir": "dist"
+  }
 }

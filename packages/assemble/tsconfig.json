@@ -5,10 +5,8 @@
     { "path": "../command" },
     { "path": "../types" }
   ],
+  "include": ["src"],
   "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "dist",
-    "rootDir": "src"
-  },
-  "include": ["src/**/*.ts"]
+    "outDir": "dist"
+  }
 }

@@ -5,7 +5,7 @@ import {
   allCommandsSchema,
   pkgManagerSchema,
   configFileSchema,
-} from "../../files/src/schema";
+} from "@covector/files";
 import { TomlDocument } from "@covector/toml";
 import { Operation } from "effection";
 

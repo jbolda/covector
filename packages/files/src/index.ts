@@ -2,7 +2,7 @@ import { default as fsDefault, PathLike } from "fs";
 // this is compatible with node@12+
 const fs = fsDefault.promises;
 
-import { type Logger } from "@covector/types";
+import type { Logger } from "@covector/types";
 import { all, call, type Operation } from "effection";
 import { configFileSchema } from "./schema";
 import { fromZodError } from "zod-validation-error";
@@ -11,6 +11,8 @@ import path from "path";
 import { TomlDocument } from "@covector/toml";
 import yaml from "js-yaml";
 import semver from "semver";
+
+export * from "./schema";
 
 import type {
   File,

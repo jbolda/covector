@@ -1,5 +1,6 @@
 {
   "files": [],
+  "include": [],
   "references": [
     { "path": "./packages/types" },
     { "path": "./packages/files" },
