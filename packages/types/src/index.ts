@@ -1,85 +1,32 @@
-import { z } from "zod";
-import type { TomlDocument } from "@covector/toml";
-import { Operation } from "effection";
+import type { Operation } from "effection";
 
-import { File, Config } from "@covector/files";
-export {
-  File,
+import type {
+  LoadedFile,
+  Config,
+  Pkg,
+  PackageFile,
+  DepsKeyed,
+} from "@covector/files";
+export type {
+  LoadedFile,
   CommandConfig,
   PkgManagerConfig,
   PackageConfig,
   ConfigFile,
   Config,
+  PkgMinimum,
+  PackageFile,
+  PreFile,
+  DepsKeyed,
+  DepTypes,
+  Pkg,
 } from "@covector/files";
-export { Logger } from "pino";
+export type { Logger } from "pino";
+
 export interface LoggerBindings {
   level: number;
   msg: string;
   renderAsYAML?: Record<string, any>;
-}
-
-/* @covector/files */
-interface NestedVersion {
-  version?: string;
-  [key: string]: any;
-}
-export type PkgFileVersion = string | NestedVersion;
-
-// Pkg for toml has a `.packages` so we need to address this union
-// or otherwise normalize it, and it will be an issue as
-// we add other PackageFile types / sources
-export interface Pkg {
-  name: string;
-  version?: string;
-  package?: NestedVersion;
-  dependencies?: Record<string, PkgFileVersion>;
-  devDependencies?: Record<string, PkgFileVersion>;
-  "dev-dependencies"?: Record<string, PkgFileVersion>;
-  "build-dependencies"?: Record<string, PkgFileVersion>;
-  target?: Record<string, PkgTarget>;
-  [key: string]: any;
-}
-
-export interface PkgTarget {
-  dependencies?: Record<string, PkgFileVersion>;
-  "dev-dependencies"?: Record<string, PkgFileVersion>;
-  "build-dependencies"?: Record<string, PkgFileVersion>;
-}
-
-export interface PkgMinimum {
-  version: string;
-  currentVersion: string;
-  pkg: Pkg | TomlDocument;
-  versionMajor: number;
-  versionMinor: number;
-  versionPatch: number;
-  deps: DepsKeyed;
-  versionPrerelease?: readonly (string | number)[] | null;
-}
-
-export type DepTypes =
-  | "dependencies"
-  | "devDependencies"
-  | "dev-dependencies"
-  | "build-dependencies"
-  | "target";
-export type DepsKeyed = Record<
-  string,
-  {
-    type: DepTypes;
-    version: string;
-  }[]
->;
-
-export interface PackageFile extends PkgMinimum {
-  file?: File;
-  name?: string;
-}
-
-export interface PreFile {
-  file?: File;
-  tag: string;
-  changes: string[] | [];
 }
 
 /* @covector/command */
@@ -108,7 +55,7 @@ export type NormalizedCommand = {
 /* @covector/changelog */
 export type Changelog = {
   changes: { name: string; version: string };
-  changelog: File;
+  changelog: LoadedFile;
 };
 
 export type PkgCommandResponse = {
@@ -155,8 +102,7 @@ export interface AssembledPlanParsed {
 }
 
 /* @covector/assemble */
-// rename to break references for the moment
-export type Changeset2 = {
+export type Changeset = {
   releases?: { [k: string]: CommonBumps } | {};
   tag?: string;
   summary?: string;
@@ -181,7 +127,7 @@ export type Change = {
   tag?: string;
   summary?: string;
   meta: {
-    file?: File;
+    file?: LoadedFile;
     dependencies?: string[];
     commits?: {
       hashShort: string;
@@ -218,7 +164,7 @@ export interface PkgVersion {
 }
 
 export type PipeVersionTemplate = {
-  release: Release;
+  release: ReleaseParsed;
   pkg: PkgVersion;
 };
 

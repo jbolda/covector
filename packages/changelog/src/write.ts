@@ -1,7 +1,7 @@
 import { all, Operation } from "effection";
 import { writeChangelog } from "@covector/files";
 
-import type { File } from "@covector/types";
+import type { LoadedFile } from "@covector/types";
 
 export function* writeAllChangelogs({
   writtenChanges,
@@ -14,7 +14,7 @@ export function* writeAllChangelogs({
         name: string;
         version: string;
       };
-      changelog?: File;
+      changelog?: LoadedFile;
     };
     addition: string;
   }[];

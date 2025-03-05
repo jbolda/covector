@@ -1,6 +1,6 @@
-import { call, Operation } from "effection";
+import { call, type Operation } from "effection";
 import unified from "unified";
-import { YAML as Frontmatter, Content } from "mdast";
+import { YAML as Frontmatter, Content, type Root } from "mdast";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
 import frontmatter from "remark-frontmatter";
@@ -10,7 +10,7 @@ import { readPkgFile } from "@covector/files";
 import { runCommand } from "@covector/command";
 
 import type {
-  File,
+  LoadedFile,
   Config,
   Changeset,
   CommonBumps,
@@ -25,7 +25,6 @@ import type {
   CommandTypes,
   PkgManagerConfig,
   Logger,
-  AssembledChanges,
   AssembledPlan,
   AssembledPlanParsed,
 } from "@covector/types";
@@ -37,7 +36,7 @@ export const parseChange = function* ({
 }: {
   logger: Logger;
   cwd?: string;
-  file: File;
+  file: LoadedFile;
 }): Operation<Change> {
   const processor = unified()
     .use(parse)
@@ -47,14 +46,15 @@ export const parseChange = function* ({
     });
 
   const parsed = processor.parse(file.content.trim());
-  const processed = yield* call(() => processor.run(parsed));
-  let changeset: Changeset = {};
-  const [parsedChanges, ...remaining]: (Frontmatter | Content)[] =
-    processed.children;
-  const parsedYaml = yaml.load(parsedChanges.value as string);
+  const processed = (yield* call(() => processor.run(parsed))) as Root;
+  let changeset: Partial<Change> = {};
+  const [parsedChanges, ...remaining] = processed.children;
+  const parsedYaml = yaml.load((parsedChanges as Frontmatter).value as string);
   changeset.releases =
-    typeof parsedYaml === "object" && parsedYaml !== null ? parsedYaml : {};
-  if (Object.keys(changeset.releases).length === 0)
+    typeof parsedYaml === "object" && parsedYaml !== null
+      ? (parsedYaml as Change["releases"])
+      : undefined;
+  if (!changeset.releases || Object.keys(changeset.releases).length === 0)
     throw new Error(
       `${file.path} didn't have any packages bumped. Please add a package bump.`
     );
@@ -72,7 +72,7 @@ export const parseChange = function* ({
     .stringify({
       type: "root",
       children: remaining,
-    })
+    } as Root)
     .trim();
 
   if (cwd) {
@@ -104,7 +104,8 @@ export const parseChange = function* ({
       };
     }
   }
-  return changeset;
+  // we have confirmed all property match
+  return changeset as Change;
 };
 
 // major, minor, or patch
@@ -182,7 +183,7 @@ export function* assemble({
 }: {
   logger: Logger;
   cwd?: string;
-  files: File[];
+  files: LoadedFile[];
   config?: Config;
   preMode?: { on: boolean; prevFiles: string[] };
 }): Operation<AssembledPlan> {
@@ -202,7 +203,7 @@ export function* assemble({
     const allChanges = yield* changesParsed({ logger, cwd, files });
     const allMergedRelease = mergeReleases(allChanges, config || {});
     if (preMode.prevFiles.length > 0) {
-      const newFiles = files.reduce((newFiles: File[], file) => {
+      const newFiles = files.reduce((newFiles: LoadedFile[], file) => {
         const prevFile = preMode.prevFiles.find(
           (filename) => file.path === filename
         );
@@ -219,7 +220,7 @@ export function* assemble({
       });
       const newMergedRelease = mergeReleases(newChanges, config || {});
 
-      const oldFiles = files.reduce((newFiles: File[], file) => {
+      const oldFiles = files.reduce((newFiles: LoadedFile[], file) => {
         const prevFile = preMode.prevFiles.find(
           (filename) => file.path === filename
         );
@@ -285,7 +286,7 @@ const changesParsed = function* ({
 }: {
   logger: Logger;
   cwd?: string;
-  files: File[];
+  files: LoadedFile[];
 }): Operation<Change[]> {
   const allChangesParsed = [];
 
@@ -310,12 +311,13 @@ const changeDiff = ({
     let diffed = { ...newMergedRelease };
     Object.keys(newMergedRelease).forEach((pkg: string) => {
       const nextBump = newMergedRelease[pkg]?.type || "noop";
-      const oldBump = oldMergedRelease[pkg]?.type || "noop";
-      if (
-        bumpMap.get(nextBump) < bumpMap.get(oldBump) &&
-        nextBump !== "major"
-      ) {
-        diffed[pkg].type = `pre${nextBump}`;
+      const oldBump = newMergedRelease[pkg]?.type || "noop";
+      const nextBumpValue = bumpMap.get(newMergedRelease[pkg]?.type) ?? 10;
+      const oldBumpValue = bumpMap.get(newMergedRelease[pkg]?.type) ?? 10;
+      // where major is low and prerelease is high
+      if (nextBumpValue < oldBumpValue) {
+        // TODO check for cases like premajor
+        diffed[pkg].type = `pre${nextBump}` as CommonBumps;
       } else {
         diffed[pkg].type = "prerelease";
       }
@@ -325,7 +327,8 @@ const changeDiff = ({
     return Object.keys(allMergedRelease).reduce(
       (diffed: { [k: string]: Release }, pkg: string) => {
         diffed[pkg] = { ...allMergedRelease[pkg] };
-        diffed[pkg].type = `pre${allMergedRelease[pkg].type}`;
+        // TODO check for cases like premajor
+        diffed[pkg].type = `pre${allMergedRelease[pkg].type}` as CommonBumps;
         return diffed;
       },
       {}
@@ -347,7 +350,15 @@ export const mergeChangesToConfig = function* ({
   command: string;
   dryRun?: boolean;
   filterPackages?: string[];
-}): Operation<{ commands: PkgVersion[]; pipeTemplate: any }> {
+}): Operation<{
+  commands: PkgVersion[];
+  pipeTemplate: {
+    [k: string]: {
+      name?: string;
+      pipe?: PipeVersionTemplate;
+    };
+  };
+}> {
   // build in assembledChanges to only issue commands with ones with changes
   // and pipe in data to template function
   const pkgCommands = Object.keys(config.packages).reduce(
@@ -360,6 +371,8 @@ export const mergeChangesToConfig = function* ({
         pkged[pkg] = {
           pkg: pkg,
           path: config.packages[pkg].path,
+          type: "noop",
+          parents: {},
           ...(!config.packages[pkg]?.packageFileName
             ? {}
             : { packageFileName: config.packages[pkg]?.packageFileName }),
@@ -407,7 +420,7 @@ export const mergeChangesToConfig = function* ({
 
     const merged: PkgVersion = {
       pkg,
-      ...(!pkgs[pkg].parents ? {} : { parents: pkgs[pkg].parents }),
+      parents: pkgs[pkg]?.parents ?? {},
       path: pkgCommands[pkg].path,
       type: pkgs[pkg].type || null,
       manager: pkgCommands[pkg].manager,

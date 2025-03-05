@@ -1,12 +1,12 @@
 {
   "extends": "../../tsconfig.base.json",
   "references": [
+    { "path": "../types" },
     { "path": "../files" },
     { "path": "../changelog" },
     { "path": "../command" },
     { "path": "../assemble" },
-    { "path": "../apply" },
-    { "path": "../types" }
+    { "path": "../apply" }
   ],
   "include": ["src"],
   "compilerOptions": {

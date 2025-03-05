@@ -38,7 +38,7 @@ export function* covector({
   branchTag?: string;
   changeFolder?: string;
   yes?: boolean;
-  createContext?: ChangeContext;
+  createContext?: ChangeContext<any>;
 }): Operation<Covector> {
   if (command === "init") {
     return yield* init({

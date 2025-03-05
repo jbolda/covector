@@ -1,8 +1,6 @@
-import { default as fsDefault, PathLike } from "fs";
-// this is compatible with node@12+
-const fs = fsDefault.promises;
+import * as fs from "fs/promises";
 
-import type { Logger } from "@covector/types";
+import type { Logger } from "pino";
 import { all, call, type Operation } from "effection";
 import { configFileSchema } from "./schema";
 import { fromZodError } from "zod-validation-error";
@@ -13,19 +11,28 @@ import yaml from "js-yaml";
 import semver from "semver";
 
 export * from "./schema";
+import type { LoadedFile, ConfigFile } from "./schema";
 
 import type {
-  File,
-  ConfigFile,
   PkgMinimum,
   PackageFile,
   PreFile,
   DepsKeyed,
   DepTypes,
   Pkg,
-} from "@covector/types";
+} from "./types";
 
-export function* loadFile(file: string, cwd: string): Operation<File> {
+export type { TomlDocument } from "@covector/toml";
+export type {
+  PkgMinimum,
+  PackageFile,
+  PreFile,
+  DepsKeyed,
+  DepTypes,
+  Pkg,
+} from "./types";
+
+export function* loadFile(file: string, cwd: string): Operation<LoadedFile> {
   const content = yield* call(() =>
     fs.readFile(path.join(cwd, file), {
       encoding: "utf-8",
@@ -43,7 +50,10 @@ export function* loadFile(file: string, cwd: string): Operation<File> {
   };
 }
 
-export function* saveFile(file: File, cwd: string): Operation<File> {
+export function* saveFile(
+  file: LoadedFile,
+  cwd: string
+): Operation<LoadedFile> {
   if (typeof file.path !== "string")
     throw new Error(`Unable to handle saving of ${file}`);
   yield* call(() =>
@@ -54,7 +64,7 @@ export function* saveFile(file: File, cwd: string): Operation<File> {
   return file;
 }
 
-const parsePkg = (file: Partial<File>): PkgMinimum => {
+const parsePkg = (file: Partial<LoadedFile>): PkgMinimum => {
   if (!file.content) throw new Error(`${file.path} does not have any content`);
   switch (file.extname) {
     case ".toml":
@@ -280,7 +290,7 @@ export function* writePkgFile({
 }: {
   packageFile: PackageFile;
   cwd: string;
-}): Operation<File> {
+}): Operation<LoadedFile> {
   if (!packageFile.file)
     throw new Error(`no file present for ${packageFile.name}`);
   const fileNext = { ...packageFile.file };
@@ -431,7 +441,7 @@ export function* writePreFile({
 }: {
   preFile: PreFile;
   cwd: string;
-}): Operation<File> {
+}): Operation<LoadedFile> {
   if (!preFile.file)
     throw new Error(`We could not find the pre.json to update.`);
   const { tag, changes } = preFile;
@@ -474,7 +484,7 @@ export function* configFile({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Operation<ConfigFile & { file: File }> {
+}): Operation<ConfigFile & { file: LoadedFile }> {
   const inputFile = yield* loadFile(
     path.join(changeFolder, "config.json"),
     cwd
@@ -519,7 +529,7 @@ export function* loadChangeFiles({
 }: {
   cwd: string;
   paths: string[];
-}): Operation<File[]> {
+}): Operation<LoadedFile[]> {
   const files = paths.map((file) => loadFile(file, cwd));
   return yield* all(files);
 }
@@ -550,7 +560,7 @@ export function* readChangelog({
   cwd: string;
   packagePath?: string;
   create?: boolean;
-}): Operation<File | undefined> {
+}): Operation<LoadedFile | undefined> {
   try {
     return yield* loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
   } catch {
@@ -573,8 +583,8 @@ export function* writeChangelog({
   changelog,
   cwd,
 }: {
-  changelog: File;
+  changelog: LoadedFile;
   cwd: string;
-}): Operation<File | Error> {
+}): Operation<LoadedFile | Error> {
   return yield* saveFile(changelog, cwd);
 }

@@ -6,10 +6,8 @@ import parse from "remark-parse";
 import stringify from "remark-stringify";
 
 import type {
-  File,
+  LoadedFile,
   ConfigFile,
-  PkgCommandResponse,
-  AssembledChanges,
   Meta,
   ChangeContext,
   Logger,
@@ -43,7 +41,7 @@ export function* fillChangelogs({
     logger,
     applied: applied.reduce(
       (
-        final: { name: string; version: string; changelog?: File }[],
+        final: { name: string; version: string; changelog?: LoadedFile }[],
         current
       ) =>
         current?.name && !config.packages[current.name].path
@@ -146,7 +144,7 @@ const renderRelease = (
 
 type Change = {
   changes: { name: string; version: string };
-  changelog?: File;
+  changelog?: LoadedFile;
 };
 type ChangedLog = { pkg: string; change: Change; addition: string };
 

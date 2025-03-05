@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../files" }, { "path": "../toml" }],
+  "references": [{ "path": "../files" }],
   "include": ["src"],
   "compilerOptions": {
     "rootDir": "src",

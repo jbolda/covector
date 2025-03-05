@@ -1,18 +1,21 @@
 {
   "compilerOptions": {
     "composite": true,
+    "declaration": true,
     "declarationMap": true,
-    "strict": true,
+    "incremental": true,
+    "skipLibCheck": true,
+    "noEmitOnError": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
     "module": "NodeNext",
     "moduleResolution": "nodenext",
-    "target": "es6",
-    "pretty": true,
-    "esModuleInterop": true,
+    "strict": true,
+    "target": "esnext",
     "resolveJsonModule": true,
     "checkJs": false,
     "preserveSymlinks": true,
-    "skipLibCheck": true,
-    "declaration": true,
     "forceConsistentCasingInFileNames": true
   }
 }

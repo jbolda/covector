@@ -8,7 +8,7 @@ export const fileSchema = z.object({
   filename: z.string(),
   extname: z.string(),
 });
-export type File = z.infer<typeof fileSchema>;
+export type LoadedFile = z.infer<typeof fileSchema>;
 
 const commandBaseSchema = z.object({
   runFromRoot: z.boolean().optional(),

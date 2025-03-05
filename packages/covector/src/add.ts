@@ -26,7 +26,7 @@ export const add = function* ({
   cwd?: string;
   changeFolder?: string;
   yes: boolean;
-}): Operation<string> {
+}): Operation<{ response: "complete" | "skipped" }> {
   const config: ConfigFile = yield* configFile({ cwd });
   let packageBumps: { [k: string]: { bump: string; changeTag?: string } } = {};
 
@@ -45,7 +45,7 @@ export const add = function* ({
 
   if (isCancel(packagesWithBump)) {
     cancel(`Skipping creating change file.`);
-    return "skipped";
+    return { response: "skipped" };
   }
 
   for (let pkg of packagesWithBump) {
@@ -69,7 +69,7 @@ export const add = function* ({
 
     if (isCancel(bump)) {
       cancel(`Skipping creating change file.`);
-      return "skipped";
+      return { response: "skipped" };
     }
 
     let changeTag = undefined;
@@ -85,7 +85,7 @@ export const add = function* ({
 
       if (isCancel(changeTag)) {
         cancel(`Skipping creating change file.`);
-        return "skipped";
+        return { response: "skipped" };
       }
     }
     packageBumps[pkg] = { bump, changeTag };
@@ -101,7 +101,7 @@ export const add = function* ({
   );
   if (isCancel(summary)) {
     cancel(`Skipping creating change file.`);
-    return "skipped";
+    return { response: "skipped" };
   }
 
   let branchName = "change-file.md";
@@ -131,7 +131,7 @@ export const add = function* ({
   );
   if (isCancel(filename)) {
     cancel(`Skipping creating change file.`);
-    return "skipped";
+    return { response: "skipped" };
   }
 
   const frontmatter = `---
@@ -148,5 +148,5 @@ ${packagesWithBump
   yield* call(() => writeFile(join(cwd, changeFolder, `${filename}`), content));
 
   outro(`Change file written to ${join(changeFolder, `${filename}`)}`);
-  return "complete";
+  return { response: "complete" };
 };

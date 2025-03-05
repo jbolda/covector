@@ -4,7 +4,6 @@ import type {
   DepsKeyed,
   AssembledPlan,
   ReleaseParsed,
-  AssembledChanges,
   AssembledPlanParsed,
 } from "@covector/types";
 
@@ -99,7 +98,11 @@ const parentBump = ({
           if (!changes[pkg]) {
             changes[pkg] = {
               changes: [
-                { meta: { dependencies: [main] }, summary: "", releases: {} },
+                {
+                  meta: { dependencies: [main], path: "" },
+                  summary: "",
+                  releases: {},
+                },
               ],
               parents: parents[pkg],
               // prerelease will do bump the X in `-beta.X` if it is already a prerelease
@@ -112,7 +115,7 @@ const parentBump = ({
             // if we have have a release planned, add a skeleton so it shows
             //  in the deps bump section
             changes[pkg].changes?.push({
-              meta: { dependencies: [main] },
+              meta: { dependencies: [main], path: "" },
               summary: "",
               releases: {},
             });
