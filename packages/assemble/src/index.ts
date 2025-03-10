@@ -310,14 +310,12 @@ const changeDiff = ({
   if (newMergedRelease && oldMergedRelease) {
     let diffed = { ...newMergedRelease };
     Object.keys(newMergedRelease).forEach((pkg: string) => {
-      const nextBump = newMergedRelease[pkg]?.type || "noop";
-      const oldBump = newMergedRelease[pkg]?.type || "noop";
-      const nextBumpValue = bumpMap.get(newMergedRelease[pkg]?.type) ?? 10;
-      const oldBumpValue = bumpMap.get(newMergedRelease[pkg]?.type) ?? 10;
+      const nextBumpType = newMergedRelease[pkg]?.type ?? "noop";
+      const nextBump = bumpMap.get(nextBumpType);
+      const oldBump = bumpMap.get(oldMergedRelease[pkg]?.type ?? "noop");
       // where major is low and prerelease is high
-      if (nextBumpValue < oldBumpValue) {
-        // TODO check for cases like premajor
-        diffed[pkg].type = `pre${nextBump}` as CommonBumps;
+      if (nextBump && oldBump && nextBump < oldBump) {
+        diffed[pkg].type = `pre${nextBumpType}` as CommonBumps;
       } else {
         diffed[pkg].type = "prerelease";
       }
