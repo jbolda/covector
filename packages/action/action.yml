@@ -71,7 +71,7 @@ outputs:
     description: The ID of the created release. Only present when `createRelease` is set to true.
 runs:
   using: "node20"
-  main: "dist/index.js"
+  main: "dist/index.cjs"
 branding:
   icon: "sliders"
   color: "green"
