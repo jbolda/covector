@@ -956,10 +956,12 @@ thiserror = "1.0.19"
           ],
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri",
           "pkg": "tauri",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -1364,10 +1366,12 @@ Summary about the changes in tauri
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri-updater",
           "pkg": "tauri-updater",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -1405,10 +1409,12 @@ Summary about the changes in tauri-updater
           ],
           "errorOnVersionRange": null,
           "manager": "javascript",
+          "parents": {},
           "path": "./cli/tauri.js",
           "pkg": "tauri.js",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -1417,6 +1423,7 @@ Summary about the changes in tauri-updater
                 "dependencies": [
                   "tauri",
                 ],
+                "path": "",
               },
               "releases": {},
               "summary": "",
@@ -2387,10 +2394,12 @@ thiserror = "1.0.19"
           ],
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri",
           "pkg": "tauri",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -2795,10 +2804,12 @@ Summary about the changes in tauri
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri-updater",
           "pkg": "tauri-updater",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -2836,10 +2847,12 @@ Summary about the changes in tauri-updater
           ],
           "errorOnVersionRange": null,
           "manager": "javascript",
+          "parents": {},
           "path": "./cli/tauri.js",
           "pkg": "tauri.js",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -2848,6 +2861,7 @@ Summary about the changes in tauri-updater
                 "dependencies": [
                   "tauri",
                 ],
+                "path": "",
               },
               "releases": {},
               "summary": "",
@@ -3819,10 +3833,12 @@ thiserror = "1.0.19"
             ],
             "errorOnVersionRange": null,
             "manager": "rust",
+            "parents": {},
             "path": "./tauri",
             "pkg": "tauri",
             "postcommand": null,
             "precommand": null,
+            "type": "noop",
           },
           "release": {
             "changes": [
@@ -4227,10 +4243,12 @@ Summary about the changes in tauri
             "dependencies": undefined,
             "errorOnVersionRange": null,
             "manager": "rust",
+            "parents": {},
             "path": "./tauri-updater",
             "pkg": "tauri-updater",
             "postcommand": null,
             "precommand": null,
+            "type": "noop",
           },
           "release": {
             "changes": [
@@ -4268,10 +4286,12 @@ Summary about the changes in tauri-updater
             ],
             "errorOnVersionRange": null,
             "manager": "javascript",
+            "parents": {},
             "path": "./cli/tauri.js",
             "pkg": "tauri.js",
             "postcommand": null,
             "precommand": null,
+            "type": "noop",
           },
           "release": {
             "changes": [
@@ -4280,6 +4300,7 @@ Summary about the changes in tauri-updater
                   "dependencies": [
                     "tauri",
                   ],
+                  "path": "",
                 },
                 "releases": {},
                 "summary": "",
@@ -5341,10 +5362,12 @@ totems = "0.2.7"",
             ],
             "errorOnVersionRange": null,
             "manager": "rust",
+            "parents": {},
             "path": "./tauri",
             "pkg": "tauri",
             "postcommand": null,
             "precommand": null,
+            "type": "noop",
           },
           "release": {
             "changes": [
@@ -5353,6 +5376,7 @@ totems = "0.2.7"",
                   "dependencies": [
                     "tauri-api",
                   ],
+                  "path": "",
                 },
                 "releases": {},
                 "summary": "",
@@ -5362,6 +5386,7 @@ totems = "0.2.7"",
                   "dependencies": [
                     "tauri-api",
                   ],
+                  "path": "",
                 },
                 "releases": {},
                 "summary": "",
@@ -5751,10 +5776,12 @@ totems = "0.2.7"",
             ],
             "errorOnVersionRange": null,
             "manager": "rust",
+            "parents": {},
             "path": "./tauri-api",
             "pkg": "tauri-api",
             "postcommand": null,
             "precommand": null,
+            "type": "noop",
           },
           "release": {
             "changes": [
@@ -5912,10 +5939,12 @@ Boop again.
             ],
             "errorOnVersionRange": null,
             "manager": "javascript",
+            "parents": {},
             "path": "./cli/tauri.js",
             "pkg": "tauri.js",
             "postcommand": null,
             "precommand": null,
+            "type": "noop",
           },
           "release": {
             "changes": [
@@ -5924,6 +5953,7 @@ Boop again.
                   "dependencies": [
                     "tauri",
                   ],
+                  "path": "",
                 },
                 "releases": {},
                 "summary": "",

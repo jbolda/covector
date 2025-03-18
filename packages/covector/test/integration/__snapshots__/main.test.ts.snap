@@ -1419,7 +1419,6 @@ thiserror = "1.0.19"",
       "name": "tauri",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -1579,7 +1578,6 @@ thiserror = "1.0.19"",
       "name": "tauri-api",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -1754,7 +1752,6 @@ thiserror = "1.0.19"",
       "name": "tauri-bundler",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -1939,7 +1936,6 @@ thiserror = "1.0.19"",
       "name": "tauri-utils",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -1998,7 +1994,6 @@ thiserror = "1.0.19"",
       "name": "tauri.js",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             [Function],
@@ -3540,10 +3535,12 @@ thiserror = "1.0.19"
           ],
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri",
           "pkg": "tauri",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -3948,10 +3945,12 @@ Summary about the changes in tauri
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri-updater",
           "pkg": "tauri-updater",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -3989,10 +3988,12 @@ Summary about the changes in tauri-updater
           ],
           "errorOnVersionRange": null,
           "manager": "javascript",
+          "parents": {},
           "path": "./cli/tauri.js",
           "pkg": "tauri.js",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -4001,6 +4002,7 @@ Summary about the changes in tauri-updater
                 "dependencies": [
                   "tauri",
                 ],
+                "path": "",
               },
               "releases": {},
               "summary": "",
@@ -5847,7 +5849,6 @@ thiserror = "1.0.19"",
       "name": "tauri",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -6006,7 +6007,6 @@ thiserror = "1.0.19"",
       "name": "tauri-api",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -6180,7 +6180,6 @@ thiserror = "1.0.19"",
       "name": "tauri-bundler",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -6364,7 +6363,6 @@ thiserror = "1.0.19"",
       "name": "tauri-utils",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -6422,7 +6420,6 @@ thiserror = "1.0.19"",
       "name": "tauri.js",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             [Function],
@@ -7057,7 +7054,6 @@ flutter:
       "name": "test_app",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": "node -e "console.log('publishing')"",
           "dependencies": undefined,
           "errorOnVersionRange": null,
@@ -7184,7 +7180,6 @@ exports[`integration test in production mode > publish > runs publish for genera
       "name": "general-pkg",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": "node -e "console.log('publishing')"",
           "dependencies": undefined,
           "errorOnVersionRange": null,
@@ -8627,7 +8622,6 @@ thiserror = "1.0.19"",
       "name": "tauri",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -8784,7 +8778,6 @@ thiserror = "1.0.19"",
       "name": "tauri-api",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -8956,7 +8949,6 @@ thiserror = "1.0.19"",
       "name": "tauri-bundler",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -9138,7 +9130,6 @@ thiserror = "1.0.19"",
       "name": "tauri-utils",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -9194,7 +9185,6 @@ thiserror = "1.0.19"",
       "name": "tauri.js",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": "node -e "console.log('publishing \${ pkg.pkg }')"",
           "dependencies": [
             "tauri",
@@ -9733,7 +9723,6 @@ exports[`integration test in production mode > runs build for js and rust 1`] = 
       "name": "tauri",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -9884,7 +9873,6 @@ exports[`integration test in production mode > runs build for js and rust 1`] = 
       "name": "tauri-api",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -10050,7 +10038,6 @@ exports[`integration test in production mode > runs build for js and rust 1`] = 
       "name": "tauri-bundler",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -10226,7 +10213,6 @@ exports[`integration test in production mode > runs build for js and rust 1`] = 
       "name": "tauri-updater",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -10312,7 +10298,6 @@ exports[`integration test in production mode > runs build for js and rust 1`] = 
       "name": "tauri-utils",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -10688,10 +10673,12 @@ flutter:
           ],
           "errorOnVersionRange": null,
           "manager": "dart",
+          "parents": {},
           "path": "./dart",
           "pkg": "test_app_one",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -10700,6 +10687,7 @@ flutter:
                 "dependencies": [
                   "test_app_two",
                 ],
+                "path": "",
               },
               "releases": {},
               "summary": "",
@@ -10709,6 +10697,7 @@ flutter:
                 "dependencies": [
                   "test_app_three",
                 ],
+                "path": "",
               },
               "releases": {},
               "summary": "",
@@ -10727,10 +10716,12 @@ flutter:
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "flutter",
+          "parents": {},
           "path": "./objectDep",
           "pkg": "test_app_three",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -10795,10 +10786,12 @@ Summary about the changes in test_app_three
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "flutter",
+          "parents": {},
           "path": "./flutter",
           "pkg": "test_app_two",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -10978,10 +10971,12 @@ flutter:
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "flutter",
+          "parents": {},
           "path": ".",
           "pkg": "test_app",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -11072,10 +11067,12 @@ exports[`integration test in production mode > version > runs version for genera
           "errorOnVersionRange": null,
           "manager": undefined,
           "packageFileName": "VERSION",
+          "parents": {},
           "path": ".",
           "pkg": "general-pkg",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -12072,10 +12069,12 @@ thiserror = "1.0.19"
           ],
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri",
           "pkg": "tauri",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -12480,10 +12479,12 @@ Summary about the changes in tauri
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri-updater",
           "pkg": "tauri-updater",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -12521,10 +12522,12 @@ Summary about the changes in tauri-updater
           ],
           "errorOnVersionRange": null,
           "manager": "javascript",
+          "parents": {},
           "path": "./cli/tauri.js",
           "pkg": "tauri.js",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -12533,6 +12536,7 @@ Summary about the changes in tauri-updater
                 "dependencies": [
                   "tauri",
                 ],
+                "path": "",
               },
               "releases": {},
               "summary": "",

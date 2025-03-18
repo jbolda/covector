@@ -1015,7 +1015,6 @@ exports[`integration test to invoke sub commands > runs publish-primary in prod 
       "name": "package-one",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": {
             "command": "echo publish",
             "pipe": true,
@@ -1054,7 +1053,6 @@ exports[`integration test to invoke sub commands > runs publish-primary in prod 
       "name": "package-two",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": {
             "command": "echo publish",
             "pipe": true,
@@ -1114,7 +1112,6 @@ exports[`integration test to invoke sub commands > runs publishSecondary in prod
       "name": "package-one",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": {
             "command": "echo publish",
             "pipe": true,
@@ -1153,7 +1150,6 @@ exports[`integration test to invoke sub commands > runs publishSecondary in prod
       "name": "package-two",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": {
             "command": "echo publish",
             "pipe": true,

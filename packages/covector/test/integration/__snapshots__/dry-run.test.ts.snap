@@ -1034,10 +1034,12 @@ thiserror = "1.0.19"
           ],
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri",
           "pkg": "tauri",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -1442,10 +1444,12 @@ Summary about the changes in tauri
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri-updater",
           "pkg": "tauri-updater",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -1483,10 +1487,12 @@ Summary about the changes in tauri-updater
           ],
           "errorOnVersionRange": null,
           "manager": "javascript",
+          "parents": {},
           "path": "./cli/tauri.js",
           "pkg": "tauri.js",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -1495,6 +1501,7 @@ Summary about the changes in tauri-updater
                 "dependencies": [
                   "tauri",
                 ],
+                "path": "",
               },
               "releases": {},
               "summary": "",
@@ -1955,7 +1962,6 @@ exports[`integration test in --dry-run mode > runs build for js and rust 1`] = `
       "name": "tauri",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -2106,7 +2112,6 @@ exports[`integration test in --dry-run mode > runs build for js and rust 1`] = `
       "name": "tauri-api",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -2272,7 +2277,6 @@ exports[`integration test in --dry-run mode > runs build for js and rust 1`] = `
       "name": "tauri-bundler",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -2448,7 +2452,6 @@ exports[`integration test in --dry-run mode > runs build for js and rust 1`] = `
       "name": "tauri-updater",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -2534,7 +2537,6 @@ exports[`integration test in --dry-run mode > runs build for js and rust 1`] = `
       "name": "tauri-utils",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('the files in the \${ pkg.pkg } folder are')"",
             "ls",
@@ -3994,7 +3996,6 @@ thiserror = "1.0.19"",
       "name": "tauri",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -4151,7 +4152,6 @@ thiserror = "1.0.19"",
       "name": "tauri-api",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -4323,7 +4323,6 @@ thiserror = "1.0.19"",
       "name": "tauri-bundler",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -4505,7 +4504,6 @@ thiserror = "1.0.19"",
       "name": "tauri-utils",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": [
             "node -e "console.log('publishing \${ pkg.pkg }')"",
             "node -e "console.log('running in \${ pkg.path }')"",
@@ -4561,7 +4559,6 @@ thiserror = "1.0.19"",
       "name": "tauri.js",
       "pipe": {
         "pkg": {
-          "changelog": false,
           "command": "node -e "console.log('publishing \${ pkg.pkg }')"",
           "dependencies": [
             "tauri",
@@ -6019,10 +6016,12 @@ thiserror = "1.0.19"
           ],
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri",
           "pkg": "tauri",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -6427,10 +6426,12 @@ Summary about the changes in tauri
           "dependencies": undefined,
           "errorOnVersionRange": null,
           "manager": "rust",
+          "parents": {},
           "path": "./tauri-updater",
           "pkg": "tauri-updater",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -6468,10 +6469,12 @@ Summary about the changes in tauri-updater
           ],
           "errorOnVersionRange": null,
           "manager": "javascript",
+          "parents": {},
           "path": "./cli/tauri.js",
           "pkg": "tauri.js",
           "postcommand": null,
           "precommand": null,
+          "type": "noop",
         },
         "release": {
           "changes": [
@@ -6480,6 +6483,7 @@ Summary about the changes in tauri-updater
                 "dependencies": [
                   "tauri",
                 ],
+                "path": "",
               },
               "releases": {},
               "summary": "",
