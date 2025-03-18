@@ -1,6 +1,5 @@
 import fs from "fs";
-import type { FunctionPipe } from "../../types/src";
-import type { ConfigFile, Logger } from "@covector/types";
+import type { ConfigFile, Logger, FunctionPipe } from "@covector/types";
 import type { GitHub } from "@actions/github/lib/utils";
 
 export const commandText = (pkg: {

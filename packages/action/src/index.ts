@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { covector } from "../../covector/src/run";
+import { covector } from "covector";
 import {
   commandText,
   packageListToArray,
@@ -19,9 +19,9 @@ import type {
   CovectorVersion,
   CovectorPublish,
   Logger,
-} from "../../types/src";
+} from "@covector/types";
 import { formatComment } from "./comment/formatGithubComment";
-import type { Operation } from "effection";
+import { call, type Operation } from "effection";
 import { CommitResponse, getCommitContext } from "./pr/getCommitContext";
 import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact";
 
@@ -46,7 +46,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
     let command = inputCommand;
 
     if (inputCommand === "version-or-publish") {
-      const status = yield covector({
+      const status = yield* covector({
         logger,
         command: "status",
         cwd,
@@ -66,14 +66,14 @@ export function* run(logger: Logger): Generator<any, any, any> {
       if (github.context.eventName === "workflow_run") {
         const octokit = github.getOctokit(token);
         const payload = github.context.payload as WorkflowRunEvent;
-        yield postGithubCommentFromArtifact({
+        yield* postGithubCommentFromArtifact({
           logger,
           octokit,
           token,
           payload,
         });
       } else {
-        const covectored: CovectorStatus = yield covector({
+        const covectored: CovectorStatus = yield* covector({
           logger,
           dryRun,
           command,
@@ -154,7 +154,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
                   },
                   pull_request: { number: prNumber },
                 } = payload;
-                yield postGithubComment({
+                yield* postGithubComment({
                   logger,
                   comment,
                   octokit,
@@ -172,7 +172,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
         }
       }
     } else if (command === "version") {
-      const status: CovectorStatus = yield covector({
+      const status: CovectorStatus = yield* covector({
         logger,
         dryRun,
         command: "status",
@@ -181,7 +181,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
       core.setOutput("status", status.response);
 
       function* createContext({ commits }: { commits: string[] }): Operation<
-        Operation<{
+        () => Operation<{
           context: Record<string, string>;
           changeContext: Record<string, string>;
         }>
@@ -227,7 +227,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
         };
       }
 
-      const covectored: CovectorVersion = yield covector({
+      const covectored: CovectorVersion = yield* covector({
         logger,
         dryRun,
         command,
@@ -261,7 +261,12 @@ export function* run(logger: Logger): Generator<any, any, any> {
         renderAsYAML: covectoredSmushed,
       });
     } else if (command === "publish") {
-      const status = yield covector({ logger, dryRun, command: "status", cwd });
+      const status = yield* covector({
+        logger,
+        dryRun,
+        command: "status",
+        cwd,
+      });
       core.setOutput("status", status.response);
 
       let covectored: CovectorPublish;
@@ -274,7 +279,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
         const octokit = github.getOctokit(token);
         const { owner, repo } = github.context.repo;
         logger.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
-        covectored = yield covector({
+        covectored = yield* covector({
           logger,
           dryRun,
           command,
@@ -292,7 +297,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
           ]),
         });
       } else {
-        covectored = yield covector({
+        covectored = yield* covector({
           logger,
           dryRun,
           command,
@@ -396,7 +401,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
             );
         }
 
-        covectored = yield covector({
+        covectored = yield* covector({
           logger,
           dryRun,
           command,
@@ -429,11 +434,13 @@ export function* run(logger: Logger): Generator<any, any, any> {
               after,
             }: any = github.context.payload;
 
-            const { data } = yield octokit.rest.issues.listComments({
-              owner,
-              repo,
-              issue_number,
-            });
+            const { data } = yield* call(() =>
+              octokit.rest.issues.listComments({
+                owner,
+                repo,
+                issue_number,
+              })
+            );
 
             const covectorComments = data.filter((comment: any) =>
               comment.body.includes("<!-- covector comment -->")
@@ -458,19 +465,23 @@ export function* run(logger: Logger): Generator<any, any, any> {
             };
 
             if (covectorComments.length !== 1) {
-              yield octokit.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number,
-                body: prComment(),
-              });
+              yield* call(() =>
+                octokit.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number,
+                  body: prComment(),
+                })
+              );
             } else {
-              yield octokit.rest.issues.updateComment({
-                owner,
-                repo,
-                comment_id: covectorComments[0].id,
-                body: prComment(),
-              });
+              yield* call(() =>
+                octokit.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: covectorComments[0].id,
+                  body: prComment(),
+                })
+              );
             }
           } else {
             throw new Error(

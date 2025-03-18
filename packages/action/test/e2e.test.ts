@@ -7,6 +7,7 @@ import pino from "pino";
 import * as pinoTest from "pino-test";
 import fixtures from "fixturez";
 import { checksWithObject } from "./helpers.ts";
+import { call } from "effection";
 const f = fixtures(__dirname);
 
 vi.mock("@actions/core", () => ({
@@ -38,29 +39,31 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      yield covector(logger);
+      yield* covector(logger);
 
       // to confirm we have reached the end of the logs
       logger.info("completed");
-      yield pinoTest.consecutive(
-        stream,
-        [
-          {
-            command: "status",
-            msg: "There are no changes.",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-            level: 30,
-          },
-          {
-            msg: "completed",
-            level: 30,
-          },
-        ],
-        checksWithObject()
+      yield* call(() =>
+        pinoTest.consecutive(
+          stream,
+          [
+            {
+              command: "status",
+              msg: "There are no changes.",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+              level: 30,
+            },
+            {
+              msg: "completed",
+              level: 30,
+            },
+          ],
+          checksWithObject()
+        )
       );
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "status");
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
@@ -83,41 +86,43 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      yield covector(logger);
+      yield* covector(logger);
 
       const changeOutput =
         "# Version Updates\n\n" +
         "Merging this PR will release new versions of the following packages based on your change files.\n\n";
       // to confirm we have reached the end of the logs
       logger.info("completed");
-      yield pinoTest.consecutive(
-        stream,
-        [
-          // status runs first to set some output
-          {
-            command: "status",
-            msg: "There are no changes.",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-            level: 30,
-          },
-          // then the version command runs
-          // TODO should there be more logs?
-          // and finishes with the output
-          {
-            msg: "covector version output",
-            renderAsYAML: changeOutput,
-            level: 30,
-          },
-          {
-            msg: "completed",
-            level: 30,
-          },
-        ],
-        checksWithObject()
+      yield* call(() =>
+        pinoTest.consecutive(
+          stream,
+          [
+            // status runs first to set some output
+            {
+              command: "status",
+              msg: "There are no changes.",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+              level: 30,
+            },
+            // then the version command runs
+            // TODO should there be more logs?
+            // and finishes with the output
+            {
+              msg: "covector version output",
+              renderAsYAML: changeOutput,
+              level: 30,
+            },
+            {
+              msg: "completed",
+              level: 30,
+            },
+          ],
+          checksWithObject()
+        )
       );
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
@@ -141,110 +146,112 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      yield covector(logger);
+      yield* covector(logger);
 
       // to confirm we have reached the end of the logs
       logger.info("completed");
-      yield pinoTest.consecutive(
-        stream,
-        [
-          // status runs first to set some output
-          {
-            command: "status",
-            msg: "changes:",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "tauri => minor",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "tauri-updater => patch",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "bumping tauri with minor",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "bumping tauri-updater with patch",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "bumping tauri.js with patch",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "tauri planned to be bumped from 0.5.2 to 0.6.0",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3",
-            level: 30,
-          },
-          // then the version command runs
-          {
-            command: "version",
-            msg: "bumping tauri with minor",
-            level: 30,
-          },
-          {
-            command: "version",
-            msg: "bumping tauri-updater with patch",
-            level: 30,
-          },
-          {
-            command: "version",
-            msg: "bumping tauri.js with patch",
-            level: 30,
-          },
-          {
-            command: "version",
-            msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: 30,
-          },
-          {
-            command: "version",
-            msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: 30,
-          },
-          {
-            command: "version",
-            msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: 30,
-          },
-          {
-            command: "version",
-            msg: ".changes/first-change.md was deleted",
-            level: 30,
-          },
-          {
-            command: "version",
-            msg: ".changes/second-change.md was deleted",
-            level: 30,
-          },
-          {
-            msg: "covector version output",
-            level: 30,
-          },
-          {
-            msg: "completed",
-            level: 30,
-          },
-        ],
-        checksWithObject()
+      yield* call(() =>
+        pinoTest.consecutive(
+          stream,
+          [
+            // status runs first to set some output
+            {
+              command: "status",
+              msg: "changes:",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "tauri => minor",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "tauri-updater => patch",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "bumping tauri with minor",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "bumping tauri-updater with patch",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "bumping tauri.js with patch",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "tauri planned to be bumped from 0.5.2 to 0.6.0",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3",
+              level: 30,
+            },
+            // then the version command runs
+            {
+              command: "version",
+              msg: "bumping tauri with minor",
+              level: 30,
+            },
+            {
+              command: "version",
+              msg: "bumping tauri-updater with patch",
+              level: 30,
+            },
+            {
+              command: "version",
+              msg: "bumping tauri.js with patch",
+              level: 30,
+            },
+            {
+              command: "version",
+              msg: "Could not load the CHANGELOG.md. Creating one.",
+              level: 30,
+            },
+            {
+              command: "version",
+              msg: "Could not load the CHANGELOG.md. Creating one.",
+              level: 30,
+            },
+            {
+              command: "version",
+              msg: "Could not load the CHANGELOG.md. Creating one.",
+              level: 30,
+            },
+            {
+              command: "version",
+              msg: ".changes/first-change.md was deleted",
+              level: 30,
+            },
+            {
+              command: "version",
+              msg: ".changes/second-change.md was deleted",
+              level: 30,
+            },
+            {
+              msg: "covector version output",
+              level: 30,
+            },
+            {
+              msg: "completed",
+              level: 30,
+            },
+          ],
+          checksWithObject()
+        )
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "status",
@@ -294,74 +301,76 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = yield covector(logger);
+      const covectoredAction = yield* covector(logger);
 
       // to confirm we have reached the end of the logs
       logger.info("completed");
-      yield pinoTest.consecutive(
-        stream,
-        [
-          // status runs first to set some output
-          {
-            command: "status",
-            msg: "There are no changes.",
-            level: 30,
-          },
-          {
-            command: "status",
-            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-            level: 30,
-          },
-          // then the publish command runs
-          {
-            command: "publish",
-            msg: "package-one [publish]: echo publish",
-            level: 30,
-          },
-          {
-            command: "publish",
-            msg: "publish",
-            level: 30,
-          },
-          // create release call
-          {
-            msg: "creating Github Release for package-one@2.3.1",
-            level: 30,
-          },
-          {
-            msg: "github release created for package-one with id: undefined",
-            level: 30,
-          },
-          {
-            command: "publish",
-            msg: "package-two [publish]: echo publish",
-            level: 30,
-          },
-          {
-            command: "publish",
-            msg: "publish",
-            level: 30,
-          },
-          // create release call
-          {
-            msg: "creating Github Release for package-two@1.9.0",
-            level: 30,
-          },
-          {
-            msg: "github release created for package-two with id: undefined",
-            level: 30,
-          },
-          {
-            msg: "covector publish output",
-            level: 30,
-          },
-          // and finishes with the output
-          {
-            msg: "completed",
-            level: 30,
-          },
-        ],
-        checksWithObject()
+      yield* call(() =>
+        pinoTest.consecutive(
+          stream,
+          [
+            // status runs first to set some output
+            {
+              command: "status",
+              msg: "There are no changes.",
+              level: 30,
+            },
+            {
+              command: "status",
+              msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+              level: 30,
+            },
+            // then the publish command runs
+            {
+              command: "publish",
+              msg: "package-one [publish]: echo publish",
+              level: 30,
+            },
+            {
+              command: "publish",
+              msg: "publish",
+              level: 30,
+            },
+            // create release call
+            {
+              msg: "creating Github Release for package-one@2.3.1",
+              level: 30,
+            },
+            {
+              msg: "github release created for package-one with id: undefined",
+              level: 30,
+            },
+            {
+              command: "publish",
+              msg: "package-two [publish]: echo publish",
+              level: 30,
+            },
+            {
+              command: "publish",
+              msg: "publish",
+              level: 30,
+            },
+            // create release call
+            {
+              msg: "creating Github Release for package-two@1.9.0",
+              level: 30,
+            },
+            {
+              msg: "github release created for package-two with id: undefined",
+              level: 30,
+            },
+            {
+              msg: "covector publish output",
+              level: 30,
+            },
+            // and finishes with the output
+            {
+              msg: "completed",
+              level: 30,
+            },
+          ],
+          checksWithObject()
+        )
       );
 
       expect({ covectoredAction }).toMatchSnapshot();
@@ -390,7 +399,7 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = yield covector(logger);
+      const covectoredAction = yield* covector(logger);
       expect(covectoredAction).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "publish");
@@ -465,7 +474,7 @@ describe("full e2e test", () => {
           },
         }));
 
-      const covectoredAction = yield covector(logger);
+      const covectoredAction = yield* covector(logger);
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
@@ -557,7 +566,7 @@ describe("full e2e test", () => {
           },
         }));
 
-      const covectoredAction = yield covector(logger);
+      const covectoredAction = yield* covector(logger);
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
@@ -646,7 +655,7 @@ describe("full e2e test", () => {
           },
         }));
 
-      const covectoredAction = yield covector(logger);
+      const covectoredAction = yield* covector(logger);
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
@@ -719,7 +728,7 @@ describe("full e2e test", () => {
           },
         }));
 
-      const covectoredAction = yield covector(logger);
+      const covectoredAction = yield* covector(logger);
 
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);

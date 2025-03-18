@@ -3,7 +3,7 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { GitHub } from "@actions/github/lib/utils";
-import type { Operation } from "effection";
+import { call, type Operation } from "effection";
 import type { WorkflowRunEvent } from "@octokit/webhooks-definitions/schema";
 import type { Logger } from "@covector/types";
 
@@ -25,11 +25,13 @@ export function* postGithubCommentFromArtifact({
     },
   } = payload;
 
-  const artifacts = yield octokit.rest.actions.listWorkflowRunArtifacts({
-    owner,
-    repo,
-    run_id: payload.workflow_run.id,
-  });
+  const artifacts = yield* call(() =>
+    octokit.rest.actions.listWorkflowRunArtifacts({
+      owner,
+      repo,
+      run_id: payload.workflow_run.id,
+    })
+  );
   const commentArtifact = artifacts.data.artifacts.filter((artifact) => {
     return artifact.name == "covector-comment";
   })[0];
@@ -43,24 +45,32 @@ export function* postGithubCommentFromArtifact({
     repositoryOwner: owner,
     repositoryName: repo,
   };
-  const { downloadPath } = yield artifact.downloadArtifact(commentArtifact.id, {
-    path: artifactRoot,
-    findBy,
-  });
+  const { downloadPath } = yield* call(() =>
+    artifact.downloadArtifact(commentArtifact.id, {
+      path: artifactRoot,
+      findBy,
+    })
+  );
+  if (!downloadPath) {
+    logger.error("Could not find artifact to post comment.");
+    return;
+  }
 
-  const comment = yield fs.readFile(
-    path.join(downloadPath, "covector-comment.md"),
-    { encoding: "utf8" }
+  const comment = yield* call(() =>
+    fs.readFile(path.join(downloadPath, "covector-comment.md"), {
+      encoding: "utf8",
+    })
   );
   // the `github.context` does not contain a PR number when triggered through a fork
   //  so uploading it as an artifact and downloading it here to comment
-  const prNumberAsString = yield fs.readFile(
-    path.join(downloadPath, "covector-prNumber.md"),
-    { encoding: "utf8" }
+  const prNumberAsString = yield* call(() =>
+    fs.readFile(path.join(downloadPath, "covector-prNumber.md"), {
+      encoding: "utf8",
+    })
   );
   const prNumber = parseInt(prNumberAsString, 10);
 
-  yield postGithubComment({
+  yield* postGithubComment({
     logger,
     comment,
     octokit,
