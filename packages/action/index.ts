@@ -5,4 +5,4 @@ import logStream from "./src/logger";
 
 const stream = logStream();
 const logger = pino(stream);
-main(run(logger));
+main(() => run(logger));

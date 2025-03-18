@@ -25,7 +25,7 @@ import { call, type Operation } from "effection";
 import { CommitResponse, getCommitContext } from "./pr/getCommitContext";
 import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact";
 
-export function* run(logger: Logger): Generator<any, any, any> {
+export function* run(logger: Logger): Operation<void> {
   try {
     const cwd =
       core.getInput("cwd") === "" ? process.cwd() : core.getInput("cwd");
