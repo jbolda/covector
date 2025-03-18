@@ -23,6 +23,7 @@
   "dependencies": {
     "@covector/types": "0.0.0",
     "@octokit/webhooks-definitions": "^3.67.3",
+    "npm-run-path": "^4.0.1",
     "pkgroll": "^2.11.2",
     "fixturez": "^1.1.0"
   },
