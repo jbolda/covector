@@ -16,7 +16,7 @@
     "development": "./src/index.ts",
     "import": {
       "types": "./dist/index.d.ts",
-    "default": "./dist/index.js"
+      "default": "./dist/index.js"
     }
   },
   "bin": {
@@ -42,7 +42,6 @@
     "effection": "4.0.0-alpha.4",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21",
     "pino": "^9.1.0",
     "pino-abstract-transport": "^1.2.0",
     "strip-ansi": "6.0.1",

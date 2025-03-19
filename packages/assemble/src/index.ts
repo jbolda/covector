@@ -5,7 +5,7 @@ import parse from "remark-parse";
 import stringify from "remark-stringify";
 import frontmatter from "remark-frontmatter";
 import yaml from "js-yaml";
-import { template, cloneDeep } from "lodash";
+import { template } from "@covector/command";
 import { readPkgFile } from "@covector/files";
 import { runCommand } from "@covector/command";
 
@@ -145,12 +145,12 @@ const mergeReleases = (
       if (!release[pkg]) {
         release[pkg] = {
           type: bumpType,
-          changes: cloneDeep([change]),
+          changes: structuredClone([change]),
         };
       } else {
         release[pkg] = {
           type: compareBumps(release[pkg].type, bumpType),
-          changes: cloneDeep([...release[pkg].changes, change]),
+          changes: structuredClone([...release[pkg].changes, change]),
         };
       }
     });

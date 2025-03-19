@@ -1,6 +1,6 @@
 import { type Operation, spawn, race, sleep, call } from "effection";
 import path from "path";
-import { template } from "lodash";
+import { template } from "./template.ts";
 
 import type {
   PkgVersion,
@@ -12,9 +12,9 @@ import type {
   BuiltInCommandOptions,
   Logger,
 } from "@covector/types";
-import { sh, x } from "./sh";
+import { sh, x } from "./sh.ts";
 
-export { sh, x };
+export { sh, x, template };
 
 export function* attemptCommands({
   logger,

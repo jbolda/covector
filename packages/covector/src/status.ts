@@ -17,7 +17,6 @@ import {
   changesConsideringParents,
   validateApply,
 } from "@covector/apply";
-import { cloneDeep } from "lodash";
 
 import type { CovectorStatus, PackageFile } from "@covector/types";
 import { call, type Operation } from "effection";
@@ -162,7 +161,7 @@ export function* status({
       logger: logger.child({ step: "apply changes" }),
       commands,
       // as the validate ends up mutating
-      allPackages: cloneDeep(allPackages),
+      allPackages: structuredClone(allPackages),
       prereleaseIdentifier,
     });
 

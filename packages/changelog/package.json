@@ -13,7 +13,7 @@
     "development": "./src/index.ts",
     "import": {
       "types": "./dist/index.d.ts",
-    "default": "./dist/index.js"
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
@@ -25,14 +25,12 @@
   "dependencies": {
     "@covector/files": "0.8.0",
     "effection": "4.0.0-alpha.4",
-    "lodash": "^4.17.21",
     "remark-parse": "^9.0.0",
     "remark-stringify": "^9.0.1",
     "unified": "^9.2.1"
   },
   "devDependencies": {
-    "@covector/types": "0.0.0",
-    "@types/lodash": "^4.14.196"
+    "@covector/types": "0.0.0"
   },
   "volta": {
     "extends": "../../package.json"
