@@ -1,4 +1,5 @@
 import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 import { covector } from "./run";
 import { pino } from "pino";
 import logStream from "./logger";
@@ -74,7 +75,4 @@ function parseOptions(argv: readonly string[]): {
     yes: rawOptions.yes as boolean | undefined,
     directory: rawOptions.directory as string | undefined,
   };
-}
-function hideBin(argv: string[]): string | readonly string[] | undefined {
-  throw new Error("Function not implemented.");
 }
