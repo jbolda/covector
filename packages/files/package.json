@@ -8,10 +8,13 @@
     "type": "git",
     "url": "https://github.com/jbolda/covector.git"
   },
+  "type": "module",
   "exports": {
-    "types": "./dist/index.d.ts",
     "development": "./src/index.ts",
-    "default": "./dist/index.js"
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -b",

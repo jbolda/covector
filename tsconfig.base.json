@@ -14,6 +14,7 @@
     "strict": true,
     "target": "esnext",
     "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
     "checkJs": false,
     "preserveSymlinks": true,
     "forceConsistentCasingInFileNames": true

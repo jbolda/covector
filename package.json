@@ -6,7 +6,7 @@
   "author": "Jacob Bolda <me@jacobbolda.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.js",
+    "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.mjs",
     "prebuild": "npm run prebuild -w @covector/toml",
     "build": "tsc --build",
     "watch": "tsc --build --verbose --watch",
@@ -31,7 +31,7 @@
     "vitest": "^2.1.8"
   },
   "volta": {
-    "node": "20.18.1",
-    "npm": "11.0.0"
+    "node": "20.19.0",
+    "npm": "11.2.0"
   }
 }
