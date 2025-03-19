@@ -1,16 +1,5 @@
-import {
-  execa,
-  Options as ExecaOptions,
-  type ResultPromise,
-  type Result,
-  type Options,
-  type StdinOption,
-  type StdoutStderrOption,
-  type TemplateExpression,
-  type Message,
-  type VerboseObject,
-  type ExecaMethod,
-} from "execa";
+import { x as $x, type KillSignal, type Options, type Output } from "tinyexec";
+import { tokenizeArgs } from "args-tokenizer";
 import type { Logger } from "@covector/types";
 import {
   spawn,
@@ -21,51 +10,60 @@ import {
   stream,
   each,
 } from "effection";
-import { split } from "shellwords";
 
-export interface ExecaProcess extends Operation<Result<Options>> {
+export interface TinyProcess extends Operation<Output> {
   /**
    * A stream of lines coming from both stdin and stdout. The stream
    * will terminate when stdout and stderr are closed which usually
    * corresponds to the process ending.
    */
-  lines: Stream<string | Uint8Array<ArrayBufferLike>, void>;
+  lines: Stream<string, void>;
+
+  /**
+   * Send `signal` to this process
+   * @paramu signal - the OS signal to send to the process
+   */
+  kill(signal?: KillSignal): Operation<void>;
 }
 
 export function x(
   cmd: string,
-  options?: ExecaOptions,
-  log?: false | string,
-  logger?: Logger
-): Operation<ExecaProcess> {
+  options?: Partial<Options>
+): Operation<TinyProcess> {
   return resource(function* (provide) {
-    const [command, ...args] = split(cmd);
-    const child = execa(command, args, { windowsHide: true, ...options });
-
-    let output = call(() => child);
-
-    let process = {
-      *[Symbol.iterator]() {
-        return yield* output;
-      },
-      lines: stream(child),
-      // *kill(signal) {
-      //   output.kill(signal);
-      //   yield* output;
-      // },
-    };
+    const aborter = new AbortController();
+    const [command, ...args] = tokenizeArgs(cmd);
+    const tinyexec = $x(command, args, {
+      signal: aborter.signal,
+      ...options,
+    });
 
     try {
-      yield* provide(process);
+      let promise: Promise<Output> = tinyexec as unknown as Promise<Output>;
+
+      let output = call(() => promise);
+
+      let tinyproc: TinyProcess = {
+        *[Symbol.iterator]() {
+          return yield* output;
+        },
+        lines: stream(tinyexec),
+        *kill(signal) {
+          tinyexec.kill(signal);
+          yield* output;
+        },
+      };
+
+      yield* provide(tinyproc);
     } finally {
-      // yield* process.kill();
+      // yield* tinyproc.kill();
     }
   });
 }
 
 export function* sh(
   command: string,
-  options: Partial<ExecaOptions> = {},
+  options: Partial<Options["nodeOptions"]> = {},
   log: false | string,
   logger: Logger
 ): Operation<{ stdout: string; stderr: string; out: string }> {
@@ -79,7 +77,7 @@ export function* sh(
     logger.warn(`"|" detected in command, setting shell to true: ${command}`);
   }
 
-  const child = yield* x(command, workingOptions);
+  const child = yield* x(command, { nodeOptions: workingOptions });
 
   for (let line of yield* each(child.lines)) {
     out += line + "\n";

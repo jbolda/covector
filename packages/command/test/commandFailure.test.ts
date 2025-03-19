@@ -36,9 +36,7 @@ describe("attemptCommand fails", () => {
       })
     );
 
-    expect(errored.message).toBe(
-      "Command failed with ENOENT: boop\nspawn boop ENOENT"
-    );
+    expect(errored.message).toBe("spawn boop ENOENT");
   });
 
   it("retries a failed function", function* () {
@@ -63,7 +61,7 @@ describe("attemptCommand fails", () => {
     );
     logger.info("completed");
 
-    const errorMessage = "Command failed with ENOENT: boop\nspawn boop ENOENT";
+    const errorMessage = "spawn boop ENOENT";
     if (process.platform === "win32") {
       const errorLog =
         "'boop' is not recognized as an internal or external command,\r\n" +

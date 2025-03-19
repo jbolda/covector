@@ -21,9 +21,9 @@
     "test": "vitest"
   },
   "dependencies": {
+    "args-tokenizer": "^0.3.0",
     "effection": "4.0.0-alpha.4",
-    "shellwords": "^1.0.1",
-    "execa": "^9.5.2"
+    "tinyexec": "^1.0.0"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"

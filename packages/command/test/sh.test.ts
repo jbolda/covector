@@ -4,39 +4,31 @@ import { it as itPromises } from "vitest";
 import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
-import { execa, type Options } from "execa";
+import { x } from "tinyexec";
 
-describe("execa compatibility checks", () => {
+describe("tinyexec compatibility checks", () => {
   itPromises("handles multiple pipes with function syntax", async () => {
-    const options: Options = { all: true };
-    const { all } = await execa(`echo`, ["this thing"], options)
-      .pipe("echo", ["and this"], options)
-      .pipe("echo", ["but this"], options);
-    expect(all).toBe("but this");
-  });
-
-  itPromises("handles multiple pipes with template syntax", async () => {
-    const options: Options = { all: true };
-    const { all } = await execa(options)`echo this thing`.pipe(
-      options
-    )`echo and this`.pipe(options)`echo but this`;
-    expect(all).toBe("but this");
+    const result = await x("echo", ["this\nthing"]).pipe("grep", ["this"]);
+    expect(result.stdout.trim()).toBe("this");
   });
 
   describe("with `shell: true`", () => {
     itPromises("single command", async () => {
-      const options: Options = { all: true, shell: true };
-      const { all } = await execa("echo but this", options);
-      expect(all).toBe("but this");
+      const result = await x("echo", ["but", "this"], {
+        nodeOptions: { shell: true },
+      });
+      expect(result.stdout.trim()).toBe("but this");
     });
 
     itPromises("multiple pipes", async () => {
-      const options: Options = { all: true, shell: true };
-      const { all } = await execa(
+      const result = await x(
         'echo "this thing" | echo "and this" | echo "but this"',
-        options
+        [],
+        {
+          nodeOptions: { shell: true },
+        }
       );
-      expect(all).toBe("but this");
+      expect(result.stdout.trim()).toBe("but this");
     });
   });
 });
