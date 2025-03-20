@@ -135,7 +135,11 @@ export function* status({
       });
     }
 
-    const allPackages: Record<string, PackageFile> = yield* readAllPkgFiles({
+    const allPackages = yield* readAllPkgFiles({
+      config,
+      cwd,
+    });
+    const allPackagesForValidation = yield* readAllPkgFiles({
       config,
       cwd,
     });
@@ -161,7 +165,7 @@ export function* status({
       logger: logger.child({ step: "apply changes" }),
       commands,
       // as the validate ends up mutating
-      allPackages: structuredClone(allPackages),
+      allPackages: allPackagesForValidation,
       prereleaseIdentifier,
     });
 
