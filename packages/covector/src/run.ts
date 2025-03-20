@@ -1,14 +1,14 @@
-import type { ChangeContext, Covector } from "../../types/src";
+import type { ChangeContext, Covector } from "@covector/types";
 import { type Operation } from "effection";
 import { Logger } from "pino";
-import { init } from "./init";
-import { add } from "./add";
-import { status } from "./status";
-import { config } from "./config";
-import { version } from "./version";
-import { preview } from "./preview";
-import { publish } from "./publish";
-import { arbitrary } from "./arbitrary";
+import { init } from "./init.ts";
+import { add } from "./add.ts";
+import { status } from "./status.ts";
+import { config } from "./config.ts";
+import { version } from "./version.ts";
+import { preview } from "./preview.ts";
+import { publish } from "./publish.ts";
+import { arbitrary } from "./arbitrary.ts";
 
 export function* covector({
   // shared

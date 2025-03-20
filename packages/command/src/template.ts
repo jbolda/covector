@@ -18,9 +18,6 @@ const stringEscapes = {
   "\u2028": "u2028",
   "\u2029": "u2029",
 };
-function escapeStringChar(chr) {
-  return "\\" + stringEscapes[chr];
-}
 
 const templateSettings = {
   // Used to detect `data` property values to be HTML-escaped.
@@ -74,7 +71,10 @@ export function template(string: string, options = {}) {
       // Escape characters that can't be included in string literals.
       source += string
         .slice(index, offset)
-        .replace(reUnescapedString, escapeStringChar);
+        .replace(
+          reUnescapedString,
+          (chr) => "\\" + stringEscapes[chr as keyof typeof stringEscapes]
+        );
 
       // Replace delimiters with snippets.
       if (escapeValue) {

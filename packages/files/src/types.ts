@@ -1,5 +1,5 @@
 import type { TomlDocument } from "@covector/toml";
-import type { LoadedFile } from "./schema";
+import type { LoadedFile } from "./schema.ts";
 
 interface NestedVersion {
   version?: string;

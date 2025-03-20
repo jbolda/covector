@@ -1,8 +1,8 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { covector } from "./run";
+import { covector } from "./run.ts";
 import { pino } from "pino";
-import logStream from "./logger";
+import logStream from "./logger.ts";
 
 export function* cli(argv: readonly string[]): Generator<any, any, any> {
   const { command, directory, yes, dryRun, cwd } = parseOptions(argv);

@@ -15,6 +15,7 @@
     "target": "esnext",
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
     "checkJs": false,
     "preserveSymlinks": true,
     "forceConsistentCasingInFileNames": true

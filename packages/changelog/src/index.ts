@@ -1,6 +1,6 @@
 import { type Operation, all } from "effection";
-import { readAllChangelogs } from "./get";
-import { writeAllChangelogs } from "./write";
+import { readAllChangelogs } from "./get.ts";
+import { writeAllChangelogs } from "./write.ts";
 import unified from "unified";
 import parse from "remark-parse";
 import stringify from "remark-stringify";
@@ -16,7 +16,7 @@ import type {
   AssembledPlanParsed,
 } from "@covector/types";
 
-export { pullLastChangelog } from "./get";
+export { pullLastChangelog } from "./get.ts";
 
 export function* fillChangelogs({
   logger,

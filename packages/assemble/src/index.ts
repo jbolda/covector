@@ -708,7 +708,6 @@ const templateCommands = (
           ...c,
           ...complexCommands.reduce((templated, complex) => {
             const commandToTemplate = c[complex];
-            // @ts-expect-error issue with proper narrowing
             templated[complex] =
               typeof commandToTemplate === "string"
                 ? template(commandToTemplate)(pipe)

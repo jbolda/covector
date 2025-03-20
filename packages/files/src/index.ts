@@ -2,7 +2,7 @@ import * as fs from "fs/promises";
 
 import type { Logger } from "pino";
 import { all, call, type Operation } from "effection";
-import { configFileSchema } from "./schema";
+import { configFileSchema } from "./schema.ts";
 import { fromZodError } from "zod-validation-error";
 import globby from "globby";
 import path from "path";
@@ -10,8 +10,8 @@ import { TomlDocument } from "@covector/toml";
 import yaml from "js-yaml";
 import semver from "semver";
 
-export * from "./schema";
-import type { LoadedFile, ConfigFile } from "./schema";
+export * from "./schema.ts";
+import type { LoadedFile, ConfigFile } from "./schema.ts";
 
 import type {
   PkgMinimum,
@@ -20,7 +20,7 @@ import type {
   DepsKeyed,
   DepTypes,
   Pkg,
-} from "./types";
+} from "./types.ts";
 
 export type { TomlDocument } from "@covector/toml";
 export type {
@@ -30,7 +30,7 @@ export type {
   DepsKeyed,
   DepTypes,
   Pkg,
-} from "./types";
+} from "./types.ts";
 
 export function* loadFile(file: string, cwd: string): Operation<LoadedFile> {
   const content = yield* call(() =>
