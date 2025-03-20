@@ -1,9 +1,5 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`integration test in production mode > failures > fails status with errorOnVersionRange 1`] = `[Error: tauri.js will be bumped to 0.6.3. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.]`;
-
-exports[`integration test in production mode > failures > fails version with errorOnVersionRange 1`] = `[Error: tauri will be bumped to 0.6.0. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.]`;
-
 exports[`integration test in production mode > handles config > allows modifying the config 1`] = `
 {
   "commandsRan": {

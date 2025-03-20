@@ -499,6 +499,7 @@ exports[`integration test for complex commands > prod > runs build 1`] = `
 > package-one@2.3.1 build
 > npm info tauri@0.8.0 description
 
+npm warn Ignoring workspaces for specified package(s)
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
       "postcommand": false,
@@ -844,6 +845,7 @@ exports[`integration test for complex commands > prod > runs test 1`] = `
 > package-one@2.3.1 build
 > npm info tauri@0.8.0 description
 
+npm warn Ignoring workspaces for specified package(s)
 Multi-binding collection of libraries and templates for building Tauri apps
 ",
       "postcommand": false,

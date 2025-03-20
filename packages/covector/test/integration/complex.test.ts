@@ -144,6 +144,11 @@ describe("integration test for complex commands", () => {
             },
             {
               command: "arbitrary",
+              msg: "npm warn Ignoring workspaces for specified package(s)",
+              level: 30,
+            },
+            {
+              command: "arbitrary",
               msg: "Multi-binding collection of libraries and templates for building Tauri apps",
               level: 30,
             },
@@ -170,6 +175,11 @@ describe("integration test for complex commands", () => {
             {
               command: "arbitrary",
               msg: "",
+              level: 30,
+            },
+            {
+              command: "arbitrary",
+              msg: "npm warn Ignoring workspaces for specified package(s)",
               level: 30,
             },
             {
@@ -306,6 +316,11 @@ describe("integration test for complex commands", () => {
             {
               command: "arbitrary",
               msg: "",
+              level: 30,
+            },
+            {
+              command: "arbitrary",
+              msg: "npm warn Ignoring workspaces for specified package(s)",
               level: 30,
             },
             {

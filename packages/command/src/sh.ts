@@ -35,6 +35,7 @@ export function x(
     const [command, ...args] = tokenizeArgs(cmd);
     const tinyexec = $x(command, args, {
       signal: aborter.signal,
+      throwOnError: true,
       ...options,
     });
 

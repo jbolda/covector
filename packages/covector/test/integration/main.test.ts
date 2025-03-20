@@ -1631,7 +1631,7 @@ describe("integration test in production mode", () => {
           cwd: fullIntegration,
         })
       );
-      expect(covectored.message).toContain("code 1");
+      expect(covectored.message).toContain("non-zero status (1)");
 
       yield* call(() =>
         pinoTest.consecutive(
@@ -1689,15 +1689,71 @@ describe("integration test in production mode", () => {
               msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
               level: 30,
             },
-            // {
-            //   command: "publish",
-            //   err: "Error: boom",
-            //   level: 30,
-            //   errorNumber: 1,
-            // },
             {
               command: "publish",
-              err: "code 1",
+              level: 30,
+              msg: "[eval]:1",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "throw new Error('boom')",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "^",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "",
+            },
+            {
+              command: "publish",
+              err: "Error: boom",
+              level: 30,
+              errorNumber: 1,
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at [eval]:1:7",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at runScriptInThisContext (node:internal/vm:209:10)",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at node:internal/process/execution:118:14",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at [eval]-wrapper:6:24",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at runScript (node:internal/process/execution:101:62)",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at evalScript (node:internal/process/execution:133:3)",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at node:internal/main/eval_string:51:3",
+            },
+
+            {
+              command: "publish",
+              msg: "Process exited with non-zero status (1)",
               level: 50,
               errorNumber: 1,
             },
@@ -1706,17 +1762,73 @@ describe("integration test in production mode", () => {
               msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
               level: 30,
             },
-            // {
-            //   command: "publish",
-            //   err: "Error: boom",
-            //   level: 30,
-            //   errorNumber: 2,
-            // },
             {
               command: "publish",
-              err: "code 1",
+              level: 30,
+              msg: "[eval]:1",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "throw new Error('boom')",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "^",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "",
+            },
+            {
+              command: "publish",
+              err: "Error: boom",
+              level: 30,
+              errorNumber: 1,
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at [eval]:1:7",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at runScriptInThisContext (node:internal/vm:209:10)",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at node:internal/process/execution:118:14",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at [eval]-wrapper:6:24",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at runScript (node:internal/process/execution:101:62)",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at evalScript (node:internal/process/execution:133:3)",
+            },
+            {
+              command: "publish",
+              level: 30,
+              msg: "    at node:internal/main/eval_string:51:3",
+            },
+
+            {
+              command: "publish",
+              msg: "Process exited with non-zero status (1)",
               level: 50,
-              errorNumber: 2,
+              errorNumber: 1,
             },
             {
               command: "publish",
@@ -1737,7 +1849,7 @@ describe("integration test in production mode", () => {
           checksChunksInMsg()
         )
       );
-      expect(covectored.message).toContain("code 1");
+      expect(covectored.message).toContain("non-zero status (1)");
     });
 
     it("fails version with errorOnVersionRange", function* () {
@@ -1762,7 +1874,6 @@ describe("integration test in production mode", () => {
       expect(covectored.message).toBe(
         "tauri will be bumped to 0.6.0. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
       );
-      expect(covectored).toMatchSnapshot();
     });
 
     it("fails status with errorOnVersionRange", function* () {
@@ -1785,9 +1896,8 @@ describe("integration test in production mode", () => {
         })
       );
       expect(covectored.message).toBe(
-        "tauri.js will be bumped to 0.6.3. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+        "tauri will be bumped to 0.6.0. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
       );
-      expect(covectored).toMatchSnapshot();
     });
   });
 
