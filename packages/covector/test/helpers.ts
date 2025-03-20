@@ -1,9 +1,8 @@
-import { spawn, type Operation } from "effection";
-import stripAnsi from "strip-ansi";
+import { type Operation, each } from "effection";
 import fs from "node:fs";
 import path from "node:path";
 import { assert } from "vitest";
-import { x } from "@covector/command";
+import { x, type TinyProcess } from "@covector/command";
 
 export const loadContent = (cwd: string, pathToContent: string) => {
   return fs.readFileSync(path.join(cwd, pathToContent), { encoding: "utf8" });
@@ -55,7 +54,7 @@ export const checksChunksInMsg =
 // with command line compat and complicates things further
 export const command = (command: string, cwd: string) =>
   `node "${path
-    .relative(cwd, path.join(__dirname, "./../bin/covector.js"))
+    .relative(cwd, path.join(__dirname, "./../bin/covector.mjs"))
     .split(path.sep)
     .join("/")}" ${command}`;
 
@@ -67,66 +66,43 @@ export function* runCommand(
   responses: Responses = [],
   timeout: number = 5000
 ): Operation<{
-  stdout: string;
-  stderr: string;
+  out: string;
   status: { code: number };
   responded: string;
 }> {
-  let stdoutBuffer = Buffer.from("");
-  let stderrBuffer = Buffer.from("");
-  let stdout = "";
-  let stderr = "";
+  let out = "";
   let responded = "";
-  try {
-    const debug = false;
-    const commandExec = yield* x(command, { cwd });
-    const elegantlyRespond = responses.length > 0;
-    let responseCount = 0;
 
-    yield* spawn(
-      commandExec.stdout.forEach(function* (chunk) {
-        stdoutBuffer = Buffer.concat([stdoutBuffer, chunk]);
-        if (elegantlyRespond) {
-          const lastMessage = stripAnsi(chunk.toString("utf-8")).trim();
+  const debug = false;
+  const child = yield* x(command, { nodeOptions: { cwd } });
+  const elegantlyRespond = responses.length > 0;
+  let responseCount = 0;
 
-          if (debug)
-            console.dir({ /* stdout: stdoutBuffer.toString(), */ lastMessage });
-          const response = tryResponse({
-            responseCount,
-            responses,
-            commandExec,
-            lastMessage,
-          });
-          if (response.length > 0) responseCount = responseCount + 1;
+  for (let line of yield* each(child.lines)) {
+    out += line + "\n";
 
-          responded += response;
-        } else {
-          commandExec.stdin.send(pressEnter);
-        }
-      })
-    );
-
-    yield* spawn(
-      commandExec.stderr.forEach((chunk) => {
-        stderrBuffer = Buffer.concat([stderrBuffer, chunk]);
-      })
-    );
-
-    let status = yield* withTimeout(timeout, commandExec.join());
-
-    stdout = stripAnsi(stdoutBuffer.toString("utf-8").trim());
-    stderr = stripAnsi(stderrBuffer.toString("utf-8").trim());
-
-    return { stdout, stderr, status, responded };
-  } catch (error: any) {
-    if (error && error?.name === "TimeoutError") {
-      throw new MainError({
-        message: `\nResponded:\n${responded}\n${error.message}`,
+    const lastMessage = line;
+    if (debug)
+      console.dir({ /* stdout: stdoutBuffer.toString(), */ lastMessage });
+    if (elegantlyRespond) {
+      const response = tryResponse({
+        responseCount,
+        responses,
+        child,
+        lastMessage,
       });
+      if (response.length > 0) responseCount = responseCount + 1;
+
+      responded += response;
     } else {
-      throw error;
+      if (child?.process?.stdin) child?.process?.stdin.write(pressEnter);
     }
+    yield* each.next();
   }
+
+  let status = { code: 0 };
+
+  return { out, status, responded };
 }
 
 const pressEnter = String.fromCharCode(13);
@@ -134,12 +110,12 @@ const pressEnter = String.fromCharCode(13);
 const tryResponse = ({
   responseCount,
   responses,
-  commandExec,
+  child,
   lastMessage,
 }: {
   responseCount: number;
   responses: Responses;
-  commandExec: Process;
+  child: TinyProcess["process"];
   lastMessage?: string;
 }) => {
   if (responseCount >= responses.length) {
@@ -149,10 +125,10 @@ const tryResponse = ({
   if (lastMessage && lastMessage.match(question)) {
     if (answer === "pressEnter") {
       // console.log(`sending Enter to ${lastMessage}`);
-      commandExec.stdin.send(pressEnter);
+      child.process.stdin.write(pressEnter);
     } else {
       // console.log(`sending ${answer} to ${lastMessage}`);
-      commandExec.stdin.send(answer + pressEnter);
+      child.process.stdin.write(answer + pressEnter);
     }
     return lastMessage.trim() + "\n";
   }

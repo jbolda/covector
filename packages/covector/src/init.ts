@@ -218,8 +218,7 @@ export const init = function* init({
     const covectorPackageFile = yield* call(
       () => import("../package.json", { with: { type: "json" } })
     );
-    // @ts-expect-error TODO Typescript thinks this should be a .default, but we tested it previously otherwise
-    const covectorVersionSplit = covectorPackageFile.version.split(".");
+    const covectorVersionSplit = covectorPackageFile.default.version.split(".");
     let covectorVersion = `${covectorVersionSplit[0]}.${covectorVersionSplit[1]}`;
 
     try {

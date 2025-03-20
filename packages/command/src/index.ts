@@ -15,6 +15,7 @@ import type {
 import { sh, x } from "./sh.ts";
 
 export { sh, x, template };
+export type { TinyProcess } from "./sh.ts";
 
 export function* attemptCommands({
   logger,

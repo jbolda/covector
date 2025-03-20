@@ -1,8 +1,13 @@
-import { x as $x, type KillSignal, type Options, type Output } from "tinyexec";
+import {
+  x as $x,
+  type KillSignal,
+  type Options,
+  type Output,
+  type Result,
+} from "tinyexec";
 import { tokenizeArgs } from "args-tokenizer";
 import type { Logger } from "@covector/types";
 import {
-  spawn,
   call,
   type Operation,
   resource,
@@ -24,6 +29,9 @@ export interface TinyProcess extends Operation<Output> {
    * @paramu signal - the OS signal to send to the process
    */
   kill(signal?: KillSignal): Operation<void>;
+
+  process: Result["process"];
+  exitCode: number | undefined;
 }
 
 export function x(
@@ -53,6 +61,8 @@ export function x(
           tinyexec.kill(signal);
           yield* output;
         },
+        process: tinyexec.process,
+        exitCode: tinyexec.exitCode,
       };
 
       yield* provide(tinyproc);
@@ -67,10 +77,8 @@ export function* sh(
   options: Partial<Options["nodeOptions"]> = {},
   log: false | string,
   logger: Logger
-): Operation<{ stdout: string; stderr: string; out: string }> {
+): Operation<{ out: string }> {
   let out = "";
-  let stdout = "";
-  let stderr = "";
 
   const workingOptions = { ...options };
   if (command.includes(" | ") && !options?.shell) {
@@ -86,5 +94,5 @@ export function* sh(
     yield* each.next();
   }
 
-  return { stdout, stderr, out: out.trim() };
+  return { out: out.trim() };
 }

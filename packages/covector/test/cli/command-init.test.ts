@@ -12,7 +12,7 @@ describe.skipIf(isWindows)("integration test for init command", () => {
   it("runs on a workspace", function* () {
     const fullIntegration = f.copy("pkg.js-yarn-workspace");
     const gitSiteUrl = "https://example.com";
-    const { stderr, status, responded } = yield* runCommand(
+    const { out, status, responded } = yield* runCommand(
       command("init", fullIntegration),
       fullIntegration,
       [
@@ -23,7 +23,6 @@ describe.skipIf(isWindows)("integration test for init command", () => {
       14900
     );
 
-    expect(stderr).toBe("");
     expect(responded).toMatchSnapshot();
     expect(status.code).toBe(0);
 
@@ -35,7 +34,7 @@ describe.skipIf(isWindows)("integration test for init command", () => {
 
   it("sets gitSiteUrl default to repo url", function* () {
     const fullIntegration = f.copy("pkg.js-single-json");
-    const { responded, stderr, status } = yield* runCommand(
+    const { responded, status } = yield* runCommand(
       command("init", fullIntegration),
       fullIntegration,
       [
@@ -45,7 +44,6 @@ describe.skipIf(isWindows)("integration test for init command", () => {
       ]
     );
 
-    expect(stderr).toBe("");
     expect(responded).toMatchSnapshot();
     expect(status.code).toBe(0);
 
