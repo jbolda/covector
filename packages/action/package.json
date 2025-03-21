@@ -9,7 +9,7 @@
   "scripts": {
     "run:source": "ncc run index.ts",
     "pkg": "ncc build index.ts -o dist",
-    "postpkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist",
+    "prepkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist/ && rm ../toml/pkg/covector_toml_bg.wasm",
     "build": "echo noop",
     "test": "vitest",
     "clean": "echo noop"
