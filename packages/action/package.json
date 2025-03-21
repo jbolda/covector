@@ -1,14 +1,14 @@
 {
   "name": "action",
   "version": "0.12.4",
-  "main": "./dist/index.mjs",
+  "main": "./dist/index.js",
   "type": "module",
   "license": "Apache-2.0",
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
   "scripts": {
     "run:source": "ncc run index.ts",
-    "pkg": "ncc build index.ts -o dist -m",
+    "pkg": "ncc build index.ts -o dist",
     "postpkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist",
     "build": "echo noop",
     "test": "vitest",

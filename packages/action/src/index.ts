@@ -20,7 +20,7 @@ import type {
 } from "@covector/types";
 import { formatComment } from "./comment/formatGithubComment.ts";
 import { call, type Operation } from "effection";
-import { CommitResponse, getCommitContext } from "./pr/getCommitContext.ts";
+import { getCommitContext } from "./pr/getCommitContext.ts";
 import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact.ts";
 
 type PullRequestEvent =
