@@ -6,26 +6,29 @@ import {
   packageListToArray,
   injectPublishFunctions,
   createReleases,
-} from "./utils";
-import { postGithubComment } from "./comment/postGithubComment";
+} from "./utils.ts";
+import { postGithubComment } from "./comment/postGithubComment.ts";
 import fs from "fs";
 
+import type { webhooks } from "@octokit/openapi-webhooks-types";
 import type {
-  PullRequestEvent,
-  WorkflowRunEvent,
-} from "@octokit/webhooks-definitions/schema";
-import type {
+  Covector,
   CovectorStatus,
   CovectorVersion,
   CovectorPublish,
   Logger,
 } from "@covector/types";
-import { formatComment } from "./comment/formatGithubComment";
+import { formatComment } from "./comment/formatGithubComment.ts";
 import { call, type Operation } from "effection";
-import { CommitResponse, getCommitContext } from "./pr/getCommitContext";
-import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact";
+import { CommitResponse, getCommitContext } from "./pr/getCommitContext.ts";
+import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact.ts";
 
-export function* run(logger: Logger): Operation<void> {
+type PullRequestEvent =
+  webhooks["pull-request-synchronize"]["post"]["requestBody"]["content"]["application/json"];
+type WorkflowRunEvent =
+  webhooks["workflow-run-requested"]["post"]["requestBody"]["content"]["application/json"];
+
+export function* run(logger: Logger): Operation<CovectorPublish | void> {
   try {
     const cwd =
       core.getInput("cwd") === "" ? process.cwd() : core.getInput("cwd");
@@ -182,11 +185,11 @@ export function* run(logger: Logger): Operation<void> {
 
       function* createContext({ commits }: { commits: string[] }): Operation<
         () => Operation<{
-          context: Record<string, string>;
+          context: Record<string, Record<string, string>>;
           changeContext: Record<string, string>;
         }>
       > {
-        let shas = {};
+        let shas = {} as Record<string, Record<string, string>>;
         try {
           const octokit = github.getOctokit(token);
           const prContext: CommitResponse = yield* getCommitContext(
@@ -221,8 +224,11 @@ export function* run(logger: Logger): Operation<void> {
         }
         const context = { ...shas };
 
-        return function* defineContexts() {
-          const changeContext = {};
+        return function* defineContexts(): Operation<{
+          context: Record<string, Record<string, string>>;
+          changeContext: Record<string, string>;
+        }> {
+          const changeContext = {} as Record<string, string>;
           return { context, changeContext };
         };
       }
@@ -233,7 +239,8 @@ export function* run(logger: Logger): Operation<void> {
         command,
         filterPackages,
         cwd,
-        ...(core.getInput("recognizeContributors") ? { createContext } : {}),
+        createContext,
+        // ...(core.getInput("recognizeContributors") ? { createContext } : {}),
       });
       core.setOutput("templatePipe", covectored.pipeTemplate);
 
@@ -361,7 +368,7 @@ export function* run(logger: Logger): Operation<void> {
         );
       } else {
         // primarily runs publish
-        let covectored: CovectorPublish;
+        let covectored: Covector["preview"];
         const branchName = github?.context?.payload?.pull_request?.head?.ref;
         let identifier;
         let versionTemplate;
@@ -411,7 +418,7 @@ export function* run(logger: Logger): Operation<void> {
           branchTag,
         });
 
-        if (covectored.commandsRan) {
+        if ("commandsRan" in covectored && covectored.commandsRan) {
           let packagesPublished: any = Object.entries(
             covectored.commandsRan
           ).reduce((pub: string[], pkg: any[]) => {

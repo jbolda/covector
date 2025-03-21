@@ -10,7 +10,7 @@ import { preview } from "./preview.ts";
 import { publish } from "./publish.ts";
 import { arbitrary } from "./arbitrary.ts";
 
-export function* covector({
+export function* covector<C extends keyof Covector>({
   // shared
   logger,
   command,
@@ -28,7 +28,7 @@ export function* covector({
   createContext,
 }: {
   logger: Logger;
-  command: string;
+  command: C;
   dryRun?: boolean;
   logs?: boolean;
   cwd?: string;
@@ -39,27 +39,31 @@ export function* covector({
   changeFolder?: string;
   yes?: boolean;
   createContext?: ChangeContext<any>;
-}): Operation<Covector> {
+}): Operation<Covector[C]> {
+  // TS isn't playing nice with the intesection, this return type is appropriate for downstream consumers
+  // but TS is not happy with it. It expects the returns of each function to match the full intersection
+  // of Covector[C], but they don't. So we cast to unknown and then to the appropriate type.
+  // The cast hurts type safety, but we ensure the types at the function level, so it's okay.
   if (command === "init") {
     return yield* init({
       logger: logger.child({ command: "init" }),
       cwd,
       changeFolder,
       yes,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "add") {
     return yield* add({
       logger: logger.child({ command: "add" }),
       cwd,
       changeFolder,
       yes,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "config") {
     return yield* config({
       logger: logger.child({ command: "config" }),
       cwd,
       modifyConfig,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "status") {
     return yield* status({
       logger: logger.child({ command: "status" }),
@@ -70,7 +74,7 @@ export function* covector({
       filterPackages,
       modifyConfig,
       branchTag,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "version") {
     return yield* version({
       logger: logger.child({ command: "version" }),
@@ -80,7 +84,7 @@ export function* covector({
       filterPackages,
       modifyConfig,
       createContext,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "preview") {
     return yield* preview({
       logger: logger.child({ command: "preview" }),
@@ -91,7 +95,7 @@ export function* covector({
       modifyConfig,
       previewVersion,
       branchTag,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "publish") {
     return yield* publish({
       logger: logger.child({ command: "publish" }),
@@ -100,7 +104,7 @@ export function* covector({
       cwd,
       filterPackages,
       modifyConfig,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else {
     return yield* arbitrary({
       logger: logger.child({ command: "arbitrary" }),
@@ -109,6 +113,6 @@ export function* covector({
       cwd,
       filterPackages,
       modifyConfig,
-    });
+    }) as unknown as Operation<Covector[C]>;
   }
 }

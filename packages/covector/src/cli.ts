@@ -1,14 +1,15 @@
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { covector } from "./run.ts";
+import type { Covector } from "@covector/types";
 import { pino } from "pino";
 import logStream from "./logger.ts";
 
-export function* cli(argv: readonly string[]): Generator<any, any, any> {
+export function* cli(argv: readonly string[]) {
   const { command, directory, yes, dryRun, cwd } = parseOptions(argv);
   const stream = logStream();
   const logger = pino(stream);
-  return yield* covector({
+  return covector({
     logger,
     command,
     changeFolder: directory,
@@ -19,7 +20,7 @@ export function* cli(argv: readonly string[]): Generator<any, any, any> {
 }
 
 function parseOptions(argv: readonly string[]): {
-  command: string;
+  command: keyof Covector;
   dryRun: boolean;
   yes?: boolean;
   directory?: string;
@@ -69,7 +70,7 @@ function parseOptions(argv: readonly string[]): {
     .parseSync();
 
   return {
-    command: String(rawOptions._[0]),
+    command: String(rawOptions._[0]) as keyof Covector,
     cwd: rawOptions.cwd,
     dryRun: rawOptions.dryRun,
     yes: rawOptions.yes as boolean | undefined,

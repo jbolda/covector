@@ -1,4 +1,3 @@
-import { type Logger } from "@covector/types";
 import { attemptCommands } from "@covector/command";
 import {
   configFile,
@@ -14,8 +13,9 @@ import { fillChangelogs } from "@covector/changelog";
 import { apply, changesConsideringParents } from "@covector/apply";
 
 import type {
+  Logger,
+  Covector,
   CommandsRan,
-  CovectorVersion,
   ChangeContext,
   ConfigFile,
 } from "@covector/types";
@@ -37,7 +37,7 @@ export function* version({
   filterPackages?: string[];
   modifyConfig?: (c: ConfigFile) => Promise<ConfigFile>;
   createContext?: ChangeContext<any>;
-}): Operation<CovectorVersion> {
+}): Operation<Covector["version"]> {
   const rawConfig = yield* configFile({ cwd });
   const config = yield* call(() => modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
@@ -154,5 +154,5 @@ export function* version({
     logger.info({ msg: "==== result ===", renderAsYAML: pkgCommandsRan });
   }
 
-  return { commandsRan, pipeTemplate };
+  return { commandsRan, pipeTemplate, response: "complete" };
 }

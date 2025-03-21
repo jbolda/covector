@@ -1,6 +1,6 @@
 import fs from "fs";
 import type { ConfigFile, Logger, FunctionPipe } from "@covector/types";
-import type { GitHub } from "@actions/github/lib/utils";
+import type { getOctokit } from "@actions/github";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -94,7 +94,7 @@ export const createReleases = curry(
     }: {
       logger: Logger;
       core: { [k: string]: Function };
-      octokit: InstanceType<typeof GitHub>;
+      octokit: ReturnType<typeof getOctokit>;
       owner: string;
       repo: string;
       targetCommitish: string;

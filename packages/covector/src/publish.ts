@@ -1,4 +1,3 @@
-import { type Logger } from "@covector/types";
 import { attemptCommands, confirmCommandsToRun } from "@covector/command";
 import {
   configFile,
@@ -12,7 +11,7 @@ import {
   pipeChangelogToCommands,
 } from "@covector/changelog";
 
-import type { CommandsRan, CovectorPublish } from "@covector/types";
+import type { Logger, Covector, CommandsRan } from "@covector/types";
 import { call, type Operation } from "effection";
 
 export function* publish({
@@ -29,7 +28,7 @@ export function* publish({
   cwd?: string;
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
-}): Operation<CovectorPublish> {
+}): Operation<Covector["publish"]> {
   const rawConfig = yield* configFile({ cwd });
   const config = yield* call(() => modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });

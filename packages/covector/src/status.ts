@@ -1,4 +1,4 @@
-import { type Logger } from "@covector/types";
+import type { Logger, Covector } from "@covector/types";
 import { confirmCommandsToRun } from "@covector/command";
 import {
   configFile,
@@ -18,7 +18,7 @@ import {
   validateApply,
 } from "@covector/apply";
 
-import type { CovectorStatus, PackageFile } from "@covector/types";
+import type { CovectorStatus } from "@covector/types";
 import { call, type Operation } from "effection";
 
 export function* status({
@@ -39,7 +39,7 @@ export function* status({
   modifyConfig?: (c: any) => Promise<any>;
   branchTag?: string;
   logs?: boolean;
-}): Operation<CovectorStatus> {
+}): Operation<Covector["status"]> {
   const rawConfig = yield* configFile({ cwd });
   const config = yield* call(() => modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });

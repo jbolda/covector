@@ -275,6 +275,7 @@ export type CovectorStatus =
 export type CovectorVersion = {
   commandsRan: CommandsRan;
   pipeTemplate: object;
+  response: string;
 };
 export type CovectorPublish = {
   commandsRan: CommandsRan;
@@ -282,11 +283,16 @@ export type CovectorPublish = {
   response: string;
 };
 
-export type Covector =
-  | CovectorStatus
-  | CovectorVersion
-  | CovectorPublish
-  | { response: string };
+export type Covector = {
+  init: { response: string };
+  add: { response: "complete" | "skipped" };
+  config: { response: string };
+  status: CovectorStatus;
+  version: CovectorVersion;
+  preview: CovectorPublish | { response: string };
+  publish: CovectorPublish;
+  arbitrary: CovectorPublish | { response: string };
+};
 
 export interface FunctionPipe extends PkgPublish {
   pkgCommandsRan: PkgCommandsRan;

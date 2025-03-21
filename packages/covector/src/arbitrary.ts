@@ -1,4 +1,3 @@
-import { type Logger } from "@covector/types";
 import { attemptCommands, confirmCommandsToRun } from "@covector/command";
 import {
   configFile,
@@ -12,7 +11,7 @@ import {
   pipeChangelogToCommands,
 } from "@covector/changelog";
 
-import type { CommandsRan, Covector } from "@covector/types";
+import type { Logger, Covector, CommandsRan } from "@covector/types";
 import { call, type Operation } from "effection";
 
 export function* arbitrary({
@@ -29,7 +28,7 @@ export function* arbitrary({
   cwd?: string;
   filterPackages?: string[];
   modifyConfig?: (c: any) => Promise<any>;
-}): Operation<Covector> {
+}): Operation<Covector["arbitrary"]> {
   const rawConfig = yield* configFile({ cwd });
   const config = yield* call(() => modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
@@ -135,5 +134,5 @@ export function* arbitrary({
     logger.info({ msg: "==== result ===", renderAsYAML: pkgCommandsRan });
   }
 
-  return { commandsRan: postCommandsRan, pipeTemplate };
+  return { commandsRan: postCommandsRan, pipeTemplate, response: "complete" };
 }

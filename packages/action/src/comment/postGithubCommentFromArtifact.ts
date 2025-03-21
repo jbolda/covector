@@ -1,11 +1,14 @@
-import { postGithubComment } from "./postGithubComment";
+import { postGithubComment } from "./postGithubComment.ts";
 import { DefaultArtifactClient } from "@actions/artifact";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { GitHub } from "@actions/github/lib/utils";
+import type { getOctokit } from "@actions/github";
 import { call, type Operation } from "effection";
-import type { WorkflowRunEvent } from "@octokit/webhooks-definitions/schema";
 import type { Logger } from "@covector/types";
+import type { webhooks } from "@octokit/openapi-webhooks-types";
+
+type WorkflowRunEvent =
+  webhooks["workflow-run-requested"]["post"]["requestBody"]["content"]["application/json"];
 
 export function* postGithubCommentFromArtifact({
   logger,
@@ -14,7 +17,7 @@ export function* postGithubCommentFromArtifact({
   payload,
 }: {
   logger: Logger;
-  octokit: InstanceType<typeof GitHub>;
+  octokit: ReturnType<typeof getOctokit>;
   token: string;
   payload: WorkflowRunEvent;
 }): Operation<void> {

@@ -1,4 +1,3 @@
-import { type Logger } from "@covector/types";
 import { attemptCommands, confirmCommandsToRun } from "@covector/command";
 import {
   configFile,
@@ -15,10 +14,9 @@ import {
 import { apply, changesConsideringParents } from "@covector/apply";
 
 import type {
-  CommandsRan,
+  Logger,
   Covector,
-  PackageFile,
-  PkgPublish,
+  CommandsRan,
   PkgVersion,
 } from "@covector/types";
 import { call, type Operation } from "effection";
@@ -41,7 +39,7 @@ export function* preview({
   modifyConfig?: (c: any) => Promise<any>;
   previewVersion?: string;
   branchTag?: string;
-}): Operation<Covector> {
+}): Operation<Covector["preview"]> {
   const rawConfig = yield* configFile({ cwd });
   const config = yield* call(() => modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
@@ -185,5 +183,9 @@ export function* preview({
     dryRun,
   });
 
-  return { commandsRan: commandsAttempted, pipeTemplate: publishCommands };
+  return {
+    commandsRan: commandsAttempted,
+    pipeTemplate: publishCommands,
+    response: "complete",
+  };
 }

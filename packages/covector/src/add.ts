@@ -7,12 +7,11 @@ import {
   select,
   text,
 } from "@clack/prompts";
-import { type Logger } from "@covector/types";
+import type { Logger, Covector, ConfigFile } from "@covector/types";
 import { writeFile } from "fs/promises";
 import { existsSync } from "fs";
 import { join } from "path";
 import { configFile } from "@covector/files";
-import type { ConfigFile } from "@covector/types";
 import { sh } from "@covector/command";
 import { call, type Operation } from "effection";
 
@@ -26,7 +25,7 @@ export const add = function* ({
   cwd?: string;
   changeFolder?: string;
   yes: boolean;
-}): Operation<{ response: "complete" | "skipped" }> {
+}): Operation<Covector["add"]> {
   const config: ConfigFile = yield* configFile({ cwd });
   let packageBumps: { [k: string]: { bump: string; changeTag?: string } } = {};
 

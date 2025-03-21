@@ -5,8 +5,7 @@ import type { Dir } from "fs";
 import path from "path";
 import { Operation, all, call } from "effection";
 import { readPkgFile } from "@covector/files";
-import type { PackageFile } from "@covector/types";
-import { type Logger } from "@covector/types";
+import type { Logger, Covector, PackageFile } from "@covector/types";
 
 function* reader(pkg: string, cwd: string): Operation<PackageFile | undefined> {
   try {
@@ -25,7 +24,7 @@ export const init = function* init({
   cwd?: string;
   changeFolder?: string;
   yes: boolean;
-}): Generator<any, any, any> {
+}): Operation<Covector["init"]> {
   const pkgs = yield* call(() => packageFiles({ cwd }));
   let packages: {
     [k: string]: { path: string; manager: string; dependencies?: string[] };
@@ -301,7 +300,7 @@ export const init = function* init({
 
   // It seems to get stuck on Windows and not close with the resume  //
   process.exit();
-  return "complete";
+  return { response: "complete" };
 };
 
 const packageFiles = async ({ cwd = process.cwd() }) => {

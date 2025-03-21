@@ -1,0 +1,12 @@
+export const id = 420;
+export const ids = [420];
+export const modules = {
+
+/***/ 18420:
+/***/ ((module) => {
+
+module.exports = /*#__PURE__*/JSON.parse('{"name":"covector","version":"0.12.4","license":"Apache-2.0","homepage":"https://github.com/jbolda/covector#readme","author":"Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)","repository":{"type":"git","url":"https://github.com/jbolda/covector.git"},"engines":{"node":">=18"},"type":"module","exports":{"development":"./src/index.ts","import":{"types":"./dist/index.d.ts","default":"./dist/index.js"}},"bin":{"covector":"./bin/covector.mjs"},"files":["bin","dist"],"scripts":{"build":"tsc -b","clean":"rimraf dist tsconfig.tsbuildinfo node_modules","prepublishOnly":"tsc -b","test":"vitest"},"dependencies":{"@clack/prompts":"^0.10.0","@covector/apply":"0.10.0","@covector/assemble":"0.12.0","@covector/changelog":"0.12.0","@covector/command":"0.8.0","@covector/files":"0.8.0","effection":"4.0.0-alpha.4","globby":"^11.1.0","js-yaml":"^4.1.0","pino":"^9.1.0","pino-abstract-transport":"^1.2.0","strip-ansi":"6.0.1","yargs":"^17.7.2"},"devDependencies":{"@covector/types":"0.0.0","@octokit/webhooks-definitions":"^3.67.3","@types/inquirer":"^8.2.6","@types/yargs":"^17.0.33","fixturez":"^1.1.0"},"volta":{"extends":"../../package.json"}}');
+
+/***/ })
+
+};

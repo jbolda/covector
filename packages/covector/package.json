@@ -49,6 +49,7 @@
   },
   "devDependencies": {
     "@covector/types": "0.0.0",
+    "@octokit/webhooks-definitions": "^3.67.3",
     "@types/inquirer": "^8.2.6",
     "@types/yargs": "^17.0.33",
     "fixturez": "^1.1.0"

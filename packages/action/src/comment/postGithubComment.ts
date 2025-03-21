@@ -1,7 +1,7 @@
 import { DefaultArtifactClient } from "@actions/artifact";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { GitHub } from "@actions/github/lib/utils";
+import type { getOctokit } from "@actions/github";
 import { call, Operation } from "effection";
 import { Logger } from "@covector/types";
 
@@ -16,7 +16,7 @@ export function* postGithubComment({
 }: {
   logger: Logger;
   comment: string;
-  octokit: InstanceType<typeof GitHub>;
+  octokit: ReturnType<typeof getOctokit>;
   repo: string;
   owner: string;
   prNumber: number;
