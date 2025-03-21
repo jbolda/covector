@@ -10340,6 +10340,7 @@ exports[`integration test in production mode > runs build for js and rust 1`] = 
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -10845,6 +10846,7 @@ Summary about the changes in test_app_two
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -11019,6 +11021,7 @@ Summary about the changes again(!) in test_app
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -11115,6 +11118,7 @@ A general summary about the generally changes in general-pkg generally
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -12544,5 +12548,6 @@ Summary about the changes in tauri-updater
       },
     },
   },
+  "response": "complete",
 }
 `;

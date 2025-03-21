@@ -9,7 +9,7 @@ export function* cli(argv: readonly string[]) {
   const { command, directory, yes, dryRun, cwd } = parseOptions(argv);
   const stream = logStream();
   const logger = pino(stream);
-  return covector({
+  return yield* covector({
     logger,
     command,
     changeFolder: directory,

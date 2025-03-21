@@ -110,6 +110,7 @@ exports[`integration test for complex commands > dry run > runs build 1`] = `
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -465,6 +466,7 @@ exports[`integration test for complex commands > dry run > runs test 1`] = `
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -485,6 +487,7 @@ exports[`integration test for complex commands > dry run > runs version 1`] = `
     },
   },
   "pipeTemplate": {},
+  "response": "complete",
 }
 `;
 
@@ -607,6 +610,7 @@ this command is not piped, it is run from scripts for pk2
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -973,6 +977,7 @@ this command is not piped, it is run from scripts for pk2
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -993,6 +998,7 @@ exports[`integration test for complex commands > prod > runs version 1`] = `
     },
   },
   "pipeTemplate": {},
+  "response": "complete",
 }
 `;
 
@@ -1090,6 +1096,7 @@ exports[`integration test to invoke sub commands > runs publish-primary in prod 
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -1187,5 +1194,6 @@ exports[`integration test to invoke sub commands > runs publishSecondary in prod
       },
     },
   },
+  "response": "complete",
 }
 `;

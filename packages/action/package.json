@@ -7,7 +7,7 @@
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
   "scripts": {
-    "run-source": "ncc run index.ts",
+    "run:source": "ncc run index.ts",
     "pkg": "ncc build index.ts -o dist -m",
     "postpkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist",
     "build": "echo noop",

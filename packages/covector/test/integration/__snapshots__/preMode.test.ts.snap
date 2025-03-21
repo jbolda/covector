@@ -1435,6 +1435,7 @@ Summary about the changes in tauri-updater
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -2873,6 +2874,7 @@ Summary about the changes in tauri-updater
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -4312,6 +4314,7 @@ Summary about the changes in tauri-updater
         },
       },
     },
+    "response": "complete",
   },
   "covectorReturnTwo": {
     "commandsRan": {
@@ -5965,6 +5968,7 @@ Boop again.
         },
       },
     },
+    "response": "complete",
   },
 }
 `;

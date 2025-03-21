@@ -2583,6 +2583,7 @@ exports[`integration test in --dry-run mode > runs build for js and rust 1`] = `
       },
     },
   },
+  "response": "complete",
 }
 `;
 
@@ -6495,5 +6496,6 @@ Summary about the changes in tauri-updater
       },
     },
   },
+  "response": "complete",
 }
 `;

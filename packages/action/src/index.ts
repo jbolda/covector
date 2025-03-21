@@ -192,7 +192,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
         let shas = {} as Record<string, Record<string, string>>;
         try {
           const octokit = github.getOctokit(token);
-          const prContext: CommitResponse = yield* getCommitContext(
+          const prContext = yield* getCommitContext(
             octokit.graphql,
             github.context.repo.owner,
             github.context.repo.repo,
@@ -239,8 +239,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
         command,
         filterPackages,
         cwd,
-        createContext,
-        // ...(core.getInput("recognizeContributors") ? { createContext } : {}),
+        ...(core.getInput("recognizeContributors") ? { createContext } : {}),
       });
       core.setOutput("templatePipe", covectored.pipeTemplate);
 
