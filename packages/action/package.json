@@ -8,8 +8,7 @@
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
   "scripts": {
     "run:source": "ncc run index.ts",
-    "pkg": "ncc build index.ts -o dist",
-    "prepkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist/ && rm ../toml/pkg/covector_toml_bg.wasm",
+    "pkg": "rollup -c rollup.config.js --logLevel silly",
     "build": "echo noop",
     "test": "vitest",
     "clean": "echo noop"
@@ -18,14 +17,19 @@
     "@actions/artifact": "^2.1.7",
     "@actions/core": "^1.10.1",
     "@actions/github": "^5.1.1",
+    "covector": "0.12.4",
     "effection": "4.0.0-alpha.4",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@covector/types": "0.0.0",
     "@octokit/openapi-webhooks-types": "^10.3.0",
-    "@vercel/ncc": "^0.38.1",
-    "fixturez": "^1.1.0"
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
+    "fixturez": "^1.1.0",
+    "rollup": "^4.36.0",
+    "tslib": "^2.8.1"
   },
   "volta": {
     "extends": "../../package.json"

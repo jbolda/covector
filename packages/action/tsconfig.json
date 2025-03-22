@@ -6,5 +6,9 @@
     "rootDir": ".",
     "outDir": "dist",
     "noEmit": true
+  },
+  "paths": {
+    "covector": ["../covector"],
+    "@covector/*": ["../*"]
   }
 }
