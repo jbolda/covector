@@ -24,7 +24,7 @@ const config = {
     wasm(),
   ],
   onwarn(warning, warn) {
-    if (warning.message.includes("Circular dependency")) {
+    if (warning.message.includes("Circular dependency") || warning.code === 'THIS_IS_UNDEFINED') {
       return;
     }
     warn(warning);
