@@ -33,7 +33,6 @@
   "scripts": {
     "prebuild": "wasm-pack build --release --target bundler",
     "build": "tsc -b",
-    "postbuild": "cp ./pkg/covector_toml_bg.wasm ../action/dist",
     "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
     "test": "vitest"
   },

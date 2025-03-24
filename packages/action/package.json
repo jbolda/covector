@@ -7,6 +7,8 @@
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
   "scripts": {
+    "run:built": "node ./dist/index.js",
+    "run:source": "node --import=tsx ./src/index.ts",
     "pkg": "tsc -b && rollup -c rollup.config.js",
     "build": "echo noop",
     "test": "vitest",
