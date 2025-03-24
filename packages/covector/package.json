@@ -44,7 +44,6 @@
     "js-yaml": "^4.1.0",
     "pino": "^9.1.0",
     "pino-abstract-transport": "^1.2.0",
-    "strip-ansi": "6.0.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
@@ -52,7 +51,8 @@
     "@octokit/webhooks-definitions": "^3.67.3",
     "@types/inquirer": "^8.2.6",
     "@types/yargs": "^17.0.33",
-    "fixturez": "^1.1.0"
+    "fixturez": "^1.1.0",
+    "strip-ansi": "^7.1.0"
   },
   "volta": {
     "extends": "../../package.json"

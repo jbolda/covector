@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { assert } from "vitest";
 import { x, type TinyProcess } from "@covector/command";
+import strip from "strip-ansi";
 
 export const loadContent = (cwd: string, pathToContent: string) => {
   return fs.readFileSync(path.join(cwd, pathToContent), { encoding: "utf8" });
@@ -81,7 +82,7 @@ export function* runCommand(
   for (let line of yield* each(child.lines)) {
     out += line + "\n";
 
-    const lastMessage = line;
+    const lastMessage = strip(line);
     if (debug)
       console.dir({ /* stdout: stdoutBuffer.toString(), */ lastMessage });
     if (elegantlyRespond) {
@@ -115,7 +116,7 @@ const tryResponse = ({
 }: {
   responseCount: number;
   responses: Responses;
-  child: TinyProcess["process"];
+  child: TinyProcess;
   lastMessage?: string;
 }) => {
   if (responseCount >= responses.length) {
@@ -125,10 +126,10 @@ const tryResponse = ({
   if (lastMessage && lastMessage.match(question)) {
     if (answer === "pressEnter") {
       // console.log(`sending Enter to ${lastMessage}`);
-      child.process.stdin.write(pressEnter);
+      if (child?.process?.stdin) child.process.stdin.write(pressEnter);
     } else {
       // console.log(`sending ${answer} to ${lastMessage}`);
-      child.process.stdin.write(answer + pressEnter);
+      if (child?.process?.stdin) child.process.stdin.write(answer + pressEnter);
     }
     return lastMessage.trim() + "\n";
   }
