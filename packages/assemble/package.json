@@ -25,7 +25,7 @@
   "dependencies": {
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
-    "effection": "4.0.0-alpha.4",
+    "effection": "4.0.0-alpha.7",
     "js-yaml": "^4.1.0",
     "remark-frontmatter": "^3.0.0",
     "remark-parse": "^9.0.0",
