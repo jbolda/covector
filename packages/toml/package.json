@@ -11,6 +11,7 @@
   "engines": {
     "node": ">=18"
   },
+  "type": "commonjs",
   "files": [
     "pkg/covector_toml_bg.wasm",
     "pkg/covector_toml.js",

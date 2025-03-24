@@ -32,6 +32,9 @@ export interface TinyProcess extends Operation<Output> {
 
   process: Result["process"];
   exitCode: number | undefined;
+  aborted: boolean;
+  killed: boolean;
+  pid: number | undefined;
 }
 
 export function x(
@@ -63,6 +66,9 @@ export function x(
         },
         process: tinyexec.process,
         exitCode: tinyexec.exitCode,
+        aborted: tinyexec.aborted,
+        killed: tinyexec.killed,
+        pid: tinyexec.pid,
       };
 
       yield* provide(tinyproc);
