@@ -1,15 +1,3 @@
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-
-let dir;
-try {
-  dir = __dirname;
-} catch (e) {
-  // @ts-expect-error
-  dir = dirname(fileURLToPath(import.meta.url));
-}
-__dirname = dir;
-
 import { TomlDocument as TomlDocumentInner } from "../pkg/covector_toml.js";
 
 function proxyPropGet<T extends TomlDocument>(
