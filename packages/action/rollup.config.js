@@ -22,14 +22,7 @@ const config = {
           inject: `import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-let dir;
-try {
-  dir = __dirname;
-} catch (e) {
-  // @ts-expect-error
-  dir = dirname(fileURLToPath(import.meta.url));
-}
-__dirname = dir;`,
+__dirname = dirname(fileURLToPath(import.meta.url));`,
         },
       ],
     }),
