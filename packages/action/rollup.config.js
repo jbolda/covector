@@ -11,27 +11,33 @@ const config = {
     exports: "named",
     dir: "dist",
     format: "esm",
+    esModule: true,
+    interop: "auto",
     sourcemap: true,
   },
+  treeshake: {
+    propertyReadSideEffects: false,
+    tryCatchDeoptimization: false,
+  },
   plugins: [
-    shimDepsPlugin({
-      "toml/pkg/covector_toml.js": [
-        {
-          inject: `import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-`,
-          src: `__dirname`,
-          replacement: `dirname(fileURLToPath(import.meta.url))`,
-        },
-      ],
-    }),
     commonjs({
-      strictRequires: true,
+      strictRequires: "auto",
       extensions: [".js"],
       sourceMap: false,
     }),
     nodeResolve({ preferBuiltins: true }),
     esbuild({ tsconfig: "tsconfig.json", target: "esnext" }),
+    shimDepsPlugin({
+      "toml/pkg/covector_toml.js": [
+        {
+          inject: `import { dirname } from "node:path";
+    import { fileURLToPath } from "node:url";
+    `,
+          src: `__dirname`,
+          replacement: `dirname(fileURLToPath(import.meta.url))`,
+        },
+      ],
+    }),
     json(),
     wasm(),
   ],
