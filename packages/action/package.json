@@ -10,6 +10,7 @@
     "run:built": "node ./dist/index.js",
     "run:source": "node --import=tsx ./src/index.ts",
     "pkg": "tsc -b && rollup -c rollup.config.js",
+    "postpkg": "cp ../toml/pkg/covector_toml_bg.wasm ./dist",
     "build": "echo noop",
     "test": "vitest",
     "clean": "echo noop"

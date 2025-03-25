@@ -14,23 +14,24 @@ const config = {
     sourcemap: true,
   },
   plugins: [
-    nodeResolve({ preferBuiltins: true }),
-    esbuild({ tsconfig: "tsconfig.json", target: "esnext" }),
     shimDepsPlugin({
       "toml/pkg/covector_toml.js": [
         {
           inject: `import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-
-__dirname = dirname(fileURLToPath(import.meta.url));`,
+`,
+          src: `__dirname`,
+          replacement: `dirname(fileURLToPath(import.meta.url))`,
         },
       ],
     }),
     commonjs({
+      strictRequires: true,
       extensions: [".js"],
       sourceMap: false,
-      strictRequires: "auto",
     }),
+    nodeResolve({ preferBuiltins: true }),
+    esbuild({ tsconfig: "tsconfig.json", target: "esnext" }),
     json(),
     wasm(),
   ],
@@ -55,12 +56,23 @@ function shimDepsPlugin(deps) {
     transform(code, id) {
       for (const file in deps) {
         if (id.replace(/\\/g, "/").endsWith(file)) {
-          for (const { inject } of deps[file]) {
+          for (const { inject, src, replacement } of deps[file]) {
             const magicString = new MagicString(code);
 
             if (inject) {
               transformed[file] = true;
               magicString.prepend(inject);
+            }
+
+            if (src) {
+              const pos = code.indexOf(src);
+              if (pos < 0) {
+                this.error(
+                  `Could not find expected src "${src}" in file "${file}"`
+                );
+              }
+              transformed[file] = true;
+              magicString.overwrite(pos, pos + src.length, replacement);
             }
 
             code = magicString.toString();

@@ -13,7 +13,8 @@
     "clean": "tsc --build --clean",
     "wipe": "npm run clean -ws && rimraf node_modules dist tsconfig.tsbuildinfo && npm i",
     "build:action": "npm run pkg -w action",
-    "run:action": "npm run run:source -w action",
+    "run:action:source": "npm run run:source -w action",
+    "run:action:built": "npm run run:built -w action",
     "test": "vitest",
     "pretty": "prettier --write --ignore-path .gitignore \"!packages/action/dist/index.js\" \"packages/**/*.{js,ts}\" \"__fixtures__/**/*.{json,js,ts,yml,yaml}\""
   },
