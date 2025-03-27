@@ -39,9 +39,12 @@ describe("e2e test with built action", () => {
         yield* each.next();
       }
 
-      expect(out).toContain("::set-output name=commandRan::status");
+      // note we cant check the output of the command
+      // as it gets ripped out in CI by GitHub
       expect(out).toContain(
-        "::set-output name=status::There are 2 changes which include tauri with minor, tauri-updater with patch"
+        " bumping tauri with minor\n" +
+          " bumping tauri-updater with patch\n" +
+          " bumping tauri.js with patch"
       );
     });
   });
