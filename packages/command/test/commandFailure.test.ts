@@ -36,7 +36,11 @@ describe("attemptCommand fails", () => {
       })
     );
 
-    expect(errored.message).toBe("spawn boop ENOENT");
+    expect(errored.message).toBe(
+      process.platform === "win32"
+        ? "Process exited with non-zero status (1)"
+        : "spawn boop ENOENT"
+    );
   });
 
   it("retries a failed function", function* () {
@@ -61,24 +65,28 @@ describe("attemptCommand fails", () => {
     );
     logger.info("completed");
 
-    const errorMessage = "spawn boop ENOENT";
     if (process.platform === "win32") {
-      const errorLog =
-        "'boop' is not recognized as an internal or external command,\r\n" +
-        "operable program or batch file.";
+      const errorMessage = "Process exited with non-zero status (1)";
+      const errorLog = [
+        {
+          msg: "'boop' is not recognized as an internal or external command,",
+          level: 30,
+        },
+        { msg: "operable program or batch file.", level: 30 },
+      ];
 
       yield* call(() =>
         pinoTest.consecutive(
           stream,
           [
             { msg: "pkg-nickname []: boop", level: 30 },
-            { msg: errorLog, level: 30 },
-            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+            ...errorLog,
+            { msg: errorMessage, level: 50 },
             { msg: "pkg-nickname []: boop", level: 30 },
-            { msg: errorLog, level: 30 },
-            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
+            ...errorLog,
+            { msg: errorMessage, level: 50 },
             { msg: "pkg-nickname []: boop", level: 30 },
-            { msg: errorLog, level: 30 },
+            ...errorLog,
             // to confirm we are done with logs
             { msg: "completed", level: 30 },
           ],
@@ -87,6 +95,7 @@ describe("attemptCommand fails", () => {
       );
       expect(errored.message).toBe(errorMessage);
     } else {
+      const errorMessage = "spawn boop ENOENT";
       yield* call(() =>
         pinoTest.consecutive(
           stream,
