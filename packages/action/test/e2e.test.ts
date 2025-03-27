@@ -1,7 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { run as covector } from "../src";
-import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect, vi } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
