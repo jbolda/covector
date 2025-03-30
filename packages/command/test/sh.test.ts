@@ -5,29 +5,45 @@ import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
 import { x } from "tinyexec";
+import { tokenizeArgs } from "args-tokenizer";
 
 describe("tinyexec compatibility checks", () => {
-  itPromises("handles multiple pipes with function syntax", async () => {
-    const result = await x("echo", ["this\nthing"]).pipe("grep", ["this"]);
+  itPromises("handles multiline stdout", async () => {
+    const commandString = `echo "this"\n"thing"`;
+    const [command, ...args] = tokenizeArgs(commandString);
+    const result = await x(command, args);
+    expect(result.stdout.trim()).toBe(
+      process.platform !== "win32" ? "this thing" : `"this" "thing"`
+    );
+  });
+
+  // no grep on windows so it just returns empty?
+  itPromises.runIf(process.platform !== "win32")("handles pipes", async () => {
+    const commandString = `echo this\nthing`;
+    const [command, ...commandArgs] = tokenizeArgs(commandString);
+    const grepString = `grep this`;
+    const [grep, ...grepArgs] = tokenizeArgs(grepString);
+    const result = await x(command, commandArgs).pipe(grep, grepArgs);
     expect(result.stdout.trim()).toBe("this");
   });
 
   describe("with `shell: true`", () => {
     itPromises("single command", async () => {
-      const result = await x("echo", ["but", "this"], {
+      const commandString = `echo but this`;
+      const [command, ...args] = tokenizeArgs(commandString);
+      const result = await x(command, args, {
         nodeOptions: { shell: true },
       });
       expect(result.stdout.trim()).toBe("but this");
     });
 
     itPromises("multiple pipes", async () => {
-      const result = await x(
-        'echo "this thing" | echo "and this" | echo "but this"',
-        [],
-        {
-          nodeOptions: { shell: true },
-        }
-      );
+      const commandString =
+        'echo "this thing" | echo "and this" | echo "but this"';
+      const [command, ...args] = tokenizeArgs(commandString);
+      const result = await x(command, args, {
+        nodeOptions: { shell: true },
+      });
       expect(result.stdout.trim()).toBe("but this");
     });
   });
@@ -50,7 +66,9 @@ Usage:
 
   it("handle single command", function* () {
     const { out } = yield* sh("echo 'this thing'", {}, false, logger);
-    expect(out).toBe("this thing");
+    expect(out).toBe(
+      process.platform !== "win32" ? "this thing" : `"this thing"`
+    );
   });
 
   describe("shell defined", () => {
@@ -171,8 +189,16 @@ Usage:
         // fallback is whichever shell this is run from
         //  check if bash which can handle otherwise assume it can't
         if (process.env.shell && process.env.shell.includes("bash.exe")) {
+          expect(process.env.shell).toBe("bash.exe");
           expect(out).toBe("but actually this");
-        } else {
+        } else if (
+          process.env.shell &&
+          process.env.shell.includes("pwsh.exe")
+        ) {
+          expect(process.env.shell).toBe("bash.exe");
+          expect(out).toBe("but actually this");
+        }
+        {
           expect(out).toBe("this thing | echo but actually this");
         }
       });
