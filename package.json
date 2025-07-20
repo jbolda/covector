@@ -23,7 +23,7 @@
   ],
   "devDependencies": {
     "@types/node": "^20.13.0",
-    "effection": "^4.0.0-alpha.7",
+    "effection": "4.0.0-beta.0",
     "fixturez": "^1.1.0",
     "pino-test": "^1.1.0",
     "prettier": "^3.4.2",
