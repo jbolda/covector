@@ -24,7 +24,7 @@ Below is a list of all of the packages within this repository. The usage and doc
 
 We drew on inspiration from [changesets](https://github.com/atlassian/changesets) which specifically focuses on the npm ecosystem with the expectation to publish to [npmjs.com](https://www.npmjs.com/). We had a need for much greater flexibility, primarily around additional languages, which changesets wasn't looking to handle. You may notice some similarities around the markdown based change files, and it begins to diverge from there. Since we started the codebase from scratch, it also opened the door for incredibly flexible and unique publishing schemes, deep changelogs, and the ability to publish to any "target" with any "asset" (such as publishing a website, a github action or a vscode extension even!).
 
-Below we other alternatives that we know about or had considered. Some of these have been released after since covector was created. There are also a fair number in the [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/#tooling-for-conventional-commits) ecosystem. If you feel that covector is not the library for your use case, one of these might be.
+Below are other alternatives that we know about or had considered. Some of these have been released after since covector was created. There are also a fair number in the [conventional commit](https://www.conventionalcommits.org/en/v1.0.0/#tooling-for-conventional-commits) ecosystem. If you feel that covector is not the library for your use case, one of these might be.
 
 - [semver-tool](https://github.com/fsaintjacques/semver-tool)
 - [semantic-release](https://github.com/semantic-release/semantic-release)
