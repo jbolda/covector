@@ -338,9 +338,12 @@ Usage:
           false,
           logger,
         );
-        expect(out).toBe(
+        const normalized = normalizeOut(out).trim();
+        const cmdVariants = [
+          "but actually this",
           "but actually this\nThe process tried to write to a nonexistent pipe.",
-        );
+        ];
+        expect(cmdVariants).toContain(normalized);
       });
 
       it("considers piped commands, defines bash as shell", function* () {

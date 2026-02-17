@@ -39,7 +39,7 @@
     "@covector/changelog": "0.12.0",
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
-    "effection": "4.0.0-beta.0",
+    "effection": "^4.0.2",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "pino": "^9.1.0",
