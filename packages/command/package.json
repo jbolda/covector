@@ -25,7 +25,7 @@
   "dependencies": {
     "args-tokenizer": "^0.3.0",
     "effection": "4.0.0-beta.0",
-    "tinyexec": "^1.0.0"
+    "tinyexec": "^1.0.2"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"
