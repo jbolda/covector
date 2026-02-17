@@ -101,7 +101,9 @@ describe("sh", () => {
     if (process.platform !== "win32") return false;
     try {
       const r = spawnSync("pwsh", ["-v"], { encoding: "utf8" });
-      return r.error == null && (r.status === 0 || (r.stdout && r.stdout.length > 0));
+      return (
+        r.error == null && (r.status === 0 || (r.stdout && r.stdout.length > 0))
+      );
     } catch {
       return false;
     }
@@ -161,7 +163,7 @@ Usage:
         expect(normalizeOut(out).trim()).toBe("this thing");
       });
     } else {
-      it.skip("handle single command — pwsh", () => {});
+      it.skip("handle single command — pwsh");
     }
   }
 
@@ -220,7 +222,7 @@ Usage:
           expect(out).toBe("this\r\nthing");
         });
       } else {
-        it.skip("defines pwsh as shell", () => {});
+        it.skip("defines pwsh as shell");
       }
     }
   });
@@ -310,7 +312,10 @@ Usage:
           "but actually this",
           "but actually this\nThe process tried to write to a nonexistent pipe.",
         ];
-        const fallbackVariants = ["this thing | echo but actually this", ...pipeVariants];
+        const fallbackVariants = [
+          "this thing | echo but actually this",
+          ...pipeVariants,
+        ];
 
         if (process.env.shell && process.env.shell.includes("bash.exe")) {
           expect(pipeVariants).toContain(normalized);
