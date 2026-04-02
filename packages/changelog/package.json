@@ -23,7 +23,7 @@
   "dependencies": {
     "@covector/files": "0.8.0",
     "effection": "^2.0.6",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "remark-parse": "^9.0.0",
     "remark-stringify": "^9.0.1",
     "unified": "^9.2.1"
