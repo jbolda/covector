@@ -32,7 +32,7 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "wasm-pack": "^0.12.1"
+    "wasm-pack": "^0.15.0"
   },
   "volta": {
     "extends": "../../package.json"
