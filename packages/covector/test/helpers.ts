@@ -1,8 +1,9 @@
-import { type Operation, each } from "effection";
+import { type Operation, call } from "effection";
 import fs from "node:fs";
 import path from "node:path";
+import { exec } from "@effectionx/process";
+import { timebox } from "@effectionx/timebox";
 import { assert } from "vitest";
-import { x, type TinyProcess } from "@covector/command";
 import strip from "strip-ansi";
 
 export const loadContent = (cwd: string, pathToContent: string) => {
@@ -12,21 +13,55 @@ export const loadContent = (cwd: string, pathToContent: string) => {
 export const checksWithObject =
   (keys = ["command"]) =>
   (received, expected) => {
+    if (typeof expected === "function") {
+      expected(received);
+      return;
+    }
+
+    const normalizeMsg = (value: unknown): string => {
+      if (Buffer.isBuffer(value)) return value.toString("utf8").trim();
+      if (typeof value === "string") return value;
+      if (value == null) return "";
+      try {
+        return String(value);
+      } catch {
+        return "";
+      }
+    };
+    const receivedMsg = normalizeMsg(received?.msg);
+    const expectedMsg = normalizeMsg(expected?.msg);
+
     // special-case: some npm registries print package descriptions in slightly
     // different places; tests may use the '__ALLOW_BLANK_OR_DESC__' sentinel to
     // accept either a blank line or the package description text.
-    if (expected && expected.msg === "__ALLOW_BLANK_OR_DESC__") {
+    if (expected && expectedMsg === "__ALLOW_BLANK_OR_DESC__") {
       if (
-        received.msg === "" ||
-        (typeof received.msg === "string" &&
-          received.msg.includes("Multi-binding collection"))
+        receivedMsg === "" ||
+        receivedMsg.includes("Multi-binding collection")
       ) {
         // accepted — don't assert
         return;
       }
     }
 
-    if (received.msg !== expected.msg || received.level !== expected.level) {
+    if (Array.isArray(expected?.msg)) {
+      for (let chunk of expected.msg) {
+        assert.include(
+          receivedMsg,
+          chunk,
+          `\nexpected:\n${JSON.stringify(expected, null, 2)}\n\nreceived:\n${JSON.stringify(received, null, 2)}\n`,
+        );
+      }
+      if (received.level !== expected.level) {
+        assert.deepEqual(received, expected);
+      }
+      for (let key of keys) {
+        if (expected?.[key]) assert.deepEqual(received?.[key], expected?.[key]);
+      }
+      return;
+    }
+
+    if (receivedMsg !== expectedMsg || received.level !== expected.level) {
       assert.deepEqual(received, expected);
     }
     for (let key of keys) {
@@ -37,24 +72,43 @@ export const checksWithObject =
 export const checksChunksInMsg =
   (keys = ["command"]) =>
   (received, expected) => {
+    const normalizeMsg = (value: unknown): string => {
+      if (Buffer.isBuffer(value)) return value.toString("utf8").trim();
+      if (typeof value === "string") return value;
+      if (value == null) return "";
+      try {
+        return String(value);
+      } catch {
+        return "";
+      }
+    };
+    const receivedMsg = normalizeMsg(received?.msg);
+    const expectedMsg = normalizeMsg(expected?.msg);
+
     if (received.level !== expected.level) {
       assert.deepEqual(received, expected);
     }
     if (expected.err) {
       assert.include(
-        received.msg,
+        receivedMsg,
         expected.err,
-        `Expected ${received.msg} to include ${expected.err}, but received:\n${JSON.stringify(received, null, 2)}`,
+        `Expected ${receivedMsg} to include ${expected.err}, but received:\n${JSON.stringify(received, null, 2)}`,
       );
-    } else if (received.msg !== expected.msg) {
+    } else if (receivedMsg !== expectedMsg) {
       if (Array.isArray(expected.msg)) {
         for (let chunk of expected.msg) {
           assert.include(
-            received.msg,
+            receivedMsg,
             chunk,
             `\nexpected:\n${JSON.stringify(expected, null, 2)}\n\nreceived:\n${JSON.stringify(received, null, 2)}\n`,
           );
         }
+      } else if (
+        expectedMsg.includes("node:internal/") &&
+        receivedMsg.includes("node:internal/")
+      ) {
+        // Node patch versions can shift internal frame names/line numbers.
+        assert.include(receivedMsg, "node:internal/");
       } else {
         assert.deepEqual(received, expected);
       }
@@ -87,50 +141,80 @@ export function* runCommand(
 }> {
   let out = "";
   let responded = "";
-
-  const debug = false;
-  const child = yield* x(command, { nodeOptions: { cwd } });
-  const elegantlyRespond = responses.length > 0;
   let responseCount = 0;
+  let pendingPrompt = "";
 
-  for (let line of yield* each(child.lines)) {
-    out += line + "\n";
+  const process = yield* exec(command, {
+    cwd,
+    shell: true,
+  });
 
-    const lastMessage = strip(line);
-    if (debug)
-      console.dir({ /* stdout: stdoutBuffer.toString(), */ lastMessage });
-    if (elegantlyRespond) {
+  yield* process.around({
+    *stdout(line) {
+      const [bytes] = line;
+      const text = bytes.toString("utf8");
+      out += text;
       const response = tryResponse({
         responseCount,
         responses,
-        child,
-        lastMessage,
+        stdin: process.stdin,
+        lastMessage: appendPrompt(pendingPrompt, text),
       });
-      if (response.length > 0) responseCount = responseCount + 1;
+      if (response.length > 0) {
+        responseCount += 1;
+        responded += response;
+        pendingPrompt = "";
+      } else {
+        pendingPrompt = appendPrompt(pendingPrompt, text);
+      }
+    },
+    *stderr(line) {
+      const [bytes] = line;
+      const text = bytes.toString("utf8");
+      out += text;
+      const response = tryResponse({
+        responseCount,
+        responses,
+        stdin: process.stdin,
+        lastMessage: appendPrompt(pendingPrompt, text),
+      });
+      if (response.length > 0) {
+        responseCount += 1;
+        responded += response;
+        pendingPrompt = "";
+      } else {
+        pendingPrompt = appendPrompt(pendingPrompt, text);
+      }
+    },
+  });
 
-      responded += response;
-    } else {
-      if (child?.process?.stdin) child?.process?.stdin.write(pressEnter);
-    }
-    yield* each.next();
+  const boxed = yield* timebox(timeout, () => process.join());
+  if (boxed.timeout) {
+    throw new Error(`timeout waiting ${timeout}ms for command: ${command}`);
   }
 
-  let status = { code: 0 };
-
-  return { out, status, responded };
+  return { out, status: boxed.value, responded };
 }
 
 const pressEnter = String.fromCharCode(13);
 
+const appendPrompt = (pendingPrompt: string, chunk: string) => {
+  const stripped = strip(chunk);
+  if (stripped.length === 0) {
+    return pendingPrompt;
+  }
+  return pendingPrompt + stripped;
+};
+
 const tryResponse = ({
   responseCount,
   responses,
-  child,
+  stdin,
   lastMessage,
 }: {
   responseCount: number;
   responses: Responses;
-  child: TinyProcess;
+  stdin?: { send(message: string): void } | null;
   lastMessage?: string;
 }) => {
   if (responseCount >= responses.length) {
@@ -139,11 +223,9 @@ const tryResponse = ({
   const [question, answer] = responses[responseCount];
   if (lastMessage && lastMessage.match(question)) {
     if (answer === "pressEnter") {
-      // console.log(`sending Enter to ${lastMessage}`);
-      if (child?.process?.stdin) child.process.stdin.write(pressEnter);
+      if (stdin) stdin.send(pressEnter);
     } else {
-      // console.log(`sending ${answer} to ${lastMessage}`);
-      if (child?.process?.stdin) child.process.stdin.write(answer + pressEnter);
+      if (stdin) stdin.send(answer + pressEnter);
     }
     return lastMessage.trim() + "\n";
   }

@@ -130,22 +130,10 @@ describe("integration test for complex commands", () => {
             },
             {
               command: "arbitrary",
-              msg: "__ALLOW_BLANK_OR_DESC__",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> package-one@2.3.1 build",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> npm info tauri@0.8.0 description",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "__ALLOW_BLANK_OR_DESC__",
+              msg: [
+                "> package-one@2.3.1 build",
+                "> npm info tauri@0.8.0 description",
+              ],
               level: 30,
             },
             {
@@ -154,8 +142,6 @@ describe("integration test for complex commands", () => {
               level: 30,
             },
             (log) => {
-              // npm output can insert package descriptions unexpectedly — accept
-              // either the expected package command line or the description text
               if (log.msg === "package-one [test]: npm test") return;
               if (
                 typeof log.msg === "string" &&
@@ -166,22 +152,15 @@ describe("integration test for complex commands", () => {
             },
             {
               command: "arbitrary",
-              msg: "",
+              msg: "package-one [test]: npm test",
               level: 30,
             },
             {
               command: "arbitrary",
-              msg: "> package-one@2.3.1 test",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> npm info covector@0.1.0 license",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "",
+              msg: [
+                "> package-one@2.3.1 test",
+                "> npm info covector@0.1.0 license",
+              ],
               level: 30,
             },
             {
@@ -211,22 +190,10 @@ describe("integration test for complex commands", () => {
             },
             {
               command: "arbitrary",
-              msg: "",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> package-two@1.9.0 build",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> echo this command is not piped, it is run from scripts for pk2",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "",
+              msg: [
+                "> package-two@1.9.0 build",
+                "> echo this command is not piped, it is run from scripts for pk2",
+              ],
               level: 30,
             },
             {
@@ -241,22 +208,10 @@ describe("integration test for complex commands", () => {
             },
             {
               command: "arbitrary",
-              msg: "",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> package-two@1.9.0 test",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> echo this command is not piped, it is run from the test script",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "",
+              msg: [
+                "> package-two@1.9.0 test",
+                "> echo this command is not piped, it is run from the test script",
+              ],
               level: 30,
             },
             {
@@ -308,22 +263,10 @@ describe("integration test for complex commands", () => {
             },
             {
               command: "arbitrary",
-              msg: "",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> package-one@2.3.1 build",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> npm info tauri@0.8.0 description",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "__ALLOW_BLANK_OR_DESC__",
+              msg: [
+                "> package-one@2.3.1 build",
+                "> npm info tauri@0.8.0 description",
+              ],
               level: 30,
             },
             {
@@ -342,22 +285,15 @@ describe("integration test for complex commands", () => {
             },
             {
               command: "arbitrary",
-              msg: "",
+              msg: "package-two [build]: npm run build",
               level: 30,
             },
             {
               command: "arbitrary",
-              msg: "> package-two@1.9.0 build",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "> echo this command is not piped, it is run from scripts for pk2",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "",
+              msg: [
+                "> package-two@1.9.0 build",
+                "> echo this command is not piped, it is run from scripts for pk2",
+              ],
               level: 30,
             },
             {

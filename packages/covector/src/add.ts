@@ -12,7 +12,7 @@ import { writeFile } from "fs/promises";
 import { existsSync } from "fs";
 import { join } from "path";
 import { configFile } from "@covector/files";
-import { sh } from "@covector/command";
+import { exec } from "@effectionx/process";
 import { call, type Operation } from "effection";
 
 export const add = function* ({
@@ -39,7 +39,7 @@ export const add = function* ({
         value: pkg,
         label: pkg,
       })),
-    })
+    }),
   );
 
   if (isCancel(packagesWithBump)) {
@@ -63,7 +63,7 @@ export const add = function* ({
               ? "won't affect the version number"
               : undefined,
           })),
-      })
+      }),
     );
 
     if (isCancel(bump)) {
@@ -78,7 +78,7 @@ export const add = function* ({
         select({
           message: `tag ${pkg} ${bump} bump with?`,
           options: ["none"].concat(tags).map((t) => ({ value: t, label: t })),
-        })
+        }),
       );
       if (addTag !== "none") changeTag = addTag;
 
@@ -96,7 +96,7 @@ export const add = function* ({
       validate(value) {
         if (value.length === 0) return "You must enter a summary.";
       },
-    })
+    }),
   );
   if (isCancel(summary)) {
     cancel(`Skipping creating change file.`);
@@ -105,13 +105,10 @@ export const add = function* ({
 
   let branchName = "change-file.md";
   try {
-    const currentBranch = yield* sh(
-      "git branch --show-current",
-      {},
-      false,
-      logger
-    );
-    branchName = `${currentBranch?.out ?? branchName}.md`;
+    const currentBranch = yield* exec("git branch --show-current", {
+      cwd,
+    }).join();
+    branchName = `${currentBranch.stdout.trim() || branchName}.md`;
   } catch (error) {
     // ignore, filled for convenience
   }
@@ -126,7 +123,7 @@ export const add = function* ({
         if (existsSync(join(cwd, changeFolder, `${answer}`)))
           return `Change file ${join(changeFolder, `${answer}`)} already exists. Use a different filename.`;
       },
-    })
+    }),
   );
   if (isCancel(filename)) {
     cancel(`Skipping creating change file.`);
@@ -137,7 +134,7 @@ export const add = function* ({
 ${packagesWithBump
   .map(
     (pkg: string) =>
-      `"${pkg}": ${packageBumps[pkg].bump}${packageBumps[pkg].changeTag ? `:${packageBumps[pkg].changeTag}` : ``}`
+      `"${pkg}": ${packageBumps[pkg].bump}${packageBumps[pkg].changeTag ? `:${packageBumps[pkg].changeTag}` : ``}`,
   )
   .join("\n")}
 ---\n\n`;

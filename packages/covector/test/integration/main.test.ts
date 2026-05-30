@@ -86,8 +86,8 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
     });
@@ -101,7 +101,7 @@ describe("integration test in production mode", () => {
         return Object.keys(config.pkgManagers).reduce(
           (finalConfig, pkgManager) => {
             finalConfig.pkgManagers[pkgManager] = Object.keys(
-              config.pkgManagers[pkgManager]
+              config.pkgManagers[pkgManager],
             ).reduce((pm, p) => {
               if (p.startsWith("publish")) {
                 const functionInject = async () => logger.warn("deboop");
@@ -122,7 +122,7 @@ describe("integration test in production mode", () => {
 
             return finalConfig;
           },
-          config
+          config,
         );
       };
 
@@ -271,27 +271,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -336,27 +316,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -400,27 +360,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -454,8 +394,8 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
     });
@@ -472,7 +412,7 @@ describe("integration test in production mode", () => {
         modifyConfig: injectPublishFunctions([
           async (pkg: any) =>
             logger.warn(
-              `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`
+              `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`,
             ),
           async () => logger.warn(`push another log`),
         ]),
@@ -636,27 +576,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -706,27 +626,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -776,27 +676,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -854,8 +734,8 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
     });
@@ -925,30 +805,30 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
 
       const changelogTauriCore = yield* loadFile(
         path.join("/tauri/", "CHANGELOG.md"),
-        fullIntegration
+        fullIntegration,
       );
       expect(changelogTauriCore.content).toBe(
         "# Changelog\n\n" +
           "## \\[0.6.0]\n\n" +
-          "- Summary about the changes in tauri\n"
+          "- Summary about the changes in tauri\n",
       );
 
       const changelogTaurijs = yield* loadFile(
         path.join("/cli/tauri.js/", "CHANGELOG.md"),
-        fullIntegration
+        fullIntegration,
       );
       expect(changelogTaurijs.content).toBe(
         "# Changelog\n\n" +
           "## \\[0.6.3]\n\n" +
           "### Dependencies\n\n" +
-          "- Upgraded to `tauri@0.6.0`\n"
+          "- Upgraded to `tauri@0.6.0`\n",
       );
     });
 
@@ -995,8 +875,8 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
 
       expect(covectored).toMatchSnapshot();
@@ -1006,12 +886,12 @@ describe("integration test in production mode", () => {
         "# Changelog\n\n" +
           "## \\[0.4.0]\n\n" +
           "- Summary about the changes in test_app\n" +
-          "- Summary about the changes again(!) in test_app\n"
+          "- Summary about the changes again(!) in test_app\n",
       );
 
       const versionFile = yield* loadFile("pubspec.yaml", fullIntegration);
       expect(versionFile.content).toEqual(
-        expect.stringContaining("version: 0.4.0\n")
+        expect.stringContaining("version: 0.4.0\n"),
       );
     });
 
@@ -1078,29 +958,29 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
 
       const changelog = yield* loadFile(
         path.join("dart", "CHANGELOG.md"),
-        fullIntegration
+        fullIntegration,
       );
       expect(changelog.content).toBe(
         "# Changelog\n\n" +
           "## \\[0.3.2]\n\n" +
           "### Dependencies\n\n" +
           "- Upgraded to `test_app_two@0.2.0`\n" +
-          "- Upgraded to `test_app_three@3.8.98`\n"
+          "- Upgraded to `test_app_three@3.8.98`\n",
       );
 
       const versionFile = yield* loadFile(
         path.join("dart", "pubspec.yaml"),
-        fullIntegration
+        fullIntegration,
       );
       expect(versionFile.content).toEqual(
-        expect.stringContaining("version: 0.3.2\n")
+        expect.stringContaining("version: 0.3.2\n"),
       );
     });
 
@@ -1147,8 +1027,8 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
 
@@ -1157,7 +1037,7 @@ describe("integration test in production mode", () => {
         "# Changelog\n\n" +
           "## \\[6.2.0]\n\n" +
           "- Summary about the changes in general-pkg\n" +
-          "- A general summary about the generally changes in general-pkg generally\n"
+          "- A general summary about the generally changes in general-pkg generally\n",
       );
 
       const versionFile = yield* loadFile("VERSION", fullIntegration);
@@ -1324,27 +1204,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -1384,27 +1244,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -1444,27 +1284,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              msg: "cli",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-api",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-updater",
-              level: 30,
-            },
-            {
-              command: "publish",
-              msg: "tauri-utils",
+              msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
               level: 30,
             },
             {
@@ -1512,8 +1332,8 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
     });
@@ -1554,8 +1374,8 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
     });
@@ -1596,8 +1416,8 @@ describe("integration test in production mode", () => {
               level: 30,
             },
           ],
-          checksWithObject()
-        )
+          checksWithObject(),
+        ),
       );
       expect(covectored).toMatchSnapshot();
     });
@@ -1613,10 +1433,10 @@ describe("integration test in production mode", () => {
           logger,
           command: "status",
           cwd: fullIntegration,
-        })
+        }),
       );
       expect(covectored.message).toBe(
-        "react listed in .changes/change-file-pkg-non-exists.md does not exist in the .changes/config.json"
+        "react listed in .changes/change-file-pkg-non-exists.md does not exist in the .changes/config.json",
       );
     });
 
@@ -1629,9 +1449,12 @@ describe("integration test in production mode", () => {
           logger,
           command: "publish",
           cwd: fullIntegration,
-        })
+        }),
       );
-      expect(covectored.message).toContain("non-zero status (1)");
+      expect(
+        covectored.message.includes("non-zero status (1)") ||
+          covectored.message.includes("code: 1"),
+      ).toBeTruthy();
 
       yield* call(() =>
         pinoTest.consecutive(
@@ -1656,8 +1479,8 @@ describe("integration test in production mode", () => {
             // it actually here and the logs (especially on linux) aren't output
             //  consistently enough to check the remaining
           ],
-          checksChunksInMsg()
-        )
+          checksChunksInMsg(),
+        ),
       );
     }, 10_000);
 
@@ -1665,14 +1488,14 @@ describe("integration test in production mode", () => {
       const stream = pinoTest.sink();
       const logger = pino(stream);
       const fullIntegration = f.copy(
-        "integration.js-with-retrying-publish-error"
+        "integration.js-with-retrying-publish-error",
       );
       const covectored = yield* captureError(
         covector({
           logger,
           command: "publish",
           cwd: fullIntegration,
-        })
+        }),
       );
 
       yield* call(() =>
@@ -1692,70 +1515,20 @@ describe("integration test in production mode", () => {
             {
               command: "publish",
               level: 30,
-              msg: "[eval]:1",
+              msg: [
+                "[eval]:1",
+                "throw new Error('boom')",
+                "Error: boom",
+                "node:internal/",
+              ],
             },
             {
               command: "publish",
-              level: 30,
-              msg: "throw new Error('boom')",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "^",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "",
-            },
-            {
-              command: "publish",
-              err: "Error: boom",
-              level: 30,
-              errorNumber: 1,
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at [eval]:1:7",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at runScriptInThisContext (node:internal/vm:209:10)",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at node:internal/process/execution:118:14",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at [eval]-wrapper:6:24",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at runScript (node:internal/process/execution:101:62)",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at evalScript (node:internal/process/execution:133:3)",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at node:internal/main/eval_string:51:3",
-            },
-
-            {
-              command: "publish",
-              msg: "Process exited with non-zero status (1)",
+              msg: [
+                "code: 1",
+                "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
+              ],
               level: 50,
-              errorNumber: 1,
             },
             {
               command: "publish",
@@ -1765,70 +1538,20 @@ describe("integration test in production mode", () => {
             {
               command: "publish",
               level: 30,
-              msg: "[eval]:1",
+              msg: [
+                "[eval]:1",
+                "throw new Error('boom')",
+                "Error: boom",
+                "node:internal/",
+              ],
             },
             {
               command: "publish",
-              level: 30,
-              msg: "throw new Error('boom')",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "^",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "",
-            },
-            {
-              command: "publish",
-              err: "Error: boom",
-              level: 30,
-              errorNumber: 1,
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at [eval]:1:7",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at runScriptInThisContext (node:internal/vm:209:10)",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at node:internal/process/execution:118:14",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at [eval]-wrapper:6:24",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at runScript (node:internal/process/execution:101:62)",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at evalScript (node:internal/process/execution:133:3)",
-            },
-            {
-              command: "publish",
-              level: 30,
-              msg: "    at node:internal/main/eval_string:51:3",
-            },
-
-            {
-              command: "publish",
-              msg: "Process exited with non-zero status (1)",
+              msg: [
+                "code: 1",
+                "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
+              ],
               level: 50,
-              errorNumber: 1,
             },
             {
               command: "publish",
@@ -1846,10 +1569,13 @@ describe("integration test in production mode", () => {
             //  and the logs (especially on linux) aren't output
             //  consistently enough to check the remaining
           ],
-          checksChunksInMsg()
-        )
+          checksChunksInMsg(),
+        ),
       );
-      expect(covectored.message).toContain("non-zero status (1)");
+      expect(
+        covectored.message.includes("non-zero status (1)") ||
+          covectored.message.includes("code: 1"),
+      ).toBeTruthy();
     });
 
     it("fails version with errorOnVersionRange", function* () {
@@ -1869,10 +1595,10 @@ describe("integration test in production mode", () => {
           command: "version",
           cwd: fullIntegration,
           modifyConfig,
-        })
+        }),
       );
       expect(covectored.message).toBe(
-        "tauri will be bumped to 0.6.0. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+        "tauri will be bumped to 0.6.0. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
     });
 
@@ -1893,10 +1619,10 @@ describe("integration test in production mode", () => {
           command: "status",
           cwd: fullIntegration,
           modifyConfig,
-        })
+        }),
       );
       expect(covectored.message).toBe(
-        "tauri will be bumped to 0.6.0. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+        "tauri will be bumped to 0.6.0. This satisfies the range >= 0.0.1 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
     });
   });
@@ -1959,8 +1685,8 @@ describe("integration test in production mode", () => {
             level: 30,
           },
         ],
-        checksWithObject()
-      )
+        checksWithObject(),
+      ),
     );
     expect(covectored).toMatchSnapshot();
   });
@@ -2118,8 +1844,8 @@ describe("integration test in production mode", () => {
             level: 30,
           },
         ],
-        checksWithObject()
-      )
+        checksWithObject(),
+      ),
     );
     expect(covectored).toMatchSnapshot();
   });

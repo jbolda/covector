@@ -104,7 +104,7 @@ describe("confirmCommandsToRun", () => {
         expect(commandsToRun).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ pkg: "effection" }),
-          ])
+          ]),
         );
       });
     });
@@ -146,7 +146,7 @@ describe("confirmCommandsToRun", () => {
               msg: "effection@0.5.0 is already published. Skipping.",
               level: 30,
             },
-          ])
+          ]),
         );
         expect(commandsToRun).toEqual([]);
       });
@@ -181,12 +181,12 @@ describe("confirmCommandsToRun", () => {
               msg: "Checking if effection@0.5.99 is already published with built-in fetch:check",
               level: 30,
             },
-          ])
+          ]),
         );
         expect(commandsToRun).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ pkg: "effection" }),
-          ])
+          ]),
         );
       });
     });
@@ -226,7 +226,7 @@ describe("confirmCommandsToRun", () => {
               msg: "tauri@0.11.0 is already published. Skipping.",
               level: 30,
             },
-          ])
+          ]),
         );
         expect(commandsToRun).toEqual([]);
       });
@@ -261,10 +261,10 @@ describe("confirmCommandsToRun", () => {
               msg: "Checking if tauri@0.12.0 is already published with built-in fetch:check",
               level: 30,
             },
-          ])
+          ]),
         );
         expect(commandsToRun).toEqual(
-          expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })])
+          expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })]),
         );
       });
     });

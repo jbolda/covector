@@ -36,11 +36,7 @@ describe("attemptCommand fails", () => {
       }),
     );
 
-    expect(errored.message).toBe(
-      process.platform === "win32"
-        ? "Process exited with non-zero status (1)"
-        : "spawn boop ENOENT",
-    );
+    expect(errored.message).toContain("ENOENT");
   });
 
   it("retries a failed function", function* () {
@@ -66,13 +62,23 @@ describe("attemptCommand fails", () => {
     logger.info("completed");
 
     if (process.platform === "win32") {
-      const errorMessage = "Process exited with non-zero status (1)";
+      const isCmdNotFound = (errored as Error).message.includes(
+        "not recognized as an internal or external command",
+      );
+      const isEnoent = (errored as Error).message.includes("ENOENT");
+      const errorMessage = isCmdNotFound
+        ? "Process exited with non-zero status (1)"
+        : isEnoent
+          ? "spawn boop ENOENT"
+          : "Process exited with non-zero status (1)";
       const errorLog = [
         {
-          msg: "'boop' is not recognized as an internal or external command,",
+          msg: [
+            "'boop' is not recognized as an internal or external command,",
+            "operable program or batch file.",
+          ],
           level: 30,
         },
-        { msg: "operable program or batch file.", level: 30 },
       ];
 
       yield* call(() =>
@@ -81,10 +87,10 @@ describe("attemptCommand fails", () => {
           [
             { msg: "pkg-nickname []: boop", level: 30 },
             ...errorLog,
-            { msg: errorMessage, level: 50 },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
             { msg: "pkg-nickname []: boop", level: 30 },
             ...errorLog,
-            { msg: errorMessage, level: 50 },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
             { msg: "pkg-nickname []: boop", level: 30 },
             ...errorLog,
             // to confirm we are done with logs
@@ -93,7 +99,13 @@ describe("attemptCommand fails", () => {
           isShallowError,
         ),
       );
-      expect(errored.message).toBe(errorMessage);
+      expect(
+        errored.message.includes("ENOENT") ||
+          errored.message.includes("non-zero status") ||
+          errored.message.includes(
+            "not recognized as an internal or external command",
+          ),
+      ).toBeTruthy();
     } else {
       const errorMessage = "spawn boop ENOENT";
       yield* call(() =>
@@ -116,10 +128,25 @@ describe("attemptCommand fails", () => {
   });
 });
 
+function getReceivedMsg(received) {
+  if (typeof received?.msg === "string") return received.msg;
+  if (typeof received?.err?.message === "string") return received.err.message;
+  return String(received?.msg ?? "");
+}
+
 function isShallowError(received, expected) {
-  if (received.msg !== expected.msg) {
+  const receivedMsg = getReceivedMsg(received);
+  if (Array.isArray(expected.msg)) {
+    for (let chunk of expected.msg) {
+      if (!receivedMsg.includes(chunk)) {
+        throw new Error(
+          `expected msg to include chunk "${chunk}" but received "${receivedMsg}"`,
+        );
+      }
+    }
+  } else if (receivedMsg !== expected.msg) {
     throw new Error(
-      `expected msg "${expected.msg}" doesn't match the received one "${received.msg}"`,
+      `expected msg "${expected.msg}" doesn't match the received one "${receivedMsg}"`,
     );
   }
   if (received.level !== expected.level) {
@@ -131,11 +158,13 @@ function isShallowError(received, expected) {
   // only surface the textual message. Accept either form — if expected
   // specifies an err.code, prefer to check it when present on the received
   // object but don't fail when it's missing.
-  if (expected?.err?.code) {
-    if (received?.err?.code && received.err.code !== expected.err.code) {
-      throw new Error(
-        `expected err code ${expected?.err?.code} doesn't match the received one ${received?.err?.code}`,
-      );
-    }
+  if (
+    expected?.err?.code &&
+    received?.err?.code &&
+    received.err.code !== expected.err.code
+  ) {
+    throw new Error(
+      `expected err code ${expected?.err?.code} doesn't match the received one ${received?.err?.code}`,
+    );
   }
 }

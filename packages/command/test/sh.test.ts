@@ -1,11 +1,10 @@
-import { sh } from "../src";
-import { describe, it, captureError } from "../../../helpers/test-scope.ts";
-import { it as itPromises, beforeAll, beforeEach, expect } from "vitest";
+import { runCommand } from "../src";
+import { describe, it } from "../../../helpers/test-scope.ts";
+import { expect } from "vitest";
 import pino from "pino";
 import * as pinoTest from "pino-test";
-import { x } from "tinyexec";
-import { tokenizeArgs } from "args-tokenizer";
 import { spawnSync } from "child_process";
+import { call } from "effection";
 
 function normalizeOut(value: string | null | undefined): string {
   if (value == null) return "";
@@ -16,74 +15,23 @@ function normalizeOut(value: string | null | undefined): string {
   return value;
 }
 
-describe("tinyexec compatibility checks", () => {
-  itPromises("handles multiline stdout", async () => {
-    const commandString = `echo "this"\n"thing"`;
-    const [command, ...args] = tokenizeArgs(commandString);
-    const result = await x(command, args);
-
-    // detect which shell the test runner is likely using so we can assert
-    // the platform-specific output more precisely (without hiding behavior)
-    const envShell = (
-      process.env.shell ||
-      process.env.SHELL ||
-      process.env.COMSPEC ||
-      ""
-    ).toLowerCase();
-    let shellHint: "bash" | "pwsh" | "cmd" | "unknown" = "unknown";
-    if (envShell.includes("bash") || envShell.includes("/bin/sh"))
-      shellHint = "bash";
-    else if (envShell.includes("pwsh") || envShell.includes("powershell"))
-      shellHint = "pwsh";
-    else if (envShell.includes("cmd")) shellHint = "cmd";
-    else if (process.platform === "win32") shellHint = "cmd";
-
-    const out = result.stdout.trim();
-    if (process.platform !== "win32" || shellHint === "bash") {
-      expect(out).toBe("this thing");
-    } else if (shellHint === "pwsh") {
-      // accept either quoted tokens or unquoted output depending on environment
-      expect(out === "this thing" || out === '"this" "thing"').toBeTruthy();
-    } else {
-      // some Windows runner shells produce unquoted tokens — accept either
-      expect(out === '"this" "thing"' || out === "this thing").toBeTruthy();
-    }
+function* sh(
+  command: string,
+  options: Record<string, unknown> = {},
+  log: false | string = false,
+  logger?: any,
+) {
+  const out = yield* runCommand({
+    logger: logger ?? ({ info: () => {} } as any),
+    pkg: "package",
+    command,
+    cwd: process.cwd(),
+    pkgPath: "",
+    log,
+    options: options as any,
   });
-
-  // no grep on windows so it just returns empty?
-  itPromises.runIf(process.platform !== "win32")("handles pipes", async () => {
-    const commandString = `echo this\nthing`;
-    const [command, ...commandArgs] = tokenizeArgs(commandString);
-    const grepString = `grep this`;
-    const [grep, ...grepArgs] = tokenizeArgs(grepString);
-    const result = await x(command, commandArgs).pipe(grep, grepArgs);
-    // some shells/tokenizers may collapse the newline into a space; accept
-    // either a single-line 'this thing' or the two-line 'this' result.
-    const out = result.stdout.trim();
-    expect(["this", "this thing"]).toContain(out);
-  });
-
-  describe("with `shell: true`", () => {
-    itPromises("single command", async () => {
-      const commandString = `echo but this`;
-      const [command, ...args] = tokenizeArgs(commandString);
-      const result = await x(command, args, {
-        nodeOptions: { shell: true },
-      });
-      expect(result.stdout.trim()).toBe("but this");
-    });
-
-    itPromises("multiple pipes", async () => {
-      const commandString =
-        'echo "this thing" | echo "and this" | echo "but this"';
-      const [command, ...args] = tokenizeArgs(commandString);
-      const result = await x(command, args, {
-        nodeOptions: { shell: true },
-      });
-      expect(result.stdout.trim()).toBe("but this");
-    });
-  });
-});
+  return { out };
+}
 
 describe("sh", () => {
   const stream = pinoTest.sink();
@@ -124,10 +72,70 @@ Usage:
     );
   });
 
+  it("logs final stdout line without trailing newline", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
+
+    const { out } = yield* sh(
+      "node -e \"process.stdout.write('final stdout')\"",
+      {},
+      "running",
+      logger,
+    );
+
+    expect(out).toBe("final stdout");
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        { msg: "running", level: 30 },
+        { msg: "final stdout", level: 30 },
+      ]),
+    );
+  });
+
+  it("logs split stdout chunks separately", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
+
+    const { out } = yield* sh(
+      "node -e \"process.stdout.write('split'); setTimeout(() => process.stdout.write(' line\\n'), 10)\"",
+      {},
+      "running",
+      logger,
+    );
+
+    expect(out).toBe("split line");
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        { msg: "running", level: 30 },
+        { msg: "split", level: 30 },
+        { msg: "line", level: 30 },
+      ]),
+    );
+  });
+
+  it("logs final stderr line without trailing newline", function* () {
+    const stream = pinoTest.sink();
+    const logger = pino(stream);
+
+    yield* sh(
+      "node -e \"process.stderr.write('final stderr')\"",
+      {},
+      "running",
+      logger,
+    );
+
+    yield* call(() =>
+      pinoTest.consecutive(stream, [
+        { msg: "running", level: 30 },
+        { msg: "final stderr", level: 30 },
+      ]),
+    );
+  });
+
   // canonical assertion — content must be preserved regardless of quoting
   it("handle single command (canonical)", function* () {
     const { out } = yield* sh("echo 'this thing'", {}, false, logger);
-    expect(out.trim().replace(/^['"]|['"]$/g, "")).toBe("this thing");
+    expect(out.trim()).toBe("this thing");
   });
 
   // explicit, per-shell assertions — split so failures are unambiguous
@@ -151,8 +159,8 @@ Usage:
         false,
         logger,
       );
-      // cmd behavior varies across environments; assert the unquoted canonical
-      expect(out.trim()).toBe("this thing");
+      // cmd behavior varies across environments; strip any surrounding quotes
+      expect(out.trim().replace(/^['"]|['"]$/g, "")).toBe("this thing");
     });
 
     if (pwshAvailable) {
@@ -390,7 +398,7 @@ Usage:
           }
         });
       } else {
-        it.skip("considers piped commands, defines pwsh as shell", () => {});
+        it.skip("considers piped commands, defines pwsh as shell");
       } // TODO increase timeout to 60s, windows seems to take forever
     },
   );

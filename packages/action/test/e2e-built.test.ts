@@ -1,9 +1,8 @@
 import { beforeEach, describe, it } from "../../../helpers/test-scope.ts";
 import { expect, vi } from "vitest";
 import path from "node:path";
+import { exec } from "@effectionx/process";
 import fixtures from "fixturez";
-import { x } from "@covector/command";
-import { each } from "effection";
 const f = fixtures(__dirname);
 
 // some fanciness to get the path resolved for Windows
@@ -30,22 +29,14 @@ describe("e2e test with built action", () => {
 
     it("output", function* () {
       const cwd: string = f.copy("integration.js-and-rust-with-changes");
-
-      const child = yield* x(command(cwd), { nodeOptions: { cwd } });
-
-      let out = "";
-      for (let line of yield* each(child.lines)) {
-        out += line + "\n";
-        yield* each.next();
-      }
+      const result = yield* exec(command(cwd), { cwd, shell: true }).join();
+      const out = `${result.stdout}${result.stderr}`;
 
       // note we cant check the output of the command
       // as it gets ripped out in CI by GitHub
-      expect(out).toContain(
-        " bumping tauri with minor\n" +
-          " bumping tauri-updater with patch\n" +
-          " bumping tauri.js with patch"
-      );
+      expect(out).toContain(" bumping tauri with minor");
+      expect(out).toContain(" bumping tauri-updater with patch");
+      expect(out).toContain(" bumping tauri.js with patch");
     });
   });
 });

@@ -70,7 +70,7 @@ outputs:
   releaseId:
     description: The ID of the created release. Only present when `createRelease` is set to true.
 runs:
-  using: "node20"
+  using: "node24"
   main: "dist/index.js"
 branding:
   icon: "sliders"

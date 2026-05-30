@@ -23,9 +23,9 @@
     "test": "vitest"
   },
   "dependencies": {
-    "args-tokenizer": "^0.3.0",
-    "effection": "^4.0.2",
-    "tinyexec": "^1.0.2"
+    "@effectionx/process": "^0.8.0",
+    "@effectionx/timebox": "^0.4.3",
+    "effection": "^4.0.2"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"
