@@ -55,7 +55,7 @@ export function* postGithubCommentFromArtifact({
     })
   );
   if (!downloadPath) {
-    logger.error("Could not find artifact to post comment.");
+    yield* logger.error("Could not find artifact to post comment.");
     return;
   }
 

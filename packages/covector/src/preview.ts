@@ -141,7 +141,7 @@ export function* preview({
   });
 
   if (publishCommands.length === 0) {
-    logger.info(`No commands configured to run on publish.`);
+    yield* logger.info(`No commands configured to run on publish.`);
     return {
       response: `No commands configured to run on publish.`,
     };

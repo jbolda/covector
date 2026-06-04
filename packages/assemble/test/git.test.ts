@@ -1,16 +1,15 @@
 import { parseChange } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import { join } from "path";
 
 import type { File } from "@covector/types";
 
 describe("git parsing", () => {
   it("parses and returns multiple commits", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     // this was a file on a previous commit, we can use it
     //   to check the git command as that should still be in the history
     const file: File = {

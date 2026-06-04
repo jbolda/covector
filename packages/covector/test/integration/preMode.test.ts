@@ -1,17 +1,18 @@
 import { covector } from "../../src";
+import { logger as covectorLogger } from "../../src/logger.ts";
 import { CovectorVersion } from "@covector/types";
 import { TomlDocument } from "@covector/toml";
 import { loadFile } from "@covector/files";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
-import { checksWithObject } from "../helpers.ts";
+import * as logTest from "../../../../helpers/test-logger.ts";
+import { checksWithObject, captureLoggerMiddleware } from "../helpers.ts";
 import path from "path";
 import * as fs from "fs";
 import fixtures from "fixturez";
 import { call } from "effection";
 const f = fixtures(__dirname);
+
 
 expect.addSnapshotSerializer({
   test: (value) => value instanceof TomlDocument,
@@ -31,8 +32,10 @@ describe("integration test with preMode `on`", () => {
     );
 
   it("runs version in production for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
@@ -46,8 +49,8 @@ describe("integration test with preMode `on`", () => {
       throw new Error("We are expecting an object here.");
 
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           {
             command: "version",
@@ -111,10 +114,14 @@ describe("integration test with preMode `on`", () => {
   });
 
   it("runs version in production with existing changes for js and rust", function* () {
-    const streamOne = pinoTest.sink();
-    const loggerOne = pino(streamOne);
-    const streamTwo = pinoTest.sink();
-    const loggerTwo = pino(streamTwo);
+    const logsOne = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logsOne));
+
+    const loggerOne = covectorLogger.operations;
+    const logsTwo = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logsTwo));
+
+    const loggerTwo = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
@@ -125,7 +132,7 @@ describe("integration test with preMode `on`", () => {
     });
 
     yield* call(() =>
-      pinoTest.consecutive(streamOne, [
+      logTest.consecutive(logsOne, [
         {
           command: "version",
           msg: "bumping tauri with preminor",
@@ -217,7 +224,7 @@ Boop again.
     });
 
     yield* call(() =>
-      pinoTest.consecutive(streamTwo, [
+      logTest.consecutive(logsTwo, [
         {
           command: "version",
           msg: "bumping tauri-api with prepatch",
@@ -291,8 +298,10 @@ Boop again.
   });
 
   it("runs version in --dry-run mode for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
@@ -304,8 +313,8 @@ Boop again.
     });
 
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           {
             command: "version",

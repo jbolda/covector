@@ -6,8 +6,7 @@ import { call, run } from "effection";
 
 import { describe, it, captureError } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
 import exp from "constants";
 const f = fixtures(__dirname);
@@ -18,8 +17,8 @@ const configDefaults = {
 
 describe("validate apply", () => {
   it("bumps single js json", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const jsonFolder = f.copy("pkg.js-single-json");
 
     const commands = [
@@ -53,8 +52,8 @@ describe("validate apply", () => {
   });
 
   it("bumps single rust toml", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const rustFolder = f.copy("pkg.rust-single");
 
     const commands = [
@@ -88,8 +87,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi js json", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
     const commands = [
@@ -146,8 +145,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const rustFolder = f.copy("pkg.rust-multi");
 
     const commands = [
@@ -193,8 +192,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml with object dep", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
     const commands = [
@@ -240,8 +239,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml with dep missing patch", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
     const commands = [
@@ -287,8 +286,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as patch with object dep missing patch", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -335,8 +334,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as minor with object dep without version number", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
 
     const rustFolder: string = f.copy("pkg.rust-multi-object-path-dep-only");
 
@@ -383,7 +382,7 @@ describe("validate apply", () => {
         allPackages,
       })
     );
-    logger.info("completed");
+    yield* logger.info("completed");
     expect(errored.message).toMatch(
       "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
         "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
@@ -391,7 +390,7 @@ describe("validate apply", () => {
 
     // to confirm that no error logs have been returned
     yield* call(() =>
-      pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }])
+      logTest.consecutive(logs, [{ msg: "completed", level: 30 }])
     );
   });
 });

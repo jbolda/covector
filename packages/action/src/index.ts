@@ -56,7 +56,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
         logs: false,
       });
       if (status.response === "No changes.") {
-        logger.info("As there are no changes, let's try publishing.");
+        yield* logger.info("As there are no changes, let's try publishing.");
         command = "publish";
       } else {
         command = "version";
@@ -167,7 +167,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
                 });
               }
             } else {
-              logger.error(
+              yield* logger.error(
                 "Comments can only be used on pull requests, skipping."
               );
             }
@@ -220,7 +220,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
           );
         } catch (error) {
           // if it fails, continue with context
-          logger.error(error);
+          yield* logger.error(error);
         }
         const context = { ...shas };
 
@@ -262,7 +262,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
         )
       );
 
-      logger.info({
+      yield* logger.info({
         msg: "covector version output",
         renderAsYAML: covectoredSmushed,
       });
@@ -276,7 +276,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
       core.setOutput("status", status.response);
 
       let covectored: CovectorPublish;
-      logger.debug(
+      yield* logger.debug(
         `createRelease is ${core.getInput("createRelease")} ${
           token ? "with" : "without"
         } a token.`
@@ -284,7 +284,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
       if (core.getInput("createRelease") === "true" && token) {
         const octokit = github.getOctokit(token);
         const { owner, repo } = github.context.repo;
-        logger.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
+        yield* logger.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
         covectored = yield* covector({
           logger,
           dryRun,
@@ -334,7 +334,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
 
         core.setOutput("change", covectored.commandsRan);
 
-        logger.info({
+        yield* logger.info({
           msg: "covector publish output",
           renderAsYAML: covectored.commandsRan,
         });
@@ -362,7 +362,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
       }
 
       if (!previewLabel) {
-        logger.warn(
+        yield* logger.warn(
           `Not publishing any preview packages because the "${configuredLabel}" label has not been applied to this pull request.`
         );
       } else {

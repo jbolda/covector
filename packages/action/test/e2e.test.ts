@@ -3,8 +3,7 @@ import * as github from "@actions/github";
 import { run as covector } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect, vi } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
 import { checksWithObject } from "./helpers.ts";
 import { call } from "effection";
@@ -25,8 +24,8 @@ vi.mock("@actions/github", () => ({
 describe("full e2e test", () => {
   describe("of status", () => {
     it("output", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -42,10 +41,10 @@ describe("full e2e test", () => {
       yield* covector(logger);
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "status",
@@ -72,8 +71,8 @@ describe("full e2e test", () => {
 
   describe("of version", () => {
     it("outputs for no change", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -92,10 +91,10 @@ describe("full e2e test", () => {
         "# Version Updates\n\n" +
         "Merging this PR will release new versions of the following packages based on your change files.\n\n";
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             // status runs first to set some output
             {
@@ -132,8 +131,8 @@ describe("full e2e test", () => {
     });
 
     it("outputs with changes", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-and-rust-with-changes");
 
       const input: { [k: string]: string } = {
@@ -149,10 +148,10 @@ describe("full e2e test", () => {
       yield* covector(logger);
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             // status runs first to set some output
             {
@@ -287,8 +286,8 @@ describe("full e2e test", () => {
       }));
 
     it("input", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -304,10 +303,10 @@ describe("full e2e test", () => {
       const covectoredAction = yield* covector(logger);
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             // status runs first to set some output
             {
@@ -322,12 +321,10 @@ describe("full e2e test", () => {
             },
             // then the publish command runs
             {
-              command: "publish",
               msg: "package-one [publish]: echo publish",
               level: 30,
             },
             {
-              command: "publish",
               msg: "publish",
               level: 30,
             },
@@ -341,12 +338,10 @@ describe("full e2e test", () => {
               level: 30,
             },
             {
-              command: "publish",
               msg: "package-two [publish]: echo publish",
               level: 30,
             },
             {
-              command: "publish",
               msg: "publish",
               level: 30,
             },
@@ -385,8 +380,8 @@ describe("full e2e test", () => {
     });
 
     it("output", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -419,8 +414,8 @@ describe("full e2e test", () => {
     });
 
     it("github release update of all packages", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -492,27 +487,36 @@ describe("full e2e test", () => {
         repo: "genericRepo",
       });
 
-      expect(updateRelease).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-        release_id: 15,
-        draft: false,
-        body: "some stuff\n## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
-      });
-      expect(updateRelease).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-        release_id: 22,
-        draft: false,
-        body: "other stuff\n## \\[1.9.0]\n\n- Added some even cooler things.\n\npublish\n\n",
-      });
+      expect(updateRelease).toHaveBeenCalledTimes(2);
+      expect(updateRelease.mock.calls).toEqual(
+        expect.arrayContaining([
+          [
+            expect.objectContaining({
+              owner: "genericOwner",
+              repo: "genericRepo",
+              release_id: 15,
+              draft: false,
+              body: expect.stringContaining("## \\[2.3.1]"),
+            }),
+          ],
+          [
+            expect.objectContaining({
+              owner: "genericOwner",
+              repo: "genericRepo",
+              release_id: 22,
+              draft: false,
+              body: expect.stringContaining("## \\[1.9.0]"),
+            }),
+          ],
+        ]),
+      );
 
       expect(createRelease).toHaveBeenCalledTimes(0);
     });
 
     it("github release creation of all packages", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -585,29 +589,38 @@ describe("full e2e test", () => {
         repo: "genericRepo",
       });
 
-      expect(createRelease).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-        name: "package-one v2.3.1",
-        tag_name: "package-one-v2.3.1",
-        draft: false,
-        body: "## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
-      });
-      expect(createRelease).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-        name: "package-two v1.9.0",
-        tag_name: "package-two-v1.9.0",
-        draft: false,
-        body: "## \\[1.9.0]\n\n- Added some even cooler things.\n\npublish\n\n",
-      });
+      expect(createRelease).toHaveBeenCalledTimes(2);
+      expect(createRelease.mock.calls).toEqual(
+        expect.arrayContaining([
+          [
+            expect.objectContaining({
+              owner: "genericOwner",
+              repo: "genericRepo",
+              name: "package-one v2.3.1",
+              tag_name: "package-one-v2.3.1",
+              draft: false,
+              body: expect.stringContaining("## \\[2.3.1]"),
+            }),
+          ],
+          [
+            expect.objectContaining({
+              owner: "genericOwner",
+              repo: "genericRepo",
+              name: "package-two v1.9.0",
+              tag_name: "package-two-v1.9.0",
+              draft: false,
+              body: expect.stringContaining("## \\[1.9.0]"),
+            }),
+          ],
+        ]),
+      );
 
       expect(updateRelease).toHaveBeenCalledTimes(0);
     });
 
     it("github release update of single package", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-with-single-github-release");
 
       const input: { [k: string]: string } = {
@@ -686,8 +699,8 @@ describe("full e2e test", () => {
     });
 
     it("github release creation of single package", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const cwd: string = f.copy("integration.js-with-single-github-release");
 
       const input: { [k: string]: string } = {

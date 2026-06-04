@@ -1,7 +1,7 @@
 import * as fs from "fs/promises";
 
-import type { Logger } from "pino";
 import { all, call, type Operation } from "effection";
+import type { Logger } from "@covector/types";
 import { configFileSchema } from "./schema.ts";
 import { fromZodError } from "zod-validation-error";
 import globby from "globby";
@@ -36,7 +36,7 @@ export function* loadFile(file: string, cwd: string): Operation<LoadedFile> {
   const content = yield* call(() =>
     fs.readFile(path.join(cwd, file), {
       encoding: "utf-8",
-    })
+    }),
   );
   const parsedPath = path.parse(file);
   return {
@@ -52,14 +52,14 @@ export function* loadFile(file: string, cwd: string): Operation<LoadedFile> {
 
 export function* saveFile(
   file: LoadedFile,
-  cwd: string
+  cwd: string,
 ): Operation<LoadedFile> {
   if (typeof file.path !== "string")
     throw new Error(`Unable to handle saving of ${file}`);
   yield* call(() =>
     fs.writeFile(path.join(cwd, file.path), file.content, {
       encoding: "utf-8",
-    })
+    }),
   );
   return file;
 }
@@ -215,7 +215,7 @@ export function* readAllPkgFiles({
 }): Operation<Record<string, PackageFile>> {
   const pkgArray = Object.entries(config.packages);
   const readPkgs = pkgArray.map(([name, pkg]) =>
-    readPkgFile({ cwd, pkgConfig: pkg, nickname: name })
+    readPkgFile({ cwd, pkgConfig: pkg, nickname: name }),
   );
   const pkgFilesArray = yield* all(readPkgs);
 
@@ -226,7 +226,7 @@ export function* readAllPkgFiles({
       }
       return pkgs;
     },
-    {}
+    {},
   );
 }
 
@@ -365,7 +365,7 @@ export const getPackageFileVersion = ({
                   throw new Error(
                     `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +
                       `This cannot be published. ` +
-                      `Please pin it to a MAJOR.MINOR.PATCH reference.`
+                      `Please pin it to a MAJOR.MINOR.PATCH reference.`,
                   );
                 }
                 return depDefinition.version;
@@ -417,8 +417,8 @@ export const setPackageFileVersion = ({
           `Expected ${property} not found in package:\n${JSON.stringify(
             pkg,
             null,
-            2
-          )}`
+            2,
+          )}`,
         );
       if (!dep) return pkg;
 
@@ -454,13 +454,13 @@ export function* writePreFile({
   return inputFile;
 }
 
-export const testSerializePkgFile = ({
+export function* testSerializePkgFile({
   logger,
   packageFile,
 }: {
   logger: Logger;
   packageFile: PackageFile;
-}) => {
+}): Operation<true> {
   try {
     if (!packageFile.file) throw `no package file present`;
     stringifyPkg({
@@ -470,13 +470,13 @@ export const testSerializePkgFile = ({
     return true;
   } catch (e: any) {
     if (e?.message === "Can only stringify objects, not null") {
-      logger.error(
-        "It appears that a dependency within this repo does not have a version specified."
+      yield* logger.error(
+        "It appears that a dependency within this repo does not have a version specified.",
       );
     }
     throw new Error(`within ${packageFile.name} => ${e?.message}`);
   }
-};
+}
 
 export function* configFile({
   cwd,
@@ -487,7 +487,7 @@ export function* configFile({
 }): Operation<ConfigFile & { file: LoadedFile }> {
   const inputFile = yield* loadFile(
     path.join(changeFolder, "config.json"),
-    cwd
+    cwd,
   );
   try {
     const parsed = configFileSchema(cwd).parse(JSON.parse(inputFile.content));
@@ -518,8 +518,8 @@ export function* changeFiles({
       ],
       {
         cwd,
-      }
-    )
+      },
+    ),
   );
 }
 
@@ -545,7 +545,7 @@ export function* changeFilesRemove({
 }): Operation<string[]> {
   for (let changeFilePath of paths) {
     yield* call(() => fs.unlink(path.posix.join(cwd, changeFilePath)));
-    logger.info(`${changeFilePath} was deleted`);
+    yield* logger.info(`${changeFilePath} was deleted`);
   }
   return paths;
 }
@@ -565,7 +565,7 @@ export function* readChangelog({
     return yield* loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
   } catch {
     if (create) {
-      logger.info("Could not load the CHANGELOG.md. Creating one.");
+      yield* logger.info("Could not load the CHANGELOG.md. Creating one.");
       return {
         path: path.join(packagePath, "CHANGELOG.md"),
         content: "# Changelog\n\n\n",
@@ -573,7 +573,7 @@ export function* readChangelog({
         extname: ".md",
       };
     } else {
-      logger.error("CHANGELOG.md not found");
+      yield* logger.error("CHANGELOG.md not found");
       return;
     }
   }

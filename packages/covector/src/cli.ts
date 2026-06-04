@@ -2,15 +2,13 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { covector } from "./run.ts";
 import type { Covector } from "@covector/types";
-import { pino } from "pino";
-import logStream from "./logger.ts";
+import { logger } from "./logger.ts";
 
 export function* cli(argv: readonly string[]) {
   const { command, directory, yes, dryRun, cwd } = parseOptions(argv);
-  const stream = logStream();
-  const logger = pino(stream);
+  const runtimeLogger = logger.operations;
   return yield* covector({
-    logger,
+    logger: runtimeLogger,
     command,
     changeFolder: directory,
     yes,
@@ -65,7 +63,7 @@ function parseOptions(argv: readonly string[]): {
     .demandCommand(1)
     .help()
     .epilogue(
-      "For more information on covector, see: https://www.github.com/jbolda/covector"
+      "For more information on covector, see: https://www.github.com/jbolda/covector",
     )
     .parseSync();
 

@@ -1,13 +1,14 @@
 import { covector } from "../../src";
+import { logger as covectorLogger } from "../../src/logger.ts";
 import { TomlDocument } from "@covector/toml";
 import { describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
-import { loadContent } from "../helpers.ts";
+import { loadContent, captureLoggerMiddleware } from "../helpers.ts";
 import { call } from "effection";
 const f = fixtures(__dirname);
+
 
 expect.addSnapshotSerializer({
   test: (value) => value instanceof TomlDocument,
@@ -16,8 +17,10 @@ expect.addSnapshotSerializer({
 
 describe("integration test for preview command", () => {
   it("runs version and publish for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-for-preview");
     const covectored = yield* covector({
       logger,
@@ -27,7 +30,7 @@ describe("integration test for preview command", () => {
     });
 
     yield* call(() =>
-      pinoTest.consecutive(stream, [
+      logTest.consecutive(logs, [
         {
           command: "preview",
           msg: "bumping package-b with branch-name.12345 identifier to publish a preview",
@@ -89,8 +92,10 @@ describe("integration test for preview command", () => {
 
 describe("integration test for preview command with dist tags", () => {
   it("runs version and publish for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-for-preview");
     const covectored = yield* covector({
       logger,
@@ -101,7 +106,7 @@ describe("integration test for preview command with dist tags", () => {
     });
 
     yield* call(() =>
-      pinoTest.consecutive(stream, [
+      logTest.consecutive(logs, [
         {
           command: "preview",
           msg: "bumping package-b with branch-name.12345 identifier to publish a preview",

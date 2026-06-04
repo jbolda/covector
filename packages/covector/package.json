@@ -39,11 +39,10 @@
     "@covector/changelog": "0.12.0",
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
+    "@effectionx/context-api": "^0.6.0",
     "effection": "^4.0.2",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
-    "pino": "^9.1.0",
-    "pino-abstract-transport": "^1.2.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

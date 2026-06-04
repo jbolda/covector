@@ -1,16 +1,21 @@
 import { covector } from "../../src";
+import { logger as covectorLogger } from "../../src/logger.ts";
 import { loadFile } from "@covector/files";
 import { TomlDocument } from "@covector/toml";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
-import { checksChunksInMsg, checksWithObject } from "../helpers.ts";
+import * as logTest from "../../../../helpers/test-logger.ts";
+import {
+  checksChunksInMsg,
+  checksWithObject,
+  captureLoggerMiddleware,
+} from "../helpers.ts";
 import path from "path";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
+
 import { injectPublishFunctions } from "../../../action/src/utils";
-import { call } from "effection";
+import { call, run } from "effection";
 
 expect.addSnapshotSerializer({
   test: (value) => value instanceof TomlDocument,
@@ -20,8 +25,10 @@ expect.addSnapshotSerializer({
 describe("integration test in production mode", () => {
   describe("handles config", () => {
     it("passes correct config for js and rust", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
       const covectored = yield* covector({
         logger,
@@ -30,10 +37,10 @@ describe("integration test in production mode", () => {
       });
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "status",
@@ -93,8 +100,10 @@ describe("integration test in production mode", () => {
     });
 
     it("allows modifying the config", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
       const modifyConfig = async (pullConfig: any) => {
         const config = await pullConfig;
@@ -104,17 +113,27 @@ describe("integration test in production mode", () => {
               config.pkgManagers[pkgManager],
             ).reduce((pm, p) => {
               if (p.startsWith("publish")) {
-                const functionInject = async () => logger.warn("deboop");
+                const functionInject = async () =>
+                  run(function* () {
+                    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+                    yield* logger.warn("deboop");
+                  });
                 pm[p] = Array.isArray(pm[p])
                   ? pm[p].concat(functionInject)
                   : [pm[p], functionInject];
               } else if (p.startsWith("pre")) {
                 const functionInject = async () =>
-                  logger.warn("begin with only boops");
+                  run(function* () {
+                    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+                    yield* logger.warn("begin with only boops");
+                  });
                 pm[p] = [functionInject];
               } else if (p.startsWith("post")) {
                 const functionInject = async () =>
-                  logger.warn("ends with overwrites using boops");
+                  run(function* () {
+                    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+                    yield* logger.warn("ends with overwrites using boops");
+                  });
                 pm[p] = functionInject;
               }
               return pm;
@@ -134,10 +153,10 @@ describe("integration test in production mode", () => {
       });
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -401,8 +420,10 @@ describe("integration test in production mode", () => {
     });
 
     it("uses the action config modification", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
 
       const covectored = yield* covector({
@@ -411,18 +432,25 @@ describe("integration test in production mode", () => {
         cwd: fullIntegration,
         modifyConfig: injectPublishFunctions([
           async (pkg: any) =>
-            logger.warn(
-              `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`,
-            ),
-          async () => logger.warn(`push another log`),
+            run(function* () {
+              yield* covectorLogger.around(captureLoggerMiddleware(logs));
+              yield* logger.warn(
+                `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`,
+              );
+            }),
+          async () =>
+            run(function* () {
+              yield* covectorLogger.around(captureLoggerMiddleware(logs));
+              yield* logger.warn(`push another log`);
+            }),
         ]),
       });
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -743,8 +771,10 @@ describe("integration test in production mode", () => {
 
   describe("version", () => {
     it("runs version for js and rust", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
       const covectored = yield* covector({
         logger,
@@ -755,10 +785,10 @@ describe("integration test in production mode", () => {
         throw new Error("We are expecting an object here.");
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "version",
@@ -833,8 +863,10 @@ describe("integration test in production mode", () => {
     });
 
     it("runs version for dart / flutter single", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.dart-flutter-single");
       const covectored = yield* covector({
         logger,
@@ -845,10 +877,10 @@ describe("integration test in production mode", () => {
         throw new Error("We are expecting an object here.");
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "version",
@@ -896,8 +928,10 @@ describe("integration test in production mode", () => {
     });
 
     it("runs version for dart / flutter multi", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.dart-flutter-multi");
       const covectored = yield* covector({
         logger,
@@ -908,10 +942,10 @@ describe("integration test in production mode", () => {
         throw new Error("We are expecting an object here.");
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "version",
@@ -985,8 +1019,10 @@ describe("integration test in production mode", () => {
     });
 
     it("runs version for general file", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.general-file");
       const covectored = yield* covector({
         logger,
@@ -997,10 +1033,10 @@ describe("integration test in production mode", () => {
         throw new Error("We are expecting an object here.");
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "version",
@@ -1047,8 +1083,10 @@ describe("integration test in production mode", () => {
 
   describe("publish", () => {
     it("runs publish for js and rust", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
       const covectored = yield* covector({
         logger,
@@ -1057,10 +1095,10 @@ describe("integration test in production mode", () => {
       });
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -1339,8 +1377,10 @@ describe("integration test in production mode", () => {
     });
 
     it("runs publish for dart / flutter", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.dart-flutter-single");
       const covectored = yield* covector({
         logger,
@@ -1349,10 +1389,10 @@ describe("integration test in production mode", () => {
       });
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -1381,8 +1421,10 @@ describe("integration test in production mode", () => {
     });
 
     it("runs publish for general file", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.general-file");
       const covectored = yield* covector({
         logger,
@@ -1391,10 +1433,10 @@ describe("integration test in production mode", () => {
       });
 
       // to confirm we have reached the end of the logs
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -1425,8 +1467,10 @@ describe("integration test in production mode", () => {
 
   describe("failures", () => {
     it("fails status for non-existant package", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-change-file-error");
       const covectored = yield* captureError(
         covector({
@@ -1441,8 +1485,10 @@ describe("integration test in production mode", () => {
     });
 
     it("fails with error", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-publish-error");
       const covectored = yield* captureError(
         covector({
@@ -1457,8 +1503,8 @@ describe("integration test in production mode", () => {
       ).toBeTruthy();
 
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -1485,8 +1531,10 @@ describe("integration test in production mode", () => {
     }, 10_000);
 
     it("fails, tries and fails two more times with error", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy(
         "integration.js-with-retrying-publish-error",
       );
@@ -1499,8 +1547,8 @@ describe("integration test in production mode", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -1514,7 +1562,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              level: 30,
+              level: 50,
               msg: [
                 "[eval]:1",
                 "throw new Error('boom')",
@@ -1537,7 +1585,7 @@ describe("integration test in production mode", () => {
             },
             {
               command: "publish",
-              level: 30,
+              level: 50,
               msg: [
                 "[eval]:1",
                 "throw new Error('boom')",
@@ -1579,8 +1627,10 @@ describe("integration test in production mode", () => {
     });
 
     it("fails version with errorOnVersionRange", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
       const modifyConfig = async (pullConfig: any) => {
         const config = await pullConfig;
@@ -1603,8 +1653,10 @@ describe("integration test in production mode", () => {
     });
 
     it("fails status with errorOnVersionRange", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
       const modifyConfig = async (pullConfig: any) => {
         const config = await pullConfig;
@@ -1628,8 +1680,10 @@ describe("integration test in production mode", () => {
   });
 
   it("runs test for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
@@ -1638,10 +1692,10 @@ describe("integration test in production mode", () => {
     });
 
     // to confirm we have reached the end of the logs
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           // throws errors because a test run
           //  expects a changelog
@@ -1692,8 +1746,10 @@ describe("integration test in production mode", () => {
   });
 
   it("runs build for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
@@ -1702,10 +1758,10 @@ describe("integration test in production mode", () => {
     });
 
     // to confirm we have reached the end of the logs
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           // throws errors because a publish
           //  expects a changelog

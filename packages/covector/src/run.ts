@@ -1,6 +1,6 @@
 import type { ChangeContext, Covector } from "@covector/types";
 import { type Operation } from "effection";
-import { Logger } from "pino";
+import type { Logger } from "@covector/types";
 import { init } from "./init.ts";
 import { add } from "./add.ts";
 import { status } from "./status.ts";
@@ -9,6 +9,7 @@ import { version } from "./version.ts";
 import { preview } from "./preview.ts";
 import { publish } from "./publish.ts";
 import { arbitrary } from "./arbitrary.ts";
+import { useAttributes } from "./logger.ts";
 
 export function* covector<C extends keyof Covector>({
   // shared
@@ -45,28 +46,32 @@ export function* covector<C extends keyof Covector>({
   // of Covector[C], but they don't. So we cast to unknown and then to the appropriate type.
   // The cast hurts type safety, but we ensure the types at the function level, so it's okay.
   if (command === "init") {
+    yield* useAttributes({ name: "init" });
     return yield* init({
-      logger: logger.child({ command: "init" }),
+      logger,
       cwd,
       changeFolder,
       yes,
     }) as unknown as Operation<Covector[C]>;
   } else if (command === "add") {
+    yield* useAttributes({ name: "add" });
     return yield* add({
-      logger: logger.child({ command: "add" }),
+      logger,
       cwd,
       changeFolder,
       yes,
     }) as unknown as Operation<Covector[C]>;
   } else if (command === "config") {
+    yield* useAttributes({ name: "config" });
     return yield* config({
-      logger: logger.child({ command: "config" }),
+      logger,
       cwd,
       modifyConfig,
     }) as unknown as Operation<Covector[C]>;
   } else if (command === "status") {
+    yield* useAttributes({ name: "status" });
     return yield* status({
-      logger: logger.child({ command: "status" }),
+      logger,
       command,
       dryRun,
       cwd,
@@ -76,8 +81,9 @@ export function* covector<C extends keyof Covector>({
       branchTag,
     }) as unknown as Operation<Covector[C]>;
   } else if (command === "version") {
+    yield* useAttributes({ name: "version" });
     return yield* version({
-      logger: logger.child({ command: "version" }),
+      logger,
       command,
       dryRun,
       cwd,
@@ -86,8 +92,9 @@ export function* covector<C extends keyof Covector>({
       createContext,
     }) as unknown as Operation<Covector[C]>;
   } else if (command === "preview") {
+    yield* useAttributes({ name: "preview" });
     return yield* preview({
-      logger: logger.child({ command: "preview" }),
+      logger,
       command,
       dryRun,
       cwd,
@@ -97,8 +104,9 @@ export function* covector<C extends keyof Covector>({
       branchTag,
     }) as unknown as Operation<Covector[C]>;
   } else if (command === "publish") {
+    yield* useAttributes({ name: "publish" });
     return yield* publish({
-      logger: logger.child({ command: "publish" }),
+      logger,
       command,
       dryRun,
       cwd,
@@ -106,8 +114,9 @@ export function* covector<C extends keyof Covector>({
       modifyConfig,
     }) as unknown as Operation<Covector[C]>;
   } else {
+    yield* useAttributes({ name: "arbitrary" });
     return yield* arbitrary({
-      logger: logger.child({ command: "arbitrary" }),
+      logger,
       command,
       dryRun,
       cwd,

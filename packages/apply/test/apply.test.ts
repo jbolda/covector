@@ -3,8 +3,7 @@ import { CommonBumps } from "@covector/types";
 import { loadFile, readAllPkgFiles } from "@covector/files";
 import { describe, it, captureError } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
 import { call } from "effection";
 const f = fixtures(__dirname);
@@ -16,8 +15,8 @@ const configDefaults = {
 describe("package file apply bump (snapshot)", () => {
   describe("on js", () => {
     it("bumps single", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const jsonFolder = f.copy("pkg.js-single-json");
 
       const commands = [
@@ -63,15 +62,15 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping js-single-json-fixture with minor", level: 30 },
         ])
       );
     });
 
     it("fails bump single that satisfies range", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const jsonFolder = f.copy("pkg.js-single-json");
 
       const commands = [
@@ -112,15 +111,15 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping js-single-json-fixture with minor", level: 30 },
         ])
       );
     });
 
     it("bumps multi", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
       const commands = [
@@ -206,7 +205,7 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping yarn-workspace-base-pkg-a with minor", level: 30 },
           { msg: "bumping yarn-workspace-base-pkg-b with minor", level: 30 },
           { msg: "bumping all with minor", level: 30 },
@@ -215,8 +214,8 @@ describe("package file apply bump (snapshot)", () => {
     });
 
     it("bumps multi with parent as range", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
       const commands = [
@@ -319,7 +318,7 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping yarn-workspace-base-pkg-a with patch", level: 30 },
           { msg: "bumping yarn-workspace-base-pkg-b with minor", level: 30 },
         ])
@@ -329,8 +328,8 @@ describe("package file apply bump (snapshot)", () => {
 
   describe("on rust", () => {
     it("bumps single", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const rustFolder = f.copy("pkg.rust-single");
 
       const commands = [
@@ -369,15 +368,15 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping rust-single-fixture with minor", level: 30 },
         ])
       );
     });
 
     it("fails bumps single that satisfies range", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const rustFolder = f.copy("pkg.rust-single");
 
       const commands = [
@@ -419,15 +418,15 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping rust-single-fixture with minor", level: 30 },
         ])
       );
     });
 
     it("bumps multi", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const rustFolder = f.copy("pkg.rust-multi");
 
       const commands = [
@@ -490,7 +489,7 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
         ])
@@ -498,8 +497,8 @@ describe("package file apply bump (snapshot)", () => {
     });
 
     it("bumps multi with object dep", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
       const commands = [
@@ -562,7 +561,7 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
         ])
@@ -570,8 +569,8 @@ describe("package file apply bump (snapshot)", () => {
     });
 
     it("bumps multi with dep missing patch", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
       const commands = [
@@ -634,7 +633,7 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
         ])
@@ -642,8 +641,8 @@ describe("package file apply bump (snapshot)", () => {
     });
 
     it("bump multi as patch with object dep missing patch", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
       const commands = [
@@ -708,7 +707,7 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping rust_pkg_a_fixture with patch", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with patch", level: 30 },
         ])
@@ -716,8 +715,8 @@ describe("package file apply bump (snapshot)", () => {
     });
 
     it("bumps multi as minor with object dep missing patch", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
       const commands = [
@@ -780,7 +779,7 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
         ])
@@ -790,8 +789,8 @@ describe("package file apply bump (snapshot)", () => {
 
   describe("on yaml", () => {
     it("bumps single", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
       const flutterFolder = f.copy("pkg.dart-flutter-single");
 
       const commands = [
@@ -838,7 +837,7 @@ describe("package file apply bump (snapshot)", () => {
       );
 
       yield* call(() =>
-        pinoTest.consecutive(stream, [
+        logTest.consecutive(logs, [
           { msg: "bumping test_app with minor", level: 30 },
         ])
       );

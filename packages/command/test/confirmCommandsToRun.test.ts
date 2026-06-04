@@ -1,8 +1,7 @@
 import { confirmCommandsToRun, sh } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
 import { call } from "effection";
 const f = fixtures(__dirname);
@@ -33,8 +32,8 @@ describe("confirmCommandsToRun", () => {
   describe("processExecute", () => {
     describe("npm view", () => {
       it("already published", function* () {
-        const stream = pinoTest.sink();
-        const logger = pino(stream);
+        const logs = logTest.sink();
+        const logger = logTest.createCapturedLogger(logs);
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger,
@@ -52,7 +51,7 @@ describe("confirmCommandsToRun", () => {
         });
 
         yield* call(() =>
-          pinoTest.consecutive(stream, [
+          logTest.consecutive(logs, [
             {
               msg: "Checking if effection@0.5.0 is already published with: npm view effection@0.5.0 version --silent",
               level: 30,
@@ -71,8 +70,8 @@ describe("confirmCommandsToRun", () => {
       });
 
       it("needs publish", function* () {
-        const stream = pinoTest.sink();
-        const logger = pino(stream);
+        const logs = logTest.sink();
+        const logger = logTest.createCapturedLogger(logs);
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger,
@@ -90,7 +89,7 @@ describe("confirmCommandsToRun", () => {
         });
 
         yield* call(() =>
-          pinoTest.consecutive(stream, [
+          logTest.consecutive(logs, [
             {
               msg: "Checking if effection@0.5.99 is already published with: npm view effection@0.5.0 version --silent",
               level: 30,
@@ -113,8 +112,8 @@ describe("confirmCommandsToRun", () => {
   describe("fetchCommand", () => {
     describe("fetch npm registry", () => {
       it("already published", function* () {
-        const stream = pinoTest.sink();
-        const logger = pino(stream);
+        const logs = logTest.sink();
+        const logger = logTest.createCapturedLogger(logs);
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger,
@@ -137,7 +136,7 @@ describe("confirmCommandsToRun", () => {
         });
 
         yield* call(() =>
-          pinoTest.consecutive(stream, [
+          logTest.consecutive(logs, [
             {
               msg: "Checking if effection@0.5.0 is already published with built-in fetch:check",
               level: 30,
@@ -152,8 +151,8 @@ describe("confirmCommandsToRun", () => {
       });
 
       it("needs publish", function* () {
-        const stream = pinoTest.sink();
-        const logger = pino(stream);
+        const logs = logTest.sink();
+        const logger = logTest.createCapturedLogger(logs);
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger,
@@ -176,7 +175,7 @@ describe("confirmCommandsToRun", () => {
         });
 
         yield* call(() =>
-          pinoTest.consecutive(stream, [
+          logTest.consecutive(logs, [
             {
               msg: "Checking if effection@0.5.99 is already published with built-in fetch:check",
               level: 30,
@@ -193,8 +192,8 @@ describe("confirmCommandsToRun", () => {
 
     describe("fetch cargo registry", () => {
       it("already published", function* () {
-        const stream = pinoTest.sink();
-        const logger = pino(stream);
+        const logs = logTest.sink();
+        const logger = logTest.createCapturedLogger(logs);
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger,
@@ -217,7 +216,7 @@ describe("confirmCommandsToRun", () => {
         });
 
         yield* call(() =>
-          pinoTest.consecutive(stream, [
+          logTest.consecutive(logs, [
             {
               msg: "Checking if tauri@0.11.0 is already published with built-in fetch:check",
               level: 30,
@@ -232,8 +231,8 @@ describe("confirmCommandsToRun", () => {
       });
 
       it("needs publish", function* () {
-        const stream = pinoTest.sink();
-        const logger = pino(stream);
+        const logs = logTest.sink();
+        const logger = logTest.createCapturedLogger(logs);
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger,
@@ -256,7 +255,7 @@ describe("confirmCommandsToRun", () => {
         });
 
         yield* call(() =>
-          pinoTest.consecutive(stream, [
+          logTest.consecutive(logs, [
             {
               msg: "Checking if tauri@0.12.0 is already published with built-in fetch:check",
               level: 30,

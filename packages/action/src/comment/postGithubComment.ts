@@ -38,7 +38,7 @@ export function* postGithubComment({
   // this can fail if the token doesn't have permissions
   try {
     if (previousComment) {
-      logger.info("Updating comment in pull request.");
+      yield* logger.info("Updating comment in pull request.");
       yield* call(() =>
         octokit.rest.issues.updateComment({
           owner,
@@ -48,7 +48,7 @@ export function* postGithubComment({
         })
       );
     } else {
-      logger.info("Posting comment in pull request.");
+      yield* logger.info("Posting comment in pull request.");
       yield* call(() =>
         octokit.rest.issues.createComment({
           owner,
@@ -60,12 +60,12 @@ export function* postGithubComment({
     }
   } catch (error) {
     if (artifactOnFailure) {
-      logger.error("Posting comment failed, creating artifact instead.");
+      yield* logger.error("Posting comment failed, creating artifact instead.");
       const artifactRoot = process.env.RUNNER_TEMP ?? "..";
 
       const artifactFilename = "./covector-comment.md";
       const artifactAbsolutePath = path.join(artifactRoot, artifactFilename);
-      logger.debug(`Writing comment body to ${artifactAbsolutePath}`);
+      yield* logger.debug(`Writing comment body to ${artifactAbsolutePath}`);
       yield* call(() => fs.writeFile(artifactAbsolutePath, body));
 
       const artifactPRNumber = "./covector-prNumber.md";
@@ -75,7 +75,7 @@ export function* postGithubComment({
       );
 
       const artifact = new DefaultArtifactClient();
-      logger.debug(`Uploading comment from ${artifactAbsolutePath}`);
+      yield* logger.debug(`Uploading comment from ${artifactAbsolutePath}`);
       yield* call(() =>
         artifact.uploadArtifact(
           "covector-comment",
@@ -87,7 +87,7 @@ export function* postGithubComment({
         )
       );
     } else {
-      logger.fatal(`Posting comment failed.`);
+      yield* logger.fatal(`Posting comment failed.`);
     }
   }
 }

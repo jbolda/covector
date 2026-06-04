@@ -68,14 +68,14 @@ export function* publish({
   });
 
   if (dryRun) {
-    logger.info({
+    yield* logger.info({
       msg: "==== commands ready to run ===",
       renderAsYAML: commands,
     });
   }
 
   if (commands.length === 0) {
-    logger.info(`No commands configured to run on [${command}].`);
+    yield* logger.info(`No commands configured to run on [${command}].`);
     return {
       response: `No commands configured to run on [${command}].`,
       commandsRan: {},
@@ -133,7 +133,7 @@ export function* publish({
   });
 
   if (dryRun) {
-    logger.info({ msg: "==== result ===", renderAsYAML: pkgCommandsRan });
+    yield* logger.info({ msg: "==== result ===", renderAsYAML: pkgCommandsRan });
   }
 
   return { response: "complete", commandsRan: postCommandsRan, pipeTemplate };

@@ -2,8 +2,7 @@ import { fillChangelogs } from "../src";
 import { loadFile } from "@covector/files";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -13,8 +12,8 @@ const configDefaults = {
 
 describe("fills changelog", () => {
   it("creates and fills a changelog", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -82,8 +81,8 @@ describe("fills changelog", () => {
   });
 
   it("creates and fills a changelog including meta and git info", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -185,8 +184,8 @@ describe("fills changelog", () => {
   });
 
   it("creates a changelog for nicknamed pkgs", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("pkg.js-single-json");
     // note the name in this package file is js-single-json-fixture
     // we use a "nickname" in our change files
@@ -256,8 +255,8 @@ describe("fills changelog", () => {
   });
 
   it("inserts into an existing changelog", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [

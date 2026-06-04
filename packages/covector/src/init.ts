@@ -128,10 +128,10 @@ export const init = function* init({
     const testOpen = yield* call(() =>
       fs.opendir(path.posix.join(cwd, changeFolder))
     );
-    logger.info(`The ${changeFolder} folder exists, skipping creation.`);
+    yield* logger.info(`The ${changeFolder} folder exists, skipping creation.`);
     yield* call(() => testOpen.close());
   } catch (e) {
-    logger.info(`Creating the ${changeFolder} directory.`);
+    yield* logger.info(`Creating the ${changeFolder} directory.`);
     yield* call(() => fs.mkdir(path.posix.join(cwd, changeFolder)));
   }
 
@@ -185,12 +185,12 @@ export const init = function* init({
     const testOpen = yield* call(() =>
       fs.open(path.posix.join(cwd, changeFolder, "config.json"), "r")
     );
-    logger.info(
+    yield* logger.info(
       `The config.json exists in ${changeFolder}, skipping creation.`
     );
     yield* call(() => testOpen.close());
   } catch (e) {
-    logger.info("Writing out the config file.");
+    yield* logger.info("Writing out the config file.");
     yield* call(() =>
       fs.writeFile(
         path.posix.join(cwd, changeFolder, "config.json"),
@@ -204,10 +204,10 @@ export const init = function* init({
     const testOpen = yield* call(() =>
       fs.open(path.posix.join(cwd, changeFolder, "readme.md"), "r")
     );
-    logger.info(`The readme.md exists in ${changeFolder}, skipping creation.`);
+    yield* logger.info(`The readme.md exists in ${changeFolder}, skipping creation.`);
     yield* call(() => testOpen.close());
   } catch (e) {
-    logger.info("Writing out a readme to serve as your guide.");
+    yield* logger.info("Writing out a readme to serve as your guide.");
     yield* call(() =>
       fs.writeFile(path.posix.join(cwd, changeFolder, "readme.md"), readme)
     );
@@ -224,10 +224,10 @@ export const init = function* init({
       const testOpen: Dir = yield* call(() =>
         fs.opendir(path.posix.join(cwd, "./.github/workflows/"))
       );
-      logger.info(`The .github/workflows folder exists, skipping creation.`);
+      yield* logger.info(`The .github/workflows folder exists, skipping creation.`);
       yield* call(() => testOpen.close());
     } catch (e) {
-      logger.info(`Creating the .github/workflows directory.`);
+      yield* logger.info(`Creating the .github/workflows directory.`);
       yield* call(() =>
         fs.mkdir(path.posix.join(cwd, "./.github/workflows/"), {
           recursive: true,
@@ -243,12 +243,12 @@ export const init = function* init({
           "r"
         )
       );
-      logger.info(
+      yield* logger.info(
         `The status workflow exists in ./.github/workflows, skipping creation.`
       );
       yield* call(() => testOpen.close());
     } catch (e) {
-      logger.info(
+      yield* logger.info(
         "Writing out covector-status.yml to give you a covector update on PR."
       );
       yield* call(() =>
@@ -272,12 +272,12 @@ export const init = function* init({
           "r"
         )
       );
-      logger.info(
+      yield* logger.info(
         `The version/publish workflow exists in ./.github/workflows, skipping creation.`
       );
       yield* call(() => testOpen.close());
     } catch (e) {
-      logger.info(
+      yield* logger.info(
         "Writing out covector-version-or-publish.yml to version and publish your packages."
       );
       yield* call(() =>

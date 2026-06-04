@@ -5,6 +5,7 @@ import { exec } from "@effectionx/process";
 import { timebox } from "@effectionx/timebox";
 import { assert } from "vitest";
 import strip from "strip-ansi";
+import * as logTest from "../../../helpers/test-logger.ts";
 
 export const loadContent = (cwd: string, pathToContent: string) => {
   return fs.readFileSync(path.join(cwd, pathToContent), { encoding: "utf8" });
@@ -126,6 +127,39 @@ export const command = (command: string, cwd: string) =>
     .relative(cwd, path.join(__dirname, "./../bin/covector.mjs"))
     .split(path.sep)
     .join("/")}" ${command}`;
+
+export function captureLoggerMiddleware(logs: logTest.TestLogEntry[]) {
+  return {
+    *info(args: unknown[], next: (...args: unknown[]) => any) {
+      logTest.pushEntry(logs, 30, args);
+      return yield* next(...args);
+    },
+    *error(args: unknown[], next: (...args: unknown[]) => any) {
+      logTest.pushEntry(logs, 50, args);
+      return yield* next(...args);
+    },
+    *warn(args: unknown[], next: (...args: unknown[]) => any) {
+      logTest.pushEntry(logs, 40, args);
+      return yield* next(...args);
+    },
+    *debug(args: unknown[], next: (...args: unknown[]) => any) {
+      logTest.pushEntry(logs, 20, args);
+      return yield* next(...args);
+    },
+    *fatal(args: unknown[], next: (...args: unknown[]) => any) {
+      logTest.pushEntry(logs, 60, args);
+      return yield* next(...args);
+    },
+    *stdout(args: unknown[], next: (...args: unknown[]) => any) {
+      logTest.pushEntry(logs, 30, args);
+      return yield* next(...args);
+    },
+    *stderr(args: unknown[], next: (...args: unknown[]) => any) {
+      logTest.pushEntry(logs, 30, args);
+      return yield* next(...args);
+    },
+  };
+}
 
 type Responses = [q: string | RegExp, a: string][];
 

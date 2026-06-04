@@ -151,13 +151,13 @@ function* executeEachCommand({
           if (index + 1 >= commandBackoff.length) {
             throw e;
           } else {
-            logger.error(e as Error);
+            yield* logger.error(e as Error);
           }
           yield* sleep(attemptTimeout);
         }
       }
     } else {
-      logger.info(
+      yield* logger.info(
         `dryRun >> ${pkg.pkg} [${commandPrefix}${command}${
           runningCommand.runFromRoot === true ? " run from the cwd" : ""
         }]: ${runningCommand.command}`,
@@ -243,7 +243,7 @@ function* callCommand({
     yield* call(() => commandFn(pipeToFunction));
 
     if (typeof pubCommand === "object" && pubCommand.pipe) {
-      logger.error(`We cannot pipe the function command in ${pkg.pkg}`);
+      yield* logger.error(`We cannot pipe the function command in ${pkg.pkg}`);
     }
   } else if (typeof runningCommand.command === "string") {
     const ranCommand: string = yield* runCommand({
@@ -303,7 +303,7 @@ export function* confirmCommandsToRun({
         });
       } else if (typeof getPublishedVersion === "object") {
         if (getPublishedVersion.use === "fetch:check") {
-          logger.info(
+          yield* logger.info(
             `Checking if ${pkg.pkg}${
               !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
             } is already published with built-in ${getPublishedVersion.use}`,
@@ -328,7 +328,7 @@ export function* confirmCommandsToRun({
       }
       version = version.trim();
       if (pkg.pkgFile && pkg.pkgFile.version === version) {
-        logger.info(
+        yield* logger.info(
           `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`,
         );
         // early return if published already
@@ -358,7 +358,7 @@ export function* runCommand({
   log: false | string;
   options?: Partial<ExecOptions>;
 }): Operation<string> {
-  if (log !== false) logger.info(log);
+  if (log !== false) yield* logger.info(log);
 
   let out = "";
   yield* Stdio.around({
@@ -367,7 +367,10 @@ export function* runCommand({
       const text = bytes.toString();
       out += text;
       if (log !== false) {
-        logger.info(text.trim());
+        const message = text.trim();
+        if (message !== "") {
+          yield* logger.stdout(message);
+        }
       }
     },
     *stderr(line) {
@@ -375,7 +378,10 @@ export function* runCommand({
       const text = bytes.toString();
       out += text;
       if (log !== false) {
-        logger.info(text.trim());
+        const message = text.trim();
+        if (message !== "") {
+          yield* logger.stderr(message);
+        }
       }
     },
   });
@@ -383,7 +389,7 @@ export function* runCommand({
   const workingOptions = { ...options, cwd: path.join(cwd, pkgPath) };
   if (command.includes(" | ") && !options?.shell) {
     workingOptions.shell = true;
-    logger.warn(`"|" detected in command, setting shell to true: ${command}`);
+    yield* logger.warn(`"|" detected in command, setting shell to true: ${command}`);
   }
 
   const process = yield* exec(command, workingOptions);

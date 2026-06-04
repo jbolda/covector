@@ -21,12 +21,36 @@ export type {
   DepTypes,
   Pkg,
 } from "@covector/files";
-export type { Logger } from "pino";
+
+export type LoggerLevel = "debug" | "info" | "warn" | "error" | "fatal";
+export type LoggerBucket = "default" | "stdout" | "stderr";
+
+export interface LoggerAttribute {
+  name: string;
+  step?: string;
+}
 
 export interface LoggerBindings {
-  level: number;
-  msg: string;
+  level?: number;
+  msg?: string;
   renderAsYAML?: Record<string, any>;
+}
+
+export interface LoggerEntry extends LoggerBindings {
+  command: string;
+  step?: string;
+  bucket: LoggerBucket;
+  levelLabel: LoggerLevel;
+}
+
+export interface Logger {
+  info(message: string | unknown | LoggerBindings): Operation<void>;
+  error(message: string | unknown | LoggerBindings): Operation<void>;
+  warn(message: string | unknown | LoggerBindings): Operation<void>;
+  debug(message: string | unknown | LoggerBindings): Operation<void>;
+  fatal(message: string | unknown | LoggerBindings): Operation<void>;
+  stdout(message: string): Operation<void>;
+  stderr(message: string): Operation<void>;
 }
 
 /* @covector/command */

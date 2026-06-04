@@ -5,8 +5,7 @@ import {
 } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -17,8 +16,8 @@ const configDefaults = {
 
 describe("reads changelog", () => {
   it("reads back the recent change", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("pkg.js-single-json");
 
     const applied = [
@@ -136,8 +135,8 @@ describe("reads changelog", () => {
   });
 
   it("reads a changelog with multiple entries", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("changelog.js-single-exists");
 
     const applied = [

@@ -14,8 +14,8 @@ describe("integration test for init command", () => {
 
     expect(status).toMatchObject({ code: 0 });
     expect(out).toBe(
-      "[info] There are no changes.\n" +
-        "[info] There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0\n"
+      "[info] status There are no changes.\n" +
+        "[info] status There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0\n"
     );
     expect(status.code).toBe(0);
   });

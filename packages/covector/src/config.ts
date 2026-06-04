@@ -14,6 +14,6 @@ export function* config({
   const rawConfig = yield* configFile({ cwd });
   const config = yield* call(() => modifyConfig(rawConfig));
   delete config.file;
-  logger.info({ renderAsYAML: config });
+  yield* logger.info({ renderAsYAML: config });
   return { response: "config returned" };
 }

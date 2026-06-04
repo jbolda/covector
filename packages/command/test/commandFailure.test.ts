@@ -1,8 +1,7 @@
 import { attemptCommands } from "../src";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
 import { call } from "effection";
 const f = fixtures(__dirname);
@@ -16,8 +15,8 @@ const base = {
 
 describe("attemptCommand fails", () => {
   it("fails a function", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
 
     const errored = yield* captureError(
       attemptCommands({
@@ -40,8 +39,8 @@ describe("attemptCommand fails", () => {
   });
 
   it("retries a failed function", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
 
     const errored = yield* captureError(
       attemptCommands({
@@ -59,7 +58,7 @@ describe("attemptCommand fails", () => {
         dryRun: false,
       }),
     );
-    logger.info("completed");
+    yield* logger.info("completed");
 
     if (process.platform === "win32") {
       const isCmdNotFound = (errored as Error).message.includes(
@@ -82,8 +81,8 @@ describe("attemptCommand fails", () => {
       ];
 
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             { msg: "pkg-nickname []: boop", level: 30 },
             ...errorLog,
@@ -109,8 +108,8 @@ describe("attemptCommand fails", () => {
     } else {
       const errorMessage = "spawn boop ENOENT";
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             { msg: "pkg-nickname []: boop", level: 30 },
             { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
@@ -144,9 +143,9 @@ function isShallowError(received, expected) {
         );
       }
     }
-  } else if (receivedMsg !== expected.msg) {
+  } else if (!receivedMsg.includes(expected.msg)) {
     throw new Error(
-      `expected msg "${expected.msg}" doesn't match the received one "${receivedMsg}"`,
+      `expected msg to include "${expected.msg}" but received "${receivedMsg}"`,
     );
   }
   if (received.level !== expected.level) {

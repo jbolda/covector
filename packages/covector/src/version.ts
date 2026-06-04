@@ -80,7 +80,7 @@ export function* version({
     filterPackages,
   });
   if (dryRun) {
-    logger.info({
+    yield* logger.info({
       msg: "==== commands ready to run ===",
       renderAsYAML: commands,
     });
@@ -151,7 +151,10 @@ export function* version({
   }
 
   if (dryRun) {
-    logger.info({ msg: "==== result ===", renderAsYAML: pkgCommandsRan });
+    yield* logger.info({
+      msg: "==== result ===",
+      renderAsYAML: pkgCommandsRan,
+    });
   }
 
   return { commandsRan, pipeTemplate, response: "complete" };

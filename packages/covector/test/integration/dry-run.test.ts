@@ -1,16 +1,17 @@
 import { covector } from "../../src";
+import { logger as covectorLogger } from "../../src/logger.ts";
 import { TomlDocument } from "@covector/toml";
 import { loadFile } from "@covector/files";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import { checksWithObject } from "../helpers.ts";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import { checksWithObject, captureLoggerMiddleware } from "../helpers.ts";
+import * as logTest from "../../../../helpers/test-logger.ts";
 import path from "path";
 import fixtures from "fixturez";
 import { call } from "effection";
 
 const f = fixtures(__dirname);
+
 
 expect.addSnapshotSerializer({
   test: (value) => value instanceof TomlDocument,
@@ -19,8 +20,10 @@ expect.addSnapshotSerializer({
 
 describe("integration test in --dry-run mode", () => {
   it("passes correct config for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
@@ -30,10 +33,10 @@ describe("integration test in --dry-run mode", () => {
     });
 
     // to confirm we have reached the end of the logs
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           {
             command: "status",
@@ -110,8 +113,10 @@ describe("integration test in --dry-run mode", () => {
   });
 
   it("runs version for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
@@ -121,10 +126,10 @@ describe("integration test in --dry-run mode", () => {
     });
 
     // to confirm we have reached the end of the logs
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           {
             command: "version",
@@ -230,8 +235,10 @@ describe("integration test in --dry-run mode", () => {
   });
 
   it("runs publish for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
@@ -241,10 +248,10 @@ describe("integration test in --dry-run mode", () => {
     });
 
     // to confirm we have reached the end of the logs
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           // throws errors because a publish
           //  expects a changelog
@@ -472,8 +479,10 @@ describe("integration test in --dry-run mode", () => {
   });
 
   it("runs test for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
@@ -483,10 +492,10 @@ describe("integration test in --dry-run mode", () => {
     });
 
     // to confirm we have reached the end of the logs
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           // throws errors because a publish
           //  expects a changelog
@@ -543,8 +552,10 @@ describe("integration test in --dry-run mode", () => {
   });
 
   it("runs build for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
@@ -554,10 +565,10 @@ describe("integration test in --dry-run mode", () => {
     });
 
     // to confirm we have reached the end of the logs
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           // throws errors because a publish
           //  expects a changelog

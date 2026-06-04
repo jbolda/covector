@@ -1,10 +1,10 @@
 import { covector } from "../../src";
+import { logger as covectorLogger } from "../../src/logger.ts";
 import { loadFile } from "@covector/files";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import { checksWithObject } from "../helpers.ts";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import { checksWithObject, captureLoggerMiddleware } from "../helpers.ts";
+import * as logTest from "../../../../helpers/test-logger.ts";
 import path from "path";
 import * as fs from "fs";
 import fixtures from "fixturez";
@@ -19,8 +19,10 @@ const itIfNotCI = process.env.CI ? it.skip : it;
 describe("integration test for complex commands", () => {
   describe("prod", () => {
     it("runs version", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger,
@@ -31,10 +33,10 @@ describe("integration test for complex commands", () => {
         throw new Error("We are expecting an object here.");
 
       // no change files so not much happens here
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               msg: "completed",
@@ -62,8 +64,10 @@ describe("integration test for complex commands", () => {
     });
 
     it("runs publish", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger,
@@ -71,10 +75,10 @@ describe("integration test for complex commands", () => {
         cwd: fullIntegration,
       });
 
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -108,142 +112,150 @@ describe("integration test for complex commands", () => {
     });
 
     // Flaky in CI due to npm/stdout chunking — skip in CI. TODO: re-enable after logger rewrite (add PR/issue link).
-    itIfNotCI("runs test", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
-      const fullIntegration = f.copy("integration.js-with-complex-commands");
-      const covectored = yield* covector({
-        logger,
-        command: "test",
-        cwd: fullIntegration,
-      });
+    itIfNotCI(
+      "runs test",
+      function* () {
+        const logs = logTest.sink();
+        yield* covectorLogger.around(captureLoggerMiddleware(logs));
 
-      logger.info("completed");
-      yield* call(() =>
-        pinoTest.consecutive(
-          stream,
-          [
-            {
-              command: "arbitrary",
-              msg: "package-one [test]: npm run build",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: [
-                "> package-one@2.3.1 build",
-                "> npm info tauri@0.8.0 description",
-              ],
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "npm warn Ignoring workspaces for specified package(s)",
-              level: 30,
-            },
-            (log) => {
-              if (log.msg === "package-one [test]: npm test") return;
-              if (
-                typeof log.msg === "string" &&
-                log.msg.includes("Multi-binding collection")
-              )
-                return;
-              throw new Error(`unexpected log: ${JSON.stringify(log)}`);
-            },
-            {
-              command: "arbitrary",
-              msg: "package-one [test]: npm test",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: [
-                "> package-one@2.3.1 test",
-                "> npm info covector@0.1.0 license",
-              ],
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "npm warn Ignoring workspaces for specified package(s)",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "Apache-2.0",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "package-one [test]: echo boop",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "boop",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "package-two [test]: npm run build",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: [
-                "> package-two@1.9.0 build",
-                "> echo this command is not piped, it is run from scripts for pk2",
-              ],
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "this command is not piped, it is run from scripts for pk2",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "package-two [test]: npm test",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: [
-                "> package-two@1.9.0 test",
-                "> echo this command is not piped, it is run from the test script",
-              ],
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "this command is not piped, it is run from the test script",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "package-two [test]: echo boop",
-              level: 30,
-            },
-            {
-              command: "arbitrary",
-              msg: "boop",
-              level: 30,
-            },
-            {
-              msg: "completed",
-              level: 30,
-            },
-          ],
-          checksWithObject(),
-        ),
-      );
-      expect(covectored).toMatchSnapshot();
-    });
+        const logger = covectorLogger.operations;
+        const fullIntegration = f.copy("integration.js-with-complex-commands");
+        const covectored = yield* covector({
+          logger,
+          command: "test",
+          cwd: fullIntegration,
+        });
+
+        yield* logger.info("completed");
+        yield* call(() =>
+          logTest.consecutive(
+            logs,
+            [
+              {
+                command: "arbitrary",
+                msg: "package-one [test]: npm run build",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: [
+                  "> package-one@2.3.1 build",
+                  "> npm info tauri@0.8.0 description",
+                ],
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "npm warn Ignoring workspaces for specified package(s)",
+                level: 30,
+              },
+              (log) => {
+                if (log.msg === "package-one [test]: npm test") return;
+                if (
+                  typeof log.msg === "string" &&
+                  log.msg.includes("Multi-binding collection")
+                )
+                  return;
+                throw new Error(`unexpected log: ${JSON.stringify(log)}`);
+              },
+              {
+                command: "arbitrary",
+                msg: "package-one [test]: npm test",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: [
+                  "> package-one@2.3.1 test",
+                  "> npm info covector@0.1.0 license",
+                ],
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "npm warn Ignoring workspaces for specified package(s)",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "Apache-2.0",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "package-one [test]: echo boop",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "boop",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "package-two [test]: npm run build",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: [
+                  "> package-two@1.9.0 build",
+                  "> echo this command is not piped, it is run from scripts for pk2",
+                ],
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "this command is not piped, it is run from scripts for pk2",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "package-two [test]: npm test",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: [
+                  "> package-two@1.9.0 test",
+                  "> echo this command is not piped, it is run from the test script",
+                ],
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "this command is not piped, it is run from the test script",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "package-two [test]: echo boop",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "boop",
+                level: 30,
+              },
+              {
+                msg: "completed",
+                level: 30,
+              },
+            ],
+            checksWithObject(),
+          ),
+        );
+        expect(covectored).toMatchSnapshot();
+      },
+      10000,
+    );
 
     // Flaky in CI due to npm/stdout chunking — skip in CI. TODO: re-enable after logger rewrite (add PR/issue link).
     itIfNotCI("runs build", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger,
@@ -251,10 +263,10 @@ describe("integration test for complex commands", () => {
         cwd: fullIntegration,
       });
 
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "arbitrary",
@@ -315,8 +327,10 @@ describe("integration test for complex commands", () => {
 
   describe("dry run", () => {
     it("runs version", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger,
@@ -327,10 +341,10 @@ describe("integration test for complex commands", () => {
       if (typeof covectored !== "object")
         throw new Error("We are expecting an object here.");
 
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "version",
@@ -370,8 +384,10 @@ describe("integration test for complex commands", () => {
     });
 
     it("runs publish", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger,
@@ -380,10 +396,10 @@ describe("integration test for complex commands", () => {
         dryRun: true,
       });
 
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "publish",
@@ -431,8 +447,10 @@ describe("integration test for complex commands", () => {
     });
 
     it("runs test", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger,
@@ -441,10 +459,10 @@ describe("integration test for complex commands", () => {
         dryRun: true,
       });
 
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "arbitrary",
@@ -522,8 +540,10 @@ describe("integration test for complex commands", () => {
     });
 
     it("runs build", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger,
@@ -532,10 +552,10 @@ describe("integration test for complex commands", () => {
         dryRun: true,
       });
 
-      logger.info("completed");
+      yield* logger.info("completed");
       yield* call(() =>
-        pinoTest.consecutive(
-          stream,
+        logTest.consecutive(
+          logs,
           [
             {
               command: "arbitrary",
@@ -586,8 +606,10 @@ describe("integration test for complex commands", () => {
 
 describe("integration test to invoke sub commands", () => {
   it("runs publish-primary in prod mode", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-with-subcommands");
     const covectored = yield* covector({
       logger,
@@ -595,10 +617,10 @@ describe("integration test to invoke sub commands", () => {
       cwd: fullIntegration,
     });
 
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           {
             command: "arbitrary",
@@ -642,8 +664,10 @@ describe("integration test to invoke sub commands", () => {
   });
 
   it("runs publishSecondary in prod mode", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const logs = logTest.sink();
+    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-with-subcommands");
     const covectored = yield* covector({
       logger,
@@ -651,10 +675,10 @@ describe("integration test to invoke sub commands", () => {
       cwd: fullIntegration,
     });
 
-    logger.info("completed");
+    yield* logger.info("completed");
     yield* call(() =>
-      pinoTest.consecutive(
-        stream,
+      logTest.consecutive(
+        logs,
         [
           {
             command: "arbitrary",
