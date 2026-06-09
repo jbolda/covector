@@ -1,6 +1,7 @@
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import path from "path";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
 import { readPkgFile, setPackageFileVersion, writePkgFile } from "../src";
 

@@ -1,6 +1,7 @@
-import { beforeEach, describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
 
 import {
@@ -12,7 +13,7 @@ import {
   loadChangeFiles,
   changeFilesRemove,
 } from "../src";
-import { createContext } from "effection";
+import { logger } from "../../covector/src/index.ts";
 
 const f = fixtures(__dirname);
 
@@ -32,7 +33,7 @@ describe("general file test", () => {
     const configFolder = f.copy("config.simple");
     const configArray = yield* configFile({ cwd: configFolder });
     expect((configArray as any).gitSiteUrl).toBe(
-      "https://github.com/jbolda/covector"
+      "https://github.com/jbolda/covector",
     );
   });
 
@@ -87,8 +88,7 @@ describe("general file test", () => {
   });
 
   it("deletes files", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const logs = yield* logTest.createCapturedLogger();
     const changesFolder = f.copy("integration.general-file");
     const changeFilesToDelete = [
       "./.changes/first-change.md",
@@ -96,7 +96,7 @@ describe("general file test", () => {
     ];
 
     const filesRemoved = yield* changeFilesRemove({
-      logger,
+      logger: logger.operations,
       cwd: changesFolder,
       paths: changeFilesToDelete,
     });
