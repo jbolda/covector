@@ -9,7 +9,7 @@ import type {
   LoggerEntry,
   LoggerLevel,
 } from "@covector/types";
-import { createApi as createContextApi } from "@effectionx/context-api";
+import { createApi } from "@effectionx/context-api";
 
 const numericLevelByLabel: Record<LoggerLevel, number> = {
   debug: 20,
@@ -117,7 +117,7 @@ function* emit(
   }
 }
 
-export const logger = createContextApi("@covector/logging", {
+export const logger = createApi("@covector/logging", {
   *info(message: string | unknown | LoggerBindings) {
     yield* emit("info", message);
   },

@@ -1,8 +1,10 @@
 import { attemptCommands } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call, run } from "effection";
+import { call, sleep, useScope } from "effection";
+import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
 const base = {
@@ -16,33 +18,36 @@ const fillWithDefaults = ({ version }: { version: string }) => {
   const [versionMajor, versionMinor, versionPatch] = version
     .split(".")
     .map((v) => parseInt(v));
+  const name = "none";
   return {
+    name,
     version,
     currentVersion: version,
     versionMajor,
     versionMinor,
     versionPatch,
-    pkg: { name: "none" },
+    pkg: { name },
     deps: {},
   };
 };
 
 describe("attemptCommand", () => {
   it("invokes a function", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
-    const commandLogger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
+    const scope = yield* useScope();
 
     yield* attemptCommands({
-      logger,
+      logger: logger.operations,
       commands: [
         {
           ...base,
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
           command: async () =>
-            run(function* () {
-              yield* commandLogger.info("boop");
+            scope.run(function* () {
+              yield* logger.operations.info("boop");
+              yield* sleep(1000);
             }),
         },
       ],
@@ -52,17 +57,17 @@ describe("attemptCommand", () => {
     });
 
     yield* call(() =>
-      logTest.consecutive(logs, [{ msg: "boop", level: 30 }]),
+      logTest.consecutive(log.sink.logs, [{ msg: "boop", level: 30 }]),
     );
   });
 
   it("invokes an array of functions", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
-    const commandLogger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
+    const scope = yield* useScope();
 
     yield* attemptCommands({
-      logger,
+      logger: logger.operations,
       commands: [
         {
           ...base,
@@ -70,20 +75,20 @@ describe("attemptCommand", () => {
           manager: "none",
           command: [
             async () =>
-              run(function* () {
-                yield* commandLogger.info("boop");
+              scope.run(function* () {
+                yield* logger.operations.info("boop");
               }),
             async () =>
-              run(function* () {
-                yield* commandLogger.info("booop");
+              scope.run(function* () {
+                yield* logger.operations.info("booop");
               }),
             async () =>
-              run(function* () {
-                yield* commandLogger.info("boooop");
+              scope.run(function* () {
+                yield* logger.operations.info("boooop");
               }),
             async () =>
-              run(function* () {
-                yield* commandLogger.info("booooop");
+              scope.run(function* () {
+                yield* logger.operations.info("booooop");
               }),
           ],
         },
@@ -94,7 +99,7 @@ describe("attemptCommand", () => {
     });
 
     yield* call(() =>
-      logTest.consecutive(logs, [
+      logTest.consecutive(log.sink.logs, [
         { msg: "boop", level: 30 },
         { msg: "booop", level: 30 },
         { msg: "boooop", level: 30 },
@@ -104,20 +109,20 @@ describe("attemptCommand", () => {
   });
 
   it("invokes a function using package values", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
-    const commandLogger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
+    const scope = yield* useScope();
 
     yield* attemptCommands({
-      logger,
+      logger: logger.operations,
       commands: [
         {
           ...base,
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
           command: async (pkg: any) =>
-            run(function* () {
-              yield* commandLogger.info(
+            scope.run(function* () {
+              yield* logger.operations.info(
                 `boop ${pkg.pkg}@${pkg.pkgFile.version}`,
               );
             }),
@@ -129,19 +134,19 @@ describe("attemptCommand", () => {
     });
 
     yield* call(() =>
-      logTest.consecutive(logs, [
+      logTest.consecutive(log.sink.logs, [
         { msg: "boop pkg-nickname@0.5.6", level: 30 },
       ]),
     );
   });
 
   it("invokes an array of functions using package values", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
-    const commandLogger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
+    const scope = yield* useScope();
 
     yield* attemptCommands({
-      logger,
+      logger: logger.operations,
       commands: [
         {
           ...base,
@@ -150,26 +155,26 @@ describe("attemptCommand", () => {
           manager: "none",
           command: [
             async (pkg: any) =>
-              run(function* () {
-                yield* commandLogger.info(
+              scope.run(function* () {
+                yield* logger.operations.info(
                   `boop ${pkg.pkg}@${pkg.pkgFile.version}`,
                 );
               }),
             async (pkg: any) =>
-              run(function* () {
-                yield* commandLogger.info(
+              scope.run(function* () {
+                yield* logger.operations.info(
                   `booop ${pkg.pkg}@${pkg.pkgFile.version}`,
                 );
               }),
             async (pkg: any) =>
-              run(function* () {
-                yield* commandLogger.info(
+              scope.run(function* () {
+                yield* logger.operations.info(
                   `boooop ${pkg.pkg}@${pkg.pkgFile.version}`,
                 );
               }),
             async (pkg: any) =>
-              run(function* () {
-                yield* commandLogger.info(
+              scope.run(function* () {
+                yield* logger.operations.info(
                   `booooop ${pkg.pkg}@${pkg.pkgFile.version}`,
                 );
               }),
@@ -182,7 +187,7 @@ describe("attemptCommand", () => {
     });
 
     yield* call(() =>
-      logTest.consecutive(logs, [
+      logTest.consecutive(log.sink.logs, [
         { msg: "boop pkg-nickname@0.5.6", level: 30 },
         { msg: "booop pkg-nickname@0.5.6", level: 30 },
         { msg: "boooop pkg-nickname@0.5.6", level: 30 },

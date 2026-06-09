@@ -5,7 +5,7 @@ import * as vitest from "vitest";
 
 function describeWithScope(
   name: string | Function,
-  factory?: vitest.SuiteFactory
+  factory?: vitest.SuiteFactory,
 ): vitest.SuiteCollector {
   return vitest.describe(name, (...args) => {
     vitest.beforeAll((suite: any) => {
@@ -25,7 +25,7 @@ function describeWithScope(
 
 describeWithScope.only = function describeWithScope(
   name: string | Function,
-  factory?: vitest.SuiteFactory
+  factory?: vitest.SuiteFactory,
 ): vitest.SuiteCollector {
   return vitest.describe.only(name, (...args) => {
     vitest.beforeAll((suite: any) => {
@@ -59,7 +59,7 @@ export function beforeEach(op: () => Operation<void>): void {
 export function it(
   desc: string,
   op?: () => Operation<void>,
-  timeout?: number
+  timeout?: number,
 ): void {
   if (op) {
     return vitest.it(
@@ -70,7 +70,7 @@ export function it(
         let adapter: TestAdapter = context.task.suite.adapter;
         return adapter.runTest(op);
       },
-      timeout
+      timeout,
     );
   } else {
     return vitest.it.todo(desc);
@@ -80,7 +80,7 @@ export function it(
 it.only = function only(
   desc: string,
   op?: () => Operation<void>,
-  timeout?: number
+  timeout?: number,
 ): void {
   if (op) {
     return vitest.it.only(
@@ -91,7 +91,7 @@ it.only = function only(
         let adapter: TestAdapter = context.task.suite.adapter;
         return adapter.runTest(op);
       },
-      timeout
+      timeout,
     );
   } else {
     return vitest.it.skip(desc, () => {});
@@ -101,7 +101,7 @@ it.only = function only(
 it.skip = function skip(
   desc: string,
   op?: () => Operation<void>,
-  timeout?: number
+  timeout?: number,
 ): void {
   return vitest.it.skip(desc, () => {});
 };
@@ -110,7 +110,7 @@ export function* captureError<T>(op: Operation<T>): Operation<Error> {
   try {
     yield* op;
     throw new Error("expected operation to throw an error, but it did not!");
-  } catch (error) {
-    return error;
+  } catch (error: unknown) {
+    return error as Error;
   }
 }

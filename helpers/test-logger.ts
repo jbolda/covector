@@ -1,16 +1,10 @@
 import { expect } from "vitest";
-import { createApi as createContextApi } from "@effectionx/context-api";
-import { createContext, useScope } from "effection";
 import { logger } from "../packages/covector/src";
 
 export interface TestLogEntry {
   msg: string;
   level: number;
   [key: string]: unknown;
-}
-
-export function sink(): TestLogEntry[] {
-  return [];
 }
 
 function toMessage(message: string | object): string {
@@ -73,10 +67,6 @@ function parseEntry(level: number, args: unknown[]): TestLogEntry {
   };
 }
 
-function push(stream: TestLogEntry[], level: number, ...args: unknown[]): void {
-  stream.push(parseEntry(level, args));
-}
-
 export function toEntry(level: number, args: unknown[]): TestLogEntry {
   return parseEntry(level, args);
 }
@@ -89,45 +79,70 @@ export function pushEntry(
   stream.push(parseEntry(level, args));
 }
 
-export function* createCapturedLogger(stream: TestLogEntry[]) {
-  const sink = {
-    info: [],
-    error: [],
-    warn: [],
-    debug: [],
-    fatal: [],
-    stdout: [],
-    stderr: [],
-  } as Record<string, TestLogEntry[]>;
+export function* createCapturedLogger() {
+  let sink = {
+    info: [] as TestLogEntry[],
+    error: [] as TestLogEntry[],
+    warn: [] as TestLogEntry[],
+    debug: [] as TestLogEntry[],
+    fatal: [] as TestLogEntry[],
+    logs: [] as TestLogEntry[],
+    all: [] as TestLogEntry[],
+    stdout: [] as TestLogEntry[],
+    stderr: [] as TestLogEntry[],
+    stdio: [] as TestLogEntry[],
+  };
 
-  yield* logger.around({
+  // yield* logger.around({
+  const around = {
     *info(args, _next) {
-      sink.info.push(...args.map((arg) => toEntry(30, [arg])));
+      const logEntry = toEntry(30, args);
+      sink.info.push(logEntry);
+      sink.logs.push(logEntry);
+      sink.all.push(logEntry);
     },
     *error(args, _next) {
-      sink.error.push(...args.map((arg) => toEntry(50, [arg])));
+      const logEntry = toEntry(50, args);
+      sink.error.push(logEntry);
+      sink.logs.push(logEntry);
+      sink.all.push(logEntry);
     },
     *warn(args, _next) {
-      sink.warn.push(...args.map((arg) => toEntry(40, [arg])));
+      const logEntry = toEntry(40, args);
+      sink.warn.push(logEntry);
+      sink.logs.push(logEntry);
+      sink.all.push(logEntry);
     },
     *debug(args, _next) {
-      sink.debug.push(...args.map((arg) => toEntry(20, [arg])));
+      const logEntry = toEntry(20, args);
+      sink.debug.push(logEntry);
+      sink.logs.push(logEntry);
+      sink.all.push(logEntry);
     },
     *fatal(args, _next) {
-      sink.fatal.push(...args.map((arg) => toEntry(60, [arg])));
+      const logEntry = toEntry(60, args);
+      sink.fatal.push(logEntry);
+      sink.logs.push(logEntry);
+      sink.all.push(logEntry);
     },
     *stdout(args, _next) {
       if (typeof args[0] === "string") {
-        sink.stdout.push(...args.map((arg) => toEntry(30, [arg])));
+        const logEntry = toEntry(30, args);
+        sink.stdout.push(logEntry);
+        sink.stdio.push(logEntry);
+        sink.all.push(logEntry);
       }
     },
     *stderr(args, _next) {
       if (typeof args[0] === "string") {
-        sink.stderr.push(...args.map((arg) => toEntry(30, [arg])));
+        const logEntry = toEntry(30, args);
+        sink.stderr.push(logEntry);
+        sink.stdio.push(logEntry);
+        sink.all.push(logEntry);
       }
     },
-  });
-  return sink;
+  } satisfies Parameters<typeof logger.around>[0];
+  return { sink, around };
 }
 
 export function consecutive(

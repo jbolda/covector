@@ -1,9 +1,11 @@
 import { attemptCommands } from "../src";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
-import { assert, expect } from "vitest";
+import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
 import { call } from "effection";
+import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
 const base = {
@@ -17,13 +19,15 @@ const fillWithDefaults = ({ version }: { version: string }) => {
   const [versionMajor, versionMinor, versionPatch] = version
     .split(".")
     .map((v) => parseInt(v));
+  const name = "none";
   return {
+    name,
     version,
     currentVersion: version,
     versionMajor,
     versionMinor,
     versionPatch,
-    pkg: { name: "none" },
+    pkg: { name },
     deps: {},
   };
 };
@@ -31,11 +35,11 @@ const fillWithDefaults = ({ version }: { version: string }) => {
 describe("fetchCommand", () => {
   describe("fetch npm registry", () => {
     it("success", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       yield* attemptCommands({
-        logger,
+        logger: logger.operations,
         commands: [
           {
             ...base,
@@ -56,20 +60,20 @@ describe("fetchCommand", () => {
         dryRun: false,
       });
       // it hangs with no logs
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
 
       yield* call(() =>
-        logTest.consecutive(logs, [{ msg: "completed", level: 30 }])
+        logTest.consecutive(log.sink.all, [{ msg: "completed", level: 30 }]),
       );
     });
 
     it("failure throws", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const errored = yield* captureError(
         attemptCommands({
-          logger,
+          logger: logger.operations,
           commands: [
             {
               ...base,
@@ -88,21 +92,21 @@ describe("fetchCommand", () => {
           command: "publish",
           cwd: "",
           dryRun: false,
-        })
+        }),
       );
 
       expect(errored.message).toBe(
-        'effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404 Not Found: "version not found: 0.5.32"'
+        'effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404 Not Found: "version not found: 0.5.32"',
       );
     });
 
     it("failure retries then throws", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const errored = yield* captureError(
         attemptCommands({
-          logger,
+          logger: logger.operations,
           commands: [
             {
               ...base,
@@ -122,7 +126,7 @@ describe("fetchCommand", () => {
           command: "publish",
           cwd: "",
           dryRun: false,
-        })
+        }),
       );
 
       const errorMessage =
@@ -130,7 +134,7 @@ describe("fetchCommand", () => {
       // first two attempts log error then retry
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             { msg: errorMessage, level: 50 },
             // { msg: errorMessage, level: 50 },
@@ -140,8 +144,8 @@ describe("fetchCommand", () => {
             expect((actual as { msg: string }).msg).toContain(
               expected.msg as string,
             );
-          }
-        )
+          },
+        ),
       );
       // final attempt throws
       expect(errored.message).toEqual(errorMessage);
@@ -150,11 +154,11 @@ describe("fetchCommand", () => {
 
   describe("fetch cargo registry", () => {
     it("success", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       yield* attemptCommands({
-        logger,
+        logger: logger.operations,
         commands: [
           {
             ...base,
@@ -175,20 +179,20 @@ describe("fetchCommand", () => {
         dryRun: false,
       });
       // it hangs with no logs
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
 
       yield* call(() =>
-        logTest.consecutive(logs, [{ msg: "completed", level: 30 }])
+        logTest.consecutive(log.sink.all, [{ msg: "completed", level: 30 }]),
       );
     });
 
     it("failure throws", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const errored = yield* captureError(
         attemptCommands({
-          logger,
+          logger: logger.operations,
           commands: [
             {
               ...base,
@@ -207,21 +211,21 @@ describe("fetchCommand", () => {
           command: "publish",
           cwd: "",
           dryRun: false,
-        })
+        }),
       );
 
       expect(errored.message).toEqual(
-        `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404 Not Found: {"errors":[{"detail":"crate \`tauri\` does not have a version \`0.12.0\`"}]}`
+        `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404 Not Found: {"errors":[{"detail":"crate \`tauri\` does not have a version \`0.12.0\`"}]}`,
       );
     });
 
     it("failure retries then throws", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const errored = yield* captureError(
         attemptCommands({
-          logger,
+          logger: logger.operations,
           commands: [
             {
               ...base,
@@ -241,14 +245,14 @@ describe("fetchCommand", () => {
           command: "publish",
           cwd: "",
           dryRun: false,
-        })
+        }),
       );
 
       const errorMessage = `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404 Not Found: {"errors":[{"detail":"crate \`tauri\` does not have a version \`0.12.0\`"}]}`;
       // first two attempts log error then retry
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             { msg: errorMessage, level: 50 },
             { msg: errorMessage, level: 50 },
@@ -258,8 +262,8 @@ describe("fetchCommand", () => {
             expect((actual as { msg: string }).msg).toContain(
               expected.msg as string,
             );
-          }
-        )
+          },
+        ),
       );
       // final attempt throws
       expect(errored.message).toEqual(errorMessage);

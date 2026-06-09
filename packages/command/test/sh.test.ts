@@ -1,62 +1,9 @@
 import { runCommand } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
+import * as logTest from "../../../helpers/test-logger.ts";
 import { spawnSync } from "child_process";
-import type { Operation } from "effection";
-
-type CapturedLog = { msg: string; level: number };
-
-function complete(effect?: () => void): Operation<void> {
-  return (function* (): Operation<void> {
-    effect?.();
-    return;
-  })();
-}
-
-function createLoggerWithSink() {
-  const entries: CapturedLog[] = [];
-
-  return {
-    entries,
-    logger: {
-      info(message: string | object) {
-        return complete(() => {
-          entries.push({ msg: toMessage(message), level: 30 });
-        });
-      },
-      error(message: string | object) {
-        return complete(() => {
-          entries.push({ msg: toMessage(message), level: 50 });
-        });
-      },
-      warn(message: string | object) {
-        return complete(() => {
-          entries.push({ msg: toMessage(message), level: 40 });
-        });
-      },
-      debug(message: string | object) {
-        return complete(() => {
-          entries.push({ msg: toMessage(message), level: 20 });
-        });
-      },
-      fatal(message: string | object) {
-        return complete(() => {
-          entries.push({ msg: toMessage(message), level: 60 });
-        });
-      },
-      stdout(message: string) {
-        return complete(() => {
-          entries.push({ msg: message, level: 30 });
-        });
-      },
-      stderr(message: string) {
-        return complete(() => {
-          entries.push({ msg: message, level: 30 });
-        });
-      },
-    },
-  };
-}
+import { logger } from "../../covector/src/index.ts";
 
 function toMessage(message: string | object): string {
   if (typeof message === "string") return message;
@@ -80,20 +27,11 @@ function* sh(
   command: string,
   options: Record<string, unknown> = {},
   log: false | string = false,
-  logger?: any,
 ) {
+  const sink = yield* logTest.createCapturedLogger();
+  yield* logger.around(sink.around, { at: "min" });
   const out = yield* runCommand({
-    logger:
-      logger ??
-      ({
-        info: () => complete(),
-        error: () => complete(),
-        warn: () => complete(),
-        debug: () => complete(),
-        fatal: () => complete(),
-        stdout: () => complete(),
-        stderr: () => complete(),
-      } as any),
+    logger: logger.operations,
     pkg: "package",
     command,
     cwd: process.cwd(),
@@ -101,12 +39,10 @@ function* sh(
     log,
     options: options as any,
   });
-  return { out };
+  return { out, ...sink };
 }
 
 describe("sh", () => {
-  const logger = createLoggerWithSink().logger;
-
   it("normalizeOut only converts CRLF to LF", function* () {
     if (process.platform === "win32") {
       expect(normalizeOut('"this\r\nthing"')).toBe('"this\nthing"');
@@ -132,7 +68,7 @@ describe("sh", () => {
   })();
 
   it("handle base command", function* () {
-    const { out } = yield* sh("npm help", {}, false, logger);
+    const { out } = yield* sh("npm help", {}, false);
     expect(out.substring(0, 23)).toEqual(
       `npm <command>
 
@@ -143,34 +79,28 @@ Usage:
   });
 
   it("logs final stdout line without trailing newline", function* () {
-    const { entries, logger } = createLoggerWithSink();
-
-    const { out } = yield* sh(
+    const { out, sink } = yield* sh(
       "node -e \"process.stdout.write('final stdout')\"",
       {},
       "running",
-      logger,
     );
 
     expect(out).toBe("final stdout");
-    expect(entries).toEqual([
+    expect(sink.all).toEqual([
       { msg: "running", level: 30 },
       { msg: "final stdout", level: 30 },
     ]);
   });
 
   it("logs split stdout chunks separately", function* () {
-    const { entries, logger } = createLoggerWithSink();
-
-    const { out } = yield* sh(
+    const { out, sink } = yield* sh(
       "node -e \"process.stdout.write('split'); setTimeout(() => process.stdout.write(' line\\n'), 10)\"",
       {},
       "running",
-      logger,
     );
 
     expect(out).toBe("split line");
-    expect(entries).toEqual([
+    expect(sink.all).toEqual([
       { msg: "running", level: 30 },
       { msg: "split", level: 30 },
       { msg: "line", level: 30 },
@@ -178,105 +108,47 @@ Usage:
   });
 
   it("logs final stderr line without trailing newline", function* () {
-    const { entries, logger } = createLoggerWithSink();
-
-    yield* sh(
+    const { sink } = yield* sh(
       "node -e \"process.stderr.write('final stderr')\"",
       {},
       "running",
-      logger,
     );
 
-    expect(entries).toEqual([
+    expect(sink.all).toEqual([
       { msg: "running", level: 30 },
       { msg: "final stderr", level: 30 },
     ]);
   });
 
   it("routes process output to stdout/stderr buckets", function* () {
-    const buckets = {
-      default: [] as Array<string | object>,
-      stdout: [] as string[],
-      stderr: [] as string[],
-    };
-
-    const logger = {
-      info(message: string | object) {
-        return complete(() => {
-          buckets.default.push(message);
-        });
-      },
-      error(message: string | object) {
-        return complete(() => {
-          buckets.default.push(message);
-        });
-      },
-      warn(message: string | object) {
-        return complete(() => {
-          buckets.default.push(message);
-        });
-      },
-      debug(message: string | object) {
-        return complete(() => {
-          buckets.default.push(message);
-        });
-      },
-      fatal(message: string | object) {
-        return complete(() => {
-          buckets.default.push(message);
-        });
-      },
-      stdout(message: string) {
-        return complete(() => {
-          buckets.stdout.push(message);
-        });
-      },
-      stderr(message: string) {
-        return complete(() => {
-          buckets.stderr.push(message);
-        });
-      },
-    };
-
-    yield* sh(
+    const { sink } = yield* sh(
       "node -e \"process.stdout.write('from-out'); process.stderr.write('from-err')\"",
       {},
       "running",
-      logger,
     );
 
-    expect(buckets.default).toEqual(["running"]);
-    expect(buckets.stdout).toEqual(["from-out"]);
-    expect(buckets.stderr).toEqual(["from-err"]);
+    expect(sink.info).toEqual([{ msg: "running", level: 30 }]);
+    expect(sink.stdout).toEqual([{ msg: "from-out", level: 30 }]);
+    expect(sink.stderr).toEqual([{ msg: "from-err", level: 30 }]);
   });
 
   // canonical assertion — content must be preserved regardless of quoting
   it("handle single command (canonical)", function* () {
-    const { out } = yield* sh("echo 'this thing'", {}, false, logger);
+    const { out } = yield* sh("echo 'this thing'", {}, false);
     expect(out.trim()).toBe("this thing");
   });
 
   // explicit, per-shell assertions — split so failures are unambiguous
   if (process.platform !== "win32") {
     it("handle single command — sh/baselike", function* () {
-      const { out } = yield* sh(
-        "echo 'this thing'",
-        { shell: "sh" },
-        false,
-        logger,
-      );
+      const { out } = yield* sh("echo 'this thing'", { shell: "sh" }, false);
       expect(out.trim()).toBe("this thing");
     });
   }
 
   if (process.platform === "win32") {
     it("handle single command — cmd", function* () {
-      const { out } = yield* sh(
-        "echo 'this thing'",
-        { shell: "cmd" },
-        false,
-        logger,
-      );
+      const { out } = yield* sh("echo 'this thing'", { shell: "cmd" }, false);
       // cmd behavior varies across environments; strip any surrounding quotes
       expect(out.trim().replace(/^['"]|['"]$/g, "")).toBe("this thing");
     });
@@ -287,7 +159,6 @@ Usage:
           "echo 'this thing'",
           { shell: "pwsh" },
           false,
-          logger,
         );
         // pwsh may include different newline/spacing — normalize whitespace
         const normalized = normalizeOut(out).trim().replace(/\s+/g, " ");
@@ -300,45 +171,25 @@ Usage:
 
   describe("shell defined", () => {
     it("shell opted in", function* () {
-      const { out } = yield* sh(
-        "echo this thing",
-        { shell: true },
-        false,
-        logger,
-      );
+      const { out } = yield* sh("echo this thing", { shell: true }, false);
       expect(out).toBe("this thing");
     });
 
     it("defines bash as shell", function* () {
-      const { out } = yield* sh(
-        "echo this thing",
-        { shell: "bash" },
-        false,
-        logger,
-      );
+      const { out } = yield* sh("echo this thing", { shell: "bash" }, false);
       expect(out).toBe("this thing");
     });
 
     if (process.platform !== "win32") {
       it("defines sh as shell", function* () {
-        const { out } = yield* sh(
-          "echo this thing",
-          { shell: "sh" },
-          false,
-          logger,
-        );
+        const { out } = yield* sh("echo this thing", { shell: "sh" }, false);
         expect(out).toBe("this thing");
       });
     }
 
     if (process.platform === "win32") {
       it("defines cmd as shell", function* () {
-        const { out } = yield* sh(
-          "echo this thing",
-          { shell: "cmd" },
-          false,
-          logger,
-        );
+        const { out } = yield* sh("echo this thing", { shell: "cmd" }, false);
         expect(out).toBe("this thing");
       });
 
@@ -348,7 +199,6 @@ Usage:
             "echo this thing",
             { shell: "pwsh" },
             false,
-            logger,
           );
           // accept CRLF or LF and normalize internal whitespace
           const normalized = normalizeOut(out).trim().replace(/\s+/g, " ");
@@ -368,7 +218,6 @@ Usage:
           "echo this thing | echo but actually this",
           { shell: true },
           false,
-          logger,
         );
         expect(out).toBe("but actually this");
       });
@@ -378,7 +227,6 @@ Usage:
           "echo this thing | echo but actually this",
           {},
           false,
-          logger,
         );
         expect(out).toBe("but actually this");
       });
@@ -389,7 +237,6 @@ Usage:
           "printf 'version: 0.11.0\n' | grep -o 0.11.0 | sort -u",
           { shell: true },
           false,
-          logger,
         );
         expect(out).toBe("0.11.0");
       });
@@ -405,7 +252,6 @@ Usage:
           "echo this thing | echo but actually this",
           { shell: true },
           false,
-          logger,
         );
 
         // accept the known variants for the runner shell (more robust than
@@ -437,7 +283,6 @@ Usage:
           "echo this thing | echo but actually this",
           {},
           false,
-          logger,
         );
 
         // fallback is whichever shell this is run from
@@ -470,7 +315,6 @@ Usage:
           "echo this thing | echo but actually this",
           { shell: "cmd" },
           false,
-          logger,
         );
         const normalized = normalizeOut(out).trim();
         const cmdVariants = [
@@ -485,7 +329,6 @@ Usage:
           "echo this thing | echo but actually this",
           { shell: "bash" },
           false,
-          logger,
         );
         // can handle pipes just fine, works like other OS
         expect(out).toBe("but actually this");
@@ -498,7 +341,6 @@ Usage:
               "echo this thing | echo but actually this",
               { shell: "pwsh" },
               false,
-              logger,
             );
             const normalized = normalizeOut(out).trim();
             const pwshVariants = [

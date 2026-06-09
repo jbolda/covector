@@ -2,8 +2,10 @@ import { attemptCommands } from "../src";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call } from "effection";
+import { call, useScope } from "effection";
+import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
 const base = {
@@ -15,12 +17,12 @@ const base = {
 
 describe("attemptCommand fails", () => {
   it("fails a function", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
 
     const errored = yield* captureError(
       attemptCommands({
-        logger,
+        logger: logger.operations,
         cwd: ".",
         command: "publish",
         commands: [
@@ -39,12 +41,12 @@ describe("attemptCommand fails", () => {
   });
 
   it("retries a failed function", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
 
     const errored = yield* captureError(
       attemptCommands({
-        logger,
+        logger: logger.operations,
         cwd: ".",
         command: "",
         commands: [
@@ -58,7 +60,7 @@ describe("attemptCommand fails", () => {
         dryRun: false,
       }),
     );
-    yield* logger.info("completed");
+    yield* logger.operations.info("completed");
 
     if (process.platform === "win32") {
       const isCmdNotFound = (errored as Error).message.includes(
@@ -82,7 +84,7 @@ describe("attemptCommand fails", () => {
 
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.logs,
           [
             { msg: "pkg-nickname []: boop", level: 30 },
             ...errorLog,
@@ -109,7 +111,7 @@ describe("attemptCommand fails", () => {
       const errorMessage = "spawn boop ENOENT";
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.logs,
           [
             { msg: "pkg-nickname []: boop", level: 30 },
             { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
