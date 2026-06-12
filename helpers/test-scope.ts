@@ -76,6 +76,23 @@ it.only = function only(
   }
 };
 
+it.skipIf = function skipIf(condition: boolean) {
+  return function (
+    desc: string,
+    op?: () => Operation<void>,
+    timeout?: number
+  ): void {
+    if (condition) {
+      return vitest.it.skip(desc, () => {});
+    }
+    if (op) {
+      return vitest.it(desc, async () => scope?.runTest(op), timeout);
+    } else {
+      return vitest.it.skip(desc, () => {});
+    }
+  };
+};
+
 export function captureError<T>(op: Operation<T>): Operation<T | Error> {
   return function* () {
     try {

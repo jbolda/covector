@@ -9,11 +9,18 @@ export const loadContent = (cwd: string, pathToContent: string) => {
   return fs.readFileSync(path.join(cwd, pathToContent), { encoding: "utf8" });
 };
 
+const normalizeLineEndings = (s: string) => s?.replace(/\r\n/g, "\n");
+
 export const checksWithObject =
   (keys = ["command"]) =>
   (received, expected) => {
-    if (received.msg !== expected.msg || received.level !== expected.level) {
-      assert.deepEqual(received, expected);
+    const receivedMsg = normalizeLineEndings(received.msg);
+    const expectedMsg = normalizeLineEndings(expected.msg);
+    if (receivedMsg !== expectedMsg || received.level !== expected.level) {
+      assert.deepEqual(
+        { ...received, msg: receivedMsg },
+        { ...expected, msg: expectedMsg }
+      );
     }
     for (let key of keys) {
       if (expected?.[key]) assert.deepEqual(received?.[key], expected?.[key]);

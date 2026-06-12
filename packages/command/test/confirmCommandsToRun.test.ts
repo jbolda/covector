@@ -119,7 +119,7 @@ describe("confirmCommandsToRun", () => {
                 manager: "cargo",
                 pkgFile: fillWithDefaults({ version: "0.11.0" }),
                 getPublishedVersion:
-                  "curl -s https://crates.io/api/v1/crates/tauri/0.11.0 | if grep -q errors; then echo not found; else echo 0.11.0; fi;",
+                  'curl -sH "User-Agent: covector-ci-test" https://crates.io/api/v1/crates/tauri/0.11.0 | if grep -q errors; then echo not found; else echo 0.11.0; fi;',
               },
             ],
             cwd: "",
@@ -128,7 +128,7 @@ describe("confirmCommandsToRun", () => {
 
           yield pinoTest.consecutive(stream, [
             {
-              msg: "Checking if tauri@0.11.0 is already published with: curl -s https://crates.io/api/v1/crates/tauri/0.11.0 | if grep -q errors; then echo not found; else echo 0.11.0; fi;",
+              msg: 'Checking if tauri@0.11.0 is already published with: curl -sH "User-Agent: covector-ci-test" https://crates.io/api/v1/crates/tauri/0.11.0 | if grep -q errors; then echo not found; else echo 0.11.0; fi;',
               level: 30,
             },
             {
@@ -156,7 +156,7 @@ describe("confirmCommandsToRun", () => {
                 manager: "cargo",
                 pkgFile: fillWithDefaults({ version: "0.12.0" }),
                 getPublishedVersion:
-                  "curl -s https://crates.io/api/v1/crates/tauri/0.12.0 | if grep -q errors; then echo not found; else echo 0.12.0; fi;",
+                  'curl -sH "User-Agent: covector-ci-test" https://crates.io/api/v1/crates/tauri/0.12.0 | if grep -q errors; then echo not found; else echo 0.12.0; fi;',
               },
             ],
             cwd: "",
@@ -165,7 +165,7 @@ describe("confirmCommandsToRun", () => {
 
           yield pinoTest.consecutive(stream, [
             {
-              msg: "Checking if tauri@0.12.0 is already published with: curl -s https://crates.io/api/v1/crates/tauri/0.12.0 | if grep -q errors; then echo not found; else echo 0.12.0; fi;",
+              msg: 'Checking if tauri@0.12.0 is already published with: curl -sH "User-Agent: covector-ci-test" https://crates.io/api/v1/crates/tauri/0.12.0 | if grep -q errors; then echo not found; else echo 0.12.0; fi;',
               level: 30,
             },
             {

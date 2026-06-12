@@ -333,7 +333,9 @@ describe("validate apply", () => {
     expect(validated).toBe(true);
   });
 
-  it("bumps multi rust toml as minor with object dep without version number", function* () {
+  it("bumps multi rust toml as minor with object dep without version number (path-only)", function* () {
+    // Path-only dependencies (e.g., { path = "../pkg" }) are valid in Cargo
+    // for local development and should not cause an error
     const stream = pinoTest.sink();
     const logger = pino(stream);
 
@@ -351,10 +353,6 @@ describe("validate apply", () => {
         },
       },
     };
-    const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
-      config,
-      cwd: rustFolder,
-    });
 
     const commands: PackageCommand[] = [
       {
@@ -375,20 +373,12 @@ describe("validate apply", () => {
       },
     ];
 
-    const errored = yield captureError(
-      validateApply({
-        logger,
-        commands,
-        allPackages,
-      })
-    );
-    logger.info("completed");
-    expect(errored.message).toMatch(
-      "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
-        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
-    );
-
-    // to confirm that no error logs have been returned
-    yield pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }]);
+    const validated = yield validateApply({
+      logger,
+      commands,
+      config,
+      cwd: rustFolder,
+    });
+    expect(validated).toBe(true);
   });
 });

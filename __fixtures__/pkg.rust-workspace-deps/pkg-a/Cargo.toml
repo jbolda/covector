@@ -1,0 +1,6 @@
+[package]
+name = "rust_workspace_dep_fixture"
+version = "0.5.0"
+
+[dependencies]
+serde = { workspace = true }

@@ -2,7 +2,12 @@ import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import path from "path";
 import fixtures from "fixturez";
-import { readPkgFile, setPackageFileVersion, writePkgFile } from "../src";
+import {
+  readPkgFile,
+  setPackageFileVersion,
+  getPackageFileVersion,
+  writePkgFile,
+} from "../src";
 
 const f = fixtures(__dirname);
 
@@ -80,6 +85,29 @@ describe("toml", () => {
         expect(cargoFilePkgB.name).toBe("rust_pkg_b_fixture");
         expect(cargoFilePkgB?.pkg?.package?.name).toBe("rust_pkg_b_fixture");
         expect(cargoFilePkgB.version).toBe("0.8.8");
+      });
+
+      it("with workspace = true dependencies", function* () {
+        // Cargo workspace dependencies can use { workspace = true } to inherit
+        // version from the workspace root. This should not throw an error.
+        const cargoFolder = f.copy("pkg.rust-workspace-deps");
+
+        const cargoFilePkgA = yield readPkgFile({
+          file: "Cargo.toml",
+          cwd: path.join(cargoFolder, "pkg-a"),
+          nickname: "rust_workspace_dep_fixture",
+        });
+        expect(cargoFilePkgA.name).toBe("rust_workspace_dep_fixture");
+        expect(cargoFilePkgA.version).toBe("0.5.0");
+
+        // getPackageFileVersion should return empty string for workspace deps
+        // instead of throwing an error
+        const depVersion = getPackageFileVersion({
+          pkg: cargoFilePkgA,
+          property: "dependencies",
+          dep: "serde",
+        });
+        expect(depVersion).toBe("");
       });
     });
   });
