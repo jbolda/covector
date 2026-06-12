@@ -17,13 +17,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: volta-cli/action@v4
-      - uses: actions/setup-node@v3
-        with:
-          registry-url: "https://registry.npmjs.org"
       - name: git config
         run: |
           git config --global user.name "${{ github.event.pusher.name }}"
@@ -34,8 +31,6 @@ jobs:
       - name: covector version-or-publish
         uses: ./packages/action
         id: covector
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           command: "version-or-publish"
