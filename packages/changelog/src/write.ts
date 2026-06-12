@@ -1,7 +1,7 @@
 import { all, Operation } from "effection";
 import { writeChangelog } from "@covector/files";
 
-import type { File } from "@covector/types";
+import type { LoadedFile } from "@covector/types";
 
 export function* writeAllChangelogs({
   writtenChanges,
@@ -14,13 +14,13 @@ export function* writeAllChangelogs({
         name: string;
         version: string;
       };
-      changelog?: File;
+      changelog?: LoadedFile;
     };
     addition: string;
   }[];
   cwd: string;
 }): Operation<any> {
-  return yield all(
+  return yield* all(
     writtenChanges.map((changes) => {
       const { changelog } = changes.change;
       if (changelog) {

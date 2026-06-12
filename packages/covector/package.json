@@ -11,14 +11,16 @@
   "engines": {
     "node": ">=18"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
   "exports": {
     "development": "./src/index.ts",
-    "default": "./dist/index.js"
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "bin": {
-    "covector": "./bin/covector.js"
+    "covector": "./bin/covector.mjs"
   },
   "files": [
     "bin",
@@ -31,28 +33,25 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@clack/prompts": "^0.7.0",
+    "@clack/prompts": "^0.10.0",
     "@covector/apply": "0.10.0",
     "@covector/assemble": "0.12.0",
     "@covector/changelog": "0.12.0",
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
-    "effection": "^2.0.6",
+    "@effectionx/context-api": "^0.6.0",
+    "effection": "^4.0.2",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21",
-    "pino": "^9.1.0",
-    "pino-abstract-transport": "^1.2.0",
-    "strip-ansi": "6.0.1",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@covector/types": "0.0.0",
+    "@octokit/webhooks-definitions": "^3.67.3",
     "@types/inquirer": "^8.2.6",
-    "@types/yargs": "^17.0.32",
+    "@types/yargs": "^17.0.33",
     "fixturez": "^1.1.0",
-    "tslib": "^2.5.0",
-    "typescript": "^4.9.5"
+    "strip-ansi": "^7.1.0"
   },
   "volta": {
     "extends": "../../package.json"

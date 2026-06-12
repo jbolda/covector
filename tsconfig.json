@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "include": [],
+  "references": [
+    { "path": "./packages/types" },
+    { "path": "./packages/files" },
+    { "path": "./packages/command" },
+    { "path": "./packages/changelog" },
+    { "path": "./packages/assemble" },
+    { "path": "./packages/apply" },
+    { "path": "./packages/toml" },
+    { "path": "./packages/covector" }
+  ]
+}

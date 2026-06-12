@@ -1,8 +1,8 @@
 import { attemptCommands } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 import fixtures from "fixturez";
+import { call, run } from "effection";
 const f = fixtures(__dirname);
 
 const base = {
@@ -29,18 +29,21 @@ const fillWithDefaults = ({ version }: { version: string }) => {
 
 describe("attemptCommand", () => {
   it("invokes a function", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
-    const commandLogger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
+    const commandLogger = logTest.createCapturedLogger(logs);
 
-    yield attemptCommands({
+    yield* attemptCommands({
       logger,
       commands: [
         {
           ...base,
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
-          command: async () => commandLogger.info("boop"),
+          command: async () =>
+            run(function* () {
+              yield* commandLogger.info("boop");
+            }),
         },
       ],
       command: "publish",
@@ -48,15 +51,17 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield pinoTest.consecutive(stream, [{ msg: "boop", level: 30 }]);
+    yield* call(() =>
+      logTest.consecutive(logs, [{ msg: "boop", level: 30 }]),
+    );
   });
 
   it("invokes an array of functions", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
-    const commandLogger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
+    const commandLogger = logTest.createCapturedLogger(logs);
 
-    yield attemptCommands({
+    yield* attemptCommands({
       logger,
       commands: [
         {
@@ -64,10 +69,22 @@ describe("attemptCommand", () => {
           pkg: "pkg-nickname",
           manager: "none",
           command: [
-            async () => commandLogger.info("boop"),
-            async () => commandLogger.info("booop"),
-            async () => commandLogger.info("boooop"),
-            async () => commandLogger.info("booooop"),
+            async () =>
+              run(function* () {
+                yield* commandLogger.info("boop");
+              }),
+            async () =>
+              run(function* () {
+                yield* commandLogger.info("booop");
+              }),
+            async () =>
+              run(function* () {
+                yield* commandLogger.info("boooop");
+              }),
+            async () =>
+              run(function* () {
+                yield* commandLogger.info("booooop");
+              }),
           ],
         },
       ],
@@ -76,20 +93,22 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield pinoTest.consecutive(stream, [
-      { msg: "boop", level: 30 },
-      { msg: "booop", level: 30 },
-      { msg: "boooop", level: 30 },
-      { msg: "booooop", level: 30 },
-    ]);
+    yield* call(() =>
+      logTest.consecutive(logs, [
+        { msg: "boop", level: 30 },
+        { msg: "booop", level: 30 },
+        { msg: "boooop", level: 30 },
+        { msg: "booooop", level: 30 },
+      ]),
+    );
   });
 
   it("invokes a function using package values", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
-    const commandLogger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
+    const commandLogger = logTest.createCapturedLogger(logs);
 
-    yield attemptCommands({
+    yield* attemptCommands({
       logger,
       commands: [
         {
@@ -97,7 +116,11 @@ describe("attemptCommand", () => {
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
           command: async (pkg: any) =>
-            commandLogger.info(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
+            run(function* () {
+              yield* commandLogger.info(
+                `boop ${pkg.pkg}@${pkg.pkgFile.version}`,
+              );
+            }),
         },
       ],
       command: "publish",
@@ -105,17 +128,19 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield pinoTest.consecutive(stream, [
-      { msg: "boop pkg-nickname@0.5.6", level: 30 },
-    ]);
+    yield* call(() =>
+      logTest.consecutive(logs, [
+        { msg: "boop pkg-nickname@0.5.6", level: 30 },
+      ]),
+    );
   });
 
   it("invokes an array of functions using package values", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
-    const commandLogger = pino(stream);
+    const logs = logTest.sink();
+    const logger = logTest.createCapturedLogger(logs);
+    const commandLogger = logTest.createCapturedLogger(logs);
 
-    yield attemptCommands({
+    yield* attemptCommands({
       logger,
       commands: [
         {
@@ -125,13 +150,29 @@ describe("attemptCommand", () => {
           manager: "none",
           command: [
             async (pkg: any) =>
-              commandLogger.info(`boop ${pkg.pkg}@${pkg.pkgFile.version}`),
+              run(function* () {
+                yield* commandLogger.info(
+                  `boop ${pkg.pkg}@${pkg.pkgFile.version}`,
+                );
+              }),
             async (pkg: any) =>
-              commandLogger.info(`booop ${pkg.pkg}@${pkg.pkgFile.version}`),
+              run(function* () {
+                yield* commandLogger.info(
+                  `booop ${pkg.pkg}@${pkg.pkgFile.version}`,
+                );
+              }),
             async (pkg: any) =>
-              commandLogger.info(`boooop ${pkg.pkg}@${pkg.pkgFile.version}`),
+              run(function* () {
+                yield* commandLogger.info(
+                  `boooop ${pkg.pkg}@${pkg.pkgFile.version}`,
+                );
+              }),
             async (pkg: any) =>
-              commandLogger.info(`booooop ${pkg.pkg}@${pkg.pkgFile.version}`),
+              run(function* () {
+                yield* commandLogger.info(
+                  `booooop ${pkg.pkg}@${pkg.pkgFile.version}`,
+                );
+              }),
           ],
         },
       ],
@@ -140,11 +181,13 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield pinoTest.consecutive(stream, [
-      { msg: "boop pkg-nickname@0.5.6", level: 30 },
-      { msg: "booop pkg-nickname@0.5.6", level: 30 },
-      { msg: "boooop pkg-nickname@0.5.6", level: 30 },
-      { msg: "booooop pkg-nickname@0.5.6", level: 30 },
-    ]);
+    yield* call(() =>
+      logTest.consecutive(logs, [
+        { msg: "boop pkg-nickname@0.5.6", level: 30 },
+        { msg: "booop pkg-nickname@0.5.6", level: 30 },
+        { msg: "boooop pkg-nickname@0.5.6", level: 30 },
+        { msg: "booooop pkg-nickname@0.5.6", level: 30 },
+      ]),
+    );
   });
 });

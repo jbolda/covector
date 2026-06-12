@@ -1,7 +1,6 @@
-import { type Logger } from "@covector/types";
 import { configFile } from "@covector/files";
-
-import type { Covector } from "@covector/types";
+import type { Logger, Covector } from "@covector/types";
+import { call, type Operation } from "effection";
 
 export function* config({
   logger,
@@ -11,9 +10,10 @@ export function* config({
   logger: Logger;
   cwd?: string;
   modifyConfig?: (c: any) => Promise<any>;
-}): Generator<any, Covector, any> {
-  let config = yield modifyConfig(yield configFile({ cwd }));
+}): Operation<Covector["config"]> {
+  const rawConfig = yield* configFile({ cwd });
+  const config = yield* call(() => modifyConfig(rawConfig));
   delete config.file;
-  logger.info({ renderAsYAML: config });
+  yield* logger.info({ renderAsYAML: config });
   return { response: "config returned" };
 }

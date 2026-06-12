@@ -1,15 +1,8 @@
-import {
-  spawn,
-  timeout,
-  Operation,
-  MainError,
-  sleep,
-  fetch,
-  isMainError,
-} from "effection";
-import { exec } from "@effection/process";
+import { type Operation, sleep, call, until } from "effection";
+import { exec, Stdio, type ExecOptions } from "@effectionx/process";
+import { timebox } from "@effectionx/timebox";
 import path from "path";
-import { template } from "lodash";
+import { template } from "./template.ts";
 
 import type {
   PkgVersion,
@@ -22,7 +15,10 @@ import type {
   Logger,
 } from "@covector/types";
 
-export const attemptCommands = function* ({
+export { template };
+export type { Process } from "@effectionx/process";
+
+export function* attemptCommands({
   logger,
   cwd,
   commands,
@@ -38,8 +34,8 @@ export const attemptCommands = function* ({
   commandPrefix?: "pre" | "post" | "";
   pkgCommandsRan?: CommandsRan;
   dryRun: boolean;
-}): Operation<{ [k: string]: { [c: string]: string | boolean } }> {
-  let pkgCommandsRun: { [k: string]: { [c: string]: string | boolean } } = {
+}): Operation<CommandsRan> {
+  let pkgCommandsRun = {
     ...pkgCommandsRan,
   };
   for (let pkg of commands) {
@@ -56,7 +52,7 @@ export const attemptCommands = function* ({
         : c;
     let stdout = initialStdout ? `${initialStdout}\n` : "";
 
-    stdout = yield executeEachCommand({
+    stdout = yield* executeEachCommand({
       logger,
       cwd,
       stdout,
@@ -76,7 +72,7 @@ export const attemptCommands = function* ({
       pkgCommandsRun[pkg.pkg]["published"] = true;
   }
   return pkgCommandsRun;
-};
+}
 
 function* executeEachCommand({
   logger,
@@ -138,7 +134,7 @@ function* executeEachCommand({
       let commandBackoff = (runningCommand?.retries ?? []).concat([0]);
       for (let [index, attemptTimeout] of commandBackoff.entries()) {
         try {
-          stdout = yield callCommand({
+          stdout = yield* callCommand({
             logger,
             cwd,
             pkg,
@@ -155,20 +151,16 @@ function* executeEachCommand({
           if (index + 1 >= commandBackoff.length) {
             throw e;
           } else {
-            if (isMainError(e as Error)) {
-              logger.error((e as MainError).message);
-            } else {
-              logger.error(e);
-            }
+            yield* logger.error(e as Error);
           }
-          yield sleep(attemptTimeout);
+          yield* sleep(attemptTimeout);
         }
       }
     } else {
-      logger.info(
+      yield* logger.info(
         `dryRun >> ${pkg.pkg} [${commandPrefix}${command}${
           runningCommand.runFromRoot === true ? " run from the cwd" : ""
-        }]: ${runningCommand.command}`
+        }]: ${runningCommand.command}`,
       );
     }
   }
@@ -187,28 +179,25 @@ function* useFunction({
   if (use === "fetch:check") {
     if (options?.url) {
       const url = template(options.url)({ pkg });
-      let request = yield fetch(url, {
-        headers: { ["user-agent"]: "covector/0 github.com/jbolda/covector" },
-      });
+      let request = yield* until(
+        fetch(url, {
+          headers: { ["user-agent"]: "covector/0 github.com/jbolda/covector" },
+        }),
+      );
       if (request.status >= 400) {
-        const errorText = yield request.text();
-        throw new MainError({
-          exitCode: 1,
-          message: `${pkg.pkg} request to ${url} returned code ${request.status} ${request.statusText}: ${errorText}`,
-        });
+        const errorText = yield* until(request.text());
+        throw new CommandError(
+          `${pkg.pkg} request to ${url} returned code ${request.status} ${request.statusText}: ${errorText}`,
+        );
       }
-      const response = yield request.json();
+      const response = yield* until(request.json());
       if (response.errors) {
-        throw new MainError({
-          exitCode: 1,
-          message: `${
-            pkg.pkg
-          } request to ${url} returned errors: ${JSON.stringify(
-            response.errors,
-            null,
-            2
-          )}`,
-        });
+        const failedMessage = `${pkg.pkg} request to ${url} returned errors: ${JSON.stringify(
+          response.errors,
+          null,
+          2,
+        )}`;
+        throw new CommandError(failedMessage);
       }
       if (url.startsWith("https://crates.io")) {
         return response.version.num;
@@ -240,7 +229,9 @@ function* callCommand({
   command: string;
   commandPrefix: string;
 }): Operation<string> {
-  if (typeof runningCommand.command === "function") {
+  // this helps with TS type guards
+  const commandFn = runningCommand?.command;
+  if (commandFn && typeof commandFn === "function") {
     const pipeToFunction = {
       ...pkg,
       pkgCommandsRan: {
@@ -249,13 +240,13 @@ function* callCommand({
       },
     };
 
-    yield runningCommand.command(pipeToFunction);
+    yield* call(() => commandFn(pipeToFunction));
 
     if (typeof pubCommand === "object" && pubCommand.pipe) {
-      logger.error(`We cannot pipe the function command in ${pkg.pkg}`);
+      yield* logger.error(`We cannot pipe the function command in ${pkg.pkg}`);
     }
   } else if (typeof runningCommand.command === "string") {
-    const ranCommand: string = yield runCommand({
+    const ranCommand: string = yield* runCommand({
       logger,
       command: runningCommand.command,
       cwd,
@@ -270,7 +261,7 @@ function* callCommand({
       stdout = `${stdout}${ranCommand}\n`;
     }
   } else if (runningCommand.use) {
-    const used = yield useFunction({
+    const used = yield* useFunction({
       pkg,
       use: runningCommand.use,
       options: runningCommand.options,
@@ -300,7 +291,7 @@ export function* confirmCommandsToRun({
     if (!!getPublishedVersion) {
       let version = "";
       if (typeof getPublishedVersion === "string") {
-        version = yield runCommand({
+        version = yield* runCommand({
           logger,
           command: getPublishedVersion,
           cwd,
@@ -312,14 +303,14 @@ export function* confirmCommandsToRun({
         });
       } else if (typeof getPublishedVersion === "object") {
         if (getPublishedVersion.use === "fetch:check") {
-          logger.info(
+          yield* logger.info(
             `Checking if ${pkg.pkg}${
               !pkg.pkgFile ? "" : `@${pkg.pkgFile.version}`
-            } is already published with built-in ${getPublishedVersion.use}`
+            } is already published with built-in ${getPublishedVersion.use}`,
           );
 
           try {
-            version = yield useFunction({
+            version = yield* useFunction({
               pkg,
               use: getPublishedVersion.use,
               options: getPublishedVersion.options,
@@ -328,16 +319,17 @@ export function* confirmCommandsToRun({
             // it throws if version is not found
           }
         } else {
-          throw new Error(
+          throw new CommandError(
             `This configuration is not supported for getPublishedVersion on ${
               pkg.pkg
-            }: ${JSON.stringify(getPublishedVersion, null, 2)}`
+            }: ${JSON.stringify(getPublishedVersion, null, 2)}`,
           );
         }
       }
+      version = version.trim();
       if (pkg.pkgFile && pkg.pkgFile.version === version) {
-        logger.info(
-          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`
+        yield* logger.info(
+          `${pkg.pkg}@${pkg.pkgFile.version} is already published. Skipping.`,
         );
         // early return if published already
         continue;
@@ -349,13 +341,14 @@ export function* confirmCommandsToRun({
   return commandsToRun;
 }
 
-export const runCommand = function* ({
+export function* runCommand({
   logger,
   pkg = "package",
   command,
   cwd,
   pkgPath,
   log = `running command for ${pkg}`,
+  options = {},
 }: {
   logger: Logger;
   pkg?: string;
@@ -363,91 +356,75 @@ export const runCommand = function* ({
   cwd: string;
   pkgPath: string;
   log: false | string;
+  options?: Partial<ExecOptions>;
 }): Operation<string> {
-  if (log !== false) logger.info(log);
+  if (log !== false) yield* logger.info(log);
 
-  const timeoutPeriod = 1200000;
-  try {
-    yield spawn(timeout(timeoutPeriod));
-  } catch (e) {
-    throw new MainError({
-      message: `timeout waiting ${
-        timeoutPeriod / 1000
-      }s for command: ${command}`,
-      exitCode: 1,
-    });
-  }
-
-  const ran = yield sh(
-    command,
-    {
-      cwd: path.join(cwd, pkgPath),
-    },
-    log,
-    logger
-  );
-
-  return ran.out;
-};
-
-export const sh = function* (
-  command: string,
-  options: { [k: string]: any },
-  log: false | string,
-  logger: Logger
-): Operation<{ result: Number; stdout: string; stderr: string; out: string }> {
   let out = "";
-  let stdout = "";
-  let stderr = "";
+  yield* Stdio.around({
+    *stdout(line) {
+      const [bytes] = line;
+      const text = bytes.toString();
+      out += text;
+      if (log !== false) {
+        const message = text.trim();
+        if (message !== "") {
+          yield* logger.stdout(message);
+        }
+      }
+    },
+    *stderr(line) {
+      const [bytes] = line;
+      const text = bytes.toString();
+      out += text;
+      if (log !== false) {
+        const message = text.trim();
+        if (message !== "") {
+          yield* logger.stderr(message);
+        }
+      }
+    },
+  });
 
-  let child;
-  if (command.includes("|") && !options.shell) {
-    child = yield exec(command, {
-      ...options,
-      shell: process.platform !== "win32" ? true : process.env.shell,
-    });
-  } else if (options.shell) {
-    child = yield exec(command, {
-      ...options,
-      shell:
-        process.platform === "win32" && options.shell === true
-          ? "bash"
-          : options.shell,
-    });
-  } else {
-    child = yield exec(command, options);
+  const workingOptions = { ...options, cwd: path.join(cwd, pkgPath) };
+  if (command.includes(" | ") && !options?.shell) {
+    workingOptions.shell = true;
+    yield* logger.warn(`"|" detected in command, setting shell to true: ${command}`);
   }
 
-  yield spawn(
-    child.stderr.forEach((chunk: Buffer) => {
-      out += chunk.toString();
-      stderr += chunk.toString();
-      if (log !== false) logger.info(chunk.toString().trim());
-    })
-  );
+  const process = yield* exec(command, workingOptions);
+  const timeoutPeriod = 1200000;
+  const result = yield* timebox(timeoutPeriod, () => process.expect());
 
-  yield spawn(
-    child.stdout.forEach((chunk: Buffer) => {
-      out += chunk.toString();
-      stdout += chunk.toString();
-      if (log !== false) logger.info(chunk.toString().trim());
-    })
-  );
-
-  const result = yield child.expect();
-  return { result, stdout, stderr, out: out.trim() };
-};
-
-export const raceTime = function* ({
-  t = 1200000,
-  msg = `timeout out waiting ${t / 1000}s for command`,
-}: {
-  t?: number;
-  msg?: string;
-} = {}): Generator<any> {
-  try {
-    yield spawn(timeout(t));
-  } catch (e) {
-    throw new Error(msg);
+  if (result.timeout) {
+    throw new Error(
+      `timeout waiting ${timeoutPeriod / 1000}s for command: ${command}`,
+    );
   }
-};
+
+  return out.trim();
+}
+
+export interface CommandErrorOptions {
+  exitCode?: number;
+  message?: string;
+}
+export class CommandError extends Error {
+  name = "CommandError";
+
+  public exitCode: number;
+
+  constructor(options: CommandErrorOptions | string) {
+    super(typeof options === "string" ? options : options?.message || "");
+    this.exitCode = typeof options === "string" ? -1 : options?.exitCode || -1;
+  }
+}
+
+export function isCommandError(error: unknown): error is CommandError {
+  return (
+    !!error &&
+    typeof error === "object" &&
+    "name" in error &&
+    error.name === "CommandError"
+  );
+}

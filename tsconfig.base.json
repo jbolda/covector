@@ -1,28 +1,23 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "module": "commonjs",
-    "target": "es6",
-    "pretty": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "moduleResolution": "node",
-    "checkJs": false,
-    "preserveSymlinks": true,
-    "skipLibCheck": true,
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "forceConsistentCasingInFileNames": true,
-    "paths": {
-      "@covector/types": ["packages/types/src"],
-      "covector": ["packages/covector/src"],
-      "@covector/files": ["packages/files/src"],
-      "@covector/command": ["packages/command/src"],
-      "@covector/changelog": ["packages/changelog/src"],
-      "@covector/assemble": ["packages/assemble/src"],
-      "@covector/toml": ["packages/toml/src"],
-      "@covector/apply": ["packages/apply/src"]
-    }
+    "incremental": true,
+    "skipLibCheck": true,
+    "noEmitOnError": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "strict": true,
+    "target": "esnext",
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
+    "checkJs": false,
+    "preserveSymlinks": true,
+    "forceConsistentCasingInFileNames": true
   }
 }

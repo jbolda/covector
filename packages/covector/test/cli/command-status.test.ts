@@ -7,15 +7,15 @@ const f = fixtures(__dirname);
 describe("integration test for init command", () => {
   it("runs version for prod", function* () {
     const fullIntegration = f.copy("integration.js-with-complex-commands");
-    const { stdout, stderr, status } = yield runCommand(
+    const { out, status } = yield* runCommand(
       command("status", fullIntegration),
       fullIntegration
     );
 
-    expect(stderr).toBe("");
-    expect(stdout).toBe(
-      "[info] There are no changes.\n" +
-        "[info] There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0"
+    expect(status).toMatchObject({ code: 0 });
+    expect(out).toBe(
+      "[info] status There are no changes.\n" +
+        "[info] status There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0\n"
     );
     expect(status.code).toBe(0);
   });

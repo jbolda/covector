@@ -1,55 +1,59 @@
-import { type Operation, run } from "effection";
-
-export interface TestScope {
-  addSetup(op: () => Operation<void>): void;
-  runTest(op: () => Operation<void>): Promise<void>;
-}
-
-export function createTestScope(): TestScope {
-  let setup: (() => Operation<void>)[] = [];
-  return {
-    addSetup(op) {
-      setup.push(op);
-    },
-    runTest(op) {
-      return run(function* () {
-        for (let step of setup) {
-          yield step();
-        }
-        yield op();
-      });
-    },
-  };
-}
+import { type Operation } from "effection";
+import { createTestAdapter, TestAdapter } from "./test-adapter";
 
 import * as vitest from "vitest";
 
-let scope: TestScope | undefined;
-
 function describeWithScope(
   name: string | Function,
-  factory?: vitest.SuiteFactory<{}>
-): vitest.SuiteCollector<{}> {
-  return vitest.describe(name, () => {
-    vitest.beforeEach(() => {
-      if (!scope) {
-        scope = createTestScope();
-      }
+  factory?: vitest.SuiteFactory
+): vitest.SuiteCollector {
+  return vitest.describe(name, (...args) => {
+    vitest.beforeAll((suite: any) => {
+      let parent = suite.suite?.adapter;
+      suite.adapter = createTestAdapter({ name: String(name), parent });
     });
+
+    vitest.afterAll(async (suite: any) => {
+      await suite.adapter.destroy();
+    });
+
     if (factory && typeof factory === "function") {
-      (<Function>factory)();
+      factory(...args);
     }
   });
 }
 
-describeWithScope.only = vitest.describe.only;
+describeWithScope.only = function describeWithScope(
+  name: string | Function,
+  factory?: vitest.SuiteFactory
+): vitest.SuiteCollector {
+  return vitest.describe.only(name, (...args) => {
+    vitest.beforeAll((suite: any) => {
+      let parent = suite.suite?.adapter;
+      suite.adapter = createTestAdapter({ name: String(name), parent });
+    });
+
+    vitest.afterAll(async (suite: any) => {
+      await suite.adapter.destroy();
+    });
+
+    if (factory && typeof factory === "function") {
+      factory(...args);
+    }
+  });
+};
 describeWithScope.skip = vitest.describe.skip;
-describeWithScope.skipIf = vitest.describe.skipIf;
+describeWithScope.skipIf = (condition: any) =>
+  condition ? describeWithScope.skip : describeWithScope;
+describeWithScope.runIf = (condition: any) =>
+  condition ? describeWithScope : describeWithScope.skip;
 
 export const describe = <typeof vitest.describe>(<unknown>describeWithScope);
 
 export function beforeEach(op: () => Operation<void>): void {
-  vitest.beforeEach(() => scope!.addSetup(op));
+  vitest.beforeEach((context: any) => {
+    context.task.suite.adapter.addSetup(op);
+  });
 }
 
 export function it(
@@ -58,9 +62,18 @@ export function it(
   timeout?: number
 ): void {
   if (op) {
-    return vitest.it(desc, async () => scope?.runTest(op), timeout);
+    return vitest.it(
+      desc,
+      async (context) => {
+        if (!context.task.suite?.adapter)
+          throw new Error("missing test adapter");
+        let adapter: TestAdapter = context.task.suite.adapter;
+        return adapter.runTest(op);
+      },
+      timeout
+    );
   } else {
-    return vitest.it.skip(desc, () => {});
+    return vitest.it.todo(desc);
   }
 }
 
@@ -70,19 +83,34 @@ it.only = function only(
   timeout?: number
 ): void {
   if (op) {
-    return vitest.it.only(desc, async () => scope!.runTest(op), timeout);
+    return vitest.it.only(
+      desc,
+      async (context) => {
+        if (!context.task.suite?.adapter)
+          throw new Error("missing test adapter");
+        let adapter: TestAdapter = context.task.suite.adapter;
+        return adapter.runTest(op);
+      },
+      timeout
+    );
   } else {
     return vitest.it.skip(desc, () => {});
   }
 };
 
-export function captureError<T>(op: Operation<T>): Operation<T | Error> {
-  return function* () {
-    try {
-      yield op;
-    } catch (error) {
-      return error;
-    }
+it.skip = function skip(
+  desc: string,
+  op?: () => Operation<void>,
+  timeout?: number
+): void {
+  return vitest.it.skip(desc, () => {});
+};
+
+export function* captureError<T>(op: Operation<T>): Operation<Error> {
+  try {
+    yield* op;
     throw new Error("expected operation to throw an error, but it did not!");
-  };
+  } catch (error) {
+    return error;
+  }
 }

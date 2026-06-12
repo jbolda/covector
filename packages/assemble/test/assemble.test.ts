@@ -1,8 +1,7 @@
 import { assemble } from "../src";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
 
 const filePart = (filename: string) => ({
   filename,
@@ -135,10 +134,10 @@ This is a test.
 describe("assemble", () => {
   describe("assemble changes", () => {
     it("runs", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
       });
@@ -146,20 +145,20 @@ describe("assemble", () => {
     });
 
     it("assembles deps", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({ logger, files: [testTextFive] });
+      const assembled = yield* assemble({ logger, files: [testTextFive] });
       expect(assembled).toMatchSnapshot();
     });
   });
 
   describe("assemble changes in preMode", () => {
     it("with no existing changes", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
         preMode: { on: true, prevFiles: [] },
@@ -177,10 +176,10 @@ describe("assemble", () => {
     });
 
     it("with existing changes that upgrade", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
         preMode: { on: true, prevFiles: [testTextOne.path] },
@@ -206,10 +205,10 @@ describe("assemble", () => {
     });
 
     it("with existing changes with the same bump", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo, testTextFour],
         preMode: { on: true, prevFiles: [testTextOne.path] },
@@ -235,10 +234,10 @@ describe("assemble", () => {
     });
 
     it("with existing changes and a first bump", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo],
         preMode: { on: true, prevFiles: [testTextOne.path] },
@@ -261,10 +260,10 @@ describe("assemble", () => {
     });
 
     it("with existing changes and a lower bump", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextOne, testTextTwo],
         preMode: { on: true, prevFiles: [testTextTwo.path] },
@@ -300,11 +299,11 @@ This doesn't bump much.
     };
 
     it("throws on no changes", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
       expect.assertions(1);
-      const e = yield captureError(
+      const e = yield* captureError(
         assemble({
           logger,
           files: [emptyChangefile],
@@ -318,10 +317,10 @@ This doesn't bump much.
 
   describe("special bump types", () => {
     it("valid additional bump types", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [
           testTextOne,
@@ -336,11 +335,11 @@ This doesn't bump much.
     });
 
     it("invalid bump types", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
       expect.assertions(1);
-      const e = yield captureError(
+      const e = yield* captureError(
         assemble({
           logger,
           files: [
@@ -360,11 +359,11 @@ This doesn't bump much.
     });
 
     it("one each valid and invalid", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
       expect.assertions(1);
-      const e = yield captureError(
+      const e = yield* captureError(
         assemble({
           logger,
           files: [testTextSpecialTwo],
@@ -378,10 +377,10 @@ This doesn't bump much.
     });
 
     it("handles an only noop", function* () {
-      const stream = pinoTest.sink();
-      const logger = pino(stream);
+      const logs = logTest.sink();
+      const logger = logTest.createCapturedLogger(logs);
 
-      const assembled = yield assemble({
+      const assembled = yield* assemble({
         logger,
         files: [testTextSpecialOne],
         config: configSpecial,

@@ -9,7 +9,7 @@ describe("parses json", () => {
   const jsonFolder = f.copy("pkg.js-single-json");
 
   it("with file specified", function* () {
-    const jsonFile = yield readPkgFile({
+    const jsonFile = yield* readPkgFile({
       file: "package.json",
       cwd: jsonFolder,
       nickname: "js-single-json-fixture",
@@ -20,7 +20,7 @@ describe("parses json", () => {
   });
 
   it("by deriving", function* () {
-    const jsonFile = yield readPkgFile({
+    const jsonFile = yield* readPkgFile({
       cwd: jsonFolder,
       pkgConfig: { manager: "javascript", path: "." },
       nickname: "js-single-json-fixture",
