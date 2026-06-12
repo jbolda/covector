@@ -21,6 +21,10 @@ jobs:
         with:
           fetch-depth: 0
       - uses: volta-cli/action@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
       - name: git config
         run: |
           git config --global user.name "${{ github.event.pusher.name }}"
