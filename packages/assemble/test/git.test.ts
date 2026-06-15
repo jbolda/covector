@@ -5,11 +5,12 @@ import * as logTest from "../../../helpers/test-logger.ts";
 import { join } from "path";
 
 import type { File } from "@covector/types";
+import { logger } from "../../covector/src/index.ts";
 
 describe("git parsing", () => {
   it("parses and returns multiple commits", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
     // this was a file on a previous commit, we can use it
     //   to check the git command as that should still be in the history
     const file: File = {
@@ -22,7 +23,7 @@ describe("git parsing", () => {
     // will resolve if vitest is run from this package dir or root
     const cwd = join(import.meta.dirname, "../../..");
     const parsed = yield* parseChange({
-      logger,
+      logger: logger.operations,
       cwd,
       file,
     });

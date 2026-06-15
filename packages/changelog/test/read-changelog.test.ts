@@ -6,7 +6,9 @@ import {
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
+import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -16,9 +18,8 @@ const configDefaults = {
 
 describe("reads changelog", () => {
   it("reads back the recent change", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("pkg.js-single-json");
+    const logs = yield* logTest.createCapturedLogger();
 
     const applied = [
       {
@@ -102,7 +103,7 @@ describe("reads changelog", () => {
     };
 
     yield* fillChangelogs({
-      logger,
+      logger: logger.operations,
       applied,
       //@ts-expect-error
       assembledChanges,
@@ -117,7 +118,7 @@ describe("reads changelog", () => {
     };
 
     const changelogs = yield* pullLastChangelog({
-      logger,
+      logger: logger.operations,
       config,
       cwd: projectFolder,
     });
@@ -130,14 +131,14 @@ describe("reads changelog", () => {
       "## \\[0.5.6]\n\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#719999](/pull/719999)) This is a test.\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#123](/pull/123)) This is another test.\n" +
-        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#8873](/pull/8873)) This is the last test.\n"
+        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#8873](/pull/8873)) This is the last test.\n",
     );
   });
 
   it("reads a changelog with multiple entries", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("changelog.js-single-exists");
+    const logs = yield* logTest.createCapturedLogger();
+    yield* logger.around(logs.around, { at: "min" });
 
     const applied = [
       {
@@ -197,7 +198,7 @@ describe("reads changelog", () => {
     };
 
     yield* fillChangelogs({
-      logger,
+      logger: logger.operations,
       applied,
       //@ts-expect-error
       assembledChanges,
@@ -212,7 +213,7 @@ describe("reads changelog", () => {
     };
 
     const changelogs = yield* pullLastChangelog({
-      logger,
+      logger: logger.operations,
       config,
       cwd: projectFolder,
     });
@@ -228,7 +229,7 @@ describe("reads changelog", () => {
         "- This is the final test.\n\n" +
         "### Bugs\n\n" +
         "- This is a test.\n" +
-        "- This is another test.\n"
+        "- This is another test.\n",
     );
   });
 });

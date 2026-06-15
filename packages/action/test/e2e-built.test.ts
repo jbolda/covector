@@ -2,6 +2,7 @@ import { beforeEach, describe, it } from "../../../helpers/test-scope.ts";
 import { expect, vi } from "vitest";
 import path from "node:path";
 import { exec } from "@effectionx/process";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 

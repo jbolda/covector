@@ -2,7 +2,9 @@ import { mergeIntoConfig, mergeChangesToConfig } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
+import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
 const assembledChanges = {
@@ -122,11 +124,11 @@ const config = {
 describe("merge config", () => {
   describe("full config", () => {
     it("merges version", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const mergedVersionConfig = yield* mergeChangesToConfig({
-        logger,
+        logger: logger.operations,
         config,
         assembledChanges,
         command: "version",
@@ -136,8 +138,8 @@ describe("merge config", () => {
     });
 
     it("merges version without command", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       let modifiedConfig = { ...config };
       //@ts-expect-error
@@ -150,7 +152,7 @@ describe("merge config", () => {
       delete modifiedConfig.packages["@namespaced/assemble2"].version;
 
       const mergedVersionConfig = yield* mergeChangesToConfig({
-        logger,
+        logger: logger.operations,
         config: modifiedConfig,
         assembledChanges,
         command: "version",
@@ -160,8 +162,8 @@ describe("merge config", () => {
     });
 
     it("merges nested bumps", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const nestedAssembledChanges = {
         releases: {
@@ -220,7 +222,7 @@ describe("merge config", () => {
       };
 
       const mergedVersionConfig = yield* mergeChangesToConfig({
-        logger,
+        logger: logger.operations,
         config: nestedConfig,
         assembledChanges: nestedAssembledChanges,
         command: "version",
@@ -230,12 +232,12 @@ describe("merge config", () => {
     });
 
     it("merges publish", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const configFolder = f.copy("assemble");
 
       const mergedPublishConfig = yield* mergeIntoConfig({
-        logger,
+        logger: logger.operations,
         cwd: configFolder,
         config,
         assembledChanges: [] as any,
@@ -247,11 +249,11 @@ describe("merge config", () => {
 
   describe("filtered config", () => {
     it("merges version", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const mergedVersionConfig = yield* mergeChangesToConfig({
-        logger,
+        logger: logger.operations,
         config,
         assembledChanges,
         command: "version",
@@ -262,12 +264,12 @@ describe("merge config", () => {
     });
 
     it("merges publish", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const configFolder = f.copy("assemble");
 
       const mergedPublishConfig = yield* mergeIntoConfig({
-        logger,
+        logger: logger.operations,
         cwd: configFolder,
         config,
         assembledChanges,

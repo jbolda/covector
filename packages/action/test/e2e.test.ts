@@ -4,9 +4,11 @@ import { run as covector } from "../src";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect, vi } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
 import { checksWithObject } from "./helpers.ts";
 import { call } from "effection";
+import { logger } from "../../covector/src/logger.ts";
 const f = fixtures(__dirname);
 
 vi.mock("@actions/core", () => ({
@@ -24,8 +26,8 @@ vi.mock("@actions/github", () => ({
 describe("full e2e test", () => {
   describe("of status", () => {
     it("output", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+            yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -38,13 +40,13 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      yield* covector(logger);
+      yield* covector(logger.operations);
 
       // to confirm we have reached the end of the logs
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             {
               command: "status",
@@ -71,8 +73,8 @@ describe("full e2e test", () => {
 
   describe("of version", () => {
     it("outputs for no change", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+            yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -85,16 +87,16 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      yield* covector(logger);
+      yield* covector(logger.operations);
 
       const changeOutput =
         "# Version Updates\n\n" +
         "Merging this PR will release new versions of the following packages based on your change files.\n\n";
       // to confirm we have reached the end of the logs
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             // status runs first to set some output
             {
@@ -131,8 +133,8 @@ describe("full e2e test", () => {
     });
 
     it("outputs with changes", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+            yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-and-rust-with-changes");
 
       const input: { [k: string]: string } = {
@@ -145,13 +147,13 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      yield* covector(logger);
+      yield* covector(logger.operations);
 
       // to confirm we have reached the end of the logs
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             // status runs first to set some output
             {
@@ -286,8 +288,8 @@ describe("full e2e test", () => {
       }));
 
     it("input", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+            yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -300,13 +302,13 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = yield* covector(logger);
+      const covectoredAction = yield* covector(logger.operations);
 
       // to confirm we have reached the end of the logs
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             // status runs first to set some output
             {
@@ -380,8 +382,8 @@ describe("full e2e test", () => {
     });
 
     it("output", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+            yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -394,7 +396,7 @@ describe("full e2e test", () => {
 
       vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
 
-      const covectoredAction = yield* covector(logger);
+      const covectoredAction = yield* covector(logger.operations);
       expect(covectoredAction).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "publish");
@@ -414,8 +416,8 @@ describe("full e2e test", () => {
     });
 
     it("github release update of all packages", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+            yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -469,7 +471,7 @@ describe("full e2e test", () => {
           },
         }));
 
-      const covectoredAction = yield* covector(logger);
+      const covectoredAction = yield* covector(logger.operations);
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
@@ -515,8 +517,8 @@ describe("full e2e test", () => {
     });
 
     it("github release creation of all packages", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+            yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -570,7 +572,7 @@ describe("full e2e test", () => {
           },
         }));
 
-      const covectoredAction = yield* covector(logger);
+      const covectoredAction = yield* covector(logger.operations);
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
@@ -619,8 +621,8 @@ describe("full e2e test", () => {
     });
 
     it("github release update of single package", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-with-single-github-release");
 
       const input: { [k: string]: string } = {
@@ -668,7 +670,7 @@ describe("full e2e test", () => {
           },
         }));
 
-      const covectoredAction = yield* covector(logger);
+      const covectoredAction = yield* covector(logger.operations);
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);
       const {
@@ -699,8 +701,8 @@ describe("full e2e test", () => {
     });
 
     it("github release creation of single package", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+            yield* logger.around(log.around, {at: "min"})
       const cwd: string = f.copy("integration.js-with-single-github-release");
 
       const input: { [k: string]: string } = {
@@ -741,7 +743,7 @@ describe("full e2e test", () => {
           },
         }));
 
-      const covectoredAction = yield* covector(logger);
+      const covectoredAction = yield* covector(logger.operations);
 
       expect(covectoredAction).toMatchSnapshot();
       expect(octokit).toHaveBeenCalledWith(input.token);

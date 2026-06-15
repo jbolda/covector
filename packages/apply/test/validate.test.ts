@@ -7,8 +7,9 @@ import { call, run } from "effection";
 import { describe, it, captureError } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
-import exp from "constants";
+import { logger } from "../../covector/src/logger.ts";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -17,8 +18,8 @@ const configDefaults = {
 
 describe("validate apply", () => {
   it("bumps single js json", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
     const jsonFolder = f.copy("pkg.js-single-json");
 
     const commands = [
@@ -42,7 +43,7 @@ describe("validate apply", () => {
     };
 
     const validated = yield* validateApply({
-      logger,
+      logger: logger.operations,
       // @ts-expect-error
       commands,
       config,
@@ -52,8 +53,8 @@ describe("validate apply", () => {
   });
 
   it("bumps single rust toml", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
     const rustFolder = f.copy("pkg.rust-single");
 
     const commands = [
@@ -77,7 +78,7 @@ describe("validate apply", () => {
     };
 
     const validated = yield* validateApply({
-      logger,
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -87,8 +88,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi js json", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
     const commands = [
@@ -135,7 +136,7 @@ describe("validate apply", () => {
     };
 
     const validated = yield* validateApply({
-      logger,
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -145,8 +146,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
     const rustFolder = f.copy("pkg.rust-multi");
 
     const commands = [
@@ -182,7 +183,7 @@ describe("validate apply", () => {
     };
 
     const validated = yield* validateApply({
-      logger,
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -192,8 +193,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml with object dep", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
     const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
     const commands = [
@@ -229,7 +230,7 @@ describe("validate apply", () => {
     };
 
     const validated = yield* validateApply({
-      logger,
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -239,8 +240,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml with dep missing patch", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
     const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
     const commands = [
@@ -276,7 +277,7 @@ describe("validate apply", () => {
     };
 
     const validated = yield* validateApply({
-      logger,
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -286,8 +287,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as patch with object dep missing patch", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -324,7 +325,7 @@ describe("validate apply", () => {
     };
 
     const validated = yield* validateApply({
-      logger,
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -334,8 +335,8 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as minor with object dep without version number", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
 
     const rustFolder: string = f.copy("pkg.rust-multi-object-path-dep-only");
 
@@ -377,20 +378,20 @@ describe("validate apply", () => {
 
     const errored = yield* captureError(
       validateApply({
-        logger,
+        logger: logger.operations,
         commands,
         allPackages,
-      })
+      }),
     );
-    yield* logger.info("completed");
+    yield* logger.operations.info("completed");
     expect(errored.message).toMatch(
       "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
-        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
+        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference.",
     );
 
     // to confirm that no error logs have been returned
     yield* call(() =>
-      logTest.consecutive(logs, [{ msg: "completed", level: 30 }])
+      logTest.consecutive(log.sink.all, [{ msg: "completed", level: 30 }]),
     );
   });
 });

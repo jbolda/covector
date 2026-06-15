@@ -3,7 +3,9 @@ import { loadFile } from "@covector/files";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
+import { logger } from "../../covector/src/logger.ts";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -12,9 +14,9 @@ const configDefaults = {
 
 describe("fills changelog", () => {
   it("creates and fills a changelog", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("pkg.js-single-json");
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
 
     const applied = [
       {
@@ -62,9 +64,8 @@ describe("fills changelog", () => {
     };
 
     yield* fillChangelogs({
-      logger,
+      logger: logger.operations,
       applied,
-      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -76,14 +77,14 @@ describe("fills changelog", () => {
         "## \\[0.5.6]\n\n" +
         "- This is a test.\n" +
         "- This is another test.\n" +
-        "- This is the last test.\n"
+        "- This is the last test.\n",
     );
   });
 
   it("creates and fills a changelog including meta and git info", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("pkg.js-single-json");
+    const logs = yield* logTest.createCapturedLogger();
+    yield* logger.around(logs.around, { at: "min" });
 
     const applied = [
       {
@@ -165,9 +166,8 @@ describe("fills changelog", () => {
     };
 
     yield* fillChangelogs({
-      logger,
+      logger: logger.operations,
       applied,
-      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -179,14 +179,14 @@ describe("fills changelog", () => {
         "## \\[0.5.6]\n\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#719999](/pull/719999)) This is a test.\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#123](/pull/123)) This is another test.\n" +
-        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#8873](/pull/8873)) This is the last test.\n"
+        "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#8873](/pull/8873)) This is the last test.\n",
     );
   });
 
   it("creates a changelog for nicknamed pkgs", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("pkg.js-single-json");
+    const logs = yield* logTest.createCapturedLogger();
+    yield* logger.around(logs.around, { at: "min" });
     // note the name in this package file is js-single-json-fixture
     // we use a "nickname" in our change files
 
@@ -236,9 +236,8 @@ describe("fills changelog", () => {
     };
 
     yield* fillChangelogs({
-      logger,
+      logger: logger.operations,
       applied,
-      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -250,14 +249,14 @@ describe("fills changelog", () => {
         "## \\[0.5.6]\n\n" +
         "- This is a test.\n" +
         "- This is another test.\n" +
-        "- This is the last test.\n"
+        "- This is the last test.\n",
     );
   });
 
   it("inserts into an existing changelog", function* () {
-    const logs = logTest.sink();
-    const logger = logTest.createCapturedLogger(logs);
     const projectFolder = f.copy("changelog.js-single-exists");
+    const logs = yield* logTest.createCapturedLogger();
+    yield* logger.around(logs.around, { at: "min" });
 
     const applied = [
       {
@@ -305,9 +304,8 @@ describe("fills changelog", () => {
     };
 
     yield* fillChangelogs({
-      logger,
+      logger: logger.operations,
       applied,
-      //@ts-expect-error
       assembledChanges,
       config,
       cwd: projectFolder,
@@ -325,7 +323,7 @@ describe("fills changelog", () => {
         "- Fixes no-server mode not running on another machine due to fs::read_to_string usage instead of the include_str macro.\n" +
         "- Build no longer fails when compiling without environment variables, now the app will show an error.\n" +
         "- Adds desktop notifications API.\n" +
-        "- Properly reflect tauri.conf.json changes on app when running tauri dev.\n"
+        "- Properly reflect tauri.conf.json changes on app when running tauri dev.\n",
     );
   });
 });

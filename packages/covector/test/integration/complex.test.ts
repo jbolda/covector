@@ -1,12 +1,12 @@
 import { covector } from "../../src";
-import { logger as covectorLogger } from "../../src/logger.ts";
+import { logger as covectorLogger, logger } from "../../src/logger.ts";
 import { loadFile } from "@covector/files";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import { checksWithObject, captureLoggerMiddleware } from "../helpers.ts";
 import * as logTest from "../../../../helpers/test-logger.ts";
 import path from "path";
-import * as fs from "fs";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
 import { call } from "effection";
 const f = fixtures(__dirname);
@@ -19,13 +19,12 @@ const itIfNotCI = process.env.CI ? it.skip : it;
 describe("integration test for complex commands", () => {
   describe("prod", () => {
     it("runs version", function* () {
-      const logs = logTest.sink();
-      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
-      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
-        logger,
+        logger: logger.operations,
         command: "version",
         cwd: fullIntegration,
       });
@@ -33,10 +32,10 @@ describe("integration test for complex commands", () => {
         throw new Error("We are expecting an object here.");
 
       // no change files so not much happens here
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             {
               msg: "completed",
@@ -64,21 +63,20 @@ describe("integration test for complex commands", () => {
     });
 
     it("runs publish", function* () {
-      const logs = logTest.sink();
-      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
-      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
-        logger,
+        logger: logger.operations,
         command: "publish",
         cwd: fullIntegration,
       });
 
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             {
               command: "publish",
@@ -115,21 +113,20 @@ describe("integration test for complex commands", () => {
     itIfNotCI(
       "runs test",
       function* () {
-        const logs = logTest.sink();
-        yield* covectorLogger.around(captureLoggerMiddleware(logs));
+        const log = yield* logTest.createCapturedLogger();
+        yield* logger.around(log.around, { at: "min" });
 
-        const logger = covectorLogger.operations;
         const fullIntegration = f.copy("integration.js-with-complex-commands");
         const covectored = yield* covector({
-          logger,
+          logger: logger.operations,
           command: "test",
           cwd: fullIntegration,
         });
 
-        yield* logger.info("completed");
+        yield* logger.operations.info("completed");
         yield* call(() =>
           logTest.consecutive(
-            logs,
+            log.sink.all,
             [
               {
                 command: "arbitrary",
@@ -138,10 +135,12 @@ describe("integration test for complex commands", () => {
               },
               {
                 command: "arbitrary",
-                msg: [
-                  "> package-one@2.3.1 build",
-                  "> npm info tauri@0.8.0 description",
-                ],
+                msg: "> package-one@2.3.1 build",
+                level: 30,
+              },
+              {
+                command: "arbitrary",
+                msg: "> npm info tauri@0.8.0 description",
                 level: 30,
               },
               {
@@ -252,21 +251,20 @@ describe("integration test for complex commands", () => {
 
     // Flaky in CI due to npm/stdout chunking — skip in CI. TODO: re-enable after logger rewrite (add PR/issue link).
     itIfNotCI("runs build", function* () {
-      const logs = logTest.sink();
-      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
-      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
-        logger,
+        logger: logger.operations,
         command: "build",
         cwd: fullIntegration,
       });
 
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             {
               command: "arbitrary",
@@ -327,13 +325,12 @@ describe("integration test for complex commands", () => {
 
   describe("dry run", () => {
     it("runs version", function* () {
-      const logs = logTest.sink();
-      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
-      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
-        logger,
+        logger: logger.operations,
         command: "version",
         cwd: fullIntegration,
         dryRun: true,
@@ -341,10 +338,10 @@ describe("integration test for complex commands", () => {
       if (typeof covectored !== "object")
         throw new Error("We are expecting an object here.");
 
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             {
               command: "version",
@@ -384,22 +381,21 @@ describe("integration test for complex commands", () => {
     });
 
     it("runs publish", function* () {
-      const logs = logTest.sink();
-      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
-      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
-        logger,
+        logger: logger.operations,
         command: "publish",
         cwd: fullIntegration,
         dryRun: true,
       });
 
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             {
               command: "publish",
@@ -447,22 +443,21 @@ describe("integration test for complex commands", () => {
     });
 
     it("runs test", function* () {
-      const logs = logTest.sink();
-      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
-      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
-        logger,
+        logger: logger.operations,
         command: "test",
         cwd: fullIntegration,
         dryRun: true,
       });
 
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             {
               command: "arbitrary",
@@ -540,22 +535,21 @@ describe("integration test for complex commands", () => {
     });
 
     it("runs build", function* () {
-      const logs = logTest.sink();
-      yield* covectorLogger.around(captureLoggerMiddleware(logs));
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
-      const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
-        logger,
+        logger: logger.operations,
         command: "build",
         cwd: fullIntegration,
         dryRun: true,
       });
 
-      yield* logger.info("completed");
+      yield* logger.operations.info("completed");
       yield* call(() =>
         logTest.consecutive(
-          logs,
+          log.sink.all,
           [
             {
               command: "arbitrary",
@@ -606,21 +600,20 @@ describe("integration test for complex commands", () => {
 
 describe("integration test to invoke sub commands", () => {
   it("runs publish-primary in prod mode", function* () {
-    const logs = logTest.sink();
-    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
 
-    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-with-subcommands");
     const covectored = yield* covector({
-      logger,
+      logger: logger.operations,
       command: "publish-primary",
       cwd: fullIntegration,
     });
 
-    yield* logger.info("completed");
+    yield* logger.operations.info("completed");
     yield* call(() =>
       logTest.consecutive(
-        logs,
+        log.sink.all,
         [
           {
             command: "arbitrary",
@@ -664,21 +657,20 @@ describe("integration test to invoke sub commands", () => {
   });
 
   it("runs publishSecondary in prod mode", function* () {
-    const logs = logTest.sink();
-    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+    const log = yield* logTest.createCapturedLogger();
+    yield* logger.around(log.around, { at: "min" });
 
-    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-with-subcommands");
     const covectored = yield* covector({
-      logger,
+      logger: logger.operations,
       command: "publishSecondary",
       cwd: fullIntegration,
     });
 
-    yield* logger.info("completed");
+    yield* logger.operations.info("completed");
     yield* call(() =>
       logTest.consecutive(
-        logs,
+        log.sink.all,
         [
           {
             command: "arbitrary",

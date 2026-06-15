@@ -1,11 +1,10 @@
-import { type Operation, call } from "effection";
+import { type Operation } from "effection";
 import fs from "node:fs";
 import path from "node:path";
-import { exec } from "@effectionx/process";
+import { exec, ExitStatus } from "@effectionx/process";
 import { timebox } from "@effectionx/timebox";
 import { assert } from "vitest";
 import strip from "strip-ansi";
-import * as logTest from "../../../helpers/test-logger.ts";
 
 export const loadContent = (cwd: string, pathToContent: string) => {
   return fs.readFileSync(path.join(cwd, pathToContent), { encoding: "utf8" });
@@ -128,39 +127,6 @@ export const command = (command: string, cwd: string) =>
     .split(path.sep)
     .join("/")}" ${command}`;
 
-export function captureLoggerMiddleware(logs: logTest.TestLogEntry[]) {
-  return {
-    *info(args: unknown[], next: (...args: unknown[]) => any) {
-      logTest.pushEntry(logs, 30, args);
-      return yield* next(...args);
-    },
-    *error(args: unknown[], next: (...args: unknown[]) => any) {
-      logTest.pushEntry(logs, 50, args);
-      return yield* next(...args);
-    },
-    *warn(args: unknown[], next: (...args: unknown[]) => any) {
-      logTest.pushEntry(logs, 40, args);
-      return yield* next(...args);
-    },
-    *debug(args: unknown[], next: (...args: unknown[]) => any) {
-      logTest.pushEntry(logs, 20, args);
-      return yield* next(...args);
-    },
-    *fatal(args: unknown[], next: (...args: unknown[]) => any) {
-      logTest.pushEntry(logs, 60, args);
-      return yield* next(...args);
-    },
-    *stdout(args: unknown[], next: (...args: unknown[]) => any) {
-      logTest.pushEntry(logs, 30, args);
-      return yield* next(...args);
-    },
-    *stderr(args: unknown[], next: (...args: unknown[]) => any) {
-      logTest.pushEntry(logs, 30, args);
-      return yield* next(...args);
-    },
-  };
-}
-
 type Responses = [q: string | RegExp, a: string][];
 
 export function* runCommand(
@@ -170,7 +136,7 @@ export function* runCommand(
   timeout: number = 5000,
 ): Operation<{
   out: string;
-  status: { code: number };
+  status: ExitStatus;
   responded: string;
 }> {
   let out = "";
@@ -186,7 +152,7 @@ export function* runCommand(
   yield* process.around({
     *stdout(line) {
       const [bytes] = line;
-      const text = bytes.toString("utf8");
+      const text = bytes.toString();
       out += text;
       const response = tryResponse({
         responseCount,
@@ -204,7 +170,7 @@ export function* runCommand(
     },
     *stderr(line) {
       const [bytes] = line;
-      const text = bytes.toString("utf8");
+      const text = bytes.toString();
       out += text;
       const response = tryResponse({
         responseCount,

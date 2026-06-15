@@ -4,8 +4,10 @@ import { loadFile, readAllPkgFiles } from "@covector/files";
 import { describe, it, captureError } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
 import { call } from "effection";
+import { logger } from "../../covector/src/logger.ts";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -15,8 +17,8 @@ const configDefaults = {
 describe("package file apply bump (snapshot)", () => {
   describe("on js", () => {
     it("bumps single", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const jsonFolder = f.copy("pkg.js-single-json");
 
       const commands = [
@@ -43,7 +45,7 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         //@ts-expect-error
         commands,
         config,
@@ -58,19 +60,19 @@ describe("package file apply bump (snapshot)", () => {
           '  "description": "A single package at the root. No monorepo setup.",\n' +
           '  "repository": "https://www.github.com/jbolda/covector.git",\n' +
           '  "version": "0.6.0"\n' +
-          "}\n"
+          "}\n",
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping js-single-json-fixture with minor", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("fails bump single that satisfies range", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const jsonFolder = f.copy("pkg.js-single-json");
 
       const commands = [
@@ -98,28 +100,28 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
       const applied = yield* captureError(
         apply({
-          logger,
+          logger: logger.operations,
           //@ts-expect-error
           commands,
           config,
           allPackages,
           cwd: jsonFolder,
-        })
+        }),
       );
       expect(applied.message).toBe(
-        "js-single-json-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+        "js-single-json-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping js-single-json-fixture with minor", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("bumps multi", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
       const commands = [
@@ -172,7 +174,7 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         //@ts-expect-error
         commands,
         config,
@@ -181,7 +183,7 @@ describe("package file apply bump (snapshot)", () => {
       });
       const modifiedPkgAFile = yield* loadFile(
         "packages/pkg-a/package.json",
-        jsonFolder
+        jsonFolder,
       );
       expect(modifiedPkgAFile.content).toBe(
         "{\n" +
@@ -190,32 +192,32 @@ describe("package file apply bump (snapshot)", () => {
           '  "dependencies": {\n' +
           '    "yarn-workspace-base-pkg-b": "1.1.0"\n' +
           "  }\n" +
-          "}\n"
+          "}\n",
       );
 
       const modifiedPkgBFile = yield* loadFile(
         "packages/pkg-b/package.json",
-        jsonFolder
+        jsonFolder,
       );
       expect(modifiedPkgBFile.content).toBe(
         "{\n" +
           '  "name": "yarn-workspace-base-pkg-b",\n' +
           '  "version": "1.1.0"\n' +
-          "}\n"
+          "}\n",
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping yarn-workspace-base-pkg-a with minor", level: 30 },
           { msg: "bumping yarn-workspace-base-pkg-b with minor", level: 30 },
           { msg: "bumping all with minor", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("bumps multi with parent as range", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
       const commands = [
@@ -267,7 +269,7 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         // @ts-expect-error
         commands,
         config,
@@ -277,19 +279,19 @@ describe("package file apply bump (snapshot)", () => {
 
       const modifiedPkgBFile = yield* loadFile(
         "packages/pkg-b/package.json",
-        jsonFolder
+        jsonFolder,
       );
       expect(modifiedPkgBFile.content).toBe(
         "{\n" +
           '  "name": "yarn-workspace-base-pkg-b",\n' +
           '  "version": "1.1.0"\n' +
-          "}\n"
+          "}\n",
       );
 
       // this is an exact version dep which will be patch bumped
       const modifiedPkgAFile = yield* loadFile(
         "packages/pkg-a/package.json",
-        jsonFolder
+        jsonFolder,
       );
       expect(modifiedPkgAFile.content).toBe(
         "{\n" +
@@ -298,13 +300,13 @@ describe("package file apply bump (snapshot)", () => {
           '  "dependencies": {\n' +
           '    "yarn-workspace-base-pkg-b": "1.1.0"\n' +
           "  }\n" +
-          "}\n"
+          "}\n",
       );
 
       // this is a range dep which will not be patch bumped
       const modifiedPkgCFile = yield* loadFile(
         "packages/pkg-c/package.json",
-        jsonFolder
+        jsonFolder,
       );
 
       expect(modifiedPkgCFile.content).toEqual(
@@ -314,22 +316,22 @@ describe("package file apply bump (snapshot)", () => {
           '  "dependencies": {\n' +
           '    "yarn-workspace-base-pkg-b": "^1.0.0"\n' +
           "  }\n" +
-          "}\n"
+          "}\n",
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping yarn-workspace-base-pkg-a with patch", level: 30 },
           { msg: "bumping yarn-workspace-base-pkg-b with minor", level: 30 },
-        ])
+        ]),
       );
     });
   });
 
   describe("on rust", () => {
     it("bumps single", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const rustFolder = f.copy("pkg.rust-single");
 
       const commands = [
@@ -357,26 +359,26 @@ describe("package file apply bump (snapshot)", () => {
 
       // @ts-expect-error
       yield* apply({
-        logger,
+        logger: logger.operations,
         commands,
         allPackages,
         cwd: rustFolder,
       });
       const modifiedFile = yield* loadFile("Cargo.toml", rustFolder);
       expect(modifiedFile.content).toBe(
-        '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n'
+        '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n',
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping rust-single-fixture with minor", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("fails bumps single that satisfies range", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const rustFolder = f.copy("pkg.rust-single");
 
       const commands = [
@@ -405,28 +407,28 @@ describe("package file apply bump (snapshot)", () => {
 
       const applied = yield* captureError(
         apply({
-          logger,
+          logger: logger.operations,
           //@ts-expect-error
           commands,
           config,
           allPackages,
           cwd: rustFolder,
-        })
+        }),
       );
       expect(applied.message).toBe(
-        "rust-single-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`."
+        "rust-single-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping rust-single-fixture with minor", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("bumps multi", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const rustFolder = f.copy("pkg.rust-multi");
 
       const commands = [
@@ -465,7 +467,7 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         //@ts-expect-error
         commands,
         config,
@@ -480,25 +482,25 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.6.0"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = "0.9.0"\n'
+          'rust_pkg_b_fixture = "0.9.0"\n',
       );
 
       const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("bumps multi with object dep", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
       const commands = [
@@ -537,7 +539,7 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         //@ts-expect-error
         commands,
         config,
@@ -552,25 +554,25 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.6.0"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = { version = "0.9.0", path = "../rust_pkg_b_fixture" }\n'
+          'rust_pkg_b_fixture = { version = "0.9.0", path = "../rust_pkg_b_fixture" }\n',
       );
 
       const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("bumps multi with dep missing patch", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
       const commands = [
@@ -609,7 +611,7 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         //@ts-expect-error
         commands,
         config,
@@ -624,25 +626,25 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.6.0"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = "0.9"\n'
+          'rust_pkg_b_fixture = "0.9"\n',
       );
 
       const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("bump multi as patch with object dep missing patch", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
       const commands = [
@@ -683,7 +685,7 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         //@ts-expect-error
         commands,
         config,
@@ -698,25 +700,25 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.5.1"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = { version = "0.8", path = "../rust_pkg_b_fixture" }\n'
+          'rust_pkg_b_fixture = { version = "0.8", path = "../rust_pkg_b_fixture" }\n',
       );
 
       const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.8.9"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.8.9"\n',
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping rust_pkg_a_fixture with patch", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with patch", level: 30 },
-        ])
+        ]),
       );
     });
 
     it("bumps multi as minor with object dep missing patch", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
       const commands = [
@@ -755,7 +757,7 @@ describe("package file apply bump (snapshot)", () => {
       const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         //@ts-expect-error
         commands,
         config,
@@ -770,27 +772,27 @@ describe("package file apply bump (snapshot)", () => {
           'version = "0.6.0"\n' +
           "\n" +
           "[dependencies]\n" +
-          'rust_pkg_b_fixture = { version = "0.9", path = "../rust_pkg_b_fixture" }\n'
+          'rust_pkg_b_fixture = { version = "0.9", path = "../rust_pkg_b_fixture" }\n',
       );
 
       const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
       expect(modifiedBPKGFile.content).toBe(
-        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n'
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
           { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
-        ])
+        ]),
       );
     });
   });
 
   describe("on yaml", () => {
     it("bumps single", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
       const flutterFolder = f.copy("pkg.dart-flutter-single");
 
       const commands = [
@@ -820,7 +822,7 @@ describe("package file apply bump (snapshot)", () => {
       });
 
       yield* apply({
-        logger,
+        logger: logger.operations,
         //@ts-expect-error
         commands,
         config,
@@ -833,13 +835,13 @@ describe("package file apply bump (snapshot)", () => {
           "environment:\n  sdk: '>=2.10.0 <3.0.0'\n" +
           "dependencies:\n  flutter:\n    sdk: flutter\n  meta: any\n  provider: ^4.3.2\n  related_package:\n    git:\n      url: git@github.com:jbolda/covector.git\n      ref: main\n      path: __fixtures__/haha/\n" +
           "dev_dependencies:\n  flutter_test:\n    sdk: flutter\n  build_runner: any\n  json_serializable: any\n  mobx_codegen: any\n" +
-          "flutter:\n  assets:\n    - assets/schema/\n    - assets/localization/\n"
+          "flutter:\n  assets:\n    - assets/schema/\n    - assets/localization/\n",
       );
 
       yield* call(() =>
-        logTest.consecutive(logs, [
+        logTest.consecutive(log.sink.all, [
           { msg: "bumping test_app with minor", level: 30 },
-        ])
+        ]),
       );
     });
   });

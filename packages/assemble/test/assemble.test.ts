@@ -2,6 +2,7 @@ import { assemble } from "../src";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+import { logger } from "../../covector/src/index.ts";
 
 const filePart = (filename: string) => ({
   filename,
@@ -134,32 +135,35 @@ This is a test.
 describe("assemble", () => {
   describe("assemble changes", () => {
     it("runs", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const assembled = yield* assemble({
-        logger,
+        logger: logger.operations,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
       });
       expect(assembled).toMatchSnapshot();
     });
 
     it("assembles deps", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
-      const assembled = yield* assemble({ logger, files: [testTextFive] });
+      const assembled = yield* assemble({
+        logger: logger.operations,
+        files: [testTextFive],
+      });
       expect(assembled).toMatchSnapshot();
     });
   });
 
   describe("assemble changes in preMode", () => {
     it("with no existing changes", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const assembled = yield* assemble({
-        logger,
+        logger: logger.operations,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
         preMode: { on: true, prevFiles: [] },
       });
@@ -176,11 +180,11 @@ describe("assemble", () => {
     });
 
     it("with existing changes that upgrade", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const assembled = yield* assemble({
-        logger,
+        logger: logger.operations,
         files: [testTextOne, testTextTwo, testTextThree, testTextFour],
         preMode: { on: true, prevFiles: [testTextOne.path] },
       });
@@ -190,7 +194,7 @@ describe("assemble", () => {
             releases: { assemble1: "patch", assemble2: "patch" },
             summary: "This is a test.",
           },
-        ])
+        ]),
       );
       expect(assembled.releases).toMatchObject({
         "@namespaced/assemble2": { type: "prepatch" },
@@ -205,11 +209,11 @@ describe("assemble", () => {
     });
 
     it("with existing changes with the same bump", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const assembled = yield* assemble({
-        logger,
+        logger: logger.operations,
         files: [testTextOne, testTextTwo, testTextFour],
         preMode: { on: true, prevFiles: [testTextOne.path] },
       });
@@ -219,7 +223,7 @@ describe("assemble", () => {
             releases: { assemble1: "patch", assemble2: "patch" },
             summary: "This is a test.",
           },
-        ])
+        ]),
       );
       expect(assembled.releases).toMatchObject({
         "@namespaced/assemble2": { type: "prepatch" },
@@ -234,11 +238,11 @@ describe("assemble", () => {
     });
 
     it("with existing changes and a first bump", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const assembled = yield* assemble({
-        logger,
+        logger: logger.operations,
         files: [testTextOne, testTextTwo],
         preMode: { on: true, prevFiles: [testTextOne.path] },
       });
@@ -248,7 +252,7 @@ describe("assemble", () => {
             releases: { assemble1: "patch", assemble2: "patch" },
             summary: "This is a test.",
           },
-        ])
+        ]),
       );
       expect(assembled.releases).toMatchObject({
         assemble1: { type: "preminor" },
@@ -260,11 +264,11 @@ describe("assemble", () => {
     });
 
     it("with existing changes and a lower bump", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const assembled = yield* assemble({
-        logger,
+        logger: logger.operations,
         files: [testTextOne, testTextTwo],
         preMode: { on: true, prevFiles: [testTextTwo.path] },
       });
@@ -274,7 +278,7 @@ describe("assemble", () => {
             releases: { assemble1: "minor", assemble2: "patch" },
             summary: "This is a test.",
           },
-        ])
+        ]),
       );
       expect(assembled.releases).toMatchObject({
         assemble1: { type: "prerelease" },
@@ -299,29 +303,29 @@ This doesn't bump much.
     };
 
     it("throws on no changes", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       expect.assertions(1);
       const e = yield* captureError(
         assemble({
-          logger,
+          logger: logger.operations,
           files: [emptyChangefile],
-        })
+        }),
       );
       expect(e.message).toMatch(
-        ".changes/empty-file.md didn't have any packages bumped. Please add a package bump."
+        ".changes/empty-file.md didn't have any packages bumped. Please add a package bump.",
       );
     });
   });
 
   describe("special bump types", () => {
     it("valid additional bump types", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const assembled = yield* assemble({
-        logger,
+        logger: logger.operations,
         files: [
           testTextOne,
           testTextTwo,
@@ -335,13 +339,13 @@ This doesn't bump much.
     });
 
     it("invalid bump types", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       expect.assertions(1);
       const e = yield* captureError(
         assemble({
-          logger,
+          logger: logger.operations,
           files: [
             testTextOne,
             testTextTwo,
@@ -350,38 +354,38 @@ This doesn't bump much.
             testTextSpecialOne,
           ],
           config,
-        })
+        }),
       );
       expect(e.message).toMatch(
         "housekeeping specified for assemble1 is invalid.\n" +
-          "Try one of the following: major, minor, patch.\n"
+          "Try one of the following: major, minor, patch.\n",
       );
     });
 
     it("one each valid and invalid", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       expect.assertions(1);
       const e = yield* captureError(
         assemble({
-          logger,
+          logger: logger.operations,
           files: [testTextSpecialTwo],
           config: configSpecial,
-        })
+        }),
       );
       expect(e.message).toMatch(
         "explosions specified for @namespaced/assemble2 is invalid.\n" +
-          "Try one of the following: major, minor, patch, housekeeping, workflows.\n"
+          "Try one of the following: major, minor, patch, housekeeping, workflows.\n",
       );
     });
 
     it("handles an only noop", function* () {
-      const logs = logTest.sink();
-      const logger = logTest.createCapturedLogger(logs);
+      const log = yield* logTest.createCapturedLogger();
+      yield* logger.around(log.around, { at: "min" });
 
       const assembled = yield* assemble({
-        logger,
+        logger: logger.operations,
         files: [testTextSpecialOne],
         config: configSpecial,
       });

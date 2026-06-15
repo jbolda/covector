@@ -2,6 +2,7 @@ import { loadFile } from "@covector/files";
 import { describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import { command, runCommand } from "../helpers";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
@@ -20,7 +21,7 @@ describe.skipIf(isWindows)("integration test for init command", () => {
         [/should we include GitHub Action workflows/, "pressEnter"],
         [/What is the name of your default branch/, "pressEnter"],
       ],
-      14900
+      14900,
     );
 
     expect(responded).toMatchSnapshot();
@@ -41,7 +42,7 @@ describe.skipIf(isWindows)("integration test for init command", () => {
         [/What is the url to your GitHub repo/, "pressEnter"],
         [/should we include GitHub Action workflows/, "pressEnter"],
         [/What is the name of your default branch/, "pressEnter"],
-      ]
+      ],
     );
 
     expect(responded).toMatchSnapshot();
@@ -51,7 +52,7 @@ describe.skipIf(isWindows)("integration test for init command", () => {
     const config = yield* loadFile("./.changes/config.json", fullIntegration);
     expect(config.path).toEqual(".changes/config.json");
     expect(JSON.parse(config.content).gitSiteUrl).toBe(
-      "https://www.github.com/jbolda/covector/"
+      "https://www.github.com/jbolda/covector/",
     );
   });
 });

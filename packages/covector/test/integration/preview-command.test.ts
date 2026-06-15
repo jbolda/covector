@@ -1,14 +1,14 @@
 import { covector } from "../../src";
 import { logger as covectorLogger } from "../../src/logger.ts";
 import { TomlDocument } from "@covector/toml";
-import { describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
+import { describe, it } from "../../../../helpers/test-scope.ts";
 import * as logTest from "../../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
-import { loadContent, captureLoggerMiddleware } from "../helpers.ts";
+import { loadContent } from "../helpers.ts";
 import { call } from "effection";
 const f = fixtures(__dirname);
-
 
 expect.addSnapshotSerializer({
   test: (value) => value instanceof TomlDocument,
@@ -17,8 +17,7 @@ expect.addSnapshotSerializer({
 
 describe("integration test for preview command", () => {
   it("runs version and publish for js and rust", function* () {
-    const logs = logTest.sink();
-    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+    const sink = yield* logTest.createCapturedLogger();
 
     const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-for-preview");
@@ -30,7 +29,7 @@ describe("integration test for preview command", () => {
     });
 
     yield* call(() =>
-      logTest.consecutive(logs, [
+      logTest.consecutive(sink.all, [
         {
           command: "preview",
           msg: "bumping package-b with branch-name.12345 identifier to publish a preview",
@@ -76,7 +75,7 @@ describe("integration test for preview command", () => {
           msg: "package-c [publish]: node -e \"fs.appendFileSync('../log.txt', 'publishing would happen here\\\\n')\"",
           level: 30,
         },
-      ])
+      ]),
     );
     expect(loadContent(fullIntegration, "log.txt")).toEqual(
       "prepublishing package-a would happen here\n" +
@@ -84,7 +83,7 @@ describe("integration test for preview command", () => {
         "prepublishing package-c would happen here\n" +
         "publishing --tag  would happen here\n" +
         "publishing --tag  would happen here\n" +
-        "publishing would happen here\n"
+        "publishing would happen here\n",
     );
     expect(covectored).toMatchSnapshot();
   });
@@ -92,8 +91,7 @@ describe("integration test for preview command", () => {
 
 describe("integration test for preview command with dist tags", () => {
   it("runs version and publish for js and rust", function* () {
-    const logs = logTest.sink();
-    yield* covectorLogger.around(captureLoggerMiddleware(logs));
+    const sink = yield* logTest.createCapturedLogger();
 
     const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-for-preview");
@@ -106,7 +104,7 @@ describe("integration test for preview command with dist tags", () => {
     });
 
     yield* call(() =>
-      logTest.consecutive(logs, [
+      logTest.consecutive(sink.all, [
         {
           command: "preview",
           msg: "bumping package-b with branch-name.12345 identifier to publish a preview",
@@ -152,7 +150,7 @@ describe("integration test for preview command with dist tags", () => {
           msg: "package-c [publish]: node -e \"fs.appendFileSync('../log.txt', 'publishing --tag branch_name would happen here\\\\n')\"",
           level: 30,
         },
-      ])
+      ]),
     );
     expect(loadContent(fullIntegration, "log.txt")).toEqual(
       "prepublishing package-a would happen here\n" +
@@ -160,7 +158,7 @@ describe("integration test for preview command with dist tags", () => {
         "prepublishing package-c would happen here\n" +
         "publishing would happen here\n" +
         "publishing would happen here\n" +
-        "publishing --tag branch_name would happen here\n"
+        "publishing --tag branch_name would happen here\n",
     );
     expect(covectored).toMatchSnapshot();
   });

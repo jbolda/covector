@@ -30,17 +30,17 @@ const allPackagesWithoutRead = ({
               deps[dep] = [{ type: "dependencies", version }];
               return deps;
             },
-            {} as Record<string, { type: "dependencies"; version: string }[]>
+            {} as Record<string, { type: "dependencies"; version: string }[]>,
           ),
         };
-      }
+      },
     )
     .reduce(
       (pkgs, pkg: any) => {
         if (pkg.name) pkgs[pkg.name] = pkg;
         return pkgs;
       },
-      {} as Record<string, PackageFile>
+      {} as Record<string, PackageFile>,
     );
 
 describe("list changes considering parents", () => {
