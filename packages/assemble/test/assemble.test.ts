@@ -135,8 +135,7 @@ This is a test.
 describe("assemble", () => {
   describe("assemble changes", () => {
     it("runs", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,
@@ -146,8 +145,7 @@ describe("assemble", () => {
     });
 
     it("assembles deps", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,
@@ -159,8 +157,7 @@ describe("assemble", () => {
 
   describe("assemble changes in preMode", () => {
     it("with no existing changes", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,
@@ -180,8 +177,7 @@ describe("assemble", () => {
     });
 
     it("with existing changes that upgrade", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,
@@ -209,8 +205,7 @@ describe("assemble", () => {
     });
 
     it("with existing changes with the same bump", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,
@@ -238,8 +233,7 @@ describe("assemble", () => {
     });
 
     it("with existing changes and a first bump", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,
@@ -264,8 +258,7 @@ describe("assemble", () => {
     });
 
     it("with existing changes and a lower bump", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,
@@ -303,8 +296,7 @@ This doesn't bump much.
     };
 
     it("throws on no changes", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       expect.assertions(1);
       const e = yield* captureError(
@@ -321,8 +313,7 @@ This doesn't bump much.
 
   describe("special bump types", () => {
     it("valid additional bump types", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,
@@ -339,8 +330,7 @@ This doesn't bump much.
     });
 
     it("invalid bump types", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       expect.assertions(1);
       const e = yield* captureError(
@@ -363,8 +353,7 @@ This doesn't bump much.
     });
 
     it("one each valid and invalid", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       expect.assertions(1);
       const e = yield* captureError(
@@ -381,8 +370,7 @@ This doesn't bump much.
     });
 
     it("handles an only noop", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
 
       const assembled = yield* assemble({
         logger: logger.operations,

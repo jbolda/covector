@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { run as covector } from "../src/index.js";
+import { run as covector } from "../src/index.ts";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect, vi } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
@@ -26,8 +26,7 @@ vi.mock("@actions/github", () => ({
 describe("full e2e test", () => {
   describe("of status", () => {
     it("output", function* () {
-      const log = yield* logTest.createCapturedLogger();
-            yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -45,25 +44,25 @@ describe("full e2e test", () => {
       // to confirm we have reached the end of the logs
       yield* logger.operations.info("completed");
       yield* logTest.consecutive(
-          log.sink.all,
-          [
-            {
-              command: "status",
-              msg: "There are no changes.",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-              level: "info",
-            },
-            {
-              msg: "completed",
-              level: "info",
-            },
-          ],
-          checksWithObject()
-        );
+        log.all,
+        [
+          {
+            command: "status",
+            msg: "There are no changes.",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+            level: "info",
+          },
+          {
+            msg: "completed",
+            level: "info",
+          },
+        ],
+        checksWithObject(),
+      );
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "status");
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
     });
@@ -71,8 +70,7 @@ describe("full e2e test", () => {
 
   describe("of version", () => {
     it("outputs for no change", function* () {
-      const log = yield* logTest.createCapturedLogger();
-            yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -93,34 +91,34 @@ describe("full e2e test", () => {
       // to confirm we have reached the end of the logs
       yield* logger.operations.info("completed");
       yield* logTest.consecutive(
-          log.sink.all,
-          [
-            // status runs first to set some output
-            {
-              command: "status",
-              msg: "There are no changes.",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-              level: "info",
-            },
-            // then the version command runs
-            // TODO should there be more logs?
-            // and finishes with the output
-            {
-              msg: "covector version output",
-              renderAsYAML: changeOutput,
-              level: "info",
-            },
-            {
-              msg: "completed",
-              level: "info",
-            },
-          ],
-          checksWithObject()
-        );
+        log.all,
+        [
+          // status runs first to set some output
+          {
+            command: "status",
+            msg: "There are no changes.",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+            level: "info",
+          },
+          // then the version command runs
+          // TODO should there be more logs?
+          // and finishes with the output
+          {
+            msg: "covector version output",
+            renderAsYAML: changeOutput,
+            level: "info",
+          },
+          {
+            msg: "completed",
+            level: "info",
+          },
+        ],
+        checksWithObject(),
+      );
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
       expect(core.setOutput).toHaveBeenCalledWith("change", changeOutput);
@@ -129,8 +127,7 @@ describe("full e2e test", () => {
     });
 
     it("outputs with changes", function* () {
-      const log = yield* logTest.createCapturedLogger();
-            yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-and-rust-with-changes");
 
       const input: { [k: string]: string } = {
@@ -148,109 +145,109 @@ describe("full e2e test", () => {
       // to confirm we have reached the end of the logs
       yield* logger.operations.info("completed");
       yield* logTest.consecutive(
-          log.sink.all,
-          [
-            // status runs first to set some output
-            {
-              command: "status",
-              msg: "changes:",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "tauri => minor",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "tauri-updater => patch",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "bumping tauri with minor",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "bumping tauri-updater with patch",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "bumping tauri.js with patch",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "tauri planned to be bumped from 0.5.2 to 0.6.0",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3",
-              level: "info",
-            },
-            // then the version command runs
-            {
-              command: "version",
-              msg: "bumping tauri with minor",
-              level: "info",
-            },
-            {
-              command: "version",
-              msg: "bumping tauri-updater with patch",
-              level: "info",
-            },
-            {
-              command: "version",
-              msg: "bumping tauri.js with patch",
-              level: "info",
-            },
-            {
-              command: "version",
-              msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: "info",
-            },
-            {
-              command: "version",
-              msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: "info",
-            },
-            {
-              command: "version",
-              msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: "info",
-            },
-            {
-              command: "version",
-              msg: ".changes/first-change.md was deleted",
-              level: "info",
-            },
-            {
-              command: "version",
-              msg: ".changes/second-change.md was deleted",
-              level: "info",
-            },
-            {
-              msg: "covector version output",
-              level: "info",
-            },
-            {
-              msg: "completed",
-              level: "info",
-            },
-          ],
-          checksWithObject()
-        );
+        log.all,
+        [
+          // status runs first to set some output
+          {
+            command: "status",
+            msg: "changes:",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "tauri => minor",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "tauri-updater => patch",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "bumping tauri with minor",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "bumping tauri-updater with patch",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "bumping tauri.js with patch",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "tauri planned to be bumped from 0.5.2 to 0.6.0",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3",
+            level: "info",
+          },
+          // then the version command runs
+          {
+            command: "version",
+            msg: "bumping tauri with minor",
+            level: "info",
+          },
+          {
+            command: "version",
+            msg: "bumping tauri-updater with patch",
+            level: "info",
+          },
+          {
+            command: "version",
+            msg: "bumping tauri.js with patch",
+            level: "info",
+          },
+          {
+            command: "version",
+            msg: "Could not load the CHANGELOG.md. Creating one.",
+            level: "info",
+          },
+          {
+            command: "version",
+            msg: "Could not load the CHANGELOG.md. Creating one.",
+            level: "info",
+          },
+          {
+            command: "version",
+            msg: "Could not load the CHANGELOG.md. Creating one.",
+            level: "info",
+          },
+          {
+            command: "version",
+            msg: ".changes/first-change.md was deleted",
+            level: "info",
+          },
+          {
+            command: "version",
+            msg: ".changes/second-change.md was deleted",
+            level: "info",
+          },
+          {
+            msg: "covector version output",
+            level: "info",
+          },
+          {
+            msg: "completed",
+            level: "info",
+          },
+        ],
+        checksWithObject(),
+      );
       expect(core.setOutput).toHaveBeenCalledWith(
         "status",
-        "There are 2 changes which include tauri with minor, tauri-updater with patch"
+        "There are 2 changes which include tauri with minor, tauri-updater with patch",
       );
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
       // @ts-expect-error
@@ -282,8 +279,7 @@ describe("full e2e test", () => {
       }));
 
     it("input", function* () {
-      const log = yield* logTest.createCapturedLogger();
-            yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -301,81 +297,80 @@ describe("full e2e test", () => {
       // to confirm we have reached the end of the logs
       yield* logger.operations.info("completed");
       yield* logTest.consecutive(
-          log.sink.all,
-          [
-            // status runs first to set some output
-            {
-              command: "status",
-              msg: "There are no changes.",
-              level: "info",
-            },
-            {
-              command: "status",
-              msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-              level: "info",
-            },
-            // then the publish command runs
-            {
-              msg: "package-one [publish]: echo publish",
-              level: "info",
-            },
-            {
-              msg: "publish",
-              level: "info",
-            },
-            // create release call
-            {
-              msg: "creating Github Release for package-one@2.3.1",
-              level: "info",
-            },
-            {
-              msg: "github release created for package-one with id: undefined",
-              level: "info",
-            },
-            {
-              msg: "package-two [publish]: echo publish",
-              level: "info",
-            },
-            {
-              msg: "publish",
-              level: "info",
-            },
-            // create release call
-            {
-              msg: "creating Github Release for package-two@1.9.0",
-              level: "info",
-            },
-            {
-              msg: "github release created for package-two with id: undefined",
-              level: "info",
-            },
-            {
-              msg: "covector publish output",
-              level: "info",
-            },
-            // and finishes with the output
-            {
-              msg: "completed",
-              level: "info",
-            },
-          ],
-          checksWithObject()
-        );
+        log.all,
+        [
+          // status runs first to set some output
+          {
+            command: "status",
+            msg: "There are no changes.",
+            level: "info",
+          },
+          {
+            command: "status",
+            msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
+            level: "info",
+          },
+          // then the publish command runs
+          {
+            msg: "package-one [publish]: echo publish",
+            level: "info",
+          },
+          {
+            msg: "publish",
+            level: "info",
+          },
+          // create release call
+          {
+            msg: "creating Github Release for package-one@2.3.1",
+            level: "info",
+          },
+          {
+            msg: "github release created for package-one with id: undefined",
+            level: "info",
+          },
+          {
+            msg: "package-two [publish]: echo publish",
+            level: "info",
+          },
+          {
+            msg: "publish",
+            level: "info",
+          },
+          // create release call
+          {
+            msg: "creating Github Release for package-two@1.9.0",
+            level: "info",
+          },
+          {
+            msg: "github release created for package-two with id: undefined",
+            level: "info",
+          },
+          {
+            msg: "covector publish output",
+            level: "info",
+          },
+          // and finishes with the output
+          {
+            msg: "completed",
+            level: "info",
+          },
+        ],
+        checksWithObject(),
+      );
 
       expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("2.3.1")
+        expect.stringContaining("2.3.1"),
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("1.9.0")
+        expect.stringContaining("1.9.0"),
       );
     });
 
     it("output", function* () {
-      const log = yield* logTest.createCapturedLogger();
-            yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -395,21 +390,20 @@ describe("full e2e test", () => {
       expect(core.setOutput).toHaveBeenCalledWith("successfulPublish", true);
       expect(core.setOutput).toHaveBeenCalledWith(
         "packagesPublished",
-        "package-one,package-two"
+        "package-one,package-two",
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("2.3.1")
+        expect.stringContaining("2.3.1"),
       );
       expect(core.setOutput).toHaveBeenCalledWith(
         "templatePipe",
-        expect.stringContaining("1.9.0")
+        expect.stringContaining("1.9.0"),
       );
     });
 
     it("github release update of all packages", function* () {
-      const log = yield* logTest.createCapturedLogger();
-            yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -447,17 +441,17 @@ describe("full e2e test", () => {
               updateRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               createRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               uploadReleaseAsset: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
             },
           },
@@ -509,8 +503,7 @@ describe("full e2e test", () => {
     });
 
     it("github release creation of all packages", function* () {
-      const log = yield* logTest.createCapturedLogger();
-            yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
       const input: { [k: string]: string } = {
@@ -548,17 +541,17 @@ describe("full e2e test", () => {
               updateRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               createRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               uploadReleaseAsset: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
             },
           },
@@ -613,8 +606,7 @@ describe("full e2e test", () => {
     });
 
     it("github release update of single package", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-single-github-release");
 
       const input: { [k: string]: string } = {
@@ -646,17 +638,17 @@ describe("full e2e test", () => {
               updateRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               createRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               uploadReleaseAsset: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
             },
           },
@@ -693,8 +685,7 @@ describe("full e2e test", () => {
     });
 
     it("github release creation of single package", function* () {
-      const log = yield* logTest.createCapturedLogger();
-            yield* logger.around(log.around, {at: "min"})
+      const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-single-github-release");
 
       const input: { [k: string]: string } = {
@@ -719,17 +710,17 @@ describe("full e2e test", () => {
               updateRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               createRelease: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
               uploadReleaseAsset: vi
                 .fn()
                 .mockImplementation((input) =>
-                  Promise.resolve({ data: input })
+                  Promise.resolve({ data: input }),
                 ),
             },
           },

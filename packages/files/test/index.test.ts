@@ -88,7 +88,7 @@ describe("general file test", () => {
   });
 
   it("deletes files", function* () {
-    const logs = yield* logTest.createCapturedLogger();
+    const logs = yield* logTest.useCapturedLogger();
     const changesFolder = f.copy("integration.general-file");
     const changeFilesToDelete = [
       "./.changes/first-change.md",

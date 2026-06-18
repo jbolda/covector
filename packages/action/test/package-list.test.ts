@@ -1,4 +1,4 @@
-import { packageListToArray } from "../src/utils";
+import { packageListToArray } from "../src/utils.ts";
 import { describe, it, expect } from "vitest";
 
 describe("packageListToArray", () => {

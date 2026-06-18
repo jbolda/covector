@@ -18,8 +18,7 @@ const configDefaults = {
 
 describe("validate apply", () => {
   it("bumps single js json", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const jsonFolder = f.copy("pkg.js-single-json");
 
     const commands = [
@@ -53,8 +52,7 @@ describe("validate apply", () => {
   });
 
   it("bumps single rust toml", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-single");
 
     const commands = [
@@ -88,8 +86,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi js json", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
     const commands = [
@@ -146,8 +143,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-multi");
 
     const commands = [
@@ -193,8 +189,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml with object dep", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
     const commands = [
@@ -240,8 +235,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml with dep missing patch", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
     const commands = [
@@ -287,8 +281,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as patch with object dep missing patch", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -335,8 +328,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as minor with object dep without version number", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
 
     const rustFolder: string = f.copy("pkg.rust-multi-object-path-dep-only");
 
@@ -390,6 +382,6 @@ describe("validate apply", () => {
     );
 
     // to confirm that no error logs have been returned
-    yield* logTest.consecutive(log.sink.all, [{ msg: "completed", level: "info" }]);
+    yield* logTest.consecutive(log.all, [{ msg: "completed", level: "info" }]);
   });
 });

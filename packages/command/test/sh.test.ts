@@ -28,8 +28,7 @@ function* sh(
   options: Record<string, unknown> = {},
   log: false | string = false,
 ) {
-  const sink = yield* logTest.createCapturedLogger();
-  yield* logger.around(sink.around, { at: "min" });
+  const sink = yield* logTest.useCapturedLogger();
   const out = yield* runCommand({
     logger: logger.operations,
     pkg: "package",
@@ -39,7 +38,7 @@ function* sh(
     log,
     options: options as any,
   });
-  return { out, ...sink };
+  return { out, sink };
 }
 
 describe("sh", () => {

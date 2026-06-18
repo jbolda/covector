@@ -1,4 +1,4 @@
-import { confirmCommandsToRun } from "../src/index.js";
+import { confirmCommandsToRun } from "../src/index.ts";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
@@ -36,8 +36,7 @@ describe("confirmCommandsToRun", () => {
   describe("processExecute", () => {
     describe("npm view", () => {
       it("already published", function* () {
-        const log = yield* logTest.createCapturedLogger();
-        yield* logger.around(log.around, { at: "min" });
+        const log = yield* logTest.useCapturedLogger();
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger: logger.operations,
@@ -54,26 +53,25 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* logTest.consecutive(log.sink.all, [
-            {
-              msg: "Checking if effection@0.5.0 is already published with: npm view effection@0.5.0 version --silent",
-              level: "info",
-            },
-            {
-              msg: "0.5.0",
-              level: "info",
-            },
-            {
-              msg: "effection@0.5.0 is already published. Skipping.",
-              level: "info",
-            },
-          ]);
+        yield* logTest.consecutive(log.all, [
+          {
+            msg: "Checking if effection@0.5.0 is already published with: npm view effection@0.5.0 version --silent",
+            level: "info",
+          },
+          {
+            msg: "0.5.0",
+            level: "info",
+          },
+          {
+            msg: "effection@0.5.0 is already published. Skipping.",
+            level: "info",
+          },
+        ]);
         expect(commandsToRun).toEqual([]);
       });
 
       it("needs publish", function* () {
-        const log = yield* logTest.createCapturedLogger();
-        yield* logger.around(log.around, { at: "min" });
+        const log = yield* logTest.useCapturedLogger();
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger: logger.operations,
@@ -90,16 +88,16 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* logTest.consecutive(log.sink.all, [
-            {
-              msg: "Checking if effection@0.5.99 is already published with: npm view effection@0.5.0 version --silent",
-              level: "info",
-            },
-            {
-              msg: "0.5.0",
-              level: "info",
-            },
-          ]);
+        yield* logTest.consecutive(log.all, [
+          {
+            msg: "Checking if effection@0.5.99 is already published with: npm view effection@0.5.0 version --silent",
+            level: "info",
+          },
+          {
+            msg: "0.5.0",
+            level: "info",
+          },
+        ]);
         expect(commandsToRun).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ pkg: "effection" }),
@@ -112,8 +110,7 @@ describe("confirmCommandsToRun", () => {
   describe("fetchCommand", () => {
     describe("fetch npm registry", () => {
       it("already published", function* () {
-        const log = yield* logTest.createCapturedLogger();
-        yield* logger.around(log.around, { at: "min" });
+        const log = yield* logTest.useCapturedLogger();
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger: logger.operations,
@@ -135,22 +132,21 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* logTest.consecutive(log.sink.logs, [
-            {
-              msg: "Checking if effection@0.5.0 is already published with built-in fetch:check",
-              level: "info",
-            },
-            {
-              msg: "effection@0.5.0 is already published. Skipping.",
-              level: "info",
-            },
-          ]);
+        yield* logTest.consecutive(log.logs, [
+          {
+            msg: "Checking if effection@0.5.0 is already published with built-in fetch:check",
+            level: "info",
+          },
+          {
+            msg: "effection@0.5.0 is already published. Skipping.",
+            level: "info",
+          },
+        ]);
         expect(commandsToRun).toEqual([]);
       });
 
       it("needs publish", function* () {
-        const log = yield* logTest.createCapturedLogger();
-        yield* logger.around(log.around, { at: "min" });
+        const log = yield* logTest.useCapturedLogger();
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger: logger.operations,
@@ -172,12 +168,12 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* logTest.consecutive(log.sink.logs, [
-            {
-              msg: "Checking if effection@0.5.99 is already published with built-in fetch:check",
-              level: "info",
-            },
-          ]);
+        yield* logTest.consecutive(log.logs, [
+          {
+            msg: "Checking if effection@0.5.99 is already published with built-in fetch:check",
+            level: "info",
+          },
+        ]);
         expect(commandsToRun).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ pkg: "effection" }),
@@ -188,8 +184,7 @@ describe("confirmCommandsToRun", () => {
 
     describe("fetch cargo registry", () => {
       it("already published", function* () {
-        const log = yield* logTest.createCapturedLogger();
-        yield* logger.around(log.around, { at: "min" });
+        const log = yield* logTest.useCapturedLogger();
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger: logger.operations,
@@ -211,22 +206,21 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* logTest.consecutive(log.sink.logs, [
-            {
-              msg: "Checking if tauri@0.11.0 is already published with built-in fetch:check",
-              level: "info",
-            },
-            {
-              msg: "tauri@0.11.0 is already published. Skipping.",
-              level: "info",
-            },
-          ]);
+        yield* logTest.consecutive(log.logs, [
+          {
+            msg: "Checking if tauri@0.11.0 is already published with built-in fetch:check",
+            level: "info",
+          },
+          {
+            msg: "tauri@0.11.0 is already published. Skipping.",
+            level: "info",
+          },
+        ]);
         expect(commandsToRun).toEqual([]);
       });
 
       it("needs publish", function* () {
-        const log = yield* logTest.createCapturedLogger();
-        yield* logger.around(log.around, { at: "min" });
+        const log = yield* logTest.useCapturedLogger();
 
         const commandsToRun = yield* confirmCommandsToRun({
           logger: logger.operations,
@@ -248,12 +242,12 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* logTest.consecutive(log.sink.logs, [
-            {
-              msg: "Checking if tauri@0.12.0 is already published with built-in fetch:check",
-              level: "info",
-            },
-          ]);
+        yield* logTest.consecutive(log.logs, [
+          {
+            msg: "Checking if tauri@0.12.0 is already published with built-in fetch:check",
+            level: "info",
+          },
+        ]);
         expect(commandsToRun).toEqual(
           expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })]),
         );

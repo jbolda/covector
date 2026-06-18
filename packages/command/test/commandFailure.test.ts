@@ -1,4 +1,4 @@
-import { attemptCommands } from "../src/index.js";
+import { attemptCommands } from "../src/index.ts";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
@@ -18,8 +18,7 @@ const base = {
 
 describe("attemptCommand fails", () => {
   it("fails a function", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
 
     const errored = yield* captureError(
       attemptCommands({
@@ -42,8 +41,7 @@ describe("attemptCommand fails", () => {
   });
 
   it("retries a failed function", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
 
     const errored = yield* captureError(
       attemptCommands({
@@ -84,21 +82,21 @@ describe("attemptCommand fails", () => {
       ];
 
       yield* logTest.consecutive(
-          log.sink.logs,
-          [
-            { msg: "pkg-nickname []: boop", level: "info" },
-            ...errorLog,
-            { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
-            { msg: "pkg-nickname []: boop", level: "info" },
-            ...errorLog,
-            { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
-            { msg: "pkg-nickname []: boop", level: "info" },
-            ...errorLog,
-            // to confirm we are done with logs
-            { msg: "completed", level: "info" },
-          ],
-          isShallowError,
-        );
+        log.logs,
+        [
+          { msg: "pkg-nickname []: boop", level: "info" },
+          ...errorLog,
+          { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+          { msg: "pkg-nickname []: boop", level: "info" },
+          ...errorLog,
+          { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+          { msg: "pkg-nickname []: boop", level: "info" },
+          ...errorLog,
+          // to confirm we are done with logs
+          { msg: "completed", level: "info" },
+        ],
+        isShallowError,
+      );
       expect(
         errored.message.includes("ENOENT") ||
           errored.message.includes("non-zero status") ||
@@ -109,18 +107,18 @@ describe("attemptCommand fails", () => {
     } else {
       const errorMessage = "spawn boop ENOENT";
       yield* logTest.consecutive(
-          log.sink.logs,
-          [
-            { msg: "pkg-nickname []: boop", level: "info" },
-            { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
-            { msg: "pkg-nickname []: boop", level: "info" },
-            { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
-            { msg: "pkg-nickname []: boop", level: "info" },
-            // to confirm we are done with logs
-            { msg: "completed", level: "info" },
-          ],
-          isShallowError,
-        );
+        log.logs,
+        [
+          { msg: "pkg-nickname []: boop", level: "info" },
+          { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+          { msg: "pkg-nickname []: boop", level: "info" },
+          { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+          { msg: "pkg-nickname []: boop", level: "info" },
+          // to confirm we are done with logs
+          { msg: "completed", level: "info" },
+        ],
+        isShallowError,
+      );
       expect(errored.message).toBe(errorMessage);
     }
   });

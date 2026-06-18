@@ -14,8 +14,7 @@ const configDefaults = {
 
 describe("package file applies preview bump", () => {
   it("bumps single js json", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const jsonFolder = f.copy("pkg.js-single-json"); // 0.5.9
 
     const commands = [
@@ -61,7 +60,7 @@ describe("package file applies preview bump", () => {
         "}\n",
     );
 
-    yield* logTest.consecutive(log.sink.all, [
+    yield* logTest.consecutive(log.all, [
         {
           msg: "bumping js-single-json-fixture with branch-name.12345 identifier to publish a preview",
           level: "info",
@@ -70,8 +69,7 @@ describe("package file applies preview bump", () => {
   });
 
   it("bumps multi js json", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const jsonFolder = f.copy("pkg.js-yarn-workspace"); // 1.0.0
 
     const commands = [
@@ -157,7 +155,7 @@ describe("package file applies preview bump", () => {
         "}\n",
     );
 
-    yield* logTest.consecutive(log.sink.all, [
+    yield* logTest.consecutive(log.all, [
         {
           msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
           level: "info",
@@ -176,8 +174,7 @@ describe("package file applies preview bump", () => {
 
 describe("package file applies preview bump to pre-release", () => {
   it("bumps single js json without pre-release", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const jsonFolder = f.copy("pkg.js-single-prerelease-json"); // 0.5.9-abc.2
 
     const commands = [
@@ -222,7 +219,7 @@ describe("package file applies preview bump to pre-release", () => {
         "}\n",
     );
 
-    yield* logTest.consecutive(log.sink.all, [
+    yield* logTest.consecutive(log.all, [
         {
           msg: "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
           level: "info",
@@ -231,8 +228,7 @@ describe("package file applies preview bump to pre-release", () => {
   });
 
   it("bumps multi js json without pre-release", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
     const jsonFolder = f.copy("pkg.js-yarn-prerelease-workspace");
 
     const commands = [
@@ -317,7 +313,7 @@ describe("package file applies preview bump to pre-release", () => {
         "}\n",
     );
 
-    yield* logTest.consecutive(log.sink.all, [
+    yield* logTest.consecutive(log.all, [
         {
           msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
           level: "info",

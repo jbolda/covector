@@ -1,4 +1,4 @@
-import { covector } from "../../src/index.js";
+import { covector } from "../../src/index.ts";
 import { logger as covectorLogger } from "../../src/logger.ts";
 import { TomlDocument } from "@covector/toml";
 import { loadFile } from "@covector/files";
@@ -47,41 +47,41 @@ describe("integration test with preMode `on`", () => {
       throw new Error("We are expecting an object here.");
 
     yield* logTest.consecutive(
-        sink.all,
-        [
-          {
-            msg: "bumping tauri with preminor",
-            level: "info",
-            meta: { command: "version" },
-          },
-          {
-            msg: "bumping tauri-updater with prepatch",
-            level: "info",
-            meta: { command: "version" },
-          },
-          {
-            msg: "bumping tauri.js with prerelease",
-            level: "info",
-            meta: { command: "version" },
-          },
-          {
-            msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: "info",
-            meta: { command: "version" },
-          },
-          {
-            msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: "info",
-            meta: { command: "version" },
-          },
-          {
-            msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: "info",
-            meta: { command: "version" },
-          },
-        ],
-        checksWithObject(),
-      );
+      sink.all,
+      [
+        {
+          msg: "bumping tauri with preminor",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "bumping tauri-updater with prepatch",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "bumping tauri.js with prerelease",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+      ],
+      checksWithObject(),
+    );
 
     expect(covectored).toMatchSnapshot();
 
@@ -126,31 +126,31 @@ describe("integration test with preMode `on`", () => {
     });
 
     yield* logTest.consecutive(sinkOne.all, [
-        {
-          msg: "bumping tauri with preminor",
-          level: "info",
-        },
-        {
-          msg: "bumping tauri-updater with prepatch",
-          level: "info",
-        },
-        {
-          msg: "bumping tauri.js with prerelease",
-          level: "info",
-        },
-        {
-          msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: "info",
-        },
-        {
-          msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: "info",
-        },
-        {
-          msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: "info",
-        },
-      ]);
+      {
+        msg: "bumping tauri with preminor",
+        level: "info",
+      },
+      {
+        msg: "bumping tauri-updater with prepatch",
+        level: "info",
+      },
+      {
+        msg: "bumping tauri.js with prerelease",
+        level: "info",
+      },
+      {
+        msg: "Could not load the CHANGELOG.md. Creating one.",
+        level: "info",
+      },
+      {
+        msg: "Could not load the CHANGELOG.md. Creating one.",
+        level: "info",
+      },
+      {
+        msg: "Could not load the CHANGELOG.md. Creating one.",
+        level: "info",
+      },
+    ]);
 
     const changelogTauriCoreOne = yield* loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
@@ -210,23 +210,23 @@ Boop again.
     });
 
     yield* logTest.consecutive(sinkTwo.all, [
-        {
-          msg: "bumping tauri-api with prepatch",
-          level: "info",
-        },
-        {
-          msg: "bumping tauri with prerelease",
-          level: "info",
-        },
-        {
-          msg: "bumping tauri.js with prerelease",
-          level: "info",
-        },
-        {
-          msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: "info",
-        },
-      ]);
+      {
+        msg: "bumping tauri-api with prepatch",
+        level: "info",
+      },
+      {
+        msg: "bumping tauri with prerelease",
+        level: "info",
+      },
+      {
+        msg: "bumping tauri.js with prerelease",
+        level: "info",
+      },
+      {
+        msg: "Could not load the CHANGELOG.md. Creating one.",
+        level: "info",
+      },
+    ]);
 
     const changelogTauriCoreTwo = yield* loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
@@ -292,16 +292,16 @@ Boop again.
     });
 
     yield* logTest.consecutive(
-        sink.all,
-        [
-          {
-            msg: "==== data piped into commands ===",
-            level: "info",
-            meta: { command: "version" },
-          },
-        ],
-        checksWithObject(),
-      );
+      sink.all,
+      [
+        {
+          msg: "==== data piped into commands ===",
+          level: "info",
+          meta: { command: "version" },
+        },
+      ],
+      checksWithObject(),
+    );
 
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");

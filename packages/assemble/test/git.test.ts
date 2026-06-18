@@ -9,8 +9,8 @@ import { logger } from "../../covector/src/index.ts";
 
 describe("git parsing", () => {
   it("parses and returns multiple commits", function* () {
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
+    
     // this was a file on a previous commit, we can use it
     //   to check the git command as that should still be in the history
     const file: File = {

@@ -17,9 +17,8 @@ const configDefaults = {
 describe("package file apply bump (snapshot)", () => {
   describe("on js", () => {
     it("bumps single", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const jsonFolder = f.copy("pkg.js-single-json");
+      const log = yield* logTest.useCapturedLogger();
+        const jsonFolder = f.copy("pkg.js-single-json");
 
       const commands = [
         {
@@ -63,15 +62,14 @@ describe("package file apply bump (snapshot)", () => {
           "}\n",
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping js-single-json-fixture with minor", level: "info" },
         ]);
     });
 
     it("fails bump single that satisfies range", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const jsonFolder = f.copy("pkg.js-single-json");
+      const log = yield* logTest.useCapturedLogger();
+        const jsonFolder = f.copy("pkg.js-single-json");
 
       const commands = [
         {
@@ -110,15 +108,14 @@ describe("package file apply bump (snapshot)", () => {
         "js-single-json-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping js-single-json-fixture with minor", level: "info" },
         ]);
     });
 
     it("bumps multi", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const jsonFolder = f.copy("pkg.js-yarn-workspace");
+      const log = yield* logTest.useCapturedLogger();
+        const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
       const commands = [
         {
@@ -202,7 +199,7 @@ describe("package file apply bump (snapshot)", () => {
           "}\n",
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping yarn-workspace-base-pkg-a with minor", level: "info" },
           { msg: "bumping yarn-workspace-base-pkg-b with minor", level: "info" },
           { msg: "bumping all with minor", level: "info" },
@@ -210,9 +207,8 @@ describe("package file apply bump (snapshot)", () => {
     });
 
     it("bumps multi with parent as range", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const jsonFolder = f.copy("pkg.js-yarn-workspace");
+      const log = yield* logTest.useCapturedLogger();
+        const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
       const commands = [
         {
@@ -313,7 +309,7 @@ describe("package file apply bump (snapshot)", () => {
           "}\n",
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping yarn-workspace-base-pkg-a with patch", level: "info" },
           { msg: "bumping yarn-workspace-base-pkg-b with minor", level: "info" },
         ]);
@@ -322,9 +318,8 @@ describe("package file apply bump (snapshot)", () => {
 
   describe("on rust", () => {
     it("bumps single", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const rustFolder = f.copy("pkg.rust-single");
+      const log = yield* logTest.useCapturedLogger();
+        const rustFolder = f.copy("pkg.rust-single");
 
       const commands = [
         {
@@ -361,15 +356,14 @@ describe("package file apply bump (snapshot)", () => {
         '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n',
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping rust-single-fixture with minor", level: "info" },
         ]);
     });
 
     it("fails bumps single that satisfies range", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const rustFolder = f.copy("pkg.rust-single");
+      const log = yield* logTest.useCapturedLogger();
+        const rustFolder = f.copy("pkg.rust-single");
 
       const commands = [
         {
@@ -409,15 +403,14 @@ describe("package file apply bump (snapshot)", () => {
         "rust-single-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping rust-single-fixture with minor", level: "info" },
         ]);
     });
 
     it("bumps multi", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const rustFolder = f.copy("pkg.rust-multi");
+      const log = yield* logTest.useCapturedLogger();
+        const rustFolder = f.copy("pkg.rust-multi");
 
       const commands = [
         {
@@ -478,16 +471,15 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
           { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
         ]);
     });
 
     it("bumps multi with object dep", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const rustFolder = f.copy("pkg.rust-multi-object-dep");
+      const log = yield* logTest.useCapturedLogger();
+        const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
       const commands = [
         {
@@ -548,16 +540,15 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
           { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
         ]);
     });
 
     it("bumps multi with dep missing patch", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
+      const log = yield* logTest.useCapturedLogger();
+        const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
       const commands = [
         {
@@ -618,16 +609,15 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
           { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
         ]);
     });
 
     it("bump multi as patch with object dep missing patch", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
+      const log = yield* logTest.useCapturedLogger();
+        const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
       const commands = [
         {
@@ -690,16 +680,15 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.8.9"\n',
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping rust_pkg_a_fixture with patch", level: "info" },
           { msg: "bumping rust_pkg_b_fixture with patch", level: "info" },
         ]);
     });
 
     it("bumps multi as minor with object dep missing patch", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
+      const log = yield* logTest.useCapturedLogger();
+        const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
       const commands = [
         {
@@ -760,7 +749,7 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
           { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
         ]);
@@ -769,9 +758,8 @@ describe("package file apply bump (snapshot)", () => {
 
   describe("on yaml", () => {
     it("bumps single", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
-      const flutterFolder = f.copy("pkg.dart-flutter-single");
+      const log = yield* logTest.useCapturedLogger();
+        const flutterFolder = f.copy("pkg.dart-flutter-single");
 
       const commands = [
         {
@@ -816,7 +804,7 @@ describe("package file apply bump (snapshot)", () => {
           "flutter:\n  assets:\n    - assets/schema/\n    - assets/localization/\n",
       );
 
-      yield* logTest.consecutive(log.sink.all, [
+      yield* logTest.consecutive(log.all, [
           { msg: "bumping test_app with minor", level: "info" },
         ]);
     });

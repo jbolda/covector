@@ -124,8 +124,8 @@ const config = {
 describe("merge config", () => {
   describe("full config", () => {
     it("merges version", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
+      
 
       const mergedVersionConfig = yield* mergeChangesToConfig({
         logger: logger.operations,
@@ -138,8 +138,8 @@ describe("merge config", () => {
     });
 
     it("merges version without command", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
+      
 
       let modifiedConfig = { ...config };
       //@ts-expect-error
@@ -162,8 +162,8 @@ describe("merge config", () => {
     });
 
     it("merges nested bumps", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
+      
 
       const nestedAssembledChanges = {
         releases: {
@@ -232,8 +232,8 @@ describe("merge config", () => {
     });
 
     it("merges publish", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
+      
       const configFolder = f.copy("assemble");
 
       const mergedPublishConfig = yield* mergeIntoConfig({
@@ -249,8 +249,8 @@ describe("merge config", () => {
 
   describe("filtered config", () => {
     it("merges version", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
+      
 
       const mergedVersionConfig = yield* mergeChangesToConfig({
         logger: logger.operations,
@@ -264,8 +264,8 @@ describe("merge config", () => {
     });
 
     it("merges publish", function* () {
-      const log = yield* logTest.createCapturedLogger();
-      yield* logger.around(log.around, { at: "min" });
+      const log = yield* logTest.useCapturedLogger();
+      
       const configFolder = f.copy("assemble");
 
       const mergedPublishConfig = yield* mergeIntoConfig({

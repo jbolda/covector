@@ -19,7 +19,7 @@ const configDefaults = {
 describe("reads changelog", () => {
   it("reads back the recent change", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
-    const logs = yield* logTest.createCapturedLogger();
+    const logs = yield* logTest.useCapturedLogger();
 
     const applied = [
       {
@@ -137,8 +137,8 @@ describe("reads changelog", () => {
 
   it("reads a changelog with multiple entries", function* () {
     const projectFolder = f.copy("changelog.js-single-exists");
-    const logs = yield* logTest.createCapturedLogger();
-    yield* logger.around(logs.around, { at: "min" });
+    const logs = yield* logTest.useCapturedLogger();
+    
 
     const applied = [
       {

@@ -15,8 +15,8 @@ const configDefaults = {
 describe("fills changelog", () => {
   it("creates and fills a changelog", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
-    const log = yield* logTest.createCapturedLogger();
-    yield* logger.around(log.around, { at: "min" });
+    const log = yield* logTest.useCapturedLogger();
+    
 
     const applied = [
       {
@@ -83,8 +83,8 @@ describe("fills changelog", () => {
 
   it("creates and fills a changelog including meta and git info", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
-    const logs = yield* logTest.createCapturedLogger();
-    yield* logger.around(logs.around, { at: "min" });
+    const logs = yield* logTest.useCapturedLogger();
+    
 
     const applied = [
       {
@@ -185,8 +185,8 @@ describe("fills changelog", () => {
 
   it("creates a changelog for nicknamed pkgs", function* () {
     const projectFolder = f.copy("pkg.js-single-json");
-    const logs = yield* logTest.createCapturedLogger();
-    yield* logger.around(logs.around, { at: "min" });
+    const logs = yield* logTest.useCapturedLogger();
+    
     // note the name in this package file is js-single-json-fixture
     // we use a "nickname" in our change files
 
@@ -255,8 +255,8 @@ describe("fills changelog", () => {
 
   it("inserts into an existing changelog", function* () {
     const projectFolder = f.copy("changelog.js-single-exists");
-    const logs = yield* logTest.createCapturedLogger();
-    yield* logger.around(logs.around, { at: "min" });
+    const logs = yield* logTest.useCapturedLogger();
+    
 
     const applied = [
       {
