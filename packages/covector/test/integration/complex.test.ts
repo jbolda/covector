@@ -1,14 +1,16 @@
-import { covector } from "../../src";
+import { covector } from "../../src/index.js";
 import { logger as covectorLogger, logger } from "../../src/logger.ts";
 import { loadFile } from "@covector/files";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import { checksWithObject, captureLoggerMiddleware } from "../helpers.ts";
+import type { Covector } from "@covector/types";
+import { checksWithObject } from "../helpers.ts";
+import type { TestLogEntry } from "../../../../helpers/test-logger.ts";
 import * as logTest from "../../../../helpers/test-logger.ts";
 import path from "path";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call } from "effection";
+
 const f = fixtures(__dirname);
 
 // Skip specific flaky `prod` assertions in CI because npm/stdout chunking causes
@@ -33,18 +35,17 @@ describe("integration test for complex commands", () => {
 
       // no change files so not much happens here
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
 
       const changelogTauriCore = yield* captureError(
@@ -74,38 +75,37 @@ describe("integration test for complex commands", () => {
       });
 
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             {
-              command: "publish",
               msg: "package-one [publish]: echo publish",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publish",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "package-two [publish]: echo publish",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publish",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
 
@@ -119,36 +119,35 @@ describe("integration test for complex commands", () => {
         const fullIntegration = f.copy("integration.js-with-complex-commands");
         const covectored = yield* covector({
           logger: logger.operations,
-          command: "test",
+          command: "test" as keyof Covector,
           cwd: fullIntegration,
         });
 
         yield* logger.operations.info("completed");
-        yield* call(() =>
-          logTest.consecutive(
+        yield* logTest.consecutive(
             log.sink.all,
             [
               {
-                command: "arbitrary",
                 msg: "package-one [test]: npm run build",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "> package-one@2.3.1 build",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "> npm info tauri@0.8.0 description",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "npm warn Ignoring workspaces for specified package(s)",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
-              (log) => {
+              ((log: any) => {
                 if (log.msg === "package-one [test]: npm test") return;
                 if (
                   typeof log.msg === "string" &&
@@ -156,94 +155,94 @@ describe("integration test for complex commands", () => {
                 )
                   return;
                 throw new Error(`unexpected log: ${JSON.stringify(log)}`);
-              },
+              }) as unknown as Partial<TestLogEntry>,
               {
-                command: "arbitrary",
                 msg: "package-one [test]: npm test",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: [
                   "> package-one@2.3.1 test",
                   "> npm info covector@0.1.0 license",
-                ],
-                level: 30,
+                ] as unknown as string,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "npm warn Ignoring workspaces for specified package(s)",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "Apache-2.0",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "package-one [test]: echo boop",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "boop",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "package-two [test]: npm run build",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: [
                   "> package-two@1.9.0 build",
                   "> echo this command is not piped, it is run from scripts for pk2",
-                ],
-                level: 30,
+                ] as unknown as string,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "this command is not piped, it is run from scripts for pk2",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "package-two [test]: npm test",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: [
                   "> package-two@1.9.0 test",
                   "> echo this command is not piped, it is run from the test script",
-                ],
-                level: 30,
+                ] as unknown as string,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "this command is not piped, it is run from the test script",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "package-two [test]: echo boop",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
-                command: "arbitrary",
                 msg: "boop",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
               {
                 msg: "completed",
-                level: 30,
+                level: "info",
+                meta: { command: "test" },
               },
             ],
             checksWithObject(),
-          ),
-        );
+          );
         expect(covectored).toMatchSnapshot();
       },
       10000,
@@ -257,68 +256,67 @@ describe("integration test for complex commands", () => {
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger: logger.operations,
-        command: "build",
+        command: "build" as keyof Covector,
         cwd: fullIntegration,
       });
 
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             {
-              command: "arbitrary",
               msg: "package-one [build]: npm run build",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
             {
-              command: "arbitrary",
               msg: [
                 "> package-one@2.3.1 build",
                 "> npm info tauri@0.8.0 description",
-              ],
-              level: 30,
+              ] as unknown as string,
+              level: "info",
+              meta: { command: "build" },
             },
             {
-              command: "arbitrary",
               msg: "npm warn Ignoring workspaces for specified package(s)",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
-            (log) => {
-              if (log.msg === "package-two [build]: npm run build") return;
+              ((log: any) => {
+                if (log.msg === "package-two [build]: npm run build") return;
               if (
                 typeof log.msg === "string" &&
                 log.msg.includes("Multi-binding collection")
               )
                 return;
               throw new Error(`unexpected log: ${JSON.stringify(log)}`);
-            },
+            }) as unknown as Partial<TestLogEntry>,
             {
-              command: "arbitrary",
               msg: "package-two [build]: npm run build",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
             {
-              command: "arbitrary",
               msg: [
                 "> package-two@1.9.0 build",
                 "> echo this command is not piped, it is run from scripts for pk2",
-              ],
-              level: 30,
+              ] as unknown as string,
+              level: "info",
+              meta: { command: "build" },
             },
             {
-              command: "arbitrary",
               msg: "this command is not piped, it is run from scripts for pk2",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
   });
@@ -339,30 +337,29 @@ describe("integration test for complex commands", () => {
         throw new Error("We are expecting an object here.");
 
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             {
-              command: "version",
               msg: "==== commands ready to run ===",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
               renderAsYAML: {},
             },
             {
-              command: "version",
               msg: "==== result ===",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
               renderAsYAML: {},
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
 
       const changelogTauriCore = yield* captureError(
@@ -393,52 +390,51 @@ describe("integration test for complex commands", () => {
       });
 
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             {
-              command: "publish",
               msg: "==== data piped into commands ===",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
               renderAsYAML: {},
             },
             {
-              command: "publish",
               msg: "==== data piped into commands ===",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
               renderAsYAML: {},
             },
             {
-              command: "publish",
               msg: "==== commands ready to run ===",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
               renderAsYAML: {},
             },
             {
-              command: "publish",
               msg: "dryRun >> package-one [publish]: echo publish",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "dryRun >> package-two [publish]: echo publish",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "==== result ===",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
               renderAsYAML: {},
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
 
@@ -449,88 +445,87 @@ describe("integration test for complex commands", () => {
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger: logger.operations,
-        command: "test",
+        command: "test" as keyof Covector,
         cwd: fullIntegration,
         dryRun: true,
       });
 
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             {
-              command: "arbitrary",
               msg: "==== data piped into commands ===",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
               renderAsYAML: {},
             },
             {
-              command: "arbitrary",
               msg: "==== data piped into commands ===",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
               renderAsYAML: {},
             },
             {
-              command: "arbitrary",
               msg: "==== commands ready to run ===",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
               renderAsYAML: {},
             },
             {
-              command: "arbitrary",
               msg: "dryRun >> package-one [test]: npm run build",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             {
-              command: "arbitrary",
               msg: "dryRun >> package-one [test]: npm test",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             {
-              command: "arbitrary",
               msg: "package-one [test]: echo deboop",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             {
-              command: "arbitrary",
               msg: "deboop",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             {
-              command: "arbitrary",
               msg: "dryRun >> package-two [test]: npm run build",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             {
-              command: "arbitrary",
               msg: "dryRun >> package-two [test]: npm test",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             {
-              command: "arbitrary",
               msg: "package-two [test]: echo deboop",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             {
-              command: "arbitrary",
               msg: "deboop",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             {
-              command: "arbitrary",
               msg: "==== result ===",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
               renderAsYAML: {},
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
 
@@ -541,58 +536,57 @@ describe("integration test for complex commands", () => {
       const fullIntegration = f.copy("integration.js-with-complex-commands");
       const covectored = yield* covector({
         logger: logger.operations,
-        command: "build",
+        command: "build" as keyof Covector,
         cwd: fullIntegration,
         dryRun: true,
       });
 
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             {
-              command: "arbitrary",
               msg: "==== data piped into commands ===",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
               renderAsYAML: {},
             },
             {
-              command: "arbitrary",
               msg: "==== data piped into commands ===",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
               renderAsYAML: {},
             },
             {
-              command: "arbitrary",
               msg: "==== commands ready to run ===",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
               renderAsYAML: {},
             },
             {
-              command: "arbitrary",
               msg: "dryRun >> package-one [build]: npm run build",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
             {
-              command: "arbitrary",
               msg: "dryRun >> package-two [build]: npm run build",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
             {
-              command: "arbitrary",
               msg: "==== result ===",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
               renderAsYAML: {},
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
   });
@@ -606,53 +600,52 @@ describe("integration test to invoke sub commands", () => {
     const fullIntegration = f.copy("integration.js-with-subcommands");
     const covectored = yield* covector({
       logger: logger.operations,
-      command: "publish-primary",
+      command: "publish-primary" as keyof Covector,
       cwd: fullIntegration,
     });
 
     yield* logger.operations.info("completed");
-    yield* call(() =>
-      logTest.consecutive(
+    yield* logTest.consecutive(
         log.sink.all,
         [
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "package-one [publish-primary]: echo publish",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "publish",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "package-two [publish-primary]: echo publish",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "publish",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
           {
             msg: "completed",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
         ],
         checksWithObject(),
-      ),
-    );
+      );
     expect(covectored).toMatchSnapshot();
   });
 
@@ -663,53 +656,52 @@ describe("integration test to invoke sub commands", () => {
     const fullIntegration = f.copy("integration.js-with-subcommands");
     const covectored = yield* covector({
       logger: logger.operations,
-      command: "publishSecondary",
+      command: "publishSecondary" as keyof Covector,
       cwd: fullIntegration,
     });
 
     yield* logger.operations.info("completed");
-    yield* call(() =>
-      logTest.consecutive(
+    yield* logTest.consecutive(
         log.sink.all,
         [
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "package-one [publishSecondary]: echo publish",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "publish",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "package-two [publishSecondary]: echo publish",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
           {
-            command: "arbitrary",
             msg: "publish",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
           {
             msg: "completed",
-            level: 30,
+            level: "info",
+            meta: { command: "publishSecondary" },
           },
         ],
         checksWithObject(),
-      ),
-    );
+      );
     expect(covectored).toMatchSnapshot();
   });
 });

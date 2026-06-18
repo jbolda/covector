@@ -1,4 +1,4 @@
-import { covector } from "../../src";
+import { covector } from "../../src/index.js";
 import { logger as covectorLogger } from "../../src/logger.ts";
 import { TomlDocument } from "@covector/toml";
 import { loadFile } from "@covector/files";
@@ -8,8 +8,9 @@ import * as logTest from "../../../../helpers/test-logger.ts";
 import { checksWithObject } from "../helpers.ts";
 import path from "path";
 import * as fs from "fs";
+// @ts-expect-error fixturez has no types
 import fixtures from "fixturez";
-import { call } from "effection";
+
 const f = fixtures(__dirname);
 
 expect.addSnapshotSerializer({
@@ -30,7 +31,7 @@ describe("integration test with preMode `on`", () => {
     );
 
   it("runs version in production for js and rust", function* () {
-    const sink = yield* logTest.createCapturedLogger();
+    const sink = yield* logTest.useCapturedLogger();
 
     const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -45,44 +46,42 @@ describe("integration test with preMode `on`", () => {
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
 
-    yield* call(() =>
-      logTest.consecutive(
+    yield* logTest.consecutive(
         sink.all,
         [
           {
-            command: "version",
             msg: "bumping tauri with preminor",
-            level: 30,
+            level: "info",
+            meta: { command: "version" },
           },
           {
-            command: "version",
             msg: "bumping tauri-updater with prepatch",
-            level: 30,
+            level: "info",
+            meta: { command: "version" },
           },
           {
-            command: "version",
             msg: "bumping tauri.js with prerelease",
-            level: 30,
+            level: "info",
+            meta: { command: "version" },
           },
           {
-            command: "version",
             msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: 30,
+            level: "info",
+            meta: { command: "version" },
           },
           {
-            command: "version",
             msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: 30,
+            level: "info",
+            meta: { command: "version" },
           },
           {
-            command: "version",
             msg: "Could not load the CHANGELOG.md. Creating one.",
-            level: 30,
+            level: "info",
+            meta: { command: "version" },
           },
         ],
         checksWithObject(),
-      ),
-    );
+      );
 
     expect(covectored).toMatchSnapshot();
 
@@ -111,10 +110,10 @@ describe("integration test with preMode `on`", () => {
   });
 
   it("runs version in production with existing changes for js and rust", function* () {
-    const sinkOne = yield* logTest.createCapturedLogger();
+    const sinkOne = yield* logTest.useCapturedLogger();
 
     const loggerOne = covectorLogger.operations;
-    const sinkTwo = yield* logTest.createCapturedLogger();
+    const sinkTwo = yield* logTest.useCapturedLogger();
 
     const loggerTwo = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -126,40 +125,32 @@ describe("integration test with preMode `on`", () => {
       cwd: fullIntegration,
     });
 
-    yield* call(() =>
-      logTest.consecutive(sinkOne.all, [
+    yield* logTest.consecutive(sinkOne.all, [
         {
-          command: "version",
           msg: "bumping tauri with preminor",
-          level: 30,
+          level: "info",
         },
         {
-          command: "version",
           msg: "bumping tauri-updater with prepatch",
-          level: 30,
+          level: "info",
         },
         {
-          command: "version",
           msg: "bumping tauri.js with prerelease",
-          level: 30,
+          level: "info",
         },
         {
-          command: "version",
           msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: 30,
+          level: "info",
         },
         {
-          command: "version",
           msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: 30,
+          level: "info",
         },
         {
-          command: "version",
           msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: 30,
+          level: "info",
         },
-      ]),
-    );
+      ]);
 
     const changelogTauriCoreOne = yield* loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
@@ -218,30 +209,24 @@ Boop again.
       cwd: fullIntegration,
     });
 
-    yield* call(() =>
-      logTest.consecutive(sinkTwo.all, [
+    yield* logTest.consecutive(sinkTwo.all, [
         {
-          command: "version",
           msg: "bumping tauri-api with prepatch",
-          level: 30,
+          level: "info",
         },
         {
-          command: "version",
           msg: "bumping tauri with prerelease",
-          level: 30,
+          level: "info",
         },
         {
-          command: "version",
           msg: "bumping tauri.js with prerelease",
-          level: 30,
+          level: "info",
         },
         {
-          command: "version",
           msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: 30,
+          level: "info",
         },
-      ]),
-    );
+      ]);
 
     const changelogTauriCoreTwo = yield* loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
@@ -293,7 +278,7 @@ Boop again.
   });
 
   it("runs version in --dry-run mode for js and rust", function* () {
-    const sink = yield* logTest.createCapturedLogger();
+    const sink = yield* logTest.useCapturedLogger();
 
     const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -306,19 +291,17 @@ Boop again.
       dryRun: true,
     });
 
-    yield* call(() =>
-      logTest.consecutive(
+    yield* logTest.consecutive(
         sink.all,
         [
           {
-            command: "version",
             msg: "==== data piped into commands ===",
-            level: 30,
+            level: "info",
+            meta: { command: "version" },
           },
         ],
         checksWithObject(),
-      ),
-    );
+      );
 
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");

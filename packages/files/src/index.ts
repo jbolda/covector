@@ -11,8 +11,7 @@ import yaml from "js-yaml";
 import semver from "semver";
 
 export * from "./schema.ts";
-import type { LoadedFile, ConfigFile } from "./schema.ts";
-
+import type { LoadedFile, ConfigFile } from "@covector/types";
 import type {
   PkgMinimum,
   PackageFile,
@@ -20,7 +19,7 @@ import type {
   DepsKeyed,
   DepTypes,
   Pkg,
-} from "./types.ts";
+} from "@covector/types";
 
 export type { TomlDocument } from "@covector/toml";
 export type {
@@ -30,7 +29,13 @@ export type {
   DepsKeyed,
   DepTypes,
   Pkg,
-} from "./types.ts";
+  LoadedFile,
+  ConfigFile,
+  CommandConfig,
+  PkgManagerConfig,
+  PackageConfig,
+  Config,
+} from "@covector/types";
 
 export function* loadFile(file: string, cwd: string): Operation<LoadedFile> {
   const content = yield* call(() =>

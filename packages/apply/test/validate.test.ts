@@ -390,8 +390,6 @@ describe("validate apply", () => {
     );
 
     // to confirm that no error logs have been returned
-    yield* call(() =>
-      logTest.consecutive(log.sink.all, [{ msg: "completed", level: 30 }]),
-    );
+    yield* logTest.consecutive(log.sink.all, [{ msg: "completed", level: "info" }]);
   });
 });

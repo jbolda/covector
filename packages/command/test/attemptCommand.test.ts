@@ -1,9 +1,9 @@
-import { attemptCommands } from "../src";
+import { attemptCommands } from "../src/index.js";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call, sleep, useScope } from "effection";
+import { sleep, useScope } from "effection";
 import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
@@ -56,9 +56,7 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield* call(() =>
-      logTest.consecutive(log.sink.logs, [{ msg: "boop", level: 30 }]),
-    );
+    yield* logTest.consecutive(log.sink.logs, [{ msg: "boop", level: "info" }]);
   });
 
   it("invokes an array of functions", function* () {
@@ -98,14 +96,12 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield* call(() =>
-      logTest.consecutive(log.sink.logs, [
-        { msg: "boop", level: 30 },
-        { msg: "booop", level: 30 },
-        { msg: "boooop", level: 30 },
-        { msg: "booooop", level: 30 },
-      ]),
-    );
+    yield* logTest.consecutive(log.sink.logs, [
+        { msg: "boop", level: "info" },
+        { msg: "booop", level: "info" },
+        { msg: "boooop", level: "info" },
+        { msg: "booooop", level: "info" },
+      ]);
   });
 
   it("invokes a function using package values", function* () {
@@ -133,11 +129,9 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield* call(() =>
-      logTest.consecutive(log.sink.logs, [
-        { msg: "boop pkg-nickname@0.5.6", level: 30 },
-      ]),
-    );
+    yield* logTest.consecutive(log.sink.logs, [
+        { msg: "boop pkg-nickname@0.5.6", level: "info" },
+      ]);
   });
 
   it("invokes an array of functions using package values", function* () {
@@ -186,13 +180,11 @@ describe("attemptCommand", () => {
       dryRun: false,
     });
 
-    yield* call(() =>
-      logTest.consecutive(log.sink.logs, [
-        { msg: "boop pkg-nickname@0.5.6", level: 30 },
-        { msg: "booop pkg-nickname@0.5.6", level: 30 },
-        { msg: "boooop pkg-nickname@0.5.6", level: 30 },
-        { msg: "booooop pkg-nickname@0.5.6", level: 30 },
-      ]),
-    );
+    yield* logTest.consecutive(log.sink.logs, [
+        { msg: "boop pkg-nickname@0.5.6", level: "info" },
+        { msg: "booop pkg-nickname@0.5.6", level: "info" },
+        { msg: "boooop pkg-nickname@0.5.6", level: "info" },
+        { msg: "booooop pkg-nickname@0.5.6", level: "info" },
+      ]);
   });
 });

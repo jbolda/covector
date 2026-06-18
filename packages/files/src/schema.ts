@@ -8,7 +8,6 @@ export const fileSchema = z.object({
   filename: z.string(),
   extname: z.string(),
 });
-export type LoadedFile = z.infer<typeof fileSchema>;
 
 const commandBaseSchema = z.object({
   runFromRoot: z.boolean().optional(),
@@ -86,7 +85,6 @@ export const packageConfigSchema = (cwd: string = ".") =>
         return packageConfig;
       }
     });
-export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
 
 export const configFileSchema = (cwd: string = ".") =>
   z

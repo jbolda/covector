@@ -22,4 +22,5 @@ jobs:
       - run: npm ci
       - run: npm run build # covector CLI tests run built files
       - run: npm run build:action
+      - run: npm run test:types
       - run: npm test

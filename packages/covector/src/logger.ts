@@ -11,14 +11,6 @@ import type {
 } from "@covector/types";
 import { createApi } from "@effectionx/context-api";
 
-const numericLevelByLabel: Record<LoggerLevel, number> = {
-  debug: 20,
-  info: 30,
-  warn: 40,
-  error: 50,
-  fatal: 60,
-};
-
 function normalizeMessage(
   message: string | unknown | Error | LoggerBindings,
 ): LoggerBindings {
@@ -30,8 +22,6 @@ function normalizeMessage(
     const error = message as Error;
     return {
       msg: error.message,
-      //   name: error.name,
-      //   stack: error.stack,
     };
   }
 
@@ -41,7 +31,7 @@ function normalizeMessage(
 }
 
 function formatConsoleLine(entry: LoggerEntry): string {
-  const level = entry.levelLabel.toLowerCase();
+  const level = entry.level.toLowerCase();
   const covectorStep = entry?.step ? ` ${entry.step} :: ` : "";
   const command = entry?.command ? ` ${entry.command}` : "";
   const msg = entry?.msg ? ` ${entry.msg}` : "";
@@ -81,14 +71,11 @@ export function* useAttributes(
 }
 
 export function getAttributes(scope: Scope) {
-  if (scope.hasOwn(AttributesContext)) {
-    return scope.expect(AttributesContext);
-  }
-  return AttributesContext.defaultValue as LoggerAttribute;
+  return scope.get(AttributesContext) as LoggerAttribute;
 }
 
 function* emit(
-  levelLabel: LoggerLevel,
+  level: LoggerLevel,
   message: string | unknown | LoggerBindings,
   bucket: LoggerBucket = "default",
 ): Operation<void> {
@@ -100,17 +87,17 @@ function* emit(
     command: attrs.name,
     ...normalized,
     bucket,
-    levelLabel,
-    level: numericLevelByLabel[levelLabel],
+    level,
     msg: normalized.msg,
+    meta: { ...normalized.meta, command: attrs.name, step: attrs.step },
   };
 
   const line = formatConsoleLine(entry);
-  if (entry.bucket === "stderr" || entry.levelLabel === "error") {
+  if (entry.bucket === "stderr" || entry.level === "error") {
     console.error(line);
-  } else if (entry.levelLabel === "warn") {
+  } else if (entry.level === "warn") {
     console.warn(line);
-  } else if (entry.levelLabel === "debug") {
+  } else if (entry.level === "debug") {
     console.debug(line);
   } else {
     console.log(line);

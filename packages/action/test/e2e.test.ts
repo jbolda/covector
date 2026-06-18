@@ -1,20 +1,20 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { run as covector } from "../src";
+import { run as covector } from "../src/index.js";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect, vi } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
 import { checksWithObject } from "./helpers.ts";
-import { call } from "effection";
+
 import { logger } from "../../covector/src/logger.ts";
 const f = fixtures(__dirname);
 
 vi.mock("@actions/core", () => ({
   setOutput: vi.fn(),
   getInput: vi.fn(),
-  setFailed: (err) => {
+  setFailed: (err: any) => {
     throw new Error(err);
   },
 }));
@@ -44,28 +44,26 @@ describe("full e2e test", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             {
               command: "status",
               msg: "There are no changes.",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-              level: 30,
+              level: "info",
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
             },
           ],
           checksWithObject()
-        )
-      );
+        );
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "status");
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
     });
@@ -94,20 +92,19 @@ describe("full e2e test", () => {
         "Merging this PR will release new versions of the following packages based on your change files.\n\n";
       // to confirm we have reached the end of the logs
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             // status runs first to set some output
             {
               command: "status",
               msg: "There are no changes.",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-              level: 30,
+              level: "info",
             },
             // then the version command runs
             // TODO should there be more logs?
@@ -115,16 +112,15 @@ describe("full e2e test", () => {
             {
               msg: "covector version output",
               renderAsYAML: changeOutput,
-              level: 30,
+              level: "info",
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
             },
           ],
           checksWithObject()
-        )
-      );
+        );
       expect(core.setOutput).toHaveBeenCalledWith("status", "No changes.");
       expect(core.setOutput).toHaveBeenCalledWith("commandRan", "version");
       expect(core.setOutput).toHaveBeenCalledWith("change", changeOutput);
@@ -151,109 +147,107 @@ describe("full e2e test", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             // status runs first to set some output
             {
               command: "status",
               msg: "changes:",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "tauri => minor",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "tauri-updater => patch",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "bumping tauri with minor",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "bumping tauri-updater with patch",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "bumping tauri.js with patch",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "tauri planned to be bumped from 0.5.2 to 0.6.0",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3",
-              level: 30,
+              level: "info",
             },
             // then the version command runs
             {
               command: "version",
               msg: "bumping tauri with minor",
-              level: 30,
+              level: "info",
             },
             {
               command: "version",
               msg: "bumping tauri-updater with patch",
-              level: 30,
+              level: "info",
             },
             {
               command: "version",
               msg: "bumping tauri.js with patch",
-              level: 30,
+              level: "info",
             },
             {
               command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
             },
             {
               command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
             },
             {
               command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
             },
             {
               command: "version",
               msg: ".changes/first-change.md was deleted",
-              level: 30,
+              level: "info",
             },
             {
               command: "version",
               msg: ".changes/second-change.md was deleted",
-              level: 30,
+              level: "info",
             },
             {
               msg: "covector version output",
-              level: 30,
+              level: "info",
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
             },
           ],
           checksWithObject()
-        )
-      );
+        );
       expect(core.setOutput).toHaveBeenCalledWith(
         "status",
         "There are 2 changes which include tauri with minor, tauri-updater with patch"
@@ -306,69 +300,67 @@ describe("full e2e test", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.operations.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.all,
           [
             // status runs first to set some output
             {
               command: "status",
               msg: "There are no changes.",
-              level: 30,
+              level: "info",
             },
             {
               command: "status",
               msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
-              level: 30,
+              level: "info",
             },
             // then the publish command runs
             {
               msg: "package-one [publish]: echo publish",
-              level: 30,
+              level: "info",
             },
             {
               msg: "publish",
-              level: 30,
+              level: "info",
             },
             // create release call
             {
               msg: "creating Github Release for package-one@2.3.1",
-              level: 30,
+              level: "info",
             },
             {
               msg: "github release created for package-one with id: undefined",
-              level: 30,
+              level: "info",
             },
             {
               msg: "package-two [publish]: echo publish",
-              level: 30,
+              level: "info",
             },
             {
               msg: "publish",
-              level: 30,
+              level: "info",
             },
             // create release call
             {
               msg: "creating Github Release for package-two@1.9.0",
-              level: 30,
+              level: "info",
             },
             {
               msg: "github release created for package-two with id: undefined",
-              level: 30,
+              level: "info",
             },
             {
               msg: "covector publish output",
-              level: 30,
+              level: "info",
             },
             // and finishes with the output
             {
               msg: "completed",
-              level: 30,
+              level: "info",
             },
           ],
           checksWithObject()
-        )
-      );
+        );
 
       expect({ covectoredAction }).toMatchSnapshot();
       expect(core.setOutput).toHaveBeenCalledWith(

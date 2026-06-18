@@ -61,14 +61,12 @@ describe("package file applies preview bump", () => {
         "}\n",
     );
 
-    yield* call(() =>
-      logTest.consecutive(log.sink.all, [
+    yield* logTest.consecutive(log.sink.all, [
         {
           msg: "bumping js-single-json-fixture with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
-      ]),
-    );
+      ]);
   });
 
   it("bumps multi js json", function* () {
@@ -159,22 +157,20 @@ describe("package file applies preview bump", () => {
         "}\n",
     );
 
-    yield* call(() =>
-      logTest.consecutive(log.sink.all, [
+    yield* logTest.consecutive(log.sink.all, [
         {
           msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
           msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
           msg: "bumping all with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
-      ]),
-    );
+      ]);
   });
 });
 
@@ -226,14 +222,12 @@ describe("package file applies preview bump to pre-release", () => {
         "}\n",
     );
 
-    yield* call(() =>
-      logTest.consecutive(log.sink.all, [
+    yield* logTest.consecutive(log.sink.all, [
         {
           msg: "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
-      ]),
-    );
+      ]);
   });
 
   it("bumps multi js json without pre-release", function* () {
@@ -323,21 +317,19 @@ describe("package file applies preview bump to pre-release", () => {
         "}\n",
     );
 
-    yield* call(() =>
-      logTest.consecutive(log.sink.all, [
+    yield* logTest.consecutive(log.sink.all, [
         {
           msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
           msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
           msg: "bumping all with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
-      ]),
-    );
+      ]);
   });
 });

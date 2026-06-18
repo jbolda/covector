@@ -12,7 +12,7 @@ export const loadContent = (cwd: string, pathToContent: string) => {
 
 export const checksWithObject =
   (keys = ["command"]) =>
-  (received, expected) => {
+  (received: any, expected: any) => {
     if (typeof expected === "function") {
       expected(received);
       return;
@@ -71,7 +71,7 @@ export const checksWithObject =
 
 export const checksChunksInMsg =
   (keys = ["command"]) =>
-  (received, expected) => {
+  (received: any, expected: any) => {
     const normalizeMsg = (value: unknown): string => {
       if (Buffer.isBuffer(value)) return value.toString("utf8").trim();
       if (typeof value === "string") return value;

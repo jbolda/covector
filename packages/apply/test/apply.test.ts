@@ -63,11 +63,9 @@ describe("package file apply bump (snapshot)", () => {
           "}\n",
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping js-single-json-fixture with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping js-single-json-fixture with minor", level: "info" },
+        ]);
     });
 
     it("fails bump single that satisfies range", function* () {
@@ -112,11 +110,9 @@ describe("package file apply bump (snapshot)", () => {
         "js-single-json-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping js-single-json-fixture with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping js-single-json-fixture with minor", level: "info" },
+        ]);
     });
 
     it("bumps multi", function* () {
@@ -206,13 +202,11 @@ describe("package file apply bump (snapshot)", () => {
           "}\n",
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping yarn-workspace-base-pkg-a with minor", level: 30 },
-          { msg: "bumping yarn-workspace-base-pkg-b with minor", level: 30 },
-          { msg: "bumping all with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping yarn-workspace-base-pkg-a with minor", level: "info" },
+          { msg: "bumping yarn-workspace-base-pkg-b with minor", level: "info" },
+          { msg: "bumping all with minor", level: "info" },
+        ]);
     });
 
     it("bumps multi with parent as range", function* () {
@@ -319,12 +313,10 @@ describe("package file apply bump (snapshot)", () => {
           "}\n",
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping yarn-workspace-base-pkg-a with patch", level: 30 },
-          { msg: "bumping yarn-workspace-base-pkg-b with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping yarn-workspace-base-pkg-a with patch", level: "info" },
+          { msg: "bumping yarn-workspace-base-pkg-b with minor", level: "info" },
+        ]);
     });
   });
 
@@ -369,11 +361,9 @@ describe("package file apply bump (snapshot)", () => {
         '[package]\nname = "rust-single-fixture"\nversion = "0.6.0"\n',
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping rust-single-fixture with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping rust-single-fixture with minor", level: "info" },
+        ]);
     });
 
     it("fails bumps single that satisfies range", function* () {
@@ -419,11 +409,9 @@ describe("package file apply bump (snapshot)", () => {
         "rust-single-fixture will be bumped to 0.6.0. This satisfies the range >= 0.6.0 which the configuration disallows. Please adjust your bump to accommodate the range or otherwise adjust the allowed range in `errorOnVersionRange`.",
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping rust-single-fixture with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping rust-single-fixture with minor", level: "info" },
+        ]);
     });
 
     it("bumps multi", function* () {
@@ -490,12 +478,10 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
-          { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
+          { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
+        ]);
     });
 
     it("bumps multi with object dep", function* () {
@@ -562,12 +548,10 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
-          { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
+          { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
+        ]);
     });
 
     it("bumps multi with dep missing patch", function* () {
@@ -634,12 +618,10 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
-          { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
+          { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
+        ]);
     });
 
     it("bump multi as patch with object dep missing patch", function* () {
@@ -708,12 +690,10 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.8.9"\n',
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping rust_pkg_a_fixture with patch", level: 30 },
-          { msg: "bumping rust_pkg_b_fixture with patch", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping rust_pkg_a_fixture with patch", level: "info" },
+          { msg: "bumping rust_pkg_b_fixture with patch", level: "info" },
+        ]);
     });
 
     it("bumps multi as minor with object dep missing patch", function* () {
@@ -780,12 +760,10 @@ describe("package file apply bump (snapshot)", () => {
         "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping rust_pkg_a_fixture with minor", level: 30 },
-          { msg: "bumping rust_pkg_b_fixture with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
+          { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
+        ]);
     });
   });
 
@@ -838,11 +816,9 @@ describe("package file apply bump (snapshot)", () => {
           "flutter:\n  assets:\n    - assets/schema/\n    - assets/localization/\n",
       );
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [
-          { msg: "bumping test_app with minor", level: 30 },
-        ]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+          { msg: "bumping test_app with minor", level: "info" },
+        ]);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { covector } from "../../src";
+import { covector } from "../../src/index.js";
 import { logger as covectorLogger } from "../../src/logger.ts";
 import { TomlDocument } from "@covector/toml";
 import { expect } from "vitest";
@@ -7,7 +7,7 @@ import * as logTest from "../../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
 import { loadContent } from "../helpers.ts";
-import { call } from "effection";
+
 const f = fixtures(__dirname);
 
 expect.addSnapshotSerializer({
@@ -17,7 +17,7 @@ expect.addSnapshotSerializer({
 
 describe("integration test for preview command", () => {
   it("runs version and publish for js and rust", function* () {
-    const sink = yield* logTest.createCapturedLogger();
+    const sink = yield* logTest.useCapturedLogger();
 
     const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-for-preview");
@@ -28,55 +28,44 @@ describe("integration test for preview command", () => {
       previewVersion: "branch-name.12345",
     });
 
-    yield* call(() =>
-      logTest.consecutive(sink.all, [
+    yield* logTest.consecutive(sink.all, [
         {
-          command: "preview",
           msg: "bumping package-b with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "bumping package-a with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "bumping package-c with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-a [prepublish]: node -e \"fs.appendFileSync('../log.txt', 'prepublishing package-a would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-b [prepublish]: node -e \"fs.appendFileSync('../log.txt', 'prepublishing package-b would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-c [prepublish]: node -e \"fs.appendFileSync('../log.txt', 'prepublishing package-c would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-a [publish]: node -e \"fs.appendFileSync('../log.txt', 'publishing --tag  would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-b [publish]: node -e \"fs.appendFileSync('../log.txt', 'publishing --tag  would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-c [publish]: node -e \"fs.appendFileSync('../log.txt', 'publishing would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
-      ]),
-    );
+      ]);
     expect(loadContent(fullIntegration, "log.txt")).toEqual(
       "prepublishing package-a would happen here\n" +
         "prepublishing package-b would happen here\n" +
@@ -91,7 +80,7 @@ describe("integration test for preview command", () => {
 
 describe("integration test for preview command with dist tags", () => {
   it("runs version and publish for js and rust", function* () {
-    const sink = yield* logTest.createCapturedLogger();
+    const sink = yield* logTest.useCapturedLogger();
 
     const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-for-preview");
@@ -103,55 +92,44 @@ describe("integration test for preview command with dist tags", () => {
       branchTag: "branch_name",
     });
 
-    yield* call(() =>
-      logTest.consecutive(sink.all, [
+    yield* logTest.consecutive(sink.all, [
         {
-          command: "preview",
           msg: "bumping package-b with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "bumping package-a with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "bumping package-c with branch-name.12345 identifier to publish a preview",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-a [prepublish]: node -e \"fs.appendFileSync('../log.txt', 'prepublishing package-a would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-b [prepublish]: node -e \"fs.appendFileSync('../log.txt', 'prepublishing package-b would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-c [prepublish]: node -e \"fs.appendFileSync('../log.txt', 'prepublishing package-c would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-a [publish]: node -e \"fs.appendFileSync('../log.txt', 'publishing would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-b [publish]: node -e \"fs.appendFileSync('../log.txt', 'publishing would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
         {
-          command: "preview",
           msg: "package-c [publish]: node -e \"fs.appendFileSync('../log.txt', 'publishing --tag branch_name would happen here\\\\n')\"",
-          level: 30,
+          level: "info",
         },
-      ]),
-    );
+      ]);
     expect(loadContent(fullIntegration, "log.txt")).toEqual(
       "prepublishing package-a would happen here\n" +
         "prepublishing package-b would happen here\n" +

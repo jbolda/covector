@@ -1,6 +1,6 @@
 import { describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import { command, runCommand } from "../helpers";
+import { command, runCommand } from "../helpers.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
 const f = fixtures(__dirname);

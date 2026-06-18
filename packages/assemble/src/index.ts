@@ -24,6 +24,7 @@ import type {
   NormalizedCommand,
   CommandTypes,
   PkgManagerConfig,
+  PackageConfig,
   Logger,
   AssembledPlan,
   AssembledPlanParsed,
@@ -667,14 +668,14 @@ const mergeCommand = ({
 }: {
   pkg: keyof Config["packages"];
   pkgManager: string | undefined;
-  command: keyof PkgManagerConfig;
+  command: string;
   config: Config;
 }): Command | null => {
   const managerCommand =
-    config.pkgManagers?.[pkgManager ?? ""]?.[command] ?? null;
-  const mergedCommand = config.packages?.[pkg]?.[command] ?? managerCommand;
+    config.pkgManagers?.[pkgManager ?? ""]?.[command as keyof PkgManagerConfig] ?? null;
+  const mergedCommand = config.packages?.[pkg]?.[command as keyof PackageConfig] ?? managerCommand;
 
-  return mergedCommand;
+  return mergedCommand as Command | null;
 };
 
 const usePackageSubset = (commands: any, subset: string[] = []) =>

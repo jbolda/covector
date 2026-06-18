@@ -16,6 +16,7 @@
     "run:action:source": "npm run run:source -w action",
     "run:action:built": "npm run run:built -w action",
     "test": "vitest",
+"test:types": "tsc --noEmit -p tsconfig.tests.json",
     "pretty": "prettier --write --ignore-path .gitignore \"!packages/action/dist/index.js\" \"packages/**/*.{js,ts}\" \"__fixtures__/**/*.{json,js,ts,yml,yaml}\""
   },
   "workspaces": [

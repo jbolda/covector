@@ -65,9 +65,10 @@ export function it(
     return vitest.it(
       desc,
       async (context) => {
-        if (!context.task.suite?.adapter)
+        const suite = context.task.suite as any;
+        if (!suite?.adapter)
           throw new Error("missing test adapter");
-        let adapter: TestAdapter = context.task.suite.adapter;
+        let adapter: TestAdapter = suite.adapter;
         return adapter.runTest(op);
       },
       timeout,
@@ -86,9 +87,10 @@ it.only = function only(
     return vitest.it.only(
       desc,
       async (context) => {
-        if (!context.task.suite?.adapter)
+        const suite = context.task.suite as any;
+        if (!suite?.adapter)
           throw new Error("missing test adapter");
-        let adapter: TestAdapter = context.task.suite.adapter;
+        let adapter: TestAdapter = suite.adapter;
         return adapter.runTest(op);
       },
       timeout,

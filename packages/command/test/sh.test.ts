@@ -1,4 +1,4 @@
-import { runCommand } from "../src";
+import { runCommand } from "../src/index.ts";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
@@ -87,8 +87,8 @@ Usage:
 
     expect(out).toBe("final stdout");
     expect(sink.all).toEqual([
-      { msg: "running", level: 30 },
-      { msg: "final stdout", level: 30 },
+      { msg: "running", level: "info" },
+      { msg: "final stdout", level: "info" },
     ]);
   });
 
@@ -101,9 +101,9 @@ Usage:
 
     expect(out).toBe("split line");
     expect(sink.all).toEqual([
-      { msg: "running", level: 30 },
-      { msg: "split", level: 30 },
-      { msg: "line", level: 30 },
+      { msg: "running", level: "info" },
+      { msg: "split", level: "info" },
+      { msg: "line", level: "info" },
     ]);
   });
 
@@ -115,8 +115,8 @@ Usage:
     );
 
     expect(sink.all).toEqual([
-      { msg: "running", level: 30 },
-      { msg: "final stderr", level: 30 },
+      { msg: "running", level: "info" },
+      { msg: "final stderr", level: "error" },
     ]);
   });
 
@@ -127,9 +127,9 @@ Usage:
       "running",
     );
 
-    expect(sink.info).toEqual([{ msg: "running", level: 30 }]);
-    expect(sink.stdout).toEqual([{ msg: "from-out", level: 30 }]);
-    expect(sink.stderr).toEqual([{ msg: "from-err", level: 30 }]);
+    expect(sink.info).toEqual([{ msg: "running", level: "info" }]);
+    expect(sink.stdout).toEqual([{ msg: "from-out", level: "info" }]);
+    expect(sink.stderr).toEqual([{ msg: "from-err", level: "error" }]);
   });
 
   // canonical assertion — content must be preserved regardless of quoting

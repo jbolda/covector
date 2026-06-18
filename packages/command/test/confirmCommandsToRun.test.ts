@@ -1,10 +1,10 @@
-import { confirmCommandsToRun } from "../src";
+import { confirmCommandsToRun } from "../src/index.js";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call } from "effection";
+
 import { logger } from "../../covector/src/logger.ts";
 const f = fixtures(__dirname);
 
@@ -54,22 +54,20 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* call(() =>
-          logTest.consecutive(log.sink.all, [
+        yield* logTest.consecutive(log.sink.all, [
             {
               msg: "Checking if effection@0.5.0 is already published with: npm view effection@0.5.0 version --silent",
-              level: 30,
+              level: "info",
             },
             {
               msg: "0.5.0",
-              level: 30,
+              level: "info",
             },
             {
               msg: "effection@0.5.0 is already published. Skipping.",
-              level: 30,
+              level: "info",
             },
-          ]),
-        );
+          ]);
         expect(commandsToRun).toEqual([]);
       });
 
@@ -92,18 +90,16 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* call(() =>
-          logTest.consecutive(log.sink.all, [
+        yield* logTest.consecutive(log.sink.all, [
             {
               msg: "Checking if effection@0.5.99 is already published with: npm view effection@0.5.0 version --silent",
-              level: 30,
+              level: "info",
             },
             {
               msg: "0.5.0",
-              level: 30,
+              level: "info",
             },
-          ]),
-        );
+          ]);
         expect(commandsToRun).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ pkg: "effection" }),
@@ -139,18 +135,16 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* call(() =>
-          logTest.consecutive(log.sink.logs, [
+        yield* logTest.consecutive(log.sink.logs, [
             {
               msg: "Checking if effection@0.5.0 is already published with built-in fetch:check",
-              level: 30,
+              level: "info",
             },
             {
               msg: "effection@0.5.0 is already published. Skipping.",
-              level: 30,
+              level: "info",
             },
-          ]),
-        );
+          ]);
         expect(commandsToRun).toEqual([]);
       });
 
@@ -178,14 +172,12 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* call(() =>
-          logTest.consecutive(log.sink.logs, [
+        yield* logTest.consecutive(log.sink.logs, [
             {
               msg: "Checking if effection@0.5.99 is already published with built-in fetch:check",
-              level: 30,
+              level: "info",
             },
-          ]),
-        );
+          ]);
         expect(commandsToRun).toEqual(
           expect.arrayContaining([
             expect.objectContaining({ pkg: "effection" }),
@@ -219,18 +211,16 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* call(() =>
-          logTest.consecutive(log.sink.logs, [
+        yield* logTest.consecutive(log.sink.logs, [
             {
               msg: "Checking if tauri@0.11.0 is already published with built-in fetch:check",
-              level: 30,
+              level: "info",
             },
             {
               msg: "tauri@0.11.0 is already published. Skipping.",
-              level: 30,
+              level: "info",
             },
-          ]),
-        );
+          ]);
         expect(commandsToRun).toEqual([]);
       });
 
@@ -258,14 +248,12 @@ describe("confirmCommandsToRun", () => {
           command: "publish",
         });
 
-        yield* call(() =>
-          logTest.consecutive(log.sink.logs, [
+        yield* logTest.consecutive(log.sink.logs, [
             {
               msg: "Checking if tauri@0.12.0 is already published with built-in fetch:check",
-              level: 30,
+              level: "info",
             },
-          ]),
-        );
+          ]);
         expect(commandsToRun).toEqual(
           expect.arrayContaining([expect.objectContaining({ pkg: "tauri" })]),
         );

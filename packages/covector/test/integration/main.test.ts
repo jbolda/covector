@@ -1,4 +1,4 @@
-import { covector } from "../../src";
+import { covector } from "../../src/index.js";
 import { logger as covectorLogger } from "../../src/logger.ts";
 import { loadFile } from "@covector/files";
 import { TomlDocument } from "@covector/toml";
@@ -7,11 +7,13 @@ import { expect } from "vitest";
 import * as logTest from "../../../../helpers/test-logger.ts";
 import { checksChunksInMsg, checksWithObject } from "../helpers.ts";
 import path from "path";
+import type { Covector } from "@covector/types";
+// @ts-expect-error has not types
 import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
-import { injectPublishFunctions } from "../../../action/src/utils";
-import { call, run } from "effection";
+import { injectPublishFunctions } from "../../../action/src/utils.js";
+import { run } from "effection";
 
 expect.addSnapshotSerializer({
   test: (value) => value instanceof TomlDocument,
@@ -21,7 +23,7 @@ expect.addSnapshotSerializer({
 describe("integration test in production mode", () => {
   describe("handles config", () => {
     it("passes correct config for js and rust", function* () {
-      const logs = yield* logTest.createCapturedLogger();
+      const logs = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -33,69 +35,68 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
-          logs,
+      yield* logTest.consecutive(
+          logs.all,
           [
             {
-              command: "status",
               msg: "changes:",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
               // TODO check yaml
             },
             {
-              command: "status",
               msg: "tauri => minor",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
             {
-              command: "status",
               msg: "tauri-updater => patch",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
             {
-              command: "status",
               msg: "bumping tauri with minor",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
             {
-              command: "status",
               msg: "bumping tauri-updater with patch",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
             {
-              command: "status",
               msg: "bumping tauri.js with patch",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
             {
-              command: "status",
               msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
             {
-              command: "status",
               msg: "tauri planned to be bumped from 0.5.2 to 0.6.0",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
             {
-              command: "status",
               msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "status" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
 
     it("allows modifying the config", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -148,273 +149,282 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-bundler@0.6.0 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri@0.5.2 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri@0.5.2 is already published. Skipping.",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-api@0.5.1 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-utils@0.5.0 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "begin with only boops",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "begin with only boops",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "begin with only boops",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri.js [publish]: node -e \"console.log('publishing tauri.js')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri.js",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "deboop",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: node -e \"console.log('publishing tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: node -e \"console.log('running in ./cli/tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./cli/tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "deboop",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: node -e \"console.log('publishing tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: node -e \"console.log('running in ./tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               msg: "deboop",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: node -e \"console.log('publishing tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: node -e \"console.log('running in ./tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               msg: "deboop",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               msg: "ends with overwrites using boops",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               msg: "ends with overwrites using boops",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               msg: "ends with overwrites using boops",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
 
     it("uses the action config modification", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -441,330 +451,337 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-bundler@0.6.0 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri@0.5.2 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri@0.5.2 is already published. Skipping.",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-api@0.5.1 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-utils@0.5.0 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [prepublish]: node -e \"console.log('premode for tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "premode for tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [prepublish]: node -e \"console.log('premode for tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "premode for tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [prepublish]: node -e \"console.log('premode for tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "premode for tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri.js [publish]: node -e \"console.log('publishing tauri.js')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri.js",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "push log into publish for tauri.js-v0.6.2",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "push another log",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: node -e \"console.log('publishing tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: node -e \"console.log('running in ./cli/tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./cli/tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "push log into publish for tauri-bundler-v0.6.0",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "push another log",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: node -e \"console.log('publishing tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: node -e \"console.log('running in ./tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "push log into publish for tauri-api-v0.5.1",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "push another log",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: node -e \"console.log('publishing tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: node -e \"console.log('running in ./tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "push log into publish for tauri-utils-v0.5.0",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
               // this is an injected log from modifying the config
               msg: "push another log",
-              level: 40,
+              level: "warn",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [postpublish]: node -e \"console.log('postmode for tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "postmode for tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [postpublish]: node -e \"console.log('postmode for tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "postmode for tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [postpublish]: node -e \"console.log('postmode for tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "postmode for tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
   });
 
   describe("version", () => {
     it("runs version for js and rust", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -778,58 +795,57 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "version",
               msg: "bumping tauri with minor",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "bumping tauri-updater with patch",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "bumping tauri.js with patch",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: ".changes/first-change.md was deleted",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: ".changes/second-change.md was deleted",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
 
       const changelogTauriCore = yield* loadFile(
@@ -855,7 +871,7 @@ describe("integration test in production mode", () => {
     });
 
     it("runs version for dart / flutter single", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.dart-flutter-single");
@@ -869,38 +885,37 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "version",
               msg: "bumping test_app with minor",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: ".changes/first-change.md was deleted",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: ".changes/second-change.md was deleted",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
 
       expect(covectored).toMatchSnapshot();
 
@@ -919,7 +934,7 @@ describe("integration test in production mode", () => {
     });
 
     it("runs version for dart / flutter multi", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.dart-flutter-multi");
@@ -933,58 +948,57 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "version",
               msg: "bumping test_app_two with minor",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "bumping test_app_three with patch",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "bumping test_app_one with patch",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: ".changes/first-change.md was deleted",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "version",
               msg: ".changes/second-change.md was deleted",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
 
       const changelog = yield* loadFile(
@@ -1009,7 +1023,7 @@ describe("integration test in production mode", () => {
     });
 
     it("runs version for general file", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.general-file");
@@ -1023,38 +1037,37 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "version",
               msg: "bumping general-pkg with minor",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "version",
               msg: "Could not load the CHANGELOG.md. Creating one.",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "version",
               msg: ".changes/first-change.md was deleted",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "version",
               msg: ".changes/second-change.md was deleted",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
 
       const changelog = yield* loadFile("CHANGELOG.md", fullIntegration);
@@ -1072,7 +1085,7 @@ describe("integration test in production mode", () => {
 
   describe("publish", () => {
     it("runs publish for js and rust", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -1084,288 +1097,287 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-bundler@0.6.0 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri@0.5.2 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri@0.5.2 is already published. Skipping.",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-api@0.5.1 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Checking if tauri-utils@0.5.0 is already published with: node -e \"console.log('0.5.2')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "0.5.2",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [prepublish]: node -e \"console.log('premode for tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "premode for tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [prepublish]: node -e \"console.log('premode for tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "premode for tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [prepublish]: node -e \"console.log('premode for tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "premode for tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri.js [publish]: node -e \"console.log('publishing tauri.js')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri.js",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: node -e \"console.log('publishing tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: node -e \"console.log('running in ./cli/tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./cli/tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: node -e \"console.log('publishing tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: node -e \"console.log('running in ./tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: node -e \"console.log('publishing tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: node -e \"console.log('running in ./tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "running in ./tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish run from the cwd]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "cli\ntauri\ntauri-api\ntauri-updater\ntauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [publish]: ls",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "Cargo.toml",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-bundler [postpublish]: node -e \"console.log('postmode for tauri-bundler')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "postmode for tauri-bundler",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-api [postpublish]: node -e \"console.log('postmode for tauri-api')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "postmode for tauri-api",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "tauri-utils [postpublish]: node -e \"console.log('postmode for tauri-utils')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "postmode for tauri-utils",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
 
     it("runs publish for dart / flutter", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.dart-flutter-single");
@@ -1377,38 +1389,37 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "test_app [publish]: node -e \"console.log('publishing')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
-              command: "publish",
               msg: "publishing",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "publish" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
 
     it("runs publish for general file", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.general-file");
@@ -1420,40 +1431,39 @@ describe("integration test in production mode", () => {
 
       // to confirm we have reached the end of the logs
       yield* logger.info("completed");
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "version" },
             },
             {
-              command: "publish",
               msg: "general-pkg [publish]: node -e \"console.log('publishing')\"",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
-              command: "publish",
               msg: "publishing",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
             {
               msg: "completed",
-              level: 30,
+              level: "info",
+              meta: { command: "version" },
             },
           ],
           checksWithObject(),
-        ),
-      );
+        );
       expect(covectored).toMatchSnapshot();
     });
   });
 
   describe("failures", () => {
     it("fails status for non-existant package", function* () {
-      yield* logTest.createCapturedLogger();
+      yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-change-file-error");
@@ -1470,7 +1480,7 @@ describe("integration test in production mode", () => {
     });
 
     it("fails with error", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-with-publish-error");
@@ -1486,36 +1496,34 @@ describe("integration test in production mode", () => {
           covectored.message.includes("code: 1"),
       ).toBeTruthy();
 
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "test" },
             },
             {
-              command: "publish",
               msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
-              level: 30,
+              level: "info",
+              meta: { command: "test" },
             },
             // TODO check boom with command in error
             // {
             //   command: "publish",
             //   err: "Error: boom",
-            //   level: 50,
+            //   level: "error",
             // },
             // it actually here and the logs (especially on linux) aren't output
             //  consistently enough to check the remaining
           ],
           checksChunksInMsg(),
-        ),
-      );
+        );
     }, 10_000);
 
     it("fails, tries and fails two more times with error", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy(
@@ -1529,71 +1537,70 @@ describe("integration test in production mode", () => {
         }),
       );
 
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           sink.all,
           [
             {
-              command: "publish",
               msg: "CHANGELOG.md not found",
-              level: 50,
+              level: "error",
+              meta: { command: "build" },
             },
             {
-              command: "publish",
               msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
             {
-              command: "publish",
-              level: 50,
+              level: "error",
+              meta: { command: "build" },
               msg: [
                 "[eval]:1",
                 "throw new Error('boom')",
                 "Error: boom",
                 "node:internal/",
-              ],
+              ] as unknown as string,
             },
             {
-              command: "publish",
               msg: [
                 "code: 1",
                 "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
-              ],
-              level: 50,
+              ] as unknown as string,
+              level: "error",
+              meta: { command: "build" },
             },
             {
-              command: "publish",
               msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
             {
-              command: "publish",
-              level: 50,
+              level: "error",
+              meta: { command: "build" },
               msg: [
                 "[eval]:1",
                 "throw new Error('boom')",
                 "Error: boom",
                 "node:internal/",
-              ],
+              ] as unknown as string,
             },
             {
-              command: "publish",
               msg: [
                 "code: 1",
                 "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
-              ],
-              level: 50,
+              ] as unknown as string,
+              level: "error",
+              meta: { command: "build" },
             },
             {
-              command: "publish",
               msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
-              level: 30,
+              level: "info",
+              meta: { command: "build" },
             },
             // TODO check boom with command in error
             // {
             //   command: "publish",
             //   err: "Error: boom",
-            //   level: 50,
+            //   level: "error",
             //   errorNumber: 3,
             // },
             // it actually throws after the third error it hits
@@ -1601,8 +1608,7 @@ describe("integration test in production mode", () => {
             //  consistently enough to check the remaining
           ],
           checksChunksInMsg(),
-        ),
-      );
+        );
       expect(
         covectored.message.includes("non-zero status (1)") ||
           covectored.message.includes("code: 1"),
@@ -1610,7 +1616,7 @@ describe("integration test in production mode", () => {
     });
 
     it("fails version with errorOnVersionRange", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -1635,7 +1641,7 @@ describe("integration test in production mode", () => {
     });
 
     it("fails status with errorOnVersionRange", function* () {
-      const sink = yield* logTest.createCapturedLogger();
+      const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
@@ -1661,227 +1667,225 @@ describe("integration test in production mode", () => {
   });
 
   it("runs test for js and rust", function* () {
-    const sink = yield* logTest.createCapturedLogger();
+    const sink = yield* logTest.useCapturedLogger();
 
     const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
-      command: "test",
+      command: "test" as keyof Covector,
       cwd: fullIntegration,
     });
-
+ 
     // to confirm we have reached the end of the logs
     yield* logger.info("completed");
-    yield* call(() =>
-      logTest.consecutive(
+    yield* logTest.consecutive(
         sink.all,
         [
           // throws errors because a test run
           //  expects a changelog
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "No commands configured to run on [test].",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
             msg: "completed",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
         ],
         checksWithObject(),
-      ),
-    );
+      );
     expect(covectored).toMatchSnapshot();
   });
 
   it("runs build for js and rust", function* () {
-    const sink = yield* logTest.createCapturedLogger();
+    const sink = yield* logTest.useCapturedLogger();
 
     const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     const covectored = yield* covector({
       logger,
-      command: "build",
+      command: "build" as keyof Covector,
       cwd: fullIntegration,
     });
-
+ 
     // to confirm we have reached the end of the logs
     yield* logger.info("completed");
-    yield* call(() =>
-      logTest.consecutive(
+    yield* logTest.consecutive(
         sink.all,
         [
           // throws errors because a publish
           //  expects a changelog
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "CHANGELOG.md not found",
-            level: 50,
+            level: "error",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri-bundler [build]: node -e \"console.log('the files in the tauri-bundler folder are')\"",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "the files in the tauri-bundler folder are",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri-bundler [build]: ls",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "Cargo.toml",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri [build]: node -e \"console.log('the files in the tauri folder are')\"",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "the files in the tauri folder are",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri [build]: ls",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "Cargo.toml",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri-api [build]: node -e \"console.log('the files in the tauri-api folder are')\"",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "the files in the tauri-api folder are",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri-api [build]: ls",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "Cargo.toml",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri-utils [build]: node -e \"console.log('the files in the tauri-utils folder are')\"",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "the files in the tauri-utils folder are",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri-utils [build]: ls",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "Cargo.toml",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri-updater [build]: node -e \"console.log('the files in the tauri-updater folder are')\"",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "the files in the tauri-updater folder are",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "tauri-updater [build]: ls",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
-            command: "arbitrary",
             msg: "Cargo.toml",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
           {
             msg: "completed",
-            level: 30,
+            level: "info",
+            meta: { command: "build" },
           },
         ],
         checksWithObject(),
-      ),
-    );
+      );
     expect(covectored).toMatchSnapshot();
   });
 });

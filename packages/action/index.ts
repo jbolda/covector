@@ -1,8 +1,9 @@
 import { main, type Operation } from "effection";
 import { run } from "./src/index.ts";
-import { pino } from "pino";
-import logStream from "./src/logger.ts";
+import { logger } from "covector";
+import { actionAround } from "./src/logger.ts";
 
-const stream = logStream();
-const logger = pino(stream);
-await main(() => run(logger) as Operation<void>);
+await main(function* (): Operation<void> {
+  yield* logger.around(actionAround, { at: "min" });
+  yield* run(logger.operations);
+});

@@ -1,10 +1,10 @@
-import { attemptCommands } from "../src";
+import { attemptCommands } from "../src/index";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call } from "effection";
+
 import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
@@ -62,9 +62,9 @@ describe("fetchCommand", () => {
       // it hangs with no logs
       yield* logger.operations.info("completed");
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [{ msg: "completed", level: 30 }]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+        { msg: "completed", level: "info" },
+      ]);
     });
 
     it("failure throws", function* () {
@@ -132,20 +132,18 @@ describe("fetchCommand", () => {
       const errorMessage =
         'effection request to https://registry.npmjs.com/effection/0.5.32 returned code 404 Not Found: "version not found: 0.5.32"';
       // first two attempts log error then retry
-      yield* call(() =>
-        logTest.consecutive(
-          log.sink.all,
-          [
-            { msg: errorMessage, level: 50 },
-            // { msg: errorMessage, level: 50 },
-          ],
-          (actual, expected) => {
-            expect((actual as { level: number }).level).toBe(expected.level);
-            expect((actual as { msg: string }).msg).toContain(
-              expected.msg as string,
-            );
-          },
-        ),
+      yield* logTest.consecutive(
+        log.sink.all,
+        [
+          { msg: errorMessage, level: "error" },
+          // { msg: errorMessage, level: "error" },
+        ],
+        (actual, expected) => {
+          expect((actual as { level: string }).level).toBe(expected.level);
+          expect((actual as { msg: string }).msg).toContain(
+            expected.msg as string,
+          );
+        },
       );
       // final attempt throws
       expect(errored.message).toEqual(errorMessage);
@@ -181,9 +179,9 @@ describe("fetchCommand", () => {
       // it hangs with no logs
       yield* logger.operations.info("completed");
 
-      yield* call(() =>
-        logTest.consecutive(log.sink.all, [{ msg: "completed", level: 30 }]),
-      );
+      yield* logTest.consecutive(log.sink.all, [
+        { msg: "completed", level: "info" },
+      ]);
     });
 
     it("failure throws", function* () {
@@ -250,20 +248,18 @@ describe("fetchCommand", () => {
 
       const errorMessage = `tauri request to https://crates.io/api/v1/crates/tauri/0.12.0 returned code 404 Not Found: {"errors":[{"detail":"crate \`tauri\` does not have a version \`0.12.0\`"}]}`;
       // first two attempts log error then retry
-      yield* call(() =>
-        logTest.consecutive(
-          log.sink.all,
-          [
-            { msg: errorMessage, level: 50 },
-            { msg: errorMessage, level: 50 },
-          ],
-          (actual, expected) => {
-            expect((actual as { level: number }).level).toBe(expected.level);
-            expect((actual as { msg: string }).msg).toContain(
-              expected.msg as string,
-            );
-          },
-        ),
+      yield* logTest.consecutive(
+        log.sink.all,
+        [
+          { msg: errorMessage, level: "error" },
+          { msg: errorMessage, level: "error" },
+        ],
+        (actual, expected) => {
+          expect((actual as { level: string }).level).toBe(expected.level);
+          expect((actual as { msg: string }).msg).toContain(
+            expected.msg as string,
+          );
+        },
       );
       // final attempt throws
       expect(errored.message).toEqual(errorMessage);

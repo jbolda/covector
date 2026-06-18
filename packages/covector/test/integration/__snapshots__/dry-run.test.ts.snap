@@ -2591,7 +2591,7 @@ exports[`integration test in --dry-run mode > runs publish for js and rust 1`] =
 {
   "commandsRan": {
     "tauri": {
-      "command": false,
+      "command": true,
       "pkg": {
         "command": [
           "node -e "console.log('publishing tauri')"",
@@ -2820,8 +2820,9 @@ path = "examples/communication/src-tauri/src/main.rs"",
         ],
         "releaseTag": "tauri-v0.5.2",
       },
-      "postcommand": false,
-      "precommand": false,
+      "postcommand": true,
+      "precommand": true,
+      "published": true,
     },
     "tauri-api": {
       "command": true,

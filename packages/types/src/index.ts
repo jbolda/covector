@@ -1,26 +1,139 @@
 import type { Operation } from "effection";
 
-import type {
-  LoadedFile,
-  Config,
-  Pkg,
-  PackageFile,
-  DepsKeyed,
-} from "@covector/files";
-export type {
-  LoadedFile,
-  CommandConfig,
-  PkgManagerConfig,
-  PackageConfig,
-  ConfigFile,
-  Config,
-  PkgMinimum,
-  PackageFile,
-  PreFile,
-  DepsKeyed,
-  DepTypes,
-  Pkg,
-} from "@covector/files";
+export interface LoadedFile {
+  content: string;
+  path: string;
+  filename: string;
+  extname: string;
+}
+
+export type PkgFileVersion = string | { version?: string; [key: string]: any };
+
+export interface PkgTarget {
+  dependencies?: Record<string, PkgFileVersion>;
+  "dev-dependencies"?: Record<string, PkgFileVersion>;
+  "build-dependencies"?: Record<string, PkgFileVersion>;
+}
+
+export interface Pkg {
+  name: string;
+  version?: string;
+  package?: { version?: string; [key: string]: any };
+  dependencies?: Record<string, PkgFileVersion>;
+  devDependencies?: Record<string, PkgFileVersion>;
+  "dev-dependencies"?: Record<string, PkgFileVersion>;
+  "build-dependencies"?: Record<string, PkgFileVersion>;
+  target?: Record<string, PkgTarget>;
+  [key: string]: any;
+}
+
+export interface PkgMinimum {
+  version: string;
+  currentVersion: string;
+  pkg: Pkg | Record<string, any>;
+  versionMajor: number;
+  versionMinor: number;
+  versionPatch: number;
+  deps: DepsKeyed;
+  versionPrerelease?: readonly (string | number)[] | null;
+}
+
+export type DepTypes =
+  | "dependencies"
+  | "devDependencies"
+  | "dev-dependencies"
+  | "build-dependencies"
+  | "target";
+
+export type DepsKeyed = Record<
+  string,
+  {
+    type: DepTypes;
+    version: string;
+  }[]
+>;
+
+export interface PackageFile extends PkgMinimum {
+  file?: LoadedFile;
+  name: string;
+}
+
+export interface PreFile {
+  file?: LoadedFile;
+  tag: string;
+  changes: string[] | [];
+}
+
+interface CommandBaseOptions {
+  runFromRoot?: boolean;
+  retries?: number[];
+  dryRunCommand?: string | boolean;
+  pipe?: boolean;
+}
+
+interface ProcessCommandOptions extends CommandBaseOptions {
+  command: string;
+}
+
+interface UseCommandOptions extends CommandBaseOptions {
+  use: "fetch:check";
+  options: { url: string };
+}
+
+type CommandOption = ProcessCommandOptions | UseCommandOptions;
+type RawCommand =
+  | boolean
+  | string
+  | CommandOption
+  | (string | CommandOption)[];
+
+export type CommandConfig = {
+  version?: RawCommand;
+  prepublish?: RawCommand;
+  publish?: RawCommand;
+  postpublish?: RawCommand;
+  errorOnVersionRange?: string;
+  releaseTag?: string | false;
+  assets?: { path: string; name: string }[] | false;
+  [key: string]: any;
+};
+
+export type PkgManagerConfig = {
+  version?: RawCommand;
+  prepublish?: RawCommand;
+  publish?: RawCommand;
+  postpublish?: RawCommand;
+  errorOnVersionRange?: string;
+  releaseTag?: string | false;
+  assets?: { path: string; name: string }[] | false;
+};
+
+export type PackageConfig = {
+  manager?: string;
+  path?: string;
+  dependencies?: string[];
+  packageFileName?: string;
+  version?: RawCommand;
+  prepublish?: RawCommand;
+  publish?: RawCommand;
+  postpublish?: RawCommand;
+  errorOnVersionRange?: string;
+  releaseTag?: string | false;
+  assets?: { path: string; name: string }[] | false;
+};
+
+export type ConfigFile = {
+  changeFolder?: string;
+  gitSiteUrl?: string;
+  timeout?: number;
+  additionalBumpTypes?: string[];
+  defaultChangeTag?: string;
+  pkgManagers?: Record<string, PkgManagerConfig>;
+  packages: Record<string, PackageConfig>;
+  changeTags?: Record<string, string>;
+};
+
+export type Config = ConfigFile & { file?: File };
 
 export type LoggerLevel = "debug" | "info" | "warn" | "error" | "fatal";
 export type LoggerBucket = "default" | "stdout" | "stderr";
@@ -31,16 +144,17 @@ export interface LoggerAttribute {
 }
 
 export interface LoggerBindings {
-  level?: number;
   msg?: string;
   renderAsYAML?: Record<string, any>;
+  meta?: Record<string, unknown>;
 }
 
 export interface LoggerEntry extends LoggerBindings {
   command: string;
   step?: string;
   bucket: LoggerBucket;
-  levelLabel: LoggerLevel;
+  level: LoggerLevel;
+  meta?: Record<string, unknown>;
 }
 
 export interface Logger {

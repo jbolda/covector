@@ -1,10 +1,11 @@
-import { attemptCommands } from "../src";
+import { attemptCommands } from "../src/index.js";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+import type { LoggerLevel } from "@covector/types";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call, useScope } from "effection";
+
 import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
@@ -72,34 +73,32 @@ describe("attemptCommand fails", () => {
         : isEnoent
           ? "spawn boop ENOENT"
           : "Process exited with non-zero status (1)";
-      const errorLog = [
+      const errorLog: Array<Partial<logTest.TestLogEntry>> = [
         {
           msg: [
             "'boop' is not recognized as an internal or external command,",
             "operable program or batch file.",
-          ],
-          level: 30,
+          ] as unknown as string,
+          level: "info" as LoggerLevel,
         },
       ];
 
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.logs,
           [
-            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: "pkg-nickname []: boop", level: "info" },
             ...errorLog,
-            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+            { msg: "pkg-nickname []: boop", level: "info" },
             ...errorLog,
-            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+            { msg: "pkg-nickname []: boop", level: "info" },
             ...errorLog,
             // to confirm we are done with logs
-            { msg: "completed", level: 30 },
+            { msg: "completed", level: "info" },
           ],
           isShallowError,
-        ),
-      );
+        );
       expect(
         errored.message.includes("ENOENT") ||
           errored.message.includes("non-zero status") ||
@@ -109,33 +108,31 @@ describe("attemptCommand fails", () => {
       ).toBeTruthy();
     } else {
       const errorMessage = "spawn boop ENOENT";
-      yield* call(() =>
-        logTest.consecutive(
+      yield* logTest.consecutive(
           log.sink.logs,
           [
-            { msg: "pkg-nickname []: boop", level: 30 },
-            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-            { msg: "pkg-nickname []: boop", level: 30 },
-            { msg: errorMessage, err: { code: "ENOENT" }, level: 50 },
-            { msg: "pkg-nickname []: boop", level: 30 },
+            { msg: "pkg-nickname []: boop", level: "info" },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+            { msg: "pkg-nickname []: boop", level: "info" },
+            { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+            { msg: "pkg-nickname []: boop", level: "info" },
             // to confirm we are done with logs
-            { msg: "completed", level: 30 },
+            { msg: "completed", level: "info" },
           ],
           isShallowError,
-        ),
-      );
+        );
       expect(errored.message).toBe(errorMessage);
     }
   });
 });
 
-function getReceivedMsg(received) {
+function getReceivedMsg(received: any) {
   if (typeof received?.msg === "string") return received.msg;
   if (typeof received?.err?.message === "string") return received.err.message;
   return String(received?.msg ?? "");
 }
 
-function isShallowError(received, expected) {
+function isShallowError(received: any, expected: any) {
   const receivedMsg = getReceivedMsg(received);
   if (Array.isArray(expected.msg)) {
     for (let chunk of expected.msg) {
