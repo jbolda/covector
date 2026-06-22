@@ -2,7 +2,6 @@ import { attemptCommands } from "../src/index.ts";
 import { captureError, describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
-import type { LoggerLevel } from "@covector/types";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
 
@@ -73,11 +72,12 @@ describe("attemptCommand fails", () => {
           : "Process exited with non-zero status (1)";
       const errorLog: Array<Partial<logTest.TestLogEntry>> = [
         {
-          msg: [
-            "'boop' is not recognized as an internal or external command,",
-            "operable program or batch file.",
-          ] as unknown as string,
-          level: "info" as LoggerLevel,
+          msg: "'boop' is not recognized as an internal or external command,",
+          level: "info",
+        },
+        {
+          msg: "operable program or batch file.",
+          level: "info",
         },
       ];
 

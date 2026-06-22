@@ -158,14 +158,7 @@ describe("integration test for complex commands", () => {
               level: "info",
               meta: { command: "test" },
             },
-            {
-              msg: [
-                "> package-one@2.3.1 test",
-                "> npm info covector@0.1.0 license",
-              ] as unknown as string,
-              level: "info",
-              meta: { command: "test" },
-            },
+            { msg: "> package-one@2.3.1 test\n> npm info covector@0.1.0 license", level: "info", meta: { command: "test" } },
             {
               msg: "npm warn Ignoring workspaces for specified package(s)",
               level: "info",
@@ -191,14 +184,7 @@ describe("integration test for complex commands", () => {
               level: "info",
               meta: { command: "test" },
             },
-            {
-              msg: [
-                "> package-two@1.9.0 build",
-                "> echo this command is not piped, it is run from scripts for pk2",
-              ] as unknown as string,
-              level: "info",
-              meta: { command: "test" },
-            },
+            { msg: "> package-two@1.9.0 build\n> echo this command is not piped, it is run from scripts for pk2", level: "info", meta: { command: "test" } },
             {
               msg: "this command is not piped, it is run from scripts for pk2",
               level: "info",
@@ -209,14 +195,7 @@ describe("integration test for complex commands", () => {
               level: "info",
               meta: { command: "test" },
             },
-            {
-              msg: [
-                "> package-two@1.9.0 test",
-                "> echo this command is not piped, it is run from the test script",
-              ] as unknown as string,
-              level: "info",
-              meta: { command: "test" },
-            },
+            { msg: "> package-two@1.9.0 test\n> echo this command is not piped, it is run from the test script", level: "info", meta: { command: "test" } },
             {
               msg: "this command is not piped, it is run from the test script",
               level: "info",
@@ -265,14 +244,7 @@ describe("integration test for complex commands", () => {
             level: "info",
             meta: { command: "build" },
           },
-          {
-            msg: [
-              "> package-one@2.3.1 build",
-              "> npm info tauri@0.8.0 description",
-            ] as unknown as string,
-            level: "info",
-            meta: { command: "build" },
-          },
+          { msg: "> package-one@2.3.1 build\n> npm info tauri@0.8.0 description", level: "info", meta: { command: "build" } },
           {
             msg: "npm warn Ignoring workspaces for specified package(s)",
             level: "info",
@@ -292,14 +264,7 @@ describe("integration test for complex commands", () => {
             level: "info",
             meta: { command: "build" },
           },
-          {
-            msg: [
-              "> package-two@1.9.0 build",
-              "> echo this command is not piped, it is run from scripts for pk2",
-            ] as unknown as string,
-            level: "info",
-            meta: { command: "build" },
-          },
+            { msg: "> package-two@1.9.0 build\n> echo this command is not piped, it is run from scripts for pk2", level: "info", meta: { command: "build" } },
           {
             msg: "this command is not piped, it is run from scripts for pk2",
             level: "info",

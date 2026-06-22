@@ -13,7 +13,7 @@ vi.mock("@actions/github", () => ({
 describe("test mocks", () => {
   it("mocks core getInput", function* () {
     vi.spyOn(core, "getInput").mockImplementationOnce(
-      (arg) => `This returns ${arg}`
+      (arg) => `This returns ${arg}`,
     );
     const test = core.getInput("test");
     expect(test).toBe("This returns test");

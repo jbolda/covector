@@ -1551,20 +1551,32 @@ describe("integration test in production mode", () => {
             meta: { command: "build" },
           },
           {
+            msg: "[eval]:1",
             level: "error",
             meta: { command: "build" },
-            msg: [
-              "[eval]:1",
-              "throw new Error('boom')",
-              "Error: boom",
-              "node:internal/",
-            ] as unknown as string,
           },
           {
-            msg: [
-              "code: 1",
-              "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
-            ] as unknown as string,
+            msg: "throw new Error('boom')",
+            level: "error",
+            meta: { command: "build" },
+          },
+          {
+            msg: "Error: boom",
+            level: "error",
+            meta: { command: "build" },
+          },
+          {
+            msg: "node:internal/",
+            level: "error",
+            meta: { command: "build" },
+          },
+          {
+            msg: "code: 1",
+            level: "error",
+            meta: { command: "build" },
+          },
+          {
+            msg: "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
             level: "error",
             meta: { command: "build" },
           },
@@ -1574,20 +1586,32 @@ describe("integration test in production mode", () => {
             meta: { command: "build" },
           },
           {
+            msg: "[eval]:1",
             level: "error",
             meta: { command: "build" },
-            msg: [
-              "[eval]:1",
-              "throw new Error('boom')",
-              "Error: boom",
-              "node:internal/",
-            ] as unknown as string,
           },
           {
-            msg: [
-              "code: 1",
-              "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
-            ] as unknown as string,
+            msg: "throw new Error('boom')",
+            level: "error",
+            meta: { command: "build" },
+          },
+          {
+            msg: "Error: boom",
+            level: "error",
+            meta: { command: "build" },
+          },
+          {
+            msg: "node:internal/",
+            level: "error",
+            meta: { command: "build" },
+          },
+          {
+            msg: "code: 1",
+            level: "error",
+            meta: { command: "build" },
+          },
+          {
+            msg: "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
             level: "error",
             meta: { command: "build" },
           },
