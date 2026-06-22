@@ -19,7 +19,7 @@
     "@actions/artifact": "^2.1.7",
     "@actions/core": "^1.10.1",
     "@actions/github": "^5.1.1",
-    "covector": "0.12.4",
+    "covector": "0.12.5",
     "effection": "^4.0.2",
     "js-yaml": "^4.1.0"
   },
