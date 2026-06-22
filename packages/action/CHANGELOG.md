@@ -1,5 +1,13 @@
 # Changelog
 
+## \[0.12.5]
+
+- [`ff91f1d`](https://www.github.com/jbolda/covector/commit/ff91f1d62901c1a30230a84b400abae57adf0c1e) ([#385](https://www.github.com/jbolda/covector/pull/385) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Update Action Node.js version from 20 to 24
+
+### Dependencies
+
+- Upgraded to `covector@0.12.5`
+
 ## \[0.12.4]
 
 ### Dependencies
