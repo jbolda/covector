@@ -39,7 +39,7 @@
     "@covector/files": "0.8.0",
     "effection": "^2.0.6",
     "globby": "^11.1.0",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "^4.2.0",
     "lodash": "^4.17.21",
     "pino": "^9.1.0",
     "pino-abstract-transport": "^1.2.0",
