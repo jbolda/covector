@@ -11,7 +11,7 @@ const f = fixtures(__dirname);
 // with command line compat and complicates things further
 export const command = (cwd: string) =>
   `node "${path
-    .relative(cwd, path.join(__dirname, "./../dist/index.js"))
+    .relative(cwd, path.join(__dirname, "./../dist/index.mjs"))
     .split(path.sep)
     .join("/")}"`;
 
