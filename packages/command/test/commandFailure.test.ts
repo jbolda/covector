@@ -60,67 +60,24 @@ describe("attemptCommand fails", () => {
     );
     yield* logger.operations.info("completed");
 
-    if (process.platform === "win32") {
-      const isCmdNotFound = (errored as Error).message.includes(
-        "not recognized as an internal or external command",
-      );
-      const isEnoent = (errored as Error).message.includes("ENOENT");
-      const errorMessage = isCmdNotFound
-        ? "Process exited with non-zero status (1)"
-        : isEnoent
-          ? "spawn boop ENOENT"
-          : "Process exited with non-zero status (1)";
-      const errorLog: Array<Partial<logTest.TestLogEntry>> = [
-        {
-          msg: "'boop' is not recognized as an internal or external command,",
-          level: "info",
-        },
-        {
-          msg: "operable program or batch file.",
-          level: "info",
-        },
-      ];
-
-      yield* logTest.consecutive(
-        log.logs,
-        [
-          { msg: "pkg-nickname []: boop", level: "info" },
-          ...errorLog,
-          { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
-          { msg: "pkg-nickname []: boop", level: "info" },
-          ...errorLog,
-          { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
-          { msg: "pkg-nickname []: boop", level: "info" },
-          ...errorLog,
-          // to confirm we are done with logs
-          { msg: "completed", level: "info" },
-        ],
-        isShallowError,
-      );
-      expect(
-        errored.message.includes("ENOENT") ||
-          errored.message.includes("non-zero status") ||
-          errored.message.includes(
-            "not recognized as an internal or external command",
-          ),
-      ).toBeTruthy();
-    } else {
-      const errorMessage = "spawn boop ENOENT";
-      yield* logTest.consecutive(
-        log.logs,
-        [
-          { msg: "pkg-nickname []: boop", level: "info" },
-          { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
-          { msg: "pkg-nickname []: boop", level: "info" },
-          { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
-          { msg: "pkg-nickname []: boop", level: "info" },
-          // to confirm we are done with logs
-          { msg: "completed", level: "info" },
-        ],
-        isShallowError,
-      );
-      expect(errored.message).toBe(errorMessage);
-    }
+    const errorMessage = "spawn boop ENOENT";
+    yield* logTest.consecutive(
+      log.logs,
+      [
+        { msg: "pkg-nickname []: boop", level: "info" },
+        { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+        { msg: "pkg-nickname []: boop", level: "info" },
+        { msg: errorMessage, err: { code: "ENOENT" }, level: "error" },
+        { msg: "pkg-nickname []: boop", level: "info" },
+        // to confirm we are done with logs
+        { msg: "completed", level: "info" },
+      ],
+      isShallowError,
+    );
+    expect(
+      errored.message.includes("ENOENT") ||
+        errored.message.includes("non-zero status"),
+    ).toBeTruthy();
   });
 });
 

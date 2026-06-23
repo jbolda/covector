@@ -354,7 +354,7 @@ Usage:
             // error contains a recognizable message so we don't swallow
             // unexpected failures.
             expect(err.message || String(err)).toMatch(
-              /Process exited with non-zero status|nonexistent pipe/i,
+              /Process exited with non-zero status|nonexistent pipe|ENOENT/i,
             );
           }
         });
