@@ -24,6 +24,10 @@ const config = {
       strictRequires: "auto",
       extensions: [".js"],
       sourceMap: false,
+      // ctrlc-windows uses a dynamic require with a template-literal path
+      // for its native .node binary. Leave it as a runtime require since
+      // native addons cannot be bundled by rollup.
+      ignoreDynamicRequires: true,
     }),
     nodeResolve({ preferBuiltins: true }),
     esbuild({ tsconfig: "tsconfig.json", target: "esnext" }),
