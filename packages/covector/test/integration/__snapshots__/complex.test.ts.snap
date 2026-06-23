@@ -513,7 +513,10 @@ Multi-binding collection of libraries and templates for building Tauri apps
 
 - Added some even cooler things.
 
+> package-two@1.9.0 build
+> echo this command is not piped, it is run from scripts for pk2
 
+this command is not piped, it is run from scripts for pk2
 ",
       "postcommand": false,
       "precommand": false,
@@ -683,7 +686,7 @@ publish
 
 - Added some even cooler things.
 
-
+publish
 ",
       "pkg": {
         "command": [
@@ -857,7 +860,10 @@ Multi-binding collection of libraries and templates for building Tauri apps
 
 - Added some even cooler things.
 
+> package-two@1.9.0 build
+> echo this command is not piped, it is run from scripts for pk2
 
+this command is not piped, it is run from scripts for pk2
 ",
       "postcommand": false,
       "precommand": false,
@@ -1006,7 +1012,7 @@ exports[`integration test to invoke sub commands > runs publish-primary in prod 
       "precommand": false,
     },
     "package-two": {
-      "command": "
+      "command": "publish
 ",
       "postcommand": false,
       "precommand": false,
@@ -1104,7 +1110,7 @@ exports[`integration test to invoke sub commands > runs publishSecondary in prod
       "precommand": false,
     },
     "package-two": {
-      "command": "
+      "command": "publish
 ",
       "postcommand": false,
       "precommand": false,

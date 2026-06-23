@@ -110,22 +110,19 @@ describe("integration test with preMode `on`", () => {
   });
 
   it("runs version in production with existing changes for js and rust", function* () {
-    const sinkOne = yield* logTest.useCapturedLogger();
+    const sink = yield* logTest.useCapturedLogger();
 
-    const loggerOne = covectorLogger.operations;
-    const sinkTwo = yield* logTest.useCapturedLogger();
-
-    const loggerTwo = covectorLogger.operations;
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
     const covectoredOne = yield* covector({
-      logger: loggerOne,
+      logger,
       command: "version",
       cwd: fullIntegration,
     });
 
-    yield* logTest.consecutive(sinkOne.all, [
+    yield* logTest.consecutive(sink.all, [
       {
         msg: "bumping tauri with preminor",
         level: "info",
@@ -203,13 +200,15 @@ Boop again.
       "---\n" + '"tauri-api": patch\n' + "---\n\n" + "Boop again.\n",
     );
 
+    const startIndex = sink.all.length;
+
     const covectoredTwo = yield* covector({
-      logger: loggerTwo,
+      logger,
       command: "version",
       cwd: fullIntegration,
     });
 
-    yield* logTest.consecutive(sinkTwo.all, [
+    yield* logTest.consecutive(sink.all.slice(startIndex), [
       {
         msg: "bumping tauri-api with prepatch",
         level: "info",
@@ -296,6 +295,71 @@ Boop again.
       [
         {
           msg: "==== data piped into commands ===",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "==== data piped into commands ===",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "==== data piped into commands ===",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "==== commands ready to run ===",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "bumping tauri with preminor",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "bumping tauri-updater with prepatch",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "bumping tauri.js with prerelease",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3-beta.0",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "tauri planned to be bumped from 0.5.2 to 0.6.0-beta.0",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3-beta.0",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "==== result ===",
           level: "info",
           meta: { command: "version" },
         },

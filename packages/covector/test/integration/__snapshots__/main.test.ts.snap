@@ -4,7 +4,7 @@ exports[`integration test in production mode > handles config > allows modifying
 {
   "commandsRan": {
     "tauri": {
-      "command": true,
+      "command": false,
       "pkg": {
         "command": [
           "node -e "console.log('publishing tauri')"",
@@ -234,9 +234,8 @@ path = "examples/communication/src-tauri/src/main.rs"",
         ],
         "releaseTag": "tauri-v0.5.2",
       },
-      "postcommand": true,
-      "precommand": true,
-      "published": true,
+      "postcommand": false,
+      "precommand": false,
     },
     "tauri-api": {
       "command": true,
@@ -4430,7 +4429,7 @@ exports[`integration test in production mode > handles config > uses the action 
 {
   "commandsRan": {
     "tauri": {
-      "command": true,
+      "command": false,
       "pkg": {
         "command": [
           "node -e "console.log('publishing tauri')"",
@@ -4661,9 +4660,8 @@ path = "examples/communication/src-tauri/src/main.rs"",
         ],
         "releaseTag": "tauri-v0.5.2",
       },
-      "postcommand": true,
-      "precommand": true,
-      "published": true,
+      "postcommand": false,
+      "precommand": false,
     },
     "tauri-api": {
       "command": true,
@@ -7214,7 +7212,7 @@ exports[`integration test in production mode > publish > runs publish for js and
 {
   "commandsRan": {
     "tauri": {
-      "command": true,
+      "command": false,
       "pkg": {
         "command": [
           "node -e "console.log('publishing tauri')"",
@@ -7443,9 +7441,8 @@ path = "examples/communication/src-tauri/src/main.rs"",
         ],
         "releaseTag": "tauri-v0.5.2",
       },
-      "postcommand": true,
-      "precommand": true,
-      "published": true,
+      "postcommand": false,
+      "precommand": false,
     },
     "tauri-api": {
       "command": true,

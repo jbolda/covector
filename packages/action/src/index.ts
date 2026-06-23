@@ -19,7 +19,7 @@ import type {
   Logger,
 } from "@covector/types";
 import { formatComment } from "./comment/formatGithubComment.ts";
-import { call, type Operation } from "effection";
+import { until, type Operation } from "effection";
 import { getCommitContext } from "./pr/getCommitContext.ts";
 import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact.ts";
 
@@ -294,7 +294,6 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
           modifyConfig: injectPublishFunctions([
             createReleases({
               logger,
-              core,
               octokit,
               owner,
               repo,
@@ -440,7 +439,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
               after,
             }: any = github.context.payload;
 
-            const { data } = yield* call(() =>
+            const { data } = yield* until(
               octokit.rest.issues.listComments({
                 owner,
                 repo,
@@ -471,7 +470,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
             };
 
             if (covectorComments.length !== 1) {
-              yield* call(() =>
+              yield* until(
                 octokit.rest.issues.createComment({
                   owner,
                   repo,
@@ -480,7 +479,7 @@ export function* run(logger: Logger): Operation<CovectorPublish | void> {
                 })
               );
             } else {
-              yield* call(() =>
+              yield* until(
                 octokit.rest.issues.updateComment({
                   owner,
                   repo,

@@ -2,7 +2,7 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { getOctokit } from "@actions/github";
-import { call, Operation } from "effection";
+import { until, Operation } from "effection";
 import { Logger } from "@covector/types";
 
 export function* postGithubComment({
@@ -24,7 +24,7 @@ export function* postGithubComment({
 }): Operation<void> {
   const tag = "<!-- Covector Action -->\n";
   const body = tag + comment;
-  const allComments = yield* call(() =>
+  const allComments = yield* until(
     octokit.rest.issues.listComments({
       owner,
       repo,
@@ -39,7 +39,7 @@ export function* postGithubComment({
   try {
     if (previousComment) {
       yield* logger.info("Updating comment in pull request.");
-      yield* call(() =>
+      yield* until(
         octokit.rest.issues.updateComment({
           owner,
           repo,
@@ -49,7 +49,7 @@ export function* postGithubComment({
       );
     } else {
       yield* logger.info("Posting comment in pull request.");
-      yield* call(() =>
+      yield* until(
         octokit.rest.issues.createComment({
           owner,
           repo,
@@ -66,17 +66,17 @@ export function* postGithubComment({
       const artifactFilename = "./covector-comment.md";
       const artifactAbsolutePath = path.join(artifactRoot, artifactFilename);
       yield* logger.debug(`Writing comment body to ${artifactAbsolutePath}`);
-      yield* call(() => fs.writeFile(artifactAbsolutePath, body));
+      yield* until(fs.writeFile(artifactAbsolutePath, body));
 
       const artifactPRNumber = "./covector-prNumber.md";
       const prNumberAbsolutePath = path.join(artifactRoot, artifactPRNumber);
-      yield* call(() =>
+      yield* until(
         fs.writeFile(prNumberAbsolutePath, issue_number.toString())
       );
 
       const artifact = new DefaultArtifactClient();
       yield* logger.debug(`Uploading comment from ${artifactAbsolutePath}`);
-      yield* call(() =>
+      yield* until(
         artifact.uploadArtifact(
           "covector-comment",
           [artifactAbsolutePath, prNumberAbsolutePath],

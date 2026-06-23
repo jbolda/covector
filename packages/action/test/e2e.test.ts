@@ -310,6 +310,16 @@ describe("full e2e test", () => {
             msg: "There is 2 packages ready to publish which includes package-one@2.3.1, package-two@1.9.0",
             level: "info",
           },
+          {
+            command: "status",
+            msg: "createRelease is true with a token.",
+            level: "debug",
+          },
+          {
+            command: "status",
+            msg: "Fetched context, owner is genericOwner and repo is genericRepo.",
+            level: "debug",
+          },
           // then the publish command runs
           {
             msg: "package-one [publish]: echo publish",
@@ -319,7 +329,10 @@ describe("full e2e test", () => {
             msg: "publish",
             level: "info",
           },
-          // create release call
+          {
+            msg: "creating release with tag package-one-v2.3.1",
+            level: "debug",
+          },
           {
             msg: "creating Github Release for package-one@2.3.1",
             level: "info",
@@ -336,7 +349,10 @@ describe("full e2e test", () => {
             msg: "publish",
             level: "info",
           },
-          // create release call
+          {
+            msg: "creating release with tag package-two-v1.9.0",
+            level: "debug",
+          },
           {
             msg: "creating Github Release for package-two@1.9.0",
             level: "info",

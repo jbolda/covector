@@ -184,26 +184,14 @@ export function* consecutive(
     expect(actualEntry).toMatchObject(expectedEntry);
   },
 ): Operation<void> {
-  if (expected.length === 0) return;
+  if (expected.length !== actual.length) {
+    throw new Error(
+      `expected log entry count mismatch: actual has ${actual.length} entries, expected ${expected.length} entries.\n` +
+        `actual=${JSON.stringify(actual)}\nexpected=${JSON.stringify(expected)}`,
+    );
+  }
 
-  let cursor = 0;
-  for (const expectedEntry of expected) {
-    let found = false;
-    for (let index = cursor; index < actual.length; index++) {
-      try {
-        matcher(actual[index], expectedEntry);
-        cursor = index + 1;
-        found = true;
-        break;
-      } catch {
-        // keep scanning forward for this expected entry
-      }
-    }
-
-    if (!found) {
-      throw new Error(
-        `expected log entry not found in order. expected=${JSON.stringify(expectedEntry)} actual=${JSON.stringify(actual)}`,
-      );
-    }
+  for (let i = 0; i < expected.length; i++) {
+    matcher(actual[i], expected[i]);
   }
 }

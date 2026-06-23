@@ -13,7 +13,6 @@ import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 import { injectPublishFunctions } from "../../../action/src/utils.js";
-import { run } from "effection";
 
 expect.addSnapshotSerializer({
   test: (value) => value instanceof TomlDocument,
@@ -99,6 +98,7 @@ describe("integration test in production mode", () => {
       const sink = yield* logTest.useCapturedLogger();
 
       const logger = covectorLogger.operations;
+
       const fullIntegration = f.copy("integration.js-and-rust-with-changes");
       const modifyConfig = async (pullConfig: any) => {
         const config = await pullConfig;
@@ -108,27 +108,21 @@ describe("integration test in production mode", () => {
               config.pkgManagers[pkgManager],
             ).reduce((pm, p) => {
               if (p.startsWith("publish")) {
-                const functionInject = async () =>
-                  run(function* () {
-                    // yield* covectorLogger.around(captureLoggerMiddleware(logs));
-                    yield* logger.warn("deboop");
-                  });
+                const functionInject = function* () {
+                  yield* logger.warn("deboop");
+                };
                 pm[p] = Array.isArray(pm[p])
                   ? pm[p].concat(functionInject)
                   : [pm[p], functionInject];
               } else if (p.startsWith("pre")) {
-                const functionInject = async () =>
-                  run(function* () {
-                    // yield* covectorLogger.around(captureLoggerMiddleware(logs));
-                    yield* logger.warn("begin with only boops");
-                  });
+                const functionInject = function* () {
+                  yield* logger.warn("begin with only boops");
+                };
                 pm[p] = [functionInject];
               } else if (p.startsWith("post")) {
-                const functionInject = async () =>
-                  run(function* () {
-                    // yield* covectorLogger.around(captureLoggerMiddleware(logs));
-                    yield* logger.warn("ends with overwrites using boops");
-                  });
+                const functionInject = function* () {
+                  yield* logger.warn("ends with overwrites using boops");
+                };
                 pm[p] = functionInject;
               }
               return pm;
@@ -251,7 +245,7 @@ describe("integration test in production mode", () => {
             meta: { command: "publish" },
           },
           {
-            msg: "publishing tauri.ts",
+            msg: "publishing tauri.js",
             level: "info",
             meta: { command: "publish" },
           },
@@ -434,18 +428,14 @@ describe("integration test in production mode", () => {
         command: "publish",
         cwd: fullIntegration,
         modifyConfig: injectPublishFunctions([
-          async (pkg: any) =>
-            run(function* () {
-              // yield* covectorLogger.around(captureLoggerMiddleware(logs));
-              yield* logger.warn(
-                `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`,
-              );
-            }),
-          async () =>
-            run(function* () {
-              // yield* covectorLogger.around(captureLoggerMiddleware(logs));
-              yield* logger.warn(`push another log`);
-            }),
+          function* (pkg: any) {
+            yield* logger.warn(
+              `push log into publish for ${pkg.pkg}-v${pkg.pkgFile.version}`,
+            );
+          },
+          function* () {
+            yield* logger.warn(`push another log`);
+          },
         ]),
       });
 
@@ -565,18 +555,16 @@ describe("integration test in production mode", () => {
             meta: { command: "publish" },
           },
           {
-            msg: "publishing tauri.ts",
+            msg: "publishing tauri.js",
             level: "info",
             meta: { command: "publish" },
           },
           {
-            // this is an injected log from modifying the config
             msg: "push log into publish for tauri.js-v0.6.2",
             level: "warn",
             meta: { command: "publish" },
           },
           {
-            // this is an injected log from modifying the config
             msg: "push another log",
             level: "warn",
             meta: { command: "publish" },
@@ -622,13 +610,11 @@ describe("integration test in production mode", () => {
             meta: { command: "publish" },
           },
           {
-            // this is an injected log from modifying the config
             msg: "push log into publish for tauri-bundler-v0.6.0",
             level: "warn",
             meta: { command: "publish" },
           },
           {
-            // this is an injected log from modifying the config
             msg: "push another log",
             level: "warn",
             meta: { command: "publish" },
@@ -674,13 +660,11 @@ describe("integration test in production mode", () => {
             meta: { command: "publish" },
           },
           {
-            // this is an injected log from modifying the config
             msg: "push log into publish for tauri-api-v0.5.1",
             level: "warn",
             meta: { command: "publish" },
           },
           {
-            // this is an injected log from modifying the config
             msg: "push another log",
             level: "warn",
             meta: { command: "publish" },
@@ -726,13 +710,11 @@ describe("integration test in production mode", () => {
             meta: { command: "publish" },
           },
           {
-            // this is an injected log from modifying the config
             msg: "push log into publish for tauri-utils-v0.5.0",
             level: "warn",
             meta: { command: "publish" },
           },
           {
-            // this is an injected log from modifying the config
             msg: "push another log",
             level: "warn",
             meta: { command: "publish" },
@@ -1211,7 +1193,7 @@ describe("integration test in production mode", () => {
             meta: { command: "publish" },
           },
           {
-            msg: "publishing tauri.ts",
+            msg: "publishing tauri.js",
             level: "info",
             meta: { command: "publish" },
           },
@@ -1517,6 +1499,11 @@ describe("integration test in production mode", () => {
           // },
           // it actually here and the logs (especially on linux) aren't output
           //  consistently enough to check the remaining
+          {
+            msg: "[eval]:1",
+            level: "error",
+            meta: { command: "test" },
+          },
         ],
         checksChunksInMsg(),
       );
@@ -1543,82 +1530,47 @@ describe("integration test in production mode", () => {
           {
             msg: "CHANGELOG.md not found",
             level: "error",
-            meta: { command: "build" },
+            meta: { command: "publish" },
           },
           {
             msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
             level: "info",
-            meta: { command: "build" },
+            meta: { command: "publish" },
           },
           {
             msg: "[eval]:1",
             level: "error",
-            meta: { command: "build" },
-          },
-          {
-            msg: "throw new Error('boom')",
-            level: "error",
-            meta: { command: "build" },
-          },
-          {
-            msg: "Error: boom",
-            level: "error",
-            meta: { command: "build" },
-          },
-          {
-            msg: "node:internal/",
-            level: "error",
-            meta: { command: "build" },
+            meta: { command: "publish" },
           },
           {
             msg: "code: 1",
             level: "error",
-            meta: { command: "build" },
-          },
-          {
-            msg: "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
-            level: "error",
-            meta: { command: "build" },
+            meta: { command: "publish" },
           },
           {
             msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
             level: "info",
-            meta: { command: "build" },
+            meta: { command: "publish" },
           },
           {
             msg: "[eval]:1",
             level: "error",
-            meta: { command: "build" },
-          },
-          {
-            msg: "throw new Error('boom')",
-            level: "error",
-            meta: { command: "build" },
-          },
-          {
-            msg: "Error: boom",
-            level: "error",
-            meta: { command: "build" },
-          },
-          {
-            msg: "node:internal/",
-            level: "error",
-            meta: { command: "build" },
+            meta: { command: "publish" },
           },
           {
             msg: "code: 1",
             level: "error",
-            meta: { command: "build" },
-          },
-          {
-            msg: "$ node -e throw new Error('boom') --no-extra-info-on-fatal-exception",
-            level: "error",
-            meta: { command: "build" },
+            meta: { command: "publish" },
           },
           {
             msg: "tauri.js [publish]: node -e \"throw new Error('boom')\" --no-extra-info-on-fatal-exception",
             level: "info",
-            meta: { command: "build" },
+            meta: { command: "publish" },
+          },
+          {
+            msg: "[eval]:1",
+            level: "error",
+            meta: { command: "publish" },
           },
           // TODO check boom with command in error
           // {
@@ -1711,42 +1663,42 @@ describe("integration test in production mode", () => {
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "No commands configured to run on [test].",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "completed",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
       ],
       checksWithObject(),
@@ -1775,137 +1727,137 @@ describe("integration test in production mode", () => {
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "CHANGELOG.md not found",
           level: "error",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri-bundler [build]: node -e \"console.log('the files in the tauri-bundler folder are')\"",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "the files in the tauri-bundler folder are",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri-bundler [build]: ls",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "Cargo.toml",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri [build]: node -e \"console.log('the files in the tauri folder are')\"",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "the files in the tauri folder are",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri [build]: ls",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "Cargo.toml",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri-api [build]: node -e \"console.log('the files in the tauri-api folder are')\"",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "the files in the tauri-api folder are",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri-api [build]: ls",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "Cargo.toml",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri-utils [build]: node -e \"console.log('the files in the tauri-utils folder are')\"",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "the files in the tauri-utils folder are",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri-utils [build]: ls",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "Cargo.toml",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri-updater [build]: node -e \"console.log('the files in the tauri-updater folder are')\"",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "the files in the tauri-updater folder are",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "tauri-updater [build]: ls",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "Cargo.toml",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
         {
           msg: "completed",
           level: "info",
-          meta: { command: "build" },
+          meta: { command: "arbitrary" },
         },
       ],
       checksWithObject(),

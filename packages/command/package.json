@@ -23,9 +23,9 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@effectionx/process": "^0.8.0",
+    "@effectionx/process": "^0.8.1",
     "@effectionx/timebox": "^0.4.3",
-    "effection": "^4.0.2"
+    "effection": "^4.0.3"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"

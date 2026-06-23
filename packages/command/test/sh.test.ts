@@ -127,7 +127,9 @@ Usage:
     );
 
     expect(sink.info).toEqual([{ msg: "running", level: "info" }]);
-    expect(sink.stdout).toEqual([{ msg: "from-out", level: "info" }]);
+    expect(sink.stdout).toEqual([
+      { msg: "from-out", level: "info" },
+    ]);
     expect(sink.stderr).toEqual([{ msg: "from-err", level: "error" }]);
   });
 

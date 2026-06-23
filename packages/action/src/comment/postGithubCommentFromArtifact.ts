@@ -3,7 +3,7 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { getOctokit } from "@actions/github";
-import { call, type Operation } from "effection";
+import { until, type Operation } from "effection";
 import type { Logger } from "@covector/types";
 import type { webhooks } from "@octokit/openapi-webhooks-types";
 
@@ -28,7 +28,7 @@ export function* postGithubCommentFromArtifact({
     },
   } = payload;
 
-  const artifacts = yield* call(() =>
+  const artifacts = yield* until(
     octokit.rest.actions.listWorkflowRunArtifacts({
       owner,
       repo,
@@ -48,7 +48,7 @@ export function* postGithubCommentFromArtifact({
     repositoryOwner: owner,
     repositoryName: repo,
   };
-  const { downloadPath } = yield* call(() =>
+  const { downloadPath } = yield* until(
     artifact.downloadArtifact(commentArtifact.id, {
       path: artifactRoot,
       findBy,
@@ -59,14 +59,14 @@ export function* postGithubCommentFromArtifact({
     return;
   }
 
-  const comment = yield* call(() =>
+  const comment = yield* until(
     fs.readFile(path.join(downloadPath, "covector-comment.md"), {
       encoding: "utf8",
     })
   );
   // the `github.context` does not contain a PR number when triggered through a fork
   //  so uploading it as an artifact and downloading it here to comment
-  const prNumberAsString = yield* call(() =>
+  const prNumberAsString = yield* until(
     fs.readFile(path.join(downloadPath, "covector-prNumber.md"), {
       encoding: "utf8",
     })

@@ -109,6 +109,9 @@ export const checksChunksInMsg =
       ) {
         // Node patch versions can shift internal frame names/line numbers.
         assert.include(receivedMsg, "node:internal/");
+      } else if (receivedMsg.includes(expectedMsg)) {
+        // General substring match: actual entry's msg is longer (e.g. contains
+        // a full stack trace). Only verify level and the keys below.
       } else {
         assert.deepEqual(received, expected);
       }

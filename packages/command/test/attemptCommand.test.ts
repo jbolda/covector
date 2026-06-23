@@ -3,7 +3,7 @@ import { describe, it } from "../../../helpers/test-scope.ts";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
-import { sleep, useScope } from "effection";
+import { sleep } from "effection";
 import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
@@ -34,7 +34,6 @@ const fillWithDefaults = ({ version }: { version: string }) => {
 describe("attemptCommand", () => {
   it("invokes a function", function* () {
     const log = yield* logTest.useCapturedLogger();
-    const scope = yield* useScope();
 
     yield* attemptCommands({
       logger: logger.operations,
@@ -43,11 +42,10 @@ describe("attemptCommand", () => {
           ...base,
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
-          command: async () =>
-            scope.run(function* () {
-              yield* logger.operations.info("boop");
-              yield* sleep(1000);
-            }),
+          command: function* () {
+            yield* logger.operations.info("boop");
+            yield* sleep(1000);
+          },
         },
       ],
       command: "publish",
@@ -60,7 +58,6 @@ describe("attemptCommand", () => {
 
   it("invokes an array of functions", function* () {
     const log = yield* logTest.useCapturedLogger();
-    const scope = yield* useScope();
 
     yield* attemptCommands({
       logger: logger.operations,
@@ -70,22 +67,18 @@ describe("attemptCommand", () => {
           pkg: "pkg-nickname",
           manager: "none",
           command: [
-            async () =>
-              scope.run(function* () {
-                yield* logger.operations.info("boop");
-              }),
-            async () =>
-              scope.run(function* () {
-                yield* logger.operations.info("booop");
-              }),
-            async () =>
-              scope.run(function* () {
-                yield* logger.operations.info("boooop");
-              }),
-            async () =>
-              scope.run(function* () {
-                yield* logger.operations.info("booooop");
-              }),
+            function* () {
+              yield* logger.operations.info("boop");
+            },
+            function* () {
+              yield* logger.operations.info("booop");
+            },
+            function* () {
+              yield* logger.operations.info("boooop");
+            },
+            function* () {
+              yield* logger.operations.info("booooop");
+            },
           ],
         },
       ],
@@ -104,7 +97,6 @@ describe("attemptCommand", () => {
 
   it("invokes a function using package values", function* () {
     const log = yield* logTest.useCapturedLogger();
-    const scope = yield* useScope();
 
     yield* attemptCommands({
       logger: logger.operations,
@@ -113,12 +105,11 @@ describe("attemptCommand", () => {
           ...base,
           pkg: "pkg-nickname",
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
-          command: async (pkg: any) =>
-            scope.run(function* () {
-              yield* logger.operations.info(
-                `boop ${pkg.pkg}@${pkg.pkgFile.version}`,
-              );
-            }),
+          command: function* (pkg: any) {
+            yield* logger.operations.info(
+              `boop ${pkg.pkg}@${pkg.pkgFile.version}`,
+            );
+          },
         },
       ],
       command: "publish",
@@ -133,7 +124,6 @@ describe("attemptCommand", () => {
 
   it("invokes an array of functions using package values", function* () {
     const log = yield* logTest.useCapturedLogger();
-    const scope = yield* useScope();
 
     yield* attemptCommands({
       logger: logger.operations,
@@ -144,30 +134,26 @@ describe("attemptCommand", () => {
           pkgFile: fillWithDefaults({ version: "0.5.6" }),
           manager: "none",
           command: [
-            async (pkg: any) =>
-              scope.run(function* () {
-                yield* logger.operations.info(
-                  `boop ${pkg.pkg}@${pkg.pkgFile.version}`,
-                );
-              }),
-            async (pkg: any) =>
-              scope.run(function* () {
-                yield* logger.operations.info(
-                  `booop ${pkg.pkg}@${pkg.pkgFile.version}`,
-                );
-              }),
-            async (pkg: any) =>
-              scope.run(function* () {
-                yield* logger.operations.info(
-                  `boooop ${pkg.pkg}@${pkg.pkgFile.version}`,
-                );
-              }),
-            async (pkg: any) =>
-              scope.run(function* () {
-                yield* logger.operations.info(
-                  `booooop ${pkg.pkg}@${pkg.pkgFile.version}`,
-                );
-              }),
+            function* (pkg: any) {
+              yield* logger.operations.info(
+                `boop ${pkg.pkg}@${pkg.pkgFile.version}`,
+              );
+            },
+            function* (pkg: any) {
+              yield* logger.operations.info(
+                `booop ${pkg.pkg}@${pkg.pkgFile.version}`,
+              );
+            },
+            function* (pkg: any) {
+              yield* logger.operations.info(
+                `boooop ${pkg.pkg}@${pkg.pkgFile.version}`,
+              );
+            },
+            function* (pkg: any) {
+              yield* logger.operations.info(
+                `booooop ${pkg.pkg}@${pkg.pkgFile.version}`,
+              );
+            },
           ],
         },
       ],

@@ -1,4 +1,4 @@
-import { type Operation, sleep, call, until } from "effection";
+import { type Operation, sleep, until, spawn } from "effection";
 import { exec, Stdio, type ExecOptions } from "@effectionx/process";
 import { timebox } from "@effectionx/timebox";
 import path from "path";
@@ -240,7 +240,7 @@ function* callCommand({
       },
     };
 
-    yield* call(() => commandFn(pipeToFunction));
+    yield* commandFn(pipeToFunction);
 
     if (typeof pubCommand === "object" && pubCommand.pipe) {
       yield* logger.error(`We cannot pipe the function command in ${pkg.pkg}`);
@@ -360,41 +360,44 @@ export function* runCommand({
 }): Operation<string> {
   if (log !== false) yield* logger.info(log);
 
-  let out = "";
-  yield* Stdio.around({
-    *stdout(line) {
-      const [bytes] = line;
-      const text = bytes.toString();
-      out += text;
-      if (log !== false) {
-        const message = text.trim();
-        if (message !== "") {
-          yield* logger.stdout(message);
-        }
-      }
-    },
-    *stderr(line) {
-      const [bytes] = line;
-      const text = bytes.toString();
-      out += text;
-      if (log !== false) {
-        const message = text.trim();
-        if (message !== "") {
-          yield* logger.stderr(message);
-        }
-      }
-    },
-  });
-
   const workingOptions = { ...options, cwd: path.join(cwd, pkgPath) };
   if (command.includes(" | ") && !options?.shell) {
     workingOptions.shell = true;
     yield* logger.warn(`"|" detected in command, setting shell to true: ${command}`);
   }
 
-  const process = yield* exec(command, workingOptions);
+  let out = "";
   const timeoutPeriod = 1200000;
-  const result = yield* timebox(timeoutPeriod, () => process.expect());
+  const result = yield* timebox(timeoutPeriod, function* () {
+    yield* Stdio.around({
+      *stdout(line, next) {
+        const [bytes] = line;
+        const text = bytes.toString();
+        out += text;
+        if (log !== false) {
+          const message = text.trim();
+          if (message !== "") {
+            yield* logger.stdout(message);
+          }
+        }
+      },
+      *stderr(line, next) {
+        const [bytes] = line;
+        const text = bytes.toString();
+        out += text;
+        if (log !== false) {
+          const message = text.trim();
+          if (message !== "") {
+            yield* logger.stderr(message);
+          }
+        }
+      },
+    });
+
+    const process = yield* exec(command, workingOptions);
+
+    return yield* process.expect();
+  });
 
   if (result.timeout) {
     throw new Error(

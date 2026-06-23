@@ -133,7 +133,7 @@ describe("fetchCommand", () => {
         log.all,
         [
           { msg: errorMessage, level: "error" },
-          // { msg: errorMessage, level: "error" },
+          { msg: errorMessage, level: "error" },
         ],
         (actual, expected) => {
           expect((actual as { level: string }).level).toBe(expected.level);
