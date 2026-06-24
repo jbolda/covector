@@ -12,7 +12,7 @@ import {
 } from "@covector/changelog";
 
 import type { Logger, Covector, CommandsRan } from "@covector/types";
-import { call, type Operation } from "effection";
+import { until, type Operation } from "effection";
 
 export function* arbitrary({
   logger,
@@ -30,7 +30,7 @@ export function* arbitrary({
   modifyConfig?: (c: any) => Promise<any>;
 }): Operation<Covector["arbitrary"]> {
   const rawConfig = yield* configFile({ cwd });
-  const config = yield* call(() => modifyConfig(rawConfig));
+  const config = yield* until(modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
 
   const changesPaths = yield* changeFiles({

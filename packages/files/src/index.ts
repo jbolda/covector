@@ -1,6 +1,6 @@
 import * as fs from "fs/promises";
 
-import { all, call, type Operation } from "effection";
+import { all, until, type Operation } from "effection";
 import type { Logger } from "@covector/types";
 import { configFileSchema } from "./schema.ts";
 import { fromZodError } from "zod-validation-error";
@@ -38,7 +38,7 @@ export type {
 } from "@covector/types";
 
 export function* loadFile(file: string, cwd: string): Operation<LoadedFile> {
-  const content = yield* call(() =>
+  const content = yield* until(
     fs.readFile(path.join(cwd, file), {
       encoding: "utf-8",
     }),
@@ -61,7 +61,7 @@ export function* saveFile(
 ): Operation<LoadedFile> {
   if (typeof file.path !== "string")
     throw new Error(`Unable to handle saving of ${file}`);
-  yield* call(() =>
+  yield* until(
     fs.writeFile(path.join(cwd, file.path), file.content, {
       encoding: "utf-8",
     }),
@@ -513,7 +513,7 @@ export function* changeFiles({
   cwd: string;
   changeFolder?: string;
 }): Operation<string[]> {
-  return yield* call(() =>
+  return yield* until(
     globby(
       [
         path.posix.join(changeFolder, "*.md"),
@@ -549,7 +549,7 @@ export function* changeFilesRemove({
   paths: string[];
 }): Operation<string[]> {
   for (let changeFilePath of paths) {
-    yield* call(() => fs.unlink(path.posix.join(cwd, changeFilePath)));
+    yield* until(fs.unlink(path.posix.join(cwd, changeFilePath)));
     yield* logger.info(`${changeFilePath} was deleted`);
   }
   return paths;

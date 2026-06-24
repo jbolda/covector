@@ -1,5 +1,5 @@
 import { getOctokit } from "@actions/github";
-import { call, Operation } from "effection";
+import { until, type Operation } from "effection";
 
 export type CommitResponse = {
   repository: Record<string, Commit>;
@@ -58,12 +58,12 @@ export function* getCommitContext(
     #   }
     }`;
 
-  const response = yield* call(async () =>
+  const response = (yield* until(
     client(query, {
       owner,
       name,
     })
-  ) as Operation<CommitResponse>;
+  )) as CommitResponse;
 
   return response;
 }

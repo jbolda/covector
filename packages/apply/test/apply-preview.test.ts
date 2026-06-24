@@ -3,8 +3,8 @@ import { loadFile, readAllPkgFiles } from "@covector/files";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call } from "effection";
 import { logger } from "../../covector/src/index.ts";
 const f = fixtures(__dirname);
 
@@ -61,11 +61,11 @@ describe("package file applies preview bump", () => {
     );
 
     yield* logTest.consecutive(log.all, [
-        {
-          msg: "bumping js-single-json-fixture with branch-name.12345 identifier to publish a preview",
-          level: "info",
-        },
-      ]);
+      {
+        msg: "bumping js-single-json-fixture with branch-name.12345 identifier to publish a preview",
+        level: "info",
+      },
+    ]);
   });
 
   it("bumps multi js json", function* () {
@@ -156,19 +156,19 @@ describe("package file applies preview bump", () => {
     );
 
     yield* logTest.consecutive(log.all, [
-        {
-          msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-          level: "info",
-        },
-        {
-          msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-          level: "info",
-        },
-        {
-          msg: "bumping all with branch-name.12345 identifier to publish a preview",
-          level: "info",
-        },
-      ]);
+      {
+        msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
+        level: "info",
+      },
+      {
+        msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
+        level: "info",
+      },
+      {
+        msg: "bumping all with branch-name.12345 identifier to publish a preview",
+        level: "info",
+      },
+    ]);
   });
 });
 
@@ -220,11 +220,11 @@ describe("package file applies preview bump to pre-release", () => {
     );
 
     yield* logTest.consecutive(log.all, [
-        {
-          msg: "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
-          level: "info",
-        },
-      ]);
+      {
+        msg: "bumping js-single-prerelease-json-fixture with branch-name.12345 identifier to publish a preview",
+        level: "info",
+      },
+    ]);
   });
 
   it("bumps multi js json without pre-release", function* () {
@@ -314,18 +314,18 @@ describe("package file applies preview bump to pre-release", () => {
     );
 
     yield* logTest.consecutive(log.all, [
-        {
-          msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
-          level: "info",
-        },
-        {
-          msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
-          level: "info",
-        },
-        {
-          msg: "bumping all with branch-name.12345 identifier to publish a preview",
-          level: "info",
-        },
-      ]);
+      {
+        msg: "bumping yarn-workspace-base-pkg-a with branch-name.12345 identifier to publish a preview",
+        level: "info",
+      },
+      {
+        msg: "bumping yarn-workspace-base-pkg-b with branch-name.12345 identifier to publish a preview",
+        level: "info",
+      },
+      {
+        msg: "bumping all with branch-name.12345 identifier to publish a preview",
+        level: "info",
+      },
+    ]);
   });
 });

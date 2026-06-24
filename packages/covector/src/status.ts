@@ -18,8 +18,7 @@ import {
   validateApply,
 } from "@covector/apply";
 
-import type { CovectorStatus } from "@covector/types";
-import { call, type Operation } from "effection";
+import { until, type Operation } from "effection";
 import { useAttributes } from "./logger.ts";
 
 export function* status({
@@ -42,7 +41,7 @@ export function* status({
   logs?: boolean;
 }): Operation<Covector["status"]> {
   const rawConfig = yield* configFile({ cwd });
-  const config = yield* call(() => modifyConfig(rawConfig));
+  const config = yield* until(modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? undefined : pre.tag;
 

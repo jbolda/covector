@@ -2,8 +2,6 @@ import { validateApply } from "../src";
 import { readAllPkgFiles } from "@covector/files";
 import { PackageCommand, PackageFile } from "@covector/types";
 
-import { call, run } from "effection";
-
 import { describe, it, captureError } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";

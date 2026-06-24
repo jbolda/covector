@@ -19,7 +19,7 @@ import type {
   CommandsRan,
   PkgVersion,
 } from "@covector/types";
-import { call, type Operation } from "effection";
+import { until, type Operation } from "effection";
 
 export function* preview({
   logger,
@@ -41,7 +41,7 @@ export function* preview({
   branchTag?: string;
 }): Operation<Covector["preview"]> {
   const rawConfig = yield* configFile({ cwd });
-  const config = yield* call(() => modifyConfig(rawConfig));
+  const config = yield* until(modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? undefined : pre.tag;
 

@@ -6,7 +6,6 @@ import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
-import { call } from "effection";
 import { logger } from "../../covector/src/logger.ts";
 const f = fixtures(__dirname);
 

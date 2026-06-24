@@ -13,7 +13,7 @@ import { existsSync } from "fs";
 import { join } from "path";
 import { configFile } from "@covector/files";
 import { exec } from "@effectionx/process";
-import { call, type Operation } from "effection";
+import { until, type Operation } from "effection";
 
 export const add = function* ({
   logger,
@@ -32,7 +32,7 @@ export const add = function* ({
   intro(`What have we changed?`);
 
   const pkgList = Object.keys(config.packages);
-  const packagesWithBump = yield* call(() =>
+  const packagesWithBump = yield* until(
     multiselect({
       message: "Select packages which need a version bump.",
       options: pkgList.map((pkg) => ({
@@ -51,7 +51,7 @@ export const add = function* ({
     const additionalBumpTypes = config.additionalBumpTypes
       ? config.additionalBumpTypes
       : [];
-    const bump = yield* call(() =>
+    const bump = yield* until(
       select({
         message: `bump ${pkg} with?`,
         options: ["patch", "minor", "major"]
@@ -74,7 +74,7 @@ export const add = function* ({
     let changeTag = undefined;
     if (config?.changeTags) {
       const tags = Object.keys(config.changeTags);
-      const addTag = yield* call(() =>
+      const addTag = yield* until(
         select({
           message: `tag ${pkg} ${bump} bump with?`,
           options: ["none"].concat(tags).map((t) => ({ value: t, label: t })),
@@ -90,7 +90,7 @@ export const add = function* ({
     packageBumps[pkg] = { bump, changeTag };
   }
 
-  const summary = yield* call(() =>
+  const summary = yield* until(
     text({
       message: `Please summarize the changes that occurred.`,
       validate(value) {
@@ -112,7 +112,7 @@ export const add = function* ({
   } catch (error) {
     // ignore, filled for convenience
   }
-  const filename = yield* call(() =>
+  const filename = yield* until(
     text({
       message: `Please name the change file.`,
       initialValue: branchName,
@@ -141,7 +141,7 @@ ${packagesWithBump
 
   const content = `${frontmatter}${summary}\n`;
 
-  yield* call(() => writeFile(join(cwd, changeFolder, `${filename}`), content));
+  yield* until(writeFile(join(cwd, changeFolder, `${filename}`), content));
 
   outro(`Change file written to ${join(changeFolder, `${filename}`)}`);
   return { response: "complete" };

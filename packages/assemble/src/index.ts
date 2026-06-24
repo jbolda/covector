@@ -1,4 +1,4 @@
-import { call, type Operation } from "effection";
+import { until, type Operation } from "effection";
 import unified from "unified";
 import { YAML as Frontmatter, Content, type Root } from "mdast";
 import parse from "remark-parse";
@@ -47,7 +47,7 @@ export const parseChange = function* ({
     });
 
   const parsed = processor.parse(file.content.trim());
-  const processed = (yield* call(() => processor.run(parsed))) as Root;
+  const processed = (yield* until(processor.run(parsed))) as Root;
   let changeset: Partial<Change> = {};
   const [parsedChanges, ...remaining] = processed.children;
   const parsedYaml = yaml.load((parsedChanges as Frontmatter).value as string);

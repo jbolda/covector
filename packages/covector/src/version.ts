@@ -19,7 +19,7 @@ import type {
   ChangeContext,
   ConfigFile,
 } from "@covector/types";
-import { call, Operation } from "effection";
+import { until, Operation } from "effection";
 
 export function* version({
   logger,
@@ -39,7 +39,7 @@ export function* version({
   createContext?: ChangeContext<any>;
 }): Operation<Covector["version"]> {
   const rawConfig = yield* configFile({ cwd });
-  const config = yield* call(() => modifyConfig(rawConfig));
+  const config = yield* until(modifyConfig(rawConfig));
   const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
   const prereleaseIdentifier = !pre ? undefined : pre.tag;
 
