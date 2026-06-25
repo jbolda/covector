@@ -33,21 +33,20 @@ function normalizeMessage(
 function formatConsoleLine(entry: LoggerEntry): string {
   const level = entry.level.toLowerCase();
   const covectorStep = entry?.step ? ` ${entry.step} :: ` : "";
-  const command = entry?.command ? ` ${entry.command}` : "";
   const msg = entry?.msg ? ` ${entry.msg}` : "";
   const renderAsYAML = entry?.renderAsYAML
     ? `\n    ${yaml.dump(entry.renderAsYAML).replace(/\n/gm, "\n    ")}`
     : "";
 
   if (entry.bucket === "stdout") {
-    return `[stdout]${command}${msg}${renderAsYAML}`;
+    return `[stdout]${msg}${renderAsYAML}`;
   }
 
   if (entry.bucket === "stderr") {
-    return `[stderr]${command}${msg}${renderAsYAML}`;
+    return `[stderr]${msg}${renderAsYAML}`;
   }
 
-  return `[${level}]${command}${covectorStep}${msg}${renderAsYAML}`;
+  return `[${level}]${covectorStep}${msg}${renderAsYAML}`;
 }
 
 const AttributesContext = createContext<LoggerAttribute>(
