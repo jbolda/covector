@@ -72,7 +72,7 @@ describe("attemptCommand fails", () => {
         // to confirm we are done with logs
         { msg: "completed", level: "info" },
       ],
-      isShallowError,
+      logTest.isShallowError,
     );
     expect(
       errored.message.includes("ENOENT") ||
@@ -80,44 +80,3 @@ describe("attemptCommand fails", () => {
     ).toBeTruthy();
   });
 });
-
-function getReceivedMsg(received: any) {
-  if (typeof received?.msg === "string") return received.msg;
-  if (typeof received?.err?.message === "string") return received.err.message;
-  return String(received?.msg ?? "");
-}
-
-function isShallowError(received: any, expected: any) {
-  const receivedMsg = getReceivedMsg(received);
-  if (Array.isArray(expected.msg)) {
-    for (let chunk of expected.msg) {
-      if (!receivedMsg.includes(chunk)) {
-        throw new Error(
-          `expected msg to include chunk "${chunk}" but received "${receivedMsg}"`,
-        );
-      }
-    }
-  } else if (!receivedMsg.includes(expected.msg)) {
-    throw new Error(
-      `expected msg to include "${expected.msg}" but received "${receivedMsg}"`,
-    );
-  }
-  if (received.level !== expected.level) {
-    throw new Error(
-      `expected level ${expected.level} doesn't match the received one ${received.level}`,
-    );
-  }
-  // Some environments attach an `err.code` on the logged error while others
-  // only surface the textual message. Accept either form — if expected
-  // specifies an err.code, prefer to check it when present on the received
-  // object but don't fail when it's missing.
-  if (
-    expected?.err?.code &&
-    received?.err?.code &&
-    received.err.code !== expected.err.code
-  ) {
-    throw new Error(
-      `expected err code ${expected?.err?.code} doesn't match the received one ${received?.err?.code}`,
-    );
-  }
-}

@@ -1,4 +1,4 @@
-import { expect } from "vitest";
+import { expect, assert } from "vitest";
 import { type Operation, useScope } from "effection";
 import { getAttributes, logger } from "../packages/covector/src/logger.ts";
 import type { LoggerLevel } from "../packages/types/src/index.ts";
@@ -195,3 +195,155 @@ export function* consecutive(
     matcher(actual[i], expected[i]);
   }
 }
+
+function getReceivedMsg(received: any) {
+  if (typeof received?.msg === "string") return received.msg;
+  if (typeof received?.err?.message === "string") return received.err.message;
+  return String(received?.msg ?? "");
+}
+
+export function isShallowError(received: any, expected: any) {
+  const receivedMsg = getReceivedMsg(received);
+  if (Array.isArray(expected.msg)) {
+    for (let chunk of expected.msg) {
+      if (!receivedMsg.includes(chunk)) {
+        throw new Error(
+          `expected msg to include chunk "${chunk}" but received "${receivedMsg}"`,
+        );
+      }
+    }
+  } else if (!receivedMsg.includes(expected.msg)) {
+    throw new Error(
+      `expected msg to include "${expected.msg}" but received "${receivedMsg}"`,
+    );
+  }
+  if (received.level !== expected.level) {
+    throw new Error(
+      `expected level ${expected.level} doesn't match the received one ${received.level}`,
+    );
+  }
+  // Some environments attach an `err.code` on the logged error while others
+  // only surface the textual message. Accept either form — if expected
+  // specifies an err.code, prefer to check it when present on the received
+  // object but don't fail when it's missing.
+  if (
+    expected?.err?.code &&
+    received?.err?.code &&
+    received.err.code !== expected.err.code
+  ) {
+    throw new Error(
+      `expected err code ${expected?.err?.code} doesn't match the received one ${received?.err?.code}`,
+    );
+  }
+}
+
+export const checksWithObject =
+  (keys = ["command"]) =>
+  (received: any, expected: any) => {
+    if (typeof expected === "function") {
+      expected(received);
+      return;
+    }
+
+    const normalizeMsg = (value: unknown): string => {
+      if (Buffer.isBuffer(value)) return value.toString("utf8").trim();
+      if (typeof value === "string") return value;
+      if (value == null) return "";
+      try {
+        return String(value);
+      } catch {
+        return "";
+      }
+    };
+    const receivedMsg = normalizeMsg(received?.msg);
+    const expectedMsg = normalizeMsg(expected?.msg);
+
+    // special-case: some npm registries print package descriptions in slightly
+    // different places; tests may use the '__ALLOW_BLANK_OR_DESC__' sentinel to
+    // accept either a blank line or the package description text.
+    if (expected && expectedMsg === "__ALLOW_BLANK_OR_DESC__") {
+      if (
+        receivedMsg === "" ||
+        receivedMsg.includes("Multi-binding collection")
+      ) {
+        // accepted — don't assert
+        return;
+      }
+    }
+
+    if (Array.isArray(expected?.msg)) {
+      for (let chunk of expected.msg) {
+        assert.include(
+          receivedMsg,
+          chunk,
+          `\nexpected:\n${JSON.stringify(expected, null, 2)}\n\nreceived:\n${JSON.stringify(received, null, 2)}\n`,
+        );
+      }
+      if (received.level !== expected.level) {
+        assert.deepEqual(received, expected);
+      }
+      for (let key of keys) {
+        if (expected?.[key]) assert.deepEqual(received?.[key], expected?.[key]);
+      }
+      return;
+    }
+
+    if (receivedMsg !== expectedMsg || received.level !== expected.level) {
+      assert.deepEqual(received, expected);
+    }
+    for (let key of keys) {
+      if (expected?.[key]) assert.deepEqual(received?.[key], expected?.[key]);
+    }
+  };
+
+export const checksChunksInMsg =
+  (keys = ["command"]) =>
+  (received: any, expected: any) => {
+    const normalizeMsg = (value: unknown): string => {
+      if (Buffer.isBuffer(value)) return value.toString("utf8").trim();
+      if (typeof value === "string") return value;
+      if (value == null) return "";
+      try {
+        return String(value);
+      } catch {
+        return "";
+      }
+    };
+    const receivedMsg = normalizeMsg(received?.msg);
+    const expectedMsg = normalizeMsg(expected?.msg);
+
+    if (received.level !== expected.level) {
+      assert.deepEqual(received, expected);
+    }
+    if (expected.err) {
+      assert.include(
+        receivedMsg,
+        expected.err,
+        `Expected ${receivedMsg} to include ${expected.err}, but received:\n${JSON.stringify(received, null, 2)}`,
+      );
+    } else if (receivedMsg !== expectedMsg) {
+      if (Array.isArray(expected.msg)) {
+        for (let chunk of expected.msg) {
+          assert.include(
+            receivedMsg,
+            chunk,
+            `\nexpected:\n${JSON.stringify(expected, null, 2)}\n\nreceived:\n${JSON.stringify(received, null, 2)}\n`,
+          );
+        }
+      } else if (
+        expectedMsg.includes("node:internal/") &&
+        receivedMsg.includes("node:internal/")
+      ) {
+        // Node patch versions can shift internal frame names/line numbers.
+        assert.include(receivedMsg, "node:internal/");
+      } else if (receivedMsg.includes(expectedMsg)) {
+        // General substring match: actual entry's msg is longer (e.g. contains
+        // a full stack trace). Only verify level and the keys below.
+      } else {
+        assert.deepEqual(received, expected);
+      }
+    }
+    for (let key of keys) {
+      if (expected?.[key]) assert.deepEqual(received?.[key], expected?.[key]);
+    }
+  };

@@ -5,7 +5,7 @@ import { loadFile } from "@covector/files";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../../helpers/test-logger.ts";
-import { checksWithObject } from "../helpers.ts";
+import { checksWithObject } from "../../../../helpers/test-logger.ts";
 import path from "path";
 import * as fs from "fs";
 // @ts-expect-error fixturez has no types

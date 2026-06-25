@@ -5,7 +5,7 @@ import { TomlDocument } from "@covector/toml";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import * as logTest from "../../../../helpers/test-logger.ts";
-import { checksChunksInMsg, checksWithObject } from "../helpers.ts";
+import { checksChunksInMsg, checksWithObject } from "../../../../helpers/test-logger.ts";
 import path from "path";
 import type { Covector } from "@covector/types";
 // @ts-expect-error has not types

@@ -5,7 +5,7 @@ import { loadFile } from "@covector/files";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 import type { Covector } from "@covector/types";
-import { checksWithObject } from "../helpers.ts";
+import { checksWithObject } from "../../../../helpers/test-logger.ts";
 import * as logTest from "../../../../helpers/test-logger.ts";
 import path from "path";
 // @ts-expect-error has no types
