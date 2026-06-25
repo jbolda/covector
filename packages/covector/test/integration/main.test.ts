@@ -41,17 +41,38 @@ describe("integration test in production mode", () => {
             msg: "changes:",
             level: "info",
             meta: { command: "status" },
-            // TODO check yaml
           },
           {
             msg: "tauri => minor",
             level: "info",
             meta: { command: "status" },
+            renderAsYAML: [
+              {
+                releases: { tauri: "minor" },
+                summary: "Summary about the changes in tauri",
+                meta: expect.objectContaining({
+                  path: ".changes/first-change.md",
+                  filename: "first-change",
+                  extname: ".md",
+                }),
+              },
+            ],
           },
           {
             msg: "tauri-updater => patch",
             level: "info",
             meta: { command: "status" },
+            renderAsYAML: [
+              {
+                releases: { "tauri-updater": "patch" },
+                summary: "Summary about the changes in tauri-updater",
+                meta: expect.objectContaining({
+                  path: ".changes/second-change.md",
+                  filename: "second-change",
+                  extname: ".md",
+                }),
+              },
+            ],
           },
           {
             msg: "bumping tauri with minor",
@@ -91,6 +112,7 @@ describe("integration test in production mode", () => {
         ],
         checksWithObject(),
       );
+
       expect(covectored).toMatchSnapshot();
     });
 

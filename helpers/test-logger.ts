@@ -237,6 +237,12 @@ export function isShallowError(received: any, expected: any) {
   }
 }
 
+const checkRenderAsYAML = (received: any, expected: any) => {
+  if (expected?.renderAsYAML !== undefined) {
+    expect(received?.renderAsYAML).toMatchObject(expected.renderAsYAML);
+  }
+};
+
 export const checksWithObject =
   (keys = ["command"]) =>
   (received: any, expected: any) => {
@@ -285,6 +291,7 @@ export const checksWithObject =
       for (let key of keys) {
         if (expected?.[key]) assert.deepEqual(received?.[key], expected?.[key]);
       }
+      checkRenderAsYAML(received, expected);
       return;
     }
 
@@ -294,6 +301,7 @@ export const checksWithObject =
     for (let key of keys) {
       if (expected?.[key]) assert.deepEqual(received?.[key], expected?.[key]);
     }
+    checkRenderAsYAML(received, expected);
   };
 
 export const checksChunksInMsg =

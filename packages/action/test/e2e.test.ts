@@ -105,7 +105,6 @@ describe("full e2e test", () => {
             level: "info",
           },
           // then the version command runs
-          // TODO should there be more logs?
           // and finishes with the output
           {
             msg: "covector version output",

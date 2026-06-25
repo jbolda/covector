@@ -44,29 +44,84 @@ describe("integration test in --dry-run mode", () => {
           msg: "tauri => minor",
           level: "info",
           meta: { command: "status" },
+          renderAsYAML: [
+            {
+              releases: { tauri: "minor" },
+              summary: "Summary about the changes in tauri",
+              meta: expect.objectContaining({
+                path: ".changes/first-change.md",
+                filename: "first-change",
+                extname: ".md",
+              }),
+            },
+          ],
         },
         {
           msg: "tauri-updater => patch",
           level: "info",
           meta: { command: "status" },
+          renderAsYAML: [
+            {
+              releases: { "tauri-updater": "patch" },
+              summary: "Summary about the changes in tauri-updater",
+              meta: expect.objectContaining({
+                path: ".changes/second-change.md",
+                filename: "second-change",
+                extname: ".md",
+              }),
+            },
+          ],
         },
         {
           msg: "==== data piped into commands ===",
           level: "info",
           meta: { command: "status" },
-          // TODO check render
+          renderAsYAML: {
+            pkg: "tauri",
+            pipe: {
+              release: {
+                type: "minor",
+                changes: [
+                  {
+                    releases: { tauri: "minor" },
+                    summary: "Summary about the changes in tauri",
+                  },
+                ],
+              },
+            },
+          },
         },
         {
           msg: "==== data piped into commands ===",
           level: "info",
           meta: { command: "status" },
-          // TODO check render
+          renderAsYAML: {
+            pkg: "tauri-updater",
+            pipe: {
+              release: {
+                type: "patch",
+                changes: [
+                  {
+                    releases: { "tauri-updater": "patch" },
+                    summary: "Summary about the changes in tauri-updater",
+                  },
+                ],
+              },
+            },
+          },
         },
         {
           msg: "==== data piped into commands ===",
           level: "info",
           meta: { command: "status" },
-          // TODO check render
+          renderAsYAML: {
+            pkg: "tauri.js",
+            pipe: {
+              release: {
+                type: "patch",
+              },
+            },
+          },
         },
         {
           msg: "bumping tauri with minor",
@@ -101,11 +156,12 @@ describe("integration test in --dry-run mode", () => {
         {
           msg: "completed",
           level: "info",
-          meta: { command: "status" },
         },
       ],
       checksWithObject(),
     );
+
+    expect(covectored).toMatchSnapshot();
     expect(covectored).toMatchSnapshot();
   });
 

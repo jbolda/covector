@@ -14,9 +14,7 @@ import fixtures from "fixturez";
 const f = fixtures(__dirname);
 
 // Skip specific flaky `prod` assertions in CI because npm/stdout chunking causes
-// nondeterministic log ordering.  These will be re-enabled after the planned
-// logger rewrite (TODO: attach PR/issue reference).
-const itIfNotCI = process.env.CI ? it.skip : it;
+// nondeterministic log ordering.
 
 describe("integration test for complex commands", () => {
   describe("prod", () => {
@@ -107,8 +105,7 @@ describe("integration test for complex commands", () => {
       expect(covectored).toMatchSnapshot();
     });
 
-    // Flaky in CI due to npm/stdout chunking — skip in CI. TODO: re-enable after logger rewrite (add PR/issue link).
-    itIfNotCI(
+    it(
       "runs test",
       function* () {
         const log = yield* logTest.useCapturedLogger();
@@ -215,8 +212,7 @@ describe("integration test for complex commands", () => {
       10000,
     );
 
-    // Flaky in CI due to npm/stdout chunking — skip in CI. TODO: re-enable after logger rewrite (add PR/issue link).
-    itIfNotCI("runs build", function* () {
+    it("runs build", function* () {
       const log = yield* logTest.useCapturedLogger();
 
       const fullIntegration = f.copy("integration.js-with-complex-commands");
