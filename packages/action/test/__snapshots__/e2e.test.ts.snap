@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`full e2e test > of publish > github release creation of all packages 1`] = `
+exports[`full e2e test > of publish > github release creation of all packages > github release creation of all packages 1`] = `
 {
   "commandsRan": {
     "package-one": {
@@ -232,7 +232,7 @@ publish
 }
 `;
 
-exports[`full e2e test > of publish > github release creation of single package 1`] = `
+exports[`full e2e test > of publish > github release creation of single package > github release creation of single package 1`] = `
 {
   "commandsRan": {
     "package-one": {
@@ -566,7 +566,7 @@ publish
 }
 `;
 
-exports[`full e2e test > of publish > github release update of all packages 1`] = `
+exports[`full e2e test > of publish > github release update of all packages > github release update of all packages 1`] = `
 {
   "commandsRan": {
     "package-one": {
@@ -798,7 +798,7 @@ publish
 }
 `;
 
-exports[`full e2e test > of publish > github release update of single package 1`] = `
+exports[`full e2e test > of publish > github release update of single package > github release update of single package 1`] = `
 {
   "commandsRan": {
     "package-one": {
@@ -1132,7 +1132,7 @@ publish
 }
 `;
 
-exports[`full e2e test > of publish > input 1`] = `
+exports[`full e2e test > of publish > publish actions > input 1`] = `
 {
   "covectoredAction": {
     "commandsRan": {
@@ -1366,7 +1366,7 @@ publish
 }
 `;
 
-exports[`full e2e test > of publish > output 1`] = `
+exports[`full e2e test > of publish > publish actions > output 1`] = `
 {
   "commandsRan": {
     "package-one": {

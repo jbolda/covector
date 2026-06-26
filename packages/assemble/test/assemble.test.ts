@@ -1,5 +1,5 @@
 import { assemble } from "../src";
-import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { captureError, describe, it } from "@effectionx/vitest";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 import { logger } from "../../covector/src/index.ts";

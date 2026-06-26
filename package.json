@@ -23,14 +23,13 @@
     "packages/*"
   ],
   "devDependencies": {
-    "@types/node": "^20.13.0",
+    "@types/node": "^24",
+    "@effectionx/vitest": "^0.3.1",
     "effection": "^4.0.2",
     "fixturez": "^1.1.0",
     "prettier": "^3.4.2",
-    "rimraf": "^6.0.1",
     "tsx": "^4.19.3",
-    "vite": "^5.4.12",
-    "vite-plugin-wasm": "^3.4.1",
-    "vitest": "^2.1.8"
+    "vite-plugin-wasm": "^3.6.0",
+    "vitest": "^4.1.9"
   }
 }

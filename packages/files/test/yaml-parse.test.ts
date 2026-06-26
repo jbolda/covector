@@ -1,4 +1,4 @@
-import { describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it } from "@effectionx/vitest";
 import { expect } from "vitest";
 // @ts-expect-error has no types
 import fixtures from "fixturez";

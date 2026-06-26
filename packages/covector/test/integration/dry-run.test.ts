@@ -2,7 +2,7 @@ import { covector } from "../../src/index.ts";
 import { logger as covectorLogger, logger } from "../../src/logger.ts";
 import { TomlDocument } from "@covector/toml";
 import { loadFile } from "@covector/files";
-import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
+import { captureError, describe, it } from "@effectionx/vitest";
 import { expect } from "vitest";
 import type { Covector } from "@covector/types";
 import { checksWithObject } from "../../../../helpers/test-logger.ts";

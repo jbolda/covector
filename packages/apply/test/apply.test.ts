@@ -1,7 +1,7 @@
 import { apply } from "../src";
 import { CommonBumps } from "@covector/types";
 import { loadFile, readAllPkgFiles } from "@covector/files";
-import { describe, it, captureError } from "../../../helpers/test-scope.ts";
+import { describe, it, captureError } from "@effectionx/vitest";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
