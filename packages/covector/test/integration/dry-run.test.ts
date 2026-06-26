@@ -162,7 +162,6 @@ describe("integration test in --dry-run mode", () => {
     );
 
     expect(covectored).toMatchSnapshot();
-    expect(covectored).toMatchSnapshot();
   });
 
   it("runs version for js and rust", function* () {
