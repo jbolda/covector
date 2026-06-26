@@ -14,11 +14,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # some of the tests use the covector git history to run
           fetch-depth: 0
-      - uses: volta-cli/action@v4
+      - uses: jdx/mise-action@v4
       - run: npm ci
       - run: npm run build # covector CLI tests run built files
       - run: npm run build:action
