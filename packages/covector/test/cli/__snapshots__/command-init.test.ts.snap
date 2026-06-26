@@ -1,0 +1,43 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`integration test for init command > runs on a workspace 1`] = `
+"┌  Initializing Covector
+│
+◆  What is the url to your GitHub repo?
+│  _
+└
+│  h█│  ht█│  htt█│  http█│  https█│  https:█│  https:/█│  https://█│  https://e█│  https://ex█│  https://exa█│  https://exam█│  https://examp█│  https://exampl█│  https://example█│  https://example.█│  https://example.c█│  https://example.co█│  https://example.com█◇  What is the url to your GitHub repo?
+│  https://example.com
+│
+◆  should we include GitHub Action workflows?
+│  ● Yes / ○ No
+└
+◇  should we include GitHub Action workflows?
+│  Yes
+│
+◆  What is the name of your default branch?
+│  main
+└
+"
+`;
+
+exports[`integration test for init command > sets gitSiteUrl default to repo url 1`] = `
+"┌  Initializing Covector
+│
+◆  What is the url to your GitHub repo?
+│  https://www.github.com/jbolda/covector
+└
+◇  What is the url to your GitHub repo?
+│  https://www.github.com/jbolda/covector
+│
+◆  should we include GitHub Action workflows?
+│  ● Yes / ○ No
+└
+◇  should we include GitHub Action workflows?
+│  Yes
+│
+◆  What is the name of your default branch?
+│  main
+└
+"
+`;

@@ -11,6 +11,7 @@
   "engines": {
     "node": ">=18"
   },
+  "type": "commonjs",
   "files": [
     "pkg/covector_toml_bg.wasm",
     "pkg/covector_toml.js",
@@ -18,21 +19,25 @@
     "dist/index.js",
     "dist/index.d.ts"
   ],
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "exports": {
     "development": "./src/index.ts",
-    "default": "./dist/index.js"
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "require": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
-    "prebuild": "wasm-pack build --release --no-pack --target nodejs",
+    "prebuild": "wasm-pack build --release --target nodejs",
     "build": "tsc -b",
-    "postbuild": "cp ./pkg/covector_toml_bg.wasm ../action/dist",
     "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
     "test": "vitest"
   },
   "devDependencies": {
-    "wasm-pack": "^0.12.1"
+    "wasm-pack": "^0.13.1"
   },
   "volta": {
     "extends": "../../package.json"

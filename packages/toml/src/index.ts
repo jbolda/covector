@@ -1,8 +1,8 @@
-import { TomlDocument as TomlDocumentInner } from "../pkg/covector_toml";
+import { TomlDocument as TomlDocumentInner } from "../pkg/covector_toml.js";
 
 function proxyPropGet<T extends TomlDocument>(
   target: T,
-  prop: string | symbol,
+  prop: string | symbol
 ): typeof Proxy<T> | undefined {
   if (typeof prop === "symbol") return undefined;
 
@@ -72,7 +72,7 @@ export class TomlDocument {
       return toml.toString();
     } else {
       throw new TypeError(
-        `Expected: \`TomlDocument\`, Got: \`${typeof toml}\``,
+        `Expected: \`TomlDocument\`, Got: \`${typeof toml}\``
       );
     }
   }

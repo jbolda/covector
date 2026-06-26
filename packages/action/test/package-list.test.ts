@@ -1,5 +1,5 @@
-import { packageListToArray } from "../src/utils";
-import { describe, it, expect, vi } from "vitest";
+import { packageListToArray } from "../src/utils.ts";
+import { describe, it, expect } from "vitest";
 
 describe("packageListToArray", () => {
   it("returns empty array on empty string", () => {

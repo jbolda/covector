@@ -1,10 +1,8 @@
-import { default as fsDefault, PathLike } from "fs";
-// this is compatible with node@12+
-const fs = fsDefault.promises;
+import * as fs from "fs/promises";
 
-import { type Logger } from "@covector/types";
-import { all, MainError, type Operation } from "effection";
-import { configFileSchema } from "./schema";
+import { all, until, type Operation } from "effection";
+import type { Logger } from "@covector/types";
+import { configFileSchema } from "./schema.ts";
 import { fromZodError } from "zod-validation-error";
 import globby from "globby";
 import path from "path";
@@ -12,9 +10,9 @@ import { TomlDocument } from "@covector/toml";
 import yaml from "js-yaml";
 import semver from "semver";
 
+export * from "./schema.ts";
+import type { LoadedFile, ConfigFile } from "@covector/types";
 import type {
-  File,
-  ConfigFile,
   PkgMinimum,
   PackageFile,
   PreFile,
@@ -23,34 +21,55 @@ import type {
   Pkg,
 } from "@covector/types";
 
-export function* loadFile(file: PathLike, cwd: string): Operation<File | void> {
-  if (typeof file === "string") {
-    const content = yield fs.readFile(path.join(cwd, file), {
+export type { TomlDocument } from "@covector/toml";
+export type {
+  PkgMinimum,
+  PackageFile,
+  PreFile,
+  DepsKeyed,
+  DepTypes,
+  Pkg,
+  LoadedFile,
+  ConfigFile,
+  CommandConfig,
+  PkgManagerConfig,
+  PackageConfig,
+  Config,
+} from "@covector/types";
+
+export function* loadFile(file: string, cwd: string): Operation<LoadedFile> {
+  const content = yield* until(
+    fs.readFile(path.join(cwd, file), {
       encoding: "utf-8",
-    });
-    const parsedPath = path.parse(file);
-    return {
-      content,
-      path: path.posix
-        .relative(cwd, path.posix.join(cwd, file))
-        .split("\\")
-        .join("/"),
-      filename: parsedPath?.name ?? "",
-      extname: parsedPath?.ext ?? "",
-    };
-  }
+    }),
+  );
+  const parsedPath = path.parse(file);
+  return {
+    content,
+    path: path.posix
+      .relative(cwd, path.posix.join(cwd, file))
+      .split("\\")
+      .join("/"),
+    filename: parsedPath?.name ?? "",
+    extname: parsedPath?.ext ?? "",
+  };
 }
 
-export function* saveFile(file: File, cwd: string): Operation<File> {
+export function* saveFile(
+  file: LoadedFile,
+  cwd: string,
+): Operation<LoadedFile> {
   if (typeof file.path !== "string")
     throw new Error(`Unable to handle saving of ${file}`);
-  yield fs.writeFile(path.join(cwd, file.path), file.content, {
-    encoding: "utf-8",
-  });
+  yield* until(
+    fs.writeFile(path.join(cwd, file.path), file.content, {
+      encoding: "utf-8",
+    }),
+  );
   return file;
 }
 
-const parsePkg = (file: Partial<File>): PkgMinimum => {
+const parsePkg = (file: Partial<LoadedFile>): PkgMinimum => {
   if (!file.content) throw new Error(`${file.path} does not have any content`);
   switch (file.extname) {
     case ".toml":
@@ -201,9 +220,9 @@ export function* readAllPkgFiles({
 }): Operation<Record<string, PackageFile>> {
   const pkgArray = Object.entries(config.packages);
   const readPkgs = pkgArray.map(([name, pkg]) =>
-    readPkgFile({ cwd, pkgConfig: pkg, nickname: name })
+    readPkgFile({ cwd, pkgConfig: pkg, nickname: name }),
   );
-  const pkgFilesArray: PackageFile[] = yield all(readPkgs);
+  const pkgFilesArray = yield* all(readPkgs);
 
   return pkgFilesArray.reduce(
     (pkgs: Record<string, PackageFile>, pkg: PackageFile) => {
@@ -212,7 +231,7 @@ export function* readAllPkgFiles({
       }
       return pkgs;
     },
-    {}
+    {},
   );
 }
 
@@ -228,7 +247,7 @@ export function* readPkgFile({
   nickname: string;
 }): Operation<PackageFile> {
   if (file) {
-    const inputFile = yield loadFile(file, cwd);
+    const inputFile = yield* loadFile(file, cwd);
     const parsed = parsePkg(inputFile);
     return {
       file: inputFile,
@@ -238,7 +257,7 @@ export function* readPkgFile({
   } else {
     if (pkgConfig?.path && pkgConfig?.packageFileName) {
       const configFile = path.join(pkgConfig.path, pkgConfig.packageFileName);
-      const inputFile = yield loadFile(configFile, cwd);
+      const inputFile = yield* loadFile(configFile, cwd);
       const parsed = parsePkg(inputFile);
       return {
         file: inputFile,
@@ -259,7 +278,7 @@ export function* readPkgFile({
         }
       }
       const deriveFile = path.join(pkgConfig?.path || "", packageFile);
-      const inputFile = yield loadFile(deriveFile, cwd);
+      const inputFile = yield* loadFile(deriveFile, cwd);
       const parsed = parsePkg(inputFile);
       return {
         file: inputFile,
@@ -276,7 +295,7 @@ export function* writePkgFile({
 }: {
   packageFile: PackageFile;
   cwd: string;
-}): Operation<File> {
+}): Operation<LoadedFile> {
   if (!packageFile.file)
     throw new Error(`no file present for ${packageFile.name}`);
   const fileNext = { ...packageFile.file };
@@ -284,7 +303,7 @@ export function* writePkgFile({
     newContents: packageFile.pkg,
     extname: packageFile.file.extname,
   });
-  const inputFile = yield saveFile(fileNext, cwd);
+  const inputFile = yield* saveFile(fileNext, cwd);
   return inputFile;
 }
 
@@ -296,7 +315,7 @@ export function* readPreFile({
   changeFolder?: string;
 }): Operation<PreFile | null> {
   try {
-    const inputFile = yield loadFile(path.join(changeFolder, "pre.json"), cwd);
+    const inputFile = yield* loadFile(path.join(changeFolder, "pre.json"), cwd);
     const parsed = JSON.parse(inputFile.content);
     return {
       file: inputFile,
@@ -351,7 +370,7 @@ export const getPackageFileVersion = ({
                   throw new Error(
                     `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +
                       `This cannot be published. ` +
-                      `Please pin it to a MAJOR.MINOR.PATCH reference.`
+                      `Please pin it to a MAJOR.MINOR.PATCH reference.`,
                   );
                 }
                 return depDefinition.version;
@@ -403,8 +422,8 @@ export const setPackageFileVersion = ({
           `Expected ${property} not found in package:\n${JSON.stringify(
             pkg,
             null,
-            2
-          )}`
+            2,
+          )}`,
         );
       if (!dep) return pkg;
 
@@ -427,7 +446,7 @@ export function* writePreFile({
 }: {
   preFile: PreFile;
   cwd: string;
-}): Operation<File> {
+}): Operation<LoadedFile> {
   if (!preFile.file)
     throw new Error(`We could not find the pre.json to update.`);
   const { tag, changes } = preFile;
@@ -436,17 +455,17 @@ export function* writePreFile({
     newContents: { tag, changes },
     extname: preFile.file.extname,
   });
-  const inputFile = yield saveFile(fileNext, cwd);
+  const inputFile = yield* saveFile(fileNext, cwd);
   return inputFile;
 }
 
-export const testSerializePkgFile = ({
+export function* testSerializePkgFile({
   logger,
   packageFile,
 }: {
   logger: Logger;
   packageFile: PackageFile;
-}) => {
+}): Operation<true> {
   try {
     if (!packageFile.file) throw `no package file present`;
     stringifyPkg({
@@ -456,13 +475,13 @@ export const testSerializePkgFile = ({
     return true;
   } catch (e: any) {
     if (e?.message === "Can only stringify objects, not null") {
-      logger.error(
-        "It appears that a dependency within this repo does not have a version specified."
+      yield* logger.error(
+        "It appears that a dependency within this repo does not have a version specified.",
       );
     }
     throw new Error(`within ${packageFile.name} => ${e?.message}`);
   }
-};
+}
 
 export function* configFile({
   cwd,
@@ -470,10 +489,10 @@ export function* configFile({
 }: {
   cwd: string;
   changeFolder?: string;
-}): Operation<ConfigFile & { file: File }> {
-  const inputFile: File = yield loadFile(
+}): Operation<ConfigFile & { file: LoadedFile }> {
+  const inputFile = yield* loadFile(
     path.join(changeFolder, "config.json"),
-    cwd
+    cwd,
   );
   try {
     const parsed = configFileSchema(cwd).parse(JSON.parse(inputFile.content));
@@ -483,29 +502,31 @@ export function* configFile({
     };
   } catch (error: any) {
     const validationError = fromZodError(error);
-    throw new MainError({ exitCode: 1, message: validationError.message });
+    throw new Error(validationError.message);
   }
 }
 
-export const changeFiles = async ({
+export function* changeFiles({
   cwd,
   changeFolder = ".changes",
 }: {
   cwd: string;
   changeFolder?: string;
-}): Promise<string[]> => {
-  return await globby(
-    [
-      path.posix.join(changeFolder, "*.md"),
-      `!${path.posix.join(changeFolder, "README.md")}`,
-      `!${path.posix.join(changeFolder, "readme.md")}`,
-      `!${path.posix.join(changeFolder, "Readme.md")}`,
-    ],
-    {
-      cwd,
-    }
+}): Operation<string[]> {
+  return yield* until(
+    globby(
+      [
+        path.posix.join(changeFolder, "*.md"),
+        `!${path.posix.join(changeFolder, "README.md")}`,
+        `!${path.posix.join(changeFolder, "readme.md")}`,
+        `!${path.posix.join(changeFolder, "Readme.md")}`,
+      ],
+      {
+        cwd,
+      },
+    ),
   );
-};
+}
 
 export function* loadChangeFiles({
   cwd,
@@ -513,9 +534,9 @@ export function* loadChangeFiles({
 }: {
   cwd: string;
   paths: string[];
-}): Operation<File[]> {
+}): Operation<LoadedFile[]> {
   const files = paths.map((file) => loadFile(file, cwd));
-  return yield all(files);
+  return yield* all(files);
 }
 
 export function* changeFilesRemove({
@@ -526,10 +547,10 @@ export function* changeFilesRemove({
   logger: Logger;
   cwd: string;
   paths: string[];
-}): Operation<string> {
+}): Operation<string[]> {
   for (let changeFilePath of paths) {
-    yield fs.unlink(path.posix.join(cwd, changeFilePath));
-    logger.info(`${changeFilePath} was deleted`);
+    yield* until(fs.unlink(path.posix.join(cwd, changeFilePath)));
+    yield* logger.info(`${changeFilePath} was deleted`);
   }
   return paths;
 }
@@ -544,28 +565,31 @@ export function* readChangelog({
   cwd: string;
   packagePath?: string;
   create?: boolean;
-}): Operation<File> {
-  let file = null;
+}): Operation<LoadedFile | undefined> {
   try {
-    file = yield loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
+    return yield* loadFile(path.join(packagePath, "CHANGELOG.md"), cwd);
   } catch {
     if (create) {
-      logger.info("Could not load the CHANGELOG.md. Creating one.");
-      file = {
+      yield* logger.info("Could not load the CHANGELOG.md. Creating one.");
+      return {
         path: path.join(packagePath, "CHANGELOG.md"),
         content: "# Changelog\n\n\n",
+        filename: "CHANGELOG",
+        extname: ".md",
       };
+    } else {
+      yield* logger.error("CHANGELOG.md not found");
+      return;
     }
   }
-  return file;
 }
 
 export function* writeChangelog({
   changelog,
   cwd,
 }: {
-  changelog: File;
+  changelog: LoadedFile;
   cwd: string;
-}): Operation<void | Error> {
-  return yield saveFile(changelog, cwd);
+}): Operation<LoadedFile | Error> {
+  return yield* saveFile(changelog, cwd);
 }

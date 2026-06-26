@@ -1,17 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "dist",
-    "rootDir": "./src"
-  },
   "references": [
+    { "path": "../types" },
     { "path": "../files" },
     { "path": "../changelog" },
     { "path": "../command" },
     { "path": "../assemble" },
-    { "path": "../apply" },
-    { "path": "../types" }
+    { "path": "../apply" }
   ],
-  "include": ["src/**/*.ts"]
+  "include": ["src"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  }
 }

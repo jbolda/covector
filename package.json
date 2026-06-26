@@ -6,14 +6,17 @@
   "author": "Jacob Bolda <me@jacobbolda.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.js",
+    "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.mjs",
     "prebuild": "npm run prebuild -w @covector/toml",
-    "build": "tsc --build tsconfig.packages.json",
-    "watch": "tsc --build --watch tsconfig.packages.json",
-    "clean": "tsc --build --clean tsconfig.packages.json",
+    "build": "tsc --build",
+    "watch": "tsc --build --verbose --watch",
+    "clean": "tsc --build --clean",
     "wipe": "npm run clean -ws && rimraf node_modules dist tsconfig.tsbuildinfo && npm i",
     "build:action": "npm run pkg -w action",
-    "test": "vitest --pool=forks",
+    "run:action:source": "npm run run:source -w action",
+    "run:action:built": "npm run run:built -w action",
+    "test": "vitest",
+"test:types": "tsc --noEmit -p tsconfig.tests.json",
     "pretty": "prettier --write --ignore-path .gitignore \"!packages/action/dist/index.js\" \"packages/**/*.{js,ts}\" \"__fixtures__/**/*.{json,js,ts,yml,yaml}\""
   },
   "workspaces": [
@@ -21,17 +24,17 @@
   ],
   "devDependencies": {
     "@types/node": "^20.13.0",
-    "@vitest/ui": "^1.6.0",
+    "effection": "^4.0.2",
     "fixturez": "^1.1.0",
-    "pino-test": "^1.0.1",
-    "prettier": "^3.3.0",
-    "rimraf": "^5.0.7",
-    "tsx": "^4.11.0",
-    "typescript": "5.4.5",
-    "vitest": "^1.6.0"
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.3",
+    "vite": "^5.4.12",
+    "vite-plugin-wasm": "^3.4.1",
+    "vitest": "^2.1.8"
   },
   "volta": {
-    "node": "20.14.0",
-    "npm": "10.8.1"
+    "node": "24.13.1",
+    "npm": "11.10.0"
   }
 }

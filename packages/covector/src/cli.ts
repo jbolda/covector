@@ -1,14 +1,14 @@
 import yargs from "yargs";
-import { covector } from "./run";
-import { pino } from "pino";
-import logStream from "./logger";
+import { hideBin } from "yargs/helpers";
+import { covector } from "./run.ts";
+import type { Covector } from "@covector/types";
+import { logger } from "./logger.ts";
 
-export function* cli(argv: readonly string[]): Generator<any, any, any> {
+export function* cli(argv: readonly string[]) {
   const { command, directory, yes, dryRun, cwd } = parseOptions(argv);
-  const stream = logStream();
-  const logger = pino(stream);
-  return yield covector({
-    logger,
+  const runtimeLogger = logger.operations;
+  return yield* covector({
+    logger: runtimeLogger,
     command,
     changeFolder: directory,
     yes,
@@ -18,13 +18,13 @@ export function* cli(argv: readonly string[]): Generator<any, any, any> {
 }
 
 function parseOptions(argv: readonly string[]): {
-  command: string;
+  command: keyof Covector;
   dryRun: boolean;
   yes?: boolean;
   directory?: string;
   cwd: string;
 } {
-  let rawOptions = yargs
+  const rawOptions = yargs(hideBin(process.argv))
     .scriptName("covector")
     .command("init", "initialize covector in your repo", function (yargs) {
       return yargs
@@ -63,21 +63,15 @@ function parseOptions(argv: readonly string[]): {
     .demandCommand(1)
     .help()
     .epilogue(
-      "For more information on covector, see: https://www.github.com/jbolda/covector"
+      "For more information on covector, see: https://www.github.com/jbolda/covector",
     )
-    .parse(argv);
+    .parseSync();
 
-  // TODO type narrow, it thinks it could be a promise
   return {
-    // @ts-expect-error
-    command: String(rawOptions._[0]),
-    // @ts-expect-error
-    dryRun: rawOptions["dry-run"],
-    // @ts-expect-error
-    yes: rawOptions.yes,
-    // @ts-expect-error
-    directory: rawOptions.directory,
-    // @ts-expect-error
+    command: String(rawOptions._[0]) as keyof Covector,
     cwd: rawOptions.cwd,
+    dryRun: rawOptions.dryRun,
+    yes: rawOptions.yes as boolean | undefined,
+    directory: rawOptions.directory as string | undefined,
   };
 }

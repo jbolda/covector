@@ -1,15 +1,17 @@
-import { Logger } from "pino";
-import { init } from "./init";
-import { add } from "./add";
-import { status } from "./status";
-import { config } from "./config";
-import { version } from "./version";
-import { preview } from "./preview";
-import { publish } from "./publish";
-import { arbitrary } from "./arbitrary";
-import { ChangeContext } from "../../types/src";
+import type { ChangeContext, Covector } from "@covector/types";
+import { type Operation } from "effection";
+import type { Logger } from "@covector/types";
+import { init } from "./init.ts";
+import { add } from "./add.ts";
+import { status } from "./status.ts";
+import { config } from "./config.ts";
+import { version } from "./version.ts";
+import { preview } from "./preview.ts";
+import { publish } from "./publish.ts";
+import { arbitrary } from "./arbitrary.ts";
+import { useAttributes } from "./logger.ts";
 
-export function* covector({
+export function* covector<C extends keyof Covector>({
   // shared
   logger,
   command,
@@ -27,7 +29,7 @@ export function* covector({
   createContext,
 }: {
   logger: Logger;
-  command: string;
+  command: C;
   dryRun?: boolean;
   logs?: boolean;
   cwd?: string;
@@ -37,31 +39,39 @@ export function* covector({
   branchTag?: string;
   changeFolder?: string;
   yes?: boolean;
-  createContext?: ChangeContext;
-}): Generator<any, any, any> {
+  createContext?: ChangeContext<any>;
+}): Operation<Covector[C]> {
+  // TS isn't playing nice with the intesection, this return type is appropriate for downstream consumers
+  // but TS is not happy with it. It expects the returns of each function to match the full intersection
+  // of Covector[C], but they don't. So we cast to unknown and then to the appropriate type.
+  // The cast hurts type safety, but we ensure the types at the function level, so it's okay.
   if (command === "init") {
-    return yield init({
-      logger: logger.child({ command: "init" }),
+    yield* useAttributes({ name: "init" });
+    return yield* init({
+      logger,
       cwd,
       changeFolder,
       yes,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "add") {
-    return yield add({
-      logger: logger.child({ command: "add" }),
+    yield* useAttributes({ name: "add" });
+    return yield* add({
+      logger,
       cwd,
       changeFolder,
       yes,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "config") {
-    return yield config({
-      logger: logger.child({ command: "config" }),
+    yield* useAttributes({ name: "config" });
+    return yield* config({
+      logger,
       cwd,
       modifyConfig,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "status") {
-    return yield status({
-      logger: logger.child({ command: "status" }),
+    yield* useAttributes({ name: "status" });
+    return yield* status({
+      logger,
       command,
       dryRun,
       cwd,
@@ -69,20 +79,22 @@ export function* covector({
       filterPackages,
       modifyConfig,
       branchTag,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "version") {
-    return yield version({
-      logger: logger.child({ command: "version" }),
+    yield* useAttributes({ name: "version" });
+    return yield* version({
+      logger,
       command,
       dryRun,
       cwd,
       filterPackages,
       modifyConfig,
       createContext,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "preview") {
-    return yield preview({
-      logger: logger.child({ command: "preview" }),
+    yield* useAttributes({ name: "preview" });
+    return yield* preview({
+      logger,
       command,
       dryRun,
       cwd,
@@ -90,24 +102,26 @@ export function* covector({
       modifyConfig,
       previewVersion,
       branchTag,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else if (command === "publish") {
-    return yield publish({
-      logger: logger.child({ command: "publish" }),
+    yield* useAttributes({ name: "publish" });
+    return yield* publish({
+      logger,
       command,
       dryRun,
       cwd,
       filterPackages,
       modifyConfig,
-    });
+    }) as unknown as Operation<Covector[C]>;
   } else {
-    return yield arbitrary({
-      logger: logger.child({ command: "arbitrary" }),
+    yield* useAttributes({ name: "arbitrary" });
+    return yield* arbitrary({
+      logger,
       command,
       dryRun,
       cwd,
       filterPackages,
       modifyConfig,
-    });
+    }) as unknown as Operation<Covector[C]>;
   }
 }

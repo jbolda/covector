@@ -1,8 +1,8 @@
 import { DefaultArtifactClient } from "@actions/artifact";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { GitHub } from "@actions/github/lib/utils";
-import { Operation } from "effection";
+import type { getOctokit } from "@actions/github";
+import { until, Operation } from "effection";
 import { Logger } from "@covector/types";
 
 export function* postGithubComment({
@@ -16,7 +16,7 @@ export function* postGithubComment({
 }: {
   logger: Logger;
   comment: string;
-  octokit: InstanceType<typeof GitHub>;
+  octokit: ReturnType<typeof getOctokit>;
   repo: string;
   owner: string;
   prNumber: number;
@@ -24,62 +24,70 @@ export function* postGithubComment({
 }): Operation<void> {
   const tag = "<!-- Covector Action -->\n";
   const body = tag + comment;
-  const allComments = yield octokit.rest.issues.listComments({
-    owner,
-    repo,
-    issue_number,
-  });
+  const allComments = yield* until(
+    octokit.rest.issues.listComments({
+      owner,
+      repo,
+      issue_number,
+    })
+  );
   const previousComment =
     allComments.data.length > 0 &&
-    allComments.data.find((comment: { body: string | string[] }) =>
-      comment.body.includes(tag)
-    );
+    allComments.data.find((comment) => comment?.body?.includes(tag));
 
   // this can fail if the token doesn't have permissions
   try {
     if (previousComment) {
-      logger.info("Updating comment in pull request.");
-      yield octokit.rest.issues.updateComment({
-        owner,
-        repo,
-        comment_id: previousComment.id,
-        body,
-      });
+      yield* logger.info("Updating comment in pull request.");
+      yield* until(
+        octokit.rest.issues.updateComment({
+          owner,
+          repo,
+          comment_id: previousComment.id,
+          body,
+        })
+      );
     } else {
-      logger.info("Posting comment in pull request.");
-      yield octokit.rest.issues.createComment({
-        owner,
-        repo,
-        issue_number,
-        body,
-      });
+      yield* logger.info("Posting comment in pull request.");
+      yield* until(
+        octokit.rest.issues.createComment({
+          owner,
+          repo,
+          issue_number,
+          body,
+        })
+      );
     }
   } catch (error) {
     if (artifactOnFailure) {
-      logger.error("Posting comment failed, creating artifact instead.");
+      yield* logger.error("Posting comment failed, creating artifact instead.");
       const artifactRoot = process.env.RUNNER_TEMP ?? "..";
 
       const artifactFilename = "./covector-comment.md";
       const artifactAbsolutePath = path.join(artifactRoot, artifactFilename);
-      logger.debug(`Writing comment body to ${artifactAbsolutePath}`);
-      yield fs.writeFile(artifactAbsolutePath, body);
+      yield* logger.debug(`Writing comment body to ${artifactAbsolutePath}`);
+      yield* until(fs.writeFile(artifactAbsolutePath, body));
 
       const artifactPRNumber = "./covector-prNumber.md";
       const prNumberAbsolutePath = path.join(artifactRoot, artifactPRNumber);
-      yield fs.writeFile(prNumberAbsolutePath, issue_number.toString());
+      yield* until(
+        fs.writeFile(prNumberAbsolutePath, issue_number.toString())
+      );
 
       const artifact = new DefaultArtifactClient();
-      logger.debug(`Uploading comment from ${artifactAbsolutePath}`);
-      yield artifact.uploadArtifact(
-        "covector-comment",
-        [artifactAbsolutePath, prNumberAbsolutePath],
-        artifactRoot,
-        {
-          retentionDays: 1,
-        }
+      yield* logger.debug(`Uploading comment from ${artifactAbsolutePath}`);
+      yield* until(
+        artifact.uploadArtifact(
+          "covector-comment",
+          [artifactAbsolutePath, prNumberAbsolutePath],
+          artifactRoot,
+          {
+            retentionDays: 1,
+          }
+        )
       );
     } else {
-      logger.fatal(`Posting comment failed.`);
+      yield* logger.fatal(`Posting comment failed.`);
     }
   }
 }

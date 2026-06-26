@@ -3,17 +3,34 @@
 exports[`list changes considering parents > adds changes for dependency 1`] = `
 {
   "changes": {
-    "changes": undefined,
+    "changes": [],
     "releases": {
       "all": {
-        "dependencies": undefined,
-        "manager": "javascript",
+        "changes": [],
         "parents": {
-          "yarn-workspace-base-pkg-a": {},
-          "yarn-workspace-base-pkg-b": {},
+          "yarn-workspace-base-pkg-a": {
+            "all": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+            "yarn-workspace-base-pkg-b": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+          "yarn-workspace-base-pkg-b": {
+            "all": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
         },
-        "path": undefined,
-        "pkg": "all",
         "type": "minor",
       },
       "yarn-workspace-base-pkg-a": {
@@ -23,6 +40,7 @@ exports[`list changes considering parents > adds changes for dependency 1`] = `
               "dependencies": [
                 "all",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -32,6 +50,7 @@ exports[`list changes considering parents > adds changes for dependency 1`] = `
               "dependencies": [
                 "all",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -41,6 +60,7 @@ exports[`list changes considering parents > adds changes for dependency 1`] = `
               "dependencies": [
                 "yarn-workspace-base-pkg-b",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -56,6 +76,7 @@ exports[`list changes considering parents > adds changes for dependency 1`] = `
               "dependencies": [
                 "all",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -65,13 +86,27 @@ exports[`list changes considering parents > adds changes for dependency 1`] = `
               "dependencies": [
                 "all",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
           },
         ],
         "parents": {
-          "yarn-workspace-base-pkg-a": {},
+          "yarn-workspace-base-pkg-a": {
+            "all": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+            "yarn-workspace-base-pkg-b": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
         },
         "type": "patch",
       },
@@ -83,25 +118,70 @@ exports[`list changes considering parents > adds changes for dependency 1`] = `
 exports[`list changes considering parents > bumps patch due to dependency bump 1`] = `
 {
   "changes": {
-    "changes": undefined,
+    "changes": [],
     "releases": {
       "all": {
-        "dependencies": undefined,
-        "manager": "javascript",
+        "changes": [],
         "parents": {
-          "yarn-workspace-base-pkg-a": {},
-          "yarn-workspace-base-pkg-b": {},
+          "yarn-workspace-base-pkg-a": {
+            "all": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+            "yarn-workspace-base-pkg-b": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
+          "yarn-workspace-base-pkg-b": {
+            "all": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
         },
-        "path": undefined,
-        "pkg": "all",
         "type": "minor",
       },
       "yarn-workspace-base-pkg-a": {
-        "dependencies": undefined,
-        "manager": "javascript",
+        "changes": [
+          {
+            "meta": {
+              "dependencies": [
+                "all",
+              ],
+              "path": "",
+            },
+            "releases": {},
+            "summary": "",
+          },
+          {
+            "meta": {
+              "dependencies": [
+                "all",
+              ],
+              "path": "",
+            },
+            "releases": {},
+            "summary": "",
+          },
+          {
+            "meta": {
+              "dependencies": [
+                "yarn-workspace-base-pkg-b",
+              ],
+              "path": "",
+            },
+            "releases": {},
+            "summary": "",
+          },
+        ],
         "parents": {},
-        "path": undefined,
-        "pkg": "all",
         "type": "patch",
       },
       "yarn-workspace-base-pkg-b": {
@@ -111,6 +191,7 @@ exports[`list changes considering parents > bumps patch due to dependency bump 1
               "dependencies": [
                 "all",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -120,13 +201,27 @@ exports[`list changes considering parents > bumps patch due to dependency bump 1
               "dependencies": [
                 "all",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
           },
         ],
         "parents": {
-          "yarn-workspace-base-pkg-a": {},
+          "yarn-workspace-base-pkg-a": {
+            "all": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+            "yarn-workspace-base-pkg-b": [
+              {
+                "type": "dependencies",
+                "version": "none",
+              },
+            ],
+          },
         },
         "type": "patch",
       },
@@ -138,7 +233,7 @@ exports[`list changes considering parents > bumps patch due to dependency bump 1
 exports[`list changes considering parents > rolls up the parent bumps 1`] = `
 {
   "changes": {
-    "changes": undefined,
+    "changes": [],
     "releases": {
       "pkg-a": {
         "changes": [
@@ -147,6 +242,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-c",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -156,6 +252,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-c",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -165,6 +262,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-c",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -174,6 +272,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-c",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -200,7 +299,9 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
       "pkg-b": {
         "changes": [
           {
-            "meta": {},
+            "meta": {
+              "path": "more-boop.md",
+            },
             "releases": {
               "pkg-b": "minor",
             },
@@ -228,7 +329,9 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
       "pkg-c": {
         "changes": [
           {
-            "meta": {},
+            "meta": {
+              "path": "boop.md",
+            },
             "releases": {
               "pkg-c": "patch",
               "pkg-d": "major",
@@ -240,6 +343,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-d",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -249,6 +353,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-d",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -258,6 +363,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-d",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -267,6 +373,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-d",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -287,7 +394,9 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
       "pkg-d": {
         "changes": [
           {
-            "meta": {},
+            "meta": {
+              "path": "boop.md",
+            },
             "releases": {
               "pkg-c": "patch",
               "pkg-d": "major",
@@ -322,6 +431,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-d",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -331,6 +441,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-d",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -340,6 +451,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-d",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -349,6 +461,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-d",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -373,6 +486,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-two",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -388,6 +502,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-b",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -397,6 +512,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-b",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -406,6 +522,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-a",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -415,6 +532,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-b",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -424,6 +542,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-a",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -433,6 +552,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-b",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -442,6 +562,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-a",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -457,6 +578,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-four",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -466,6 +588,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-four",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -475,6 +598,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-four",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -499,6 +623,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-three",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -508,6 +633,7 @@ exports[`list changes considering parents > rolls up the parent bumps 1`] = `
               "dependencies": [
                 "pkg-three",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",
@@ -572,6 +698,7 @@ exports[`list changes considering parents > skips roll up if range dep 1`] = `
               "dependencies": [
                 "pkg-a",
               ],
+              "path": "",
             },
             "releases": {},
             "summary": "",

@@ -338,6 +338,7 @@ package-b = "0.0.1-branch-name.12345"
       "releaseTag": "package-c-v0.0.1-branch-name.12345",
     },
   ],
+  "response": "complete",
 }
 `;
 
@@ -679,5 +680,6 @@ package-b = "0.0.1-branch-name.12345"
       "releaseTag": "package-c-v0.0.1-branch-name.12345",
     },
   ],
+  "response": "complete",
 }
 `;

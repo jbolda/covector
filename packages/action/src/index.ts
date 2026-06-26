@@ -1,31 +1,34 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { covector } from "../../covector/src/run";
+import { covector } from "covector";
 import {
   commandText,
   packageListToArray,
   injectPublishFunctions,
   createReleases,
-} from "./utils";
-import { postGithubComment } from "./comment/postGithubComment";
+} from "./utils.ts";
+import { postGithubComment } from "./comment/postGithubComment.ts";
 import fs from "fs";
 
+import type { webhooks } from "@octokit/openapi-webhooks-types";
 import type {
-  PullRequestEvent,
-  WorkflowRunEvent,
-} from "@octokit/webhooks-definitions/schema";
-import type {
+  Covector,
   CovectorStatus,
   CovectorVersion,
   CovectorPublish,
   Logger,
-} from "../../types/src";
-import { formatComment } from "./comment/formatGithubComment";
-import type { Operation } from "effection";
-import { CommitResponse, getCommitContext } from "./pr/getCommitContext";
-import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact";
+} from "@covector/types";
+import { formatComment } from "./comment/formatGithubComment.ts";
+import { until, type Operation } from "effection";
+import { getCommitContext } from "./pr/getCommitContext.ts";
+import { postGithubCommentFromArtifact } from "./comment/postGithubCommentFromArtifact.ts";
 
-export function* run(logger: Logger): Generator<any, any, any> {
+type PullRequestEvent =
+  webhooks["pull-request-synchronize"]["post"]["requestBody"]["content"]["application/json"];
+type WorkflowRunEvent =
+  webhooks["workflow-run-requested"]["post"]["requestBody"]["content"]["application/json"];
+
+export function* run(logger: Logger): Operation<CovectorPublish | void> {
   try {
     const cwd =
       core.getInput("cwd") === "" ? process.cwd() : core.getInput("cwd");
@@ -46,14 +49,14 @@ export function* run(logger: Logger): Generator<any, any, any> {
     let command = inputCommand;
 
     if (inputCommand === "version-or-publish") {
-      const status = yield covector({
+      const status = yield* covector({
         logger,
         command: "status",
         cwd,
         logs: false,
       });
       if (status.response === "No changes.") {
-        logger.info("As there are no changes, let's try publishing.");
+        yield* logger.info("As there are no changes, let's try publishing.");
         command = "publish";
       } else {
         command = "version";
@@ -66,14 +69,14 @@ export function* run(logger: Logger): Generator<any, any, any> {
       if (github.context.eventName === "workflow_run") {
         const octokit = github.getOctokit(token);
         const payload = github.context.payload as WorkflowRunEvent;
-        yield postGithubCommentFromArtifact({
+        yield* postGithubCommentFromArtifact({
           logger,
           octokit,
           token,
           payload,
         });
       } else {
-        const covectored: CovectorStatus = yield covector({
+        const covectored: CovectorStatus = yield* covector({
           logger,
           dryRun,
           command,
@@ -154,7 +157,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
                   },
                   pull_request: { number: prNumber },
                 } = payload;
-                yield postGithubComment({
+                yield* postGithubComment({
                   logger,
                   comment,
                   octokit,
@@ -164,7 +167,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
                 });
               }
             } else {
-              logger.error(
+              yield* logger.error(
                 "Comments can only be used on pull requests, skipping."
               );
             }
@@ -172,7 +175,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
         }
       }
     } else if (command === "version") {
-      const status: CovectorStatus = yield covector({
+      const status: CovectorStatus = yield* covector({
         logger,
         dryRun,
         command: "status",
@@ -181,15 +184,15 @@ export function* run(logger: Logger): Generator<any, any, any> {
       core.setOutput("status", status.response);
 
       function* createContext({ commits }: { commits: string[] }): Operation<
-        Operation<{
-          context: Record<string, string>;
+        () => Operation<{
+          context: Record<string, Record<string, string>>;
           changeContext: Record<string, string>;
         }>
       > {
-        let shas = {};
+        let shas = {} as Record<string, Record<string, string>>;
         try {
           const octokit = github.getOctokit(token);
-          const prContext: CommitResponse = yield getCommitContext(
+          const prContext = yield* getCommitContext(
             octokit.graphql,
             github.context.repo.owner,
             github.context.repo.repo,
@@ -217,17 +220,20 @@ export function* run(logger: Logger): Generator<any, any, any> {
           );
         } catch (error) {
           // if it fails, continue with context
-          logger.error(error);
+          yield* logger.error(error);
         }
         const context = { ...shas };
 
-        return function* defineContexts() {
-          const changeContext = {};
+        return function* defineContexts(): Operation<{
+          context: Record<string, Record<string, string>>;
+          changeContext: Record<string, string>;
+        }> {
+          const changeContext = {} as Record<string, string>;
           return { context, changeContext };
         };
       }
 
-      const covectored: CovectorVersion = yield covector({
+      const covectored: CovectorVersion = yield* covector({
         logger,
         dryRun,
         command,
@@ -256,16 +262,21 @@ export function* run(logger: Logger): Generator<any, any, any> {
         )
       );
 
-      logger.info({
+      yield* logger.info({
         msg: "covector version output",
         renderAsYAML: covectoredSmushed,
       });
     } else if (command === "publish") {
-      const status = yield covector({ logger, dryRun, command: "status", cwd });
+      const status = yield* covector({
+        logger,
+        dryRun,
+        command: "status",
+        cwd,
+      });
       core.setOutput("status", status.response);
 
       let covectored: CovectorPublish;
-      logger.debug(
+      yield* logger.debug(
         `createRelease is ${core.getInput("createRelease")} ${
           token ? "with" : "without"
         } a token.`
@@ -273,8 +284,8 @@ export function* run(logger: Logger): Generator<any, any, any> {
       if (core.getInput("createRelease") === "true" && token) {
         const octokit = github.getOctokit(token);
         const { owner, repo } = github.context.repo;
-        logger.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
-        covectored = yield covector({
+        yield* logger.debug(`Fetched context, owner is ${owner} and repo is ${repo}.`);
+        covectored = yield* covector({
           logger,
           dryRun,
           command,
@@ -283,7 +294,6 @@ export function* run(logger: Logger): Generator<any, any, any> {
           modifyConfig: injectPublishFunctions([
             createReleases({
               logger,
-              core,
               octokit,
               owner,
               repo,
@@ -292,7 +302,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
           ]),
         });
       } else {
-        covectored = yield covector({
+        covectored = yield* covector({
           logger,
           dryRun,
           command,
@@ -323,7 +333,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
 
         core.setOutput("change", covectored.commandsRan);
 
-        logger.info({
+        yield* logger.info({
           msg: "covector publish output",
           renderAsYAML: covectored.commandsRan,
         });
@@ -351,12 +361,12 @@ export function* run(logger: Logger): Generator<any, any, any> {
       }
 
       if (!previewLabel) {
-        logger.warn(
+        yield* logger.warn(
           `Not publishing any preview packages because the "${configuredLabel}" label has not been applied to this pull request.`
         );
       } else {
         // primarily runs publish
-        let covectored: CovectorPublish;
+        let covectored: Covector["preview"];
         const branchName = github?.context?.payload?.pull_request?.head?.ref;
         let identifier;
         let versionTemplate;
@@ -396,7 +406,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
             );
         }
 
-        covectored = yield covector({
+        covectored = yield* covector({
           logger,
           dryRun,
           command,
@@ -406,7 +416,7 @@ export function* run(logger: Logger): Generator<any, any, any> {
           branchTag,
         });
 
-        if (covectored.commandsRan) {
+        if ("commandsRan" in covectored && covectored.commandsRan) {
           let packagesPublished: any = Object.entries(
             covectored.commandsRan
           ).reduce((pub: string[], pkg: any[]) => {
@@ -429,11 +439,13 @@ export function* run(logger: Logger): Generator<any, any, any> {
               after,
             }: any = github.context.payload;
 
-            const { data } = yield octokit.rest.issues.listComments({
-              owner,
-              repo,
-              issue_number,
-            });
+            const { data } = yield* until(
+              octokit.rest.issues.listComments({
+                owner,
+                repo,
+                issue_number,
+              })
+            );
 
             const covectorComments = data.filter((comment: any) =>
               comment.body.includes("<!-- covector comment -->")
@@ -458,19 +470,23 @@ export function* run(logger: Logger): Generator<any, any, any> {
             };
 
             if (covectorComments.length !== 1) {
-              yield octokit.rest.issues.createComment({
-                owner,
-                repo,
-                issue_number,
-                body: prComment(),
-              });
+              yield* until(
+                octokit.rest.issues.createComment({
+                  owner,
+                  repo,
+                  issue_number,
+                  body: prComment(),
+                })
+              );
             } else {
-              yield octokit.rest.issues.updateComment({
-                owner,
-                repo,
-                comment_id: covectorComments[0].id,
-                body: prComment(),
-              });
+              yield* until(
+                octokit.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: covectorComments[0].id,
+                  body: prComment(),
+                })
+              );
             }
           } else {
             throw new Error(

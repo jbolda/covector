@@ -8,11 +8,13 @@
     "type": "git",
     "url": "https://github.com/jbolda/covector.git"
   },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "type": "module",
   "exports": {
     "development": "./src/index.ts",
-    "default": "./dist/index.js"
+    "import": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
     "build": "tsc -b",
@@ -23,9 +25,8 @@
   "dependencies": {
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
-    "effection": "^2.0.6",
+    "effection": "^4.0.2",
     "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21",
     "remark-frontmatter": "^3.0.0",
     "remark-parse": "^9.0.0",
     "remark-stringify": "^9.0.1",

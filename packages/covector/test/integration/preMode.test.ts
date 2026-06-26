@@ -1,15 +1,16 @@
-import { covector } from "../../src";
-import { CovectorVersion } from "@covector/types";
+import { covector } from "../../src/index.ts";
+import { logger as covectorLogger } from "../../src/logger.ts";
 import { TomlDocument } from "@covector/toml";
 import { loadFile } from "@covector/files";
 import { captureError, describe, it } from "../../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
-import { checksWithObject } from "../helpers.ts";
+import * as logTest from "../../../../helpers/test-logger.ts";
+import { checksWithObject } from "../../../../helpers/test-logger.ts";
 import path from "path";
 import * as fs from "fs";
+// @ts-expect-error fixturez has no types
 import fixtures from "fixturez";
+
 const f = fixtures(__dirname);
 
 expect.addSnapshotSerializer({
@@ -26,147 +27,141 @@ describe("integration test with preMode `on`", () => {
     "tag": "beta",
     "changes": [${prevChanges.length === 0 ? "" : prevChanges.join(", ")}]
   }
-  `
+  `,
     );
 
   it("runs version in production for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const sink = yield* logTest.useCapturedLogger();
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
 
-    const covectored = (yield covector({
+    const covectored = yield* covector({
       logger,
       command: "version",
       cwd: fullIntegration,
-    })) as CovectorVersion;
+    });
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
 
-    yield pinoTest.consecutive(
-      stream,
+    yield* logTest.consecutive(
+      sink.all,
       [
         {
-          command: "version",
           msg: "bumping tauri with preminor",
-          level: 30,
+          level: "info",
+          meta: { command: "version" },
         },
         {
-          command: "version",
           msg: "bumping tauri-updater with prepatch",
-          level: 30,
+          level: "info",
+          meta: { command: "version" },
         },
         {
-          command: "version",
           msg: "bumping tauri.js with prerelease",
-          level: 30,
+          level: "info",
+          meta: { command: "version" },
         },
         {
-          command: "version",
           msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: 30,
+          level: "info",
+          meta: { command: "version" },
         },
         {
-          command: "version",
           msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: 30,
+          level: "info",
+          meta: { command: "version" },
         },
         {
-          command: "version",
           msg: "Could not load the CHANGELOG.md. Creating one.",
-          level: 30,
+          level: "info",
+          meta: { command: "version" },
         },
       ],
-      checksWithObject()
+      checksWithObject(),
     );
 
     expect(covectored).toMatchSnapshot();
 
-    const changelogTauriCore = yield loadFile(
+    const changelogTauriCore = yield* loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     // has a direct minor from 0.5.2
     expect(changelogTauriCore.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.0-beta.0]\n\n" +
-        "- Summary about the changes in tauri\n"
+        "- Summary about the changes in tauri\n",
     );
 
-    const changelogTaurijs = yield loadFile(
+    const changelogTaurijs = yield* loadFile(
       path.join("/cli/tauri.js/", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     // tauri.js through a dep bump
     expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
-        "- Upgraded to `tauri@0.6.0-beta.0`\n"
+        "- Upgraded to `tauri@0.6.0-beta.0`\n",
     );
   });
 
   it("runs version in production with existing changes for js and rust", function* () {
-    const streamOne = pinoTest.sink();
-    const loggerOne = pino(streamOne);
-    const streamTwo = pinoTest.sink();
-    const loggerTwo = pino(streamTwo);
+    const sink = yield* logTest.useCapturedLogger();
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
-    const covectoredOne = (yield covector({
-      logger: loggerOne,
+    const covectoredOne = yield* covector({
+      logger,
       command: "version",
       cwd: fullIntegration,
-    })) as CovectorVersion;
+    });
 
-    yield pinoTest.consecutive(streamOne, [
+    yield* logTest.consecutive(sink.all, [
       {
-        command: "version",
         msg: "bumping tauri with preminor",
-        level: 30,
+        level: "info",
       },
       {
-        command: "version",
         msg: "bumping tauri-updater with prepatch",
-        level: 30,
+        level: "info",
       },
       {
-        command: "version",
         msg: "bumping tauri.js with prerelease",
-        level: 30,
+        level: "info",
       },
       {
-        command: "version",
         msg: "Could not load the CHANGELOG.md. Creating one.",
-        level: 30,
+        level: "info",
       },
       {
-        command: "version",
         msg: "Could not load the CHANGELOG.md. Creating one.",
-        level: 30,
+        level: "info",
       },
       {
-        command: "version",
         msg: "Could not load the CHANGELOG.md. Creating one.",
-        level: 30,
+        level: "info",
       },
     ]);
 
-    const changelogTauriCoreOne = yield loadFile(
+    const changelogTauriCoreOne = yield* loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     expect(changelogTauriCoreOne.content).toBe(
       "# Changelog\n\n" +
         "## \\[0.6.0-beta.0]\n\n" +
-        "- Summary about the changes in tauri\n"
+        "- Summary about the changes in tauri\n",
     );
 
-    const changelogTaurijsOne = yield loadFile(
+    const changelogTaurijsOne = yield* loadFile(
       path.join("/cli/tauri.js/", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     // tauri.js does not have a change file directly or through a dep bump
     // so it should remain the same
@@ -174,15 +169,15 @@ describe("integration test with preMode `on`", () => {
       "# Changelog\n\n" +
         "## \\[0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
-        "- Upgraded to `tauri@0.6.0-beta.0`\n"
+        "- Upgraded to `tauri@0.6.0-beta.0`\n",
     );
 
-    const preOne = yield loadFile(
+    const preOne = yield* loadFile(
       path.join(".changes", "pre.json"),
-      fullIntegration
+      fullIntegration,
     );
     expect(preOne.content).toBe(
-      '{\n  "tag": "beta",\n  "changes": [\n    ".changes/first-change.md",\n    ".changes/second-change.md"\n  ]\n}\n'
+      '{\n  "tag": "beta",\n  "changes": [\n    ".changes/first-change.md",\n    ".changes/second-change.md"\n  ]\n}\n',
     );
 
     // add change file
@@ -193,50 +188,48 @@ describe("integration test with preMode `on`", () => {
 ---
 
 Boop again.
-`
+`,
     );
 
     // double check the write and formatting
-    const newChange = yield loadFile(
+    const newChange = yield* loadFile(
       path.join(".changes", "third-change.md"),
-      fullIntegration
+      fullIntegration,
     );
     expect(newChange.content).toBe(
-      "---\n" + '"tauri-api": patch\n' + "---\n\n" + "Boop again.\n"
+      "---\n" + '"tauri-api": patch\n' + "---\n\n" + "Boop again.\n",
     );
 
-    const covectoredTwo = (yield covector({
-      logger: loggerTwo,
+    const startIndex = sink.all.length;
+
+    const covectoredTwo = yield* covector({
+      logger,
       command: "version",
       cwd: fullIntegration,
-    })) as CovectorVersion;
+    });
 
-    yield pinoTest.consecutive(streamTwo, [
+    yield* logTest.consecutive(sink.all.slice(startIndex), [
       {
-        command: "version",
         msg: "bumping tauri-api with prepatch",
-        level: 30,
+        level: "info",
       },
       {
-        command: "version",
         msg: "bumping tauri with prerelease",
-        level: 30,
+        level: "info",
       },
       {
-        command: "version",
         msg: "bumping tauri.js with prerelease",
-        level: 30,
+        level: "info",
       },
       {
-        command: "version",
         msg: "Could not load the CHANGELOG.md. Creating one.",
-        level: 30,
+        level: "info",
       },
     ]);
 
-    const changelogTauriCoreTwo = yield loadFile(
+    const changelogTauriCoreTwo = yield* loadFile(
       path.join("/tauri/", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     expect(changelogTauriCoreTwo.content).toBe(
       "# Changelog\n\n" +
@@ -245,12 +238,12 @@ Boop again.
         "- Upgraded to `tauri-api@0.5.2-beta.0`\n" +
         "\n" +
         "## \\[0.6.0-beta.0]\n\n" +
-        "- Summary about the changes in tauri\n"
+        "- Summary about the changes in tauri\n",
     );
 
-    const changelogTaurijsTwo = yield loadFile(
+    const changelogTaurijsTwo = yield* loadFile(
       path.join("/cli/tauri.js/", "CHANGELOG.md"),
-      fullIntegration
+      fullIntegration,
     );
     // tauri.js does not have a change file directly or through a dep bump
     // so it should remain the same
@@ -262,15 +255,15 @@ Boop again.
         "\n" +
         "## \\[0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
-        "- Upgraded to `tauri@0.6.0-beta.0`\n"
+        "- Upgraded to `tauri@0.6.0-beta.0`\n",
     );
 
-    const preTwo = yield loadFile(
+    const preTwo = yield* loadFile(
       path.join(".changes", "pre.json"),
-      fullIntegration
+      fullIntegration,
     );
     expect(preTwo.content).toBe(
-      '{\n  "tag": "beta",\n  "changes": [\n    ".changes/first-change.md",\n    ".changes/second-change.md",\n    ".changes/third-change.md"\n  ]\n}\n'
+      '{\n  "tag": "beta",\n  "changes": [\n    ".changes/first-change.md",\n    ".changes/second-change.md",\n    ".changes/third-change.md"\n  ]\n}\n',
     );
 
     if (typeof covectoredOne !== "object")
@@ -284,44 +277,112 @@ Boop again.
   });
 
   it("runs version in --dry-run mode for js and rust", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const sink = yield* logTest.useCapturedLogger();
+
+    const logger = covectorLogger.operations;
     const fullIntegration = f.copy("integration.js-and-rust-with-changes");
     // this enables "pre" mode
     makePre(fullIntegration);
-    const covectored = (yield covector({
+    const covectored = yield* covector({
       logger,
       command: "version",
       cwd: fullIntegration,
       dryRun: true,
-    })) as CovectorVersion;
+    });
 
-    yield pinoTest.consecutive(
-      stream,
+    yield* logTest.consecutive(
+      sink.all,
       [
         {
-          command: "version",
           msg: "==== data piped into commands ===",
-          level: 30,
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "==== data piped into commands ===",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "==== data piped into commands ===",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "==== commands ready to run ===",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "bumping tauri with preminor",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "bumping tauri-updater with prepatch",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "bumping tauri.js with prerelease",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "tauri.js planned to be bumped from 0.6.2 to 0.6.3-beta.0",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "tauri planned to be bumped from 0.5.2 to 0.6.0-beta.0",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "tauri-updater planned to be bumped from 0.4.2 to 0.4.3-beta.0",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "Could not load the CHANGELOG.md. Creating one.",
+          level: "info",
+          meta: { command: "version" },
+        },
+        {
+          msg: "==== result ===",
+          level: "info",
+          meta: { command: "version" },
         },
       ],
-      checksWithObject()
+      checksWithObject(),
     );
 
     if (typeof covectored !== "object")
       throw new Error("We are expecting an object here.");
     expect(covectored).toMatchSnapshot();
 
-    const changelogTauriCore = yield captureError(
-      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration)
+    const changelogTauriCore = yield* captureError(
+      loadFile(path.join("/tauri/", "CHANGELOG.md"), fullIntegration),
     );
-    expect(changelogTauriCore.effectionTrace[0].state).toEqual("erroring");
-    expect(changelogTauriCore.effectionTrace[1].state).toEqual("erroring");
+    expect(changelogTauriCore.message).toContain(
+      "ENOENT: no such file or directory",
+    );
 
-    const changelogTaurijs = yield captureError(
-      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration)
+    const changelogTaurijs = yield* captureError(
+      loadFile(path.join("/cli/tauri.js/", "CHANGELOG.md"), fullIntegration),
     );
-    expect(changelogTaurijs.effectionTrace[0].state).toEqual("erroring");
-    expect(changelogTaurijs.effectionTrace[1].state).toEqual("erroring");
+    expect(changelogTaurijs.message).toContain(
+      "ENOENT: no such file or directory",
+    );
   });
 });

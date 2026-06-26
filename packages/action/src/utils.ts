@@ -1,7 +1,8 @@
 import fs from "fs";
-import type { FunctionPipe } from "../../types/src";
-import type { ConfigFile, Logger } from "@covector/types";
-import type { GitHub } from "@actions/github/lib/utils";
+import type { ConfigFile, Logger, FunctionPipe } from "@covector/types";
+import type { getOctokit } from "@actions/github";
+import * as core from "@actions/core";
+import { until, type Operation } from "effection";
 
 export const commandText = (pkg: {
   precommand: string | boolean | null;
@@ -39,19 +40,19 @@ export const injectPublishFunctions = curry(
     if (!config) return config;
     if (!Array.isArray(functionsToInject))
       throw new Error(
-        "injectPublishFunctions() in modifyConfig() expects an array"
+        "injectPublishFunctions() in modifyConfig() expects an array",
       );
     return {
       ...config,
       pkgManagers: injectIntoPublish(config.pkgManagers, functionsToInject),
       packages: injectIntoPublish(config.packages, functionsToInject),
     };
-  }
+  },
 );
 
 const injectIntoPublish = (
   packages: { [k: string]: object } | undefined,
-  functionsToInject: Function[]
+  functionsToInject: Function[],
 ) => {
   if (!packages) return {};
   return Object.keys(packages).reduce((finalConfig, pkg) => {
@@ -64,7 +65,7 @@ const injectIntoPublish = (
         }
         return pm;
       },
-      packages![pkg] || {}
+      packages![pkg] || {},
     );
 
     return finalConfig;
@@ -83,85 +84,87 @@ function curry(func: Function): Function {
   };
 }
 
-export const createReleases = curry(
-  async (
-    {
-      logger,
-      core,
-      octokit,
-      owner,
-      repo,
-      targetCommitish,
-    }: {
-      logger: Logger;
-      core: { [k: string]: Function };
-      octokit: InstanceType<typeof GitHub>;
-      owner: string;
-      repo: string;
-      targetCommitish: string;
-    },
-    pipe: FunctionPipe
-  ): Promise<void> => {
+export const createReleases = ({
+  logger,
+  octokit,
+  owner,
+  repo,
+  targetCommitish,
+}: {
+  logger: Logger;
+  octokit: ReturnType<typeof getOctokit>;
+  owner: string;
+  repo: string;
+  targetCommitish: string;
+}): ((pipe: FunctionPipe) => Operation<void>) => {
+  return function* (pipe: FunctionPipe) {
     if (!pipe.pkgFile) {
-      logger.error(
-        `skipping Github Release for ${pipe.pkg}, no package file present`
+      yield* logger.error(
+        `skipping Github Release for ${pipe.pkg}, no package file present`,
       );
       return;
     }
+    const pkgFile = pipe.pkgFile;
 
     if (!pipe.releaseTag) {
-      logger.error(
-        `skipping Github Release for ${pipe.pkg}, releaseTag is null`
+      yield* logger.error(
+        `skipping Github Release for ${pipe.pkg}, releaseTag is null`,
       );
       return;
     }
 
     const releaseTag = pipe.releaseTag;
-    logger.debug(`creating release with tag ${releaseTag}`);
-    const existingRelease = await octokit.rest.repos
-      .listReleases({
-        owner,
-        repo,
-      })
-      .then((releases) => {
-        const release = releases.data.find(
-          (r) => r.draft && r.tag_name === releaseTag
-        );
-        return release ? release : null;
-      })
-      .catch((error: Error) => null);
+    yield* logger.debug(`creating release with tag ${releaseTag}`);
+    let existingRelease;
+    try {
+      const releases = yield* until(
+        octokit.rest.repos.listReleases({
+          owner,
+          repo,
+        }),
+      );
+      existingRelease = releases.data.find(
+        (r) => r.draft && r.tag_name === releaseTag,
+      ) ?? null;
+    } catch {
+      existingRelease = null;
+    }
 
     let releaseResponse;
     if (existingRelease && existingRelease.draft) {
-      logger.info(
-        `updating and publishing Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
+      yield* logger.info(
+        `updating and publishing Github Release for ${pipe.pkg}@${pkgFile.version}`,
       );
-      releaseResponse = await octokit.rest.repos
-        .updateRelease({
-          owner,
-          repo,
-          release_id: existingRelease.id,
-          body: `${
-            existingRelease.body ? `${existingRelease.body}\n` : ""
-          }${commandText(pipe.pkgCommandsRan)}`,
-          draft: false,
-        })
-        .then((response) => response.data);
+      releaseResponse = yield* until(
+        octokit.rest.repos
+          .updateRelease({
+            owner,
+            repo,
+            release_id: existingRelease.id,
+            body: `${
+              existingRelease.body ? `${existingRelease.body}\n` : ""
+            }${commandText(pipe.pkgCommandsRan)}`,
+            draft: false,
+          })
+          .then((response) => response.data),
+      );
     } else {
-      logger.info(
-        `creating Github Release for ${pipe.pkg}@${pipe.pkgFile.version}`
+      yield* logger.info(
+        `creating Github Release for ${pipe.pkg}@${pkgFile.version}`,
       );
-      releaseResponse = await octokit.rest.repos
-        .createRelease({
-          owner,
-          repo,
-          tag_name: releaseTag,
-          name: `${pipe.pkg} v${pipe.pkgFile.version}`,
-          body: commandText(pipe.pkgCommandsRan),
-          draft: core.getInput("draftRelease") === "true" ? true : false,
-          target_commitish: targetCommitish,
-        })
-        .then((response) => response.data);
+      releaseResponse = yield* until(
+        octokit.rest.repos
+          .createRelease({
+            owner,
+            repo,
+            tag_name: releaseTag,
+            name: `${pipe.pkg} v${pkgFile.version}`,
+            body: commandText(pipe.pkgCommandsRan),
+            draft: core.getInput("draftRelease") === "true" ? true : false,
+            target_commitish: targetCommitish,
+          })
+          .then((response) => response.data),
+      );
     }
     // keeping this one since this was originally used
     // considered deprecated and will remove in v1
@@ -181,11 +184,11 @@ export const createReleases = curry(
     core.setOutput(`${cleanPipePkg}-releaseUrl`, releaseResponse.url);
     core.setOutput(
       `${cleanPipePkg}-releaseUploadUrl`,
-      releaseResponse.upload_url
+      releaseResponse.upload_url,
     );
     core.setOutput(`${cleanPipePkg}-releaseId`, releaseResponse.id);
 
-    logger.info({
+    yield* logger.info({
       msg: `github release created for ${pipe.pkg} with id: ${releaseResponse.id}`,
       renderAsYAML: releaseResponse,
     });
@@ -193,30 +196,32 @@ export const createReleases = curry(
     if (pipe.assets) {
       try {
         for (let asset of pipe.assets) {
-          logger.info(
-            `uploading asset ${asset.name} for ${pipe.pkg}@${pipe.pkgFile.version}`
+          yield* logger.info(
+            `uploading asset ${asset.name} for ${pipe.pkg}@${pkgFile.version}`,
           );
-          const uploadedAsset = await octokit.rest.repos
-            .uploadReleaseAsset({
-              owner,
-              repo,
-              release_id: releaseResponse.id,
-              name: asset.name,
-              // this type seems to be set incorrectly upstream as their API expects a Buffer
-              // per https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset
-              // or we need to somehow pass in the expected body type but... let's just ignore it
-              // @ts-expect-error error TS2322: Type 'Buffer' is not assignable to type 'string'.
-              data: fs.readFileSync(asset.path),
-            })
-            .then((response) => response.data);
-          logger.info({
+          const uploadedAsset = yield* until(
+            octokit.rest.repos
+              .uploadReleaseAsset({
+                owner,
+                repo,
+                release_id: releaseResponse.id,
+                name: asset.name,
+                // this type seems to be set incorrectly upstream as their API expects a Buffer
+                // per https://docs.github.com/en/rest/releases/assets?apiVersion=2022-11-28#upload-a-release-asset
+                // or we need to somehow pass in the expected body type but... let's just ignore it
+                // @ts-expect-error error TS2322: Type 'Buffer' is not assignable to type 'string'.
+                data: fs.readFileSync(asset.path),
+              })
+              .then((response) => response.data),
+          );
+          yield* logger.info({
             msg: `asset uploaded to release for ${pipe.pkg}`,
             renderAsYAML: uploadedAsset,
           });
         }
       } catch (error) {
-        logger.error(error);
+        yield* logger.error(error);
       }
     }
-  }
-);
+  };
+};

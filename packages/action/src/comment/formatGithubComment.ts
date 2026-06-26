@@ -1,5 +1,8 @@
 import type { Config, CovectorStatus, PackageFile } from "@covector/types";
-import type { PullRequestEvent } from "@octokit/webhooks-definitions/schema";
+import type { webhooks } from "@octokit/openapi-webhooks-types";
+
+type PullRequestEvent =
+  webhooks["pull-request-synchronize"]["post"]["requestBody"]["content"]["application/json"];
 
 export function formatComment({
   covectored,

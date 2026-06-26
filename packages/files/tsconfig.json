@@ -1,11 +1,9 @@
 {
   "extends": "../../tsconfig.base.json",
+  "references": [{ "path": "../toml" }, { "path": "../types" }],
+  "include": ["src"],
   "compilerOptions": {
-    "strict": true,
-    "baseUrl": ".",
-    "outDir": "dist",
-    "rootDir": "src"
-  },
-  "include": ["src/**/*.ts"],
-  "references": [{ "path": "../types" }]
+    "rootDir": "src",
+    "outDir": "dist"
+  }
 }

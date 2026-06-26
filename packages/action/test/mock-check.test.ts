@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { captureError, describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect, vi } from "vitest";
 
 vi.mock("@actions/core");
@@ -13,7 +13,7 @@ vi.mock("@actions/github", () => ({
 describe("test mocks", () => {
   it("mocks core getInput", function* () {
     vi.spyOn(core, "getInput").mockImplementationOnce(
-      (arg) => `This returns ${arg}`
+      (arg) => `This returns ${arg}`,
     );
     const test = core.getInput("test");
     expect(test).toBe("This returns test");

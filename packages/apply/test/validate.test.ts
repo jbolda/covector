@@ -2,13 +2,12 @@ import { validateApply } from "../src";
 import { readAllPkgFiles } from "@covector/files";
 import { PackageCommand, PackageFile } from "@covector/types";
 
-import { run } from "effection";
-
 import { describe, it, captureError } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
-import pino from "pino";
-import * as pinoTest from "pino-test";
+import * as logTest from "../../../helpers/test-logger.ts";
+// @ts-expect-error has no types
 import fixtures from "fixturez";
+import { logger } from "../../covector/src/logger.ts";
 const f = fixtures(__dirname);
 
 const configDefaults = {
@@ -17,8 +16,7 @@ const configDefaults = {
 
 describe("validate apply", () => {
   it("bumps single js json", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const log = yield* logTest.useCapturedLogger();
     const jsonFolder = f.copy("pkg.js-single-json");
 
     const commands = [
@@ -41,8 +39,8 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
-      logger,
+    const validated = yield* validateApply({
+      logger: logger.operations,
       // @ts-expect-error
       commands,
       config,
@@ -52,8 +50,7 @@ describe("validate apply", () => {
   });
 
   it("bumps single rust toml", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-single");
 
     const commands = [
@@ -76,8 +73,8 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
-      logger,
+    const validated = yield* validateApply({
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -87,8 +84,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi js json", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const log = yield* logTest.useCapturedLogger();
     const jsonFolder = f.copy("pkg.js-yarn-workspace");
 
     const commands = [
@@ -134,8 +130,8 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
-      logger,
+    const validated = yield* validateApply({
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -145,8 +141,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-multi");
 
     const commands = [
@@ -181,8 +176,8 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
-      logger,
+    const validated = yield* validateApply({
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -192,8 +187,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml with object dep", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-multi-object-dep");
 
     const commands = [
@@ -228,8 +222,8 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
-      logger,
+    const validated = yield* validateApply({
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -239,8 +233,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml with dep missing patch", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");
 
     const commands = [
@@ -275,8 +268,8 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
-      logger,
+    const validated = yield* validateApply({
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -286,8 +279,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as patch with object dep missing patch", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const log = yield* logTest.useCapturedLogger();
     const rustFolder = f.copy("pkg.rust-multi-object-no-patch-dep");
 
     const commands = [
@@ -323,8 +315,8 @@ describe("validate apply", () => {
       },
     };
 
-    const validated = yield validateApply({
-      logger,
+    const validated = yield* validateApply({
+      logger: logger.operations,
       //@ts-expect-error
       commands,
       config,
@@ -334,8 +326,7 @@ describe("validate apply", () => {
   });
 
   it("bumps multi rust toml as minor with object dep without version number", function* () {
-    const stream = pinoTest.sink();
-    const logger = pino(stream);
+    const log = yield* logTest.useCapturedLogger();
 
     const rustFolder: string = f.copy("pkg.rust-multi-object-path-dep-only");
 
@@ -351,7 +342,7 @@ describe("validate apply", () => {
         },
       },
     };
-    const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+    const allPackages: Record<string, PackageFile> = yield* readAllPkgFiles({
       config,
       cwd: rustFolder,
     });
@@ -375,20 +366,20 @@ describe("validate apply", () => {
       },
     ];
 
-    const errored = yield captureError(
+    const errored = yield* captureError(
       validateApply({
-        logger,
+        logger: logger.operations,
         commands,
         allPackages,
-      })
+      }),
     );
-    logger.info("completed");
+    yield* logger.operations.info("completed");
     expect(errored.message).toMatch(
       "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
-        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference."
+        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference.",
     );
 
     // to confirm that no error logs have been returned
-    yield pinoTest.consecutive(stream, [{ msg: "completed", level: 30 }]);
+    yield* logTest.consecutive(log.all, [{ msg: "completed", level: "info" }]);
   });
 });

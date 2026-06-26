@@ -1,4 +1,4 @@
-import { type Logger } from "@covector/types";
+import type { Logger, Covector } from "@covector/types";
 import { confirmCommandsToRun } from "@covector/command";
 import {
   configFile,
@@ -17,16 +17,9 @@ import {
   changesConsideringParents,
   validateApply,
 } from "@covector/apply";
-import { cloneDeep } from "lodash";
 
-import type {
-  CovectorStatus,
-  Covector,
-  PkgPublish,
-  PackageFile,
-  PkgVersion,
-  Config,
-} from "@covector/types";
+import { until, type Operation } from "effection";
+import { useAttributes } from "./logger.ts";
 
 export function* status({
   logger,
@@ -46,152 +39,165 @@ export function* status({
   modifyConfig?: (c: any) => Promise<any>;
   branchTag?: string;
   logs?: boolean;
-}): Generator<any, Covector, any> {
-  const config: Config = yield modifyConfig(yield configFile({ cwd }));
-  const pre = yield readPreFile({ cwd, changeFolder: config.changeFolder });
-  const prereleaseIdentifier = !pre ? null : pre.tag;
+}): Operation<Covector["status"]> {
+  const rawConfig = yield* configFile({ cwd });
+  const config = yield* until(modifyConfig(rawConfig));
+  const pre = yield* readPreFile({ cwd, changeFolder: config.changeFolder });
+  const prereleaseIdentifier = !pre ? undefined : pre.tag;
 
-  const changesPaths = yield changeFiles({
+  const changesPaths = yield* changeFiles({
     cwd,
     changeFolder: config.changeFolder,
   });
-  const changeFilesLoaded = yield loadChangeFiles({
+  const changeFilesLoaded = yield* loadChangeFiles({
     cwd,
     paths: changesPaths,
   });
-  const assembledChanges = yield assemble({
-    logger: logger.child({ step: "assemble changes" }),
+  yield* useAttributes({ step: "assemble changes" });
+  const assembledPlan = yield* assemble({
+    logger,
     cwd,
     files: changeFilesLoaded,
     config,
     preMode: { on: !!pre, prevFiles: !pre ? [] : pre.changes },
   });
+  yield* useAttributes({ step: "" });
 
   if (changeFilesLoaded.length === 0) {
-    if (logs) logger.info("There are no changes.");
+    if (logs) yield* logger.info("There are no changes.");
 
-    const { commands: publishCommands }: { commands: PkgPublish[] } =
-      yield mergeIntoConfig({
-        logger: logger.child({ step: "assemble changes" }),
-        assembledChanges,
-        config,
-        command: "publish",
-        cwd,
-        dryRun,
-        filterPackages,
-        tag: branchTag,
-      });
+    yield* useAttributes({ step: "assemble changes" });
+    const { commands: publishCommands } = yield* mergeIntoConfig({
+      logger,
+      assembledPlan,
+      config,
+      command: "publish",
+      cwd,
+      dryRun,
+      filterPackages,
+      tag: branchTag,
+    });
+    yield* useAttributes({ step: "" });
 
     if (publishCommands.length === 0) {
-      if (logs) logger.info(`No commands configured to run on publish.`);
+      if (logs) yield* logger.info(`No commands configured to run on publish.`);
       return {
+        config,
         response: `No commands configured to run on publish.`,
         pkgReadyToPublish: [],
+        pkgVersion: [],
       };
     }
 
-    const commandsToRun: PkgPublish[] = yield confirmCommandsToRun({
-      logger: logger.child({ step: "assemble changes" }),
+    yield* useAttributes({ step: "assemble changes" });
+    const commandsToRun = yield* confirmCommandsToRun({
+      logger,
       cwd,
       commands: publishCommands,
       command: "publish",
     });
+    yield* useAttributes({ step: "" });
 
     if (commandsToRun.length > 0 && logs) {
-      logger.info(
+      yield* logger.info(
         `There ${
           commandsToRun.length === 1
             ? `is 1 package`
             : `is ${commandsToRun.length} packages`
         } ready to publish which includes${commandsToRun.map(
-          (pkg) => ` ${pkg.pkg}@${pkg.pkgFile?.version}`
-        )}`
+          (pkg: any) => ` ${pkg.pkg}@${pkg.pkgFile?.version}`,
+        )}`,
       );
     }
 
-    return <CovectorStatus>{
+    return {
       pkgReadyToPublish: commandsToRun,
+      pkgVersion: [],
       config,
       response: "No changes.",
     };
-  } else if (!!pre && assembledChanges?.changes?.length === 0) {
+  } else if (!!pre && assembledPlan?.changes?.length === 0) {
     if (logs) {
-      logger.info("There are no changes.");
-      logger.info({
+      yield* logger.info("There are no changes.");
+      yield* logger.info({
         msg: "We have previously released the changes in these files:",
         renderAsYAML: changesPaths,
       });
     }
-    return { pkgReadyToPublish: [], config, response: "No changes." };
+    return {
+      pkgReadyToPublish: [],
+      pkgVersion: [],
+      config,
+      response: "No changes.",
+    };
   } else {
     if (logs) {
-      logger.info("changes:");
-      Object.keys(assembledChanges.releases).forEach((release) => {
-        logger.info({
-          msg: `${release} => ${assembledChanges.releases[release].type}`,
-          renderAsYAML: assembledChanges.releases[release].changes,
+      yield* logger.info("changes:");
+      for (const release of Object.keys(assembledPlan?.releases ?? {})) {
+        yield* logger.info({
+          msg: `${release} => ${assembledPlan?.releases?.[release].type}`,
+          renderAsYAML: assembledPlan?.releases?.[release].changes,
         });
-      });
+      }
     }
 
-    const allPackages: Record<string, PackageFile> = yield readAllPkgFiles({
+    const allPackages = yield* readAllPkgFiles({
+      config,
+      cwd,
+    });
+    const allPackagesForValidation = yield* readAllPkgFiles({
       config,
       cwd,
     });
 
     const changes = changesConsideringParents({
-      assembledChanges,
+      assembledPlan,
       config,
       allPackages,
       prereleaseIdentifier,
     });
 
-    const {
-      commands,
-      pipeTemplate,
-    }: { commands: PkgVersion[]; pipeTemplate: any } =
-      yield mergeChangesToConfig({
-        logger: logger.child({ step: "compile changes" }),
-        assembledChanges: changes,
-        config,
-        command,
-        dryRun,
-        filterPackages,
-        cwd,
-      });
+    yield* useAttributes({ step: "compile changes" });
+    const { commands, pipeTemplate } = yield* mergeChangesToConfig({
+      logger,
+      assembledChanges: changes,
+      config,
+      command,
+      dryRun,
+      filterPackages,
+    });
+    yield* useAttributes({ step: "" });
 
     // throws if failed validation
-    yield validateApply({
-      logger: logger.child({ step: "apply changes" }),
-      //@ts-expect-error
+    yield* useAttributes({ step: "apply changes" });
+    yield* validateApply({
+      logger,
       commands,
       // as the validate ends up mutating
-      allPackages: cloneDeep(allPackages),
+      allPackages: allPackagesForValidation,
       prereleaseIdentifier,
     });
 
-    const applied = yield apply({
-      logger: logger.child({ step: "apply changes" }),
-      //@ts-expect-error
+    const applied = yield* apply({
+      logger,
       commands,
-      config,
       allPackages,
       cwd,
       bump: false,
       prereleaseIdentifier,
       logs,
     });
+    yield* useAttributes({ step: "" });
 
-    return <CovectorStatus>{
+    return {
       pkgVersion: commands,
       config,
       applied,
       pipeTemplate: pipeTemplate,
       response: `There are ${
-        Object.keys(assembledChanges.releases).length
-      } changes which include${Object.keys(assembledChanges.releases).map(
-        (release) =>
-          ` ${release} with ${assembledChanges.releases[release].type}`
+        Object.keys(assembledPlan.releases).length
+      } changes which include${Object.keys(assembledPlan.releases).map(
+        (release) => ` ${release} with ${assembledPlan.releases[release].type}`,
       )}`,
     };
   }

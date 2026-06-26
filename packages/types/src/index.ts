@@ -1,42 +1,24 @@
-import { z } from "zod";
-import {
-  fileSchema,
-  packageConfigSchema,
-  allCommandsSchema,
-  pkgManagerSchema,
-  configFileSchema,
-} from "@covector/files/src/schema";
-import { TomlDocument } from "@covector/toml";
-import { Operation } from "effection";
+import type { Operation } from "effection";
 
-export type File = z.infer<typeof fileSchema>;
-export type PackageConfig = z.infer<ReturnType<typeof packageConfigSchema>>;
-export type CommandConfig = z.infer<typeof allCommandsSchema>;
-export type PkgManagerConfig = z.infer<typeof pkgManagerSchema>;
-export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
-export type Config = ConfigFile & { file?: File };
-
-export { Logger } from "pino";
-export interface LoggerBindings {
-  level: number;
-  msg: string;
-  renderAsYAML?: Record<string, any>;
+export interface LoadedFile {
+  content: string;
+  path: string;
+  filename: string;
+  extname: string;
 }
 
-/* @covector/files */
-interface NestedVersion {
-  version?: string;
-  [key: string]: any;
-}
-export type PkgFileVersion = string | NestedVersion;
+export type PkgFileVersion = string | { version?: string; [key: string]: any };
 
-// Pkg for toml has a `.packages` so we need to address this union
-// or otherwise normalize it, and it will be an issue as
-// we add other PackageFile types / sources
+export interface PkgTarget {
+  dependencies?: Record<string, PkgFileVersion>;
+  "dev-dependencies"?: Record<string, PkgFileVersion>;
+  "build-dependencies"?: Record<string, PkgFileVersion>;
+}
+
 export interface Pkg {
   name: string;
   version?: string;
-  package?: NestedVersion;
+  package?: { version?: string; [key: string]: any };
   dependencies?: Record<string, PkgFileVersion>;
   devDependencies?: Record<string, PkgFileVersion>;
   "dev-dependencies"?: Record<string, PkgFileVersion>;
@@ -45,16 +27,10 @@ export interface Pkg {
   [key: string]: any;
 }
 
-export interface PkgTarget {
-  dependencies?: Record<string, PkgFileVersion>;
-  "dev-dependencies"?: Record<string, PkgFileVersion>;
-  "build-dependencies"?: Record<string, PkgFileVersion>;
-}
-
 export interface PkgMinimum {
   version: string;
   currentVersion: string;
-  pkg: Pkg | TomlDocument;
+  pkg: Pkg | Record<string, any>;
   versionMajor: number;
   versionMinor: number;
   versionPatch: number;
@@ -68,6 +44,7 @@ export type DepTypes =
   | "dev-dependencies"
   | "build-dependencies"
   | "target";
+
 export type DepsKeyed = Record<
   string,
   {
@@ -77,14 +54,117 @@ export type DepsKeyed = Record<
 >;
 
 export interface PackageFile extends PkgMinimum {
-  file?: File;
-  name?: string;
+  file?: LoadedFile;
+  name: string;
 }
 
 export interface PreFile {
-  file?: File;
+  file?: LoadedFile;
   tag: string;
   changes: string[] | [];
+}
+
+interface CommandBaseOptions {
+  runFromRoot?: boolean;
+  retries?: number[];
+  dryRunCommand?: string | boolean;
+  pipe?: boolean;
+}
+
+interface ProcessCommandOptions extends CommandBaseOptions {
+  command: string;
+}
+
+interface UseCommandOptions extends CommandBaseOptions {
+  use: "fetch:check";
+  options: { url: string };
+}
+
+type CommandOption = ProcessCommandOptions | UseCommandOptions;
+type RawCommand =
+  | boolean
+  | string
+  | CommandOption
+  | (string | CommandOption)[];
+
+export type CommandConfig = {
+  version?: RawCommand;
+  prepublish?: RawCommand;
+  publish?: RawCommand;
+  postpublish?: RawCommand;
+  errorOnVersionRange?: string;
+  releaseTag?: string | false;
+  assets?: { path: string; name: string }[] | false;
+  [key: string]: any;
+};
+
+export type PkgManagerConfig = {
+  version?: RawCommand;
+  prepublish?: RawCommand;
+  publish?: RawCommand;
+  postpublish?: RawCommand;
+  errorOnVersionRange?: string;
+  releaseTag?: string | false;
+  assets?: { path: string; name: string }[] | false;
+};
+
+export type PackageConfig = {
+  manager?: string;
+  path?: string;
+  dependencies?: string[];
+  packageFileName?: string;
+  version?: RawCommand;
+  prepublish?: RawCommand;
+  publish?: RawCommand;
+  postpublish?: RawCommand;
+  errorOnVersionRange?: string;
+  releaseTag?: string | false;
+  assets?: { path: string; name: string }[] | false;
+};
+
+export type ConfigFile = {
+  changeFolder?: string;
+  gitSiteUrl?: string;
+  timeout?: number;
+  additionalBumpTypes?: string[];
+  defaultChangeTag?: string;
+  pkgManagers?: Record<string, PkgManagerConfig>;
+  packages: Record<string, PackageConfig>;
+  changeTags?: Record<string, string>;
+};
+
+export type Config = ConfigFile & { file?: File };
+
+export type LoggerLevel = "debug" | "info" | "warn" | "error" | "fatal";
+export type LoggerBucket = "default" | "stdout" | "stderr";
+
+export interface LoggerAttribute {
+  name: string;
+  step?: string;
+}
+
+export interface LoggerBindings {
+  msg?: string;
+  renderAsYAML?: Record<string, any>;
+  meta?: Record<string, unknown>;
+}
+
+export interface LoggerEntry extends LoggerBindings {
+  command: string;
+  step?: string;
+  bucket: LoggerBucket;
+  level: LoggerLevel;
+  meta?: Record<string, unknown>;
+}
+
+export interface Logger {
+  info(message: string | unknown | LoggerBindings): Operation<void>;
+  error(message: string | unknown | LoggerBindings): Operation<void>;
+  warn(message: string | unknown | LoggerBindings): Operation<void>;
+  debug(message: string | unknown | LoggerBindings): Operation<void>;
+  fatal(message: string | unknown | LoggerBindings): Operation<void>;
+  stdout(message: string): Operation<void>;
+  stderr(message: string): Operation<void>;
 }
 
 /* @covector/command */
@@ -113,7 +193,7 @@ export type NormalizedCommand = {
 /* @covector/changelog */
 export type Changelog = {
   changes: { name: string; version: string };
-  changelog: File;
+  changelog: LoadedFile;
 };
 
 export type PkgCommandResponse = {
@@ -132,6 +212,7 @@ export type Meta = {
     date: string;
     commitSubject: string;
   }[];
+  path: string;
 };
 
 export type AssembledChanges = {
@@ -147,6 +228,16 @@ export type AssembledChanges = {
   summary: string;
   meta?: Meta;
 };
+
+export interface AssembledPlan {
+  changes: Change[];
+  releases: { [k: string]: Release };
+}
+
+export interface AssembledPlanParsed {
+  changes: AssembledPlan["changes"];
+  releases: { [k: string]: ReleaseParsed };
+}
 
 /* @covector/assemble */
 export type Changeset = {
@@ -172,7 +263,18 @@ export type CommonBumpsWithTag =
 export type Change = {
   releases: { [k: string]: CommonBumps };
   tag?: string;
-  meta: File;
+  summary?: string;
+  meta: {
+    file?: LoadedFile;
+    dependencies?: string[];
+    commits?: {
+      hashShort: string;
+      hashLong: string;
+      date: string;
+      commitSubject: string;
+    }[];
+    path: string;
+  };
 };
 
 export type Release = {
@@ -185,22 +287,22 @@ export type Release = {
 export type CommandTypes = NormalizedCommand | string | Function | true;
 export type Command = CommandTypes[] | CommandTypes | boolean;
 
-export type PkgVersion = {
+export interface PkgVersion {
   pkg: string;
   path?: string;
+  dependencies?: string[];
+  manager?: string;
+  type: CommonBumps;
+  parents: Parents;
   packageFileName?: string;
-  type?: string;
-  parents?: Parents;
   precommand: Command | null;
   command: Command | null;
   postcommand: Command | null;
-  manager?: string;
-  dependencies?: string[];
   errorOnVersionRange: string | null;
-};
+}
 
 export type PipeVersionTemplate = {
-  release: Release;
+  release: ReleaseParsed;
   pkg: PkgVersion;
 };
 
@@ -232,12 +334,18 @@ export type ChangeParsed = {
   releases: { [k: string]: string };
   tag?: string;
   summary: string;
-  meta: { dependencies: string[] };
+  meta: Meta;
 };
 
-export type ChangeContext = ({ commits }: { commits: string[] }) => Operation<
-  Operation<{
-    context: Record<string, string>;
+export type ReleaseParsed = {
+  type: CommonBumps;
+  changes: ChangeParsed[];
+  parents?: Parents;
+};
+
+export type ChangeContext<A> = (args: A) => Operation<
+  () => Operation<{
+    context: Record<string, Record<string, string>>;
     changeContext: Record<string, string>;
   }>
 >;
@@ -265,20 +373,21 @@ export type Releases = {
 
 export type PackageCommand = {
   pkg: string;
+  path?: string;
   dependencies?: string[];
   manager?: string;
-  path: string;
   type: CommonBumps;
   parents: Parents;
 };
 
 /* covector */
 export type PkgCommandsRan = {
-  precommand: string | false;
-  command: string | false;
-  postcommand: string | false;
-  applied: string | false;
+  precommand: string | boolean;
+  command: string | boolean;
+  postcommand: string | boolean;
+  applied?: PackageFile | false;
   published?: boolean;
+  pkg?: PkgPublish;
 };
 
 export type CommandsRan = {
@@ -304,6 +413,7 @@ export type CovectorStatus =
 export type CovectorVersion = {
   commandsRan: CommandsRan;
   pipeTemplate: object;
+  response: string;
 };
 export type CovectorPublish = {
   commandsRan: CommandsRan;
@@ -311,11 +421,16 @@ export type CovectorPublish = {
   response: string;
 };
 
-export type Covector =
-  | CovectorStatus
-  | CovectorVersion
-  | CovectorPublish
-  | { response: string };
+export type Covector = {
+  init: { response: string };
+  add: { response: "complete" | "skipped" };
+  config: { response: string };
+  status: CovectorStatus;
+  version: CovectorVersion;
+  preview: CovectorPublish | { response: string };
+  publish: CovectorPublish;
+  arbitrary: CovectorPublish | { response: string };
+};
 
 export interface FunctionPipe extends PkgPublish {
   pkgCommandsRan: PkgCommandsRan;

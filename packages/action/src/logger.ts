@@ -1,52 +1,68 @@
-import build from "pino-abstract-transport";
-import yaml from "js-yaml";
 import * as core from "@actions/core";
-import type { LoggerBindings } from "@covector/types";
+import yaml from "js-yaml";
+import type { LoggerLevel } from "@covector/types";
 
-const logLevel = {
-  10: "trace",
-  20: "debug",
-  30: "info",
-  40: "warn",
-  50: "error",
-  60: "fatal",
-};
-
-export default function (opts?: never) {
-  return build(function (source) {
-    source.on("data", function (log: LoggerBindings) {
-      const level =
-        log.level > 40
-          ? `[${logLevel[log.level as keyof typeof logLevel].toLowerCase()}]`
-          : "";
-      const msg = log?.msg ? ` ${log.msg}` : "";
-      const renderAsYAML = log?.renderAsYAML
-        ? `\n    ${yaml.dump(log.renderAsYAML).replace(/\n/gm, "\n    ")}`
-        : "";
-
-      actionLog(log, `${level}${msg}${renderAsYAML}`);
-    });
-  });
+function extractMessage(args: unknown[]): { msg: string; renderAsYAML?: Record<string, any> } {
+  const first = args[0];
+  if (first != null && typeof first === "object" && !Array.isArray(first) && !(first instanceof Error)) {
+    const obj = first as Record<string, unknown>;
+    const msg = typeof obj.msg === "string" ? obj.msg : typeof args[1] === "string" ? args[1] as string : "";
+    const renderAsYAML = obj.renderAsYAML as Record<string, any> | undefined;
+    return { msg, renderAsYAML };
+  }
+  return { msg: String(first ?? "") };
 }
 
-function actionLog(log: LoggerBindings, message: string) {
-  if (log.renderAsYAML) core.startGroup(log.msg);
-  switch (log.level) {
-    case 60:
-      core.error(message);
-    case 50:
-      core.warning(message);
+function formatLine(msg: string, level: LoggerLevel, renderAsYAML?: Record<string, any>): string {
+  const levelPrefix = level === "error" || level === "fatal" ? `[${level}]` : "";
+  const yamlSuffix = renderAsYAML ? `\n    ${yaml.dump(renderAsYAML).replace(/\n/gm, "\n    ")}` : "";
+  return `${levelPrefix}${msg ? ` ${msg}` : ""}${yamlSuffix}`;
+}
+
+function actionLog(level: LoggerLevel, args: unknown[]) {
+  const { msg, renderAsYAML } = extractMessage(args);
+  const line = formatLine(msg, level, renderAsYAML);
+
+  if (renderAsYAML) core.startGroup(msg);
+  switch (level) {
+    case "fatal":
+      core.error(line);
+    case "error":
+      core.warning(line);
       break;
-    case 40:
-      core.notice(message);
+    case "warn":
+      core.notice(line);
       break;
-    case 20:
-    case 10:
-      core.debug(message);
+    case "debug":
+      core.debug(line);
       break;
     default:
-      core.info(message);
+      core.info(line);
       break;
   }
-  if (log.renderAsYAML) core.endGroup();
+  if (renderAsYAML) core.endGroup();
 }
+
+export const actionAround = {
+  *info(args: unknown[], _next: any) {
+    actionLog("info", args);
+  },
+  *error(args: unknown[], _next: any) {
+    actionLog("error", args);
+  },
+  *warn(args: unknown[], _next: any) {
+    actionLog("warn", args);
+  },
+  *debug(args: unknown[], _next: any) {
+    actionLog("debug", args);
+  },
+  *fatal(args: unknown[], _next: any) {
+    actionLog("fatal", args);
+  },
+  *stdout(args: unknown[], _next: any) {
+    actionLog("info", args);
+  },
+  *stderr(args: unknown[], _next: any) {
+    actionLog("error", args);
+  },
+};

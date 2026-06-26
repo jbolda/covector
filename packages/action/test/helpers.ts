@@ -8,7 +8,7 @@ export const loadContent = (cwd: string, pathToContent: string) => {
 
 export const checksWithObject =
   (keys = ["command"]) =>
-  (received, expected) => {
+  (received: any, expected: any) => {
     if (received.msg !== expected.msg || received.level !== expected.level) {
       assert.deepEqual(received, expected);
     }
@@ -19,7 +19,7 @@ export const checksWithObject =
 
 export const checksChunksInMsg =
   (keys = ["command"]) =>
-  (received, expected) => {
+  (received: any, expected: any) => {
     if (received.level !== expected.level) {
       assert.deepEqual(received, expected);
     }

@@ -1,6 +1,11 @@
 import { changesConsideringParents } from "../src";
 import { PackageFile, CommonBumps } from "@covector/types";
-import type { ConfigFile, PackageConfig } from "@covector/types";
+import type {
+  AssembledPlan,
+  Change,
+  ConfigFile,
+  PackageConfig,
+} from "@covector/types";
 import { describe, it } from "../../../helpers/test-scope.ts";
 import { expect } from "vitest";
 
@@ -25,29 +30,27 @@ const allPackagesWithoutRead = ({
               deps[dep] = [{ type: "dependencies", version }];
               return deps;
             },
-            {} as Record<string, { type: "dependencies"; version: string }[]>
+            {} as Record<string, { type: "dependencies"; version: string }[]>,
           ),
         };
-      }
+      },
     )
     .reduce(
       (pkgs, pkg: any) => {
         if (pkg.name) pkgs[pkg.name] = pkg;
         return pkgs;
       },
-      {} as Record<string, PackageFile>
+      {} as Record<string, PackageFile>,
     );
 
 describe("list changes considering parents", () => {
   it("adds changes for dependency", function* () {
-    const assembledChanges = {
+    const assembledPlan: AssembledPlan = {
+      changes: [],
       releases: {
         all: {
-          dependencies: undefined,
-          manager: "javascript",
-          path: undefined,
-          pkg: "all",
           type: "minor",
+          changes: [],
         },
       },
     };
@@ -67,9 +70,13 @@ describe("list changes considering parents", () => {
         all: { version: true },
       },
     };
+    const allPackages = allPackagesWithoutRead({ config });
 
-    //@ts-expect-error
-    const changes = changesConsideringParents({ assembledChanges, config });
+    const changes = changesConsideringParents({
+      assembledPlan,
+      allPackages,
+      config,
+    });
 
     expect({
       changes,
@@ -77,20 +84,15 @@ describe("list changes considering parents", () => {
   });
 
   it("bumps patch due to dependency bump", function* () {
-    const assembledChanges = {
+    const assembledPlan: AssembledPlan = {
+      changes: [],
       releases: {
         "yarn-workspace-base-pkg-a": {
-          dependencies: undefined,
-          manager: "javascript",
-          path: undefined,
-          pkg: "all",
+          changes: [],
           type: "patch",
         },
         all: {
-          dependencies: undefined,
-          manager: "javascript",
-          path: undefined,
-          pkg: "all",
+          changes: [],
           type: "minor",
         },
       },
@@ -111,9 +113,13 @@ describe("list changes considering parents", () => {
         all: { version: true },
       },
     };
+    const allPackages = allPackagesWithoutRead({ config });
 
-    //@ts-expect-error
-    const changes = changesConsideringParents({ assembledChanges, config });
+    const changes = changesConsideringParents({
+      assembledPlan,
+      allPackages,
+      config,
+    });
 
     expect({
       changes,
@@ -121,7 +127,7 @@ describe("list changes considering parents", () => {
   });
 
   it("rolls up the parent bumps", function* () {
-    const changesFiles = [
+    const changesFiles: Change[] = [
       {
         releases: {
           "pkg-c": "patch",
@@ -129,7 +135,7 @@ describe("list changes considering parents", () => {
         },
         summary:
           "This should patch bump up the pkg-[number] line to where pkg-one also receives a bump. The pkg-c writes to a patch so we patch bump up that line too.",
-        meta: {},
+        meta: { path: "boop.md" },
       },
       {
         releases: {
@@ -137,11 +143,12 @@ describe("list changes considering parents", () => {
         },
         summary:
           "The pkg-b doesn't have a dep bump, but can dep bump pkg-a and pkg-overall with a patch.",
-        meta: {},
+        meta: { path: "more-boop.md" },
       },
     ];
 
-    const assembledChanges = {
+    const assembledPlan: AssembledPlan = {
+      changes: [],
       releases: {
         "pkg-b": {
           type: "minor",
@@ -212,12 +219,10 @@ describe("list changes considering parents", () => {
     const allPackages = allPackagesWithoutRead({ config });
 
     const changes = changesConsideringParents({
-      //@ts-expect-error
-      assembledChanges,
+      assembledPlan,
       config,
       allPackages,
     });
-    // console.error(changes)
 
     // these are directly defined in the change files
     expect(changes.releases["pkg-b"].type).toBe("minor");
@@ -251,7 +256,7 @@ describe("list changes considering parents", () => {
     ];
 
     // this is the initial set of changes
-    const assembledChanges = {
+    const assembledPlan = {
       releases: {
         "pkg-a": {
           type: "patch" as CommonBumps,
@@ -288,8 +293,7 @@ describe("list changes considering parents", () => {
     const allPackages = allPackagesWithoutRead({ config, pkgDepVersion });
 
     const changes = changesConsideringParents({
-      //@ts-expect-error
-      assembledChanges,
+      assembledPlan,
       config,
       allPackages,
     });

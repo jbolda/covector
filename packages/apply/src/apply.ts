@@ -32,7 +32,7 @@ export function* apply({
   allPackages: Record<string, PackageFile>;
   cwd: string;
   bump: boolean;
-  previewVersion: string;
+  previewVersion?: string;
   prereleaseIdentifier?: string;
   logs?: boolean;
 }): Operation<PackageFile[]> {
@@ -41,10 +41,10 @@ export function* apply({
       finalChanges[command.pkg] = command;
       return finalChanges;
     },
-    {}
+    {},
   );
 
-  const bumps = bumpAll({
+  const bumps = yield* bumpAll({
     logger,
     changes,
     allPackages,
@@ -54,21 +54,22 @@ export function* apply({
   });
 
   if (bump) {
-    yield writeAll({
+    yield* writeAll({
       bumps: bumps.reduce(
         (final: PackageFile[], current) =>
           !current.file ? final : final.concat([current]),
-        []
+        [],
       ),
       cwd,
     });
   } else {
-    bumps.forEach((b) => {
-      if (!!b && logs)
-        logger.info(
-          `${b.name} planned to be bumped from ${b.currentVersion} to ${b.version}`
+    for (const b of bumps) {
+      if (!!b && logs) {
+        yield* logger.info(
+          `${b.name} planned to be bumped from ${b.currentVersion} to ${b.version}`,
         );
-    });
+      }
+    }
   }
   return bumps;
 }
@@ -89,24 +90,24 @@ export function* validateApply({
       finalChanges[command.pkg] = command;
       return finalChanges;
     },
-    {}
+    {},
   );
 
-  const bumps = bumpAll({
+  const bumps = (yield* bumpAll({
     logger,
     changes,
     allPackages,
     logs: false,
     prereleaseIdentifier,
-  }).reduce(
+  })).reduce(
     (final: PackageFile[], current) =>
       !current.file ? final : final.concat([current]),
-    []
+    [],
   );
 
   try {
     for (let bump of bumps) {
-      testSerializePkgFile({ logger, packageFile: bump });
+      yield* testSerializePkgFile({ logger, packageFile: bump });
     }
     // will throw on validation error and not return true
     return true;
@@ -123,11 +124,11 @@ const writeAll = function* ({
   cwd: string;
 }) {
   for (let bump of bumps) {
-    yield writePkgFile({ packageFile: bump, cwd });
+    yield* writePkgFile({ packageFile: bump, cwd });
   }
 };
 
-const bumpAll = ({
+function* bumpAll({
   logger,
   changes,
   allPackages,
@@ -141,7 +142,7 @@ const bumpAll = ({
   logs?: boolean;
   previewVersion?: string;
   prereleaseIdentifier?: string;
-}) => {
+}): Operation<PackageFile[]> {
   // spread so that we can mutate
   let packageFiles = { ...allPackages };
 
@@ -150,11 +151,11 @@ const bumpAll = ({
     if (!packageFiles[pkg]?.file || changes[pkg].type === "noop") continue;
 
     if (logs && !previewVersion) {
-      logger.info(`bumping ${pkg} with ${changes[pkg].type}`);
+      yield* logger.info(`bumping ${pkg} with ${changes[pkg].type}`);
     } else if (previewVersion) {
       // change log (assume that the prerelease will be removed)
-      logger.info(
-        `bumping ${pkg} with ${previewVersion} identifier to publish a preview`
+      yield* logger.info(
+        `bumping ${pkg} with ${previewVersion} identifier to publish a preview`,
       );
     }
 
@@ -189,7 +190,7 @@ const bumpAll = ({
   return Object.keys(packageFiles)
     .filter((pkg) => changes?.[pkg])
     .map((pkg) => packageFiles[pkg]);
-};
+}
 
 const bumpMain = ({
   packageFile,
@@ -213,7 +214,7 @@ const bumpMain = ({
 
   if (prereleaseIdentifier && typeof prereleaseIdentifier !== "string")
     throw new Error(
-      `${pkg.name} needs prereleaseIdentifier passed as a string`
+      `${pkg.name} needs prereleaseIdentifier passed as a string`,
     );
 
   let next = semver.inc(pkg.version, bumpType, prereleaseIdentifier);
@@ -239,7 +240,7 @@ const bumpMain = ({
       throw new Error(
         `${pkg.name} will be bumped to ${version}. ` +
           `This satisfies the range ${errorOnVersionRange} which the configuration disallows. ` +
-          `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`
+          `Please adjust your bump to accommodate the range or otherwise adjust the allowed range in \`errorOnVersionRange\`.`,
       );
     }
   }
