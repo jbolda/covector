@@ -1,8 +1,5 @@
 import { all, Operation } from "effection";
 import { readChangelog } from "@covector/files";
-import unified from "unified";
-import parse from "remark-parse";
-import stringify from "remark-stringify";
 
 import type {
   LoadedFile,
@@ -83,25 +80,27 @@ const pullChanges = ({
     changelog?: LoadedFile;
   }[];
 }) => {
-  const processor: any = unified().use(parse).use(stringify, {
-    bullet: "-",
-    listItemIndent: "one",
-  });
-
   return changelogs.map((change) => {
     if (change.changelog) {
-      let changelogParsed = processor.parse(change.changelog.content);
-      const startNode = 1;
-      const nextNode: number = changelogParsed.children
-        .slice(startNode + 1)
-        .findIndex((node: any) => node.type === "heading" && node.depth === 2);
-      const endNode =
-        nextNode && nextNode > 0 ? nextNode + startNode + 1 : 9999;
-      let changelogAST = {
-        ...changelogParsed,
-        children: changelogParsed.children.slice(startNode, endNode),
-      };
-      const changelog = processor.stringify(changelogAST);
+      const lines = change.changelog.content.split("\n");
+      let inCodeBlock = false;
+      let firstH2 = -1;
+      let secondH2 = lines.length;
+      // walk lines, skip code blocks, find first `##` heading boundary
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith("```")) inCodeBlock = !inCodeBlock;
+        if (!inCodeBlock && line.startsWith("## ")) {
+          if (firstH2 === -1) firstH2 = i;
+          else {
+            secondH2 = i;
+            break;
+          }
+        }
+      }
+
+      const changelog =
+        firstH2 === -1 ? "" : lines.slice(firstH2, secondH2).join("\n");
       return {
         pkg: change.changes.name,
         changelog,
@@ -109,7 +108,7 @@ const pullChanges = ({
     } else {
       return {
         pkg: change.changes.name,
-        changelog: false,
+        changelog: "",
       };
     }
   });

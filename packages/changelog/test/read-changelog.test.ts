@@ -128,7 +128,7 @@ describe("reads changelog", () => {
       pkgCommandsRan,
     });
     expect(pkgCommandsRan[pkgName].command).toBe(
-      "## \\[0.5.6]\n\n" +
+      "## [0.5.6]\n\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#719999](/pull/719999)) This is a test.\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#123](/pull/123)) This is another test.\n" +
         "- [`3ca0504`](/commit/3ca05042c51821d229209e18391535c266b6b200) ([#8873](/pull/8873)) This is the last test.\n",
@@ -223,7 +223,7 @@ describe("reads changelog", () => {
       pkgCommandsRan,
     });
     expect(pkgCommandsRan[pkgName].command).toBe(
-      "## \\[0.9.0]\n\n" +
+      "## [0.9.0]\n\n" +
         "### Features\n\n" +
         "- This is the last test.\n" +
         "- This is the final test.\n\n" +

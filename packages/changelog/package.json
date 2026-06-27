@@ -23,10 +23,7 @@
   },
   "dependencies": {
     "@covector/files": "0.8.0",
-    "effection": "^4.0.3",
-    "remark-parse": "^9.0.0",
-    "remark-stringify": "^9.0.1",
-    "unified": "^9.2.1"
+    "effection": "^4.0.3"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"
