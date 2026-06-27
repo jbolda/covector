@@ -21,7 +21,7 @@
     "@actions/github": "^5.1.1",
     "covector": "0.12.5",
     "effection": "^4.0.3",
-    "js-yaml": "^4.1.0"
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@covector/types": "0.0.0",

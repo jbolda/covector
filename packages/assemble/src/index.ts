@@ -1,10 +1,10 @@
 import { until, type Operation } from "effection";
 import unified from "unified";
 import { YAML as Frontmatter, Content, type Root } from "mdast";
-import parse from "remark-parse";
+import remarkParse from "remark-parse";
 import stringify from "remark-stringify";
 import frontmatter from "remark-frontmatter";
-import yaml from "js-yaml";
+import { parse } from "yaml";
 import { template } from "@covector/command";
 import { readPkgFile } from "@covector/files";
 import { runCommand } from "@covector/command";
@@ -40,7 +40,7 @@ export const parseChange = function* ({
   file: LoadedFile;
 }): Operation<Change> {
   const processor = unified()
-    .use(parse)
+    .use(remarkParse)
     .use(frontmatter, ["yaml"])
     .use(stringify, {
       bullet: "-",
@@ -50,7 +50,7 @@ export const parseChange = function* ({
   const processed = (yield* until(processor.run(parsed))) as Root;
   let changeset: Partial<Change> = {};
   const [parsedChanges, ...remaining] = processed.children;
-  const parsedYaml = yaml.load((parsedChanges as Frontmatter).value as string);
+  const parsedYaml = parse((parsedChanges as Frontmatter).value as string);
   changeset.releases =
     typeof parsedYaml === "object" && parsedYaml !== null
       ? (parsedYaml as Change["releases"])

@@ -1,5 +1,5 @@
 import * as core from "@actions/core";
-import yaml from "js-yaml";
+import { stringify } from "yaml";
 import type { LoggerLevel } from "@covector/types";
 
 function extractMessage(args: unknown[]): { msg: string; renderAsYAML?: Record<string, any> } {
@@ -15,7 +15,7 @@ function extractMessage(args: unknown[]): { msg: string; renderAsYAML?: Record<s
 
 function formatLine(msg: string, level: LoggerLevel, renderAsYAML?: Record<string, any>): string {
   const levelPrefix = level === "error" || level === "fatal" ? `[${level}]` : "";
-  const yamlSuffix = renderAsYAML ? `\n    ${yaml.dump(renderAsYAML).replace(/\n/gm, "\n    ")}` : "";
+  const yamlSuffix = renderAsYAML ? `\n    ${stringify(renderAsYAML).replace(/\n/gm, "\n    ")}` : "";
   return `${levelPrefix}${msg ? ` ${msg}` : ""}${yamlSuffix}`;
 }
 
