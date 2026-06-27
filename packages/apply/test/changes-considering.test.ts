@@ -6,7 +6,7 @@ import type {
   ConfigFile,
   PackageConfig,
 } from "@covector/types";
-import { describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it } from "@effectionx/vitest";
 import { expect } from "vitest";
 
 const allPackagesWithoutRead = ({

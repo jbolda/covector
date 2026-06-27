@@ -1,5 +1,5 @@
 import { mergeIntoConfig, mergeChangesToConfig } from "../src";
-import { describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it } from "@effectionx/vitest";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types

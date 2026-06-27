@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
-import { describe, it } from "../../../helpers/test-scope.ts";
+import { describe, it } from "@effectionx/vitest";
 import { expect, vi } from "vitest";
 
 vi.mock("@actions/core");

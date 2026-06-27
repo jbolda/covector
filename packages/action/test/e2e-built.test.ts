@@ -1,4 +1,4 @@
-import { beforeEach, describe, it } from "../../../helpers/test-scope.ts";
+import { beforeEach, describe, it } from "@effectionx/vitest";
 import { expect, vi } from "vitest";
 import path from "node:path";
 import { exec } from "@effectionx/process";

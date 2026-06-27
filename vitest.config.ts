@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import wasm from "vite-plugin-wasm";
 
 export default defineConfig({
@@ -8,6 +8,7 @@ export default defineConfig({
   // },
   test: {
     environment: "node",
+    mockReset: true,
   },
   plugins: [wasm()],
 });

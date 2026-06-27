@@ -1,8 +1,8 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { run as covector } from "../src/index.ts";
-import { describe, it } from "../../../helpers/test-scope.ts";
-import { expect, vi } from "vitest";
+import { describe, it } from "@effectionx/vitest";
+import { beforeEach, expect, vi } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
@@ -255,29 +255,39 @@ describe("full e2e test", () => {
   });
 
   describe("of publish", () => {
-    vi.spyOn(github, "getOctokit")
-      //@ts-expect-error
-      .mockImplementation((token: string) => ({
-        context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-        rest: {
-          repos: {
-            listReleases: vi.fn().mockResolvedValue({
-              data: [],
-            }),
-            updateRelease: vi
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            createRelease: vi
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-            uploadReleaseAsset: vi
-              .fn()
-              .mockImplementation((input) => Promise.resolve({ data: input })),
-          },
-        },
-      }));
+    describe("publish actions", () => {
+      beforeEach(() => {
+        vi.spyOn(github, "getOctokit")
+          .mockImplementation((token: string): any => ({
+            context: {
+              repo: { owner: "genericOwner", repo: "genericRepo" },
+            },
+            rest: {
+              repos: {
+                listReleases: vi.fn().mockResolvedValue({
+                  data: [],
+                }),
+                updateRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                createRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                uploadReleaseAsset: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+              },
+            },
+          }));
+      });
 
-    it("input", function* () {
+      it("input", function* () {
       const log = yield* logTest.useCapturedLogger();
       const cwd: string = f.copy("integration.js-with-complex-commands");
 
@@ -416,362 +426,383 @@ describe("full e2e test", () => {
         expect.stringContaining("1.9.0"),
       );
     });
-
-    it("github release update of all packages", function* () {
-      const log = yield* logTest.useCapturedLogger();
-      const cwd: string = f.copy("integration.js-with-complex-commands");
-
-      const input: { [k: string]: string } = {
-        command: "publish",
-        cwd,
-        createRelease: "true",
-        draftRelease: "false",
-        token: "randomsequenceofcharactersforsecurity",
-      };
-
-      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
-      const octokit = vi
-        .spyOn(github, "getOctokit")
-        //@ts-expect-error
-        .mockImplementation((token: string) => ({
-          context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-          rest: {
-            repos: {
-              listReleases: vi.fn().mockResolvedValue({
-                data: [
-                  {
-                    draft: true,
-                    body: "some stuff",
-                    id: 15,
-                    tag_name: "package-one-v2.3.1",
-                  },
-                  {
-                    draft: true,
-                    body: "other stuff",
-                    id: 22,
-                    tag_name: "package-two-v1.9.0",
-                  },
-                ],
-              }),
-              updateRelease: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-              createRelease: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-              uploadReleaseAsset: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-            },
-          },
-        }));
-
-      const covectoredAction = yield* covector(logger.operations);
-      expect(covectoredAction).toMatchSnapshot();
-      expect(octokit).toHaveBeenCalledWith(input.token);
-      const {
-        listReleases,
-        createRelease,
-        updateRelease,
-        //@ts-expect-error
-      } = github.getOctokit.mock.results[0].value.rest.repos;
-      expect(listReleases).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-      });
-      expect(listReleases).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-      });
-
-      expect(updateRelease).toHaveBeenCalledTimes(2);
-      expect(updateRelease.mock.calls).toEqual(
-        expect.arrayContaining([
-          [
-            expect.objectContaining({
-              owner: "genericOwner",
-              repo: "genericRepo",
-              release_id: 15,
-              draft: false,
-              body: expect.stringContaining("## \\[2.3.1]"),
-            }),
-          ],
-          [
-            expect.objectContaining({
-              owner: "genericOwner",
-              repo: "genericRepo",
-              release_id: 22,
-              draft: false,
-              body: expect.stringContaining("## \\[1.9.0]"),
-            }),
-          ],
-        ]),
-      );
-
-      expect(createRelease).toHaveBeenCalledTimes(0);
     });
 
-    it("github release creation of all packages", function* () {
-      const log = yield* logTest.useCapturedLogger();
-      const cwd: string = f.copy("integration.js-with-complex-commands");
-
-      const input: { [k: string]: string } = {
-        command: "publish",
-        cwd,
-        createRelease: "true",
-        draftRelease: "false",
-        token: "randomsequenceofcharactersforsecurity",
-      };
-
-      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
-      const octokit = vi
-        .spyOn(github, "getOctokit")
-        //@ts-expect-error
-        .mockImplementation((token: string) => ({
-          context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-          rest: {
-            repos: {
-              listReleases: vi.fn().mockResolvedValue({
-                data: [
-                  {
-                    draft: false,
-                    body: "some stuff",
-                    id: 15,
-                    tag_name: "package-one-v2.3.0",
-                  },
-                  {
-                    draft: false,
-                    body: "other stuff",
-                    id: 22,
-                    tag_name: "package-two-v1.8.7",
-                  },
-                ],
-              }),
-              updateRelease: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-              createRelease: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-              uploadReleaseAsset: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
+    describe("github release update of all packages", () => {
+      beforeEach(() => {
+        vi.spyOn(github, "getOctokit")
+          .mockImplementation((token: string): any => ({
+            context: {
+              repo: { owner: "genericOwner", repo: "genericRepo" },
             },
-          },
-        }));
-
-      const covectoredAction = yield* covector(logger.operations);
-      expect(covectoredAction).toMatchSnapshot();
-      expect(octokit).toHaveBeenCalledWith(input.token);
-      const {
-        listReleases,
-        createRelease,
-        updateRelease,
-        //@ts-expect-error
-      } = github.getOctokit.mock.results[0].value.rest.repos;
-
-      expect(listReleases).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
+            rest: {
+              repos: {
+                listReleases: vi.fn().mockResolvedValue({
+                  data: [
+                    {
+                      draft: true,
+                      body: "some stuff",
+                      id: 15,
+                      tag_name: "package-one-v2.3.1",
+                    },
+                    {
+                      draft: true,
+                      body: "other stuff",
+                      id: 22,
+                      tag_name: "package-two-v1.9.0",
+                    },
+                  ],
+                }),
+                updateRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                createRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                uploadReleaseAsset: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+              },
+            },
+          }));
       });
-      expect(listReleases).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
+
+      it("github release update of all packages", function* () {
+        const log = yield* logTest.useCapturedLogger();
+        const cwd: string = f.copy("integration.js-with-complex-commands");
+
+        const input: { [k: string]: string } = {
+          command: "publish",
+          cwd,
+          createRelease: "true",
+          draftRelease: "false",
+          token: "randomsequenceofcharactersforsecurity",
+        };
+
+        vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+
+        const covectoredAction = yield* covector(logger.operations);
+        expect(covectoredAction).toMatchSnapshot();
+        expect(github.getOctokit).toHaveBeenCalledWith(input.token);
+        const {
+          listReleases,
+          createRelease,
+          updateRelease,
+          //@ts-expect-error
+        } = github.getOctokit.mock.results[0].value.rest.repos;
+        expect(listReleases).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+        });
+        expect(listReleases).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+        });
+
+        expect(updateRelease).toHaveBeenCalledTimes(2);
+        expect(updateRelease.mock.calls).toEqual(
+          expect.arrayContaining([
+            [
+              expect.objectContaining({
+                owner: "genericOwner",
+                repo: "genericRepo",
+                release_id: 15,
+                draft: false,
+                body: expect.stringContaining("## \\[2.3.1]"),
+              }),
+            ],
+            [
+              expect.objectContaining({
+                owner: "genericOwner",
+                repo: "genericRepo",
+                release_id: 22,
+                draft: false,
+                body: expect.stringContaining("## \\[1.9.0]"),
+              }),
+            ],
+          ]),
+        );
+
+        expect(createRelease).toHaveBeenCalledTimes(0);
       });
-
-      expect(createRelease).toHaveBeenCalledTimes(2);
-      expect(createRelease.mock.calls).toEqual(
-        expect.arrayContaining([
-          [
-            expect.objectContaining({
-              owner: "genericOwner",
-              repo: "genericRepo",
-              name: "package-one v2.3.1",
-              tag_name: "package-one-v2.3.1",
-              draft: false,
-              body: expect.stringContaining("## \\[2.3.1]"),
-            }),
-          ],
-          [
-            expect.objectContaining({
-              owner: "genericOwner",
-              repo: "genericRepo",
-              name: "package-two v1.9.0",
-              tag_name: "package-two-v1.9.0",
-              draft: false,
-              body: expect.stringContaining("## \\[1.9.0]"),
-            }),
-          ],
-        ]),
-      );
-
-      expect(updateRelease).toHaveBeenCalledTimes(0);
     });
 
-    it("github release update of single package", function* () {
-      const log = yield* logTest.useCapturedLogger();
-      const cwd: string = f.copy("integration.js-with-single-github-release");
-
-      const input: { [k: string]: string } = {
-        command: "publish",
-        cwd,
-        createRelease: "true",
-        draftRelease: "false",
-        token: "randomsequenceofcharactersforsecurity",
-      };
-
-      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
-      const octokit = vi
-        .spyOn(github, "getOctokit")
-        //@ts-expect-error
-        .mockImplementation((token: string) => ({
-          context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-          rest: {
-            repos: {
-              listReleases: vi.fn().mockResolvedValue({
-                data: [
-                  {
-                    draft: true,
-                    body: "some stuff",
-                    id: 15,
-                    tag_name: "v2.3.1",
-                  },
-                ],
-              }),
-              updateRelease: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-              createRelease: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-              uploadReleaseAsset: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
+    describe("github release creation of all packages", () => {
+      beforeEach(() => {
+        vi.spyOn(github, "getOctokit")
+          .mockImplementation((token: string): any => ({
+            context: {
+              repo: { owner: "genericOwner", repo: "genericRepo" },
             },
-          },
-        }));
-
-      const covectoredAction = yield* covector(logger.operations);
-      expect(covectoredAction).toMatchSnapshot();
-      expect(octokit).toHaveBeenCalledWith(input.token);
-      const {
-        listReleases,
-        createRelease,
-        updateRelease,
-        //@ts-expect-error
-      } = github.getOctokit.mock.results[0].value.rest.repos;
-      expect(listReleases).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
+            rest: {
+              repos: {
+                listReleases: vi.fn().mockResolvedValue({
+                  data: [
+                    {
+                      draft: false,
+                      body: "some stuff",
+                      id: 15,
+                      tag_name: "package-one-v2.3.0",
+                    },
+                    {
+                      draft: false,
+                      body: "other stuff",
+                      id: 22,
+                      tag_name: "package-two-v1.8.7",
+                    },
+                  ],
+                }),
+                updateRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                createRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                uploadReleaseAsset: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+              },
+            },
+          }));
       });
-      expect(listReleases).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-      });
 
-      expect(updateRelease).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-        release_id: 15,
-        draft: false,
-        body: "some stuff\n## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
-      });
+      it("github release creation of all packages", function* () {
+        const log = yield* logTest.useCapturedLogger();
+        const cwd: string = f.copy("integration.js-with-complex-commands");
 
-      expect(updateRelease).toHaveBeenCalledTimes(1);
-      expect(createRelease).toHaveBeenCalledTimes(0);
+        const input: { [k: string]: string } = {
+          command: "publish",
+          cwd,
+          createRelease: "true",
+          draftRelease: "false",
+          token: "randomsequenceofcharactersforsecurity",
+        };
+
+        vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+
+        const covectoredAction = yield* covector(logger.operations);
+        expect(covectoredAction).toMatchSnapshot();
+        expect(github.getOctokit).toHaveBeenCalledWith(input.token);
+        const {
+          listReleases,
+          createRelease,
+          updateRelease,
+          //@ts-expect-error
+        } = github.getOctokit.mock.results[0].value.rest.repos;
+
+        expect(listReleases).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+        });
+        expect(listReleases).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+        });
+
+        expect(createRelease).toHaveBeenCalledTimes(2);
+        expect(createRelease.mock.calls).toEqual(
+          expect.arrayContaining([
+            [
+              expect.objectContaining({
+                owner: "genericOwner",
+                repo: "genericRepo",
+                name: "package-one v2.3.1",
+                tag_name: "package-one-v2.3.1",
+                draft: false,
+                body: expect.stringContaining("## \\[2.3.1]"),
+              }),
+            ],
+            [
+              expect.objectContaining({
+                owner: "genericOwner",
+                repo: "genericRepo",
+                name: "package-two v1.9.0",
+                tag_name: "package-two-v1.9.0",
+                draft: false,
+                body: expect.stringContaining("## \\[1.9.0]"),
+              }),
+            ],
+          ]),
+        );
+
+        expect(updateRelease).toHaveBeenCalledTimes(0);
+      });
     });
 
-    it("github release creation of single package", function* () {
-      const log = yield* logTest.useCapturedLogger();
-      const cwd: string = f.copy("integration.js-with-single-github-release");
-
-      const input: { [k: string]: string } = {
-        command: "publish",
-        cwd,
-        createRelease: "true",
-        draftRelease: "false",
-        token: "randomsequenceofcharactersforsecurity",
-      };
-
-      vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
-      const octokit = vi
-        .spyOn(github, "getOctokit")
-        //@ts-expect-error
-        .mockImplementation((token: string) => ({
-          context: { repo: { owner: "genericOwner", repo: "genericRepo" } },
-          rest: {
-            repos: {
-              listReleases: vi.fn().mockResolvedValue({
-                data: [],
-              }),
-              updateRelease: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-              createRelease: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
-              uploadReleaseAsset: vi
-                .fn()
-                .mockImplementation((input) =>
-                  Promise.resolve({ data: input }),
-                ),
+    describe("github release update of single package", () => {
+      beforeEach(() => {
+        vi.spyOn(github, "getOctokit")
+          .mockImplementation((token: string): any => ({
+            context: {
+              repo: { owner: "genericOwner", repo: "genericRepo" },
             },
-          },
-        }));
-
-      const covectoredAction = yield* covector(logger.operations);
-
-      expect(covectoredAction).toMatchSnapshot();
-      expect(octokit).toHaveBeenCalledWith(input.token);
-      const {
-        listReleases,
-        createRelease,
-        updateRelease,
-        //@ts-expect-error
-      } = github.getOctokit.mock.results[0].value.rest.repos;
-
-      expect(listReleases).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
+            rest: {
+              repos: {
+                listReleases: vi.fn().mockResolvedValue({
+                  data: [
+                    {
+                      draft: true,
+                      body: "some stuff",
+                      id: 15,
+                      tag_name: "v2.3.1",
+                    },
+                  ],
+                }),
+                updateRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                createRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                uploadReleaseAsset: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+              },
+            },
+          }));
       });
-      expect(listReleases).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
+
+      it("github release update of single package", function* () {
+        const log = yield* logTest.useCapturedLogger();
+        const cwd: string = f.copy("integration.js-with-single-github-release");
+
+        const input: { [k: string]: string } = {
+          command: "publish",
+          cwd,
+          createRelease: "true",
+          draftRelease: "false",
+          token: "randomsequenceofcharactersforsecurity",
+        };
+
+        vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+
+        const covectoredAction = yield* covector(logger.operations);
+        expect(covectoredAction).toMatchSnapshot();
+        expect(github.getOctokit).toHaveBeenCalledWith(input.token);
+        const {
+          listReleases,
+          createRelease,
+          updateRelease,
+          //@ts-expect-error
+        } = github.getOctokit.mock.results[0].value.rest.repos;
+        expect(listReleases).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+        });
+        expect(listReleases).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+        });
+
+        expect(updateRelease).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+          release_id: 15,
+          draft: false,
+          body: "some stuff\n## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
+        });
+
+        expect(updateRelease).toHaveBeenCalledTimes(1);
+        expect(createRelease).toHaveBeenCalledTimes(0);
+      });
+    });
+
+    describe("github release creation of single package", () => {
+      beforeEach(() => {
+        vi.spyOn(github, "getOctokit")
+          .mockImplementation((token: string): any => ({
+            context: {
+              repo: { owner: "genericOwner", repo: "genericRepo" },
+            },
+            rest: {
+              repos: {
+                listReleases: vi.fn().mockResolvedValue({
+                  data: [],
+                }),
+                updateRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                createRelease: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+                uploadReleaseAsset: vi
+                  .fn()
+                  .mockImplementation((input) =>
+                    Promise.resolve({ data: input }),
+                  ),
+              },
+            },
+          }));
       });
 
-      expect(createRelease).toHaveBeenCalledWith({
-        owner: "genericOwner",
-        repo: "genericRepo",
-        name: "package-one v2.3.1",
-        tag_name: "v2.3.1",
-        draft: false,
-        body: "## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
-      });
+      it("github release creation of single package", function* () {
+        const log = yield* logTest.useCapturedLogger();
+        const cwd: string = f.copy("integration.js-with-single-github-release");
 
-      expect(createRelease).toHaveBeenCalledTimes(1);
-      expect(updateRelease).toHaveBeenCalledTimes(0);
+        const input: { [k: string]: string } = {
+          command: "publish",
+          cwd,
+          createRelease: "true",
+          draftRelease: "false",
+          token: "randomsequenceofcharactersforsecurity",
+        };
+
+        vi.spyOn(core, "getInput").mockImplementation((arg) => input[arg]);
+
+        const covectoredAction = yield* covector(logger.operations);
+
+        expect(covectoredAction).toMatchSnapshot();
+        expect(github.getOctokit).toHaveBeenCalledWith(input.token);
+        const {
+          listReleases,
+          createRelease,
+          updateRelease,
+          //@ts-expect-error
+        } = github.getOctokit.mock.results[0].value.rest.repos;
+
+        expect(listReleases).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+        });
+        expect(listReleases).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+        });
+
+        expect(createRelease).toHaveBeenCalledWith({
+          owner: "genericOwner",
+          repo: "genericRepo",
+          name: "package-one v2.3.1",
+          tag_name: "v2.3.1",
+          draft: false,
+          body: "## \\[2.3.1]\n\n- Added some cool things.\n\npublish\n\n",
+        });
+
+        expect(createRelease).toHaveBeenCalledTimes(1);
+        expect(updateRelease).toHaveBeenCalledTimes(0);
+      });
     });
   });
 });
