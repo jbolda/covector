@@ -858,7 +858,7 @@ describe("integration test in production mode", () => {
       );
       expect(changelogTauriCore.content).toBe(
         "# Changelog\n\n" +
-          "## \\[0.6.0]\n\n" +
+          "## [0.6.0]\n\n" +
           "- Summary about the changes in tauri\n",
       );
 
@@ -868,7 +868,7 @@ describe("integration test in production mode", () => {
       );
       expect(changelogTaurijs.content).toBe(
         "# Changelog\n\n" +
-          "## \\[0.6.3]\n\n" +
+          "## [0.6.3]\n\n" +
           "### Dependencies\n\n" +
           "- Upgraded to `tauri@0.6.0`\n",
       );
@@ -926,7 +926,7 @@ describe("integration test in production mode", () => {
       const changelog = yield* loadFile("CHANGELOG.md", fullIntegration);
       expect(changelog.content).toBe(
         "# Changelog\n\n" +
-          "## \\[0.4.0]\n\n" +
+          "## [0.4.0]\n\n" +
           "- Summary about the changes in test_app\n" +
           "- Summary about the changes again(!) in test_app\n",
       );
@@ -1011,7 +1011,7 @@ describe("integration test in production mode", () => {
       );
       expect(changelog.content).toBe(
         "# Changelog\n\n" +
-          "## \\[0.3.2]\n\n" +
+          "## [0.3.2]\n\n" +
           "### Dependencies\n\n" +
           "- Upgraded to `test_app_two@0.2.0`\n" +
           "- Upgraded to `test_app_three@3.8.98`\n",
@@ -1077,7 +1077,7 @@ describe("integration test in production mode", () => {
       const changelog = yield* loadFile("CHANGELOG.md", fullIntegration);
       expect(changelog.content).toBe(
         "# Changelog\n\n" +
-          "## \\[6.2.0]\n\n" +
+          "## [6.2.0]\n\n" +
           "- Summary about the changes in general-pkg\n" +
           "- A general summary about the generally changes in general-pkg generally\n",
       );

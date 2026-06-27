@@ -17,13 +17,9 @@
     }
   },
   "scripts": {
-    "build": "echo noop",
-    "clean": "rimraf dist tsconfig.tsbuildinfo"
+    "build": "echo noop"
   },
   "devDependencies": {
     "typescript": "^5.8.2"
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

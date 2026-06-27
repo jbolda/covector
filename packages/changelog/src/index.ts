@@ -1,9 +1,6 @@
 import { type Operation, all } from "effection";
 import { readAllChangelogs } from "./get.ts";
 import { writeAllChangelogs } from "./write.ts";
-import unified from "unified";
-import parse from "remark-parse";
-import stringify from "remark-stringify";
 
 import type {
   LoadedFile,
@@ -182,11 +179,6 @@ function* applyChanges({
     ? "/"
     : config.gitSiteUrl.replace(/\/$/, "") + "/";
 
-  const processor: any = unified().use(parse).use(stringify, {
-    bullet: "-",
-    listItemIndent: "one",
-  });
-
   const commits = Object.values(assembledChanges.releases).flatMap(
     (release) =>
       release.changes
@@ -199,7 +191,6 @@ function* applyChanges({
     changelogs.map(function* (change) {
       let additionChunks = [];
       if (change.changelog) {
-        let changelog = processor.parse(change.changelog.content);
         if (!assembledChanges.releases[change.changes.name]) {
           additionChunks.push(
             `## [${change.changes.version}]\nBumped due to dependency.`
@@ -305,15 +296,29 @@ function* applyChanges({
         }
 
         const addition = additionChunks.join("");
-        const parsedAddition = processor.parse(addition);
-        const changelogFirstElement = changelog.children.shift();
-        const changelogRemainingElements = changelog.children;
-        changelog.children = [].concat(
-          changelogFirstElement,
-          parsedAddition.children,
-          changelogRemainingElements
+        // ensure a blank line after each heading that isn't already followed by one
+        let normalizedAddition = addition.replace(
+          /^(#+ .+)(?:\n(?!\n))/gm,
+          "$1\n\n"
         );
-        change.changelog.content = processor.stringify(changelog);
+        // ensure a blank line before each heading that follows non-blank content
+        normalizedAddition = normalizedAddition.replace(
+          /([^\n])\n(?=#{1,6} )/g,
+          "$1\n\n"
+        );
+
+        const content = change.changelog.content;
+        const firstHeadingMatch = content.match(/^(# .+)\n?([\s\S]*)$/);
+        if (firstHeadingMatch) {
+          const heading = firstHeadingMatch[1];
+          const rest = firstHeadingMatch[2].replace(/^\n+/, "");
+          change.changelog.content = rest
+            ? `${heading}\n\n${normalizedAddition}\n\n${rest}`
+            : `${heading}\n\n${normalizedAddition}`;
+          if (!change.changelog.content.endsWith("\n")) {
+            change.changelog.content += "\n";
+          }
+        }
       }
       return {
         pkg: change.changes.name,

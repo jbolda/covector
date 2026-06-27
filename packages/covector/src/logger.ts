@@ -1,6 +1,6 @@
 import type { Operation, Scope } from "effection";
 import { createContext, useScope } from "effection";
-import yaml from "js-yaml";
+import { stringify } from "yaml";
 import type {
   Logger,
   LoggerAttribute,
@@ -35,7 +35,7 @@ function formatConsoleLine(entry: LoggerEntry): string {
   const covectorStep = entry?.step ? ` ${entry.step} :: ` : "";
   const msg = entry?.msg ? ` ${entry.msg}` : "";
   const renderAsYAML = entry?.renderAsYAML
-    ? `\n    ${yaml.dump(entry.renderAsYAML).replace(/\n/gm, "\n    ")}`
+    ? `\n    ${stringify(entry.renderAsYAML).replace(/\n/gm, "\n    ")}`
     : "";
 
   if (entry.bucket === "stdout") {

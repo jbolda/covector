@@ -18,21 +18,14 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
     "prepublishOnly": "tsc -b",
     "test": "vitest"
   },
   "dependencies": {
     "@covector/files": "0.8.0",
-    "effection": "^4.0.2",
-    "remark-parse": "^9.0.0",
-    "remark-stringify": "^9.0.1",
-    "unified": "^9.2.1"
+    "effection": "^4.0.3"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

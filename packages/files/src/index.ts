@@ -4,10 +4,10 @@ import { all, until, type Operation } from "effection";
 import type { Logger } from "@covector/types";
 import { configFileSchema } from "./schema.ts";
 import { fromZodError } from "zod-validation-error";
-import globby from "globby";
+import { glob } from "tinyglobby";
 import path from "path";
 import { TomlDocument } from "@covector/toml";
-import yaml from "js-yaml";
+import { parse, stringify } from "yaml";
 import semver from "semver";
 
 export * from "./schema.ts";
@@ -115,7 +115,7 @@ const parsePkg = (file: Partial<LoadedFile>): PkgMinimum => {
       };
     case ".yml":
     case ".yaml":
-      const parsedYAML = yaml.load(file.content) as Pkg;
+      const parsedYAML = parse(file.content) as Pkg;
       if (
         typeof parsedYAML === "string" ||
         typeof parsedYAML === "number" ||
@@ -205,7 +205,7 @@ const stringifyPkg = ({
     case ".yml":
     case ".yaml":
       // this clobbers gaps between sections: https://github.com/nodeca/js-yaml/issues/441
-      return yaml.dump(newContents);
+      return stringify(newContents);
     default:
       return newContents.version;
   }
@@ -514,7 +514,7 @@ export function* changeFiles({
   changeFolder?: string;
 }): Operation<string[]> {
   return yield* until(
-    globby(
+    glob(
       [
         path.posix.join(changeFolder, "*.md"),
         `!${path.posix.join(changeFolder, "README.md")}`,

@@ -83,7 +83,7 @@ export function* postGithubComment({
           artifactRoot,
           {
             retentionDays: 1,
-          }
+          },
         )
       );
     } else {

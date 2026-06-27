@@ -1,10 +1,5 @@
-import { until, type Operation } from "effection";
-import unified from "unified";
-import { YAML as Frontmatter, Content, type Root } from "mdast";
-import parse from "remark-parse";
-import stringify from "remark-stringify";
-import frontmatter from "remark-frontmatter";
-import yaml from "js-yaml";
+import { type Operation } from "effection";
+import { parse } from "yaml";
 import { template } from "@covector/command";
 import { readPkgFile } from "@covector/files";
 import { runCommand } from "@covector/command";
@@ -39,42 +34,37 @@ export const parseChange = function* ({
   cwd?: string;
   file: LoadedFile;
 }): Operation<Change> {
-  const processor = unified()
-    .use(parse)
-    .use(frontmatter, ["yaml"])
-    .use(stringify, {
-      bullet: "-",
-    });
-
-  const parsed = processor.parse(file.content.trim());
-  const processed = (yield* until(processor.run(parsed))) as Root;
+  const match = file.content.trim().match(
+    /^---\n([\s\S]*?)\n?---(\n|$)([\s\S]*)$/,
+  );
   let changeset: Partial<Change> = {};
-  const [parsedChanges, ...remaining] = processed.children;
-  const parsedYaml = yaml.load((parsedChanges as Frontmatter).value as string);
-  changeset.releases =
-    typeof parsedYaml === "object" && parsedYaml !== null
-      ? (parsedYaml as Change["releases"])
-      : undefined;
-  if (!changeset.releases || Object.keys(changeset.releases).length === 0)
+
+  if (match) {
+    const parsedYaml = parse(match[1]);
+    changeset.releases =
+      typeof parsedYaml === "object" && parsedYaml !== null
+        ? (parsedYaml as Change["releases"])
+        : undefined;
+    if (!changeset.releases || Object.keys(changeset.releases).length === 0)
+      throw new Error(
+        `${file.path} didn't have any packages bumped. Please add a package bump.`,
+      );
+
+    for (const [k, v] of Object.entries(
+      changeset.releases as { [k: string]: CommonBumps },
+    )) {
+      const [bump, tag] = (v as string).split(":");
+      (changeset.releases as { [k: string]: CommonBumps })[k] =
+        bump as CommonBumps;
+      changeset.tag = tag;
+    }
+
+    changeset.summary = (match[3] ?? "").trim();
+  } else {
     throw new Error(
       `${file.path} didn't have any packages bumped. Please add a package bump.`,
     );
-
-  for (const [k, v] of Object.entries(
-    changeset.releases as { [k: string]: CommonBumps },
-  )) {
-    const [bump, tag] = (v as string).split(":");
-    (changeset.releases as { [k: string]: CommonBumps })[k] =
-      bump as CommonBumps;
-    changeset.tag = tag;
   }
-
-  changeset.summary = processor
-    .stringify({
-      type: "root",
-      children: remaining,
-    } as Root)
-    .trim();
 
   if (cwd) {
     try {

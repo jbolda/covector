@@ -1,4 +1,5 @@
-import globby from "globby";
+import { execSync } from "node:child_process";
+import { glob, escapePath } from "tinyglobby";
 import { intro, outro, group, cancel, text, confirm } from "@clack/prompts";
 import * as fs from "fs/promises";
 import type { Dir } from "fs";
@@ -303,30 +304,39 @@ export const init = function* init({
   return { response: "complete" };
 };
 
-const packageFiles = async ({ cwd = process.cwd() }) => {
-  return await globby(
-    ["**/package.json", "**/Cargo.toml", "!**/__fixtures__", "!**/__tests__"],
-    {
-      cwd,
-      gitignore: true,
-    }
-  );
+const packageFiles = async ({ cwd = process.cwd() }: { cwd?: string }) => {
+  try {
+    const gitIgnored = execSync(
+      "git ls-files --others --ignored --exclude-standard --directory",
+      { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }
+    )
+      .split("\n")
+      .filter(Boolean)
+      .map((p) => escapePath(p));
+
+    return glob(
+      ["**/package.json", "**/Cargo.toml", "!**/__fixtures__", "!**/__tests__"],
+      { cwd, ignore: gitIgnored }
+    );
+  } catch {
+    return glob(
+      ["**/package.json", "**/Cargo.toml", "!**/__fixtures__", "!**/__tests__"],
+      { cwd }
+    );
+  }
 };
 
 const derivePkgManager = async ({
-  path,
+  path: pkgPath,
   pkgFile,
 }: {
   path: string;
   pkgFile: PackageFile;
 }) => {
-  const actionFile = await globby(["action.yml"], {
-    cwd: path,
-    gitignore: true,
-  });
-  if (actionFile.length > 0) {
+  try {
+    await fs.stat(path.posix.join(pkgPath, "action.yml"));
     return "github action";
-  } else {
+  } catch {
     return pkgFile?.name?.endsWith("Cargo.toml") ? "rust" : "javascript";
   }
 };

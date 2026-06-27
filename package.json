@@ -11,21 +11,20 @@
     "build": "tsc --build",
     "watch": "tsc --build --verbose --watch",
     "clean": "tsc --build --clean",
-    "wipe": "npm run clean -ws && rimraf node_modules dist tsconfig.tsbuildinfo && npm i",
     "build:action": "npm run pkg -w action",
     "run:action:source": "npm run run:source -w action",
     "run:action:built": "npm run run:built -w action",
     "test": "vitest",
-"test:types": "tsc --noEmit -p tsconfig.tests.json",
+    "test:types": "tsc --noEmit -p tsconfig.tests.json",
     "pretty": "prettier --write --ignore-path .gitignore \"!packages/action/dist/index.js\" \"packages/**/*.{js,ts}\" \"__fixtures__/**/*.{json,js,ts,yml,yaml}\""
   },
   "workspaces": [
     "packages/*"
   ],
   "devDependencies": {
-    "@types/node": "^24",
     "@effectionx/vitest": "^0.3.1",
-    "effection": "^4.0.2",
+    "@types/node": "^24",
+    "effection": "^4.0.3",
     "fixturez": "^1.1.0",
     "prettier": "^3.4.2",
     "tsx": "^4.19.3",

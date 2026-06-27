@@ -92,7 +92,7 @@ describe("integration test with preMode `on`", () => {
     // has a direct minor from 0.5.2
     expect(changelogTauriCore.content).toBe(
       "# Changelog\n\n" +
-        "## \\[0.6.0-beta.0]\n\n" +
+        "## [0.6.0-beta.0]\n\n" +
         "- Summary about the changes in tauri\n",
     );
 
@@ -103,7 +103,7 @@ describe("integration test with preMode `on`", () => {
     // tauri.js through a dep bump
     expect(changelogTaurijs.content).toBe(
       "# Changelog\n\n" +
-        "## \\[0.6.3-beta.0]\n\n" +
+        "## [0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
         "- Upgraded to `tauri@0.6.0-beta.0`\n",
     );
@@ -155,7 +155,7 @@ describe("integration test with preMode `on`", () => {
     );
     expect(changelogTauriCoreOne.content).toBe(
       "# Changelog\n\n" +
-        "## \\[0.6.0-beta.0]\n\n" +
+        "## [0.6.0-beta.0]\n\n" +
         "- Summary about the changes in tauri\n",
     );
 
@@ -167,7 +167,7 @@ describe("integration test with preMode `on`", () => {
     // so it should remain the same
     expect(changelogTaurijsOne.content).toBe(
       "# Changelog\n\n" +
-        "## \\[0.6.3-beta.0]\n\n" +
+        "## [0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
         "- Upgraded to `tauri@0.6.0-beta.0`\n",
     );
@@ -233,11 +233,11 @@ Boop again.
     );
     expect(changelogTauriCoreTwo.content).toBe(
       "# Changelog\n\n" +
-        "## \\[0.6.0-beta.1]\n\n" +
+        "## [0.6.0-beta.1]\n\n" +
         "### Dependencies\n\n" +
         "- Upgraded to `tauri-api@0.5.2-beta.0`\n" +
         "\n" +
-        "## \\[0.6.0-beta.0]\n\n" +
+        "## [0.6.0-beta.0]\n\n" +
         "- Summary about the changes in tauri\n",
     );
 
@@ -249,11 +249,11 @@ Boop again.
     // so it should remain the same
     expect(changelogTaurijsTwo.content).toBe(
       "# Changelog\n\n" +
-        "## \\[0.6.3-beta.1]\n\n" +
+        "## [0.6.3-beta.1]\n\n" +
         "### Dependencies\n\n" +
         "- Upgraded to `tauri@0.6.0-beta.1`\n" +
         "\n" +
-        "## \\[0.6.3-beta.0]\n\n" +
+        "## [0.6.3-beta.0]\n\n" +
         "### Dependencies\n\n" +
         "- Upgraded to `tauri@0.6.0-beta.0`\n",
     );
