@@ -33,13 +33,9 @@
   "scripts": {
     "prebuild": "wasm-pack build --release --target nodejs",
     "build": "tsc -b",
-    "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
     "test": "vitest"
   },
   "devDependencies": {
-    "wasm-pack": "^0.13.1"
-  },
-  "volta": {
-    "extends": "../../package.json"
+    "wasm-pack": "^0.15.0"
   }
 }
