@@ -4,7 +4,7 @@ import { all, until, type Operation } from "effection";
 import type { Logger } from "@covector/types";
 import { configFileSchema } from "./schema.ts";
 import { fromZodError } from "zod-validation-error";
-import globby from "globby";
+import { glob } from "tinyglobby";
 import path from "path";
 import { TomlDocument } from "@covector/toml";
 import { parse, stringify } from "yaml";
@@ -514,7 +514,7 @@ export function* changeFiles({
   changeFolder?: string;
 }): Operation<string[]> {
   return yield* until(
-    globby(
+    glob(
       [
         path.posix.join(changeFolder, "*.md"),
         `!${path.posix.join(changeFolder, "README.md")}`,
