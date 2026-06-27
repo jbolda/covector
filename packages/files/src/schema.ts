@@ -94,9 +94,9 @@ export const configFileSchema = (cwd: string = ".") =>
       timeout: z.number().optional(),
       additionalBumpTypes: z.string().array().optional(),
       defaultChangeTag: z.string().optional(),
-      pkgManagers: z.record(pkgManagerSchema).optional(),
-      packages: z.record(packageConfigSchema(cwd)),
-      changeTags: z.record(z.string()).optional(),
+      pkgManagers: z.record(z.string(), pkgManagerSchema).optional(),
+      packages: z.record(z.string(), packageConfigSchema(cwd)),
+      changeTags: z.record(z.string(), z.string()).optional(),
     })
     .strict();
 export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
