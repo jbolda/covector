@@ -28,7 +28,6 @@
   ],
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
     "prepublishOnly": "tsc -b",
     "test": "vitest"
   },
@@ -40,7 +39,7 @@
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
     "@effectionx/context-api": "^0.6.0",
-    "effection": "^4.0.2",
+    "effection": "^4.0.3",
     "globby": "^11.1.0",
     "js-yaml": "^4.1.0",
     "yargs": "^17.7.2"
@@ -52,8 +51,5 @@
     "@types/yargs": "^17.0.33",
     "fixturez": "^1.1.0",
     "strip-ansi": "^7.1.0"
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }

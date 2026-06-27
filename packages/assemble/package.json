@@ -18,14 +18,13 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf dist tsconfig.tsbuildinfo node_modules",
     "prepublishOnly": "tsc -b",
     "test": "vitest"
   },
   "dependencies": {
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
-    "effection": "^4.0.2",
+    "effection": "^4.0.3",
     "js-yaml": "^4.1.0",
     "remark-frontmatter": "^3.0.0",
     "remark-parse": "^9.0.0",
@@ -36,8 +35,5 @@
     "@covector/types": "0.0.0",
     "@types/js-yaml": "^4.0.5",
     "@types/lodash": "^4.14.196"
-  },
-  "volta": {
-    "extends": "../../package.json"
   }
 }
