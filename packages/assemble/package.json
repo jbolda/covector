@@ -25,11 +25,7 @@
     "@covector/command": "0.8.0",
     "@covector/files": "0.8.0",
     "effection": "^4.0.3",
-    "yaml": "^2.9.0",
-    "remark-frontmatter": "^3.0.0",
-    "remark-parse": "^9.0.0",
-    "remark-stringify": "^9.0.1",
-    "unified": "^9.2.1"
+    "yaml": "^2.9.0"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"
