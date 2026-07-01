@@ -1,15 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
-  "files": [],
-  "include": [],
-  "references": [
-    { "path": "./packages/types" },
-    { "path": "./packages/files" },
-    { "path": "./packages/command" },
-    { "path": "./packages/changelog" },
-    { "path": "./packages/assemble" },
-    { "path": "./packages/apply" },
-    { "path": "./packages/toml" },
-    { "path": "./packages/covector" }
-  ]
+  "include": ["packages/*/src", "packages/action/index.ts", "packages/action/src"],
+  "compilerOptions": {
+    "noEmit": true
+  }
 }

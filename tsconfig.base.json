@@ -1,12 +1,8 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declaration": true,
-    "declarationMap": true,
-    "incremental": true,
+    "noEmit": true,
     "skipLibCheck": true,
     "noEmitOnError": true,
-    "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "isolatedModules": true,
     "module": "NodeNext",
@@ -15,9 +11,6 @@
     "target": "esnext",
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "rewriteRelativeImportExtensions": true,
-    "checkJs": false,
-    "preserveSymlinks": true,
     "forceConsistentCasingInFileNames": true
   }
 }

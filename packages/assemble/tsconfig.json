@@ -1,13 +1,4 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [
-    { "path": "../files" },
-    { "path": "../command" },
-    { "path": "../types" }
-  ],
-  "include": ["src"],
-  "compilerOptions": {
-    "rootDir": "src",
-    "outDir": "dist"
-  }
+  "include": ["src"]
 }

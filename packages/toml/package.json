@@ -11,28 +11,24 @@
   "engines": {
     "node": ">=18"
   },
-  "type": "commonjs",
+  "type": "module",
   "files": [
-    "pkg/covector_toml_bg.wasm",
-    "pkg/covector_toml.js",
-    "pkg/covector_toml.d.ts",
-    "dist/index.js",
-    "dist/index.d.ts"
+    "dist"
   ],
   "exports": {
     "development": "./src/index.ts",
     "import": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     },
     "require": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     }
   },
   "scripts": {
-    "prebuild": "wasm-pack build --release --target nodejs",
-    "build": "tsc -b",
+    "prebuild": "wasm-pack build --target bundler --out-dir pkg --release",
+    "build": "tsdown",
     "test": "vitest"
   },
   "devDependencies": {
