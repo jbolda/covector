@@ -808,19 +808,19 @@ thiserror = "1.0.19"",
             "@babel/core": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-env": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-typescript": [
               {
                 "type": "devDependencies",
-                "version": "7.10.1",
+                "version": "7.29.6",
               },
             ],
             "@tauri-apps/tauri-inliner": [
@@ -910,7 +910,7 @@ thiserror = "1.0.19"",
             "babel-jest": [
               {
                 "type": "devDependencies",
-                "version": "26.0.1",
+                "version": "26.6.3",
               },
             ],
             "chalk": [
@@ -1233,9 +1233,9 @@ thiserror = "1.0.19"",
     "webpack-shell-plugin": "0.5.0"
   },
   "devDependencies": {
-    "@babel/core": "7.10.2",
-    "@babel/preset-env": "7.10.2",
-    "@babel/preset-typescript": "7.10.1",
+    "@babel/core": "7.29.6",
+    "@babel/preset-env": "7.29.6",
+    "@babel/preset-typescript": "7.29.6",
     "@types/cross-spawn": "6.0.2",
     "@types/fs-extra": "9.0.1",
     "@types/http-proxy": "1.17.4",
@@ -1248,7 +1248,7 @@ thiserror = "1.0.19"",
     "@types/webpack-merge": "4.1.5",
     "@typescript-eslint/eslint-plugin": "3.1.0",
     "@typescript-eslint/parser": "3.1.0",
-    "babel-jest": "26.0.1",
+    "babel-jest": "26.6.3",
     "dotenv": "8.2.0",
     "eslint": "7.1.0",
     "eslint-config-standard-with-typescript": "18.0.2",
@@ -1324,9 +1324,9 @@ thiserror = "1.0.19"",
             },
             "description": "Multi-binding collection of libraries and templates for building Tauri apps",
             "devDependencies": {
-              "@babel/core": "7.10.2",
-              "@babel/preset-env": "7.10.2",
-              "@babel/preset-typescript": "7.10.1",
+              "@babel/core": "7.29.6",
+              "@babel/preset-env": "7.29.6",
+              "@babel/preset-typescript": "7.29.6",
               "@types/cross-spawn": "6.0.2",
               "@types/fs-extra": "9.0.1",
               "@types/http-proxy": "1.17.4",
@@ -1339,7 +1339,7 @@ thiserror = "1.0.19"",
               "@types/webpack-merge": "4.1.5",
               "@typescript-eslint/eslint-plugin": "3.1.0",
               "@typescript-eslint/parser": "3.1.0",
-              "babel-jest": "26.0.1",
+              "babel-jest": "26.6.3",
               "dotenv": "8.2.0",
               "eslint": "7.1.0",
               "eslint-config-standard-with-typescript": "18.0.2",
@@ -2012,19 +2012,19 @@ thiserror = "1.0.19"",
             "@babel/core": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-env": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-typescript": [
               {
                 "type": "devDependencies",
-                "version": "7.10.1",
+                "version": "7.29.6",
               },
             ],
             "@tauri-apps/tauri-inliner": [
@@ -2114,7 +2114,7 @@ thiserror = "1.0.19"",
             "babel-jest": [
               {
                 "type": "devDependencies",
-                "version": "26.0.1",
+                "version": "26.6.3",
               },
             ],
             "chalk": [
@@ -2414,9 +2414,9 @@ thiserror = "1.0.19"",
             },
             "description": "Multi-binding collection of libraries and templates for building Tauri apps",
             "devDependencies": {
-              "@babel/core": "7.10.2",
-              "@babel/preset-env": "7.10.2",
-              "@babel/preset-typescript": "7.10.1",
+              "@babel/core": "7.29.6",
+              "@babel/preset-env": "7.29.6",
+              "@babel/preset-typescript": "7.29.6",
               "@types/cross-spawn": "6.0.2",
               "@types/fs-extra": "9.0.1",
               "@types/http-proxy": "1.17.4",
@@ -2429,7 +2429,7 @@ thiserror = "1.0.19"",
               "@types/webpack-merge": "4.1.5",
               "@typescript-eslint/eslint-plugin": "3.1.0",
               "@typescript-eslint/parser": "3.1.0",
-              "babel-jest": "26.0.1",
+              "babel-jest": "26.6.3",
               "dotenv": "8.2.0",
               "eslint": "7.1.0",
               "eslint-config-standard-with-typescript": "18.0.2",
@@ -2506,19 +2506,19 @@ exports[`integration test in production mode > handles config > passes correct c
         "@babel/core": [
           {
             "type": "devDependencies",
-            "version": "7.10.2",
+            "version": "7.29.6",
           },
         ],
         "@babel/preset-env": [
           {
             "type": "devDependencies",
-            "version": "7.10.2",
+            "version": "7.29.6",
           },
         ],
         "@babel/preset-typescript": [
           {
             "type": "devDependencies",
-            "version": "7.10.1",
+            "version": "7.29.6",
           },
         ],
         "@tauri-apps/tauri-inliner": [
@@ -2608,7 +2608,7 @@ exports[`integration test in production mode > handles config > passes correct c
         "babel-jest": [
           {
             "type": "devDependencies",
-            "version": "26.0.1",
+            "version": "26.6.3",
           },
         ],
         "chalk": [
@@ -2931,9 +2931,9 @@ exports[`integration test in production mode > handles config > passes correct c
     "webpack-shell-plugin": "0.5.0"
   },
   "devDependencies": {
-    "@babel/core": "7.10.2",
-    "@babel/preset-env": "7.10.2",
-    "@babel/preset-typescript": "7.10.1",
+    "@babel/core": "7.29.6",
+    "@babel/preset-env": "7.29.6",
+    "@babel/preset-typescript": "7.29.6",
     "@types/cross-spawn": "6.0.2",
     "@types/fs-extra": "9.0.1",
     "@types/http-proxy": "1.17.4",
@@ -2946,7 +2946,7 @@ exports[`integration test in production mode > handles config > passes correct c
     "@types/webpack-merge": "4.1.5",
     "@typescript-eslint/eslint-plugin": "3.1.0",
     "@typescript-eslint/parser": "3.1.0",
-    "babel-jest": "26.0.1",
+    "babel-jest": "26.6.3",
     "dotenv": "8.2.0",
     "eslint": "7.1.0",
     "eslint-config-standard-with-typescript": "18.0.2",
@@ -3022,9 +3022,9 @@ exports[`integration test in production mode > handles config > passes correct c
         },
         "description": "Multi-binding collection of libraries and templates for building Tauri apps",
         "devDependencies": {
-          "@babel/core": "7.10.2",
-          "@babel/preset-env": "7.10.2",
-          "@babel/preset-typescript": "7.10.1",
+          "@babel/core": "7.29.6",
+          "@babel/preset-env": "7.29.6",
+          "@babel/preset-typescript": "7.29.6",
           "@types/cross-spawn": "6.0.2",
           "@types/fs-extra": "9.0.1",
           "@types/http-proxy": "1.17.4",
@@ -3037,7 +3037,7 @@ exports[`integration test in production mode > handles config > passes correct c
           "@types/webpack-merge": "4.1.5",
           "@typescript-eslint/eslint-plugin": "3.1.0",
           "@typescript-eslint/parser": "3.1.0",
-          "babel-jest": "26.0.1",
+          "babel-jest": "26.6.3",
           "dotenv": "8.2.0",
           "eslint": "7.1.0",
           "eslint-config-standard-with-typescript": "18.0.2",
@@ -3564,19 +3564,19 @@ Summary about the changes in tauri
               "@babel/core": [
                 {
                   "type": "devDependencies",
-                  "version": "7.10.2",
+                  "version": "7.29.6",
                 },
               ],
               "@babel/preset-env": [
                 {
                   "type": "devDependencies",
-                  "version": "7.10.2",
+                  "version": "7.29.6",
                 },
               ],
               "@babel/preset-typescript": [
                 {
                   "type": "devDependencies",
-                  "version": "7.10.1",
+                  "version": "7.29.6",
                 },
               ],
               "@tauri-apps/tauri-inliner": [
@@ -3666,7 +3666,7 @@ Summary about the changes in tauri
               "babel-jest": [
                 {
                   "type": "devDependencies",
-                  "version": "26.0.1",
+                  "version": "26.6.3",
                 },
               ],
               "chalk": [
@@ -4023,19 +4023,19 @@ Summary about the changes in tauri-updater
           "@babel/core": [
             {
               "type": "devDependencies",
-              "version": "7.10.2",
+              "version": "7.29.6",
             },
           ],
           "@babel/preset-env": [
             {
               "type": "devDependencies",
-              "version": "7.10.2",
+              "version": "7.29.6",
             },
           ],
           "@babel/preset-typescript": [
             {
               "type": "devDependencies",
-              "version": "7.10.1",
+              "version": "7.29.6",
             },
           ],
           "@tauri-apps/tauri-inliner": [
@@ -4125,7 +4125,7 @@ Summary about the changes in tauri-updater
           "babel-jest": [
             {
               "type": "devDependencies",
-              "version": "26.0.1",
+              "version": "26.6.3",
             },
           ],
           "chalk": [
@@ -5238,19 +5238,19 @@ thiserror = "1.0.19"",
             "@babel/core": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-env": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-typescript": [
               {
                 "type": "devDependencies",
-                "version": "7.10.1",
+                "version": "7.29.6",
               },
             ],
             "@tauri-apps/tauri-inliner": [
@@ -5340,7 +5340,7 @@ thiserror = "1.0.19"",
             "babel-jest": [
               {
                 "type": "devDependencies",
-                "version": "26.0.1",
+                "version": "26.6.3",
               },
             ],
             "chalk": [
@@ -5663,9 +5663,9 @@ thiserror = "1.0.19"",
     "webpack-shell-plugin": "0.5.0"
   },
   "devDependencies": {
-    "@babel/core": "7.10.2",
-    "@babel/preset-env": "7.10.2",
-    "@babel/preset-typescript": "7.10.1",
+    "@babel/core": "7.29.6",
+    "@babel/preset-env": "7.29.6",
+    "@babel/preset-typescript": "7.29.6",
     "@types/cross-spawn": "6.0.2",
     "@types/fs-extra": "9.0.1",
     "@types/http-proxy": "1.17.4",
@@ -5678,7 +5678,7 @@ thiserror = "1.0.19"",
     "@types/webpack-merge": "4.1.5",
     "@typescript-eslint/eslint-plugin": "3.1.0",
     "@typescript-eslint/parser": "3.1.0",
-    "babel-jest": "26.0.1",
+    "babel-jest": "26.6.3",
     "dotenv": "8.2.0",
     "eslint": "7.1.0",
     "eslint-config-standard-with-typescript": "18.0.2",
@@ -5754,9 +5754,9 @@ thiserror = "1.0.19"",
             },
             "description": "Multi-binding collection of libraries and templates for building Tauri apps",
             "devDependencies": {
-              "@babel/core": "7.10.2",
-              "@babel/preset-env": "7.10.2",
-              "@babel/preset-typescript": "7.10.1",
+              "@babel/core": "7.29.6",
+              "@babel/preset-env": "7.29.6",
+              "@babel/preset-typescript": "7.29.6",
               "@types/cross-spawn": "6.0.2",
               "@types/fs-extra": "9.0.1",
               "@types/http-proxy": "1.17.4",
@@ -5769,7 +5769,7 @@ thiserror = "1.0.19"",
               "@types/webpack-merge": "4.1.5",
               "@typescript-eslint/eslint-plugin": "3.1.0",
               "@typescript-eslint/parser": "3.1.0",
-              "babel-jest": "26.0.1",
+              "babel-jest": "26.6.3",
               "dotenv": "8.2.0",
               "eslint": "7.1.0",
               "eslint-config-standard-with-typescript": "18.0.2",
@@ -6439,19 +6439,19 @@ thiserror = "1.0.19"",
             "@babel/core": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-env": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-typescript": [
               {
                 "type": "devDependencies",
-                "version": "7.10.1",
+                "version": "7.29.6",
               },
             ],
             "@tauri-apps/tauri-inliner": [
@@ -6541,7 +6541,7 @@ thiserror = "1.0.19"",
             "babel-jest": [
               {
                 "type": "devDependencies",
-                "version": "26.0.1",
+                "version": "26.6.3",
               },
             ],
             "chalk": [
@@ -6841,9 +6841,9 @@ thiserror = "1.0.19"",
             },
             "description": "Multi-binding collection of libraries and templates for building Tauri apps",
             "devDependencies": {
-              "@babel/core": "7.10.2",
-              "@babel/preset-env": "7.10.2",
-              "@babel/preset-typescript": "7.10.1",
+              "@babel/core": "7.29.6",
+              "@babel/preset-env": "7.29.6",
+              "@babel/preset-typescript": "7.29.6",
               "@types/cross-spawn": "6.0.2",
               "@types/fs-extra": "9.0.1",
               "@types/http-proxy": "1.17.4",
@@ -6856,7 +6856,7 @@ thiserror = "1.0.19"",
               "@types/webpack-merge": "4.1.5",
               "@typescript-eslint/eslint-plugin": "3.1.0",
               "@typescript-eslint/parser": "3.1.0",
-              "babel-jest": "26.0.1",
+              "babel-jest": "26.6.3",
               "dotenv": "8.2.0",
               "eslint": "7.1.0",
               "eslint-config-standard-with-typescript": "18.0.2",
@@ -8011,19 +8011,19 @@ thiserror = "1.0.19"",
             "@babel/core": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-env": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-typescript": [
               {
                 "type": "devDependencies",
-                "version": "7.10.1",
+                "version": "7.29.6",
               },
             ],
             "@tauri-apps/tauri-inliner": [
@@ -8113,7 +8113,7 @@ thiserror = "1.0.19"",
             "babel-jest": [
               {
                 "type": "devDependencies",
-                "version": "26.0.1",
+                "version": "26.6.3",
               },
             ],
             "chalk": [
@@ -8436,9 +8436,9 @@ thiserror = "1.0.19"",
     "webpack-shell-plugin": "0.5.0"
   },
   "devDependencies": {
-    "@babel/core": "7.10.2",
-    "@babel/preset-env": "7.10.2",
-    "@babel/preset-typescript": "7.10.1",
+    "@babel/core": "7.29.6",
+    "@babel/preset-env": "7.29.6",
+    "@babel/preset-typescript": "7.29.6",
     "@types/cross-spawn": "6.0.2",
     "@types/fs-extra": "9.0.1",
     "@types/http-proxy": "1.17.4",
@@ -8451,7 +8451,7 @@ thiserror = "1.0.19"",
     "@types/webpack-merge": "4.1.5",
     "@typescript-eslint/eslint-plugin": "3.1.0",
     "@typescript-eslint/parser": "3.1.0",
-    "babel-jest": "26.0.1",
+    "babel-jest": "26.6.3",
     "dotenv": "8.2.0",
     "eslint": "7.1.0",
     "eslint-config-standard-with-typescript": "18.0.2",
@@ -8527,9 +8527,9 @@ thiserror = "1.0.19"",
             },
             "description": "Multi-binding collection of libraries and templates for building Tauri apps",
             "devDependencies": {
-              "@babel/core": "7.10.2",
-              "@babel/preset-env": "7.10.2",
-              "@babel/preset-typescript": "7.10.1",
+              "@babel/core": "7.29.6",
+              "@babel/preset-env": "7.29.6",
+              "@babel/preset-typescript": "7.29.6",
               "@types/cross-spawn": "6.0.2",
               "@types/fs-extra": "9.0.1",
               "@types/http-proxy": "1.17.4",
@@ -8542,7 +8542,7 @@ thiserror = "1.0.19"",
               "@types/webpack-merge": "4.1.5",
               "@typescript-eslint/eslint-plugin": "3.1.0",
               "@typescript-eslint/parser": "3.1.0",
-              "babel-jest": "26.0.1",
+              "babel-jest": "26.6.3",
               "dotenv": "8.2.0",
               "eslint": "7.1.0",
               "eslint-config-standard-with-typescript": "18.0.2",
@@ -9200,19 +9200,19 @@ thiserror = "1.0.19"",
             "@babel/core": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-env": [
               {
                 "type": "devDependencies",
-                "version": "7.10.2",
+                "version": "7.29.6",
               },
             ],
             "@babel/preset-typescript": [
               {
                 "type": "devDependencies",
-                "version": "7.10.1",
+                "version": "7.29.6",
               },
             ],
             "@tauri-apps/tauri-inliner": [
@@ -9302,7 +9302,7 @@ thiserror = "1.0.19"",
             "babel-jest": [
               {
                 "type": "devDependencies",
-                "version": "26.0.1",
+                "version": "26.6.3",
               },
             ],
             "chalk": [
@@ -9602,9 +9602,9 @@ thiserror = "1.0.19"",
             },
             "description": "Multi-binding collection of libraries and templates for building Tauri apps",
             "devDependencies": {
-              "@babel/core": "7.10.2",
-              "@babel/preset-env": "7.10.2",
-              "@babel/preset-typescript": "7.10.1",
+              "@babel/core": "7.29.6",
+              "@babel/preset-env": "7.29.6",
+              "@babel/preset-typescript": "7.29.6",
               "@types/cross-spawn": "6.0.2",
               "@types/fs-extra": "9.0.1",
               "@types/http-proxy": "1.17.4",
@@ -9617,7 +9617,7 @@ thiserror = "1.0.19"",
               "@types/webpack-merge": "4.1.5",
               "@typescript-eslint/eslint-plugin": "3.1.0",
               "@typescript-eslint/parser": "3.1.0",
-              "babel-jest": "26.0.1",
+              "babel-jest": "26.6.3",
               "dotenv": "8.2.0",
               "eslint": "7.1.0",
               "eslint-config-standard-with-typescript": "18.0.2",
@@ -11457,19 +11457,19 @@ thiserror = "1.0.19"
           "@babel/core": [
             {
               "type": "devDependencies",
-              "version": "7.10.2",
+              "version": "7.29.6",
             },
           ],
           "@babel/preset-env": [
             {
               "type": "devDependencies",
-              "version": "7.10.2",
+              "version": "7.29.6",
             },
           ],
           "@babel/preset-typescript": [
             {
               "type": "devDependencies",
-              "version": "7.10.1",
+              "version": "7.29.6",
             },
           ],
           "@tauri-apps/tauri-inliner": [
@@ -11559,7 +11559,7 @@ thiserror = "1.0.19"
           "babel-jest": [
             {
               "type": "devDependencies",
-              "version": "26.0.1",
+              "version": "26.6.3",
             },
           ],
           "chalk": [
@@ -11882,9 +11882,9 @@ thiserror = "1.0.19"
     "webpack-shell-plugin": "0.5.0"
   },
   "devDependencies": {
-    "@babel/core": "7.10.2",
-    "@babel/preset-env": "7.10.2",
-    "@babel/preset-typescript": "7.10.1",
+    "@babel/core": "7.29.6",
+    "@babel/preset-env": "7.29.6",
+    "@babel/preset-typescript": "7.29.6",
     "@types/cross-spawn": "6.0.2",
     "@types/fs-extra": "9.0.1",
     "@types/http-proxy": "1.17.4",
@@ -11897,7 +11897,7 @@ thiserror = "1.0.19"
     "@types/webpack-merge": "4.1.5",
     "@typescript-eslint/eslint-plugin": "3.1.0",
     "@typescript-eslint/parser": "3.1.0",
-    "babel-jest": "26.0.1",
+    "babel-jest": "26.6.3",
     "dotenv": "8.2.0",
     "eslint": "7.1.0",
     "eslint-config-standard-with-typescript": "18.0.2",
@@ -11973,9 +11973,9 @@ thiserror = "1.0.19"
           },
           "description": "Multi-binding collection of libraries and templates for building Tauri apps",
           "devDependencies": {
-            "@babel/core": "7.10.2",
-            "@babel/preset-env": "7.10.2",
-            "@babel/preset-typescript": "7.10.1",
+            "@babel/core": "7.29.6",
+            "@babel/preset-env": "7.29.6",
+            "@babel/preset-typescript": "7.29.6",
             "@types/cross-spawn": "6.0.2",
             "@types/fs-extra": "9.0.1",
             "@types/http-proxy": "1.17.4",
@@ -11988,7 +11988,7 @@ thiserror = "1.0.19"
             "@types/webpack-merge": "4.1.5",
             "@typescript-eslint/eslint-plugin": "3.1.0",
             "@typescript-eslint/parser": "3.1.0",
-            "babel-jest": "26.0.1",
+            "babel-jest": "26.6.3",
             "dotenv": "8.2.0",
             "eslint": "7.1.0",
             "eslint-config-standard-with-typescript": "18.0.2",
@@ -12102,19 +12102,19 @@ Summary about the changes in tauri
               "@babel/core": [
                 {
                   "type": "devDependencies",
-                  "version": "7.10.2",
+                  "version": "7.29.6",
                 },
               ],
               "@babel/preset-env": [
                 {
                   "type": "devDependencies",
-                  "version": "7.10.2",
+                  "version": "7.29.6",
                 },
               ],
               "@babel/preset-typescript": [
                 {
                   "type": "devDependencies",
-                  "version": "7.10.1",
+                  "version": "7.29.6",
                 },
               ],
               "@tauri-apps/tauri-inliner": [
@@ -12204,7 +12204,7 @@ Summary about the changes in tauri
               "babel-jest": [
                 {
                   "type": "devDependencies",
-                  "version": "26.0.1",
+                  "version": "26.6.3",
                 },
               ],
               "chalk": [
