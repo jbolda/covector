@@ -1,17 +1,15 @@
 {
   "name": "covector-workspace",
   "version": "0.0.0",
+  "type": "module",
   "private": true,
   "repository": "https://github.com/jbolda/covector.git",
   "author": "Jacob Bolda <me@jacobbolda.com>",
   "license": "Apache-2.0",
   "scripts": {
     "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.mjs",
-    "prebuild": "npm run prebuild -w @covector/toml",
-    "build": "tsc --build",
-    "watch": "tsc --build --verbose --watch",
-    "clean": "tsc --build --clean",
-    "build:action": "npm run pkg -w action",
+    "build": "npm run build --workspaces --if-present",
+    "build:action": "npm run build:action -w action",
     "run:action:source": "npm run run:source -w action",
     "run:action:built": "npm run run:built -w action",
     "test": "vitest",
@@ -27,8 +25,8 @@
     "effection": "^4.0.3",
     "fixturez": "^1.1.0",
     "prettier": "^3.4.2",
-    "tsx": "^4.19.3",
-    "vite-plugin-wasm": "^3.6.0",
+    "rolldown-plugin-wasm": "^0.3.2",
+    "tsdown": "^0.22.3",
     "vitest": "^4.1.9"
   }
 }

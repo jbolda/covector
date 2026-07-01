@@ -1,20 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
-  "files": [],
   "include": ["packages/covector/test/**/*.ts", "packages/command/test/**/*.ts", "packages/action/test/**/*.ts", "helpers/**/*.ts"],
-  "references": [
-    { "path": "./packages/types" },
-    { "path": "./packages/files" },
-    { "path": "./packages/command" },
-    { "path": "./packages/changelog" },
-    { "path": "./packages/assemble" },
-    { "path": "./packages/apply" },
-    { "path": "./packages/toml" },
-    { "path": "./packages/covector" }
-  ],
   "compilerOptions": {
-    "composite": false,
-    "noEmit": true,
-    "rewriteRelativeImportExtensions": false
+    "noEmit": true
   }
 }

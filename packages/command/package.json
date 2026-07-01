@@ -12,13 +12,13 @@
   "exports": {
     "development": "./src/index.ts",
     "import": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     }
   },
   "scripts": {
-    "build": "tsc -b",
-    "prepublishOnly": "tsc -b",
+    "build": "tsdown",
+    "prepublishOnly": "tsdown",
     "test": "vitest"
   },
   "dependencies": {

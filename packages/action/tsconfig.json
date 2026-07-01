@@ -1,10 +1,4 @@
 {
   "extends": "../../tsconfig.base.json",
-  "references": [{ "path": "../types" }, { "path": "../covector" }],
-  "include": ["src"],
-  "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "dist",
-    "noEmit": true
-  }
+  "include": ["src", "../covector/src", "../types/src", "index.ts"]
 }

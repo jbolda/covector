@@ -41,8 +41,7 @@ jobs:
       - uses: jdx/mise-action@v4
       - run: npm ci --ignore-scripts
       - run: npm run build
-      - run: npm run -ws --if-present prepublishOnly
-      - run: npm run pkg -w action
+      - run: npm run build:action
       - name: covector preview
         uses: ./packages/action
         id: covector

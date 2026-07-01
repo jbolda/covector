@@ -12,12 +12,12 @@
   "exports": {
     "development": "./src/index.ts",
     "import": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
     }
   },
   "scripts": {
-    "build": "echo noop"
+    "build": "tsdown"
   },
   "devDependencies": {
     "typescript": "^5.8.2"
