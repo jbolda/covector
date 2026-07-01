@@ -25,6 +25,7 @@
     "effection": "^4.0.3",
     "fixturez": "^1.1.0",
     "prettier": "^3.4.2",
+    "rolldown-plugin-wasm": "^0.3.2",
     "tsdown": "^0.22.3",
     "vite-plugin-wasm": "^3.6.0",
     "vitest": "^4.1.9"
