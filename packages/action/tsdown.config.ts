@@ -23,6 +23,16 @@ export default defineConfig({
     }),
   ],
   copy: [
-    { from: '../toml/dist/*.wasm', to: 'dist', flatten: true },
+    // from workspace @covector/toml
+    { from: "../toml/dist/*.wasm", to: "dist", flatten: true },
+    // from ctrlc-windows which comes in as a dep from @effectionx/process
+    {
+      from: "../../node_modules/ctrlc-windows/dist/arm64/*.{node,exe}",
+      to: "dist/arm64",
+    },
+    {
+      from: "../../node_modules/ctrlc-windows/dist/x64/*.{node,exe}",
+      to: "dist/x64",
+    },
   ],
 });
