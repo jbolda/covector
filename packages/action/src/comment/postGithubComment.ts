@@ -2,7 +2,7 @@ import { DefaultArtifactClient } from "@actions/artifact";
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { getOctokit } from "@actions/github";
-import { until, Operation } from "effection";
+import { until, type Operation } from "effection";
 import { Logger } from "@covector/types";
 
 export function* postGithubComment({

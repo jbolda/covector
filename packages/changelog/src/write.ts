@@ -1,4 +1,4 @@
-import { all, Operation } from "effection";
+import { all, type Operation } from "effection";
 import { writeChangelog } from "@covector/files";
 
 import type { LoadedFile } from "@covector/types";
