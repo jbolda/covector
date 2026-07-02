@@ -7,7 +7,7 @@
   "author": "Jacob Bolda <me@jacobbolda.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "covector": "node --conditions=development --import=tsx ./packages/covector/bin/covector.mjs",
+    "covector": "node --conditions=development ./packages/covector/bin/covector.mjs",
     "build": "npm run build --workspaces --if-present",
     "build:action": "npm run build:action -w action",
     "run:action:source": "npm run run:source -w action",

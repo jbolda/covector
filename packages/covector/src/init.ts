@@ -4,7 +4,7 @@ import { intro, outro, group, cancel, text, confirm } from "@clack/prompts";
 import * as fs from "fs/promises";
 import type { Dir } from "fs";
 import path from "path";
-import { Operation, all, until } from "effection";
+import { type Operation, all, until } from "effection";
 import { readPkgFile } from "@covector/files";
 import type { Logger, Covector, PackageFile } from "@covector/types";
 

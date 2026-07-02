@@ -19,7 +19,7 @@ import type {
   ChangeContext,
   ConfigFile,
 } from "@covector/types";
-import { until, Operation } from "effection";
+import { until, type Operation } from "effection";
 
 export function* version({
   logger,
