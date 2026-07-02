@@ -149,7 +149,6 @@
     "action": {
       "path": "./packages/action",
       "manager": "javascript",
-      "preversion": "npm run pkg",
       "publish": false,
       "getPublishedVersion": false,
       "dependencies": ["covector"],
