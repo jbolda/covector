@@ -366,6 +366,18 @@ export const getPackageFileVersion = ({
               case "string":
                 return depDefinition;
               case "object":
+                // a Cargo dependency declared with `{ workspace = true }` inherits
+                // its version from the workspace root manifest, so there is no
+                // version here to read (or bump)
+                if (depDefinition.workspace === true) {
+                  return depDefinition.version || "";
+                }
+                // a Cargo path-only dependency, e.g. `{ path = "../pkg" }`, is
+                // valid without a version for crates that are not published to
+                // a registry
+                if (depDefinition.path && !depDefinition.version) {
+                  return "";
+                }
                 if (!depDefinition.version) {
                   throw new Error(
                     `${pkg.name} has a dependency on ${dep}, and ${dep} does not have a version number. ` +

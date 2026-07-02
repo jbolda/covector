@@ -3,7 +3,12 @@ import { expect } from "vitest";
 import path from "path";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
-import { readPkgFile, setPackageFileVersion, writePkgFile } from "../src";
+import {
+  readPkgFile,
+  setPackageFileVersion,
+  getPackageFileVersion,
+  writePkgFile,
+} from "../src";
 
 const f = fixtures(__dirname);
 
@@ -81,6 +86,30 @@ describe("toml", () => {
         expect(cargoFilePkgB.name).toBe("rust_pkg_b_fixture");
         expect(cargoFilePkgB?.pkg?.package?.name).toBe("rust_pkg_b_fixture");
         expect(cargoFilePkgB.version).toBe("0.8.8");
+      });
+
+      it("with workspace = true dependencies", function* () {
+        const cargoFolder = f.copy("pkg.rust-workspace-deps");
+
+        const cargoFilePkgA = yield* readPkgFile({
+          file: "Cargo.toml",
+          cwd: path.join(cargoFolder, "pkg-a"),
+          nickname: "rust_workspace_dep_fixture",
+        });
+        expect(cargoFilePkgA.name).toBe("rust_workspace_dep_fixture");
+        expect(cargoFilePkgA?.pkg?.package?.name).toBe(
+          "rust_workspace_dep_fixture",
+        );
+        expect(cargoFilePkgA.version).toBe("0.5.0");
+
+        // a `{ workspace = true }` dependency inherits its version from the
+        // workspace root manifest, so there is no version to read here
+        const depVersion = getPackageFileVersion({
+          pkg: cargoFilePkgA,
+          property: "dependencies",
+          dep: "serde",
+        });
+        expect(depVersion).toBe("");
       });
     });
   });

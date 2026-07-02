@@ -349,19 +349,37 @@ const getDepBumpVersion = ({
     // if pkg is in dep list
     if (existingDep === depName) {
       const prevVersion = getPreviousVersion();
-      const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
+      // the pnpm/yarn workspace protocol pins `workspace:*` / `workspace:^` /
+      // `workspace:~` deps to whatever version the workspace holds, and the
+      // package manager rewrites them at publish time, so there is no version
+      // in the declaration to bump (aliased deps, `workspace:name@range`, are
+      // also left alone); an embedded range such as `workspace:^1.2.3` keeps
+      // the protocol prefix and bumps the range within it
+      const workspaceProtocol = prevVersion.startsWith("workspace:");
+      const range = workspaceProtocol
+        ? prevVersion.slice("workspace:".length)
+        : prevVersion;
+      if (
+        workspaceProtocol &&
+        (range === "*" || range === "^" || range === "~" || range.includes("@"))
+      ) {
+        return null;
+      }
+
+      const versionRequirementMatch = /[\^=~]/.exec(range);
       const versionRequirement = versionRequirementMatch
         ? versionRequirementMatch[0]
         : "";
 
       const version = deriveVersionConsideringPartials({
         dependency: dep,
-        prevVersion,
+        prevVersion: range,
         versionRequirement,
         previewVersion,
         packageFiles,
       });
-      return version;
+      if (!version) return version;
+      return workspaceProtocol ? `workspace:${version}` : version;
     }
   }
   return null;

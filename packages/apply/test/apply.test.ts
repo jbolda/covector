@@ -205,6 +205,121 @@ describe("package file apply bump (snapshot)", () => {
         ]);
     });
 
+    it("bumps multi with pnpm workspace protocol deps", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const jsonFolder = f.copy("pkg.js-pnpm-workspace");
+
+      const commands = [
+        {
+          dependencies: ["pnpm-workspace-pkg-b", "pnpm-workspace-pkg-c"],
+          manager: "javascript",
+          path: "./packages/pkg-a/",
+          pkg: "pnpm-workspace-pkg-a",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-b/",
+          pkg: "pnpm-workspace-pkg-b",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: ["pnpm-workspace-pkg-b"],
+          manager: "javascript",
+          path: "./packages/pkg-c/",
+          pkg: "pnpm-workspace-pkg-c",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          "pnpm-workspace-pkg-a": {
+            path: "./packages/pkg-a/",
+            manager: "javascript",
+            dependencies: ["pnpm-workspace-pkg-b", "pnpm-workspace-pkg-c"],
+          },
+          "pnpm-workspace-pkg-b": {
+            path: "./packages/pkg-b/",
+            manager: "javascript",
+          },
+          "pnpm-workspace-pkg-c": {
+            path: "./packages/pkg-c/",
+            manager: "javascript",
+            dependencies: ["pnpm-workspace-pkg-b"],
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: jsonFolder,
+      });
+
+      // `workspace:*` and `workspace:~` deps resolve to whatever version the
+      // workspace holds and get rewritten by the package manager at publish,
+      // so the declarations survive the bump byte-for-byte
+      const modifiedPkgAFile = yield* loadFile(
+        "packages/pkg-a/package.json",
+        jsonFolder,
+      );
+      expect(modifiedPkgAFile.content).toBe(
+        "{\n" +
+          '  "name": "pnpm-workspace-pkg-a",\n' +
+          '  "version": "1.1.0",\n' +
+          '  "dependencies": {\n' +
+          '    "pnpm-workspace-pkg-b": "workspace:*"\n' +
+          "  },\n" +
+          '  "devDependencies": {\n' +
+          '    "pnpm-workspace-pkg-c": "workspace:~"\n' +
+          "  }\n" +
+          "}\n",
+      );
+
+      // an embedded range keeps the protocol prefix and bumps within it
+      const modifiedPkgCFile = yield* loadFile(
+        "packages/pkg-c/package.json",
+        jsonFolder,
+      );
+      expect(modifiedPkgCFile.content).toBe(
+        "{\n" +
+          '  "name": "pnpm-workspace-pkg-c",\n' +
+          '  "version": "1.1.0",\n' +
+          '  "dependencies": {\n' +
+          '    "pnpm-workspace-pkg-b": "workspace:^1.1.0"\n' +
+          "  }\n" +
+          "}\n",
+      );
+
+      const modifiedPkgBFile = yield* loadFile(
+        "packages/pkg-b/package.json",
+        jsonFolder,
+      );
+      expect(modifiedPkgBFile.content).toBe(
+        "{\n" +
+          '  "name": "pnpm-workspace-pkg-b",\n' +
+          '  "version": "1.1.0"\n' +
+          "}\n",
+      );
+
+      yield* logTest.consecutive(log.all, [
+        { msg: "bumping pnpm-workspace-pkg-a with minor", level: "info" },
+        { msg: "bumping pnpm-workspace-pkg-b with minor", level: "info" },
+        { msg: "bumping pnpm-workspace-pkg-c with minor", level: "info" },
+      ]);
+    });
+
     it("bumps multi with parent as range", function* () {
       const log = yield* logTest.useCapturedLogger();
         const jsonFolder = f.copy("pkg.js-yarn-workspace");
@@ -474,6 +589,87 @@ describe("package file apply bump (snapshot)", () => {
           { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
           { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
         ]);
+    });
+
+    it("bumps multi with workspace inherited dep", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const rustFolder = f.copy("pkg.rust-workspace-deps");
+
+      const commands = [
+        {
+          dependencies: ["rust_workspace_pkg_b_fixture"],
+          manager: "rust",
+          path: "./pkg-a/",
+          pkg: "rust_workspace_dep_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-b/",
+          pkg: "rust_workspace_pkg_b_fixture",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          rust_workspace_dep_fixture: {
+            path: "./pkg-a/",
+            manager: "rust",
+          },
+          rust_workspace_pkg_b_fixture: {
+            path: "./pkg-b/",
+            manager: "rust",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: rustFolder,
+      });
+
+      // the version of a `{ workspace = true }` dependency lives in the
+      // workspace root manifest, so the member manifest is left untouched
+      // aside from its own version bump
+      const modifiedAPKGFile = yield* loadFile("pkg-a/Cargo.toml", rustFolder);
+      expect(modifiedAPKGFile.content).toBe(
+        "[package]\n" +
+          'name = "rust_workspace_dep_fixture"\n' +
+          'version = "0.6.0"\n' +
+          "\n" +
+          "[dependencies]\n" +
+          "serde = { workspace = true }\n" +
+          "rust_workspace_pkg_b_fixture = { workspace = true }\n",
+      );
+
+      const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
+      expect(modifiedBPKGFile.content).toBe(
+        "[package]\n" +
+          'name = "rust_workspace_pkg_b_fixture"\n' +
+          'version = "0.9.0"\n',
+      );
+
+      yield* logTest.consecutive(log.all, [
+        {
+          msg: "bumping rust_workspace_dep_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_workspace_pkg_b_fixture with minor",
+          level: "info",
+        },
+      ]);
     });
 
     it("bumps multi with object dep", function* () {

@@ -2,7 +2,7 @@ import { validateApply } from "../src";
 import { readAllPkgFiles } from "@covector/files";
 import { PackageCommand, PackageFile } from "@covector/types";
 
-import { describe, it, captureError } from "@effectionx/vitest";
+import { describe, it } from "@effectionx/vitest";
 import { expect } from "vitest";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
@@ -325,9 +325,12 @@ describe("validate apply", () => {
     expect(validated).toBe(true);
   });
 
-  it("bumps multi rust toml as minor with object dep without version number", function* () {
+  it("bumps multi rust toml as minor with object dep without version number (path-only)", function* () {
     const log = yield* logTest.useCapturedLogger();
 
+    // a path-only dependency, e.g. `{ path = "../pkg" }`, is valid in Cargo
+    // for crates that are not published to a registry, so it should not
+    // fail validation
     const rustFolder: string = f.copy("pkg.rust-multi-object-path-dep-only");
 
     const config = {
@@ -366,20 +369,63 @@ describe("validate apply", () => {
       },
     ];
 
-    const errored = yield* captureError(
-      validateApply({
-        logger: logger.operations,
-        commands,
-        allPackages,
-      }),
-    );
-    yield* logger.operations.info("completed");
-    expect(errored.message).toMatch(
-      "rust_pkg_a_fixture has a dependency on rust_pkg_b_fixture, and rust_pkg_b_fixture does not have a version number. " +
-        "This cannot be published. Please pin it to a MAJOR.MINOR.PATCH reference.",
-    );
+    const validated = yield* validateApply({
+      logger: logger.operations,
+      commands,
+      allPackages,
+    });
+    expect(validated).toBe(true);
+  });
 
-    // to confirm that no error logs have been returned
-    yield* logTest.consecutive(log.all, [{ msg: "completed", level: "info" }]);
+  it("bumps multi rust toml as minor with workspace inherited dep", function* () {
+    const log = yield* logTest.useCapturedLogger();
+
+    // a `{ workspace = true }` dependency inherits its version from the
+    // workspace root manifest, so the member manifest has no version to
+    // validate
+    const rustFolder: string = f.copy("pkg.rust-workspace-deps");
+
+    const config = {
+      packages: {
+        rust_workspace_dep_fixture: {
+          path: "./pkg-a/",
+          manager: "rust",
+        },
+        rust_workspace_pkg_b_fixture: {
+          path: "./pkg-b/",
+          manager: "rust",
+        },
+      },
+    };
+    const allPackages: Record<string, PackageFile> = yield* readAllPkgFiles({
+      config,
+      cwd: rustFolder,
+    });
+
+    const commands: PackageCommand[] = [
+      {
+        dependencies: ["rust_workspace_pkg_b_fixture"],
+        manager: "rust",
+        path: "./pkg-a/",
+        pkg: "rust_workspace_dep_fixture",
+        type: "minor",
+        parents: {},
+      },
+      {
+        dependencies: undefined,
+        manager: "rust",
+        path: "./pkg-b/",
+        pkg: "rust_workspace_pkg_b_fixture",
+        type: "minor",
+        parents: {},
+      },
+    ];
+
+    const validated = yield* validateApply({
+      logger: logger.operations,
+      commands,
+      allPackages,
+    });
+    expect(validated).toBe(true);
   });
 });

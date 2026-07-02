@@ -1,0 +1,3 @@
+[package]
+name = "rust_workspace_pkg_b_fixture"
+version = "0.8.0"
