@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.0]
+
+### Enhancements
+
+- [`1c745f0`](https://www.github.com/jbolda/covector/commit/1c745f062521531a18cd09469a7ab131c9840dd5) ([#365](https://www.github.com/jbolda/covector/pull/365) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Upgrade to `effection` v4. This is mostly an internal change, but allows for much better type handling and deeper logging customization.
+
+### Changes Supporting Covector Development
+
+- [`29348d2`](https://www.github.com/jbolda/covector/commit/29348d217b906f5a39b45a94bae10be523874f40) ([#395](https://www.github.com/jbolda/covector/pull/395) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Shift to using `tsdown` for bundling dependencies.
+
 ## \[0.8.0]
 
 ### Enhancements

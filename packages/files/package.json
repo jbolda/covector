@@ -1,6 +1,6 @@
 {
   "name": "@covector/files",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "license": "Apache-2.0",
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
@@ -22,7 +22,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@covector/toml": "0.2.0",
+    "@covector/toml": "0.3.0",
     "semver": "^7.8.5",
     "tinyglobby": "0.2.17",
     "yaml": "^2.9.0",
