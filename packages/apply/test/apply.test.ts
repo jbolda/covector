@@ -476,6 +476,87 @@ describe("package file apply bump (snapshot)", () => {
         ]);
     });
 
+    it("bumps multi with workspace inherited dep", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const rustFolder = f.copy("pkg.rust-workspace-deps");
+
+      const commands = [
+        {
+          dependencies: ["rust_workspace_pkg_b_fixture"],
+          manager: "rust",
+          path: "./pkg-a/",
+          pkg: "rust_workspace_dep_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-b/",
+          pkg: "rust_workspace_pkg_b_fixture",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          rust_workspace_dep_fixture: {
+            path: "./pkg-a/",
+            manager: "rust",
+          },
+          rust_workspace_pkg_b_fixture: {
+            path: "./pkg-b/",
+            manager: "rust",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: rustFolder,
+      });
+
+      // the version of a `{ workspace = true }` dependency lives in the
+      // workspace root manifest, so the member manifest is left untouched
+      // aside from its own version bump
+      const modifiedAPKGFile = yield* loadFile("pkg-a/Cargo.toml", rustFolder);
+      expect(modifiedAPKGFile.content).toBe(
+        "[package]\n" +
+          'name = "rust_workspace_dep_fixture"\n' +
+          'version = "0.6.0"\n' +
+          "\n" +
+          "[dependencies]\n" +
+          "serde = { workspace = true }\n" +
+          "rust_workspace_pkg_b_fixture = { workspace = true }\n",
+      );
+
+      const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
+      expect(modifiedBPKGFile.content).toBe(
+        "[package]\n" +
+          'name = "rust_workspace_pkg_b_fixture"\n' +
+          'version = "0.9.0"\n',
+      );
+
+      yield* logTest.consecutive(log.all, [
+        {
+          msg: "bumping rust_workspace_dep_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_workspace_pkg_b_fixture with minor",
+          level: "info",
+        },
+      ]);
+    });
+
     it("bumps multi with object dep", function* () {
       const log = yield* logTest.useCapturedLogger();
         const rustFolder = f.copy("pkg.rust-multi-object-dep");
