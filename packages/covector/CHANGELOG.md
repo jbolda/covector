@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.13.0]
+
+### Enhancements
+
+- [`1c745f0`](https://www.github.com/jbolda/covector/commit/1c745f062521531a18cd09469a7ab131c9840dd5) ([#365](https://www.github.com/jbolda/covector/pull/365) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Upgrade to `effection` v4. This is mostly an internal change, but allows for much better type handling and deeper logging customization.
+
+### Dependencies
+
+- Upgraded to `@covector/assemble@0.13.0`
+- Upgraded to `@covector/apply@0.11.0`
+- Upgraded to `@covector/changelog@0.13.0`
+- Upgraded to `@covector/files@0.9.0`
+- Upgraded to `@covector/command@0.9.0`
+- [`4aa45ed`](https://www.github.com/jbolda/covector/commit/4aa45ed242bbd419f0a3abb380da6112e6a7f782) ([#394](https://www.github.com/jbolda/covector/pull/394) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Swap to `tinyglobby`.
+- [`4aa45ed`](https://www.github.com/jbolda/covector/commit/4aa45ed242bbd419f0a3abb380da6112e6a7f782) ([#394](https://www.github.com/jbolda/covector/pull/394) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Move over to `yaml` for YAML parsing and stringification.
+
+### Changes Supporting Covector Development
+
+- [`29348d2`](https://www.github.com/jbolda/covector/commit/29348d217b906f5a39b45a94bae10be523874f40) ([#395](https://www.github.com/jbolda/covector/pull/395) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Shift to using `tsdown` for bundling dependencies.
+
 ## \[0.12.5]
 
 - [`ff91f1d`](https://www.github.com/jbolda/covector/commit/ff91f1d62901c1a30230a84b400abae57adf0c1e) ([#385](https://www.github.com/jbolda/covector/pull/385) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Update Action Node.js version from 20 to 24
