@@ -1,0 +1,10 @@
+{
+  "name": "pnpm-workspace-pkg-a",
+  "version": "1.0.0",
+  "dependencies": {
+    "pnpm-workspace-pkg-b": "workspace:*"
+  },
+  "devDependencies": {
+    "pnpm-workspace-pkg-c": "workspace:~"
+  }
+}
