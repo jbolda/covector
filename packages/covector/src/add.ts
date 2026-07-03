@@ -94,7 +94,7 @@ export const add = function* ({
     text({
       message: `Please summarize the changes that occurred.`,
       validate(value) {
-        if (value.length === 0) return "You must enter a summary.";
+        if (!value || value.length === 0) return "You must enter a summary.";
       },
     }),
   );
@@ -117,7 +117,7 @@ export const add = function* ({
       message: `Please name the change file.`,
       initialValue: branchName,
       validate(answer) {
-        if (answer.length === 0) return "You must enter a file name.";
+        if (!answer || answer.length === 0) return "You must enter a file name.";
         if (!answer.endsWith(".md"))
           return "File name must end with the .md file extension.";
         if (existsSync(join(cwd, changeFolder, `${answer}`)))
