@@ -325,6 +325,10 @@ export function* readCargoWorkspaceRoots({
 }): Operation<CargoWorkspaceRoot[]> {
   const roots: Record<string, CargoWorkspaceRoot> = {};
   for (const manifestPath of memberManifestPaths) {
+    // the walk starts at the member manifest itself rather than its parent:
+    // a root manifest can be a package in its own right, and one holding the
+    // version its members inherit at [workspace.package] is the package
+    // covector bumps, so its own [workspace.dependencies] table is in scope
     let dir = path.posix.dirname(manifestPath);
     while (true) {
       const rootManifestPath = dir === "." ? "Cargo.toml" : `${dir}/Cargo.toml`;

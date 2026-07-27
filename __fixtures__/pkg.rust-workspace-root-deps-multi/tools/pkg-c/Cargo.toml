@@ -1,0 +1,6 @@
+[package]
+name = "rust_multi_root_pkg_c_fixture"
+version = "1.0.0"
+
+[dependencies]
+rust_multi_root_pkg_a_fixture = { workspace = true }

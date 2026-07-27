@@ -196,6 +196,35 @@ describe("toml", () => {
       expect(roots).toEqual([]);
     });
 
+    it("finds a root per workspace when members span several", function* () {
+      const cargoFolder = f.copy("pkg.rust-workspace-root-deps-multi");
+
+      const roots = yield* readCargoWorkspaceRoots({
+        memberManifestPaths: [
+          "core/pkg-a/Cargo.toml",
+          "core/pkg-b/Cargo.toml",
+          "tools/pkg-c/Cargo.toml",
+        ],
+        cwd: cargoFolder,
+      });
+      expect(roots.map((root) => root.file.path)).toEqual([
+        "core/Cargo.toml",
+        "tools/Cargo.toml",
+      ]);
+    });
+
+    it("finds a root manifest that is the member walked up from", function* () {
+      const cargoFolder = f.copy("pkg.rust-workspace-root-deps-inherited");
+
+      // covector bumps the root manifest itself when it holds the version
+      // its members inherit at [workspace.package]
+      const roots = yield* readCargoWorkspaceRoots({
+        memberManifestPaths: ["Cargo.toml"],
+        cwd: cargoFolder,
+      });
+      expect(roots.map((root) => root.file.path)).toEqual(["Cargo.toml"]);
+    });
+
     it("terminates on an absolute manifest path", function* () {
       const cargoFolder = f.copy("pkg.rust-single");
 
