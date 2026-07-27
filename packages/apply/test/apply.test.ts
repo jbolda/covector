@@ -785,6 +785,7 @@ describe("package file apply bump (snapshot)", () => {
             "rust_root_pkg_b_fixture",
             "rust_root_pkg_c_fixture",
             "rust_root_pkg_d_fixture",
+            "rust_root_pkg_g_fixture",
           ],
           manager: "rust",
           path: "./pkg-a/",
@@ -907,6 +908,8 @@ describe("package file apply bump (snapshot)", () => {
           'rust_root_pkg_g_fixture = "=0.6"\n',
       );
 
+      // the `{ workspace = true }` declarations carry no version of their
+      // own, in a [target] table as much as anywhere else
       const modifiedAPKGFile = yield* loadFile("pkg-a/Cargo.toml", rustFolder);
       expect(modifiedAPKGFile.content).toBe(
         "[package]\n" +
@@ -919,7 +922,10 @@ describe("package file apply bump (snapshot)", () => {
           "rust_root_pkg_c_fixture = { workspace = true }\n" +
           "\n" +
           "[dev-dependencies]\n" +
-          "rust_root_pkg_d_fixture = { workspace = true }\n",
+          "rust_root_pkg_d_fixture = { workspace = true }\n" +
+          "\n" +
+          '[target."cfg(windows)".dependencies]\n' +
+          "rust_root_pkg_g_fixture = { workspace = true }\n",
       );
 
       yield* logTest.consecutive(log.all, [

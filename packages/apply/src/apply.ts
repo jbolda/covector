@@ -444,7 +444,7 @@ const getDepBumpVersion = ({
   dep: string;
   previewVersion: string;
   packageFiles: Record<string, PackageFile>;
-  getPreviousVersion: () => string;
+  getPreviousVersion: () => string | undefined;
 }) => {
   const pkgProperties = Object.keys(currentPkg[property] as object) as Array<
     keyof Pkg
@@ -453,6 +453,11 @@ const getDepBumpVersion = ({
     // if pkg is in dep list
     if (existingDep === depName) {
       const prevVersion = getPreviousVersion();
+      // a dependency can carry no version of its own: a cargo
+      // `{ workspace = true }` or path-only declaration reads back empty,
+      // and one within a `[target]` table reads back undefined. either way
+      // there is nothing here to bump
+      if (!prevVersion) return null;
       // a pnpm catalog reference (`catalog:` or `catalog:groupname`) points at
       // a range kept in pnpm-workspace.yaml and is rewritten by pnpm at
       // publish time, so there is no version in the declaration to bump

@@ -9,3 +9,6 @@ rust_root_pkg_c_fixture = { workspace = true }
 
 [dev-dependencies]
 rust_root_pkg_d_fixture = { workspace = true }
+
+[target."cfg(windows)".dependencies]
+rust_root_pkg_g_fixture = { workspace = true }
