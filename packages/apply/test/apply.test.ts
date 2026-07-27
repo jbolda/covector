@@ -205,6 +205,116 @@ describe("package file apply bump (snapshot)", () => {
         ]);
     });
 
+    it("leaves range and wildcard dependency requirements alone", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const jsonFolder = f.copy("pkg.js-range-deps");
+
+      const commands = [
+        {
+          dependencies: [
+            "range-deps-pkg-b",
+            "range-deps-pkg-c",
+            "range-deps-pkg-d",
+          ],
+          manager: "javascript",
+          path: "./packages/pkg-a/",
+          pkg: "range-deps-pkg-a",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-b/",
+          pkg: "range-deps-pkg-b",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-c/",
+          pkg: "range-deps-pkg-c",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-d/",
+          pkg: "range-deps-pkg-d",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          "range-deps-pkg-a": {
+            path: "./packages/pkg-a/",
+            manager: "javascript",
+            dependencies: [
+              "range-deps-pkg-b",
+              "range-deps-pkg-c",
+              "range-deps-pkg-d",
+            ],
+          },
+          "range-deps-pkg-b": {
+            path: "./packages/pkg-b/",
+            manager: "javascript",
+          },
+          "range-deps-pkg-c": {
+            path: "./packages/pkg-c/",
+            manager: "javascript",
+          },
+          "range-deps-pkg-d": {
+            path: "./packages/pkg-d/",
+            manager: "javascript",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: jsonFolder,
+      });
+
+      // a comparator range, a wildcard, and `*` each already cover the bumped
+      // version and have no single pin to rewrite, so narrowing them onto the
+      // bumped version would take away range the package deliberately allows
+      const modifiedPkgAFile = yield* loadFile(
+        "packages/pkg-a/package.json",
+        jsonFolder,
+      );
+      expect(modifiedPkgAFile.content).toBe(
+        "{\n" +
+          '  "name": "range-deps-pkg-a",\n' +
+          '  "version": "1.1.0",\n' +
+          '  "dependencies": {\n' +
+          '    "range-deps-pkg-b": ">=1.0 <2",\n' +
+          '    "range-deps-pkg-c": "*"\n' +
+          "  },\n" +
+          '  "devDependencies": {\n' +
+          '    "range-deps-pkg-d": "1.x"\n' +
+          "  }\n" +
+          "}\n",
+      );
+
+      yield* logTest.consecutive(log.all, [
+        { msg: "bumping range-deps-pkg-a with minor", level: "info" },
+        { msg: "bumping range-deps-pkg-b with minor", level: "info" },
+        { msg: "bumping range-deps-pkg-c with minor", level: "info" },
+        { msg: "bumping range-deps-pkg-d with minor", level: "info" },
+      ]);
+    });
+
     it("bumps multi with pnpm workspace protocol deps", function* () {
       const log = yield* logTest.useCapturedLogger();
       const jsonFolder = f.copy("pkg.js-pnpm-workspace");
@@ -234,6 +344,14 @@ describe("package file apply bump (snapshot)", () => {
           type: "minor",
           parents: {},
         },
+        {
+          dependencies: ["pnpm-workspace-pkg-b", "pnpm-workspace-pkg-c"],
+          manager: "javascript",
+          path: "./packages/pkg-d/",
+          pkg: "pnpm-workspace-pkg-d",
+          type: "minor",
+          parents: {},
+        },
       ];
 
       const config = {
@@ -252,6 +370,11 @@ describe("package file apply bump (snapshot)", () => {
             path: "./packages/pkg-c/",
             manager: "javascript",
             dependencies: ["pnpm-workspace-pkg-b"],
+          },
+          "pnpm-workspace-pkg-d": {
+            path: "./packages/pkg-d/",
+            manager: "javascript",
+            dependencies: ["pnpm-workspace-pkg-b", "pnpm-workspace-pkg-c"],
           },
         },
       };
@@ -313,10 +436,31 @@ describe("package file apply bump (snapshot)", () => {
           "}\n",
       );
 
+      // a wildcard or comparator range behind the protocol prefix is the
+      // workspace's to resolve as much as a bare `workspace:*` is, so it is
+      // left alone rather than collapsed onto the bumped version
+      const modifiedPkgDFile = yield* loadFile(
+        "packages/pkg-d/package.json",
+        jsonFolder,
+      );
+      expect(modifiedPkgDFile.content).toBe(
+        "{\n" +
+          '  "name": "pnpm-workspace-pkg-d",\n' +
+          '  "version": "1.1.0",\n' +
+          '  "dependencies": {\n' +
+          '    "pnpm-workspace-pkg-b": "workspace:1.x"\n' +
+          "  },\n" +
+          '  "devDependencies": {\n' +
+          '    "pnpm-workspace-pkg-c": "workspace:>=1.0 <2"\n' +
+          "  }\n" +
+          "}\n",
+      );
+
       yield* logTest.consecutive(log.all, [
         { msg: "bumping pnpm-workspace-pkg-a with minor", level: "info" },
         { msg: "bumping pnpm-workspace-pkg-b with minor", level: "info" },
         { msg: "bumping pnpm-workspace-pkg-c with minor", level: "info" },
+        { msg: "bumping pnpm-workspace-pkg-d with minor", level: "info" },
       ]);
     });
 

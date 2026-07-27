@@ -440,25 +440,27 @@ const getDepBumpVersion = ({
       // a range kept in pnpm-workspace.yaml and is rewritten by pnpm at
       // publish time, so there is no version in the declaration to bump
       if (prevVersion.startsWith("catalog:")) return null;
-      // the pnpm/yarn workspace protocol pins `workspace:*` / `workspace:^` /
-      // `workspace:~` deps to whatever version the workspace holds, and the
-      // package manager rewrites them at publish time, so there is no version
-      // in the declaration to bump (aliased deps, `workspace:name@range`, are
-      // also left alone); an embedded range such as `workspace:^1.2.3` keeps
-      // the protocol prefix and bumps the range within it
+      // the pnpm/yarn workspace protocol hands resolution to the package
+      // manager, which rewrites the declaration at publish time. an aliased
+      // dep (`workspace:name@range`), and anything the protocol leaves to the
+      // workspace to resolve (`workspace:*`, `workspace:^`, `workspace:1.x`,
+      // `workspace:>=1.2 <2`), names no version to bump toward; an embedded
+      // pin such as `workspace:^1.2.3` keeps the prefix and bumps within it
       const workspaceProtocol = prevVersion.startsWith("workspace:");
       const requirement = workspaceProtocol
         ? prevVersion.slice("workspace:".length)
         : prevVersion;
       if (
         workspaceProtocol &&
-        (requirement === "*" ||
-          requirement === "^" ||
-          requirement === "~" ||
+        (requirementFloats(requirement) ||
+          requirementSpansRange(requirement) ||
           requirement.includes("@"))
       ) {
         return null;
       }
+
+      if (requirementFloats(requirement) || requirementSpansRange(requirement))
+        return null;
 
       const version = bumpRequirement({
         requirement,
@@ -473,9 +475,10 @@ const getDepBumpVersion = ({
   return null;
 };
 
-// a requirement floats when it names no version to bump toward: `*` takes
-// whatever version the workspace resolves, and a wildcard such as `1.*` or
-// `1.x` takes any version below the wildcard
+// a requirement floats when it names no version to bump toward: `*` and the
+// bare `^` / `~` of the workspace protocol take whatever version the
+// workspace resolves, and a wildcard such as `1.*` or `1.x` takes any
+// version below the wildcard
 const requirementFloats = (requirement: string) =>
   !/\d/.test(requirement) || /(^|\.)[xX*](\.|$)/.test(requirement);
 

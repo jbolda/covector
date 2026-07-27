@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "js-range-deps",
+  "description": "workspace",
+  "version": "1.0.0",
+  "workspaces": [
+    "packages/*"
+  ]
+}
