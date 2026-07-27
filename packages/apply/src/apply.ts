@@ -169,37 +169,6 @@ function* applyWorkspaceRootDepBumps({
     packageFiles[b.name!] = b;
   }
 
-  const bumpRequirement = ({
-    prevVersion,
-    dependency,
-  }: {
-    prevVersion: string;
-    dependency: string;
-  }) => {
-    // `*` floats on whatever version the workspace holds
-    if (prevVersion === "*") return null;
-    // comparator/compound ranges (`>=1.2, <2`) and wildcard requirements
-    // (`1.*`, `1.x`) float by design and have no single-pin rewrite; leave
-    // them untouched rather than collapsing them to a pin (range bump
-    // policy is tracked in #184)
-    if (/[<>,| ]/.test(prevVersion) || /(^|\.)[xX*](\.|$)/.test(prevVersion))
-      return null;
-    const versionRequirementMatch = /[\^=~]/.exec(prevVersion);
-    const versionRequirement = versionRequirementMatch
-      ? versionRequirementMatch[0]
-      : "";
-    const version = deriveVersionConsideringPartials({
-      dependency,
-      prevVersion,
-      versionRequirement,
-      previewVersion,
-      packageFiles,
-    });
-    // a partial pin such as `"2.11"` may already cover the bumped version
-    if (!version || version === prevVersion) return null;
-    return version;
-  };
-
   const roots = yield* readCargoWorkspaceRoots({
     memberManifestPaths: cargoBumps.map((b) => b.file!.path),
     cwd,
@@ -214,8 +183,17 @@ function* applyWorkspaceRootDepBumps({
       const entry = root.doc.get(key);
       const prevVersion = typeof entry === "string" ? entry : entry?.version;
       if (typeof prevVersion !== "string" || prevVersion === "") continue;
+      // a requirement that floats or spans a range has no single pin to
+      // rewrite, so leave it untouched rather than collapse it
+      if (requirementFloats(prevVersion) || requirementSpansRange(prevVersion))
+        continue;
 
-      const version = bumpRequirement({ prevVersion, dependency: b.name! });
+      const version = bumpRequirement({
+        requirement: prevVersion,
+        dependency: b.name!,
+        previewVersion,
+        packageFiles,
+      });
       if (!version) continue;
 
       root.doc.set(typeof entry === "string" ? key : `${key}.version`, version);
@@ -469,33 +447,69 @@ const getDepBumpVersion = ({
       // also left alone); an embedded range such as `workspace:^1.2.3` keeps
       // the protocol prefix and bumps the range within it
       const workspaceProtocol = prevVersion.startsWith("workspace:");
-      const range = workspaceProtocol
+      const requirement = workspaceProtocol
         ? prevVersion.slice("workspace:".length)
         : prevVersion;
       if (
         workspaceProtocol &&
-        (range === "*" || range === "^" || range === "~" || range.includes("@"))
+        (requirement === "*" ||
+          requirement === "^" ||
+          requirement === "~" ||
+          requirement.includes("@"))
       ) {
         return null;
       }
 
-      const versionRequirementMatch = /[\^=~]/.exec(range);
-      const versionRequirement = versionRequirementMatch
-        ? versionRequirementMatch[0]
-        : "";
-
-      const version = deriveVersionConsideringPartials({
+      const version = bumpRequirement({
+        requirement,
         dependency: dep,
-        prevVersion: range,
-        versionRequirement,
         previewVersion,
         packageFiles,
       });
-      if (!version) return version;
+      if (!version) return null;
       return workspaceProtocol ? `workspace:${version}` : version;
     }
   }
   return null;
+};
+
+// a requirement floats when it names no version to bump toward: `*` takes
+// whatever version the workspace resolves, and a wildcard such as `1.*` or
+// `1.x` takes any version below the wildcard
+const requirementFloats = (requirement: string) =>
+  !/\d/.test(requirement) || /(^|\.)[xX*](\.|$)/.test(requirement);
+
+// a comparator range such as `>=0.2, <0.4` spans versions instead of naming
+// one, so there is no single pin to rewrite (range bump policy is tracked in
+// #184)
+const requirementSpansRange = (requirement: string) =>
+  /[<>,| ]/.test(requirement);
+
+// rewrite a version requirement around the dependency's bumped version,
+// keeping both the comparator it was written with (`^`, `=`, `~`) and its
+// precision: `^1.2` stays two part, `1` stays one part. returns null when the
+// requirement already covers the bumped version, as a partial pin often does
+const bumpRequirement = ({
+  requirement,
+  dependency,
+  previewVersion,
+  packageFiles,
+}: {
+  requirement: string;
+  dependency: string;
+  previewVersion: string;
+  packageFiles: Record<string, PackageFile>;
+}) => {
+  const comparatorMatch = /[\^=~]/.exec(requirement);
+  const version = deriveVersionConsideringPartials({
+    dependency,
+    prevVersion: requirement,
+    versionRequirement: comparatorMatch ? comparatorMatch[0] : "",
+    previewVersion,
+    packageFiles,
+  });
+  if (!version || version === requirement) return null;
+  return version;
 };
 
 const deriveVersionConsideringPartials = ({
