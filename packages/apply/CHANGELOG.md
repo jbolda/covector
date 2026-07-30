@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.11.0]
+
+- [`f22a1a9`](https://www.github.com/jbolda/covector/commit/f22a1a9511495f2a2c8fbe7574f99d41ef8b7666) ([#400](https://www.github.com/jbolda/covector/pull/400) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) `catalog:` references in package.json are left untouched during dependency bumps: pnpm rewrites them at publish time from the catalog tables in pnpm-workspace.yaml, and previously they were corrupted to a bare major version.
+- [`3f48294`](https://www.github.com/jbolda/covector/commit/3f48294397500ebf88dbbc5bb97332df4a104a5e) ([#397](https://www.github.com/jbolda/covector/pull/397) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) Leave pnpm/yarn `workspace:*` (and `workspace:^` / `workspace:~`) dependency declarations untouched when bumping dependent packages instead of rewriting them to a bare major version; a declaration with an embedded range like `workspace:^1.2.3` keeps the protocol prefix and bumps the range within it.
+- [`f22a1a9`](https://www.github.com/jbolda/covector/commit/f22a1a9511495f2a2c8fbe7574f99d41ef8b7666) ([#400](https://www.github.com/jbolda/covector/pull/400) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) Leave a dependency requirement that spans a range or floats alone instead of collapsing it onto the bumped version. A comparator range (`>=1.0 <2`), a wildcard (`1.x`), and `*` already cover the bumped version, and were previously narrowed to a single pin — `">=1.0 <2"` became `"=1.1"`. This covers requirements written behind the pnpm workspace protocol prefix (`workspace:1.x`) as well as plain ones.
+- [`f22a1a9`](https://www.github.com/jbolda/covector/commit/f22a1a9511495f2a2c8fbe7574f99d41ef8b7666) ([#400](https://www.github.com/jbolda/covector/pull/400) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) Skip dependencies declared without a version of their own in a cargo `[target]` table, such as `{ workspace = true }` or a path-only entry. Bumping a package that another crate depends on through a target table previously threw.
+- [`f22a1a9`](https://www.github.com/jbolda/covector/commit/f22a1a9511495f2a2c8fbe7574f99d41ef8b7666) ([#400](https://www.github.com/jbolda/covector/pull/400) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) Bump version requirements for member crates declared in a cargo workspace root manifest's `[workspace.dependencies]` table. Requirements keep their form (partial pins stay partial, range prefixes are preserved), while path-only entries, `*` requirements, and comparator or wildcard ranges (`>=1.2, <2`, `1.*`) are left untouched.
+
+### Enhancements
+
+- [`1c745f0`](https://www.github.com/jbolda/covector/commit/1c745f062521531a18cd09469a7ab131c9840dd5) ([#365](https://www.github.com/jbolda/covector/pull/365) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Upgrade to `effection` v4. This is mostly an internal change, but allows for much better type handling and deeper logging customization.
+
+### Dependencies
+
+- Upgraded to `@covector/files@0.9.0`
+
+### Changes Supporting Covector Development
+
+- [`29348d2`](https://www.github.com/jbolda/covector/commit/29348d217b906f5a39b45a94bae10be523874f40) ([#395](https://www.github.com/jbolda/covector/pull/395) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Shift to using `tsdown` for bundling dependencies.
+
 ## \[0.10.0]
 
 ### Enhancements
