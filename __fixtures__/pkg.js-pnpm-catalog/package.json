@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "name": "js-pnpm-catalog",
+  "description": "workspace with pnpm catalogs",
+  "version": "1.0.0"
+}

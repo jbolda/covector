@@ -1,0 +1,11 @@
+{
+  "name": "js-catalog-pkg-a",
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "catalog:",
+    "js-catalog-pkg-b": "catalog:"
+  },
+  "devDependencies": {
+    "js-catalog-pkg-c": "catalog:tools"
+  }
+}

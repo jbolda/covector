@@ -1,0 +1,11 @@
+{
+  "name": "range-deps-pkg-a",
+  "version": "1.0.0",
+  "dependencies": {
+    "range-deps-pkg-b": ">=1.0 <2",
+    "range-deps-pkg-c": "*"
+  },
+  "devDependencies": {
+    "range-deps-pkg-d": "1.x"
+  }
+}

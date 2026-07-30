@@ -1,0 +1,3 @@
+[package]
+name = "rust_root_inherited_helper_fixture"
+version.workspace = true

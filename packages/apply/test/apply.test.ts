@@ -205,6 +205,116 @@ describe("package file apply bump (snapshot)", () => {
         ]);
     });
 
+    it("leaves range and wildcard dependency requirements alone", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const jsonFolder = f.copy("pkg.js-range-deps");
+
+      const commands = [
+        {
+          dependencies: [
+            "range-deps-pkg-b",
+            "range-deps-pkg-c",
+            "range-deps-pkg-d",
+          ],
+          manager: "javascript",
+          path: "./packages/pkg-a/",
+          pkg: "range-deps-pkg-a",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-b/",
+          pkg: "range-deps-pkg-b",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-c/",
+          pkg: "range-deps-pkg-c",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-d/",
+          pkg: "range-deps-pkg-d",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          "range-deps-pkg-a": {
+            path: "./packages/pkg-a/",
+            manager: "javascript",
+            dependencies: [
+              "range-deps-pkg-b",
+              "range-deps-pkg-c",
+              "range-deps-pkg-d",
+            ],
+          },
+          "range-deps-pkg-b": {
+            path: "./packages/pkg-b/",
+            manager: "javascript",
+          },
+          "range-deps-pkg-c": {
+            path: "./packages/pkg-c/",
+            manager: "javascript",
+          },
+          "range-deps-pkg-d": {
+            path: "./packages/pkg-d/",
+            manager: "javascript",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: jsonFolder,
+      });
+
+      // a comparator range, a wildcard, and `*` each already cover the bumped
+      // version and have no single pin to rewrite, so narrowing them onto the
+      // bumped version would take away range the package deliberately allows
+      const modifiedPkgAFile = yield* loadFile(
+        "packages/pkg-a/package.json",
+        jsonFolder,
+      );
+      expect(modifiedPkgAFile.content).toBe(
+        "{\n" +
+          '  "name": "range-deps-pkg-a",\n' +
+          '  "version": "1.1.0",\n' +
+          '  "dependencies": {\n' +
+          '    "range-deps-pkg-b": ">=1.0 <2",\n' +
+          '    "range-deps-pkg-c": "*"\n' +
+          "  },\n" +
+          '  "devDependencies": {\n' +
+          '    "range-deps-pkg-d": "1.x"\n' +
+          "  }\n" +
+          "}\n",
+      );
+
+      yield* logTest.consecutive(log.all, [
+        { msg: "bumping range-deps-pkg-a with minor", level: "info" },
+        { msg: "bumping range-deps-pkg-b with minor", level: "info" },
+        { msg: "bumping range-deps-pkg-c with minor", level: "info" },
+        { msg: "bumping range-deps-pkg-d with minor", level: "info" },
+      ]);
+    });
+
     it("bumps multi with pnpm workspace protocol deps", function* () {
       const log = yield* logTest.useCapturedLogger();
       const jsonFolder = f.copy("pkg.js-pnpm-workspace");
@@ -234,6 +344,14 @@ describe("package file apply bump (snapshot)", () => {
           type: "minor",
           parents: {},
         },
+        {
+          dependencies: ["pnpm-workspace-pkg-b", "pnpm-workspace-pkg-c"],
+          manager: "javascript",
+          path: "./packages/pkg-d/",
+          pkg: "pnpm-workspace-pkg-d",
+          type: "minor",
+          parents: {},
+        },
       ];
 
       const config = {
@@ -252,6 +370,11 @@ describe("package file apply bump (snapshot)", () => {
             path: "./packages/pkg-c/",
             manager: "javascript",
             dependencies: ["pnpm-workspace-pkg-b"],
+          },
+          "pnpm-workspace-pkg-d": {
+            path: "./packages/pkg-d/",
+            manager: "javascript",
+            dependencies: ["pnpm-workspace-pkg-b", "pnpm-workspace-pkg-c"],
           },
         },
       };
@@ -313,10 +436,134 @@ describe("package file apply bump (snapshot)", () => {
           "}\n",
       );
 
+      // a wildcard or comparator range behind the protocol prefix is the
+      // workspace's to resolve as much as a bare `workspace:*` is, so it is
+      // left alone rather than collapsed onto the bumped version
+      const modifiedPkgDFile = yield* loadFile(
+        "packages/pkg-d/package.json",
+        jsonFolder,
+      );
+      expect(modifiedPkgDFile.content).toBe(
+        "{\n" +
+          '  "name": "pnpm-workspace-pkg-d",\n' +
+          '  "version": "1.1.0",\n' +
+          '  "dependencies": {\n' +
+          '    "pnpm-workspace-pkg-b": "workspace:1.x"\n' +
+          "  },\n" +
+          '  "devDependencies": {\n' +
+          '    "pnpm-workspace-pkg-c": "workspace:>=1.0 <2"\n' +
+          "  }\n" +
+          "}\n",
+      );
+
       yield* logTest.consecutive(log.all, [
         { msg: "bumping pnpm-workspace-pkg-a with minor", level: "info" },
         { msg: "bumping pnpm-workspace-pkg-b with minor", level: "info" },
         { msg: "bumping pnpm-workspace-pkg-c with minor", level: "info" },
+        { msg: "bumping pnpm-workspace-pkg-d with minor", level: "info" },
+      ]);
+    });
+
+    it("bumps multi with pnpm catalog deps", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const jsonFolder = f.copy("pkg.js-pnpm-catalog");
+
+      const commands = [
+        {
+          dependencies: ["js-catalog-pkg-b", "js-catalog-pkg-c"],
+          manager: "javascript",
+          path: "./packages/pkg-a/",
+          pkg: "js-catalog-pkg-a",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-b/",
+          pkg: "js-catalog-pkg-b",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "javascript",
+          path: "./packages/pkg-c/",
+          pkg: "js-catalog-pkg-c",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          "js-catalog-pkg-a": {
+            path: "./packages/pkg-a/",
+            manager: "javascript",
+            dependencies: ["js-catalog-pkg-b", "js-catalog-pkg-c"],
+          },
+          "js-catalog-pkg-b": {
+            path: "./packages/pkg-b/",
+            manager: "javascript",
+          },
+          "js-catalog-pkg-c": {
+            path: "./packages/pkg-c/",
+            manager: "javascript",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: jsonFolder });
+      const originalWorkspaceFile = yield* loadFile(
+        "pnpm-workspace.yaml",
+        jsonFolder,
+      );
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: jsonFolder,
+      });
+
+      // a `catalog:` reference points at a range kept in pnpm-workspace.yaml
+      // and is rewritten by pnpm at publish time, so the declaration itself
+      // must survive a cascade bump byte-for-byte
+      const modifiedPkgAFile = yield* loadFile(
+        "packages/pkg-a/package.json",
+        jsonFolder,
+      );
+      expect(modifiedPkgAFile.content).toBe(
+        "{\n" +
+          '  "name": "js-catalog-pkg-a",\n' +
+          '  "version": "1.1.0",\n' +
+          '  "dependencies": {\n' +
+          '    "react": "catalog:",\n' +
+          '    "js-catalog-pkg-b": "catalog:"\n' +
+          "  },\n" +
+          '  "devDependencies": {\n' +
+          '    "js-catalog-pkg-c": "catalog:tools"\n' +
+          "  }\n" +
+          "}\n",
+      );
+
+      // the catalog tables are managed manually (pnpm does not document
+      // catalog entries for workspace-internal packages), so the workspace
+      // manifest is never rewritten: it survives byte-for-byte as checked
+      // out, line endings included
+      const modifiedWorkspaceFile = yield* loadFile(
+        "pnpm-workspace.yaml",
+        jsonFolder,
+      );
+      expect(modifiedWorkspaceFile.content).toBe(originalWorkspaceFile.content);
+
+      yield* logTest.consecutive(log.all, [
+        { msg: "bumping js-catalog-pkg-a with minor", level: "info" },
+        { msg: "bumping js-catalog-pkg-b with minor", level: "info" },
+        { msg: "bumping js-catalog-pkg-c with minor", level: "info" },
       ]);
     });
 
@@ -667,6 +914,397 @@ describe("package file apply bump (snapshot)", () => {
         },
         {
           msg: "bumping rust_workspace_pkg_b_fixture with minor",
+          level: "info",
+        },
+      ]);
+    });
+
+    it("bumps multi with workspace root dependency requirements", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const rustFolder = f.copy("pkg.rust-workspace-root-deps");
+
+      const commands = [
+        {
+          dependencies: [
+            "rust_root_pkg_b_fixture",
+            "rust_root_pkg_c_fixture",
+            "rust_root_pkg_d_fixture",
+            "rust_root_pkg_g_fixture",
+          ],
+          manager: "rust",
+          path: "./pkg-a/",
+          pkg: "rust_root_pkg_a_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-b/",
+          pkg: "rust_root_pkg_b_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-c/",
+          pkg: "rust_root_pkg_c_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-d/",
+          pkg: "rust_root_pkg_d_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-e/",
+          pkg: "rust_root_pkg_e_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-f/",
+          pkg: "rust_root_pkg_f_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-g/",
+          pkg: "rust_root_pkg_g_fixture",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          rust_root_pkg_a_fixture: {
+            path: "./pkg-a/",
+            manager: "rust",
+          },
+          rust_root_pkg_b_fixture: {
+            path: "./pkg-b/",
+            manager: "rust",
+          },
+          rust_root_pkg_c_fixture: {
+            path: "./pkg-c/",
+            manager: "rust",
+          },
+          rust_root_pkg_d_fixture: {
+            path: "./pkg-d/",
+            manager: "rust",
+          },
+          rust_root_pkg_e_fixture: {
+            path: "./pkg-e/",
+            manager: "rust",
+          },
+          rust_root_pkg_f_fixture: {
+            path: "./pkg-f/",
+            manager: "rust",
+          },
+          rust_root_pkg_g_fixture: {
+            path: "./pkg-g/",
+            manager: "rust",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: rustFolder,
+      });
+
+      // requirements for member crates in the root [workspace.dependencies]
+      // table track the bumped versions: partial pins stay partial, exact
+      // pins and range prefixes are kept, and path-only, `*`,
+      // comparator-range, or wildcard entries are left untouched
+      const modifiedRootFile = yield* loadFile("Cargo.toml", rustFolder);
+      expect(modifiedRootFile.content).toBe(
+        "[workspace]\n" +
+          'members = ["pkg-a", "pkg-b", "pkg-c", "pkg-d", "pkg-e", "pkg-f", "pkg-g"]\n' +
+          "\n" +
+          "[workspace.dependencies]\n" +
+          'serde = "1.0"\n' +
+          'rust_root_pkg_a_fixture = { version = "0.6", path = "pkg-a", default-features = false }\n' +
+          'rust_root_pkg_b_fixture = "^0.9.0"\n' +
+          'rust_root_pkg_c_fixture = { path = "pkg-c", version = "*" }\n' +
+          'rust_root_pkg_d_fixture = { path = "pkg-d" }\n' +
+          'rust_root_pkg_e_fixture = ">=0.2, <0.4"\n' +
+          'rust_root_pkg_f_fixture = "0.*"\n' +
+          'rust_root_pkg_g_fixture = "=0.6"\n',
+      );
+
+      // the `{ workspace = true }` declarations carry no version of their
+      // own, in a [target] table as much as anywhere else
+      const modifiedAPKGFile = yield* loadFile("pkg-a/Cargo.toml", rustFolder);
+      expect(modifiedAPKGFile.content).toBe(
+        "[package]\n" +
+          'name = "rust_root_pkg_a_fixture"\n' +
+          'version = "0.6.0"\n' +
+          "\n" +
+          "[dependencies]\n" +
+          "serde = { workspace = true }\n" +
+          "rust_root_pkg_b_fixture = { workspace = true }\n" +
+          "rust_root_pkg_c_fixture = { workspace = true }\n" +
+          "\n" +
+          "[dev-dependencies]\n" +
+          "rust_root_pkg_d_fixture = { workspace = true }\n" +
+          "\n" +
+          '[target."cfg(windows)".dependencies]\n' +
+          "rust_root_pkg_g_fixture = { workspace = true }\n",
+      );
+
+      yield* logTest.consecutive(log.all, [
+        {
+          msg: "bumping rust_root_pkg_a_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_b_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_c_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_d_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_e_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_f_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_g_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_a_fixture in Cargo.toml [workspace.dependencies] to 0.6",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_b_fixture in Cargo.toml [workspace.dependencies] to ^0.9.0",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_pkg_g_fixture in Cargo.toml [workspace.dependencies] to =0.6",
+          level: "info",
+        },
+      ]);
+    });
+
+    it("bumps workspace root dependency requirements across multiple roots", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const rustFolder = f.copy("pkg.rust-workspace-root-deps-multi");
+
+      const commands = [
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./core/pkg-a/",
+          pkg: "rust_multi_root_pkg_a_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./core/pkg-b/",
+          pkg: "rust_multi_root_pkg_b_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: ["rust_multi_root_pkg_a_fixture"],
+          manager: "rust",
+          path: "./tools/pkg-c/",
+          pkg: "rust_multi_root_pkg_c_fixture",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          rust_multi_root_pkg_a_fixture: {
+            path: "./core/pkg-a/",
+            manager: "rust",
+          },
+          rust_multi_root_pkg_b_fixture: {
+            path: "./core/pkg-b/",
+            manager: "rust",
+          },
+          rust_multi_root_pkg_c_fixture: {
+            path: "./tools/pkg-c/",
+            manager: "rust",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: rustFolder,
+      });
+
+      // each workspace root in the repo is bumped, and a member that no root
+      // declares (pkg-b) leaves every [workspace.dependencies] table alone
+      const modifiedCoreRootFile = yield* loadFile(
+        "core/Cargo.toml",
+        rustFolder,
+      );
+      expect(modifiedCoreRootFile.content).toBe(
+        "[workspace]\n" +
+          'members = ["pkg-a", "pkg-b"]\n' +
+          "\n" +
+          "[workspace.dependencies]\n" +
+          'serde = "1.0"\n' +
+          'rust_multi_root_pkg_a_fixture = { version = "0.6", path = "pkg-a" }\n',
+      );
+
+      // a root can declare a crate from a sibling workspace by path, so the
+      // requirement is bumped wherever it is declared
+      const modifiedToolsRootFile = yield* loadFile(
+        "tools/Cargo.toml",
+        rustFolder,
+      );
+      expect(modifiedToolsRootFile.content).toBe(
+        "[workspace]\n" +
+          'members = ["pkg-c"]\n' +
+          "\n" +
+          "[workspace.dependencies]\n" +
+          'rust_multi_root_pkg_a_fixture = { version = "^0.6", path = "../core/pkg-a" }\n' +
+          'rust_multi_root_pkg_c_fixture = { version = "1.1", path = "pkg-c" }\n',
+      );
+
+      yield* logTest.consecutive(log.all, [
+        {
+          msg: "bumping rust_multi_root_pkg_a_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_multi_root_pkg_b_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_multi_root_pkg_c_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_multi_root_pkg_a_fixture in core/Cargo.toml [workspace.dependencies] to 0.6",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_multi_root_pkg_a_fixture in tools/Cargo.toml [workspace.dependencies] to ^0.6",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_multi_root_pkg_c_fixture in tools/Cargo.toml [workspace.dependencies] to 1.1",
+          level: "info",
+        },
+      ]);
+    });
+
+    it("bumps workspace root dependency requirements with an inherited version", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const rustFolder = f.copy("pkg.rust-workspace-root-deps-inherited");
+
+      const commands = [
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./",
+          pkg: "rust_root_inherited_fixture",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          rust_root_inherited_fixture: {
+            path: "./",
+            manager: "rust",
+          },
+        },
+      };
+
+      // the member manifests inherit their version from the workspace root
+      // (`version.workspace = true`) and are never rewritten, so they keep
+      // their checked-out bytes; compare them against their original content
+      const originalAPKGFile = yield* loadFile("pkg-a/Cargo.toml", rustFolder);
+      const originalBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: rustFolder,
+      });
+
+      // the package's version lives at [workspace.package] in the root
+      // manifest, so the root carries both the bumped version and the bumped
+      // [workspace.dependencies] requirement, while the entry without a
+      // version (path and features only) is left untouched
+      const modifiedRootFile = yield* loadFile("Cargo.toml", rustFolder);
+      expect(modifiedRootFile.content).toBe(
+        "[workspace]\n" +
+          'members = ["pkg-a", "pkg-b"]\n' +
+          "\n" +
+          "[workspace.package]\n" +
+          'version = "1.3.0"\n' +
+          "\n" +
+          "[workspace.dependencies]\n" +
+          'rust_root_inherited_fixture = { version = "1.3", path = "pkg-a" }\n' +
+          'rust_root_inherited_helper_fixture = { path = "pkg-b", default-features = false }\n',
+      );
+
+      const modifiedAPKGFile = yield* loadFile("pkg-a/Cargo.toml", rustFolder);
+      expect(modifiedAPKGFile.content).toBe(originalAPKGFile.content);
+      const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
+      expect(modifiedBPKGFile.content).toBe(originalBPKGFile.content);
+
+      yield* logTest.consecutive(log.all, [
+        {
+          msg: "bumping rust_root_inherited_fixture with minor",
+          level: "info",
+        },
+        {
+          msg: "bumping rust_root_inherited_fixture in Cargo.toml [workspace.dependencies] to 1.3",
           level: "info",
         },
       ]);

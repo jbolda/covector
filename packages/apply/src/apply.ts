@@ -1,6 +1,8 @@
 import { type Operation } from "effection";
 import {
   writePkgFile,
+  saveFile,
+  readCargoWorkspaceRoots,
   getPackageFileVersion,
   setPackageFileVersion,
   testSerializePkgFile,
@@ -54,13 +56,19 @@ export function* apply({
   });
 
   if (bump) {
-    yield* writeAll({
-      bumps: bumps.reduce(
-        (final: PackageFile[], current) =>
-          !current.file ? final : final.concat([current]),
-        [],
-      ),
+    const bumpsToWrite = bumps.reduce(
+      (final: PackageFile[], current) =>
+        !current.file ? final : final.concat([current]),
+      [],
+    );
+    yield* writeAll({ bumps: bumpsToWrite, cwd });
+    yield* applyWorkspaceRootDepBumps({
+      logger,
+      bumps: bumpsToWrite,
+      allPackages,
       cwd,
+      previewVersion,
+      logs,
     });
   } else {
     for (const b of bumps) {
@@ -127,6 +135,80 @@ const writeAll = function* ({
     yield* writePkgFile({ packageFile: bump, cwd });
   }
 };
+
+// a cargo workspace root manifest can declare version requirements for
+// member packages in its [workspace.dependencies] table, outside the
+// members' own manifests. bump those requirements here to track each bumped
+// member's new version. entries without a version (path-only) and `*`
+// requirements float on the workspace and are left untouched
+function* applyWorkspaceRootDepBumps({
+  logger,
+  bumps,
+  allPackages,
+  cwd,
+  previewVersion = "",
+  logs = true,
+}: {
+  logger: Logger;
+  bumps: PackageFile[];
+  allPackages: Record<string, PackageFile>;
+  cwd: string;
+  previewVersion?: string;
+  logs?: boolean;
+}): Operation<void> {
+  const cargoBumps = bumps.filter(
+    (b) =>
+      !!b.name && b.file?.filename === "Cargo" && b.file?.extname === ".toml",
+  );
+  if (cargoBumps.length === 0) return;
+
+  // deriveVersionConsideringPartials reads the bumped version off the
+  // package file record
+  const packageFiles = { ...allPackages };
+  for (const b of cargoBumps) {
+    packageFiles[b.name!] = b;
+  }
+
+  const roots = yield* readCargoWorkspaceRoots({
+    memberManifestPaths: cargoBumps.map((b) => b.file!.path),
+    cwd,
+  });
+
+  for (const root of roots) {
+    let modified = false;
+    for (const b of cargoBumps) {
+      const depName = b.pkg.package?.name || b.pkg.name || b.name!;
+      const key = `workspace.dependencies.${depName}`;
+      if (!root.doc.has(key)) continue;
+      const entry = root.doc.get(key);
+      const prevVersion = typeof entry === "string" ? entry : entry?.version;
+      if (typeof prevVersion !== "string" || prevVersion === "") continue;
+      // a requirement that floats or spans a range has no single pin to
+      // rewrite, so leave it untouched rather than collapse it
+      if (requirementFloats(prevVersion) || requirementSpansRange(prevVersion))
+        continue;
+
+      const version = bumpRequirement({
+        requirement: prevVersion,
+        dependency: b.name!,
+        previewVersion,
+        packageFiles,
+      });
+      if (!version) continue;
+
+      root.doc.set(typeof entry === "string" ? key : `${key}.version`, version);
+      modified = true;
+      if (logs) {
+        yield* logger.info(
+          `bumping ${depName} in ${root.file.path} [workspace.dependencies] to ${version}`,
+        );
+      }
+    }
+    if (modified) {
+      yield* saveFile({ ...root.file, content: root.doc.toString() }, cwd);
+    }
+  }
+}
 
 function* bumpAll({
   logger,
@@ -340,7 +422,7 @@ const getDepBumpVersion = ({
   dep: string;
   previewVersion: string;
   packageFiles: Record<string, PackageFile>;
-  getPreviousVersion: () => string;
+  getPreviousVersion: () => string | undefined;
 }) => {
   const pkgProperties = Object.keys(currentPkg[property] as object) as Array<
     keyof Pkg
@@ -349,40 +431,88 @@ const getDepBumpVersion = ({
     // if pkg is in dep list
     if (existingDep === depName) {
       const prevVersion = getPreviousVersion();
-      // the pnpm/yarn workspace protocol pins `workspace:*` / `workspace:^` /
-      // `workspace:~` deps to whatever version the workspace holds, and the
-      // package manager rewrites them at publish time, so there is no version
-      // in the declaration to bump (aliased deps, `workspace:name@range`, are
-      // also left alone); an embedded range such as `workspace:^1.2.3` keeps
-      // the protocol prefix and bumps the range within it
+      // a dependency can carry no version of its own: a cargo
+      // `{ workspace = true }` or path-only declaration reads back empty,
+      // and one within a `[target]` table reads back undefined. either way
+      // there is nothing here to bump
+      if (!prevVersion) return null;
+      // a pnpm catalog reference (`catalog:` or `catalog:groupname`) points at
+      // a range kept in pnpm-workspace.yaml and is rewritten by pnpm at
+      // publish time, so there is no version in the declaration to bump
+      if (prevVersion.startsWith("catalog:")) return null;
+      // the pnpm/yarn workspace protocol hands resolution to the package
+      // manager, which rewrites the declaration at publish time. an aliased
+      // dep (`workspace:name@range`), and anything the protocol leaves to the
+      // workspace to resolve (`workspace:*`, `workspace:^`, `workspace:1.x`,
+      // `workspace:>=1.2 <2`), names no version to bump toward; an embedded
+      // pin such as `workspace:^1.2.3` keeps the prefix and bumps within it
       const workspaceProtocol = prevVersion.startsWith("workspace:");
-      const range = workspaceProtocol
+      const requirement = workspaceProtocol
         ? prevVersion.slice("workspace:".length)
         : prevVersion;
       if (
         workspaceProtocol &&
-        (range === "*" || range === "^" || range === "~" || range.includes("@"))
+        (requirementFloats(requirement) ||
+          requirementSpansRange(requirement) ||
+          requirement.includes("@"))
       ) {
         return null;
       }
 
-      const versionRequirementMatch = /[\^=~]/.exec(range);
-      const versionRequirement = versionRequirementMatch
-        ? versionRequirementMatch[0]
-        : "";
+      if (requirementFloats(requirement) || requirementSpansRange(requirement))
+        return null;
 
-      const version = deriveVersionConsideringPartials({
+      const version = bumpRequirement({
+        requirement,
         dependency: dep,
-        prevVersion: range,
-        versionRequirement,
         previewVersion,
         packageFiles,
       });
-      if (!version) return version;
+      if (!version) return null;
       return workspaceProtocol ? `workspace:${version}` : version;
     }
   }
   return null;
+};
+
+// a requirement floats when it names no version to bump toward: `*` and the
+// bare `^` / `~` of the workspace protocol take whatever version the
+// workspace resolves, and a wildcard such as `1.*` or `1.x` takes any
+// version below the wildcard
+const requirementFloats = (requirement: string) =>
+  !/\d/.test(requirement) || /(^|\.)[xX*](\.|$)/.test(requirement);
+
+// a comparator range such as `>=0.2, <0.4` spans versions instead of naming
+// one, so there is no single pin to rewrite (range bump policy is tracked in
+// #184)
+const requirementSpansRange = (requirement: string) =>
+  /[<>,| ]/.test(requirement);
+
+// rewrite a version requirement around the dependency's bumped version,
+// keeping both the comparator it was written with (`^`, `=`, `~`) and its
+// precision: `^1.2` stays two part, `1` stays one part. returns null when the
+// requirement already covers the bumped version, as a partial pin often does
+const bumpRequirement = ({
+  requirement,
+  dependency,
+  previewVersion,
+  packageFiles,
+}: {
+  requirement: string;
+  dependency: string;
+  previewVersion: string;
+  packageFiles: Record<string, PackageFile>;
+}) => {
+  const comparatorMatch = /[\^=~]/.exec(requirement);
+  const version = deriveVersionConsideringPartials({
+    dependency,
+    prevVersion: requirement,
+    versionRequirement: comparatorMatch ? comparatorMatch[0] : "",
+    previewVersion,
+    packageFiles,
+  });
+  if (!version || version === requirement) return null;
+  return version;
 };
 
 const deriveVersionConsideringPartials = ({

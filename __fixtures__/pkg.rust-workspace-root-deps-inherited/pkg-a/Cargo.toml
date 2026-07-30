@@ -1,0 +1,6 @@
+[package]
+name = "rust_root_inherited_fixture"
+version.workspace = true
+
+[dependencies]
+rust_root_inherited_helper_fixture = { workspace = true }

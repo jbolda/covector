@@ -307,6 +307,53 @@ export function* writePkgFile({
   return inputFile;
 }
 
+export type CargoWorkspaceRoot = {
+  file: LoadedFile;
+  doc: TomlDocument;
+};
+
+// a cargo workspace's root manifest can declare version requirements for
+// member crates in its [workspace.dependencies] table; find the nearest
+// ancestor manifest declaring a [workspace] (cargo's workspace resolution
+// rule) for each member manifest so those requirements can be kept in sync
+export function* readCargoWorkspaceRoots({
+  memberManifestPaths,
+  cwd,
+}: {
+  memberManifestPaths: string[];
+  cwd: string;
+}): Operation<CargoWorkspaceRoot[]> {
+  const roots: Record<string, CargoWorkspaceRoot> = {};
+  for (const manifestPath of memberManifestPaths) {
+    // the walk starts at the member manifest itself rather than its parent:
+    // a root manifest can be a package in its own right, and one holding the
+    // version its members inherit at [workspace.package] is the package
+    // covector bumps, so its own [workspace.dependencies] table is in scope
+    let dir = path.posix.dirname(manifestPath);
+    while (true) {
+      const rootManifestPath = dir === "." ? "Cargo.toml" : `${dir}/Cargo.toml`;
+      if (roots[rootManifestPath]) break;
+      try {
+        const file = yield* loadFile(rootManifestPath, cwd);
+        const doc = TomlDocument.parse(file.content);
+        if (doc.has("workspace")) {
+          roots[rootManifestPath] = { file, doc };
+          break;
+        }
+      } catch (error) {
+        // no manifest at this level, keep walking up
+      }
+      // `dirname` reaches a fixed point at the top of the walk (`.` for
+      // relative paths, `/` for absolute ones), so the loop terminates even
+      // for paths outside the cwd-relative shape loadFile produces
+      const parent = path.posix.dirname(dir);
+      if (parent === dir) break;
+      dir = parent;
+    }
+  }
+  return Object.values(roots);
+}
+
 export function* readPreFile({
   cwd,
   changeFolder = ".changes",
@@ -342,6 +389,13 @@ export const getPackageFileVersion = ({
           return pkg.pkg.version;
         } else if (pkg.file.extname === ".toml" && pkg?.pkg?.package?.version) {
           return pkg.pkg.package.version;
+        } else if (
+          pkg.file.extname === ".toml" &&
+          pkg?.pkg?.workspace?.package?.version
+        ) {
+          // a workspace root manifest can hold the version its members
+          // inherit at [workspace.package], mirroring setPackageFileVersion
+          return pkg.pkg.workspace.package.version;
         } else if (!pkg.pkg.version) {
           return "";
         } else {

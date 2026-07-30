@@ -1,0 +1,12 @@
+[workspace]
+members = ["pkg-a", "pkg-b", "pkg-c", "pkg-d", "pkg-e", "pkg-f", "pkg-g"]
+
+[workspace.dependencies]
+serde = "1.0"
+rust_root_pkg_a_fixture = { version = "0.5", path = "pkg-a", default-features = false }
+rust_root_pkg_b_fixture = "^0.8.0"
+rust_root_pkg_c_fixture = { path = "pkg-c", version = "*" }
+rust_root_pkg_d_fixture = { path = "pkg-d" }
+rust_root_pkg_e_fixture = ">=0.2, <0.4"
+rust_root_pkg_f_fixture = "0.*"
+rust_root_pkg_g_fixture = "=0.5"
