@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.9.0]
+
+- [`3f48294`](https://www.github.com/jbolda/covector/commit/3f48294397500ebf88dbbc5bb97332df4a104a5e) ([#397](https://www.github.com/jbolda/covector/pull/397) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) Handle Cargo dependencies declared with `{ workspace = true }` or as path-only (`{ path = "../pkg" }`): read them as version-less instead of throwing, and leave their declarations untouched when bumping dependent packages.
+- [`f22a1a9`](https://www.github.com/jbolda/covector/commit/f22a1a9511495f2a2c8fbe7574f99d41ef8b7666) ([#400](https://www.github.com/jbolda/covector/pull/400) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) Read the version off `[workspace.package]` when a Cargo manifest inherits it, matching the existing write support. Applying a bump to a crate whose version is declared at the workspace root previously left the manifest unchanged.
+- [`f22a1a9`](https://www.github.com/jbolda/covector/commit/f22a1a9511495f2a2c8fbe7574f99d41ef8b7666) ([#400](https://www.github.com/jbolda/covector/pull/400) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) Bump version requirements for member crates declared in a cargo workspace root manifest's `[workspace.dependencies]` table. Requirements keep their form (partial pins stay partial, range prefixes are preserved), while path-only entries, `*` requirements, and comparator or wildcard ranges (`>=1.2, <2`, `1.*`) are left untouched.
+
+### Enhancements
+
+- [`1c745f0`](https://www.github.com/jbolda/covector/commit/1c745f062521531a18cd09469a7ab131c9840dd5) ([#365](https://www.github.com/jbolda/covector/pull/365) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Upgrade to `effection` v4. This is mostly an internal change, but allows for much better type handling and deeper logging customization.
+
+### Dependencies
+
+- Upgraded to `@covector/toml@0.3.0`
+- [`4aa45ed`](https://www.github.com/jbolda/covector/commit/4aa45ed242bbd419f0a3abb380da6112e6a7f782) ([#394](https://www.github.com/jbolda/covector/pull/394) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Update zod to v4.
+- [`4aa45ed`](https://www.github.com/jbolda/covector/commit/4aa45ed242bbd419f0a3abb380da6112e6a7f782) ([#394](https://www.github.com/jbolda/covector/pull/394) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Swap to `tinyglobby`.
+- [`4aa45ed`](https://www.github.com/jbolda/covector/commit/4aa45ed242bbd419f0a3abb380da6112e6a7f782) ([#394](https://www.github.com/jbolda/covector/pull/394) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Move over to `yaml` for YAML parsing and stringification.
+
+### Changes Supporting Covector Development
+
+- [`29348d2`](https://www.github.com/jbolda/covector/commit/29348d217b906f5a39b45a94bae10be523874f40) ([#395](https://www.github.com/jbolda/covector/pull/395) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Shift to using `tsdown` for bundling dependencies.
+
 ## \[0.8.0]
 
 ### Enhancements
