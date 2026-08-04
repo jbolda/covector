@@ -3,7 +3,7 @@ import * as fs from "fs/promises";
 import { all, until, type Operation } from "effection";
 import type { Logger } from "@covector/types";
 import { configFileSchema } from "./schema.ts";
-import { fromZodError } from "zod-validation-error";
+import { fromError } from "zod-validation-error";
 import { glob } from "tinyglobby";
 import path from "path";
 import { TomlDocument } from "@covector/toml";
@@ -566,8 +566,10 @@ export function* configFile({
       file: inputFile,
       ...parsed,
     };
-  } catch (error: any) {
-    const validationError = fromZodError(error);
+  } catch (error) {
+    // this also catches the `JSON.parse` above, and anything thrown from within
+    // a schema transform, so it needs to handle errors that aren't a `ZodError`
+    const validationError = fromError(error);
     throw new Error(validationError.message);
   }
 }
