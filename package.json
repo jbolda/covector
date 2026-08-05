@@ -27,6 +27,6 @@
     "prettier": "^3.4.2",
     "rolldown-plugin-wasm": "^0.3.2",
     "tsdown": "^0.22.3",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.10"
   }
 }
