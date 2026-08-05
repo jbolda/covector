@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.13.1]
+
+### Dependencies
+
+- Upgraded to `@covector/apply@0.11.1`
+- Upgraded to `@covector/assemble@0.13.1`
+- Upgraded to `@covector/changelog@0.13.1`
+- Upgraded to `@covector/command@0.9.1`
+- Upgraded to `@covector/files@0.9.1`
+
 ## [0.13.0]
 
 ### Enhancements

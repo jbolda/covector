@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.1]
+
+### Dependencies
+
+- Upgraded to `covector@0.13.1`
+
 ## [0.13.0]
 
 ### Enhancements
