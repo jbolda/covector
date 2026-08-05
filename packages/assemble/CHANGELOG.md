@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.13.1]
+
+### Bug Fixes
+
+- [`eeaec3f`](https://www.github.com/jbolda/covector/commit/eeaec3fc131ecfcf9d6cb6f32af56821ba26437e) ([#418](https://www.github.com/jbolda/covector/pull/418) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Restrict published tarballs to the built `dist/` output. Internal packages were publishing without `dist/` because the root `.gitignore` excludes it and no `files` field overrode that so `tsdown` used the `.gitignore`.
+
+### Dependencies
+
+- Upgraded to `@covector/command@0.9.1`
+- Upgraded to `@covector/files@0.9.1`
+
 ## [0.13.0]
 
 ### Enhancements
