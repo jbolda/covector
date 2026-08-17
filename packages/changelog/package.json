@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@covector/files": "0.9.1",
-    "effection": "^4.0.3"
+    "effection": "^4.1.0"
   },
   "devDependencies": {
     "@covector/types": "0.0.0"

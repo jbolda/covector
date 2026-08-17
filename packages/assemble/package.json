@@ -27,7 +27,7 @@
   "dependencies": {
     "@covector/command": "0.9.1",
     "@covector/files": "0.9.1",
-    "effection": "^4.0.3",
+    "effection": "^4.1.0",
     "yaml": "^2.9.0"
   },
   "devDependencies": {
