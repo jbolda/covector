@@ -6,13 +6,23 @@ updates:
       interval: "weekly"
     exclude-paths:
       - "__fixtures__/**"
+    allow:
+      - dependency-type: "direct"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "cargo"
     directory: "/"
     schedule:
       interval: "weekly"
     exclude-paths:
       - "__fixtures__/**"
+    allow:
+      - dependency-type: "direct"
+    cooldown:
+      default-days: 7
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
