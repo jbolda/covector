@@ -39,7 +39,7 @@
     "@covector/command": "0.9.1",
     "@covector/files": "0.9.1",
     "@effectionx/context-api": "^0.6.0",
-    "effection": "^4.0.3",
+    "effection": "^4.1.0",
     "tinyglobby": "0.2.17",
     "yaml": "^2.9.0",
     "yargs": "^17.7.2"
