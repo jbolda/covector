@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.2]
+
+### Dependencies
+
+- [`789bd1d`](https://www.github.com/jbolda/covector/commit/789bd1dc7259f13bf1d91515fdd75455247bfe34) ([#424](https://www.github.com/jbolda/covector/pull/424) by [@jbolda](https://www.github.com/jbolda/covector/../../jbolda)) Update `effection` to `^4.1.0` and `@effectionx/process` to `^0.8.2`.
+
 ## [0.9.1]
 
 ### Bug Fixes
