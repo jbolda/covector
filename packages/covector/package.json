@@ -1,6 +1,6 @@
 {
   "name": "covector",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "license": "Apache-2.0",
   "homepage": "https://github.com/jbolda/covector#readme",
   "author": "Jacob Bolda <me@jacobbolda.com> (https://www.jacobbolda.com/)",
@@ -33,10 +33,10 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.6.0",
-    "@covector/apply": "0.11.1",
-    "@covector/assemble": "0.13.1",
-    "@covector/changelog": "0.13.1",
-    "@covector/command": "0.9.1",
+    "@covector/apply": "0.11.2",
+    "@covector/assemble": "0.13.2",
+    "@covector/changelog": "0.13.2",
+    "@covector/command": "0.9.2",
     "@covector/files": "0.9.1",
     "@effectionx/context-api": "^0.6.0",
     "effection": "^4.1.0",

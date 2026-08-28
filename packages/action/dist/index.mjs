@@ -215,6 +215,19 @@ function action$1(executor, desc) {
 /**
 * Create a new {@link Context}
 *
+* @example
+* ```ts
+* import { createContext, main } from "effection";
+*
+* const YourContext = createContext<string>("context-id");
+*
+* await main(function* () {
+*   yield* YourContext.with("abc-123", function* () {
+*     console.log(yield* YourContext.expect()); // "abc-123"
+*   });
+* });
+* ```
+*
 * @param name - the unique name to give this context.
 * @returns the new context
 * @since 3.0
@@ -257,6 +270,185 @@ function UseScope(fn, description) {
 }
 const Priority = createContext("@effection/scope.generation", 0);
 const Children = createContext("@effection/scope.children");
+//#endregion
+//#region ../../node_modules/effection/esm/lib/api-internal.js
+function createApiInternal(name, core) {
+	let fields = Object.keys(core);
+	let api = {
+		core,
+		context: createContext(`api::${name}`),
+		invoke: (scope, key, args) => {
+			let member = (scope.get(api.context)?.handle ?? core)[key];
+			if (typeof member === "function") return member(...args);
+			else return member;
+		},
+		around: (decorator, options = { at: "max" }) => ({ *[Symbol.iterator]() {
+			decorateApi(yield GetScope, api, decorator, options);
+		} }),
+		operations: fields.reduce((sum, field) => {
+			if (typeof core[field] === "function") return Object.assign(sum, { [field]: (...args) => ({ *[Symbol.iterator]() {
+				let scope = yield GetScope;
+				let target = api.invoke(scope, field, args);
+				return isOperation$2(target) ? yield* target : target;
+			} }) });
+			else return Object.assign(sum, { [field]: { *[Symbol.iterator]() {
+				let scope = yield GetScope;
+				let target = api.invoke(scope, field, []);
+				return isOperation$2(target) ? yield* target : target;
+			} } });
+		}, {})
+	};
+	return api;
+}
+function decorateApi(scope, api, decorator, options) {
+	let current = scope.get(api.context) ?? {
+		total: {},
+		local: {}
+	};
+	let local = decorate$1(current.local, { [options?.at ?? "max"]: decorator });
+	if (!scope.hasOwn(api.context)) scope.set(api.context, {
+		local,
+		total: current.total,
+		handle: api.core
+	});
+	else current.local = local;
+	install(scope, api, current.total);
+}
+function decorate$1(base, next) {
+	return {
+		max: base.max ? next.max ? append(base.max, next.max) : base.max : next.max,
+		min: next.min ? base.min ? append(next.min, base.min) : next.min : base.min
+	};
+}
+function append(outer, inner) {
+	let result = { ...outer };
+	for (let key of Object.keys(inner)) {
+		let current = outer[key];
+		let decoration = inner[key];
+		if (!current) result[key] = decoration;
+		else result[key] = combine$1([current, decoration]);
+	}
+	return result;
+}
+function install(scope, api, total) {
+	if (scope.hasOwn(api.context)) {
+		let context = scope.expect(api.context);
+		context.total = total;
+		total = decorate$1(context.total, context.local);
+		context.handle = createApiHandle(total, api.core);
+	}
+	for (let child of scope.expect(Children)) install(child, api, total);
+}
+function createApiHandle(decoration, core) {
+	let around = decoration.max ? decoration.min ? append(decoration.max, decoration.min) : decoration.max : decoration.min;
+	if (!around) return core;
+	let handle = {};
+	for (let key of Object.keys(core)) {
+		let middleware = around[key];
+		if (middleware) if (typeof core[key] === "function") handle[key] = ((...args) => middleware(args, core[key]));
+		else Object.defineProperty(handle, key, {
+			enumerable: true,
+			get() {
+				return middleware([], () => core[key]);
+			}
+		});
+		else handle[key] = core[key];
+	}
+	return handle;
+}
+function isOperation$2(target) {
+	return target && !isNativeIterable$1(target) && typeof target[Symbol.iterator] === "function";
+}
+function isNativeIterable$1(target) {
+	return typeof target === "string" || Array.isArray(target) || target instanceof Map || target instanceof Set;
+}
+function combine$1(middlewares) {
+	if (middlewares.length === 0) return (args, next) => next(...args);
+	return middlewares.reduceRight((sum, middleware) => (args, next) => middleware(args, (...args) => sum(args, next)));
+}
+const GetScope = {
+	description: "Fast, non-typesafe lookup of co-routine scope",
+	enter: (resolve, routine) => {
+		resolve(Ok(routine.scope));
+		return (didExit) => didExit(Ok());
+	}
+};
+//#endregion
+//#region ../../node_modules/effection/esm/lib/api.js
+/**
+* Create an {@link Api} whose implementation can be decorated within a scope.
+*
+* The `core` implementation defines the API's default behavior. Use
+* {@link Api.around} or {@link Scope.around} to install middleware that changes
+* that behavior for a scope and its descendants.
+*
+* @example
+* ```ts
+* import { createApi } from "effection/experimental";
+* import type { Operation } from "effection";
+*
+* interface DatabaseApi {
+*   query(sql: string): Operation<{ id: number; title: string }[]>;
+* }
+*
+* let Database = createApi<DatabaseApi>("database", {
+*   *query(sql) {
+*     console.log("running", sql);
+*     return [];
+*   },
+* });
+*
+* export let { query } = Database.operations;
+* ```
+*
+* @template A - the shape of the API's core implementation
+* @param name - the API identifier used in debug messages
+* @param core - the default implementation for every API member
+* @returns an API that can be invoked and decorated per scope
+* @since 4.1
+*/
+function createApi$1(name, core) {
+	return createApiInternal(name, core);
+}
+/**
+* Built-in APIs used by Effection's runtime and host integrations.
+*
+* Advanced integrations can decorate these APIs to observe or modify runtime
+* behavior within a scope.
+*
+* @example
+* ```ts
+* import { main, useScope } from "effection";
+* import { api } from "effection/experimental";
+*
+* await main(function* () {
+*   let scope = yield* useScope();
+*
+*   scope.around(api.Scope, {
+*     create(args, next) {
+*       console.log("creating scope");
+*       return next(...args);
+*     },
+*   });
+* });
+* ```
+*
+* @since 4.1
+*/
+const api$1 = { Scope: createApi$1("Scope", {
+	create() {
+		throw new TypeError(`no handler for Scope.create()`);
+	},
+	destroy(scope) {
+		return scope.destroy();
+	},
+	set(scope, context, value) {
+		return scope.contexts[context.name] = value;
+	},
+	delete(scope, context) {
+		return delete scope.contexts[context.name];
+	}
+}) };
 //#endregion
 //#region ../../node_modules/effection/esm/lib/lazy-promise.js
 function lazyPromiseWithResolvers() {
@@ -303,11 +495,27 @@ function lazyPromise(resolver) {
 //#endregion
 //#region ../../node_modules/effection/esm/lib/with-resolvers.js
 /**
-* Create an {link @Operation} and two functions to resolve or reject
+* Create an {@link Operation} and two functions to resolve or reject
 * it, corresponding to the two parameters passed to the executor of
 * the {@link action} constructor. This is the Effection equivalent of
 * [Promise.withResolvers()]{@link
 * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/withResolvers}
+*
+* @example
+* ```ts
+* import { once, spawn, withResolvers } from "effection";
+*
+* // one may pass a type for any value (or nothing) to resolve
+* let ready = withResolvers<Event>();
+*
+* yield* spawn(function* () {
+*   // do some work
+*   ready.resolve(yield* once(socket, "open"));
+* });
+*
+* let event = yield* ready.operation;
+* console.log(event.type); // "open"
+* ```
 *
 * @returns an operation and its resolvers.
 * @since 3.2
@@ -886,9 +1094,21 @@ var TaskControl = class {
 };
 //#endregion
 //#region ../../node_modules/effection/esm/lib/scope-internal.js
+const api = api$1.Scope;
 function createScopeInternal(parent) {
+	if (!parent) {
+		let [global, destroy] = buildScopeInternal();
+		global.around(api, { create([parent]) {
+			return buildScopeInternal(parent);
+		} }, { at: "min" });
+		return [global, destroy];
+	} else return api.invoke(parent, "create", [parent]);
+}
+function buildScopeInternal(parent) {
 	let destructors = /* @__PURE__ */ new Set();
 	let destruction = createFuture();
+	let signaled = false;
+	let unbind = parent ? parent.ensure(() => destroy()) : () => {};
 	let contexts = Object.create(parent ? parent.contexts : null);
 	let scope = Object.create({
 		[Symbol.toStringTag]: "Scope",
@@ -897,7 +1117,11 @@ function createScopeInternal(parent) {
 			return contexts[context.name] ?? context.defaultValue;
 		},
 		set(context, value) {
-			return contexts[context.name] = value;
+			return api.invoke(scope, "set", [
+				scope,
+				context,
+				value
+			]);
 		},
 		expect(context) {
 			let value = scope.get(context);
@@ -909,7 +1133,7 @@ function createScopeInternal(parent) {
 			return value;
 		},
 		delete(context) {
-			return delete contexts[context.name];
+			return api.invoke(scope, "delete", [scope, context]);
 		},
 		hasOwn(context) {
 			return !!Reflect.getOwnPropertyDescriptor(contexts, context.name);
@@ -928,37 +1152,44 @@ function createScopeInternal(parent) {
 				});
 			} };
 		},
+		around(api, ...params) {
+			decorateApi(scope, api, ...params);
+		},
 		ensure(op) {
 			destructors.add(op);
 			return () => destructors.delete(op);
+		},
+		*destroy() {
+			if (signaled) return yield* destruction.future;
+			signaled = true;
+			parent?.expect(Children).delete(scope);
+			unbind();
+			let outcome = Ok();
+			try {
+				while (destructors.size > 0) {
+					let current = [...destructors];
+					destructors.clear();
+					for (let i = current.length - 1; i >= 0; i--) {
+						let destructor = current[i];
+						try {
+							yield* destructor();
+						} catch (error) {
+							outcome = Err(error);
+						}
+					}
+				}
+			} finally {
+				if (outcome.ok) destruction.resolve();
+				else destruction.reject(outcome.error);
+			}
+			unbox$1(outcome);
 		}
 	});
 	scope.set(Priority, scope.expect(Priority) + 1);
 	scope.set(Children, /* @__PURE__ */ new Set());
 	parent?.expect(Children).add(scope);
-	let destroy = function* () {
-		destroy = () => destruction.future;
-		parent?.expect(Children).delete(scope);
-		unbind();
-		let outcome = Ok();
-		try {
-			while (destructors.size > 0) {
-				let current = [...destructors];
-				destructors.clear();
-				for (let destructor of current) try {
-					yield* destructor();
-				} catch (error) {
-					outcome = Err(error);
-				}
-			}
-		} finally {
-			if (outcome.ok) destruction.resolve();
-			else destruction.reject(outcome.error);
-		}
-		unbox$1(outcome);
-	};
-	let unbind = parent ? parent.ensure(() => destroy()) : () => {};
-	return [scope, () => destroy()];
+	let destroy = () => api.invoke(scope, "destroy", [scope]);
+	return [scope, destroy];
 }
 //#endregion
 //#region ../../node_modules/effection/esm/lib/scope.js
@@ -969,6 +1200,20 @@ function createScopeInternal(parent) {
 const global$1 = createScopeInternal()[0];
 /**
 * Get the scope of the currently running {@link Operation}.
+*
+* @example
+* ```ts
+* import { sleep, useScope } from "effection";
+*
+* let scope = yield* useScope();
+* let task = yield* scope.spawn(function* () {
+*   yield* sleep(100);
+*   return "done";
+* });
+*
+* // task is attached to the current scope and cannot outlive it
+* console.log(yield* task);
+* ```
 *
 * @returns an operation yielding the current scope
 * @since 3.0
@@ -1214,12 +1459,21 @@ function isOperation$1(target) {
 * @example
 *
 * ```typescript
-* import { main, race, fetch } from 'effection';
+* import { race, sleep, call } from "effection";
 *
-* await main(function*() {
-*  let fastest = yield* race([fetch('http://google.com'), fetch('http://bing.com')]);
-*  // ...
-* });
+*   let fastest = yield* race([
+*     call(function* () {
+*       yield* sleep(100);
+*       // this is halted as it loses the race
+*       return "slow";
+*     }),
+*     call(function* () {
+*       yield* sleep(10);
+*       return "fast";
+*     }),
+*   ]);
+*
+*   console.log(fastest); // "fast"
 * ```
 *
 * @param operations a list of operations to race against each other
@@ -1256,8 +1510,7 @@ function* race(operations) {
 *
 * If any of the operations become errored, then `all` will also become errored.
 *
-* ### Example
-*
+* @example
 * ``` javascript
 * import { all, expect, main } from 'effection';
 *
@@ -1339,9 +1592,9 @@ function lift(fn) {
 *
 * await main(function*() {
 *   let queue = createQueue<number>();
-*   queue.send(1);
-*   queue.send(2);
-*   queue.send(3);
+*   queue.add(1);
+*   queue.add(2);
+*   queue.add(3);
 *
 *   let next = yield* queue.subscription.next();
 *   while (!next.done) {
@@ -1634,7 +1887,7 @@ function* callcc(op) {
 * ```
 * @param status - the exit code to use for the process exit
 * @param message - message to print to the console before exiting.
-* @param returns an operation that exits the program
+* @returns an operation that exits the program
 * @since 3.0
 */
 function* exit(status, message) {
@@ -40479,12 +40732,10 @@ const ProcessApi = createApi("@effectionx/process", {
 	*daemon(command, options) {
 		return yield* resource(function* (provide) {
 			let process = yield* ProcessApi.operations.exec(command, options);
-			yield* provide({
-				*[Symbol.iterator]() {
-					throw new DaemonExitError(yield* process.join(), command, options);
-				},
-				...process
+			yield* spawn$1(function* supervise() {
+				throw new DaemonExitError(yield* process.join(), command, options);
 			});
+			yield* provide(process);
 		});
 	}
 });

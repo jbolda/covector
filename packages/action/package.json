@@ -1,6 +1,6 @@
 {
   "name": "action",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "main": "dist/index.mjs",
   "type": "module",
   "license": "Apache-2.0",
@@ -16,7 +16,7 @@
     "@actions/artifact": "^6.2.1",
     "@actions/core": "^3.0.1",
     "@actions/github": "^9.1.1",
-    "covector": "0.13.1",
+    "covector": "0.13.2",
     "effection": "^4.1.0",
     "yaml": "^2.9.0"
   },
