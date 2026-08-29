@@ -11,10 +11,23 @@ This library is primarily designed as a CLI, but we do also have a GitHub Action
 | Command | Description                                                                                                                                             |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | init    | Initializes the configuration required for covector.                                                                                                    |
+| add     | Create a change file interactively.                                                                                                                    |
 | status  | Outputs the status letting you know if there are changes and what they are.                                                                             |
 | config  | Pretty prints the config.                                                                                                                               |
 | version | Will see which packages have changes, run the version bumps on any package changed, and update the changelog.                                           |
+| preview | Runs the preview version and publish workflow without consuming the change files.                                                                       |
 | publish | Will run the `getPublishedVersion` specified in the config, and any package whose version does not match that return will attempt the publish commands. |
+
+### CLI Options
+
+| Option | Description |
+| ------ | ----------- |
+| `--dry-run` | Log the commands that would run without executing them. |
+| `--cwd <path>` | Run covector in the specified directory. Defaults to the current directory. |
+| `init --yes` / `init -y` | Skip the initialization prompts and use each prompt's default response. |
+| `init --directory <path>` / `init -d <path>` | Use a custom change folder instead of `.changes`. |
+
+The CLI also supports `--help` for command usage.
 
 ## GitHub Action
 
@@ -128,6 +141,33 @@ Your configuration may look something like this.
 }
 ```
 
+### Configuration Reference
+
+| Property | Description |
+| -------- | ----------- |
+| `packages` | Required map of package names to package configuration. |
+| `pkgManagers` | Optional shared command configuration. A package can inherit commands by selecting a manager. |
+| `changeFolder` | Change the folder containing `config.json` and change files. Defaults to `.changes`. |
+| `gitSiteUrl` | Base URL used when linking changelog entries to commits or pull requests. |
+| `additionalBumpTypes` | Additional bump labels accepted in change files. |
+| `changeTags` | Map change tags to the headings rendered in changelogs. |
+| `defaultChangeTag` | Tag used for changes without an explicit tag. |
+
+Each package supports `path`, `manager`, `dependencies`, and `packageFileName`. `packageFileName` can be used when the package manifest is not the manager's default file. Package and package-manager configurations can also define `version`, `prepublish`, `publish`, and `postpublish` commands, plus:
+
+- `errorOnVersionRange`: fail when the resulting package version matches the specified semver range.
+- `releaseTag`: customize the git release tag, or set it to `false` to disable tagging.
+- `assets`: an array of `{ "path": "...", "name": "..." }` objects to upload to a GitHub release, or `false` to disable assets.
+
+If you haven't passed `packageFileName`, Covector checks for package files given the following information in the `manager` field.
+
+- When no recognized manager is configured, Covector falls back to expecting `package.json`.
+- Managers containing `rust` use `Cargo.toml`.
+- Managers containing `dart` or `flutter` use `pubspec.yaml`.
+- A custom `packageFileName` can select another file. Unrecognized extensions are treated as files containing only a semver version.
+
+Dependencies are read from `dependencies`, `devDependencies`, `dev-dependencies`, and `build-dependencies`, allowing dependency bumps to work across supported formats.
+
 ## Prereleases
 
 We have initial support for prereleases. Functionally, you put your repository into "prerelease mode". Every package within the repo will begin apply bumps as prerelease numbers related to the type of bump being applied. Enabling this is currently a manual process with support via CLI commands planned in a future release.
@@ -180,6 +220,9 @@ A command specified as an object.
 The `command` is required. The follow are additional options you may specify.
 
 - `retries`: `number[]` - If the command fails, opt-in to retrying based on this timeout and frequency. Using `[2000, 2000]` would try two additional times with a 2 second delay between attempts. It would throw on the last attempt if they all fail.
+- `runFromRoot`: `boolean` - Run the command from the configured working directory instead of the package directory.
+- `dryRunCommand`: `string | boolean` - Use a different command during dry runs, set to `false` to skip the command during dry runs, or `true` to run the configured command even in a dry run.
+- `pipe`: `boolean` - Capture the command's output for the next command and expose it through the command pipe template.
 
 ## Built-In Commands
 
@@ -212,6 +255,33 @@ This requires an `options.url` for use. It will fetch the specified endpoint, an
   }
 }
 ```
+
+For crates.io URLs, `fetch:check` reads the published version from `response.version.num`; other endpoints must return the version as `response.version`. The URL may use the command template variables described below.
+
+## Command Templates
+
+Commands support `${ ... }` and lodash-style `<%= ... %>` interpolation. The available object depends on the command:
+
+- Version commands receive `pkg` and `release`.
+- Publish commands receive `pkg` and `pkgFile`.
+
+Common examples include the following. `pkgFile` is available to publish commands, while `release` is available to version commands:
+
+```text
+${ pkg.pkg }
+${ pkg.path }
+${ pkg.manager }
+${ pkgFile.name }
+${ pkgFile.version }
+${ pkgFile.currentVersion }
+${ pkgFile.versionMajor }
+${ pkgFile.versionMinor }
+${ pkgFile.versionPatch }
+${ release.type }
+${ pkg.type }
+```
+
+`pkgFile.deps` contains the parsed dependency map and `pkgFile.pkg` contains the parsed manifest. For version commands, `release.changes` contains the parsed change entries. The full `pkg` and `pkgFile` objects are also available when more detail is needed.
 
 ## Change Tags
 

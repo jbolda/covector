@@ -9,6 +9,7 @@
     "url": "https://github.com/jbolda/covector.git"
   },
   "type": "module",
+  "files": ["dist"],
   "exports": {
     "development": "./src/index.ts",
     "import": {
