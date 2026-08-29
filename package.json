@@ -3,7 +3,10 @@
   "version": "0.0.0",
   "type": "module",
   "private": true,
-  "repository": "https://github.com/jbolda/covector.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jbolda/covector.git"
+  },
   "author": "Jacob Bolda <me@jacobbolda.com>",
   "license": "Apache-2.0",
   "scripts": {
