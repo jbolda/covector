@@ -1,21 +1,27 @@
 name: covector comment on forks
 
-on:
+# workflow_run is required to act on pull requests from forks as fork PRs do not
+# receive a read/write token with the pull_request trigger.
+on: # zizmor: ignore[dangerous-triggers]
   workflow_run:
     workflows: [covector status]
     types:
       - completed
 
-# note all other permissions are set to none if not specified
-permissions:
-  # to read the action artifacts
-  actions: read
-  # to write the comment
-  pull-requests: write
+permissions: {}
+
+# supersede in-flight comment runs for the same branch to avoid racing PR comments
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
 
 jobs:
   download:
+    name: comment on fork pull requests
     runs-on: ubuntu-latest
+    permissions:
+      actions: read # to download the covector-comment artifact
+      pull-requests: write # to post the covector status comment
     steps:
       - name: dump github context
         env:
@@ -25,7 +31,8 @@ jobs:
         uses: jbolda/covector/packages/action@covector-v0
         # note that this check could be shifted to the job, but for future reference, we are dumping the full github context
         if: github.event.workflow_run.conclusion == 'success' &&
-          (github.event.workflow_run.head_repository.full_name != github.repository || github.actor == 'dependabot[bot]')
+          (github.event.workflow_run.head_repository.full_name != github.repository ||
+            github.event.workflow_run.head_commit.author.email == '49699333+dependabot[bot]@users.noreply.github.com')
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           command: "status"
