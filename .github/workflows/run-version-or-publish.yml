@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
           # credentials must persist for the create-pull-request step below to push its branch
           persist-credentials: true
-      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
       - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: '24'
