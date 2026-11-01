@@ -1,15 +1,27 @@
 name: covector status
 on: pull_request
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   status:
+    name: covector status
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the pull request
+      pull-requests: write # to post the status comment
+      actions: read # to download the comment artifact when direct commenting fails
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@v4
+          persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
       - run: npm ci --ignore-scripts
       - run: npm run build
       - run: npm run build:action
@@ -32,13 +44,19 @@ jobs:
           recognizeContributors: true
 
   preview:
+    name: covector preview
     runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the pull request
+      pull-requests: write # to post the preview packages comment
+      actions: read # to download the comment artifact when direct commenting fails
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
-      - uses: jdx/mise-action@v4
+          persist-credentials: false
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
       - run: npm ci --ignore-scripts
       - run: npm run build
       - run: npm run build:action
