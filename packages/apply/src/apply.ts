@@ -5,6 +5,7 @@ import {
   readCargoWorkspaceRoots,
   getPackageFileVersion,
   setPackageFileVersion,
+  resolveDepKey,
   testSerializePkgFile,
 } from "@covector/files";
 import semver from "semver";
@@ -15,7 +16,6 @@ import type {
   Releases,
   PackageCommand,
   DepTypes,
-  Pkg,
   Logger,
 } from "@covector/types";
 
@@ -178,8 +178,13 @@ function* applyWorkspaceRootDepBumps({
     let modified = false;
     for (const b of cargoBumps) {
       const depName = b.pkg.package?.name || b.pkg.name || b.name!;
-      const key = `workspace.dependencies.${depName}`;
-      if (!root.doc.has(key)) continue;
+      // the entry may sit under an alias, `ffi = { package = "...", ... }`
+      const depKey = resolveDepKey({
+        deps: root.doc.get("workspace.dependencies"),
+        dep: depName,
+      });
+      if (!depKey) continue;
+      const key = `workspace.dependencies.${depKey}`;
       const entry = root.doc.get(key);
       const prevVersion = typeof entry === "string" ? entry : entry?.version;
       if (typeof prevVersion !== "string" || prevVersion === "") continue;
@@ -361,6 +366,11 @@ const bumpDeps = ({
           for (const target of Object.values(targets)) {
             depTypes.forEach((property: DepTypes) => {
               if (property && property in target) {
+                const depKey = resolveDepKey({
+                  deps: target[property],
+                  dep: depName,
+                });
+                if (!depKey) return;
                 const version = getDepBumpVersion({
                   pkg,
                   currentPkg: target,
@@ -369,10 +379,10 @@ const bumpDeps = ({
                   dep,
                   previewVersion,
                   packageFiles,
-                  getPreviousVersion: () => target[property][depName]?.version,
+                  getPreviousVersion: () => target[property][depKey]?.version,
                 });
                 if (version) {
-                  target[property][depName].version = version;
+                  target[property][depKey].version = version;
                 }
               }
             });
@@ -424,55 +434,50 @@ const getDepBumpVersion = ({
   packageFiles: Record<string, PackageFile>;
   getPreviousVersion: () => string | undefined;
 }) => {
-  const pkgProperties = Object.keys(currentPkg[property] as object) as Array<
-    keyof Pkg
-  >;
-  for (const existingDep of pkgProperties) {
-    // if pkg is in dep list
-    if (existingDep === depName) {
-      const prevVersion = getPreviousVersion();
-      // a dependency can carry no version of its own: a cargo
-      // `{ workspace = true }` or path-only declaration reads back empty,
-      // and one within a `[target]` table reads back undefined. either way
-      // there is nothing here to bump
-      if (!prevVersion) return null;
-      // a pnpm catalog reference (`catalog:` or `catalog:groupname`) points at
-      // a range kept in pnpm-workspace.yaml and is rewritten by pnpm at
-      // publish time, so there is no version in the declaration to bump
-      if (prevVersion.startsWith("catalog:")) return null;
-      // the pnpm/yarn workspace protocol hands resolution to the package
-      // manager, which rewrites the declaration at publish time. an aliased
-      // dep (`workspace:name@range`), and anything the protocol leaves to the
-      // workspace to resolve (`workspace:*`, `workspace:^`, `workspace:1.x`,
-      // `workspace:>=1.2 <2`), names no version to bump toward; an embedded
-      // pin such as `workspace:^1.2.3` keeps the prefix and bumps within it
-      const workspaceProtocol = prevVersion.startsWith("workspace:");
-      const requirement = workspaceProtocol
-        ? prevVersion.slice("workspace:".length)
-        : prevVersion;
-      if (
-        workspaceProtocol &&
-        (requirementFloats(requirement) ||
-          requirementSpansRange(requirement) ||
-          requirement.includes("@"))
-      ) {
-        return null;
-      }
-
-      if (requirementFloats(requirement) || requirementSpansRange(requirement))
-        return null;
-
-      const version = bumpRequirement({
-        requirement,
-        dependency: dep,
-        previewVersion,
-        packageFiles,
-      });
-      if (!version) return null;
-      return workspaceProtocol ? `workspace:${version}` : version;
-    }
+  // the dependency may be declared under an alias, so match on the key the
+  // crate resolves to rather than on its own name
+  const depKey = resolveDepKey({ deps: currentPkg[property], dep: depName });
+  if (!depKey) return null;
+  const prevVersion = getPreviousVersion();
+  // a dependency can carry no version of its own: a cargo
+  // `{ workspace = true }` or path-only declaration reads back empty,
+  // and one within a `[target]` table reads back undefined. either way
+  // there is nothing here to bump
+  if (!prevVersion) return null;
+  // a pnpm catalog reference (`catalog:` or `catalog:groupname`) points at
+  // a range kept in pnpm-workspace.yaml and is rewritten by pnpm at
+  // publish time, so there is no version in the declaration to bump
+  if (prevVersion.startsWith("catalog:")) return null;
+  // the pnpm/yarn workspace protocol hands resolution to the package
+  // manager, which rewrites the declaration at publish time. an aliased
+  // dep (`workspace:name@range`), and anything the protocol leaves to the
+  // workspace to resolve (`workspace:*`, `workspace:^`, `workspace:1.x`,
+  // `workspace:>=1.2 <2`), names no version to bump toward; an embedded
+  // pin such as `workspace:^1.2.3` keeps the prefix and bumps within it
+  const workspaceProtocol = prevVersion.startsWith("workspace:");
+  const requirement = workspaceProtocol
+    ? prevVersion.slice("workspace:".length)
+    : prevVersion;
+  if (
+    workspaceProtocol &&
+    (requirementFloats(requirement) ||
+      requirementSpansRange(requirement) ||
+      requirement.includes("@"))
+  ) {
+    return null;
   }
-  return null;
+
+  if (requirementFloats(requirement) || requirementSpansRange(requirement))
+    return null;
+
+  const version = bumpRequirement({
+    requirement,
+    dependency: dep,
+    previewVersion,
+    packageFiles,
+  });
+  if (!version) return null;
+  return workspaceProtocol ? `workspace:${version}` : version;
 };
 
 // a requirement floats when it names no version to bump toward: `*` and the

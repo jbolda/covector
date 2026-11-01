@@ -1379,6 +1379,166 @@ describe("package file apply bump (snapshot)", () => {
         ]);
     });
 
+    it("bumps multi with renamed dep", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const rustFolder = f.copy("pkg.rust-multi-renamed-dep");
+
+      const commands = [
+        {
+          dependencies: ["rust_pkg_b_fixture"],
+          manager: "rust",
+          path: "./pkg-a/",
+          pkg: "rust_pkg_a_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-b/",
+          pkg: "rust_pkg_b_fixture",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          rust_pkg_a_fixture: {
+            path: "./pkg-a/",
+            manager: "rust",
+          },
+          rust_pkg_b_fixture: {
+            path: "./pkg-b/",
+            manager: "rust",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: rustFolder,
+      });
+
+      // a dependency renamed with `package` keeps its requirement under the
+      // alias, in a [target] table as much as in [dependencies]
+      const modifiedAPKGFile = yield* loadFile("pkg-a/Cargo.toml", rustFolder);
+      expect(modifiedAPKGFile.content).toBe(
+        "[package]\n" +
+          'name = "rust_pkg_a_fixture"\n' +
+          'version = "0.6.0"\n' +
+          "\n" +
+          "[dependencies]\n" +
+          'serde = "1.0"\n' +
+          "\n" +
+          "  [dependencies.ffi]\n" +
+          '  package = "rust_pkg_b_fixture"\n' +
+          '  path = "../pkg-b"\n' +
+          '  version = "0.9.0"\n' +
+          "\n" +
+          '[target."cfg(unix)".dependencies]\n' +
+          'ffi-unix = { package = "rust_pkg_b_fixture", version = "0.9.0", path = "../pkg-b" }\n',
+      );
+
+      const modifiedBPKGFile = yield* loadFile("pkg-b/Cargo.toml", rustFolder);
+      expect(modifiedBPKGFile.content).toBe(
+        "[package]\n" + 'name = "rust_pkg_b_fixture"\n' + 'version = "0.9.0"\n',
+      );
+
+      yield* logTest.consecutive(log.all, [
+        { msg: "bumping rust_pkg_a_fixture with minor", level: "info" },
+        { msg: "bumping rust_pkg_b_fixture with minor", level: "info" },
+      ]);
+    });
+
+    it("bumps workspace root dependency requirements for a renamed dep", function* () {
+      const log = yield* logTest.useCapturedLogger();
+      const rustFolder = f.copy("pkg.rust-workspace-root-renamed-dep");
+
+      const commands = [
+        {
+          dependencies: ["rust_root_pkg_b_fixture"],
+          manager: "rust",
+          path: "./pkg-a/",
+          pkg: "rust_root_pkg_a_fixture",
+          type: "minor",
+          parents: {},
+        },
+        {
+          dependencies: undefined,
+          manager: "rust",
+          path: "./pkg-b/",
+          pkg: "rust_root_pkg_b_fixture",
+          type: "minor",
+          parents: {},
+        },
+      ];
+
+      const config = {
+        ...configDefaults,
+        packages: {
+          rust_root_pkg_a_fixture: {
+            path: "./pkg-a/",
+            manager: "rust",
+          },
+          rust_root_pkg_b_fixture: {
+            path: "./pkg-b/",
+            manager: "rust",
+          },
+        },
+      };
+
+      const allPackages = yield* readAllPkgFiles({ config, cwd: rustFolder });
+
+      yield* apply({
+        logger: logger.operations,
+        //@ts-expect-error
+        commands,
+        config,
+        allPackages,
+        cwd: rustFolder,
+      });
+
+      // the root entry is declared under the alias its members inherit
+      const modifiedRootFile = yield* loadFile("Cargo.toml", rustFolder);
+      expect(modifiedRootFile.content).toBe(
+        "[workspace]\n" +
+          'members = ["pkg-a", "pkg-b"]\n' +
+          "\n" +
+          "[workspace.dependencies]\n" +
+          'serde = "1.0"\n' +
+          'ffi = { package = "rust_root_pkg_b_fixture", version = "0.9", path = "pkg-b" }\n',
+      );
+
+      // the member's `{ workspace = true }` alias carries no version of its own
+      const modifiedAPKGFile = yield* loadFile("pkg-a/Cargo.toml", rustFolder);
+      expect(modifiedAPKGFile.content).toBe(
+        "[package]\n" +
+          'name = "rust_root_pkg_a_fixture"\n' +
+          'version = "0.6.0"\n' +
+          "\n" +
+          "[dependencies]\n" +
+          "serde = { workspace = true }\n" +
+          "ffi = { workspace = true }\n",
+      );
+
+      yield* logTest.consecutive(log.all, [
+        { msg: "bumping rust_root_pkg_a_fixture with minor", level: "info" },
+        { msg: "bumping rust_root_pkg_b_fixture with minor", level: "info" },
+        {
+          msg: "bumping rust_root_pkg_b_fixture in Cargo.toml [workspace.dependencies] to 0.9",
+          level: "info",
+        },
+      ]);
+    });
+
     it("bumps multi with dep missing patch", function* () {
       const log = yield* logTest.useCapturedLogger();
         const rustFolder = f.copy("pkg.rust-multi-no-patch-dep");

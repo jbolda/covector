@@ -1,0 +1,6 @@
+[workspace]
+members = ["pkg-a", "pkg-b"]
+
+[workspace.dependencies]
+serde = "1.0"
+ffi = { package = "rust_root_pkg_b_fixture", version = "0.8", path = "pkg-b" }
