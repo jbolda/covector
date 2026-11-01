@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.9.2]
+
+- [`84b330d`](https://www.github.com/jbolda/covector/commit/84b330d1f44c45e13db14faddf31a5ce4f9d7329) ([#416](https://www.github.com/jbolda/covector/pull/416) by [@johncarmack1984](https://www.github.com/jbolda/covector/../../johncarmack1984)) Report the underlying error when loading `config.json` fails for a reason other than schema validation. A JSON syntax error, or an error thrown while a schema transform resolves a package `path`, was passed to a helper that only accepts a `ZodError` and surfaced as `Invalid zodError param; expected instance of ZodError` instead of the actual problem.
+
 ## [0.9.1]
 
 ### Bug Fixes

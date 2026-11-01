@@ -36427,6 +36427,9 @@ const ZodURL = /*@__PURE__*/ $constructor("ZodURL", (inst, def) => {
 	$ZodURL.init(inst, def);
 	ZodStringFormat.init(inst, def);
 });
+function url$1(params) {
+	return /* @__PURE__ */ _url(ZodURL, params);
+}
 const ZodEmoji = /*@__PURE__*/ $constructor("ZodEmoji", (inst, def) => {
 	$ZodEmoji.init(inst, def);
 	ZodStringFormat.init(inst, def);
@@ -36678,6 +36681,22 @@ function object(shape, params) {
 	return new ZodObject({
 		type: "object",
 		shape: shape ?? {},
+		...normalizeParams(params)
+	});
+}
+function strictObject(shape, params) {
+	return new ZodObject({
+		type: "object",
+		shape,
+		catchall: never(),
+		...normalizeParams(params)
+	});
+}
+function looseObject(shape, params) {
+	return new ZodObject({
+		type: "object",
+		shape,
+		catchall: unknown(),
 		...normalizeParams(params)
 	});
 }
@@ -36960,7 +36979,7 @@ const commandBaseSchema = object({
 });
 const complexCommandSchema = union([commandBaseSchema.extend({ command: string() }), commandBaseSchema.extend({
 	use: _enum(["fetch:check"]),
-	options: object({ url: string().url() })
+	options: object({ url: url$1() })
 })]);
 const commandTypesSchema = union([string(), complexCommandSchema]);
 const commandSchema = union([
@@ -36968,7 +36987,7 @@ const commandSchema = union([
 	commandTypesSchema,
 	commandTypesSchema.array()
 ]);
-const allCommandsSchema = object({
+const allCommandsSchema = looseObject({
 	version: commandSchema.optional(),
 	prepublish: commandSchema.optional(),
 	publish: commandSchema.optional(),
@@ -36979,7 +36998,7 @@ const allCommandsSchema = object({
 		path: string(),
 		name: string()
 	}).array(), literal(false)]).optional()
-}).passthrough();
+});
 const pkgManagerSchema = allCommandsSchema.pick({
 	version: true,
 	prepublish: true,
@@ -37006,7 +37025,7 @@ const packageConfigSchema = (cwd = ".") => allCommandsSchema.extend({
 		};
 	} else return packageConfig;
 });
-const configFileSchema = (cwd = ".") => object({
+const configFileSchema = (cwd = ".") => strictObject({
 	changeFolder: string().optional(),
 	gitSiteUrl: string().optional(),
 	timeout: number().optional(),
@@ -37015,7 +37034,7 @@ const configFileSchema = (cwd = ".") => object({
 	pkgManagers: record(string(), pkgManagerSchema).optional(),
 	packages: record(string(), packageConfigSchema(cwd)),
 	changeTags: record(string(), string()).optional()
-}).strict();
+});
 //#endregion
 //#region ../files/node_modules/zod-validation-error/v4/index.mjs
 function isZodErrorLike(err) {
@@ -37117,10 +37136,6 @@ function conditionallyPrefixMessage(message, options) {
 	}
 	if (message.length > 0) return message;
 	return defaultMessageBuilderOptions.prefix;
-}
-function fromZodError(zodError, options = {}) {
-	if (!isZodErrorLike(zodError)) throw new TypeError(`Invalid zodError param; expected instance of ZodError. Did you mean to use the "${fromError.name}" method instead?`);
-	return fromZodErrorWithoutRuntimeCheck(zodError, options);
 }
 function fromZodErrorWithoutRuntimeCheck(zodError, options = {}) {
 	const zodIssues = zodError.issues;
@@ -39425,7 +39440,7 @@ function* configFile({ cwd, changeFolder = ".changes" }) {
 			...configFileSchema(cwd).parse(JSON.parse(inputFile.content))
 		};
 	} catch (error) {
-		const validationError = fromZodError(error);
+		const validationError = fromError(error);
 		throw new Error(validationError.message);
 	}
 }
