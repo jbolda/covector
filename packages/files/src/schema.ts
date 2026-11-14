@@ -20,7 +20,7 @@ const processCommandSchema = commandBaseSchema.extend({
 });
 const useCommandSchema = commandBaseSchema.extend({
   use: z.enum(["fetch:check"]),
-  options: z.object({ url: z.string().url() }),
+  options: z.object({ url: z.url() }),
 });
 const complexCommandSchema = z.union([processCommandSchema, useCommandSchema]);
 const commandTypesSchema = z.union([z.string(), complexCommandSchema]);
@@ -30,27 +30,25 @@ const commandSchema = z.union([
   commandTypesSchema.array(),
 ]);
 
-export const allCommandsSchema = z
-  .object({
-    version: commandSchema.optional(),
-    prepublish: commandSchema.optional(),
-    publish: commandSchema.optional(),
-    postpublish: commandSchema.optional(),
-    errorOnVersionRange: z.string().optional(),
-    releaseTag: z.union([z.literal(false), z.string()]).optional(),
-    assets: z
-      .union([
-        z
-          .object({
-            path: z.string(),
-            name: z.string(),
-          })
-          .array(),
-        z.literal(false),
-      ])
-      .optional(),
-  })
-  .passthrough();
+export const allCommandsSchema = z.looseObject({
+  version: commandSchema.optional(),
+  prepublish: commandSchema.optional(),
+  publish: commandSchema.optional(),
+  postpublish: commandSchema.optional(),
+  errorOnVersionRange: z.string().optional(),
+  releaseTag: z.union([z.literal(false), z.string()]).optional(),
+  assets: z
+    .union([
+      z
+        .object({
+          path: z.string(),
+          name: z.string(),
+        })
+        .array(),
+      z.literal(false),
+    ])
+    .optional(),
+});
 export type CommandConfig = z.infer<typeof allCommandsSchema>;
 
 export const pkgManagerSchema = allCommandsSchema.pick({
@@ -87,17 +85,15 @@ export const packageConfigSchema = (cwd: string = ".") =>
     });
 
 export const configFileSchema = (cwd: string = ".") =>
-  z
-    .object({
-      changeFolder: z.string().optional(),
-      gitSiteUrl: z.string().optional(),
-      timeout: z.number().optional(),
-      additionalBumpTypes: z.string().array().optional(),
-      defaultChangeTag: z.string().optional(),
-      pkgManagers: z.record(z.string(), pkgManagerSchema).optional(),
-      packages: z.record(z.string(), packageConfigSchema(cwd)),
-      changeTags: z.record(z.string(), z.string()).optional(),
-    })
-    .strict();
+  z.strictObject({
+    changeFolder: z.string().optional(),
+    gitSiteUrl: z.string().optional(),
+    timeout: z.number().optional(),
+    additionalBumpTypes: z.string().array().optional(),
+    defaultChangeTag: z.string().optional(),
+    pkgManagers: z.record(z.string(), pkgManagerSchema).optional(),
+    packages: z.record(z.string(), packageConfigSchema(cwd)),
+    changeTags: z.record(z.string(), z.string()).optional(),
+  });
 export type ConfigFile = z.infer<ReturnType<typeof configFileSchema>>;
 export type Config = ConfigFile & { file?: File };

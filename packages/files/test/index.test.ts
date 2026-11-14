@@ -1,5 +1,7 @@
 import { describe, it } from "@effectionx/vitest";
 import { expect } from "vitest";
+import { writeFileSync } from "fs";
+import path from "path";
 import * as logTest from "../../../helpers/test-logger.ts";
 // @ts-expect-error has no types
 import fixtures from "fixturez";
@@ -35,6 +37,53 @@ describe("general file test", () => {
     expect((configArray as any).gitSiteUrl).toBe(
       "https://github.com/jbolda/covector",
     );
+  });
+
+  describe("reports config errors", () => {
+    const writeConfig = (folder: string, content: string) =>
+      writeFileSync(path.join(folder, ".changes", "config.json"), content);
+
+    it("with the json syntax error", function* () {
+      const configFolder = f.copy("config.simple");
+      writeConfig(configFolder, `{ "packages": {}, }`);
+
+      let message = "";
+      try {
+        yield* configFile({ cwd: configFolder });
+      } catch (error: any) {
+        message = error.message;
+      }
+      expect(message).toMatch(/JSON/);
+    });
+
+    it("with the schema violation", function* () {
+      const configFolder = f.copy("config.simple");
+      writeConfig(configFolder, `{ "packages": {}, "bogusKey": true }`);
+
+      let message = "";
+      try {
+        yield* configFile({ cwd: configFolder });
+      } catch (error: any) {
+        message = error.message;
+      }
+      expect(message).toMatch(/Unrecognized key: "bogusKey"/);
+    });
+
+    it("with the error thrown while resolving a package path", function* () {
+      const configFolder = f.copy("config.simple");
+      writeConfig(
+        configFolder,
+        `{ "packages": { "pkg-a": { "path": "./not-a-folder" } } }`,
+      );
+
+      let message = "";
+      try {
+        yield* configFile({ cwd: configFolder });
+      } catch (error: any) {
+        message = error.message;
+      }
+      expect(message).toMatch(/ENOENT/);
+    });
   });
 
   it("reads all package files in config", function* () {
