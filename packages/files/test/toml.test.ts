@@ -112,6 +112,25 @@ describe("toml", () => {
         });
         expect(depVersion).toBe("");
       });
+
+      it("with a renamed dependency", function* () {
+        const cargoFolder = f.copy("pkg.rust-multi-renamed-dep");
+
+        const cargoFilePkgA = yield* readPkgFile({
+          file: "Cargo.toml",
+          cwd: path.join(cargoFolder, "pkg-a"),
+          nickname: "rust_pkg_a_fixture",
+        });
+
+        // `ffi = { package = "rust_pkg_b_fixture", ... }` declares the crate
+        // under an alias, and the requirement reads through the crate name
+        const depVersion = getPackageFileVersion({
+          pkg: cargoFilePkgA,
+          property: "dependencies",
+          dep: "rust_pkg_b_fixture",
+        });
+        expect(depVersion).toBe("0.8.8");
+      });
     });
   });
 
@@ -171,6 +190,43 @@ describe("toml", () => {
           nickname: "rust_pkg_a_fixture",
         });
         expect(cargoFileModifiedPkgA.version).toBe("4.5.6");
+      });
+
+      it("with a renamed dependency", function* () {
+        const cargoFolder = f.copy("pkg.rust-multi-renamed-dep");
+
+        const cargoFilePkgA = yield* readPkgFile({
+          file: "pkg-a/Cargo.toml",
+          cwd: cargoFolder,
+          nickname: "rust_pkg_a_fixture",
+        });
+        const cargoFileMemoryPkgA = setPackageFileVersion({
+          pkg: cargoFilePkgA,
+          version: "0.9.0",
+          property: "dependencies",
+          dep: "rust_pkg_b_fixture",
+        });
+        yield* writePkgFile({
+          packageFile: cargoFileMemoryPkgA,
+          cwd: cargoFolder,
+        });
+
+        // the write lands on the alias rather than adding a key for the crate
+        const cargoFileModifiedPkgA = yield* readPkgFile({
+          file: "pkg-a/Cargo.toml",
+          cwd: cargoFolder,
+          nickname: "rust_pkg_a_fixture",
+        });
+        expect(
+          getPackageFileVersion({
+            pkg: cargoFileModifiedPkgA,
+            property: "dependencies",
+            dep: "rust_pkg_b_fixture",
+          }),
+        ).toBe("0.9.0");
+        expect(
+          Object.keys(cargoFileModifiedPkgA.pkg?.dependencies ?? {}),
+        ).toEqual(["serde", "ffi"]);
       });
     });
   });

@@ -19,6 +19,7 @@ import type {
   DepsKeyed,
   DepTypes,
   Pkg,
+  PkgFileVersion,
 } from "@covector/types";
 
 export type { TomlDocument } from "@covector/toml";
@@ -373,6 +374,31 @@ export function* readPreFile({
   }
 }
 
+// a Cargo dependency can be declared under an alias, naming the crate it
+// resolves to with `package`:
+//
+//   ffi = { package = "javascriptcore-rs-sys", version = "1.1" }
+//
+// the requirement then lives under the alias, so that is the key to read and
+// write. returns the key `dep` is declared under in a dependencies table, or
+// undefined when it is not declared there
+export const resolveDepKey = ({
+  deps,
+  dep,
+}: {
+  deps?: Record<string, PkgFileVersion>;
+  dep: string;
+}): string | undefined => {
+  if (!deps || typeof deps !== "object") return undefined;
+  if (dep in deps) return dep;
+  for (const key of Object.keys(deps)) {
+    const definition = deps[key];
+    if (typeof definition === "object" && definition?.package === dep)
+      return key;
+  }
+  return undefined;
+};
+
 export const getPackageFileVersion = ({
   pkg,
   property = "version",
@@ -414,7 +440,9 @@ export const getPackageFileVersion = ({
 
         if (pkg.pkg[property] && typeof pkg.pkg[property] === "object") {
           if (property in pkg.pkg) {
-            const depDefinition = currentPkgDeps[dep];
+            const depKey = resolveDepKey({ deps: currentPkgDeps, dep });
+            if (!depKey) return "";
+            const depDefinition = currentPkgDeps[depKey];
 
             switch (typeof depDefinition) {
               case "string":
@@ -493,12 +521,14 @@ export const setPackageFileVersion = ({
         );
       if (!dep) return pkg;
 
-      const currentDepVersion = currentProperty[dep];
+      const depKey = resolveDepKey({ deps: currentProperty, dep });
+      if (!depKey) return pkg;
+      const currentDepVersion = currentProperty[depKey];
       if (typeof currentDepVersion === "string") {
-        pkg.pkg[property][dep] = version;
+        pkg.pkg[property][depKey] = version;
       } else if (typeof currentDepVersion === "object") {
         if ("version" in currentDepVersion) {
-          pkg.pkg[property][dep].version = version;
+          pkg.pkg[property][depKey].version = version;
         }
       }
     }
